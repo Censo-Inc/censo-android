@@ -19,7 +19,7 @@ interface CryptographyManager {
     fun getPublicKeyFromDeviceKey(): PublicKey
     fun signData(dataToSign: ByteArray): ByteArray
     fun decryptData(ciphertext: ByteArray): ByteArray
-    fun encryptDataLocal(plainText: String): ByteArray
+    fun encryptData(plainText: String): ByteArray
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -66,8 +66,7 @@ class CryptographyManagerImpl : CryptographyManager {
         )
     }
 
-    override fun encryptDataLocal(plainText: String): ByteArray {
-
+    override fun encryptData(plainText: String): ByteArray {
         val publicKey = getPublicKeyFromDeviceKey()
 
         val compressedKey = ECIESManager.extractUncompressedPublicKey(publicKey.encoded)

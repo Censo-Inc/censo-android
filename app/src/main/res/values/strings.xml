@@ -5,4 +5,9 @@
     <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Vault App.</string>
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
     <string name="biometry_deeplink_device_settings">Biometry Settings</string>
+    <string name="add_bip39_phrase">Add BIP39 phrase</string>
+    <string name="your_bip39_phrases">Your BIP39 phrases</string>
+    <string name="save">Save</string>
+    <string name="bip39">BIP39</string>
+    <string name="name">Name</string>
 </resources>

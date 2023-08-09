@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import co.censo.vault.presentation.MainViewModel
+import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
@@ -73,6 +74,9 @@ class MainActivity : ComponentActivity() {
         NavHost(navController = navController, startDestination = Screen.HomeRoute.route) {
             composable(route = Screen.HomeRoute.route) {
                 HomeScreen(navController = navController)
+            }
+            composable(route = Screen.AddBIP39Route.route) {
+                AddBIP39Screen(navController = navController)
             }
         }
     }

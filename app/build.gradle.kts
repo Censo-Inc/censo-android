@@ -84,6 +84,15 @@ dependencies {
     //Biometrics
     implementation("androidx.biometric:biometric:1.1.0")
 
+    // BIP39
+    implementation("cash.z.ecc.android:kotlin-bip39:1.0.2")
+
+    //jackson
+    val jacksonVersion = "2.15.2"
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
