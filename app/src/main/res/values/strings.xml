@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Vault</string>
+
+    <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Vault App.</string>
+    <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Vault App.</string>
+    <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
+    <string name="biometry_deeplink_device_settings">Biometry Settings</string>
 </resources>
