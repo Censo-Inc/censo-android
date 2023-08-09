@@ -9,10 +9,10 @@ import javax.inject.Inject
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import co.censo.vault.CryptographyManager
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
-
+class MainViewModel @Inject constructor(private val cryptographyManager: CryptographyManager) : ViewModel() {
     var state by mutableStateOf(MainState())
         private set
 
@@ -24,6 +24,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
                 return@launch
             }
 
+            cryptographyManager.createDeviceKeyIfNotExists()
         }
     }
 
