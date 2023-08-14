@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -20,6 +21,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -50,7 +52,15 @@ fun HomeScreen(
                         .padding(horizontal = 16.dp)
                 ) {
                     state.phrases.forEach { phrase ->
-                        Text(text = phrase.key)
+                        ClickableText(
+                            modifier = Modifier.padding(all = 48.dp),
+                            text = AnnotatedString(text = phrase.key),
+                            onClick = {
+                                navController.navigate(
+                                    "${Screen.BIP39DetailRoute.route}/${phrase.key}"
+                                )
+                            }
+                        )
                     }
                 }
             }

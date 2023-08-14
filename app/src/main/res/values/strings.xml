@@ -16,4 +16,15 @@
     <string name="foreground_access_app">Biometry is required to access your Bip39 Phrases</string>
     <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
     <string name="try_again">Try Again</string>
+    <string name="bip39_detail">BIP39 Detail</string>
+    <string name="phrase_words_empty">Complete biometry to access BIP 39 Phrase</string>
+    <string name="previous">Previous</string>
+    <string name="previous_icon_content_desc">previous icon</string>
+    <string name="next">Next</string>
+    <string name="next_icon_content_desc">next icon</string>
+    <string name="done">Done</string>
+    <string name="write_each_word_down">Write each word down\nin order</string>
+    <string name="showing_of_words">Showing %1$s - %2$s of %3$s</string>
+    <string name="leave_screen">Leave Screen</string>
+    <string name="please_complete_biometry_to_continue">Please complete biometry to continue</string>
 </resources>
