@@ -30,7 +30,7 @@ object BiometricUtil {
 
     fun createBioPrompt(
         fragmentActivity: FragmentActivity,
-        onSuccess: (cryptoObject: BiometricPrompt.CryptoObject?) -> Unit,
+        onSuccess: (authResult: BiometricPrompt.AuthenticationResult) -> Unit,
         onFail: (errorCode: Int) -> Unit
     ) =
         BiometricPrompt(fragmentActivity, object : BiometricPrompt.AuthenticationCallback() {
@@ -41,7 +41,7 @@ object BiometricUtil {
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
-                onSuccess(result.cryptoObject)
+                onSuccess(result)
             }
 
             override fun onAuthenticationFailed() {
@@ -69,21 +69,16 @@ object BiometricUtil {
         }
 
     private fun getBioPromptMessage(
-        bioPromptReason: BioPromptFailedReason,
+        failureReason: BioPromptFailedReason,
         context: Context
     ): String =
-        when (bioPromptReason) {
+        when (failureReason) {
             BioPromptFailedReason.BIOMETRY_FAILED -> ""
-            BioPromptFailedReason.CIPHER_NULL -> context.getString(R.string.key_management_bio_canceled)
             BioPromptFailedReason.FAILED_TOO_MANY_ATTEMPTS -> context.getString(R.string.too_many_failed_attempts)
         }
 
-    enum class BioPromptReason {
-        UNINITIALIZED, FOREGROUND_RETRIEVAL
-    }
-
     enum class BioPromptFailedReason {
-        BIOMETRY_FAILED, CIPHER_NULL, FAILED_TOO_MANY_ATTEMPTS
+        BIOMETRY_FAILED, FAILED_TOO_MANY_ATTEMPTS
     }
 
     fun checkForBiometricFeaturesOnDevice(context: Context): Companion.BiometricsStatus {

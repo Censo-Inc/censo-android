@@ -48,13 +48,13 @@ class MainViewModel @Inject constructor(private val cryptographyManager: Cryptog
     }
 
     private fun checkDataAfterBiometricApproval() {
-        val encryptedData = cryptographyManager.encryptData(STATIC_DEVICE_KEY_CHECK)
-
-        val decryptData =
-            String(cryptographyManager.decryptData(encryptedData))
-
         state =
             try {
+                val encryptedData = cryptographyManager.encryptData(STATIC_DEVICE_KEY_CHECK)
+
+                val decryptData =
+                    String(cryptographyManager.decryptData(encryptedData))
+
                 if (decryptData == STATIC_DEVICE_KEY_CHECK) {
                     biometrySuccessfulState()
                 } else {
@@ -65,7 +65,7 @@ class MainViewModel @Inject constructor(private val cryptographyManager: Cryptog
             }
     }
 
-    private fun biometrySuccessfulState() : MainState =
+    private fun biometrySuccessfulState(): MainState =
         state.copy(bioPromptTrigger = Resource.Uninitialized)
 
     fun onBiometryFailed(errorCode: Int) {
