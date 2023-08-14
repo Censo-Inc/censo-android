@@ -30,4 +30,6 @@ object SharedPrefsHelper {
             ?: emptyMap()
     }
 
+    fun storedPhrasesIsNotEmpty() = retrieveBIP39Phrases().isNotEmpty()
+
 }
