@@ -10,4 +10,11 @@
     <string name="save">Save</string>
     <string name="bip39">BIP39</string>
     <string name="name">Name</string>
+    <string name="too_many_failed_attempts">Too many failed attempts, please try again later.</string>
+    <string name="key_management_bio_canceled">Biometry approval failed. Please try again.</string>
+    <string name="complete_biometry">Complete Biometry</string>
+    <string name="cancel">Cancel</string>
+    <string name="foreground_access_app">Biometry is required to access the Vault App</string>
+    <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
+    <string name="try_again">Try Again</string>
 </resources>

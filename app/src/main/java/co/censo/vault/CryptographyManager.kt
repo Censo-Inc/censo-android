@@ -24,6 +24,8 @@ interface CryptographyManager {
 
 class CryptographyManagerImpl : CryptographyManager {
     companion object {
+        const val STATIC_DEVICE_KEY_CHECK = "STATIC_DEVICE_KEY_CHECK"
+
         const val KEY_ID = "deviceKey"
 
         const val BIOMETRY_TIMEOUT = 15
