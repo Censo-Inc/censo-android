@@ -103,4 +103,14 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
+
+    //UI testing
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
+
+    val kaspressoVersion = "1.5.2"
+    testImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
+    testImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
+    androidTestImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
+    androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
+    androidTestUtil("androidx.test:orchestrator:1.4.2")
 }
