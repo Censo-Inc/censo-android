@@ -61,6 +61,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp)
+                        .semantics { testTag = TestTag.phrases_list },
                 ) {
                     state.phrases.forEach { phrase ->
                         ClickableText(

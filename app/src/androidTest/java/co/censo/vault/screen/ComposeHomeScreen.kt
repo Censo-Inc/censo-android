@@ -18,4 +18,12 @@ class ComposeHomeScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     val addBip39Button: KNode = child {
         hasTestTag(TestTag.add_bip39_button)
     }
+
+    val phrasesList: KNode = child {
+        hasTestTag(TestTag.phrases_list)
+    }
+
+    val phraseRowItem: KNode = child {
+        hasTestTag(TestTag.phrase_row_item)
+    }
 }

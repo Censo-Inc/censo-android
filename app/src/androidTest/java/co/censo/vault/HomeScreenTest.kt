@@ -1,6 +1,11 @@
 package co.censo.vault
 
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import co.censo.vault.screen.ComposeAddBIP39Screen
 import co.censo.vault.screen.ComposeHomeScreen
@@ -84,7 +89,7 @@ class HomeScreenTest : TestCase(
             }
         }
 
-        step("Check we are on add bip 39 screen") {
+        step("Add bip 39 phrase") {
             ComposeScreen.onComposeScreen<ComposeAddBIP39Screen>(composeTestRule) {
                 addBip39AppBar {
                     assertIsDisplayed()
@@ -98,11 +103,24 @@ class HomeScreenTest : TestCase(
             }
         }
 
-        step("Check we are on home screen") {
+        step("Check we are on home screen with the added phrase") {
             ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
                 homeAppBar {
                     assertIsDisplayed()
                 }
+
+                phrasesList {
+                    assertIsDisplayed()
+                }
+
+                composeTestRule
+                    .onNodeWithTag(TestTag.phrases_list)
+                    .onChildren()
+                    .onFirst()
+                    .assert(
+                        hasText("test1")
+                    )
+
             }
         }
     }

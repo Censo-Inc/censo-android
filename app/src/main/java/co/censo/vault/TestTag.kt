@@ -5,6 +5,8 @@ object TestTag {
     const val home_screen_container = "home_screen_container"
     const val home_screen_app_bar = "home_screen_app_bar"
     const val add_bip39_button = "add_bip39_button"
+    const val phrases_list = "phrases_list"
+    const val phrase_row_item = "phrase_row_item"
 
     //main activity tags
     const val main_activity_surface_container = "main_activity_surface_container"
