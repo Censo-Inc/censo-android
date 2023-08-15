@@ -30,6 +30,12 @@ object SharedPrefsHelper {
             ?: emptyMap()
     }
 
+    fun clearStoredPhrases() {
+        val editor = sharedPrefs.edit()
+        editor.putString(BIP39, "")
+        editor.apply()
+    }
+
     fun storedPhrasesIsNotEmpty() = retrieveBIP39Phrases().isNotEmpty()
 
 }

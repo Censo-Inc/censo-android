@@ -15,11 +15,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
+import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
@@ -108,6 +111,17 @@ class MainActivity : FragmentActivity() {
             composable(route = Screen.AddBIP39Route.route) {
                 AddBIP39Screen(navController = navController)
             }
+            composable(
+                route = "${Screen.BIP39DetailRoute.route}/{${Screen.BIP39DetailRoute.BIP_39_NAME_ARG}}",
+                arguments = listOf(navArgument(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val nameArgument =
+                    backStackEntry.arguments?.getString(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) as String
+                BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
+            }
+
         }
     }
 }

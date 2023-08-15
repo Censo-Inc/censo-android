@@ -145,30 +145,6 @@ class CryptographyManagerImpl : CryptographyManager {
         return kpg.generateKeyPair().private
     }
 
-    private fun createAESKey(keyName: String): SecretKey {
-        val paramsBuilder = KeyGenParameterSpec.Builder(
-            keyName,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-        )
-        paramsBuilder.apply {
-            setBlockModes(ENCRYPTION_BLOCK_MODE)
-            setEncryptionPaddings(ENCRYPTION_PADDING)
-            setKeySize(KEY_SIZE)
-            setIsStrongBoxBacked(true)
-            setUserAuthenticationRequired(true)
-            setInvalidatedByBiometricEnrollment(true)
-            setRandomizedEncryptionRequired(true)
-        }
-
-        val keyGenParams = paramsBuilder.build()
-        val keyGenerator = KeyGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_AES,
-            ANDROID_KEYSTORE
-        )
-        keyGenerator.init(keyGenParams)
-        return keyGenerator.generateKey()
-    }
-
     override fun deleteDeviceKeyIfPresent() {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
