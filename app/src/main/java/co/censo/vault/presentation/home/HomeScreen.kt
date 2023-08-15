@@ -78,6 +78,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.semantics { testTag = TestTag.add_bip39_button },
                 onClick = {
                     navController.navigate(Screen.AddBIP39Route.route)
                 },

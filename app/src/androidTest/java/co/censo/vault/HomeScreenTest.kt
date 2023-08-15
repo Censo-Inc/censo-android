@@ -2,6 +2,8 @@ package co.censo.vault
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import co.censo.vault.screen.ComposeAddBIP39Screen
+import co.censo.vault.screen.ComposeHomeScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.components.composesupport.interceptors.behavior.impl.systemsafety.SystemDialogSafetySemanticsBehaviorInterceptor
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -31,10 +33,74 @@ class HomeScreenTest : TestCase(
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun test() = run {
+    fun testWeAreOnHomeScreen() = run {
         step("Assert user is on Home Screen") {
             ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
-                simpleHomeAppBar {
+                homeAppBar {
+                    assertIsDisplayed()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testWeCanNavigateToAddBip39() = run {
+        step("Assert user is on Home Screen") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                homeAppBar {
+                    assertIsDisplayed()
+                }
+            }
+        }
+
+        step("Click on add bip 39 button") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                addBip39Button.performClick()
+            }
+        }
+
+        step("Check we are on add bip 39 screen") {
+            ComposeScreen.onComposeScreen<ComposeAddBIP39Screen>(composeTestRule) {
+                addBip39AppBar {
+                    assertIsDisplayed()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun canAddBip39Phrase() = run {
+        step("Assert user is on Home Screen") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                homeAppBar {
+                    assertIsDisplayed()
+                }
+            }
+        }
+
+        step("Click on add bip 39 button") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                addBip39Button.performClick()
+            }
+        }
+
+        step("Check we are on add bip 39 screen") {
+            ComposeScreen.onComposeScreen<ComposeAddBIP39Screen>(composeTestRule) {
+                addBip39AppBar {
+                    assertIsDisplayed()
+                }
+
+                nameTextField.performTextInput("test1")
+
+                phraseTextField.performTextInput("market talent corn beef party situate domain guitar toast system tribe meat provide tennis believe coconut joy salon guide choose few obscure inflict horse")
+
+                saveButton.performClick()
+            }
+        }
+
+        step("Check we are on home screen") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                homeAppBar {
                     assertIsDisplayed()
                 }
             }

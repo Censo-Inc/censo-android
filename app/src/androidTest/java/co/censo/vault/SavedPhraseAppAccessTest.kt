@@ -1,6 +1,7 @@
 package co.censo.vault
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import co.censo.vault.screen.ComposeMainActivity
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.components.composesupport.interceptors.behavior.impl.systemsafety.SystemDialogSafetySemanticsBehaviorInterceptor
 import com.kaspersky.kaspresso.kaspresso.Kaspresso

@@ -18,12 +18,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.vault.Resource
+import co.censo.vault.TestTag
 import co.censo.vault.presentation.components.VaultButton
 import co.censo.vault.presentation.home.Screen
 
@@ -44,52 +47,68 @@ fun AddBIP39Screen(
         }
     }
 
-    Scaffold(topBar = {
-        TopAppBar(title = { Text(text = stringResource(R.string.add_bip39_phrase)) })
-    }, content = {
-        Box(modifier = Modifier.padding(it)) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-            ) {
-                Text(text = stringResource(R.string.name))
-                TextField(
-                    value = state.name,
-                    onValueChange = viewModel::updateName,
-                    isError = state.nameError != null
-                )
-                if (state.nameError != null) {
-                    Text(
-                        text = state.nameError,
-                        color = Color.Red,
-                        fontSize = 14.sp
+    Scaffold(
+        modifier = Modifier.semantics {
+            testTag = TestTag.add_bip_39_screen_container
+        },
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.semantics {
+                    testTag = TestTag.add_bip_39_screen_app_bar
+                },
+                title = { Text(text = stringResource(R.string.add_bip39_phrase)) }
+            )
+        },
+        content = {
+            Box(modifier = Modifier.padding(it)) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(text = stringResource(R.string.name))
+                    TextField(
+                        modifier = Modifier.semantics { testTag = TestTag.add_bip_39_name_text_field },
+                        value = state.name,
+                        onValueChange = viewModel::updateName,
+                        isError = state.nameError != null
                     )
-                }
+                    if (state.nameError != null) {
+                        Text(
+                            text = state.nameError,
+                            color = Color.Red,
+                            fontSize = 14.sp
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(44.dp))
+                    Spacer(modifier = Modifier.height(44.dp))
 
-                Text(text = stringResource(R.string.bip39))
-                TextField(
-                    value = state.userEnteredPhrase,
-                    onValueChange = viewModel::updateUserEnteredPhrase,
-                    isError = state.userEnteredPhraseError != null
-                )
-                if (state.userEnteredPhraseError != null) {
-                    Text(
-                        text = state.userEnteredPhraseError,
-                        color = Color.Red,
-                        fontSize = 14.sp
+                    Text(text = stringResource(R.string.bip39))
+                    TextField(
+                        modifier = Modifier.semantics { testTag = TestTag.add_bip_39_phrase_text_field },
+                        value = state.userEnteredPhrase,
+                        onValueChange = viewModel::updateUserEnteredPhrase,
+                        isError = state.userEnteredPhraseError != null
                     )
-                }
+                    if (state.userEnteredPhraseError != null) {
+                        Text(
+                            text = state.userEnteredPhraseError,
+                            color = Color.Red,
+                            fontSize = 14.sp
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(44.dp))
+                    Spacer(modifier = Modifier.height(44.dp))
 
-                VaultButton(onClick = viewModel::submit, enabled = viewModel.canSubmit()) {
-                    Text(text = stringResource(R.string.save))
+                    VaultButton(
+                        modifier = Modifier.semantics { testTag = TestTag.add_bip_39_save_button },
+                        onClick = viewModel::submit,
+                        enabled = viewModel.canSubmit()
+                    ) {
+                        Text(text = stringResource(R.string.save))
+                    }
                 }
             }
-        }
-    })
+        })
 
 }
