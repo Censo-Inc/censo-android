@@ -1,6 +1,17 @@
 package co.censo.vault
 
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.test.InstrumentationRegistry.getTargetContext
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
+import co.censo.vault.screen.ComposeAddBIP39Screen
+import co.censo.vault.screen.ComposeHomeScreen
 import co.censo.vault.screen.ComposeMainActivity
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.components.composesupport.interceptors.behavior.impl.systemsafety.SystemDialogSafetySemanticsBehaviorInterceptor
@@ -12,6 +23,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+
 
 @RunWith(JUnit4::class)
 class SavedPhraseAppAccessTest : TestCase(
@@ -32,7 +44,67 @@ class SavedPhraseAppAccessTest : TestCase(
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun test() = run {
+    fun `create phrase then leave app and re-enter app and complete biometry`() = run {
+        //region create bip 39 phrase
+        step("Assert user is on Home Screen") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                homeAppBar {
+                    assertIsDisplayed()
+                }
+            }
+        }
+
+        step("Click on add bip 39 button") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                addBip39Button.performClick()
+            }
+        }
+
+        step("Add bip 39 phrase") {
+            ComposeScreen.onComposeScreen<ComposeAddBIP39Screen>(composeTestRule) {
+                addBip39AppBar {
+                    assertIsDisplayed()
+                }
+
+                nameTextField.performTextInput("test1")
+
+                phraseTextField.performTextInput("market talent corn beef party situate domain guitar toast system tribe meat provide tennis believe coconut joy salon guide choose few obscure inflict horse")
+
+                saveButton.performClick()
+            }
+        }
+
+        step("Check we are on home screen with the added phrase") {
+            ComposeScreen.onComposeScreen<ComposeHomeScreen>(composeTestRule) {
+                homeAppBar {
+                    assertIsDisplayed()
+                }
+
+                phrasesList {
+                    assertIsDisplayed()
+                }
+
+                composeTestRule
+                    .onNodeWithTag(TestTag.phrases_list)
+                    .onChildren()
+                    .onFirst()
+                    .assert(
+                        hasText("test1")
+                    )
+
+            }
+        }
+        //endregion
+
+        //region background app + re-open app
+        UiDevice.getInstance(getInstrumentation())?.apply {
+            pressHome()
+            pressRecentApps()
+            pressRecentApps()
+        }
+        //endregion
+
+        //region do biometry auth to get in the app
         step("Assert fully authenticated logged in user is prompted for biometry on launch") {
             ComposeScreen.onComposeScreen<ComposeMainActivity>(composeTestRule) {
                 foregroundBlockingUI {
@@ -52,5 +124,6 @@ class SavedPhraseAppAccessTest : TestCase(
                 }
             }
         }
+        //endregion
     }
 }
