@@ -18,4 +18,10 @@ object TestTag {
     const val add_bip_39_name_text_field = "add_bip_39_name_text_field"
     const val add_bip_39_phrase_text_field = "add_bip_39_phrase_text_field"
     const val add_bip_39_save_button = "add_bip_39_phrase_save_button"
+
+    //bip 39 detail
+    const val bip_39_detail_screen_container = "bip_39_detail_screen_container"
+    const val bip_39_detail_screen_app_bar = "bip_39_detail_screen_app_bar"
+    const val bip_39_detail_biometry_text = "bip_39_detail_biometry_text"
+    const val bip_39_detail_phrase_ui = "bip_39_detail_phrase_ui"
 }

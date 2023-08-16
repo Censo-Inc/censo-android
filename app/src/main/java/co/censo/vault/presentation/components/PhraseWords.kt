@@ -2,23 +2,14 @@ package co.censo.vault.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.NavigateBefore
-import androidx.compose.material.icons.filled.NavigateNext
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,146 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import co.censo.vault.R
-import co.censo.vault.presentation.components.PhraseUICompanion.DISPLAY_RANGE_SET
-
-@Composable
-fun WriteWordUI(
-    phrase: String,
-    index: Int,
-    phraseSize: Int,
-    changeWordIndex: (increasing: Boolean) -> Unit,
-    retry: () -> Unit,
-    failedBiometry: Boolean
-) {
-
-    val splitWords = phrase.split(" ")
-    val wordsToShow = mutableListOf<IndexedPhraseWord>()
-
-    if (splitWords.size >= index + DISPLAY_RANGE_SET) {
-        for ((wordIndex, word) in splitWords.withIndex()) {
-            if (wordIndex in index..index + DISPLAY_RANGE_SET) {
-                wordsToShow.add(
-                    IndexedPhraseWord(
-                        wordIndex = wordIndex + PhraseUICompanion.OFFSET_INDEX_ZERO,
-                        wordValue = word
-                    )
-                )
-            }
-        }
-    }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxHeight()
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1.0f)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            //region Title + Sub-title
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
-            if (phrase.isNotEmpty()) {
-                Text(
-                    text = stringResource(
-                        id = R.string.showing_of_words,
-                        (index + 1).toString(),
-                        (index + 1 + DISPLAY_RANGE_SET).toString(),
-                        phraseSize
-                    ),
-                    color = Color.Gray,
-                    fontSize = 18.sp
-                )
-            }
-            Spacer(
-                modifier = Modifier.height(48.dp)
-            )
-            //endregion
-
-            //Phrase words
-            PhraseWords(
-                phraseWords = wordsToShow,
-                biometryError = failedBiometry,
-                retry = retry
-            )
-
-            //region Buttons
-            Spacer(
-                modifier = Modifier.height(15.dp)
-            )
-
-        }
-
-        if (phrase.isNotEmpty()) {
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                //Buttons for displaying previous/next words
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable {
-                                changeWordIndex(false)
-                            }
-                            .padding(end = 16.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(32.dp),
-                            imageVector = Icons.Filled.NavigateBefore,
-                            contentDescription = stringResource(R.string.previous_icon_content_desc),
-                            tint = Color.Gray
-                        )
-                        Text(
-                            text = stringResource(R.string.previous),
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable {
-                                changeWordIndex(true)
-                            }
-                            .padding(start = 16.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.next),
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
-                        )
-                        Icon(
-                            modifier = Modifier.size(32.dp),
-                            imageVector = Icons.Filled.NavigateNext,
-                            contentDescription = stringResource(R.string.next_icon_content_desc),
-                            tint = Color.Gray
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                //endregion
-            }
-        }
-    }
-}
+import co.censo.vault.TestTag
 
 @Composable
 fun PhraseWords(
@@ -190,6 +49,7 @@ fun PhraseWords(
             }
         } else if (phraseWords.isEmpty()) {
             Text(
+                modifier = Modifier.semantics { testTag = TestTag.bip_39_detail_biometry_text },
                 text = stringResource(R.string.phrase_words_empty),
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -210,7 +70,8 @@ fun PhraseWords(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 44.dp),
+                        .padding(horizontal = 44.dp)
+                        .semantics { testTag = TestTag.bip_39_detail_phrase_ui },
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
