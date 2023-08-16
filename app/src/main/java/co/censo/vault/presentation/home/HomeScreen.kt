@@ -2,6 +2,7 @@ package co.censo.vault.presentation.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,11 +22,14 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
+import co.censo.vault.TestTag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,8 +45,15 @@ fun HomeScreen(
     }
 
     Scaffold(
+        modifier = Modifier.semantics {
+            testTag = TestTag.home_screen_container
+        },
         topBar = {
-            TopAppBar(title = { Text(text = stringResource(R.string.your_bip39_phrases)) })
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { testTag = TestTag.home_screen_app_bar },
+                title = { Text(text = stringResource(R.string.your_bip39_phrases)) })
         },
         content = {
             Box(modifier = Modifier.padding(it)) {
@@ -50,6 +61,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp)
+                        .semantics { testTag = TestTag.phrases_list },
                 ) {
                     state.phrases.forEach { phrase ->
                         ClickableText(
@@ -67,6 +79,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.semantics { testTag = TestTag.add_bip39_button },
                 onClick = {
                     navController.navigate(Screen.AddBIP39Route.route)
                 },

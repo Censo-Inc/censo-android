@@ -19,6 +19,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -54,6 +57,9 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
+    }
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
     packaging {
         resources {
@@ -103,4 +109,15 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
+
+    //UI testing
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
+
+    val kaspressoVersion = "1.5.2"
+    testImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
+    testImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
+    androidTestImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
+    androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestUtil("androidx.test:orchestrator:1.4.2")
 }

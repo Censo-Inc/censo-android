@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
@@ -70,7 +72,9 @@ class MainActivity : FragmentActivity() {
             VaultTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().semantics {
+                        testTag = TestTag.main_activity_surface_container
+                    },
                     color = MaterialTheme.colorScheme.background
                 ) {
                     CensoNavHost(navController = navController)

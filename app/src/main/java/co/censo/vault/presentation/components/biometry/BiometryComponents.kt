@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import co.censo.vault.R
 import co.censo.vault.Resource
+import co.censo.vault.TestTag
 import co.censo.vault.presentation.main.BlockAppUI
 import co.censo.vault.presentation.components.VaultButton
 import javax.crypto.Cipher
@@ -72,6 +75,7 @@ fun ForegroundBlockingUI(
         Modifier
             .fillMaxSize()
             .background(color = Color.Gray)
+            .semantics { testTag = TestTag.biometry_blocking_ui_container }
             .clickable(
                 indication = null,
                 interactionSource = interactionSource
