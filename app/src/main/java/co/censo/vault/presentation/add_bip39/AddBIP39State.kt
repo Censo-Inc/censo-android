@@ -8,4 +8,6 @@ data class AddBIP39State(
     val nameError: String? = null,
     val userEnteredPhraseError: String? = null,
     val submitStatus: Resource<Unit> = Resource.Uninitialized
-)
+) {
+    val nameValid = name.isNotEmpty()
+}
