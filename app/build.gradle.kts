@@ -19,6 +19,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -54,6 +57,9 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
+    }
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
     packaging {
         resources {
@@ -112,5 +118,6 @@ dependencies {
     testImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
     androidTestImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
     androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
+    androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestUtil("androidx.test:orchestrator:1.4.2")
 }
