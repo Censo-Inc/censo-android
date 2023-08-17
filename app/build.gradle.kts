@@ -11,6 +11,10 @@ plugins {
     id("com.adarshr.test-logger")
 }
 
+val versionNameMajor = 0
+val versionNameMinor = 0
+val versionNamePatch = 1
+
 android {
     namespace = "co.censo.vault"
     compileSdk = 33
@@ -41,7 +45,7 @@ android {
         minSdk = 33
         targetSdk = 33
         versionCode = 1
-        versionName = "1.0"
+        versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
 
         signingConfig = if (signBuild) {
             signingConfigs.getByName("release")
