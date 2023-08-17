@@ -9,7 +9,7 @@ import co.censo.vault.PhraseValidator
 import co.censo.vault.Resource
 import co.censo.vault.jsonMapper
 import co.censo.vault.storage.EncryptedBIP39
-import co.censo.vault.storage.SharedPrefsHelper
+import co.censo.vault.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.ZonedDateTime
 import java.util.Base64
@@ -17,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddBIP39ViewModel @Inject constructor(
-    private val cryptographyManager: CryptographyManager
+    private val cryptographyManager: CryptographyManager,
+    private val storage: Storage
 ) : ViewModel() {
 
     var state by mutableStateOf(AddBIP39State())
@@ -28,52 +29,62 @@ class AddBIP39ViewModel @Inject constructor(
     }
 
     fun updateName(name: String) {
-        state = state.copy(name = name)
+        state = state.copy(name = name.lowercase().trim())
     }
 
     fun updateUserEnteredPhrase(userEnteredPhrase: String) {
         state = state.copy(
-            userEnteredPhrase = userEnteredPhrase,
+            userEnteredPhrase = userEnteredPhrase.lowercase().trim(),
             userEnteredPhraseError = null
         )
     }
 
     fun canSubmit(): Boolean {
-        return state.name.isNotBlank() && state.userEnteredPhrase.isNotBlank()
+        return state.nameValid && state.userEnteredPhrase.isNotBlank()
     }
 
     fun submit() {
         state = state.copy(submitStatus = Resource.Loading())
 
-        if (PhraseValidator.isPhraseValid(state.userEnteredPhrase)) {
-            val currentPhrases = SharedPrefsHelper.retrieveBIP39Phrases()
+        if (!state.nameValid) {
+            state = state.copy(
+                nameError = "Please enter a valid name",
+                submitStatus = Resource.Error()
+            )
+            return
+        }
 
-            if (currentPhrases.containsKey(state.name)) {
-                state = state.copy(
-                    nameError = "You already stored BIP39 phrase with this name",
-                    submitStatus = Resource.Error()
-                )
-            } else {
-                val newPhrase = EncryptedBIP39(
-                    Base64.getEncoder().encodeToString(
-                        cryptographyManager.encryptData(
-                            jsonMapper.writeValueAsString(
-                                PhraseValidator.format(state.userEnteredPhrase).split(" ")
-                            )
-                        )
-                    ),
-                    ZonedDateTime.now()
-                )
-
-                SharedPrefsHelper.saveBIP39Phrases(currentPhrases + mapOf(state.name to newPhrase))
-
-                state = state.copy(submitStatus = Resource.Success(Unit))
-            }
-        } else {
+        if (!PhraseValidator.isPhraseValid(state.userEnteredPhrase)) {
             state = state.copy(
                 userEnteredPhraseError = "Invalid BIP39",
                 submitStatus = Resource.Error()
             )
+            return
         }
+
+        val currentPhrases = storage.retrieveBIP39Phrases()
+
+        if (currentPhrases.containsKey(state.name)) {
+            state = state.copy(
+                nameError = "You already stored BIP39 phrase with this name",
+                submitStatus = Resource.Error()
+            )
+            return
+        }
+
+        val phraseAsJson = jsonMapper.writeValueAsString(
+            PhraseValidator.format(state.userEnteredPhrase).split(" ")
+        )
+        val encryptedPhrase = cryptographyManager.encryptData(phraseAsJson)
+        val base64EncryptedPhrase = Base64.getEncoder().encodeToString(encryptedPhrase)
+
+        val newPhrase = EncryptedBIP39(
+            base64EncryptedPhrase,
+            ZonedDateTime.now()
+        )
+
+        storage.saveBIP39Phrases(currentPhrases + mapOf(state.name to newPhrase))
+
+        state = state.copy(submitStatus = Resource.Success(Unit))
     }
 }

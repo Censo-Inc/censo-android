@@ -5,7 +5,15 @@ import android.content.SharedPreferences
 import co.censo.vault.jsonMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 
-object SharedPrefsHelper {
+
+interface Storage {
+    fun saveBIP39Phrases(phrases: BIP39Phrases)
+    fun retrieveBIP39Phrases(): BIP39Phrases
+    fun clearStoredPhrases()
+    fun storedPhrasesIsNotEmpty() : Boolean
+}
+
+object SharedPrefsStorage : Storage {
 
     private const val MAIN_PREFS = "main_prefs"
 
@@ -19,23 +27,22 @@ object SharedPrefsHelper {
         sharedPrefs = appContext.getSharedPreferences(MAIN_PREFS, Context.MODE_PRIVATE)
     }
 
-    fun saveBIP39Phrases(phrases: BIP39Phrases) {
+    override fun saveBIP39Phrases(phrases: BIP39Phrases) {
         val editor = sharedPrefs.edit()
         editor.putString(BIP39, jsonMapper.writeValueAsString(phrases))
         editor.apply()
     }
 
-    fun retrieveBIP39Phrases(): BIP39Phrases {
+    override fun retrieveBIP39Phrases(): BIP39Phrases {
         return sharedPrefs.getString(BIP39, null)?.let { jsonMapper.readValue<BIP39Phrases>(it) }
             ?: emptyMap()
     }
 
-    fun clearStoredPhrases() {
+    override fun clearStoredPhrases() {
         val editor = sharedPrefs.edit()
         editor.putString(BIP39, "")
         editor.apply()
     }
 
-    fun storedPhrasesIsNotEmpty() = retrieveBIP39Phrases().isNotEmpty()
-
+    override fun storedPhrasesIsNotEmpty() = retrieveBIP39Phrases().isNotEmpty()
 }

@@ -9,14 +9,15 @@ import co.censo.vault.Resource
 import co.censo.vault.jsonMapper
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.CHANGE_AMOUNT
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.FIRST_WORD_INDEX
-import co.censo.vault.storage.SharedPrefsHelper
+import co.censo.vault.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
 class BIP39DetailViewModel @Inject constructor(
-    private val cryptographyManager: CryptographyManager
+    private val cryptographyManager: CryptographyManager,
+    private val storage: Storage
 ) : ViewModel() {
 
     var state by mutableStateOf(BIP39DetailState())
@@ -40,7 +41,7 @@ class BIP39DetailViewModel @Inject constructor(
     fun onBiometryApproved() {
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
 
-        val phrases = SharedPrefsHelper.retrieveBIP39Phrases()
+        val phrases = storage.retrieveBIP39Phrases()
 
         val encryptedPhrase = phrases[state.name]
 
@@ -71,7 +72,7 @@ class BIP39DetailViewModel @Inject constructor(
         state = state.copy(currentWordIndex = wordIndex)
     }
 
-    fun handleWordIndexChanged(increasing: Boolean, currentWordIndex: Int): Int {
+    private fun handleWordIndexChanged(increasing: Boolean, currentWordIndex: Int): Int {
         var newWordIndex =
             if (increasing) {
                 currentWordIndex + CHANGE_AMOUNT

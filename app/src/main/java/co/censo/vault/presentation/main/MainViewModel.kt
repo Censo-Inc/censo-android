@@ -1,51 +1,48 @@
 package co.censo.vault.presentation.main
 
 import BiometricUtil
-import android.os.Build
-import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.UserNotAuthenticatedException
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import co.censo.vault.CryptographyManager
 import co.censo.vault.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.Resource
-import co.censo.vault.storage.SharedPrefsHelper
-import java.security.InvalidAlgorithmParameterException
+import co.censo.vault.storage.Storage
 import java.security.ProviderException
-import javax.crypto.Cipher
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val cryptographyManager: CryptographyManager) :
+class MainViewModel @Inject constructor(
+    private val cryptographyManager: CryptographyManager,
+    private val storage: Storage
+) :
     ViewModel() {
     var state by mutableStateOf(MainState())
         private set
 
     fun onForeground(biometricCapability: BiometricUtil.Companion.BiometricsStatus) {
-        viewModelScope.launch {
-            state = state.copy(biometryStatus = biometricCapability)
+        state = state.copy(biometryStatus = biometricCapability)
 
-            if (biometricCapability != BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED) {
-                return@launch
-            }
-
-            if (cryptographyManager.deviceKeyExists() && SharedPrefsHelper.storedPhrasesIsNotEmpty()) {
-                launchBlockingForegroundBiometryRetrieval()
-            } else {
-                cryptographyManager.createDeviceKeyIfNotExists()
-            }
+        if (biometricCapability != BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED) {
+            state = state.copy(blockAppUI = BlockAppUI.BIOMETRY_DISABLED)
+            return
         }
+
+        if (cryptographyManager.deviceKeyExists() && storage.storedPhrasesIsNotEmpty()) {
+            launchBlockingForegroundBiometryRetrieval()
+        } else {
+            cryptographyManager.createDeviceKeyIfNotExists()
+        }
+
     }
 
     fun launchBlockingForegroundBiometryRetrieval() {
         state = state.copy(
             bioPromptTrigger = Resource.Success(Unit),
+            blockAppUI = BlockAppUI.FOREGROUND_BIOMETRY
         )
     }
 
@@ -81,13 +78,16 @@ class MainViewModel @Inject constructor(private val cryptographyManager: Cryptog
             else -> false
         }
 
-    fun clearOutSavedData() {
+    private fun clearOutSavedData() {
         cryptographyManager.deleteDeviceKeyIfPresent()
-        SharedPrefsHelper.clearStoredPhrases()
+        storage.clearStoredPhrases()
     }
 
     private fun biometrySuccessfulState(): MainState =
-        state.copy(bioPromptTrigger = Resource.Uninitialized)
+        state.copy(
+            bioPromptTrigger = Resource.Uninitialized,
+            blockAppUI = BlockAppUI.NONE
+        )
 
     fun onBiometryFailed(errorCode: Int) {
         state =
