@@ -70,6 +70,7 @@ android {
             isMinifyEnabled = false
             isDebuggable = false
             resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -78,12 +79,14 @@ android {
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Vault")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".aintegration"
             isDebuggable = false
         }
@@ -106,6 +109,7 @@ android {
             initWith(getByName("aintegration"))
             resValue("string", "app_name", "Debug Vault")
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
             applicationIdSuffix = ".debug"
             isDebuggable = true
         }
@@ -183,7 +187,7 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
 
     //UI testing
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
 
     val kaspressoVersion = "1.5.2"
     testImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")

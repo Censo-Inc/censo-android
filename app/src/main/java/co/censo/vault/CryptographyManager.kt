@@ -128,7 +128,7 @@ class CryptographyManagerImpl : CryptographyManager {
         val parameterSpec = paramBuilder
             .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
             .setKeySize(KEY_SIZE)
-            .setIsStrongBoxBacked(!BuildConfig.DEBUG)
+            .setIsStrongBoxBacked(BuildConfig.STRONGBOX_ENABLED)
             .setRandomizedEncryptionRequired(true)
             .setUserAuthenticationRequired(true)
             .setUserAuthenticationParameters(
