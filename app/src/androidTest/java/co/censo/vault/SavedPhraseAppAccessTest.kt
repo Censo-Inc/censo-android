@@ -7,10 +7,8 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.InstrumentationRegistry.getTargetContext
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiSelector
 import co.censo.vault.screen.ComposeAddBIP39Screen
 import co.censo.vault.screen.ComposeBip39DetailScreen
 import co.censo.vault.screen.ComposeHomeScreen

@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -8,16 +11,49 @@ plugins {
     id("com.adarshr.test-logger")
 }
 
+val versionNameMajor = 0
+val versionNameMinor = 0
+val versionNamePatch = 1
+
 android {
     namespace = "co.censo.vault"
     compileSdk = 33
+
+    var signBuild = false
+    val configProperties = Properties()
+
+    if (file("../config.properties").exists()) {
+        configProperties.load(FileInputStream(file("../config.properties")))
+
+        signBuild = (configProperties["SIGN_BUILD"] as String).toBoolean()
+    }
+
+    if (signBuild) {
+        signingConfigs {
+            create("release") {
+
+                keyAlias = configProperties["RELEASE_KEY_ALIAS"] as String
+                keyPassword = configProperties["RELEASE_STORE_PASSWORD"] as String
+                storeFile = file("keystore.jks")
+                storePassword = configProperties["RELEASE_STORE_PASSWORD"] as String
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "co.censo.vault"
         minSdk = 33
         targetSdk = 33
         versionCode = 1
-        versionName = "1.0"
+        versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
+
+        signingConfig = if (signBuild) {
+            signingConfigs.getByName("release")
+        } else {
+            signingConfigs.getByName("debug")
+        }
+
+        manifestPlaceholders["STRONGBOX_ENABLED"] = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -36,13 +72,50 @@ android {
         release {
             resValue("string", "app_name", "Debug Vault")
             isMinifyEnabled = false
+            isDebuggable = false
+            resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        create("staging") {
+            resValue("string", "app_name", "Staging Vault")
+            resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            applicationIdSuffix = ".staging"
+            isDebuggable = false
+        }
+        create("aintegration") {
+            resValue("string", "app_name", "A Integration Vault")
+            resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            applicationIdSuffix = ".aintegration"
+            isDebuggable = false
+        }
+        create("bintegration") {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "B Integration Vault")
+            applicationIdSuffix = ".bintegration"
+        }
+        create("cintegration") {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "C Integration Vault")
+            applicationIdSuffix = ".cintegration"
+        }
+        create("dintegration") {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "D Integration Vault")
+            applicationIdSuffix = ".dintegration"
+        }
         debug {
+            initWith(getByName("aintegration"))
             resValue("string", "app_name", "Debug Vault")
+            manifestPlaceholders["STRONGBOX_ENABLED"] = false
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -94,6 +167,9 @@ dependencies {
 
     // BIP39
     implementation("cash.z.ecc.android:kotlin-bip39:1.0.2")
+
+    //Raygun crash reporting
+    implementation("com.raygun:raygun4android:4.0.1")
 
     //jackson
     val jacksonVersion = "2.15.2"

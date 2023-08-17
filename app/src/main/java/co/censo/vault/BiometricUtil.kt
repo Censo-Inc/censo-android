@@ -87,7 +87,7 @@ object BiometricUtil {
             PackageManager.FEATURE_STRONGBOX_KEYSTORE
         )
 
-        if (!hasStrongBox && !BuildConfig.DEBUG) {
+        if (!hasStrongBox && BuildConfig.STRONGBOX_ENABLED) {
             return Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE
         }
 
