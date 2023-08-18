@@ -59,7 +59,7 @@ class BIP39DetailViewModel @Inject constructor(
         state = state.copy(bip39Phrase = phraseAsList.joinToString(" "))
     }
 
-    fun onBiometryFailed(errorCode: Int) {
+    fun onBiometryFailed() {
         state = state.copy(bioPromptTrigger = Resource.Error())
     }
 

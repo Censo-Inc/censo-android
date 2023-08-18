@@ -27,4 +27,5 @@
     <string name="showing_of_words">Showing %1$s - %2$s of %3$s</string>
     <string name="leave_screen">Leave Screen</string>
     <string name="please_complete_biometry_to_continue">Please complete biometry to continue</string>
+    <string name="biometry_invalidated_keys_no_longer_accessible">Biometry invalidated. Keys no longer accessible.</string>
 </resources>

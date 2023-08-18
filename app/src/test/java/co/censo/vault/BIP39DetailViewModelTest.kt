@@ -86,7 +86,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     fun `on biometry failure we set biometry state to error`() = runTest {
         bip39DetailViewModel.onStart(test1Bip39Name)
 
-        bip39DetailViewModel.onBiometryFailed(-1)
+        bip39DetailViewModel.onBiometryFailed()
 
         assert(bip39DetailViewModel.state.name == test1Bip39Name)
         assert(bip39DetailViewModel.state.bioPromptTrigger is Resource.Error)

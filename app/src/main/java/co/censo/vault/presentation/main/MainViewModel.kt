@@ -66,8 +66,9 @@ class MainViewModel @Inject constructor(
             } catch (e: Exception) {
                 if (keyRanOutOfTime(e)) {
                     clearOutSavedData()
+                } else {
+                    state.copy(bioPromptTrigger = Resource.Error())
                 }
-                state.copy(bioPromptTrigger = Resource.Error())
             }
     }
 
@@ -78,9 +79,14 @@ class MainViewModel @Inject constructor(
             else -> false
         }
 
-    private fun clearOutSavedData() {
+    private fun clearOutSavedData() : MainState {
         cryptographyManager.deleteDeviceKeyIfPresent()
         storage.clearStoredPhrases()
+         return state.copy(
+            blockAppUI = BlockAppUI.NONE,
+            biometryInvalidated = Resource.Success(Unit),
+            bioPromptTrigger = Resource.Uninitialized
+        )
     }
 
     private fun biometrySuccessfulState(): MainState =
@@ -99,6 +105,10 @@ class MainViewModel @Inject constructor(
             } else {
                 state.copy(bioPromptTrigger = Resource.Error())
             }
+    }
+
+    fun resetBiometryInvalidated() {
+        state = state.copy(biometryInvalidated = Resource.Uninitialized)
     }
 
     fun blockUIStatus(): BlockAppUI {
