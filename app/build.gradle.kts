@@ -75,6 +75,7 @@ android {
             isMinifyEnabled = false
             isDebuggable = false
             resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
+            buildConfigField("String", "BASE_URL", "\"https://tbd.com/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -83,6 +84,7 @@ android {
         }
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
+            buildConfigField("String", "BASE_URL", "\"https://tbd.com/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
@@ -90,6 +92,7 @@ android {
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Vault")
+            buildConfigField("String", "BASE_URL", "\"https://tbd.com/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".aintegration"
@@ -156,9 +159,18 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    //KotlinX Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+
+    //noinspection GradleDependency
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
+    //noinspection GradleDependency
+    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")
