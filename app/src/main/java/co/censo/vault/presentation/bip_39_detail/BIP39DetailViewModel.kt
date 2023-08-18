@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import co.censo.vault.CryptographyManager
 import co.censo.vault.Resource
-import co.censo.vault.jsonMapper
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.CHANGE_AMOUNT
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.FIRST_WORD_INDEX
 import co.censo.vault.storage.Storage
@@ -14,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.serialization.json.Json
 import java.util.Base64
 import javax.inject.Inject
+import kotlinx.serialization.decodeFromString
 
 @HiltViewModel
 class BIP39DetailViewModel @Inject constructor(
@@ -50,12 +50,7 @@ class BIP39DetailViewModel @Inject constructor(
 
         val decryptedPhrase = cryptographyManager.decryptData(encryptedData)
 
-        val phraseAsList: List<String> = jsonMapper.readValue(
-            decryptedPhrase, jsonMapper.typeFactory.constructCollectionType(
-                MutableList::class.java,
-                String()::class.java
-            )
-        )
+        val phraseAsList: List<String> = Json.decodeFromString(String(decryptedPhrase))
 
         state = state.copy(bip39Phrase = phraseAsList.joinToString(" "))
     }

@@ -174,12 +174,6 @@ dependencies {
     //Raygun crash reporting
     implementation("com.raygun:raygun4android:4.0.1")
 
-    //jackson
-    val jacksonVersion = "2.15.2"
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.mockito:mockito-inline:4.8.1")

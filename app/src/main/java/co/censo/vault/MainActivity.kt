@@ -29,15 +29,8 @@ import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.main.MainViewModel
-import co.censo.vault.storage.BIP39Phrases
-import co.censo.vault.storage.EncryptedBIP39
 import co.censo.vault.ui.theme.VaultTheme
-import com.fasterxml.jackson.module.kotlin.readValue
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.time.ZonedDateTime
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -46,29 +39,6 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val phrases = mapOf("test1" to
-                EncryptedBIP39(
-                    base64 = "BKCv4TeFKsMzfc6eni1BI1qS2pKD0XcE7kezRIMXuKdvCJK4AmfLdTX4ha0lFLF9HoLjzHp2W6uBSA8OUUJfvx0cZrUpryU6ex1wKKiyw8/9rd4gHJydYy0NyovdvaWA/ieZU5qpDBj7vCsoChERVm/AM/j5xvbSQe5tjUiPDkzh3UcE70GmhPIw+6PVHjXMNGroqqgwWIGKoY7asK8m41+dQpuKzb6AU6u5HdvxJ5r5Z4Zeg6Xqdt6UllqdaR3OaBeVNwxL6N8pGju3bqXhvXoperI1iPm0tXIPSSUxxIbmfqWFy4hBfzS1hcIw9yN9xUq0t+z8xiHXJEGArSak6Npx+TwObZfK0jsG1+WQ55nsFxXJ5eST1ayZvuPaWA==",
-                    createdAt = ZonedDateTime.now()
-                )
-        )
-
-        val kotlinx = Json.encodeToString(phrases)
-        val jsonMapped = jsonMapper.writeValueAsString(phrases)
-
-        vaultLog(message = "kotlinx encoded: $kotlinx")
-        vaultLog(message = "jackson encoded: $jsonMapped")
-
-        val recreatedKotlinX = Json.decodeFromString<BIP39Phrases>(kotlinx)
-        val recreatedJsonMapped : BIP39Phrases = jsonMapper.readValue(jsonMapped)
-
-        vaultLog(message = "----------------------------------------------")
-
-        vaultLog(message = "kotlinx recreated: $recreatedKotlinX")
-        vaultLog(message = "jackson recreated: $recreatedJsonMapped")
-
-        vaultLog(message = "----------------------------------------------")
 
         setContent {
             val context = LocalContext.current

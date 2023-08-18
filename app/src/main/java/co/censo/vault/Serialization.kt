@@ -1,20 +1,25 @@
 package co.censo.vault
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
-import com.fasterxml.jackson.module.kotlin.kotlinModule
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
+object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
 
-val jsonMapper = ObjectMapper().apply {
-    registerModule(
-        kotlinModule {
-            configure(KotlinFeature.SingletonSupport, true)
-        }
-    )
-    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    registerModule(JavaTimeModule())
+    override fun serialize(encoder: Encoder, value: ZonedDateTime) {
+        encoder.encodeLong(value.toEpochSecond())
+    }
+
+    override fun deserialize(decoder: Decoder): ZonedDateTime {
+        val i = Instant.ofEpochSecond(decoder.decodeLong())
+        return ZonedDateTime.ofInstant(i, ZoneOffset.UTC)
+    }
 }

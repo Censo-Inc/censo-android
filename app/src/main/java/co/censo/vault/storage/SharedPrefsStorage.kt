@@ -2,9 +2,6 @@ package co.censo.vault.storage
 
 import android.content.Context
 import android.content.SharedPreferences
-import co.censo.vault.jsonMapper
-import co.censo.vault.vaultLog
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
