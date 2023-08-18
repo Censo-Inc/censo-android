@@ -9,6 +9,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.adarshr.test-logger")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 val versionNameMajor = 0
@@ -154,6 +155,8 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
 
     //Dagger - Hilt
