@@ -11,6 +11,7 @@ import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.CHAN
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.FIRST_WORD_INDEX
 import co.censo.vault.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.serialization.json.Json
 import java.util.Base64
 import javax.inject.Inject
 

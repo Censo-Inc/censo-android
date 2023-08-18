@@ -3,7 +3,11 @@ package co.censo.vault.storage
 import android.content.Context
 import android.content.SharedPreferences
 import co.censo.vault.jsonMapper
+import co.censo.vault.vaultLog
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 
 interface Storage {
@@ -29,7 +33,7 @@ object SharedPrefsStorage : Storage {
 
     override fun saveBIP39Phrases(phrases: BIP39Phrases) {
         val editor = sharedPrefs.edit()
-        editor.putString(BIP39, jsonMapper.writeValueAsString(phrases))
+        editor.putString(BIP39, Json.encodeToString(phrases))
         editor.apply()
     }
 
@@ -38,7 +42,7 @@ object SharedPrefsStorage : Storage {
 
         if (savedPhraseJson.isNullOrEmpty()) return emptyMap()
 
-        return jsonMapper.readValue(savedPhraseJson)
+        return Json.decodeFromString(savedPhraseJson)
     }
 
     override fun clearStoredPhrases() {

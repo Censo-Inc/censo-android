@@ -11,6 +11,7 @@ import co.censo.vault.jsonMapper
 import co.censo.vault.storage.EncryptedBIP39
 import co.censo.vault.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.serialization.json.Json
 import java.time.ZonedDateTime
 import java.util.Base64
 import javax.inject.Inject
