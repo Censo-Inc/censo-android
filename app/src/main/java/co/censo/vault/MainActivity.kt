@@ -3,6 +3,7 @@ package co.censo.vault
 import BiometricUtil
 import BlockingUI
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,14 +68,30 @@ class MainActivity : FragmentActivity() {
 
                     bioPrompt.authenticate(promptInfo)
                 }
+
+                if (mainState.biometryInvalidated is Resource.Success) {
+                    Toast.makeText(
+                        context,
+                        getString(R.string.biometry_invalidated_keys_no_longer_accessible),
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    navController.navigate(Screen.HomeRoute.route) {
+                        launchSingleTop = true
+                        popUpToTop()
+                    }
+                    mainViewModel.resetBiometryInvalidated()
+                }
             }
 
             VaultTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize().semantics {
-                        testTag = TestTag.main_activity_surface_container
-                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics {
+                            testTag = TestTag.main_activity_surface_container
+                        },
                     color = MaterialTheme.colorScheme.background
                 ) {
                     CensoNavHost(navController = navController)

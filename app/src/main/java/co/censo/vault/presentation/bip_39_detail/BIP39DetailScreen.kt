@@ -79,7 +79,7 @@ fun BIP39DetailScreen(
                         context = context,
                         errorCode = it
                     ) {
-                        viewModel.onBiometryFailed(errorCode = it)
+                        viewModel.onBiometryFailed()
                     }
                 }
             )

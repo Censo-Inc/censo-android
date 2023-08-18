@@ -251,6 +251,7 @@ class MainViewModelTest : BaseViewModelTest() {
         assert(mainViewModel.state.bioPromptTrigger is Resource.Success)
         assertEquals(mainViewModel.blockUIStatus(), BlockAppUI.FOREGROUND_BIOMETRY)
         assertEquals(mainViewModel.state.blockAppUI, BlockAppUI.FOREGROUND_BIOMETRY)
+        assert(mainViewModel.state.biometryInvalidated is Resource.Uninitialized)
 
         mainViewModel.onBiometryApproved()
 
@@ -259,7 +260,8 @@ class MainViewModelTest : BaseViewModelTest() {
         verify(cryptographyManager).deleteDeviceKeyIfPresent()
         verify(storage).clearStoredPhrases()
 
-        assert(mainViewModel.state.bioPromptTrigger is Resource.Error)
-        assert(mainViewModel.state.blockAppUI == BlockAppUI.FOREGROUND_BIOMETRY)
+        assert(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+        assert(mainViewModel.state.blockAppUI == BlockAppUI.NONE)
+        assert(mainViewModel.state.biometryInvalidated is Resource.Success)
     }
 }

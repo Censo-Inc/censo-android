@@ -6,7 +6,8 @@ data class MainState(
     val biometryStatus: BiometricUtil.Companion.BiometricsStatus? = null,
     val blockAppUI: BlockAppUI = BlockAppUI.NONE,
     val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized,
-    val tooManyAttempts: Boolean = false
+    val tooManyAttempts: Boolean = false,
+    val biometryInvalidated: Resource<Unit> = Resource.Uninitialized
 )
 
 enum class BlockAppUI {

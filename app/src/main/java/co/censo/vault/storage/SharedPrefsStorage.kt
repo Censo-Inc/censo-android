@@ -34,8 +34,11 @@ object SharedPrefsStorage : Storage {
     }
 
     override fun retrieveBIP39Phrases(): BIP39Phrases {
-        return sharedPrefs.getString(BIP39, null)?.let { jsonMapper.readValue<BIP39Phrases>(it) }
-            ?: emptyMap()
+        val savedPhraseJson = sharedPrefs.getString(BIP39, null)
+
+        if (savedPhraseJson.isNullOrEmpty()) return emptyMap()
+
+        return jsonMapper.readValue(savedPhraseJson)
     }
 
     override fun clearStoredPhrases() {
