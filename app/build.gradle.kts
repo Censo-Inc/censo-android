@@ -157,6 +157,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
 
     //Dagger - Hilt

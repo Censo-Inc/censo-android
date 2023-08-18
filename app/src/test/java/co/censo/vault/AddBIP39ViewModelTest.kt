@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import org.junit.After
@@ -202,7 +203,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
             mapOf(
                 "test2" to EncryptedBIP39(
                     "",
-                    ZonedDateTime.now()
+                    Clock.System.now()
                 )
             )
         }
@@ -237,7 +238,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
             mapOf(
                 "test1" to EncryptedBIP39(
                     "",
-                    ZonedDateTime.now()
+                    Clock.System.now()
                 )
             )
         }

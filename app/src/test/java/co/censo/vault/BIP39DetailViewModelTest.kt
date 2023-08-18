@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -52,11 +53,11 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     private val savedPhrases = mapOf(
         test1Bip39Name to EncryptedBIP39(
             base64 = test1EncryptedBIP39,
-            createdAt = ZonedDateTime.now()
+            createdAt = Clock.System.now()
         ),
         test2Bip39Name to EncryptedBIP39(
             base64 = test2EncryptedBIP39,
-            createdAt = ZonedDateTime.now()
+            createdAt = Clock.System.now()
         )
     )
 
