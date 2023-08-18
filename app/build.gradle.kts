@@ -9,6 +9,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.adarshr.test-logger")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 val versionNameMajor = 0
@@ -155,6 +156,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")
@@ -170,12 +174,6 @@ dependencies {
 
     //Raygun crash reporting
     implementation("com.raygun:raygun4android:4.0.1")
-
-    //jackson
-    val jacksonVersion = "2.15.2"
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

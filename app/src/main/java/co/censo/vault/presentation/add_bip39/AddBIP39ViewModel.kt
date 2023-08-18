@@ -7,13 +7,14 @@ import androidx.lifecycle.ViewModel
 import co.censo.vault.CryptographyManager
 import co.censo.vault.PhraseValidator
 import co.censo.vault.Resource
-import co.censo.vault.jsonMapper
 import co.censo.vault.storage.EncryptedBIP39
 import co.censo.vault.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.ZonedDateTime
+import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 import java.util.Base64
 import javax.inject.Inject
+import kotlinx.serialization.encodeToString
 
 @HiltViewModel
 class AddBIP39ViewModel @Inject constructor(
@@ -72,15 +73,15 @@ class AddBIP39ViewModel @Inject constructor(
             return
         }
 
-        val phraseAsJson = jsonMapper.writeValueAsString(
-            PhraseValidator.format(state.userEnteredPhrase).split(" ")
-        )
+        val phraseAsList = PhraseValidator.format(state.userEnteredPhrase).split(" ")
+        val phraseAsJson = Json.encodeToString(phraseAsList)
+
         val encryptedPhrase = cryptographyManager.encryptData(phraseAsJson)
         val base64EncryptedPhrase = Base64.getEncoder().encodeToString(encryptedPhrase)
 
         val newPhrase = EncryptedBIP39(
             base64EncryptedPhrase,
-            ZonedDateTime.now()
+            Clock.System.now()
         )
 
         storage.saveBIP39Phrases(currentPhrases + mapOf(state.name to newPhrase))

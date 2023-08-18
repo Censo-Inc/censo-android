@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -36,7 +37,7 @@ class HomeViewModelTest : BaseViewModelTest() {
     private val examplePhrases: BIP39Phrases = mapOf(
         "test1" to EncryptedBIP39(
             base64 = Base64.getEncoder().encodeToString("this is  a test string".toByteArray()),
-            createdAt = ZonedDateTime.now()
+            createdAt = Clock.System.now()
         )
     )
 

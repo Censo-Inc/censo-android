@@ -13,6 +13,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -165,7 +168,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
     @Test
     fun `can add a single phrase to empty phrase map`() {
         val dataToEncrypt =
-            jsonMapper.writeValueAsString(
+            Json.encodeToString(
                 PhraseValidator.format(validBIP39Phrase).split(" ")
             )
 
@@ -192,7 +195,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
     @Test
     fun `can add a phrase to existing phrase map`() {
         val dataToEncrypt =
-            jsonMapper.writeValueAsString(
+            Json.encodeToString(
                 PhraseValidator.format(validBIP39Phrase).split(" ")
             )
 
@@ -200,7 +203,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
             mapOf(
                 "test2" to EncryptedBIP39(
                     "",
-                    ZonedDateTime.now()
+                    Clock.System.now()
                 )
             )
         }
@@ -227,7 +230,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
     @Test
     fun `cannot add a same named phrase`() {
         val dataToEncrypt =
-            jsonMapper.writeValueAsString(
+            Json.encodeToString(
                 PhraseValidator.format(validBIP39Phrase).split(" ")
             )
 
@@ -235,7 +238,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
             mapOf(
                 "test1" to EncryptedBIP39(
                     "",
-                    ZonedDateTime.now()
+                    Clock.System.now()
                 )
             )
         }

@@ -23,12 +23,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.ui.theme.VaultTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,6 +39,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             val context = LocalContext.current
             val navController = rememberNavController()
