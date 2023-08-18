@@ -30,6 +30,7 @@ import co.censo.vault.data.Resource
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
+import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.home.Screen.Companion.DL_TOKEN_KEY
@@ -163,7 +164,9 @@ class MainActivity : FragmentActivity() {
                     backStackEntry.arguments?.getString(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) as String
                 BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
             }
-
+            composable(route = Screen.GuardianInvitationRoute.route) {
+                GuardianInvitationScreen(navController = navController)
+            }
         }
     }
 }
