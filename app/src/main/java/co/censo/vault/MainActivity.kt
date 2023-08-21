@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -23,12 +25,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import co.censo.vault.data.Resource
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.home.Screen.Companion.DL_TOKEN_KEY
+import co.censo.vault.presentation.home.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
@@ -130,6 +135,18 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = Screen.HomeRoute.route) {
+            composable(
+                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",
+                deepLinks = listOf(navDeepLink {
+                    uriPattern = "vault://guardian/{$DL_TOKEN_KEY}"
+                }),
+            ) { backStackEntry ->
+                val token = backStackEntry.arguments?.getString(DL_TOKEN_KEY)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text("Passed in this data on deep link: $token")
+                }
+            }
+
             composable(route = Screen.HomeRoute.route) {
                 HomeScreen(navController = navController)
             }

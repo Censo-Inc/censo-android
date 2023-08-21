@@ -1,0 +1,20 @@
+## Creating Firebase App Tester Build
+
+Run the local script `upload_build.sh`
+
+Need to pass two arguments: 
+
+    --token which is the firebase token needed to upload builds to Firebase App Tester.
+
+    --variant the variant you want to create:
+        - Debug
+        - AIntegration
+        - BIntegration
+        - CIntegration
+        - DIntegration
+        - Staging
+        - Release
+
+## Testing Deep Link
+
+adb shell am start -W -a android.intent.action.VIEW -d "vault://guardian/[TOKEN_HERE]" co.censo.vault.[VARIANT_SUFFIX]
