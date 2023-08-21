@@ -1,5 +1,6 @@
-package co.censo.vault
+package co.censo.vault.data.networking
 
+import co.censo.vault.BuildConfig
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.*

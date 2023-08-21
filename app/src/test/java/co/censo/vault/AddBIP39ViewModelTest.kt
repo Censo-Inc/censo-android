@@ -1,9 +1,12 @@
 package co.censo.vault
 
+import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.PhraseValidator
+import co.censo.vault.data.Resource
 import co.censo.vault.presentation.add_bip39.AddBIP39ViewModel
-import co.censo.vault.storage.BIP39Phrases
-import co.censo.vault.storage.EncryptedBIP39
-import co.censo.vault.storage.Storage
+import co.censo.vault.data.storage.BIP39Phrases
+import co.censo.vault.data.storage.EncryptedBIP39
+import co.censo.vault.data.storage.Storage
 import com.nhaarman.mockitokotlin2.capture
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -22,7 +25,6 @@ import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import java.time.ZonedDateTime
 
 
 @OptIn(ExperimentalCoroutinesApi::class)

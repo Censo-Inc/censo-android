@@ -1,4 +1,4 @@
-package co.censo.vault
+package co.censo.vault.data
 
 import cash.z.ecc.android.bip39.Mnemonics
 import java.util.Locale

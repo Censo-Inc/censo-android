@@ -1,7 +1,7 @@
 package co.censo.vault.screen
 
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
-import co.censo.vault.TestTag
+import co.censo.vault.util.TestTag
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.github.kakaocup.compose.node.element.KNode
 

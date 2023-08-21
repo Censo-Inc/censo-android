@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.vault.Resource
-import co.censo.vault.TestTag
+import co.censo.vault.data.Resource
+import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.components.VaultButton
 import co.censo.vault.presentation.home.Screen
 

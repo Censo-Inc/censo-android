@@ -1,4 +1,4 @@
-package co.censo.vault
+package co.censo.vault.util
 
 object TestTag {
     //home screen tags

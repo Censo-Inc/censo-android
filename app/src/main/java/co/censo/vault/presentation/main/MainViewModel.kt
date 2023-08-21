@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.main
 
-import BiometricUtil
+import co.censo.vault.util.BiometricUtil
 import android.security.keystore.UserNotAuthenticatedException
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -8,10 +8,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import co.censo.vault.CryptographyManager
-import co.censo.vault.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
-import co.censo.vault.Resource
-import co.censo.vault.storage.Storage
+import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.cryptography.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
+import co.censo.vault.data.Resource
+import co.censo.vault.data.storage.Storage
 import java.security.ProviderException
 
 @HiltViewModel

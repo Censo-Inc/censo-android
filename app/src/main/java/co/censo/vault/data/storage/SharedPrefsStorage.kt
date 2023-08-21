@@ -1,4 +1,4 @@
-package co.censo.vault.storage
+package co.censo.vault.data.storage
 
 import android.content.Context
 import android.content.SharedPreferences

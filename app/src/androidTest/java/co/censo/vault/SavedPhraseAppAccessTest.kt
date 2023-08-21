@@ -13,6 +13,7 @@ import co.censo.vault.screen.ComposeAddBIP39Screen
 import co.censo.vault.screen.ComposeBip39DetailScreen
 import co.censo.vault.screen.ComposeHomeScreen
 import co.censo.vault.screen.ComposeMainActivity
+import co.censo.vault.util.TestTag
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.components.composesupport.interceptors.behavior.impl.systemsafety.SystemDialogSafetySemanticsBehaviorInterceptor
 import com.kaspersky.kaspresso.kaspresso.Kaspresso

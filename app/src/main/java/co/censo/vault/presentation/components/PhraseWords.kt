@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import co.censo.vault.R
-import co.censo.vault.TestTag
+import co.censo.vault.util.TestTag
 
 @Composable
 fun PhraseWords(

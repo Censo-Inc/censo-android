@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import co.censo.vault.R
-import co.censo.vault.Resource
-import co.censo.vault.TestTag
+import co.censo.vault.data.Resource
+import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.main.BlockAppUI
 import co.censo.vault.presentation.components.VaultButton
-import javax.crypto.Cipher
+import co.censo.vault.util.BiometricUtil
 
 @Composable
 fun BlockingUI(

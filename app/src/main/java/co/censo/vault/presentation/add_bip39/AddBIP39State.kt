@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.add_bip39
 
-import co.censo.vault.Resource
+import co.censo.vault.data.Resource
 
 data class AddBIP39State(
     val name: String = "",

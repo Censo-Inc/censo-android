@@ -40,11 +40,12 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.vault.Resource
-import co.censo.vault.TestTag
+import co.censo.vault.data.Resource
+import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.components.IndexedPhraseWord
 import co.censo.vault.presentation.components.PhraseUICompanion
 import co.censo.vault.presentation.components.PhraseWords
+import co.censo.vault.util.BiometricUtil
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)

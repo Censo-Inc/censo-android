@@ -1,4 +1,4 @@
-package co.censo.vault
+package co.censo.vault.data.cryptography
 
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.DERBitString

@@ -1,10 +1,10 @@
 package co.censo.vault.di
 
 import android.content.Context
-import co.censo.vault.CryptographyManager
-import co.censo.vault.CryptographyManagerImpl
-import co.censo.vault.storage.SharedPrefsStorage
-import co.censo.vault.storage.Storage
+import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.cryptography.CryptographyManagerImpl
+import co.censo.vault.data.storage.SharedPrefsStorage
+import co.censo.vault.data.storage.Storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

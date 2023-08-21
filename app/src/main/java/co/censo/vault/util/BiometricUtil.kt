@@ -1,4 +1,6 @@
-import BiometricUtil.Companion.FAIL_ERROR
+package co.censo.vault.util
+
+import co.censo.vault.util.BiometricUtil.Companion.FAIL_ERROR
 import android.content.Context
 import android.content.pm.PackageManager
 import android.widget.Toast

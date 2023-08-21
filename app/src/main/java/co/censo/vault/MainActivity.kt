@@ -1,6 +1,6 @@
 package co.censo.vault
 
-import BiometricUtil
+import co.censo.vault.util.BiometricUtil
 import BlockingUI
 import android.os.Bundle
 import android.widget.Toast
@@ -23,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import co.censo.vault.data.Resource
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
@@ -30,6 +31,8 @@ import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.ui.theme.VaultTheme
+import co.censo.vault.util.TestTag
+import co.censo.vault.util.popUpToTop
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

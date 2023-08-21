@@ -1,8 +1,10 @@
 package co.censo.vault
 
+import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.Resource
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailViewModel
-import co.censo.vault.storage.EncryptedBIP39
-import co.censo.vault.storage.Storage
+import co.censo.vault.data.storage.EncryptedBIP39
+import co.censo.vault.data.storage.Storage
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +18,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import java.time.ZonedDateTime
 import java.util.Base64
 
 @OptIn(ExperimentalCoroutinesApi::class)

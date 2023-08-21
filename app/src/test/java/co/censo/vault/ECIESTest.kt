@@ -1,5 +1,6 @@
 package co.censo.vault
 
+import co.censo.vault.data.cryptography.ECIESManager
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test

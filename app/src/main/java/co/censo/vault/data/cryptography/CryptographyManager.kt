@@ -1,14 +1,13 @@
-package co.censo.vault
+package co.censo.vault.data.cryptography
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import co.censo.vault.BuildConfig
 import java.security.KeyStore
 import java.security.*
 import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 
 interface CryptographyManager {
     fun deviceKeyExists(): Boolean

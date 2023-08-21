@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.main
 
-import co.censo.vault.Resource
+import co.censo.vault.data.Resource
+import co.censo.vault.util.BiometricUtil
 
 data class MainState(
     val biometryStatus: BiometricUtil.Companion.BiometricsStatus? = null,

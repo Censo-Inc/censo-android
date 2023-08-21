@@ -1,4 +1,4 @@
-package co.censo.vault
+package co.censo.vault.data
 
 import java.lang.Exception
 

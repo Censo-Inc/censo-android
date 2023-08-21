@@ -1,5 +1,6 @@
 package co.censo.vault
 
+import co.censo.vault.data.PhraseValidator
 import org.junit.Test
 import org.junit.Assert.assertFalse
 

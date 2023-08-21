@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.vault.TestTag
+import co.censo.vault.util.TestTag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
