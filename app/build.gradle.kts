@@ -199,6 +199,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
+    implementation("io.github.novacrypto:Base58:2022.01.17")
 
     //UI testing
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
