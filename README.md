@@ -17,4 +17,16 @@ Need to pass two arguments:
 
 ## Testing Deep Link
 
-adb shell am start -W -a android.intent.action.VIEW -d "vault://guardian/[TOKEN_HERE]" co.censo.vault.[VARIANT_SUFFIX]
+`adb shell am start -W -a android.intent.action.VIEW -d "vault://guardian/[TOKEN_HERE]" co.censo.vault.[VARIANT_SUFFIX]`
+
+## UI Tests
+
+Start adb server before running UI Tests in a separate terminal
+
+`java -jar app/adbserver-desktop.jar`
+
+Start an emulator
+
+Then run the tests
+
+`./gradlew connectedCheck`

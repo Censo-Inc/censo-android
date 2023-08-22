@@ -6,7 +6,7 @@ sealed class Screen(val route: String) {
     object BIP39DetailRoute : Screen("bip_39_detail_screen") {
         const val BIP_39_NAME_ARG = "bip39_name"
     }
-
+    object GuardianInvitationRoute : Screen("guardian_invitation_screen")
     fun buildScreenDeepLinkUri() = "$VAULT_CUSTODY_URI${this.route}"
     companion object {
         const val START_DESTINATION_ID = 0

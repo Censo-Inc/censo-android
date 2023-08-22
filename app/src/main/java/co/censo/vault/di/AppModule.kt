@@ -3,6 +3,9 @@ package co.censo.vault.di
 import android.content.Context
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.CryptographyManagerImpl
+import co.censo.vault.data.OwnerRepository
+import co.censo.vault.data.OwnerRepositoryImpl
+import co.censo.vault.data.networking.ApiService
 import co.censo.vault.data.storage.SharedPrefsStorage
 import co.censo.vault.data.storage.Storage
 import dagger.Module
@@ -23,8 +26,20 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideStorage(@ApplicationContext applicationContext: Context) : Storage {
+    fun provideStorage(@ApplicationContext applicationContext: Context): Storage {
         SharedPrefsStorage.setup(applicationContext)
         return SharedPrefsStorage
+    }
+
+    @Singleton
+    @Provides
+    fun provideApiService(): ApiService {
+        return ApiService.create()
+    }
+
+    @Singleton
+    @Provides
+    fun provideOwnerRepository(apiService: ApiService): OwnerRepository {
+        return OwnerRepositoryImpl(apiService)
     }
 }
