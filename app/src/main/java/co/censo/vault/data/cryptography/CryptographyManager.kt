@@ -3,6 +3,8 @@ package co.censo.vault.data.cryptography
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import co.censo.vault.BuildConfig
+import io.github.novacrypto.base58.Base58
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.security.KeyStore
 import java.security.*
 import java.security.cert.Certificate
@@ -16,6 +18,7 @@ interface CryptographyManager {
     fun createDeviceKeyIfNotExists()
     fun getOrCreateDeviceKey(): PrivateKey
     fun getPublicKeyFromDeviceKey(): PublicKey
+    fun getDevicePublicKeyInBase58(): String
     fun signData(dataToSign: ByteArray): ByteArray
     fun decryptData(ciphertext: ByteArray): ByteArray
     fun encryptData(plainText: String): ByteArray
@@ -106,6 +109,9 @@ class CryptographyManagerImpl : CryptographyManager {
         val certificate = getCertificateFromKeystore()
         return certificate.publicKey
     }
+
+    override fun getDevicePublicKeyInBase58(): String =
+        Base58.base58Encode((getPublicKeyFromDeviceKey() as BCECPublicKey).q.getEncoded(true))
 
     override fun getCertificateFromKeystore(): Certificate {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
