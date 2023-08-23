@@ -13,7 +13,7 @@ data class ContactStateData(
     val verificationCode: String = "",
     val verified : Boolean = false,
     val contactType: ContactType = ContactType.Email,
-    val identifier : String = ""
+    val identifier : String = "",
 )
 
 data class GuardianInvitationState(
@@ -25,6 +25,7 @@ data class GuardianInvitationState(
     val invitedGuardian: GuardianInformation = GuardianInformation(),
     val ownerInputState: OwnerInputState = OwnerInputState.VIEWING_CONTACTS,
     val isLoading: Boolean = false,
+    val bioPromptTrigger: Resource<OwnerAction> = Resource.Uninitialized
 ) {
 
     fun emailContactState(): ContactState {

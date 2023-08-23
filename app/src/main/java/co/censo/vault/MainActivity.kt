@@ -2,6 +2,7 @@ package co.censo.vault
 
 import co.censo.vault.util.BiometricUtil
 import BlockingUI
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -19,6 +20,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -27,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import co.censo.vault.data.Resource
+import co.censo.vault.data.storage.Storage
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
@@ -40,11 +43,17 @@ import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import co.censo.vault.util.popUpToTop
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
+    @Inject
+    lateinit var storage: Storage
+
     private val mainViewModel: MainViewModel by viewModels()
+
+    private var authHeadersStateListener: AuthHeadersListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +61,9 @@ class MainActivity : FragmentActivity() {
         setContent {
             val context = LocalContext.current
             val navController = rememberNavController()
+
+            authHeadersStateListener = setupAuthHeadersListener()
+            authHeadersStateListener?.let { storage.addAuthHeadersStateListener(it) }
 
             val mainState = mainViewModel.state
 
@@ -119,10 +131,8 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
-                    val blockAppUI = mainViewModel.blockUIStatus()
-
                     BlockingUI(
-                        blockAppUI = blockAppUI,
+                        blockAppUI = mainState.blockAppUI,
                         bioPromptTrigger = mainState.bioPromptTrigger,
                         biometryUnavailable = mainState.tooManyAttempts,
                         biometryStatus = mainState.biometryStatus,
@@ -169,4 +179,21 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+
+    private fun setupAuthHeadersListener() =
+        object : AuthHeadersListener {
+            override fun onAuthHeadersStateChanged(authHeadersState: AuthHeadersState) {
+                if (authHeadersState == AuthHeadersState.MISSING) {
+                    mainViewModel.updateAuthHeaders()
+                }
+            }
+        }
+}
+
+interface AuthHeadersListener {
+    fun onAuthHeadersStateChanged(authHeadersState: AuthHeadersState)
+}
+
+enum class AuthHeadersState {
+    MISSING, VALID
 }

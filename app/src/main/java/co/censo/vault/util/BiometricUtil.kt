@@ -117,3 +117,7 @@ object BiometricUtil {
         }
     }
 }
+
+enum class BioPromptReason {
+    UNINITIALIZED, FOREGROUND_RETRIEVAL, AUTH_HEADERS
+}

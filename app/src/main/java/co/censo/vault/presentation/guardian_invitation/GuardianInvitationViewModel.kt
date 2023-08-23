@@ -30,6 +30,19 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
         }
     }
 
+    fun triggerBiometryPrompt(ownerAction: OwnerAction) {
+        state = state.copy(bioPromptTrigger = Resource.Success(ownerAction))
+    }
+
+    fun onBiometryApproved(ownerAction: OwnerAction) {
+        ownerAction(ownerAction = ownerAction, biometryApproved = true)
+        state = state.copy(bioPromptTrigger = Resource.Uninitialized)
+    }
+
+    fun onBiometryFailed() {
+        state = state.copy(bioPromptTrigger = Resource.Uninitialized)
+    }
+
     private suspend fun determineUserState(userState: UserState) {
         val user = ownerRepository.retrieveUser(userState)
 
@@ -115,16 +128,24 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
         )
     }
 
-    fun ownerAction(ownerAction: OwnerAction) {
+    fun ownerAction(ownerAction: OwnerAction, biometryApproved: Boolean = false) {
+
+        if (!biometryApproved) {
+            triggerBiometryPrompt(ownerAction)
+            return
+        }
+
         viewModelScope.launch {
             when (ownerAction) {
+                //POST
                 is OwnerAction.NameSubmitted -> {
-                    val createOwnerResponse = ownerRepository.createOwner()
+                    val createOwnerResponse = ownerRepository.createOwner(state.ownerName)
 
                     if (createOwnerResponse is Resource.Success) {
                         state = state.copy(ownerState = OwnerState.VERIFYING)
                     }
                 }
+                //POST
                 is OwnerAction.EmailSubmitted -> {
                     val userEnterValidEmail = state.validateEmail(state.emailContactStateData.value)
 
@@ -156,6 +177,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         else -> {}
                     }
                 }
+                //POST
                 is OwnerAction.EmailVerification -> {
                     val emailContactId = state.user.data?.contacts?.firstOrNull { it.contactType == ContactType.Email }?.identifier
                         ?: //todo: alert user they need to submit phone
@@ -176,6 +198,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         else -> {}
                     }
                 }
+                //POST
                 is OwnerAction.PhoneSubmitted -> {
                     val userEnteredValidPhone = state.validatePhone(state.phoneContactStateData.value)
 
@@ -192,7 +215,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         Contact(
                             identifier = "",
                             contactType = ContactType.Phone,
-                            value = state.emailContactStateData.value,
+                            value = state.phoneContactStateData.value,
                             verified = false
                         )
                     )
@@ -207,6 +230,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         else -> {}
                     }
                 }
+                //POST
                 is OwnerAction.PhoneVerification -> {
                     val phoneContactId = state.user.data?.contacts?.firstOrNull { it.contactType == ContactType.Phone }?.identifier
                         ?: //todo: alert user they need to submit phone
