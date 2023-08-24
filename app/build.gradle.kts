@@ -75,7 +75,7 @@ android {
             isMinifyEnabled = false
             isDebuggable = false
             resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
-            buildConfigField("String", "BASE_URL", "\"https://tbd.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -84,7 +84,7 @@ android {
         }
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
-            buildConfigField("String", "BASE_URL", "\"https://tbd.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
@@ -92,7 +92,7 @@ android {
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Vault")
-            buildConfigField("String", "BASE_URL", "\"https://tbd.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".aintegration"

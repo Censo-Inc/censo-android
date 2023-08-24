@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -37,11 +38,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.vault.data.Resource
 import co.censo.vault.presentation.components.owner_information.OwnerInformationField
 import co.censo.vault.presentation.components.owner_information.OwnerInformationRow
 import co.censo.vault.presentation.components.owner_information.VerifyCode
+import co.censo.vault.util.BiometricUtil
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "LogNotTimber")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +54,27 @@ fun GuardianInvitationScreen(
     navController: NavController, viewModel: GuardianInvitationViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-    val context = LocalContext.current
+    val context = LocalContext.current as FragmentActivity
+
+    LaunchedEffect(key1 = state) {
+        if (state.bioPromptTrigger is Resource.Success) {
+            val promptInfo = BiometricUtil.createPromptInfo(context)
+
+            val bioPrompt = BiometricUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = {
+                    viewModel.onBiometryApproved(state.bioPromptTrigger.data!!)
+                },
+                onFail = {
+                    BiometricUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                        viewModel.onBiometryFailed()
+                    }
+                }
+            )
+
+            bioPrompt.authenticate(promptInfo)
+        }
+    }
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()

@@ -3,12 +3,18 @@ package co.censo.vault.data.cryptography
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import co.censo.vault.BuildConfig
+import co.censo.vault.data.networking.ApiService
+import co.censo.vault.data.networking.AuthInterceptor
 import io.github.novacrypto.base58.Base58
+import kotlinx.datetime.Instant
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.KeyStore
 import java.security.*
 import java.security.cert.Certificate
+import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import java.util.Base64
 import javax.crypto.Cipher
 
 interface CryptographyManager {
@@ -22,6 +28,7 @@ interface CryptographyManager {
     fun signData(dataToSign: ByteArray): ByteArray
     fun decryptData(ciphertext: ByteArray): ByteArray
     fun encryptData(plainText: String): ByteArray
+    fun createReadAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -40,6 +47,18 @@ class CryptographyManagerImpl : CryptographyManager {
         const val ENCRYPTION_BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
         const val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
         const val ENCRYPTION_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
+    }
+
+    override fun createReadAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp {
+        val iso8601FormattedTimestamp = now.toString()
+        val signature = Base64.getEncoder()
+            .encodeToString(signData(iso8601FormattedTimestamp.toByteArray()))
+        val headers = ApiService.getAuthHeaders(
+            signature,
+            getDevicePublicKeyInBase58(),
+            iso8601FormattedTimestamp
+        )
+        return AuthInterceptor.AuthHeadersWithTimestamp(headers, now)
     }
 
     override fun signData(dataToSign: ByteArray): ByteArray {
@@ -111,7 +130,12 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun getDevicePublicKeyInBase58(): String =
-        Base58.base58Encode((getPublicKeyFromDeviceKey() as BCECPublicKey).q.getEncoded(true))
+        Base58.base58Encode(
+            BCECPublicKey(
+                getPublicKeyFromDeviceKey() as ECPublicKey,
+                BouncyCastleProvider.CONFIGURATION
+            ).q.getEncoded(true)
+        )
 
     override fun getCertificateFromKeystore(): Certificate {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)

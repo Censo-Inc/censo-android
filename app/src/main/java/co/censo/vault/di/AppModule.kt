@@ -33,8 +33,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideApiService(cryptographyManager: CryptographyManager): ApiService {
-        return ApiService.create(cryptographyManager)
+    fun provideApiService(cryptographyManager: CryptographyManager, storage: Storage): ApiService {
+        return ApiService.create(cryptographyManager, storage)
     }
 
     @Singleton

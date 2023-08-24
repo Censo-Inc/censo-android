@@ -12,6 +12,8 @@ import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.Resource
 import co.censo.vault.data.storage.Storage
+import co.censo.vault.util.BioPromptReason
+import kotlinx.datetime.Clock
 import java.security.ProviderException
 
 @HiltViewModel
@@ -22,6 +24,14 @@ class MainViewModel @Inject constructor(
     ViewModel() {
     var state by mutableStateOf(MainState())
         private set
+
+    fun updateAuthHeaders() {
+        state = state.copy(
+            bioPromptTrigger = Resource.Success(Unit),
+            bioPromptReason = BioPromptReason.AUTH_HEADERS,
+            blockAppUI = BlockAppUI.NONE
+        )
+    }
 
     fun onForeground(biometricCapability: BiometricUtil.Companion.BiometricsStatus) {
         state = state.copy(biometryStatus = biometricCapability)
@@ -42,12 +52,30 @@ class MainViewModel @Inject constructor(
     fun launchBlockingForegroundBiometryRetrieval() {
         state = state.copy(
             bioPromptTrigger = Resource.Success(Unit),
-            blockAppUI = BlockAppUI.FOREGROUND_BIOMETRY
+            blockAppUI = BlockAppUI.FOREGROUND_BIOMETRY,
+            bioPromptReason = BioPromptReason.FOREGROUND_RETRIEVAL
         )
     }
 
     fun onBiometryApproved() {
-        checkDataAfterBiometricApproval()
+        when (state.bioPromptReason) {
+            BioPromptReason.FOREGROUND_RETRIEVAL -> checkDataAfterBiometricApproval()
+            BioPromptReason.AUTH_HEADERS -> signAuthHeaders()
+            BioPromptReason.UNINITIALIZED -> {}
+        }
+
+        state = state.copy(bioPromptReason = BioPromptReason.UNINITIALIZED)
+    }
+
+    private fun signAuthHeaders() {
+        val cachedReadCallHeaders = cryptographyManager.createReadAuthHeaders(Clock.System.now())
+        storage.saveReadHeaders(cachedReadCallHeaders)
+
+        state = state.copy(
+            blockAppUI = BlockAppUI.NONE,
+            bioPromptTrigger = Resource.Uninitialized,
+            bioPromptReason = BioPromptReason.UNINITIALIZED
+        )
     }
 
     private fun checkDataAfterBiometricApproval() {

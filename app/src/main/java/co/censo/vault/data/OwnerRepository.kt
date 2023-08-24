@@ -3,9 +3,11 @@ package co.censo.vault.data
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateContactApiRequest
+import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService
+import okhttp3.ResponseBody
 
 enum class UserState() {
     NEW,
@@ -19,15 +21,71 @@ enum class UserState() {
 interface OwnerRepository {
 
     suspend fun retrieveUser(state: UserState): Resource<GetUserApiResponse?>
-    suspend fun createOwner(): Resource<Unit>
-    suspend fun createContact(contact: Contact): Resource<Unit>
-    suspend fun verifyContact(contactId: String, verificationCode: String): Resource<Unit>
+    suspend fun createOwner(name: String): Resource<Unit>
+    suspend fun createContact(contact: Contact): Resource<ResponseBody?>
+    suspend fun verifyContact(contactId: String, verificationCode: String): Resource<ResponseBody?>
 }
 
 class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository {
     override suspend fun retrieveUser(state: UserState): Resource<GetUserApiResponse?> {
 
-        return when (state) {
+        val userResponse = apiService.user()
+
+        return if (userResponse.isSuccessful) {
+            Resource.Success(userResponse.body())
+        } else {
+            Resource.Error()
+        }
+    }
+
+    override suspend fun createOwner(name: String): Resource<Unit> {
+        val createUserApiRequest = CreateUserApiRequest(name)
+        val response = apiService.createUser(createUserApiRequest)
+
+        return if (response.isSuccessful) {
+            Resource.Success(Unit)
+        } else {
+            Resource.Error()
+        }
+    }
+
+    override suspend fun createContact(contact: Contact): Resource<ResponseBody?> {
+        val createContactApiRequest = CreateContactApiRequest(
+            contactType = contact.contactType,
+            value = contact.value
+        )
+
+        val response = apiService.createContact(createContactApiRequest)
+
+        return if (response.isSuccessful) {
+            Resource.Success(response.body())
+        } else {
+            Resource.Error()
+        }
+    }
+
+    override suspend fun verifyContact(
+        contactId: String,
+        verificationCode: String
+    ): Resource<ResponseBody?> {
+        val verifyContactApiRequest = VerifyContactApiRequest(
+            verificationCode = verificationCode
+        )
+
+        val response = apiService.verifyContact(
+            contactId = contactId,
+            verifyContactApiRequest = verifyContactApiRequest
+        )
+
+        return if (response.isSuccessful) {
+            Resource.Success(response.body())
+        } else {
+            Resource.Error()
+        }
+    }
+
+    fun mockedUserData(userState: UserState): Resource<GetUserApiResponse> {
+        return when (userState) {
             UserState.NEW -> Resource.Success(null)
             UserState.CREATED -> Resource.Success(
                 GetUserApiResponse(
@@ -110,36 +168,5 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository 
                 )
             )
         }
-    }
-
-    override suspend fun createOwner(): Resource<Unit> {
-        return Resource.Success(Unit)
-    }
-
-    override suspend fun createContact(contact: Contact): Resource<Unit> {
-        //todo: this would be passed to the API
-
-        val createContactApiRequest = CreateContactApiRequest(
-            contactType = contact.contactType,
-            value = contact.value
-        )
-
-        return Resource.Success(Unit)
-    }
-
-    override suspend fun verifyContact(
-        contactId: String,
-        verificationCode: String
-    ): Resource<Unit> {
-        val verifyContactApiRequest = VerifyContactApiRequest(
-            verificationCode = verificationCode
-        )
-
-//        apiService.verifyContact(
-//            contactId = contactId,
-//            verifyContactApiRequest = verifyContactApiRequest
-//        )
-
-        return Resource.Success(Unit)
     }
 }
