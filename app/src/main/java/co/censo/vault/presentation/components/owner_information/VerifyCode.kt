@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -23,7 +25,8 @@ import androidx.compose.ui.unit.dp
 fun VerifyCode(
     value: String,
     onValueChange: (String) -> Unit,
-    onDone: () -> Unit
+    onDone: () -> Unit,
+    isLoading: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -45,7 +48,20 @@ fun VerifyCode(
                         text = "Enter Verification Code",
                         style = TextStyle.Default.copy(color = Color.Black)
                     )
-                }
+                },
+                trailingIcon = {
+                    if (isLoading) {
+                        Box {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .padding(all = 8.dp)
+                                    .size(32.dp),
+                                strokeWidth = 2.5.dp
+                            )
+                        }
+                    }
+                },
             )
         }
     }

@@ -1,3 +1,4 @@
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
 import java.util.Properties
 import java.io.FileInputStream
 
@@ -186,6 +187,13 @@ dependencies {
 
     //Raygun crash reporting
     implementation("com.raygun:raygun4android:4.0.1")
+
+    //Firebase BOM
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
+
+    //Push Notifications
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

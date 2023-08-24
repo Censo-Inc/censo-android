@@ -1,5 +1,6 @@
-package co.censo.vault.data
+package co.censo.vault.data.repository
 
+import co.censo.vault.data.Resource
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateContactApiRequest
@@ -20,33 +21,27 @@ enum class UserState() {
 
 interface OwnerRepository {
 
-    suspend fun retrieveUser(state: UserState): Resource<GetUserApiResponse?>
-    suspend fun createOwner(name: String): Resource<Unit>
+    suspend fun retrieveUser(): Resource<GetUserApiResponse?>
+    suspend fun createDevice(): Resource<ResponseBody>
+    suspend fun createOwner(name: String): Resource<ResponseBody>
     suspend fun createContact(contact: Contact): Resource<ResponseBody?>
     suspend fun verifyContact(contactId: String, verificationCode: String): Resource<ResponseBody?>
 }
 
-class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository {
-    override suspend fun retrieveUser(state: UserState): Resource<GetUserApiResponse?> {
+class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository, BaseRepository() {
+    override suspend fun retrieveUser(): Resource<GetUserApiResponse?> =
+        retrieveApiResource { apiService.user() }
 
-        val userResponse = apiService.user()
-
-        return if (userResponse.isSuccessful) {
-            Resource.Success(userResponse.body())
-        } else {
-            Resource.Error()
+    override suspend fun createDevice(): Resource<ResponseBody> {
+        return retrieveApiResource {
+            apiService.createDevice()
         }
     }
 
-    override suspend fun createOwner(name: String): Resource<Unit> {
+    override suspend fun createOwner(name: String): Resource<ResponseBody> {
         val createUserApiRequest = CreateUserApiRequest(name)
-        val response = apiService.createUser(createUserApiRequest)
 
-        return if (response.isSuccessful) {
-            Resource.Success(Unit)
-        } else {
-            Resource.Error()
-        }
+        return retrieveApiResource { apiService.createUser(createUserApiRequest) }
     }
 
     override suspend fun createContact(contact: Contact): Resource<ResponseBody?> {
@@ -55,13 +50,7 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository 
             value = contact.value
         )
 
-        val response = apiService.createContact(createContactApiRequest)
-
-        return if (response.isSuccessful) {
-            Resource.Success(response.body())
-        } else {
-            Resource.Error()
-        }
+        return retrieveApiResource { apiService.createContact(createContactApiRequest) }
     }
 
     override suspend fun verifyContact(
@@ -72,15 +61,11 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository 
             verificationCode = verificationCode
         )
 
-        val response = apiService.verifyContact(
-            contactId = contactId,
-            verifyContactApiRequest = verifyContactApiRequest
-        )
-
-        return if (response.isSuccessful) {
-            Resource.Success(response.body())
-        } else {
-            Resource.Error()
+        return retrieveApiResource {
+            apiService.verifyContact(
+                contactId = contactId,
+                verifyContactApiRequest = verifyContactApiRequest
+            )
         }
     }
 

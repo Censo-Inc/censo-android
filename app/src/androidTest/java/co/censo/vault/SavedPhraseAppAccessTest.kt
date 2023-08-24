@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import co.censo.vault.screen.ComposeAddBIP39Screen
 import co.censo.vault.screen.ComposeBip39DetailScreen
@@ -43,6 +44,11 @@ class SavedPhraseAppAccessTest : TestCase(
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        android.Manifest.permission.POST_NOTIFICATIONS
+    )
 
     @Test
     fun `create phrase then leave app and re-enter app and complete biometry`() = run {

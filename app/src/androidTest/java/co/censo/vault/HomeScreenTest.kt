@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import co.censo.vault.screen.ComposeAddBIP39Screen
 import co.censo.vault.screen.ComposeHomeScreen
 import co.censo.vault.util.TestTag
@@ -37,6 +38,11 @@ class HomeScreenTest : TestCase(
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        android.Manifest.permission.POST_NOTIFICATIONS
+    )
 
     @Test
     fun testWeAreOnHomeScreen() = run {

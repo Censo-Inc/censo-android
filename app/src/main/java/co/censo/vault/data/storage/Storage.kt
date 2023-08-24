@@ -29,6 +29,8 @@ object SharedPrefsStorage : Storage {
 
     private const val MAIN_PREFS = "main_prefs"
 
+    private const val USER_SEEN_PERMISSION_DIALOG = "user_seen_permission_dialog"
+
     private const val BIP39 = "bip_39"
 
     private const val AUTH_HEADERS = "read_timestamp"
@@ -42,6 +44,18 @@ object SharedPrefsStorage : Storage {
         appContext = context
         sharedPrefs = appContext.getSharedPreferences(MAIN_PREFS, Context.MODE_PRIVATE)
     }
+
+    //region push dialog
+    fun userHasSeenPermissionDialog(): Boolean {
+        return sharedPrefs.getBoolean(USER_SEEN_PERMISSION_DIALOG, false)
+    }
+
+    fun setUserSeenPermissionDialog(seenDialog: Boolean) {
+        val editor = sharedPrefs.edit()
+        editor.putBoolean(USER_SEEN_PERMISSION_DIALOG, seenDialog)
+        editor.apply()
+    }
+    //endregion
 
     //region bip 39 phrases
     override fun saveBIP39Phrases(phrases: BIP39Phrases) {

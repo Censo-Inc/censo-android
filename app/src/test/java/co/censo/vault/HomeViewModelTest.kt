@@ -1,5 +1,6 @@
 package co.censo.vault
 
+import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.presentation.home.HomeViewModel
 import co.censo.vault.data.storage.BIP39Phrases
 import co.censo.vault.data.storage.EncryptedBIP39
@@ -28,6 +29,9 @@ class HomeViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var storage: Storage
 
+    @Mock
+    lateinit var pushRepository: PushRepository
+
     private val dispatcher = StandardTestDispatcher()
 
     private lateinit var homeViewModel: HomeViewModel
@@ -46,7 +50,10 @@ class HomeViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        homeViewModel = HomeViewModel(storage)
+        homeViewModel = HomeViewModel(
+            storage = storage,
+            pushRepository = pushRepository
+        )
     }
 
     @Test

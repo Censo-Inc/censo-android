@@ -5,9 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.vault.data.OwnerRepository
+import co.censo.vault.data.repository.OwnerRepository
+import co.censo.vault.data.repository.BaseRepository.Companion.AUTH_ERROR_REASON
+import co.censo.vault.data.repository.BaseRepository.Companion.UNKNOWN_DEVICE_MESSAGE
 import co.censo.vault.data.Resource
-import co.censo.vault.data.UserState
+import co.censo.vault.data.repository.UserState
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.util.vaultLog
@@ -26,7 +28,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
 
     fun onStart() {
         viewModelScope.launch {
-            determineUserState(UserState.NEW)
+            determineUserState()
         }
     }
 
@@ -43,8 +45,9 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
     }
 
-    private suspend fun determineUserState(userState: UserState) {
-        val user = ownerRepository.retrieveUser(userState)
+    private suspend fun determineUserState() {
+        state = state.copy(user = Resource.Loading())
+        val user = ownerRepository.retrieveUser()
 
         if (user is Resource.Success) {
             val userData = user.data
@@ -59,6 +62,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                 if (userData.contacts.isNullOrEmpty()) {
                     state.copy(
                         user = user,
+                        ownerName = user.data.name,
                         ownerState = OwnerState.VERIFYING,
                         ownerInputState = OwnerInputState.VIEWING_CONTACTS
                     )
@@ -71,13 +75,23 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     if (emailContact == null || phoneContact == null) {
                         state.copy(
                             user = user,
+                            ownerName = user.data.name,
                             ownerState = OwnerState.VERIFYING,
-                            ownerInputState = OwnerInputState.VIEWING_CONTACTS
+                            ownerInputState = OwnerInputState.VIEWING_CONTACTS,
+                            phoneContactStateData = state.phoneContactStateData.copy(
+                                verified = phoneContact?.verified ?: false,
+                                value = phoneContact?.value ?: ""
+                            ),
+                            emailContactStateData = state.emailContactStateData.copy(
+                                verified = emailContact?.verified ?: false,
+                                value = emailContact?.value ?: ""
+                            ),
                         )
                     } else {
                         if (emailContact.verified && phoneContact.verified) {
                             state.copy(
                                 user = user,
+                                ownerName = user.data.name,
                                 ownerState = OwnerState.VERIFIED,
                                 phoneContactStateData = state.phoneContactStateData.copy(
                                     verified = true
@@ -90,12 +104,15 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         } else {
                             state.copy(
                                 user = user,
+                                ownerName = user.data.name,
                                 ownerState = OwnerState.VERIFYING,
                                 phoneContactStateData = state.phoneContactStateData.copy(
-                                    verified = phoneContact.verified
+                                    verified = phoneContact.verified,
+                                    value = phoneContact.value
                                 ),
                                 emailContactStateData = state.emailContactStateData.copy(
-                                    verified = emailContact.verified
+                                    verified = emailContact.verified,
+                                    value = emailContact.value
                                 ),
                                 ownerInputState = OwnerInputState.VIEWING_CONTACTS
                             )
@@ -103,6 +120,18 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     }
                 }
             }
+        } else {
+            val reason = user.errorResponse?.errors?.get(0)?.reason == AUTH_ERROR_REASON
+            val message = user.errorResponse?.errors?.get(0)?.message == UNKNOWN_DEVICE_MESSAGE
+            if (reason && message) {
+                createDevice()
+            }
+
+            state = state.copy(
+                user = Resource.Uninitialized,
+                showToast = if (user is Resource.Error) Resource.Success(user)
+                else Resource.Uninitialized
+            )
         }
     }
 
@@ -139,20 +168,37 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
             when (ownerAction) {
                 //POST
                 is OwnerAction.NameSubmitted -> {
+                    state = state.copy(createOwnerResource = Resource.Loading())
+
                     val createOwnerResponse = ownerRepository.createOwner(state.ownerName)
 
                     if (createOwnerResponse is Resource.Success) {
                         state = state.copy(ownerState = OwnerState.VERIFYING)
+                    } else if (createOwnerResponse is Resource.Error) {
+                        state = state.copy(
+                            showToast = Resource.Success(
+                                createOwnerResponse
+                            )
+                        )
                     }
+
+                    state = state.copy(createOwnerResource = Resource.Uninitialized)
                 }
                 //POST
                 is OwnerAction.EmailSubmitted -> {
+                    state = state.copy(
+                        emailContactStateData = state.emailContactStateData.copy(
+                            creationResource = Resource.Loading()
+                        )
+                    )
+
                     val userEnterValidEmail = state.validateEmail(state.emailContactStateData.value)
 
                     if (!userEnterValidEmail) {
                         state = state.copy(
                             emailContactStateData = state.emailContactStateData.copy(
                                 validationError = "Please enter a valid email...",
+                                creationResource = Resource.Uninitialized
                             ),
                         )
                         return@launch
@@ -168,20 +214,34 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     )
 
                     when (createContactResponse) {
-                        is Resource.Success -> determineUserState(UserState.EMAIL_SUBMITTED)
+                        is Resource.Success -> determineUserState()
 
                         is Resource.Error -> {
-                            //todo: alert user they failed to submit email
+                            state = state.copy(showToast = Resource.Success(
+                                createContactResponse
+                            ))
                         }
 
                         else -> {}
                     }
+
+                    state = state.copy(
+                        emailContactStateData = state.emailContactStateData.copy(
+                            creationResource = Resource.Uninitialized
+                        ),
+                    )
                 }
                 //POST
                 is OwnerAction.EmailVerification -> {
                     val emailContactId = state.user.data?.contacts?.firstOrNull { it.contactType == ContactType.Email }?.identifier
                         ?: //todo: alert user they need to submit phone
                         return@launch
+
+                    state = state.copy(
+                        emailContactStateData = state.emailContactStateData.copy(
+                            verificationResource = Resource.Loading()
+                        ),
+                    )
 
                     val verifyEmailResponse = ownerRepository.verifyContact(
                         contactId = emailContactId,
@@ -190,22 +250,37 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
 
                     when (verifyEmailResponse) {
                         is Resource.Success -> {
-                            determineUserState(UserState.EMAIL_VERIFIED)
+                            determineUserState()
                         }
                         is Resource.Error -> {
-                            //todo: alert user they failed to verify phone
+                            state = state.copy(showToast = Resource.Success(
+                                verifyEmailResponse
+                            ))
                         }
                         else -> {}
                     }
+
+                    state = state.copy(
+                        emailContactStateData = state.emailContactStateData.copy(
+                            verificationResource = Resource.Uninitialized
+                        ),
+                    )
                 }
                 //POST
                 is OwnerAction.PhoneSubmitted -> {
+                    state = state.copy(
+                        phoneContactStateData = state.phoneContactStateData.copy(
+                            creationResource = Resource.Loading()
+                        ),
+                    )
+
                     val userEnteredValidPhone = state.validatePhone(state.phoneContactStateData.value)
 
                     if (!userEnteredValidPhone) {
                         state = state.copy(
                             phoneContactStateData = state.phoneContactStateData.copy(
                                 validationError = "Please enter a valid phone...",
+                                creationResource = Resource.Uninitialized
                             ),
                         )
                         return@launch
@@ -221,20 +296,34 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     )
 
                     when (createContactResponse) {
-                        is Resource.Success -> determineUserState(UserState.PHONE_SUBMITTED)
+                        is Resource.Success -> determineUserState()
 
                         is Resource.Error -> {
-                            //todo: alert user they failed to submit phone
+                            state = state.copy(showToast = Resource.Success(
+                                createContactResponse
+                            ))
                         }
 
                         else -> {}
                     }
+
+                    state = state.copy(
+                        phoneContactStateData = state.phoneContactStateData.copy(
+                            creationResource = Resource.Uninitialized
+                        ),
+                    )
                 }
                 //POST
                 is OwnerAction.PhoneVerification -> {
                     val phoneContactId = state.user.data?.contacts?.firstOrNull { it.contactType == ContactType.Phone }?.identifier
                         ?: //todo: alert user they need to submit phone
                         return@launch
+
+                    state = state.copy(
+                        phoneContactStateData = state.phoneContactStateData.copy(
+                            verificationResource = Resource.Loading()
+                        ),
+                    )
 
                     val verifyPhoneResponse = ownerRepository.verifyContact(
                         contactId = phoneContactId,
@@ -243,13 +332,21 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
 
                     when (verifyPhoneResponse) {
                         is Resource.Success -> {
-                            determineUserState(UserState.FULLY_VERIFIED)
+                            determineUserState()
                         }
                         is Resource.Error -> {
-                            //todo: alert user they failed to verify phone
+                            state = state.copy(showToast = Resource.Success(
+                                verifyPhoneResponse
+                            ))
                         }
                         else -> {}
                     }
+
+                    state = state.copy(
+                        phoneContactStateData = state.phoneContactStateData.copy(
+                            creationResource = Resource.Uninitialized
+                        ),
+                    )
                 }
             }
         }
@@ -292,9 +389,6 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
 
             //Mocked for now
             viewModelScope.launch {
-                state = state.copy(isLoading = true)
-                delay(2500)
-
                 val rng = Random
                 val verificationCode = rng.nextInt(999999)
 
@@ -305,13 +399,26 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         verificationCode = String.format("%06d", verificationCode)
                     ),
                     ownerState = OwnerState.GUARDIAN_INVITED,
-                    isLoading = false
                 )
             }
         }
     }
+
+    private suspend fun createDevice() {
+        val createDeviceResponse = ownerRepository.createDevice()
+
+        if (createDeviceResponse is Resource.Success) {
+            determineUserState()
+        } else if (createDeviceResponse is Resource.Error) {
+            state = state.copy(
+                showToast = Resource.Success(
+                    createDeviceResponse
+                )
+            )
+        }
+    }
+
+    fun resetShowToast() {
+        state = state.copy(showToast = Resource.Uninitialized)
+    }
 }
-
-const val MAIN_PREFS = "CensoVault"
-
-const val OWNER_VERIFIED_FLAG = "owner_verified"

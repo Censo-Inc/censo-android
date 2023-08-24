@@ -14,19 +14,26 @@ data class ContactStateData(
     val verified : Boolean = false,
     val contactType: ContactType = ContactType.Email,
     val identifier : String = "",
-)
+) {
+    val isLoading = creationResource is Resource.Loading || verificationResource is Resource.Loading
+}
 
 data class GuardianInvitationState(
     val user: Resource<GetUserApiResponse?> = Resource.Uninitialized,
+    val createOwnerResource: Resource<Unit> = Resource.Uninitialized,
     val emailContactStateData: ContactStateData = ContactStateData(contactType = ContactType.Email),
     val phoneContactStateData: ContactStateData = ContactStateData(contactType = ContactType.Phone),
     val ownerState : OwnerState = OwnerState.NEW,
     val ownerName: String = "",
     val invitedGuardian: GuardianInformation = GuardianInformation(),
     val ownerInputState: OwnerInputState = OwnerInputState.VIEWING_CONTACTS,
-    val isLoading: Boolean = false,
-    val bioPromptTrigger: Resource<OwnerAction> = Resource.Uninitialized
+    val bioPromptTrigger: Resource<OwnerAction> = Resource.Uninitialized,
+    val showToast: Resource<Resource.Error<Any?>> = Resource.Uninitialized
 ) {
+
+    val isLoading =
+        user is Resource.Loading || createOwnerResource is Resource.Loading ||
+                emailContactStateData.isLoading || phoneContactStateData.isLoading
 
     fun emailContactState(): ContactState {
         val emailContact = user.data?.contacts?.firstOrNull { it.contactType == ContactType.Email }

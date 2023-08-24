@@ -6,6 +6,7 @@ import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.CryptographyManagerImpl
 import co.censo.vault.data.cryptography.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.Resource
+import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.presentation.main.BlockAppUI
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.data.storage.Storage
@@ -33,6 +34,9 @@ class MainViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var cryptographyManager: CryptographyManager
 
+    @Mock
+    lateinit var pushRepository: PushRepository
+
     private val dispatcher = StandardTestDispatcher()
 
     private lateinit var mainViewModel: MainViewModel
@@ -44,7 +48,8 @@ class MainViewModelTest : BaseViewModelTest() {
 
         mainViewModel = MainViewModel(
             storage = storage,
-            cryptographyManager = cryptographyManager
+            cryptographyManager = cryptographyManager,
+            pushRepository = pushRepository
         )
     }
 

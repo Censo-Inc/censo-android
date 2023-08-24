@@ -2,25 +2,32 @@ package co.censo.vault
 
 import co.censo.vault.util.BiometricUtil
 import BlockingUI
-import android.content.Context
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -40,6 +47,7 @@ import co.censo.vault.presentation.home.Screen.Companion.DL_TOKEN_KEY
 import co.censo.vault.presentation.home.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.ui.theme.VaultTheme
+import co.censo.vault.util.BioPromptReason
 import co.censo.vault.util.TestTag
 import co.censo.vault.util.popUpToTop
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,6 +65,8 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setupPushChannel()
 
         setContent {
             val context = LocalContext.current
@@ -138,6 +148,23 @@ class MainActivity : FragmentActivity() {
                         biometryStatus = mainState.biometryStatus,
                         retry = mainViewModel::launchBlockingForegroundBiometryRetrieval
                     )
+
+                    if (mainState.bioPromptReason == BioPromptReason.AUTH_HEADERS) {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = getString(R.string.please_complete_biometry_to_continue),
+                                fontSize = 24.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -188,6 +215,17 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
+
+    private fun setupPushChannel() {
+        val channelId = getString(R.string.default_notification_channel_id)
+        val channelName = getString(R.string.default_notification_channel_name)
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager?.createNotificationChannel(
+            NotificationChannel(channelId,
+                channelName, NotificationManager.IMPORTANCE_HIGH)
+        )
+    }
+
 }
 
 interface AuthHeadersListener {

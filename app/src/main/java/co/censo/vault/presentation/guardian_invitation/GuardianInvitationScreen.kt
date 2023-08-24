@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.vault.R
 import co.censo.vault.data.Resource
 import co.censo.vault.presentation.components.owner_information.OwnerInformationField
 import co.censo.vault.presentation.components.owner_information.OwnerInformationRow
@@ -74,6 +75,14 @@ fun GuardianInvitationScreen(
 
             bioPrompt.authenticate(promptInfo)
         }
+
+        if (state.showToast is Resource.Success) {
+            val message = state.showToast.data?.getErrorMessage(context)
+                ?: context.getString(R.string.default_err_message)
+            viewModel.resetShowToast()
+
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     DisposableEffect(key1 = viewModel) {
@@ -104,188 +113,198 @@ fun GuardianInvitationScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (state.ownerState) {
-                OwnerState.NEW -> {
-                    OwnerInformationField(
-                        value = state.ownerName,
-                        onValueChange = viewModel::updateOwnerName,
-                        placeholderText = "Owner Name (you)",
-                        keyboardActions = KeyboardActions(onNext = {
-                            viewModel.ownerAction(OwnerAction.NameSubmitted)
-                        }),
-                        error = "",
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next
+            if (state.user is Resource.Loading) {
+                CircularProgressIndicator()
+            } else {
+                when (state.ownerState) {
+                    OwnerState.NEW -> {
+                        OwnerInformationField(
+                            value = state.ownerName,
+                            onValueChange = viewModel::updateOwnerName,
+                            placeholderText = "Owner Name (you)",
+                            keyboardActions = KeyboardActions(onNext = {
+                                viewModel.ownerAction(OwnerAction.NameSubmitted)
+                            }),
+                            isLoading = state.isLoading,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            )
                         )
-                    )
-                }
+                    }
 
-                OwnerState.VERIFYING -> {
-                    when (state.ownerInputState) {
-                        OwnerInputState.VIEWING_CONTACTS -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                Text(text = "Owner Information", fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(text = "Owner Name: ${state.ownerName}")
+                    OwnerState.VERIFYING -> {
+                        when (state.ownerInputState) {
+                            OwnerInputState.VIEWING_CONTACTS -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Text(text = "Owner Information", fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(text = "Owner Name: ${state.ownerName}")
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
 
-                                when (state.emailContactState()) {
-                                    ContactState.DOES_NOT_EXIST -> {
-                                        OwnerInformationField(
-                                            value = state.emailContactStateData.value,
-                                            onValueChange = viewModel::updateOwnerEmail,
-                                            placeholderText = "Owner Email",
-                                            keyboardActions = KeyboardActions(
-                                                onNext = {
-                                                    viewModel.ownerAction(OwnerAction.EmailSubmitted)
+                                    when (state.emailContactState()) {
+                                        ContactState.DOES_NOT_EXIST -> {
+                                            OwnerInformationField(
+                                                value = state.emailContactStateData.value,
+                                                onValueChange = viewModel::updateOwnerEmail,
+                                                placeholderText = "Owner Email",
+                                                keyboardActions = KeyboardActions(
+                                                    onNext = {
+                                                        viewModel.ownerAction(OwnerAction.EmailSubmitted)
+                                                    }),
+                                                error = state.emailContactStateData.validationError,
+                                                isLoading = state.isLoading,
+                                                keyboardOptions = KeyboardOptions(
+                                                    imeAction = ImeAction.Next
+                                                )
+                                            )
+                                        }
+
+                                        ContactState.UNVERIFIED, ContactState.VERIFIED -> {
+                                            OwnerInformationRow(
+                                                value = "Owner Email: ${state.emailContactStateData.value}",
+                                                valueVerified = state.emailContactStateData.verified,
+                                                onVerifyClicked = viewModel::verifyOwnerEmail,
+                                                onEditClicked = {})
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    when (state.phoneContactState()) {
+                                        ContactState.DOES_NOT_EXIST -> {
+                                            OwnerInformationField(
+                                                value = state.phoneContactStateData.value,
+                                                onValueChange = viewModel::updateOwnerPhone,
+                                                placeholderText = "Owner Phone",
+                                                keyboardActions = KeyboardActions(onDone = {
+                                                    viewModel.ownerAction(OwnerAction.PhoneSubmitted)
                                                 }),
-                                            error = state.emailContactStateData.validationError,
-                                            keyboardOptions = KeyboardOptions(
-                                                imeAction = ImeAction.Next
+                                                error = state.phoneContactStateData.validationError,
+                                                isLoading = state.isLoading,
+                                                keyboardOptions = KeyboardOptions(
+                                                    imeAction = ImeAction.Done
+                                                )
                                             )
-                                        )
+                                        }
+
+                                        ContactState.UNVERIFIED, ContactState.VERIFIED -> {
+                                            OwnerInformationRow(value = "Owner Phone: ${state.phoneContactStateData.value}",
+                                                valueVerified = state.phoneContactStateData.verified,
+                                                onVerifyClicked = viewModel::verifyOwnerPhone,
+                                                onEditClicked = {})
+                                        }
                                     }
 
-                                    ContactState.UNVERIFIED, ContactState.VERIFIED -> {
-                                        OwnerInformationRow(
-                                            value = "Owner Email: ${state.emailContactStateData.value}",
-                                            valueVerified = state.emailContactStateData.verified,
-                                            onVerifyClicked = viewModel::verifyOwnerEmail,
-                                            onEditClicked = {})
+                                    Spacer(modifier = Modifier.height(34.dp))
+                                    //Button to verify information
+                                    ElevatedButton(modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        onClick = {
+                                            Toast.makeText(
+                                                context,
+                                                "Sending verification codes to submitted email and phone number",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            viewModel.sendVerificationCodesToOwner()
+                                        }) {
+                                        Text(text = "Resend verify codes")
                                     }
-                                }
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                when (state.phoneContactState()) {
-                                    ContactState.DOES_NOT_EXIST -> {
-                                        OwnerInformationField(
-                                            value = state.phoneContactStateData.value,
-                                            onValueChange = viewModel::updateOwnerPhone,
-                                            placeholderText = "Owner Phone",
-                                            keyboardActions = KeyboardActions(onDone = {
-                                                viewModel.ownerAction(OwnerAction.PhoneSubmitted)
-                                            }),
-                                            error = state.phoneContactStateData.validationError,
-                                            keyboardOptions = KeyboardOptions(
-                                                imeAction = ImeAction.Done
-                                            )
-                                        )
-                                    }
-
-                                    ContactState.UNVERIFIED, ContactState.VERIFIED -> {
-                                        OwnerInformationRow(value = "Owner Phone: ${state.phoneContactStateData.value}",
-                                            valueVerified = state.phoneContactStateData.verified,
-                                            onVerifyClicked = viewModel::verifyOwnerPhone,
-                                            onEditClicked = {})
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(34.dp))
-                                //Button to verify information
-                                ElevatedButton(modifier = Modifier.align(Alignment.CenterHorizontally),
-                                    onClick = {
-                                        Toast.makeText(
-                                            context,
-                                            "Sending verification codes to submitted email and phone number",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        viewModel.sendVerificationCodesToOwner()
-                                    }) {
-                                    Text(text = "Resend verify codes")
                                 }
                             }
-                        }
 
-                        OwnerInputState.VERIFY_OWNER_EMAIL -> {
-                            VerifyCode(
-                                value = state.emailContactStateData.verificationCode,
-                                onValueChange = viewModel::updateEmailVerificationCode,
-                                onDone = {
-                                    viewModel.ownerAction(OwnerAction.EmailVerification)
-                                })
-                        }
+                            OwnerInputState.VERIFY_OWNER_EMAIL -> {
+                                VerifyCode(
+                                    value = state.emailContactStateData.verificationCode,
+                                    onValueChange = viewModel::updateEmailVerificationCode,
+                                    onDone = {
+                                        viewModel.ownerAction(OwnerAction.EmailVerification)
+                                    },
+                                    isLoading = state.isLoading
+                                )
+                            }
 
-                        OwnerInputState.VERIFY_OWNER_PHONE -> {
-                            VerifyCode(
-                                value = state.phoneContactStateData.verificationCode,
-                                onValueChange = viewModel::updatePhoneVerificationCode,
-                                onDone = {
-                                    viewModel.ownerAction(OwnerAction.PhoneVerification)
-                                })
+                            OwnerInputState.VERIFY_OWNER_PHONE -> {
+                                VerifyCode(
+                                    value = state.phoneContactStateData.verificationCode,
+                                    onValueChange = viewModel::updatePhoneVerificationCode,
+                                    onDone = {
+                                        viewModel.ownerAction(OwnerAction.PhoneVerification)
+                                    },
+                                    isLoading = state.isLoading
+                                )
+                            }
                         }
                     }
-                }
 
-                OwnerState.VERIFIED -> {
-                    OwnerVerifiedUI(
-                        onSubmitClicked = { name: String, email: String ->
-                            viewModel.submitGuardian(guardianName = name, guardianEmail = email)
-                        }, isLoading = state.isLoading
-                    )
-                }
-
-                OwnerState.GUARDIAN_INVITED -> {
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Invited Guardian Status",
-                            style = TextStyle.Default.copy(color = Color.Black),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                    OwnerState.VERIFIED -> {
+                        OwnerVerifiedUI(
+                            onSubmitClicked = { name: String, email: String ->
+                                viewModel.submitGuardian(guardianName = name, guardianEmail = email)
+                            }, isLoading = state.isLoading
                         )
+                    }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                    OwnerState.GUARDIAN_INVITED -> {
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Column(
-                                modifier = Modifier.weight(0.75f),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                Text(text = "Name: ${state.invitedGuardian.name}")
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(text = "Email: ${state.invitedGuardian.email}")
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(text = "Guardian Status: ${state.invitedGuardian.invitationStatus.name.lowercase()}")
-                            }
+                            Text(
+                                text = "Invited Guardian Status",
+                                style = TextStyle.Default.copy(color = Color.Black),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
 
-                            Column(
-                                modifier = Modifier.weight(0.25f),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
                             ) {
-                                Text(
-                                    text = state.invitedGuardian.verificationCode,
-                                    style = TextStyle.Default.copy(
-                                        color = Color.Black,
-                                        fontSize = 26.sp,
-                                        letterSpacing = 12.sp
+                                Column(
+                                    modifier = Modifier.weight(0.75f),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Text(text = "Name: ${state.invitedGuardian.name}")
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(text = "Email: ${state.invitedGuardian.email}")
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(text = "Guardian Status: ${state.invitedGuardian.invitationStatus.name.lowercase()}")
+                                }
+
+                                Column(
+                                    modifier = Modifier.weight(0.25f),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = state.invitedGuardian.verificationCode,
+                                        style = TextStyle.Default.copy(
+                                            color = Color.Black,
+                                            fontSize = 26.sp,
+                                            letterSpacing = 12.sp
+                                        )
                                     )
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                //TODO: Setup countdown timer style progression for the progress indicator
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    progress = 0.65f,
-                                    strokeWidth = 2.dp
-                                )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    //TODO: Setup countdown timer style progression for the progress indicator
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        progress = 0.65f,
+                                        strokeWidth = 2.dp
+                                    )
+                                }
                             }
                         }
                     }

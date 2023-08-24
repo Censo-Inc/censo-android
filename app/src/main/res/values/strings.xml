@@ -28,4 +28,14 @@
     <string name="leave_screen">Leave Screen</string>
     <string name="please_complete_biometry_to_continue">Please complete biometry to continue</string>
     <string name="biometry_invalidated_keys_no_longer_accessible">Biometry invalidated. Keys no longer accessible.</string>
+
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="default_notification_channel_name" translatable="true">Notifications</string>
+
+    <string name="push_notification_never_dialog">Vault sends push notifications for important updates on your policy.\n\nUpdates can be time-sensitive and push notifications help to keep you informed.</string>
+    <string name="skip">Skip</string>
+    <string name="continue_text">Continue</string>
+
+    <string name="network_unavailable">No network available, please check your WiFi or Data connection</string>
+    <string name="default_err_message">"Unable to perform action"</string>
 </resources>

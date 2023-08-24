@@ -8,22 +8,55 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.Resource
+import co.censo.vault.data.repository.PushBody
+import co.censo.vault.data.repository.PushRepository
+import co.censo.vault.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
 import co.censo.vault.data.storage.Storage
 import co.censo.vault.util.BioPromptReason
+import co.censo.vault.util.vaultLog
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import java.security.ProviderException
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val cryptographyManager: CryptographyManager,
-    private val storage: Storage
+    private val storage: Storage,
+    private val pushRepository: PushRepository
 ) :
     ViewModel() {
     var state by mutableStateOf(MainState())
         private set
+
+    //Set this method in init block for vm to trigger push token registration for testing
+    //TODO: Refactor to a better location once we have better understanding of the product flow
+    fun triggerBiometryPromptForPushTokenRegistration() {
+        state = state.copy(
+            bioPromptTrigger = Resource.Success(Unit),
+            bioPromptReason = BioPromptReason.PUSH_NOTIFICATION
+        )
+    }
+
+    private suspend fun submitNotificationTokenForRegistration() {
+        try {
+            val token = pushRepository.retrievePushToken()
+            if (token.isNotEmpty()) {
+                val pushBody = PushBody(
+                    deviceType = DEVICE_TYPE,
+                    token = token
+                )
+                pushRepository.addPushNotification(pushBody = pushBody)
+            }
+        } catch (e: Exception) {
+            vaultLog(message = "Exception caught while trying to submit notif token")
+            //TODO: Log exception
+        }
+    }
+
 
     fun updateAuthHeaders() {
         state = state.copy(
@@ -62,6 +95,12 @@ class MainViewModel @Inject constructor(
             BioPromptReason.FOREGROUND_RETRIEVAL -> checkDataAfterBiometricApproval()
             BioPromptReason.AUTH_HEADERS -> signAuthHeaders()
             BioPromptReason.UNINITIALIZED -> {}
+            BioPromptReason.PUSH_NOTIFICATION -> {
+                state = state.copy(bioPromptTrigger = Resource.Uninitialized)
+                viewModelScope.launch {
+                    submitNotificationTokenForRegistration()
+                }
+            }
         }
 
         state = state.copy(bioPromptReason = BioPromptReason.UNINITIALIZED)
