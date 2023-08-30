@@ -28,7 +28,7 @@ interface CryptographyManager {
     fun signData(dataToSign: ByteArray): ByteArray
     fun decryptData(ciphertext: ByteArray): ByteArray
     fun encryptData(plainText: String): ByteArray
-    fun createReadAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp
+    fun createAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -49,7 +49,7 @@ class CryptographyManagerImpl : CryptographyManager {
         const val ENCRYPTION_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
     }
 
-    override fun createReadAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp {
+    override fun createAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp {
         val iso8601FormattedTimestamp = now.toString()
         val signature = Base64.getEncoder()
             .encodeToString(signData(iso8601FormattedTimestamp.toByteArray()))
