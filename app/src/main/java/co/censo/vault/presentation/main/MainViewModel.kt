@@ -68,7 +68,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun signAuthHeaders() {
-        val cachedReadCallHeaders = cryptographyManager.createReadAuthHeaders(Clock.System.now())
+        val cachedReadCallHeaders = cryptographyManager.createAuthHeaders(Clock.System.now())
         storage.saveReadHeaders(cachedReadCallHeaders)
 
         state = state.copy(

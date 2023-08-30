@@ -37,7 +37,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import retrofit2.http.Query
 import java.time.Duration
 import java.util.Base64
 import kotlin.time.Duration.Companion.days
@@ -168,10 +167,7 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val now = Clock.System.now()
-        val headers = when (request.method) {
-            "GET", "HEAD", "OPTIONS", "TRACE" -> getReadCallAuthHeaders(now)
-            else -> getWriteCallAuthHeaders(now, request)
-        }
+        val headers = getAuthHeaders(now)
 
         return chain.proceed(
             request.newBuilder().apply {
@@ -196,12 +192,12 @@ class AuthInterceptor(
 
     private var cachedReadCallHeaders: AuthHeadersWithTimestamp? = storage.retrieveReadHeaders()
 
-    private fun getReadCallAuthHeaders(now: Instant): List<Header>? {
+    private fun getAuthHeaders(now: Instant): List<Header>? {
         val cachedHeaders = storage.retrieveReadHeaders()
         return if (cachedHeaders == null || cachedHeaders.isExpired(now)) {
             storage.clearReadHeaders()
             try {
-                cachedReadCallHeaders = cryptographyManager.createReadAuthHeaders(now)
+                cachedReadCallHeaders = cryptographyManager.createAuthHeaders(now)
                 cachedReadCallHeaders?.let { storage.saveReadHeaders(it) }
                 storage.setAuthHeadersState(AuthHeadersState.VALID)
                 cachedReadCallHeaders?.headers
@@ -213,21 +209,5 @@ class AuthInterceptor(
         } else {
             cachedHeaders.headers
         }
-    }
-
-    private fun getWriteCallAuthHeaders(now: Instant, request: Request): List<Header> {
-        val httpMethod = request.method
-        val pathAndQueryParams = request.url.encodedPath + (request.url.encodedQuery?.let { "?$it" } ?: "")
-        val bodyBase64Encoded = Base64.getEncoder().encodeToString(
-            request.body?.let {
-                val buffer = Buffer()
-                it.writeTo(buffer)
-                buffer.readByteArray()
-            } ?: byteArrayOf()
-        )
-        val iso8601FormattedTimestamp = now.toString()
-        val stringToSign = httpMethod + pathAndQueryParams + bodyBase64Encoded + iso8601FormattedTimestamp
-        val signature = Base64.getEncoder().encodeToString(cryptographyManager.signData(stringToSign.toByteArray()))
-        return getAuthHeaders(signature, cryptographyManager.getDevicePublicKeyInBase58(), iso8601FormattedTimestamp)
     }
 }
