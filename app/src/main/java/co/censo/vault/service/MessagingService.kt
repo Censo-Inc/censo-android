@@ -81,11 +81,11 @@ class MessagingService : FirebaseMessagingService() {
                     token = token
                 )
 
-                val pushResponse = pushRepository.addPushNotification(pushBody)
-
-                if (pushResponse is Resource.Error) {
-                    vaultLog(message = "Push notification registration failed")
-                }
+//                val pushResponse = pushRepository.addPushNotification(pushBody)
+//
+//                if (pushResponse is Resource.Error) {
+//                    vaultLog(message = "Push notification registration failed")
+//                }
             }
         }
     }

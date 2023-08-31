@@ -2,8 +2,6 @@ package co.censo.vault.presentation.home
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -23,13 +21,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -141,12 +137,6 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ){
                         Text(text = stringResource(R.string.your_bip39_phrases))
-                        
-                        IconButton(onClick = {
-                            navController.navigate(Screen.GuardianInvitationRoute.route)
-                        }) {
-                            Icon(imageVector = Icons.Default.PersonAddAlt1, contentDescription = "")
-                        }
                     }
                 })
         },

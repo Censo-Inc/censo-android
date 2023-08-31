@@ -49,7 +49,7 @@ class MainViewModel @Inject constructor(
                     deviceType = DEVICE_TYPE,
                     token = token
                 )
-                pushRepository.addPushNotification(pushBody = pushBody)
+//                pushRepository.addPushNotification(pushBody = pushBody)
             }
         } catch (e: Exception) {
             vaultLog(message = "Exception caught while trying to submit notif token")

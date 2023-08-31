@@ -12,3 +12,8 @@ data class CreateContactApiRequest(
 data class CreateContactApiResponse(
     val verificationId: String,
 )
+
+@Serializable
+data class CreateUserApiResponse(
+    val verificationId: String,
+)

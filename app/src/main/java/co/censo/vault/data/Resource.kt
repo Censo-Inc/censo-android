@@ -9,15 +9,17 @@ import java.lang.Exception
 sealed class Resource<out T>(
     val data: T? = null,
     val exception: Exception? = null,
-    val errorResponse: ErrorResponse? = null
+    val errorResponse: ErrorResponse? = null,
+    val errorCode: Int? = null
 ) {
     object Uninitialized : Resource<Nothing>()
     class Success<out T>(data: T?) : Resource<T>(data)
     class Error<out T>(
         data: T? = null,
         exception: Exception? = null,
-        errorResponse: ErrorResponse? = null
-    ) : Resource<T>(data, exception = exception, errorResponse = errorResponse) {
+        errorResponse: ErrorResponse? = null,
+        errorCode: Int? = null
+    ) : Resource<T>(data, exception = exception, errorResponse = errorResponse, errorCode = errorCode) {
         fun getErrorMessage(context: Context): String {
             if (exception is NoConnectivityException) {
                 return context.getString(R.string.network_unavailable)

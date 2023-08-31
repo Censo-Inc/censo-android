@@ -40,12 +40,13 @@ import co.censo.vault.data.storage.Storage
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
-import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
+import co.censo.vault.presentation.facetec_auth.FacetecAuthScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.home.Screen.Companion.DL_TOKEN_KEY
 import co.censo.vault.presentation.home.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
 import co.censo.vault.presentation.main.MainViewModel
+import co.censo.vault.presentation.owner_entrance.OwnerEntranceScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.BioPromptReason
 import co.censo.vault.util.TestTag
@@ -172,7 +173,7 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
-        NavHost(navController = navController, startDestination = Screen.HomeRoute.route) {
+        NavHost(navController = navController, startDestination = Screen.OwnerEntrance.route) {
             composable(
                 "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",
                 deepLinks = listOf(navDeepLink {
@@ -185,11 +186,17 @@ class MainActivity : FragmentActivity() {
                 }
             }
 
+            composable(route = Screen.OwnerEntrance.route) {
+                OwnerEntranceScreen(navController = navController)
+            }
             composable(route = Screen.HomeRoute.route) {
                 HomeScreen(navController = navController)
             }
             composable(route = Screen.AddBIP39Route.route) {
                 AddBIP39Screen(navController = navController)
+            }
+            composable(route = Screen.FacetecAuthRoute.route) {
+                FacetecAuthScreen(navController = navController)
             }
             composable(
                 route = "${Screen.BIP39DetailRoute.route}/{${Screen.BIP39DetailRoute.BIP_39_NAME_ARG}}",
@@ -200,9 +207,6 @@ class MainActivity : FragmentActivity() {
                 val nameArgument =
                     backStackEntry.arguments?.getString(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) as String
                 BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
-            }
-            composable(route = Screen.GuardianInvitationRoute.route) {
-                GuardianInvitationScreen(navController = navController)
             }
         }
     }
@@ -221,8 +225,10 @@ class MainActivity : FragmentActivity() {
         val channelName = getString(R.string.default_notification_channel_name)
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager?.createNotificationChannel(
-            NotificationChannel(channelId,
-                channelName, NotificationManager.IMPORTANCE_HIGH)
+            NotificationChannel(
+                channelId,
+                channelName, NotificationManager.IMPORTANCE_HIGH
+            )
         )
     }
 

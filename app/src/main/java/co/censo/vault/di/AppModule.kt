@@ -6,6 +6,8 @@ import co.censo.vault.data.cryptography.CryptographyManagerImpl
 import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.data.repository.OwnerRepositoryImpl
 import co.censo.vault.data.networking.ApiService
+import co.censo.vault.data.repository.FacetecRepository
+import co.censo.vault.data.repository.FacetecRepositoryImpl
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.data.repository.PushRepositoryImpl
 import co.censo.vault.data.storage.SharedPrefsStorage
@@ -35,19 +37,35 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideApiService(cryptographyManager: CryptographyManager, storage: Storage, @ApplicationContext applicationContext: Context): ApiService {
+    fun provideApiService(
+        cryptographyManager: CryptographyManager,
+        storage: Storage,
+        @ApplicationContext applicationContext: Context
+    ): ApiService {
         return ApiService.create(cryptographyManager, storage, applicationContext)
     }
 
     @Singleton
     @Provides
-    fun provideOwnerRepository(apiService: ApiService): OwnerRepository {
-        return OwnerRepositoryImpl(apiService)
+    fun provideOwnerRepository(apiService: ApiService, storage: Storage): OwnerRepository {
+        return OwnerRepositoryImpl(apiService, storage)
     }
 
     @Singleton
     @Provides
-    fun providesPushRepository(api: ApiService, @ApplicationContext applicationContext: Context) : PushRepository {
+    fun providesPushRepository(
+        api: ApiService,
+        @ApplicationContext applicationContext: Context
+    ): PushRepository {
         return PushRepositoryImpl(api, applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun providesFacetecRepository(
+        api: ApiService,
+        @ApplicationContext applicationContext: Context
+    ): FacetecRepository {
+        return FacetecRepositoryImpl(api)
     }
 }
