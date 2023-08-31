@@ -47,91 +47,93 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
 
     private suspend fun determineUserState() {
         state = state.copy(user = Resource.Loading())
-        val user = ownerRepository.retrieveUser()
 
-        if (user is Resource.Success) {
-            val userData = user.data
+        when (val user = ownerRepository.retrieveUser()) {
+            is Resource.Error -> {
+                val reason = user.errorResponse?.errors?.get(0)?.reason == AUTH_ERROR_REASON
+                val message = user.errorResponse?.errors?.get(0)?.message == UNKNOWN_DEVICE_MESSAGE
+                if (reason && message) {
+                    createDevice()
+                } else {
+                    state = state.copy(
+                        user = Resource.Uninitialized,
+                        showToast = Resource.Success(user)
+                    )
+                }
+            }
+            is Resource.Success -> {
+                val userData = user.data
 
-            state = if (userData == null) {
-                state.copy(
-                    user = user,
-                    ownerState = OwnerState.NEW
-                )
-            } else {
-
-                if (userData.contacts.isNullOrEmpty()) {
+                state = if (userData == null) {
                     state.copy(
                         user = user,
-                        ownerName = user.data.name,
-                        ownerState = OwnerState.VERIFYING,
-                        ownerInputState = OwnerInputState.VIEWING_CONTACTS
+                        ownerState = OwnerState.NEW
                     )
                 } else {
-                    val phoneContact =
-                        userData.contacts.firstOrNull { it.contactType == ContactType.Phone }
-                    val emailContact =
-                        userData.contacts.firstOrNull { it.contactType == ContactType.Email }
 
-                    if (emailContact == null || phoneContact == null) {
+                    if (userData.contacts.isEmpty()) {
                         state.copy(
                             user = user,
                             ownerName = user.data.name,
                             ownerState = OwnerState.VERIFYING,
-                            ownerInputState = OwnerInputState.VIEWING_CONTACTS,
-                            phoneContactStateData = state.phoneContactStateData.copy(
-                                verified = phoneContact?.verified ?: false,
-                                value = phoneContact?.value ?: ""
-                            ),
-                            emailContactStateData = state.emailContactStateData.copy(
-                                verified = emailContact?.verified ?: false,
-                                value = emailContact?.value ?: ""
-                            ),
+                            ownerInputState = OwnerInputState.VIEWING_CONTACTS
                         )
                     } else {
-                        if (emailContact.verified && phoneContact.verified) {
-                            state.copy(
-                                user = user,
-                                ownerName = user.data.name,
-                                ownerState = OwnerState.VERIFIED,
-                                phoneContactStateData = state.phoneContactStateData.copy(
-                                    verified = true
-                                ),
-                                emailContactStateData = state.emailContactStateData.copy(
-                                    verified = true
-                                ),
-                                ownerInputState = OwnerInputState.VIEWING_CONTACTS
-                            )
-                        } else {
+                        val phoneContact =
+                            userData.contacts.firstOrNull { it.contactType == ContactType.Phone }
+                        val emailContact =
+                            userData.contacts.firstOrNull { it.contactType == ContactType.Email }
+
+                        if (emailContact == null || phoneContact == null) {
                             state.copy(
                                 user = user,
                                 ownerName = user.data.name,
                                 ownerState = OwnerState.VERIFYING,
+                                ownerInputState = OwnerInputState.VIEWING_CONTACTS,
                                 phoneContactStateData = state.phoneContactStateData.copy(
-                                    verified = phoneContact.verified,
-                                    value = phoneContact.value
+                                    verified = phoneContact?.verified ?: false,
+                                    value = phoneContact?.value ?: ""
                                 ),
                                 emailContactStateData = state.emailContactStateData.copy(
-                                    verified = emailContact.verified,
-                                    value = emailContact.value
+                                    verified = emailContact?.verified ?: false,
+                                    value = emailContact?.value ?: ""
                                 ),
-                                ownerInputState = OwnerInputState.VIEWING_CONTACTS
                             )
+                        } else {
+                            if (emailContact.verified && phoneContact.verified) {
+                                state.copy(
+                                    user = user,
+                                    ownerName = user.data.name,
+                                    ownerState = OwnerState.VERIFIED,
+                                    phoneContactStateData = state.phoneContactStateData.copy(
+                                        verified = true
+                                    ),
+                                    emailContactStateData = state.emailContactStateData.copy(
+                                        verified = true
+                                    ),
+                                    ownerInputState = OwnerInputState.VIEWING_CONTACTS
+                                )
+                            } else {
+                                state.copy(
+                                    user = user,
+                                    ownerName = user.data.name,
+                                    ownerState = OwnerState.VERIFYING,
+                                    phoneContactStateData = state.phoneContactStateData.copy(
+                                        verified = phoneContact.verified,
+                                        value = phoneContact.value
+                                    ),
+                                    emailContactStateData = state.emailContactStateData.copy(
+                                        verified = emailContact.verified,
+                                        value = emailContact.value
+                                    ),
+                                    ownerInputState = OwnerInputState.VIEWING_CONTACTS
+                                )
+                            }
                         }
                     }
                 }
             }
-        } else {
-            val reason = user.errorResponse?.errors?.get(0)?.reason == AUTH_ERROR_REASON
-            val message = user.errorResponse?.errors?.get(0)?.message == UNKNOWN_DEVICE_MESSAGE
-            if (reason && message) {
-                createDevice()
-            }
-
-            state = state.copy(
-                user = Resource.Uninitialized,
-                showToast = if (user is Resource.Error) Resource.Success(user)
-                else Resource.Uninitialized
-            )
+            else -> { }
         }
     }
 
@@ -217,9 +219,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                         is Resource.Success -> determineUserState()
 
                         is Resource.Error -> {
-                            state = state.copy(showToast = Resource.Success(
-                                createContactResponse
-                            ))
+                            state = state.copy(showToast = Resource.Success(createContactResponse))
                         }
 
                         else -> {}
