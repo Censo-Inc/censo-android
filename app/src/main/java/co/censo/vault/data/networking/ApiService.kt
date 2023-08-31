@@ -147,6 +147,12 @@ interface ApiService {
     @POST("/v1/policy/encrypted-data")
     suspend fun storeEncryptedPhraseData(): RetrofitResponse<ResponseBody>
 
+    @POST("/v1/policies/{policyKey}/guardian/{participantId}/device")
+    suspend fun registerGuardian(
+        @Path(value = "policyKey") policyKey: String,
+        @Path(value = "participantId") participantId: String,
+    ): RetrofitResponse<ResponseBody>
+
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>
 

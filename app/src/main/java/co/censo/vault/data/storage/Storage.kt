@@ -21,6 +21,13 @@ interface Storage {
     fun retrieveReadHeaders(): AuthInterceptor.AuthHeadersWithTimestamp?
     fun clearReadHeaders()
 
+    //Master Encryption Key
+    fun saveMasterEncryptionKey(key: ByteArray)
+
+    fun retrieveMasterEncryptionKey() : String
+
+    fun clearMasterEncryptionKey()
+
     //Auth Headers Notifying Functionality
     fun setAuthHeadersState(authHeadersState: AuthHeadersState)
     fun addAuthHeadersStateListener(listener: AuthHeadersListener)
@@ -36,6 +43,7 @@ object SharedPrefsStorage : Storage {
     private const val DEVICE_CREATED_FLAG = "device_created_flag"
 
     private const val BIP39 = "bip_39"
+    private const val TEMP_ENCRYPTION_MASTER_KEY = "temp_encryption_master_key"
 
     private const val AUTH_HEADERS = "read_timestamp"
 
@@ -115,6 +123,23 @@ object SharedPrefsStorage : Storage {
         editor.putString(AUTH_HEADERS, "")
         editor.apply()
     }
+
+    override fun saveMasterEncryptionKey(key: ByteArray) {
+        val editor = sharedPrefs.edit()
+        editor.putString(TEMP_ENCRYPTION_MASTER_KEY, String(key))
+        editor.apply()
+    }
+
+    override fun retrieveMasterEncryptionKey(): String {
+        return sharedPrefs.getString(TEMP_ENCRYPTION_MASTER_KEY, "") ?: ""
+    }
+
+    override fun clearMasterEncryptionKey() {
+        val editor = sharedPrefs.edit()
+        editor.putString(TEMP_ENCRYPTION_MASTER_KEY, "")
+        editor.apply()
+    }
+
 
     @AnyThread
     override fun setAuthHeadersState(authHeadersState: AuthHeadersState) {
