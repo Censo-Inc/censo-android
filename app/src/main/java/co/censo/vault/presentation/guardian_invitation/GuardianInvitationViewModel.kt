@@ -9,10 +9,12 @@ import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.data.repository.BaseRepository.Companion.AUTH_ERROR_REASON
 import co.censo.vault.data.repository.BaseRepository.Companion.UNKNOWN_DEVICE_MESSAGE
 import co.censo.vault.data.Resource
+import co.censo.vault.data.repository.UserState
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
@@ -214,12 +216,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     )
 
                     when (createContactResponse) {
-                        is Resource.Success -> {
-                            state = state.copy(emailContactStateData = state.emailContactStateData.copy(
-                                verificationId = createContactResponse.data!!.verificationId
-                            ))
-                            determineUserState()
-                        }
+                        is Resource.Success -> determineUserState()
 
                         is Resource.Error -> {
                             state = state.copy(showToast = Resource.Success(createContactResponse))
@@ -247,7 +244,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     )
 
                     val verifyEmailResponse = ownerRepository.verifyContact(
-                        verificationId = state.emailContactStateData.verificationId,
+                        contactId = emailContactId,
                         verificationCode = state.emailContactStateData.verificationCode
                     )
 
@@ -299,12 +296,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     )
 
                     when (createContactResponse) {
-                        is Resource.Success -> {
-                            state = state.copy(phoneContactStateData = state.phoneContactStateData.copy(
-                                verificationId = createContactResponse.data!!.verificationId
-                            ))
-                            determineUserState()
-                        }
+                        is Resource.Success -> determineUserState()
 
                         is Resource.Error -> {
                             state = state.copy(showToast = Resource.Success(
@@ -334,7 +326,7 @@ class GuardianInvitationViewModel @Inject constructor(private val ownerRepositor
                     )
 
                     val verifyPhoneResponse = ownerRepository.verifyContact(
-                        verificationId = state.phoneContactStateData.verificationId,
+                        contactId = phoneContactId,
                         verificationCode = state.phoneContactStateData.verificationCode
                     )
 

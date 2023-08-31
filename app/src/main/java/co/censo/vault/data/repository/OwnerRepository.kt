@@ -4,7 +4,6 @@ import co.censo.vault.data.Resource
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateContactApiRequest
-import co.censo.vault.data.model.CreateContactApiResponse
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.VerifyContactApiRequest
@@ -25,8 +24,8 @@ interface OwnerRepository {
     suspend fun retrieveUser(): Resource<GetUserApiResponse?>
     suspend fun createDevice(): Resource<ResponseBody>
     suspend fun createOwner(name: String): Resource<ResponseBody>
-    suspend fun createContact(contact: Contact): Resource<CreateContactApiResponse?>
-    suspend fun verifyContact(verificationId: String, verificationCode: String): Resource<ResponseBody?>
+    suspend fun createContact(contact: Contact): Resource<ResponseBody?>
+    suspend fun verifyContact(contactId: String, verificationCode: String): Resource<ResponseBody?>
 }
 
 class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository, BaseRepository() {
@@ -45,7 +44,7 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository,
         return retrieveApiResource { apiService.createUser(createUserApiRequest) }
     }
 
-    override suspend fun createContact(contact: Contact): Resource<CreateContactApiResponse?> {
+    override suspend fun createContact(contact: Contact): Resource<ResponseBody?> {
         val createContactApiRequest = CreateContactApiRequest(
             contactType = contact.contactType,
             value = contact.value
@@ -55,7 +54,7 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository,
     }
 
     override suspend fun verifyContact(
-        verificationId: String,
+        contactId: String,
         verificationCode: String
     ): Resource<ResponseBody?> {
         val verifyContactApiRequest = VerifyContactApiRequest(
@@ -64,7 +63,7 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository,
 
         return retrieveApiResource {
             apiService.verifyContact(
-                verificationId = verificationId,
+                contactId = contactId,
                 verifyContactApiRequest = verifyContactApiRequest
             )
         }

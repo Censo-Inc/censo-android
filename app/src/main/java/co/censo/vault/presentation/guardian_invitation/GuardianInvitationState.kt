@@ -10,7 +10,6 @@ data class ContactStateData(
     val validationError: String = "",
     val creationResource: Resource<Unit> = Resource.Uninitialized,
     val verificationResource: Resource<Unit> = Resource.Uninitialized,
-    val verificationId: String = "",
     val verificationCode: String = "",
     val verified : Boolean = false,
     val contactType: ContactType = ContactType.Email,

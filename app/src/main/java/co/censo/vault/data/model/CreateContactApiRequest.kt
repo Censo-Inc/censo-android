@@ -7,8 +7,3 @@ data class CreateContactApiRequest(
     val contactType: ContactType,
     val value: String,
 )
-
-@Serializable
-data class CreateContactApiResponse(
-    val verificationId: String,
-)
