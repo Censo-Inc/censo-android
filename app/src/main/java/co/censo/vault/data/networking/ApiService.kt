@@ -4,13 +4,13 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
 import android.security.keystore.UserNotAuthenticatedException
-import android.util.Log
 import co.censo.vault.AuthHeadersState
 import co.censo.vault.BuildConfig
 import co.censo.vault.data.Header
 import co.censo.vault.data.HeadersSerializer
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.model.CreateContactApiRequest
+import co.censo.vault.data.model.CreateContactApiResponse
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.GetPoliciesApiResponse
@@ -22,10 +22,8 @@ import co.censo.vault.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.vault.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.vault.data.networking.ApiService.Companion.IS_API
 import co.censo.vault.data.networking.ApiService.Companion.OS_VERSION_HEADER
-import co.censo.vault.data.networking.ApiService.Companion.getAuthHeaders
 import co.censo.vault.data.repository.PushBody
 import co.censo.vault.data.storage.Storage
-import co.censo.vault.util.vaultLog
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -34,18 +32,15 @@ import kotlinx.serialization.json.Json
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.logging.HttpLoggingInterceptor
-import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.io.IOException
 import java.time.Duration
-import java.util.Base64
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import retrofit2.Response as RetrofitResponse
@@ -114,11 +109,11 @@ interface ApiService {
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
 
     @POST("/v1/contacts")
-    suspend fun createContact(@Body createContactApiRequest: CreateContactApiRequest): RetrofitResponse<ResponseBody>
+    suspend fun createContact(@Body createContactApiRequest: CreateContactApiRequest): RetrofitResponse<CreateContactApiResponse>
 
-    @POST("/v1/contacts/{id}/verification-code")
+    @POST("/v1/verifications/{id}/code")
     suspend fun verifyContact(
-        @Path(value = "id", encoded = true) contactId: String,
+        @Path(value = "id", encoded = true) verificationId: String,
         @Body verifyContactApiRequest: VerifyContactApiRequest
     ): RetrofitResponse<ResponseBody>
 
