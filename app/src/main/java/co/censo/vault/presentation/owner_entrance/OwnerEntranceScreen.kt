@@ -117,7 +117,13 @@ fun OwnerEntranceScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(color = Color.White)
-                        ) { CircularProgressIndicator(modifier = Modifier.size(44.dp)) }
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(72.dp).align(Alignment.Center),
+                                strokeWidth = 8.dp,
+                                color = Color.Red
+                            )
+                        }
                     }
 
                     state.apiCallErrorOccurred -> {
@@ -220,9 +226,13 @@ fun OwnerEntranceStandardUI(
                 isLoading = false
             )
 
-        UserStatus.COMPLETE_FACETEC, UserStatus.UNINITIALIZED -> {
+        UserStatus.UNINITIALIZED -> {
             Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(modifier = Modifier.size(44.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier.size(72.dp).align(Alignment.Center),
+                    strokeWidth = 8.dp,
+                    color = Color.Red
+                )
             }
         }
     }
