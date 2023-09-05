@@ -1,5 +1,6 @@
 package co.censo.vault.data.networking
 
+import InitBiometryVerificationApiResponse
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
@@ -13,6 +14,7 @@ import co.censo.vault.data.model.CreateContactApiRequest
 import co.censo.vault.data.model.CreateContactApiResponse
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
+import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetPoliciesApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.Policy
@@ -103,19 +105,19 @@ interface ApiService {
 
     @POST("/v1/user")
     suspend fun createUser(@Body createUserApiRequest: CreateUserApiRequest):
-            RetrofitResponse<ResponseBody>
+            RetrofitResponse<CreateUserApiResponse>
 
     @GET("/v1/user")
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
 
-    @POST("/v1/contacts")
-    suspend fun createContact(@Body createContactApiRequest: CreateContactApiRequest): RetrofitResponse<CreateContactApiResponse>
-
-    @POST("/v1/verifications/{id}/code")
+    @POST("/v1/contact-verifications/{id}/code")
     suspend fun verifyContact(
         @Path(value = "id", encoded = true) verificationId: String,
         @Body verifyContactApiRequest: VerifyContactApiRequest
     ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/biometry-verifications")
+    suspend fun biometryVerification() : RetrofitResponse<InitBiometryVerificationApiResponse>
 
     @POST("/v1/policies")
     suspend fun createPolicy(
@@ -147,9 +149,6 @@ interface ApiService {
         @Path("deviceType") deviceType: String
     ) : RetrofitResponse<Unit>
 }
-
-data class HoldingBody(val ok: String)
-
 
 class AnalyticsInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain) =

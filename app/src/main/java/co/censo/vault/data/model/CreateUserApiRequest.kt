@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CreateUserApiRequest(
-    val name: String,
+    val contactType: ContactType,
+    val value: String,
 )

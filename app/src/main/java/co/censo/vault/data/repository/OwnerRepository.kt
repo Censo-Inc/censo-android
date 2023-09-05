@@ -1,14 +1,20 @@
 package co.censo.vault.data.repository
 
+import android.security.keystore.UserNotAuthenticatedException
+import co.censo.vault.AuthHeadersState
 import co.censo.vault.data.Resource
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateContactApiRequest
 import co.censo.vault.data.model.CreateContactApiResponse
 import co.censo.vault.data.model.CreateUserApiRequest
+import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService
+import co.censo.vault.data.storage.Storage
+import co.censo.vault.util.vaultLog
+import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 
 enum class UserState() {
@@ -20,18 +26,51 @@ enum class UserState() {
     EMAIL_VERIFIED,
 }
 
-interface OwnerRepository {
-
-    suspend fun retrieveUser(): Resource<GetUserApiResponse?>
-    suspend fun createDevice(): Resource<ResponseBody>
-    suspend fun createOwner(name: String): Resource<ResponseBody>
-    suspend fun createContact(contact: Contact): Resource<CreateContactApiResponse?>
-    suspend fun verifyContact(verificationId: String, verificationCode: String): Resource<ResponseBody?>
+enum class MockUserState {
+    NOT_FOUND, CREATED, VERIFIED
 }
 
-class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository, BaseRepository() {
-    override suspend fun retrieveUser(): Resource<GetUserApiResponse?> =
-        retrieveApiResource { apiService.user() }
+interface OwnerRepository {
+
+    suspend fun retrieveUser(mockUserState: MockUserState): Resource<GetUserApiResponse?>
+    suspend fun createDevice(): Resource<ResponseBody>
+    suspend fun createOwner(createUserApiRequest: CreateUserApiRequest): Resource<CreateUserApiResponse>
+    //suspend fun createContact(contact: Contact): Resource<CreateContactApiResponse?>
+    suspend fun verifyContact(verificationId: String, verificationCode: String): Resource<ResponseBody>
+    fun checkValidTimestamp() : Boolean
+}
+
+class OwnerRepositoryImpl(private val apiService: ApiService, private val storage: Storage) :
+    OwnerRepository, BaseRepository() {
+    override suspend fun retrieveUser(mockUserState: MockUserState): Resource<GetUserApiResponse?> {
+        //return retrieveApiResource { apiService.user() }
+
+        return when (mockUserState) {
+            MockUserState.CREATED ->
+                Resource.Success(
+                    data =
+                    GetUserApiResponse(
+                        name = "Action Jackson",
+                        contacts = emptyList()
+                    )
+                )
+
+            MockUserState.NOT_FOUND -> Resource.Error(errorCode = 401)
+            MockUserState.VERIFIED -> Resource.Success(
+                data = GetUserApiResponse(
+                    name = "Action Jackson",
+                    contacts = listOf(
+                        Contact(
+                            identifier = "mock email contact",
+                            contactType = ContactType.Email,
+                            value = "sam@ok.com",
+                            verified = true
+                        )
+                    )
+                )
+            )
+        }
+    }
 
     override suspend fun createDevice(): Resource<ResponseBody> {
         return retrieveApiResource {
@@ -39,35 +78,36 @@ class OwnerRepositoryImpl(private val apiService: ApiService) : OwnerRepository,
         }
     }
 
-    override suspend fun createOwner(name: String): Resource<ResponseBody> {
-        val createUserApiRequest = CreateUserApiRequest(name)
-
+    override suspend fun createOwner(createUserApiRequest: CreateUserApiRequest): Resource<CreateUserApiResponse> {
+        vaultLog(message = "Data sent to create user: $createUserApiRequest")
+        return Resource.Success(data = CreateUserApiResponse(verificationId = "123456"))
         return retrieveApiResource { apiService.createUser(createUserApiRequest) }
-    }
-
-    override suspend fun createContact(contact: Contact): Resource<CreateContactApiResponse?> {
-        val createContactApiRequest = CreateContactApiRequest(
-            contactType = contact.contactType,
-            value = contact.value
-        )
-
-        return retrieveApiResource { apiService.createContact(createContactApiRequest) }
     }
 
     override suspend fun verifyContact(
         verificationId: String,
         verificationCode: String
-    ): Resource<ResponseBody?> {
+    ): Resource<ResponseBody> {
         val verifyContactApiRequest = VerifyContactApiRequest(
             verificationCode = verificationCode
         )
 
-        return retrieveApiResource {
-            apiService.verifyContact(
-                verificationId = verificationId,
-                verifyContactApiRequest = verifyContactApiRequest
-            )
-        }
+        return Resource.Success(
+            ResponseBody.create(contentType = null, content = byteArrayOf())
+        )
+
+//        return retrieveApiResource {
+//            apiService.verifyContact(
+//                verificationId = verificationId,
+//                verifyContactApiRequest = verifyContactApiRequest
+//            )
+//        }
+    }
+
+    override fun checkValidTimestamp() : Boolean {
+        val now = Clock.System.now()
+        val cachedHeaders = storage.retrieveReadHeaders()
+        return !(cachedHeaders == null || cachedHeaders.isExpired(now))
     }
 
     fun mockedUserData(userState: UserState): Resource<GetUserApiResponse> {

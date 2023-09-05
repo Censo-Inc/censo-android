@@ -11,6 +11,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 interface Storage {
+    fun setDeviceCreatedFlag()
+    fun retrieveDeviceCreatedFlag() : Boolean
     fun saveBIP39Phrases(phrases: BIP39Phrases)
     fun retrieveBIP39Phrases(): BIP39Phrases
     fun clearStoredPhrases()
@@ -30,6 +32,8 @@ object SharedPrefsStorage : Storage {
     private const val MAIN_PREFS = "main_prefs"
 
     private const val USER_SEEN_PERMISSION_DIALOG = "user_seen_permission_dialog"
+
+    private const val DEVICE_CREATED_FLAG = "device_created_flag"
 
     private const val BIP39 = "bip_39"
 
@@ -54,6 +58,18 @@ object SharedPrefsStorage : Storage {
         val editor = sharedPrefs.edit()
         editor.putBoolean(USER_SEEN_PERMISSION_DIALOG, seenDialog)
         editor.apply()
+    }
+    //endregion
+
+    //region device created
+    override fun setDeviceCreatedFlag() {
+        val editor = sharedPrefs.edit()
+        editor.putBoolean(DEVICE_CREATED_FLAG, true)
+        editor.apply()
+    }
+
+    override fun retrieveDeviceCreatedFlag(): Boolean {
+        return sharedPrefs.getBoolean(DEVICE_CREATED_FLAG, false)
     }
     //endregion
 

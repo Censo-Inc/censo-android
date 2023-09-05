@@ -10,6 +10,7 @@ import retrofit2.Response
 import kotlinx.serialization.decodeFromString
 import com.google.gson.Gson
 import kotlinx.coroutines.withContext
+import java.util.FormattableFlags
 
 abstract class BaseRepository {
 
@@ -23,7 +24,8 @@ abstract class BaseRepository {
                 } else {
                     Resource.Error(
                         errorResponse = getErrorInfoFromResponse(response),
-                        exception = Exception("Request failed with code: ${response.code()}")
+                        exception = Exception("Request failed with code: ${response.code()}"),
+                        errorCode = response.code()
                     )
                 }
             } catch (e: NoConnectivityException) {
@@ -50,8 +52,8 @@ abstract class BaseRepository {
 
 
     companion object {
-        const val AUTH_ERROR_REASON = "AuthenticationError"
-        const val UNKNOWN_DEVICE_MESSAGE = "Unknown device"
+        const val HTTP_404 = 404
+        const val HTTP_401 = 401
     }
 }
 

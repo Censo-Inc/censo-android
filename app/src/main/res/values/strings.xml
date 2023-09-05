@@ -38,4 +38,7 @@
 
     <string name="network_unavailable">No network available, please check your WiFi or Data connection</string>
     <string name="default_err_message">"Unable to perform action"</string>
+    <string name="retry">Retry</string>
+    <string name="create_device_call_failed">Something went wrong when attempting to register device, please try again</string>
+    <string name="owner_setup">Owner Setup</string>
 </resources>
