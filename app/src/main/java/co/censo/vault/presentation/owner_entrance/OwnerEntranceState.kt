@@ -14,6 +14,7 @@ data class OwnerEntranceState(
     val verificationCode: String = "",
     val userStatus: UserStatus = UserStatus.UNINITIALIZED,
     val contactValue: String = "",
+    val contactType: ContactType = ContactType.Email,
     val contactVerified: Boolean = false,
     val validationError: String = "",
     val verificationId: String = "",
@@ -69,4 +70,7 @@ sealed class OwnerAction {
     object PhoneSubmitted : OwnerAction()
     object EmailVerification : OwnerAction()
     object PhoneVerification : OwnerAction()
+    data class UpdateContact(val value: String) : OwnerAction()
+    data class UpdateVerificationCode(val value: String) : OwnerAction()
+    object ShowVerificationDialog : OwnerAction()
 }

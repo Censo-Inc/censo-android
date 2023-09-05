@@ -3,6 +3,7 @@ package co.censo.vault.data.repository
 import android.security.keystore.UserNotAuthenticatedException
 import co.censo.vault.AuthHeadersState
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.model.Contact
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateContactApiRequest
@@ -38,9 +39,10 @@ interface OwnerRepository {
     //suspend fun createContact(contact: Contact): Resource<CreateContactApiResponse?>
     suspend fun verifyContact(verificationId: String, verificationCode: String): Resource<ResponseBody>
     fun checkValidTimestamp() : Boolean
+    fun saveValidTimestamp()
 }
 
-class OwnerRepositoryImpl(private val apiService: ApiService, private val storage: Storage) :
+class OwnerRepositoryImpl(private val apiService: ApiService, private val storage: Storage, private val cryptographyManager: CryptographyManager) :
     OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(mockUserState: MockUserState): Resource<GetUserApiResponse?> {
         //return retrieveApiResource { apiService.user() }
@@ -108,6 +110,15 @@ class OwnerRepositoryImpl(private val apiService: ApiService, private val storag
         val now = Clock.System.now()
         val cachedHeaders = storage.retrieveReadHeaders()
         return !(cachedHeaders == null || cachedHeaders.isExpired(now))
+    }
+
+    override fun saveValidTimestamp() {
+        try {
+            val cachedReadCallHeaders = cryptographyManager.createAuthHeaders(Clock.System.now())
+            storage.saveReadHeaders(cachedReadCallHeaders)
+        } catch (e : Exception) {
+            //TODO: Log exception with raygun
+        }
     }
 
     fun mockedUserData(userState: UserState): Resource<GetUserApiResponse> {

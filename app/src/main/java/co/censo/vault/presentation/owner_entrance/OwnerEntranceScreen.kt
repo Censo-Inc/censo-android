@@ -2,6 +2,8 @@ package co.censo.vault.presentation.owner_entrance
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,8 +43,8 @@ import co.censo.vault.data.Resource
 import co.censo.vault.presentation.components.owner_information.OwnerInformationField
 import co.censo.vault.presentation.components.owner_information.OwnerInformationRow
 import co.censo.vault.presentation.components.owner_information.VerifyCode
-import co.censo.vault.presentation.home.Screen
 import co.censo.vault.util.BiometricUtil
+import co.censo.vault.util.vaultLog
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,39 +117,31 @@ fun OwnerEntranceScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(color = Color.White)
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(44.dp))
-                        }
+                        ) { CircularProgressIndicator(modifier = Modifier.size(44.dp)) }
                     }
 
                     state.apiCallErrorOccurred -> {
                         if (state.createOwnerResource is Resource.Error) {
                             DisplayError(
-                                errorMessage = state.createOwnerResource.getErrorMessage(context)
-                            ) {
-                                //TODO: Retry when create owner fails
-                            }
+                                errorMessage = state.createOwnerResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetCreateOwnerResource,
+                            ) { viewModel.retryCreateUser() }
                         } else if (state.verificationResource is Resource.Error) {
                             DisplayError(
-                                errorMessage = state.verificationResource.getErrorMessage(context)
-                            ) {
-                                //TODO: Retry when verify resource fails
-                            }
+                                errorMessage = state.verificationResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetVerificationResource,
+                            ) { viewModel.retryVerifyContact() }
                         } else if (state.userResource is Resource.Error) {
                             DisplayError(
-                                errorMessage = state.userResource.getErrorMessage(context)
-                            ) {
-                                //TODO: Retry when get user
-                            }
+                                errorMessage = state.userResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetUserResource,
+                            ) { viewModel.retryGetUser() }
                         }
                     }
 
                     else -> {
                         OwnerEntranceStandardUI(
                             state = state,
-                            updateContact = viewModel::updateContactValue,
-                            updateVerificationCode = viewModel::updateVerificationCode,
-                            showVerificationDialog = viewModel::showVerificationDialog,
                             ownerAction = viewModel::ownerAction
                         )
                     }
@@ -159,9 +154,6 @@ fun OwnerEntranceScreen(
 @Composable
 fun OwnerEntranceStandardUI(
     state: OwnerEntranceState,
-    updateContact: (String) -> Unit,
-    updateVerificationCode: (String) -> Unit,
-    showVerificationDialog: () -> Unit,
     ownerAction: (OwnerAction) -> Unit
 ) {
     when (state.userStatus) {
@@ -179,7 +171,9 @@ fun OwnerEntranceStandardUI(
                 if (state.emailContactState() == ContactState.DOES_NOT_EXIST) {
                     OwnerInformationField(
                         value = state.contactValue,
-                        onValueChange = updateContact,
+                        onValueChange = { value ->
+                            ownerAction(OwnerAction.UpdateContact(value))
+                        },
                         placeholderText = "User Contact",
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -211,7 +205,7 @@ fun OwnerEntranceStandardUI(
                     value = "Owner Email: ${state.contactValue}",
                     valueVerified = state.contactVerified,
                     onVerifyClicked = {
-                        showVerificationDialog()
+                        ownerAction(OwnerAction.ShowVerificationDialog)
                     },
                     onEditClicked = {})
             }
@@ -219,7 +213,9 @@ fun OwnerEntranceStandardUI(
         UserStatus.VERIFY_CODE_ENTRY ->
             VerifyCode(
                 value = state.verificationCode,
-                onValueChange = { updateVerificationCode(it) },
+                onValueChange = { value ->
+                    ownerAction(OwnerAction.UpdateVerificationCode(value))
+                },
                 onDone = { ownerAction(OwnerAction.EmailVerification) },
                 isLoading = false
             )
@@ -235,11 +231,29 @@ fun OwnerEntranceStandardUI(
 @Composable
 fun DisplayError(
     errorMessage: String,
+    dismissAction: () -> Unit,
     retryAction: () -> Unit,
 ) {
-    Text(modifier = Modifier.padding(16.dp), text = errorMessage, textAlign = TextAlign.Center)
-    Spacer(modifier = Modifier.height(24.dp))
-    TextButton(onClick = retryAction) {
-        Text(text = stringResource(R.string.retry))
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { dismissAction() },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(modifier = Modifier.padding(16.dp), text = errorMessage, textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(18.dp))
+        TextButton(onClick = retryAction) {
+            Text(text = stringResource(R.string.retry))
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        TextButton(onClick = dismissAction) {
+            Text(text = stringResource(R.string.dismiss))
+        }
     }
 }

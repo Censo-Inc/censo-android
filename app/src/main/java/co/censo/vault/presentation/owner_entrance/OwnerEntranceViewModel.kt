@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateUserApiRequest
-import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.repository.BaseRepository.Companion.HTTP_401
 import co.censo.vault.data.repository.MockUserState
 import co.censo.vault.data.repository.OwnerRepository
@@ -68,6 +67,8 @@ class OwnerEntranceViewModel @Inject constructor(
     }
 
     fun onBiometryApproved() {
+        ownerRepository.saveValidTimestamp()
+
         checkUserState(mockUserState = MockUserState.NOT_FOUND)
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
     }
@@ -96,7 +97,7 @@ class OwnerEntranceViewModel @Inject constructor(
     fun ownerAction(ownerAction: OwnerAction) {
         viewModelScope.launch {
             when (ownerAction) {
-                is OwnerAction.EmailSubmitted -> {
+                OwnerAction.EmailSubmitted -> {
                     state = state.copy(
                         createOwnerResource = Resource.Loading(),
                     )
@@ -117,7 +118,7 @@ class OwnerEntranceViewModel @Inject constructor(
                     )
 
                 }
-                is OwnerAction.EmailVerification -> {
+                OwnerAction.EmailVerification -> {
                     state = state.copy(
                         verificationResource = Resource.Loading()
                     )
@@ -132,10 +133,8 @@ class OwnerEntranceViewModel @Inject constructor(
                     if (verifyEmailResponse is Resource.Success) {
                         checkUserState(MockUserState.VERIFIED)
                     }
-
-                    state = state.copy(verificationResource = Resource.Uninitialized)
                 }
-                is OwnerAction.PhoneSubmitted -> {
+                OwnerAction.PhoneSubmitted -> {
                     state = state.copy(
                         createOwnerResource = Resource.Loading(),
                     )
@@ -156,7 +155,7 @@ class OwnerEntranceViewModel @Inject constructor(
                         value = state.contactValue
                     )
                 }
-                is OwnerAction.PhoneVerification -> {
+                OwnerAction.PhoneVerification -> {
                     state = state.copy(verificationResource = Resource.Loading())
 
                     val verifyPhoneResponse = ownerRepository.verifyContact(
@@ -169,14 +168,17 @@ class OwnerEntranceViewModel @Inject constructor(
                     if (verifyPhoneResponse is Resource.Success) {
                         checkUserState(MockUserState.VERIFIED)
                     }
-
-                    state = state.copy(verificationResource = Resource.Uninitialized)
                 }
+                is OwnerAction.UpdateContact -> { updateContactValue(ownerAction.value) }
+                is OwnerAction.UpdateVerificationCode -> { updateVerificationCode(ownerAction.value) }
+                OwnerAction.ShowVerificationDialog -> { showVerificationDialog() }
             }
         }
     }
 
     private suspend fun registerUserToBackend(contactType: ContactType, value: String) {
+        state = state.copy(contactType = contactType)
+
         val createOwnerResponse = ownerRepository.createOwner(
             createUserApiRequest = CreateUserApiRequest(
                 contactType = contactType,
@@ -218,8 +220,28 @@ class OwnerEntranceViewModel @Inject constructor(
 
                 is Resource.Success -> {
                     vaultLog(message = "Retrieve user success")
-                    determineUserStatus(user.data)
-                    state = state.copy(userResource = user)
+                    if (user.data == null) {
+                        state =
+                            state.copy(userStatus = UserStatus.UNINITIALIZED, userResource = user)
+                        return@launch
+                    }
+
+                    if (user.data.contacts.isEmpty()) {
+                        state = state.copy(
+                            userStatus = UserStatus.CONTACT_UNVERIFIED,
+                            userResource = user
+                        )
+                        return@launch
+                    }
+
+                    if (user.data.contacts.any { it.verified }) {
+                        state = state.copy(
+                            userStatus = UserStatus.COMPLETE_FACETEC,
+                            userFinishedSetup = Resource.Success(Screen.FacetecAuthRoute.route),
+                            userResource = user
+                        )
+                        return@launch
+                    }
                 }
 
                 else -> {
@@ -229,27 +251,47 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun determineUserStatus(user: GetUserApiResponse?) {
-        if (user == null) {
-            state = state.copy(userStatus = UserStatus.UNINITIALIZED)
-            return
+    fun retryCreateUser() {
+        viewModelScope.launch {
+            registerUserToBackend(contactType = state.contactType, value = state.contactValue)
         }
+    }
 
-        if (user.contacts.isEmpty()) {
-            state = state.copy(userStatus = UserStatus.CONTACT_UNVERIFIED)
-            return
+    fun retryGetUser() {
+        viewModelScope.launch {
+            checkUserState(MockUserState.CREATED)
         }
+    }
 
-        if (user.contacts.any { it.verified }) {
-            state = state.copy(
-                userStatus = UserStatus.COMPLETE_FACETEC,
-                userFinishedSetup = Resource.Success(Screen.FacetecAuthRoute.route)
+    fun retryVerifyContact() {
+        viewModelScope.launch {
+            val verifyContactResponse = ownerRepository.verifyContact(
+                verificationId = state.verificationId,
+                verificationCode = state.verificationCode
             )
-            return
+
+            state = state.copy(verificationResource = verifyContactResponse)
+
+            if (verifyContactResponse is Resource.Success) {
+                checkUserState(MockUserState.VERIFIED)
+                state = state.copy(verificationResource = Resource.Uninitialized)
+            }
         }
     }
 
     fun resetUserFinishedSetup() {
         state = state.copy(userFinishedSetup = Resource.Uninitialized)
+    }
+
+    fun resetVerificationResource() {
+        state = state.copy(verificationResource = Resource.Uninitialized)
+    }
+
+    fun resetUserResource() {
+        state = state.copy(userResource = Resource.Uninitialized)
+    }
+
+    fun resetCreateOwnerResource() {
+        state = state.copy(createOwnerResource = Resource.Uninitialized)
     }
 }
