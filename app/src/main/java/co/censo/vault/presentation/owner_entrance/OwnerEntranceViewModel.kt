@@ -9,7 +9,6 @@ import co.censo.vault.data.Resource
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.repository.BaseRepository.Companion.HTTP_401
-import co.censo.vault.data.repository.MockUserState
 import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.util.vaultLog
@@ -55,7 +54,7 @@ class OwnerEntranceViewModel @Inject constructor(
     fun onStart() {
         if (ownerRepository.checkValidTimestamp()) {
             vaultLog(message = "Have a valid timestamp moving forward...")
-            checkUserState(MockUserState.NOT_FOUND)
+            checkUserState()
         } else {
             vaultLog(message = "Timestamp missing or expired, triggering biometry...")
             triggerBiometryPrompt()
@@ -69,7 +68,7 @@ class OwnerEntranceViewModel @Inject constructor(
     fun onBiometryApproved() {
         ownerRepository.saveValidTimestamp()
 
-        checkUserState(mockUserState = MockUserState.NOT_FOUND)
+        checkUserState()
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
     }
 
@@ -77,20 +76,20 @@ class OwnerEntranceViewModel @Inject constructor(
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
     }
 
-    fun updateVerificationCode(value: String) {
+    private fun updateVerificationCode(value: String) {
         state = state.copy(
             verificationCode = value,
         )
     }
 
-    fun updateContactValue(value: String) {
+    private fun updateContactValue(value: String) {
         state = state.copy(
             contactValue = value,
             validationError = "",
         )
     }
 
-    fun showVerificationDialog() {
+    private fun showVerificationDialog() {
         state = state.copy(userStatus = UserStatus.VERIFY_CODE_ENTRY)
     }
 
@@ -131,7 +130,7 @@ class OwnerEntranceViewModel @Inject constructor(
                     state = state.copy(verificationResource = verifyEmailResponse)
 
                     if (verifyEmailResponse is Resource.Success) {
-                        checkUserState(MockUserState.VERIFIED)
+                        checkUserState()
                     }
                 }
                 OwnerAction.PhoneSubmitted -> {
@@ -166,7 +165,7 @@ class OwnerEntranceViewModel @Inject constructor(
                     state = state.copy(verificationResource = verifyPhoneResponse)
 
                     if (verifyPhoneResponse is Resource.Success) {
-                        checkUserState(MockUserState.VERIFIED)
+                        checkUserState()
                     }
                 }
                 is OwnerAction.UpdateContact -> { updateContactValue(ownerAction.value) }
@@ -197,10 +196,10 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun checkUserState(mockUserState: MockUserState) {
+    private fun checkUserState() {
         state = state.copy(userResource = Resource.Loading())
         viewModelScope.launch {
-            val user = ownerRepository.retrieveUser(mockUserState)
+            val user = ownerRepository.retrieveUser()
             vaultLog(message = "User coming back from retrieve user: ${user.data}")
             when (user) {
                 is Resource.Error -> {
@@ -259,7 +258,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
     fun retryGetUser() {
         viewModelScope.launch {
-            checkUserState(MockUserState.CREATED)
+            checkUserState()
         }
     }
 
@@ -273,7 +272,7 @@ class OwnerEntranceViewModel @Inject constructor(
             state = state.copy(verificationResource = verifyContactResponse)
 
             if (verifyContactResponse is Resource.Success) {
-                checkUserState(MockUserState.VERIFIED)
+                checkUserState()
                 state = state.copy(verificationResource = Resource.Uninitialized)
             }
         }
