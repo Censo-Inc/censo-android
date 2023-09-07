@@ -1,5 +1,6 @@
 package co.censo.vault.data.cryptography
 
+import Base58EncodedPolicyPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import GuardianInvite
@@ -12,7 +13,7 @@ class PolicySetupHelper(
     val masterEncryptionPublicKey: Base58EncodedPublicKey,
     val encryptedMasterKey: Base64EncodedData,
     val threshold: Int,
-    val policyPublicKey: Base58EncodedPublicKey,
+    val policyPublicKey: Base58EncodedPolicyPublicKey,
     val guardianInvites: List<GuardianInvite> = emptyList(),
     val deviceKey: PrivateKey
 ) {

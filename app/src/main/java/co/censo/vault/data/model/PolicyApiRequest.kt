@@ -16,7 +16,7 @@ data class CreatePolicyApiRequest(
 
 @Serializable
 data class UpdatePolicyApiRequest(
-    val guardiansToInvite: List<GuardianUpdate>,
+    val guardians: List<GuardianUpdate>,
 )
 
 @Serializable
