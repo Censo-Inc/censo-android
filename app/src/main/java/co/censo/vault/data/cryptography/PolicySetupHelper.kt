@@ -8,12 +8,13 @@ import java.security.PrivateKey
 import java.util.Base64
 
 class PolicySetupHelper(
-    private val shards: List<Point>,
-    private val masterEncryptionPublicKey: Base58EncodedPublicKey,
-    private val encryptedMasterKey: Base64EncodedData,
-    private val policyPublicKey: Base58EncodedPublicKey,
-    private val guardianInvites: List<GuardianInvite> = emptyList(),
-    private val deviceKey: PrivateKey
+    val shards: List<Point>,
+    val masterEncryptionPublicKey: Base58EncodedPublicKey,
+    val encryptedMasterKey: Base64EncodedData,
+    val threshold: Int,
+    val policyPublicKey: Base58EncodedPublicKey,
+    val guardianInvites: List<GuardianInvite> = emptyList(),
+    val deviceKey: PrivateKey
 ) {
 
 
@@ -27,7 +28,7 @@ class PolicySetupHelper(
             val masterEncryptionKey = EncryptionKey.generateRandomKey()
             val policyEncryptionKey = EncryptionKey.generateRandomKey()
 
-            val encryptedMasterKey = java.util.Base64.getEncoder().encodeToString(
+            val encryptedMasterKey = Base64.getEncoder().encodeToString(
                 policyEncryptionKey.encrypt(
                     masterEncryptionKey.privateKeyRaw().toByteArray()
                 )
@@ -60,6 +61,7 @@ class PolicySetupHelper(
                 masterEncryptionPublicKey = masterEncryptionKey.publicExternalRepresentation(),
                 policyPublicKey = policyEncryptionKey.publicExternalRepresentation(),
                 encryptedMasterKey = encryptedMasterKey,
+                threshold = threshold,
                 guardianInvites = guardianInvites
             )
         }

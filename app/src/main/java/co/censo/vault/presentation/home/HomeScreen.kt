@@ -142,10 +142,11 @@ fun HomeScreen(
                 })
         },
         content = {
-            Box(modifier = Modifier.padding(it)) {
+            Box(modifier = Modifier.padding(it).fillMaxSize().background(color = Color.White)) {
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
+                        .background(color = Color.White)
                         .padding(horizontal = 16.dp)
                         .semantics { testTag = TestTag.phrases_list },
                 ) {

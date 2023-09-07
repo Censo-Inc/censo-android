@@ -3,6 +3,7 @@ package co.censo.vault.presentation.guardian_invitation
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -76,7 +78,9 @@ fun GuardianInvitationScreen(
     }
 
     Column(
-        Modifier.fillMaxSize(),
+        Modifier
+            .fillMaxSize()
+            .background(color = Color.White),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -86,13 +90,14 @@ fun GuardianInvitationScreen(
                 if (state.guardians.isEmpty()) {
                     Text(
                         text = stringResource(R.string.guardians_empty_message),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 } else {
                     LazyColumn {
                         items(state.guardians.size) { index ->
-                            Text(text = state.guardians[index].name)
+                            Text(text = state.guardians[index].name, color = Color.Black)
                         }
                     }
                 }
@@ -105,14 +110,14 @@ fun GuardianInvitationScreen(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     TextButton(onClick = { viewModel.addGuardian() }) {
-                        Text(text = stringResource(R.string.add_guardian))
+                        Text(text = stringResource(R.string.add_guardian), color = Color.Black)
                     }
 
                     Column(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = stringResource(R.string.threshold))
+                        Text(text = stringResource(R.string.threshold), color = Color.Black)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceAround
@@ -122,18 +127,20 @@ fun GuardianInvitationScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Remove,
-                                    contentDescription = stringResource(R.string.remove_content_desc)
+                                    contentDescription = stringResource(R.string.remove_content_desc),
+                                    tint = Color.Black
                                 )
                             }
 
-                            Text(text = state.threshold.toString())
+                            Text(text = state.threshold.toString(), color = Color.Black)
 
                             IconButton(onClick = {
                                 viewModel.updateThreshold(state.threshold + 1)
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = stringResource(R.string.add_content_desc)
+                                    contentDescription = stringResource(R.string.add_content_desc),
+                                    tint = Color.Black
                                 )
                             }
                         }
@@ -146,13 +153,19 @@ fun GuardianInvitationScreen(
                     onClick = { viewModel.userSubmitGuardianSet() },
                     enabled = state.canContinueOnboarding
                 ) {
-                    Text(text = stringResource(R.string.continue_onboarding))
+                    Text(text = stringResource(R.string.continue_onboarding), color = Color.Black)
                 }
             }
             GuardianInvitationStatus.INVITE_GUARDIANS -> {
                 val clipboardManager = LocalClipboardManager.current
+                
+                Spacer(modifier = Modifier.height(56.dp))
 
-                Text(text = stringResource(R.string.share_guardian_deeplinks), textAlign = TextAlign.Center)
+                Text(
+                    text = stringResource(R.string.share_guardian_deeplinks),
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
+                )
 
                 Spacer(Modifier.height(24.dp))
 
@@ -167,10 +180,11 @@ fun GuardianInvitationScreen(
                         Card(modifier = Modifier.padding(8.dp), onClick = {
                             clipboardManager.setText(AnnotatedString(state.guardianDeepLinks[index]))
                         }) {
-                            Row {
+                            Row(modifier = Modifier.background(color = Color(0xFF4059AD))) {
                                 Text(
                                     modifier = Modifier.padding(12.dp),
-                                    text = state.guardians[index].name
+                                    text = state.guardians[index].name,
+                                    color = Color.White
                                 )
 
                                 IconButton(onClick = {
@@ -178,7 +192,8 @@ fun GuardianInvitationScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.ContentCopy,
-                                        contentDescription = "Copy icon"
+                                        contentDescription = "Copy icon",
+                                        tint = Color.White
                                     )
                                 }
 
@@ -187,7 +202,8 @@ fun GuardianInvitationScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Share,
-                                        contentDescription = "Share icon"
+                                        contentDescription = "Share icon",
+                                        tint = Color.White
                                     )
                                 }
                             }

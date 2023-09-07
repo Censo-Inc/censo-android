@@ -81,8 +81,7 @@ class GuardianInvitationViewModel @Inject constructor(
                 guardians = state.guardians
             )
 
-            //todo: Send this policy to backend
-            val setupPolicyResponse = Resource.Success(Unit)
+            val setupPolicyResponse = ownerRepository.createPolicy(policySetupHelper)
 
 
             if (setupPolicyResponse is Resource.Success) {

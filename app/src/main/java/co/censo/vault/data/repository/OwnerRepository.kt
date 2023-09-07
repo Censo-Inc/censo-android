@@ -5,7 +5,7 @@ import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.PolicySetupHelper
 import co.censo.vault.data.cryptography.generatePartitionId
-import co.censo.vault.data.cryptography.generateRandomHex
+import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
@@ -16,6 +16,7 @@ import co.censo.vault.data.storage.Storage
 import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
 import co.censo.vault.util.vaultLog
 import kotlinx.datetime.Clock
+import okhttp3.MediaType
 import okhttp3.ResponseBody
 
 interface OwnerRepository {
@@ -32,6 +33,7 @@ interface OwnerRepository {
     fun saveValidTimestamp()
     suspend fun setupPolicy(threshold: Int, guardians: List<Guardian>) : PolicySetupHelper
     suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>) : List<String>
+    suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<Unit>
 }
 
 class OwnerRepositoryImpl(
@@ -104,6 +106,17 @@ class OwnerRepositoryImpl(
         vaultLog(message = "Policy Setup Helper Created: $policySetupHelper")
 
         return policySetupHelper
+    }
+
+    override suspend fun createPolicy(setupHelper: PolicySetupHelper): Resource<Unit> {
+        return Resource.Success(Unit)
+//        val createPolicyApiRequest = CreatePolicyApiRequest(
+//            policyKey = setupHelper.policyPublicKey,
+//            guardiansToInvite = setupHelper.guardianInvites,
+//            threshold = setupHelper.threshold
+//        )
+//
+//        return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
     override suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>): List<String> {

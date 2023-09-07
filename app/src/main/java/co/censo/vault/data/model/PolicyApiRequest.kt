@@ -1,12 +1,7 @@
 package co.censo.vault.data.model
 
+import GuardianInvite
 import kotlinx.serialization.Serializable
-
-@Serializable
-data class GuardianInvite(
-    val name: String,
-    val email: String,
-)
 
 @Serializable
 data class CreatePolicyApiRequest(
