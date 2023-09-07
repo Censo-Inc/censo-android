@@ -5,4 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GetUserApiResponse(
     val contacts: List<Contact>,
+    val biometricVerificationRequired: Boolean
 )

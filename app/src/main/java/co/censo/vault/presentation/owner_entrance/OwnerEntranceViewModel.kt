@@ -234,11 +234,15 @@ class OwnerEntranceViewModel @Inject constructor(
                     }
 
                     if (user.data.contacts.any { it.verified }) {
-                        state = state.copy(
-                            userStatus = UserStatus.COMPLETE_FACETEC,
-                            userFinishedSetup = Resource.Success(Screen.FacetecAuthRoute.route),
-                            userResource = user
-                        )
+                        val nextScreen =
+                            if (user.data.biometricVerificationRequired) Screen.FacetecAuthRoute.route else Screen.HomeRoute.route
+
+                        state =
+                            state.copy(
+                                userStatus = UserStatus.UNINITIALIZED,
+                                userFinishedSetup = Resource.Success(nextScreen),
+                                userResource = user
+                            )
                         return@launch
                     }
                 }

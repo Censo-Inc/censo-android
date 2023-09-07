@@ -7,46 +7,126 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
 import co.censo.vault.data.repository.FacetecRepository
+import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
+import com.facetec.sdk.FaceTecFaceScanProcessor
+import com.facetec.sdk.FaceTecFaceScanResultCallback
+import com.facetec.sdk.FaceTecSessionResult
+import com.facetec.sdk.FaceTecSessionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FacetecAuthViewModel @Inject constructor(
+    private val ownerRepository: OwnerRepository,
     private val facetecRepository: FacetecRepository
-) : ViewModel() {
+) : ViewModel(), FaceTecFaceScanProcessor {
 
     var state by mutableStateOf(FacetecAuthState())
         private set
 
     fun onStart() {
-        retrieveFacetecData()
+        retrieveUserData()
     }
 
-    private fun retrieveFacetecData() {
+    fun retry() {
+        when {
+            state.userResponse is Resource.Error -> {
+                retrieveUserData()
+            }
+            state.initFacetecData is Resource.Error -> {
+                retrieveFacetecData()
+            }
+            state.submitResultResponse is Resource.Error -> {
+                facetecSDKInitialized()
+            }
+        }
+    }
+
+    private fun retrieveUserData() {
         viewModelScope.launch {
+            state = state.copy(userResponse = Resource.Loading())
+            val userResponse = ownerRepository.retrieveUser()
+            state = state.copy(userResponse = userResponse)
+        }
+    }
+
+    fun retrieveFacetecData() {
+        viewModelScope.launch {
+            state = state.copy(initFacetecData = Resource.Loading())
             val facetecDataResource = facetecRepository.startFacetecBiometry()
 
             if (facetecDataResource is Resource.Success) {
                 state = state.copy(
                     initFacetecData = facetecDataResource,
-                    sessionId = facetecDataResource.data?.sessionToken ?: "",
-                    deviceKeyId = facetecDataResource.data?.deviceKeyId ?: ""
+                    facetecData = facetecDataResource.data,
+                )
+            } else if (facetecDataResource is Resource.Error) {
+                state = state.copy(
+                    initFacetecData = facetecDataResource
                 )
             }
         }
     }
 
     fun facetecSDKInitialized() {
-        vaultLog(message = "Successfully set up Facetec SDK")
+        state = state.copy(
+            startAuth = Resource.Success(Unit),
+            submitResultResponse = Resource.Loading()
+        )
     }
 
     fun failedToInitializeSDK() {
         vaultLog(message = "Failed to setup Facetec SDK")
+        state = state.copy(initFacetecData = Resource.Error())
     }
 
     fun resetFacetecInitDataResource() {
         state = state.copy(initFacetecData = Resource.Uninitialized)
+    }
+
+    fun resetStartFacetecAuth() {
+        state = state.copy(startAuth = Resource.Uninitialized)
+    }
+
+    fun resetSubmitResult() {
+        state = state.copy(submitResultResponse = Resource.Uninitialized)
+    }
+
+    override fun processSessionWhileFaceTecSDKWaits(
+        sessionResult: FaceTecSessionResult?,
+        scanResultCallback: FaceTecFaceScanResultCallback?
+    ) {
+        if (sessionResult?.status != FaceTecSessionStatus.SESSION_COMPLETED_SUCCESSFULLY) {
+            scanResultCallback?.cancel()
+            state =
+                state.copy(submitResultResponse = Resource.Error(exception = Exception("Facescan failed to complete. No result.")))
+            return
+        }
+
+        vaultLog(message = "Successfully received facetec result...")
+        state = state.copy(submitResultResponse = Resource.Loading())
+
+        viewModelScope.launch {
+            val submitResultResponse = facetecRepository.submitResult(
+                biometryId = state.facetecData?.id ?: "",
+                sessionResult = sessionResult
+            )
+
+            if (submitResultResponse is Resource.Success) {
+                vaultLog(message = "Success sending facetec data to backend")
+
+                submitResultResponse.data?.scanResultBlob?.let {
+                    scanResultCallback?.proceedToNextStep(submitResultResponse.data?.scanResultBlob)
+                } ?: scanResultCallback?.succeed()
+
+            } else if (submitResultResponse is Resource.Error) {
+                scanResultCallback?.cancel()
+                vaultLog(message = "Failed to send data to backend")
+            }
+
+            state = state.copy(submitResultResponse = submitResultResponse)
+        }
     }
 }
