@@ -178,7 +178,7 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
-        NavHost(navController = navController, startDestination = Screen.GuardianInvitationRoute.route) {
+        NavHost(navController = navController, startDestination = Screen.OwnerEntrance.route) {
             composable(
                 "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_POLICY_KEY_KEY={$DL_POLICY_KEY_KEY}?$DL_DEVICE_PUBLIC_KEY_KEY={$DL_DEVICE_PUBLIC_KEY_KEY}?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
                 deepLinks = listOf(navDeepLink {
