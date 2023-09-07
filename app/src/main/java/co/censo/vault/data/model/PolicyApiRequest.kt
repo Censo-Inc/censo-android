@@ -10,7 +10,7 @@ data class GuardianInvite(
 
 @Serializable
 data class CreatePolicyApiRequest(
-    val policyKey: String, // publicKey
+    val intermediateKey: String, // publicKey
     val threshold: Int,
     val guardiansToInvite: List<GuardianInvite>,
 )
@@ -31,7 +31,7 @@ data class Guardian(
 @Serializable
 data class Policy(
     val status: PolicyStatus,
-    val policyKey: String, // publicKey
+    val intermediateKey: String, // publicKey
     val threshold: Int,
     val guardians: List<Guardian>,
 )
