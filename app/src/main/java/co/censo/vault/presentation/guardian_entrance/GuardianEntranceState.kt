@@ -10,8 +10,15 @@ data class GuardianEntranceState(
     val participantId: ParticipantId = ParticipantId(""),
     val ownerDevicePublicKey: Base58EncodedDevicePublicKey = "",
     val intermediateKey: Base58EncodedPublicKey = "",
-    val registerGuardianResource: Resource<ResponseBody> = Resource.Uninitialized
+    val verificationCode: String = "",
+    val guardianStatus: GuardianStatus = GuardianStatus.REGISTER_GUARDIAN,
+    val registerGuardianResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized
 )
+
+enum class GuardianStatus {
+    REGISTER_GUARDIAN, ENTER_VERIFICATION_CODE
+}
 
 data class GuardianEntranceArgs(
     val participantId: ParticipantId = ParticipantId(""),

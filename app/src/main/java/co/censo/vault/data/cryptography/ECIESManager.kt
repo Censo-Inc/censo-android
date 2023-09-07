@@ -146,7 +146,7 @@ object ECIESManager {
         )
     }
 
-    private fun getPublicKeyFromBytes(pubKey: ByteArray): PublicKey {
+    fun getPublicKeyFromBytes(pubKey: ByteArray): PublicKey {
         val securityPoint: ECPoint = createPoint(params.curve, pubKey)
         val pubKeySpec = ECPublicKeySpec(securityPoint, bouncyParams)
 

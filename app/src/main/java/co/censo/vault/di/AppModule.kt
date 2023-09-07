@@ -60,9 +60,10 @@ object AppModule {
     @Singleton
     @Provides
     fun provideGuardianRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        cryptographyManager: CryptographyManager,
     ): GuardianRepository {
-        return GuardianRepositoryImpl(apiService)
+        return GuardianRepositoryImpl(apiService, cryptographyManager)
     }
 
     @Singleton

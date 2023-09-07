@@ -201,7 +201,7 @@ class MainActivity : FragmentActivity() {
                     intermediateKey = intermediateKey ?: ""
                 )
 
-                GuardianEntranceScreen(navController = navController, args = args)
+                GuardianEntranceScreen(args = args)
             }
             composable(route = Screen.OwnerEntrance.route) {
                 OwnerEntranceScreen(navController = navController)
