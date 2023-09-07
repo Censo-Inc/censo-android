@@ -1,18 +1,22 @@
 package co.censo.vault.data.model
 
+import Base58EncodedPolicyPublicKey
+import Base64EncodedData
 import GuardianInvite
+import GuardianUpdate
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class CreatePolicyApiRequest(
-    val policyKey: String, // publicKey
+    val policyKey: Base58EncodedPolicyPublicKey,
     val threshold: Int,
     val guardiansToInvite: List<GuardianInvite>,
+    val encryptedData: Base64EncodedData
 )
 
 @Serializable
 data class UpdatePolicyApiRequest(
-    val guardiansToInvite: List<GuardianInvite>,
+    val guardiansToInvite: List<GuardianUpdate>,
 )
 
 @Serializable
@@ -26,9 +30,10 @@ data class Guardian(
 @Serializable
 data class Policy(
     val status: PolicyStatus,
-    val policyKey: String, // publicKey
+    val policyKey: Base58EncodedPolicyPublicKey,
     val threshold: Int,
     val guardians: List<Guardian>,
+    val encryptedData: Base64EncodedData,
 )
 
 @Serializable

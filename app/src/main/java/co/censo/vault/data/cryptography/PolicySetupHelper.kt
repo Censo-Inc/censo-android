@@ -50,8 +50,7 @@ class PolicySetupHelper(
                 GuardianInvite(
                     name = guardianProspect.label,
                     participantId = "",
-                    encryptedShard = Base64.getEncoder().encodeToString(encryptedShard),
-                    guardianId = null
+                    encryptedShard = Base64.getEncoder().encodeToString(encryptedShard)
                 )
             }
 

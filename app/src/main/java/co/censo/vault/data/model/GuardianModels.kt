@@ -11,8 +11,15 @@ import java.math.BigInteger
 data class GuardianInvite(
     val name: String,
     val participantId: ParticipantId,
-    val encryptedShard: Base64EncodedData?,
-    val guardianId: String?
+    val encryptedShard: Base64EncodedData
+)
+
+@Serializable
+data class GuardianUpdate(
+    val id: GuardianId,
+    val name: String,
+    val participantId: ParticipantId,
+    val encryptedShard: Base64EncodedData
 )
 
 @Serializable
@@ -23,8 +30,10 @@ data class GuardianProspect(
 )
 
 
+typealias GuardianId = String
 typealias ParticipantId = String
 typealias Base58EncodedPublicKey = String
+typealias Base58EncodedPolicyPublicKey = String
 typealias Base64EncodedData = String
 
 
