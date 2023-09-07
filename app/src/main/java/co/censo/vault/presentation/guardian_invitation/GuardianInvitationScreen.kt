@@ -34,10 +34,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.vault.data.Resource
+import co.censo.vault.util.BiometricUtil
 import co.censo.vault.util.vaultLog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +48,32 @@ fun GuardianInvitationScreen(
     navController: NavController, viewModel: GuardianInvitationViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-    val context = LocalContext.current
+    val context = LocalContext.current as FragmentActivity
+
+    LaunchedEffect(key1 = state) {
+
+        if (state.bioPromptTrigger is Resource.Success) {
+
+            val promptInfo = BiometricUtil.createPromptInfo(context = context)
+
+            val bioPrompt = BiometricUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = {
+                    viewModel.onBiometryApproved()
+                },
+                onFail = {
+                    BiometricUtil.handleBioPromptOnFail(
+                        context = context,
+                        errorCode = it
+                    ) {
+                        viewModel.onBiometryFailed()
+                    }
+                }
+            )
+
+            bioPrompt.authenticate(promptInfo)
+        }
+    }
 
     Column(
         Modifier.fillMaxSize(),
@@ -116,7 +143,7 @@ fun GuardianInvitationScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 TextButton(
-                    onClick = { viewModel.createKeysAndShares() },
+                    onClick = { viewModel.userSubmitGuardianSet() },
                     enabled = state.canContinueOnboarding
                 ) {
                     Text(text = stringResource(R.string.continue_onboarding))

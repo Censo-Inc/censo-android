@@ -1,7 +1,11 @@
 package co.censo.vault.data.repository
 
+import GuardianProspect
 import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.cryptography.PolicySetupHelper
+import co.censo.vault.data.cryptography.generatePartitionId
+import co.censo.vault.data.cryptography.generateRandomHex
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
@@ -10,6 +14,7 @@ import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService
 import co.censo.vault.data.storage.Storage
 import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
+import co.censo.vault.util.vaultLog
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 
@@ -25,9 +30,8 @@ interface OwnerRepository {
 
     fun checkValidTimestamp(): Boolean
     fun saveValidTimestamp()
-    suspend fun createKeysAndShareInfo(guardians: List<Guardian>) : List<ShareInfo>
-
-    suspend fun retrieveGuardianDeepLinks() : List<String>
+    suspend fun setupPolicy(threshold: Int, guardians: List<Guardian>) : PolicySetupHelper
+    suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>) : List<String>
 }
 
 class OwnerRepositoryImpl(
@@ -80,34 +84,31 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun createKeysAndShareInfo(guardians: List<Guardian>) : List<ShareInfo> {
+    override suspend fun setupPolicy(threshold: Int, guardians: List<Guardian>) : PolicySetupHelper {
 
-        //1. Create Master Encryption Key
-        val masterEncryptKey = cryptographyManager.createMasterEncryptionKey()
+        val guardianProspect = guardians.map {
+            GuardianProspect(
+                label = it.name,
+                participantId = generatePartitionId()
+            )
+        }
 
-        //2. Encrypt Master Encryption Key w/ Device Key
-        val encryptedMasterKey = cryptographyManager.encryptData(masterEncryptKey)
+        val policySetupHelper = PolicySetupHelper.create(
+            threshold = threshold,
+            guardians = guardianProspect,
+            deviceKey = cryptographyManager.getOrCreateDeviceKey()
+        ) {
+            cryptographyManager.encryptData(String(it))
+        }
 
-        //3. Save Encrypted Master Key
-        storage.saveMasterEncryptionKey(encryptedMasterKey)
+        vaultLog(message = "Policy Setup Helper Created: $policySetupHelper")
 
-        //4. Create Intermediate Key for Share
-        val policyKey = cryptographyManager.createPolicyKey()
-
-        //5. Encrypt Master Encryption Key w/ Intermediate Key
-        //TODO
-
-        //6. Send encrypted master key to Censo
-
-
-        //7. Create and persist random coefficients and part ids for a shamir share of the intermediate key based on guardians list
-
-        return guardians.map { ShareInfo(coefficient = it.name, participantId = it.email) }
+        return policySetupHelper
     }
 
-    override suspend fun retrieveGuardianDeepLinks(): List<String> {
+    override suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>): List<String> {
         //1. Get list of shares saved in Shared Prefs
-        val shares = listOf("1", "2", "3")
+        val shares = guardians.map { it.name }
 
         //2. Get public keys saved in shared prefs
         val policyKey = cryptographyManager.createPolicyKey()

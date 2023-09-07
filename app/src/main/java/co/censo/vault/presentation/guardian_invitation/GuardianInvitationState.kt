@@ -6,6 +6,7 @@ import co.censo.vault.presentation.guardian_invitation.GuardianInvitationViewMod
 
 data class GuardianInvitationState(
     val threshold: Int = 0,
+    val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized,
     val guardians: List<Guardian> = emptyList(),
     val guardianDeepLinks: List<String> = emptyList(),
     val guardianInviteStatus: GuardianInvitationStatus = GuardianInvitationStatus.ADD_GUARDIANS,

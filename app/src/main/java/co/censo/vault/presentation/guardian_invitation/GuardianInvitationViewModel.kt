@@ -54,11 +54,38 @@ class GuardianInvitationViewModel @Inject constructor(
         )
     }
 
-    fun createKeysAndShares() {
-        viewModelScope.launch {
-            val shares = ownerRepository.createKeysAndShareInfo(state.guardians)
+    fun userSubmitGuardianSet() {
+        triggerBiometry()
+    }
 
-            if (shares.isNotEmpty()) {
+    private fun triggerBiometry() {
+        state = state.copy(
+            bioPromptTrigger = Resource.Success(Unit),
+        )
+    }
+
+    fun onBiometryApproved() {
+        state = state.copy(bioPromptTrigger = Resource.Uninitialized)
+
+        createPolicy()
+    }
+
+    fun onBiometryFailed() {
+        state = state.copy(bioPromptTrigger = Resource.Error())
+    }
+
+    private fun createPolicy() {
+        viewModelScope.launch {
+            val policySetupHelper = ownerRepository.setupPolicy(
+                threshold = state.threshold,
+                guardians = state.guardians
+            )
+
+            //todo: Send this policy to backend
+            val setupPolicyResponse = Resource.Success(Unit)
+
+
+            if (setupPolicyResponse is Resource.Success) {
                 createGuardianDeepLinks()
             }
         }
@@ -67,7 +94,7 @@ class GuardianInvitationViewModel @Inject constructor(
     private fun createGuardianDeepLinks() {
 
         viewModelScope.launch {
-            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks()
+            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(state.guardians)
 
             state = state.copy(
                 guardianDeepLinks = guardianDeepLinks,
