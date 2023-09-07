@@ -50,8 +50,8 @@ fun FacetecAuthScreen(
         if (state.initFacetecData is Resource.Success) {
             FaceTecConfig.initializeFaceTecSDKInDevelopmentMode(
                 context,
-                state.deviceKeyId,
-                state.biometryEncryptionPublicKey,
+                state.facetecData?.deviceKeyId ?: "",
+                state.facetecData?.biometryEncryptionPublicKey ?: "",
                 object : FaceTecSDK.InitializeCallback() {
                     override fun onCompletion(successful: Boolean) {
                         if (successful) {
@@ -66,7 +66,7 @@ fun FacetecAuthScreen(
         }
 
         if (state.startAuth is Resource.Success) {
-            FaceTecSessionActivity.createAndLaunchSession(context, viewModel, state.sessionToken)
+            FaceTecSessionActivity.createAndLaunchSession(context, viewModel, state.facetecData?.sessionToken ?: "")
             viewModel.resetStartFacetecAuth()
         }
 

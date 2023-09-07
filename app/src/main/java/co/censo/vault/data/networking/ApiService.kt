@@ -13,8 +13,8 @@ import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
-import co.censo.vault.data.model.FacetecResultRequest
-import co.censo.vault.data.model.FacetecResultResponse
+import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
+import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.vault.data.model.GetPoliciesApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.Policy
@@ -122,8 +122,8 @@ interface ApiService {
     @POST("/v1/biometry-verifications/{id}/biometry")
     suspend fun submitFacetecResult(
         @Path(value = "id", encoded = true) biometryId: String,
-        @Body facetecResultRequest: FacetecResultRequest
-    ) : RetrofitResponse<FacetecResultResponse>
+        @Body facetecResultRequest: SubmitBiometryVerificationApiRequest
+    ) : RetrofitResponse<SubmitBiometryVerificationApiResponse>
 
     @POST("/v1/policies")
     suspend fun createPolicy(

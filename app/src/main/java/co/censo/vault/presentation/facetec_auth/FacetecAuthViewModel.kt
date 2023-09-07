@@ -60,11 +60,7 @@ class FacetecAuthViewModel @Inject constructor(
             if (facetecDataResource is Resource.Success) {
                 state = state.copy(
                     initFacetecData = facetecDataResource,
-                    biometryId = facetecDataResource.data?.id ?: "",
-                    sessionToken = facetecDataResource.data?.sessionToken ?: "",
-                    biometryEncryptionPublicKey = facetecDataResource.data?.biometryEncryptionPublicKey
-                        ?: "",
-                    deviceKeyId = facetecDataResource.data?.deviceKeyId ?: ""
+                    facetecData = facetecDataResource.data,
                 )
             } else if (facetecDataResource is Resource.Error) {
                 state = state.copy(
@@ -114,7 +110,7 @@ class FacetecAuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             val submitResultResponse = facetecRepository.submitResult(
-                biometryId = state.biometryId,
+                biometryId = state.facetecData?.id ?: "",
                 sessionResult = sessionResult
             )
 

@@ -2,8 +2,8 @@ package co.censo.vault.data.repository
 
 import InitBiometryVerificationApiResponse
 import co.censo.vault.data.Resource
-import co.censo.vault.data.model.FacetecResultRequest
-import co.censo.vault.data.model.FacetecResultResponse
+import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
+import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.vault.data.networking.ApiService
 import com.facetec.sdk.FaceTecSessionResult
 
@@ -12,7 +12,7 @@ interface FacetecRepository {
     suspend fun submitResult(
         biometryId: String,
         sessionResult: FaceTecSessionResult
-    ): Resource<FacetecResultResponse>
+    ): Resource<SubmitBiometryVerificationApiResponse>
 }
 
 class FacetecRepositoryImpl(private val apiService: ApiService) : FacetecRepository,
@@ -23,8 +23,8 @@ class FacetecRepositoryImpl(private val apiService: ApiService) : FacetecReposit
     override suspend fun submitResult(
         biometryId: String,
         sessionResult: FaceTecSessionResult
-    ): Resource<FacetecResultResponse> {
-        val facetecResultRequest = FacetecResultRequest(
+    ): Resource<SubmitBiometryVerificationApiResponse> {
+        val facetecResultRequest = SubmitBiometryVerificationApiRequest(
             faceScan = sessionResult.faceScanBase64,
             auditTrailImage = sessionResult.auditTrailCompressedBase64[0],
             lowQualityAuditTrailImage = sessionResult.lowQualityAuditTrailCompressedBase64[0]
