@@ -1,6 +1,6 @@
 package co.censo.vault.data.repository
 
-import Base58EncodedPolicyPublicKey
+import Base58EncodedIntermediatePublicKey
 import GuardianProspect
 import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.CryptographyManager
@@ -30,7 +30,7 @@ interface OwnerRepository {
     fun checkValidTimestamp(): Boolean
     fun saveValidTimestamp()
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
-    suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedPolicyPublicKey) : List<String>
+    suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedIntermediatePublicKey) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
 }
 
@@ -102,16 +102,17 @@ class OwnerRepositoryImpl(
 
     override suspend fun createPolicy(setupHelper: PolicySetupHelper): Resource<ResponseBody> {
         val createPolicyApiRequest = CreatePolicyApiRequest(
-            intermediateKey = setupHelper.intermediatePublicKey,
+            masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
+            encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
+            intermediatePublicKey = setupHelper.intermediatePublicKey,
             guardiansToInvite = setupHelper.guardianInvites,
             threshold = setupHelper.threshold,
-            encryptedData = setupHelper.encryptedMasterKey
         )
 
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
-    override suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedPolicyPublicKey): List<String> {
+    override suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedIntermediatePublicKey): List<String> {
         //1. Get list of shares saved in Shared Prefs
         val shares = guardians.map { it }
 

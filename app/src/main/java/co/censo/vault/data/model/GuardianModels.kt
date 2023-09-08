@@ -34,7 +34,8 @@ data class GuardianProspect(
 
 typealias GuardianId = String
 typealias Base58EncodedPublicKey = String
-typealias Base58EncodedPolicyPublicKey = String
+typealias Base58EncodedMasterEncryptionPublicKey = String
+typealias Base58EncodedIntermediatePublicKey = String
 typealias Base58EncodedDevicePublicKey = String
 
 @Serializable

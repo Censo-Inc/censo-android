@@ -1,7 +1,7 @@
 package co.censo.vault.data.model
 
 import Base58EncodedDevicePublicKey
-import Base58EncodedPolicyPublicKey
+import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
 import ParticipantId
 import kotlinx.serialization.SerialName
@@ -91,7 +91,7 @@ data class Policy<T : PolicyGuardian>(
     val guardians: List<T>,
     val threshold: UInt,
     val encryptedMasterKey: Base64EncodedData,
-    val intermediateKey: Base58EncodedPolicyPublicKey,
+    val intermediateKey: Base58EncodedIntermediatePublicKey,
 )
 
 @Serializable
@@ -105,7 +105,7 @@ data class VaultSecret(
 @Serializable
 data class Vault(
     val secrets: List<VaultSecret>,
-    val publicMasterEncryptionKey: Base58EncodedPolicyPublicKey,
+    val publicMasterEncryptionKey: Base58EncodedIntermediatePublicKey,
 )
 
 @Serializable
@@ -114,7 +114,7 @@ sealed class OwnerState {
     @SerialName("PolicySetup")
     data class PolicySetup(
         val policy: Policy<PolicyGuardian.ProspectGuardian>,
-        val publicMasterEncryptionKey: Base58EncodedPolicyPublicKey,
+        val publicMasterEncryptionKey: Base58EncodedIntermediatePublicKey,
     ) : OwnerState()
 
     @Serializable
