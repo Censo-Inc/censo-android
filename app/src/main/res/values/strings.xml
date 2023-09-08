@@ -51,5 +51,19 @@
     <string name="add_guardian">Add Guardian</string>
     <string name="guardians_empty_message">Please start adding guardians to invite to your policy</string>
     <string name="share_guardian_deeplinks">Share these links with your guardians to continue setting up your policy</string>
+    <string name="missing_guardian_arg_data">The invitation link used for guardianship is missing policy data.\n\nPlease request a new link from the policy owner and try again.</string>
+    <string name="awaiting_confirmation_of_verification_code">Awaiting confirmation of verification code</string>
+    <string name="enter_verification_code">Enter verification code</string>
+    <string name="submit">Submit</string>
+    <string name="guardian_entrance">Guardian Entrance</string>
+    <string name="register_guardian_error">Register Guardian Error</string>
+    <string name="accept_guardianship_error">Accept Guardianship Error</string>
+    <string name="successful_biometry_authentication_is_required_to_use_this_app">Successful biometry authentication is required to use this app</string>
+    <string name="register">Register</string>
+    <string name="you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship">You have been invited to Vault as a guardian,\ndo you accept guardianship?</string>
+    <string name="decline">Decline</string>
+    <string name="declined_guardianship">You have declined guardianship, to restart this process have the owner of the policy send you a new invite</string>
+    <string name="guardian_setup_complete">Guardian setup complete, no further action required at this time</string>
+    <string name="received_shard_from_owner">Received shard from owner, encrypting shard and updating policy data...</string>
 
 </resources>

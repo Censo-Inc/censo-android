@@ -191,6 +191,12 @@ interface ApiService {
         @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
     ): RetrofitResponse<ResponseBody>
 
+    @GET("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}")
+    suspend fun guardian(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+    ): RetrofitResponse<ResponseBody>
+
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>
 
