@@ -1,6 +1,5 @@
 package co.censo.vault.data.cryptography
 
-import Base58EncodedPolicyPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import GuardianInvite
@@ -13,7 +12,7 @@ class PolicySetupHelper(
     val masterEncryptionPublicKey: Base58EncodedPublicKey,
     val encryptedMasterKey: Base64EncodedData,
     val threshold: Int,
-    val policyPublicKey: Base58EncodedPolicyPublicKey,
+    val intermediatePublicKey: Base58EncodedPublicKey,
     val guardianInvites: List<GuardianInvite> = emptyList(),
     val deviceKey: PrivateKey
 ) {
@@ -27,16 +26,16 @@ class PolicySetupHelper(
             encryptDataWithDeviceKey: (ByteArray) -> ByteArray
         ): PolicySetupHelper {
             val masterEncryptionKey = EncryptionKey.generateRandomKey()
-            val policyEncryptionKey = EncryptionKey.generateRandomKey()
+            val intermediateEncryptionKey = EncryptionKey.generateRandomKey()
 
             val encryptedMasterKey = Base64.getEncoder().encodeToString(
-                policyEncryptionKey.encrypt(
+                intermediateEncryptionKey.encrypt(
                     masterEncryptionKey.privateKeyRaw().toByteArray()
                 )
             )
 
             val sharer = SecretSharer(
-                secret = policyEncryptionKey.privateKeyRaw(),
+                secret = intermediateEncryptionKey.privateKeyRaw(),
                 threshold = threshold,
                 participants = guardians.map { it.participantId }
             )
@@ -59,7 +58,7 @@ class PolicySetupHelper(
                 shards = sharer.shards,
                 deviceKey = deviceKey,
                 masterEncryptionPublicKey = masterEncryptionKey.publicExternalRepresentation(),
-                policyPublicKey = policyEncryptionKey.publicExternalRepresentation(),
+                intermediatePublicKey = intermediateEncryptionKey.publicExternalRepresentation(),
                 encryptedMasterKey = encryptedMasterKey,
                 threshold = threshold,
                 guardianInvites = guardianInvites
