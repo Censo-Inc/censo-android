@@ -57,12 +57,24 @@ value class Base58EncodedDevicePublicKey(override val value: String) : Base58Enc
 
 @Serializable
 @JvmInline
-value class Base58EncodedPolicyPublicKey(override val value: String) : Base58EncodedPublicKey {
+value class Base58EncodedIntermediatePublicKey(override val value: String) : Base58EncodedPublicKey {
     init {
         runCatching {
             Base58.base58Decode(this.value)
         }.onFailure {
             throw IllegalArgumentException("Invalid policy public key format")
+        }
+    }
+}
+
+@Serializable
+@JvmInline
+value class Base58EncodedMasterPublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(this.value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid master public key format")
         }
     }
 }
