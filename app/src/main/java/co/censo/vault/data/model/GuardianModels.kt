@@ -33,7 +33,6 @@ data class GuardianProspect(
 typealias GuardianId = String
 typealias ParticipantId = String
 typealias Base58EncodedPublicKey = String
-typealias Base58EncodedPolicyPublicKey = String
 typealias Base64EncodedData = String
 
 
