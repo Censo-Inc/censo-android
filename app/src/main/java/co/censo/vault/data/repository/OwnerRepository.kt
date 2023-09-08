@@ -32,7 +32,7 @@ interface OwnerRepository {
     fun saveValidTimestamp()
     suspend fun setupPolicy(threshold: Int, guardians: List<Guardian>) : PolicySetupHelper
     suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>) : List<String>
-    suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<Unit>
+    suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
 }
 
 class OwnerRepositoryImpl(
@@ -101,15 +101,15 @@ class OwnerRepositoryImpl(
         return policySetupHelper
     }
 
-    override suspend fun createPolicy(setupHelper: PolicySetupHelper): Resource<Unit> {
-        return Resource.Success(Unit)
-//        val createPolicyApiRequest = CreatePolicyApiRequest(
-//            policyKey = setupHelper.policyPublicKey,
-//            guardiansToInvite = setupHelper.guardianInvites,
-//            threshold = setupHelper.threshold
-//        )
-//
-//        return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
+    override suspend fun createPolicy(setupHelper: PolicySetupHelper): Resource<ResponseBody> {
+        val createPolicyApiRequest = CreatePolicyApiRequest(
+            intermediateKey = setupHelper.intermediatePublicKey,
+            guardiansToInvite = setupHelper.guardianInvites,
+            threshold = setupHelper.threshold,
+            encryptedData = setupHelper.encryptedMasterKey
+        )
+
+        return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
     override suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>): List<String> {
