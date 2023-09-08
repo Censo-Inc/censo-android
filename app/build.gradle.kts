@@ -19,7 +19,7 @@ val versionNamePatch = 1
 
 android {
     namespace = "co.censo.vault"
-    compileSdk = 33
+    compileSdk = 34
 
     var signBuild = false
     val configProperties = Properties()

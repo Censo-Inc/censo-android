@@ -150,7 +150,7 @@ object ECIESManager {
         val securityPoint: ECPoint = createPoint(params.curve, pubKey)
         val pubKeySpec = ECPublicKeySpec(securityPoint, bouncyParams)
 
-        return keyFactory.generatePublic(pubKeySpec)
+        return keyFactory.generatePublic(pubKeySpec) as ECPublicKey
     }
 
     fun getPublicKeyFromPrivateKey(privateKey: ECPrivateKey): PublicKey {
