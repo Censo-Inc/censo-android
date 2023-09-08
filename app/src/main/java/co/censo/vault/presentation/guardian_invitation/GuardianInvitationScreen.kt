@@ -2,10 +2,8 @@ package co.censo.vault.presentation.guardian_invitation
 
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +40,6 @@ import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.vault.data.Resource
 import co.censo.vault.util.BiometricUtil
-import co.censo.vault.util.vaultLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +84,7 @@ fun GuardianInvitationScreen(
 
         when (state.guardianInviteStatus) {
             GuardianInvitationStatus.ADD_GUARDIANS -> {
-                if (state.guardians.isEmpty()) {
+                if (state.potentialGuardians.isEmpty()) {
                     Text(
                         text = stringResource(R.string.guardians_empty_message),
                         textAlign = TextAlign.Center,
@@ -96,8 +93,8 @@ fun GuardianInvitationScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                 } else {
                     LazyColumn {
-                        items(state.guardians.size) { index ->
-                            Text(text = state.guardians[index].name, color = Color.Black)
+                        items(state.potentialGuardians.size) { index ->
+                            Text(text = state.potentialGuardians[index], color = Color.Black)
                         }
                     }
                 }
@@ -183,7 +180,7 @@ fun GuardianInvitationScreen(
                             Row(modifier = Modifier.background(color = Color(0xFF4059AD))) {
                                 Text(
                                     modifier = Modifier.padding(12.dp),
-                                    text = state.guardians[index].name,
+                                    text = state.potentialGuardians[index],
                                     color = Color.White
                                 )
 

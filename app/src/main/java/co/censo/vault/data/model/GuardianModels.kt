@@ -5,7 +5,9 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
+import java.util.Base64
 
 @Serializable
 data class GuardianInvite(
@@ -31,9 +33,33 @@ data class GuardianProspect(
 
 
 typealias GuardianId = String
-typealias ParticipantId = String
 typealias Base58EncodedPublicKey = String
-typealias Base64EncodedData = String
+typealias Base58EncodedPolicyPublicKey = String
+typealias Base58EncodedDevicePublicKey = String
+
+@Serializable
+@JvmInline
+value class ParticipantId(val value: String) {
+    init {
+        runCatching {
+            Hex.decode(value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid participant id format")
+        }
+    }
+}
+
+@Serializable
+@JvmInline
+value class Base64EncodedData(val base64Encoded: String) {
+    init {
+        runCatching {
+            Base64.getDecoder().decode(this.base64Encoded)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid encrypted data format")
+        }
+    }
+}
 
 
 object BigIntegerSerializer : KSerializer<BigInteger> {

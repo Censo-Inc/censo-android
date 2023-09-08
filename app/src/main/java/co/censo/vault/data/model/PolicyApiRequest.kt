@@ -1,9 +1,11 @@
 package co.censo.vault.data.model
 
+import Base58EncodedPolicyPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import GuardianInvite
 import GuardianUpdate
+import ParticipantId
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,16 +23,19 @@ data class UpdatePolicyApiRequest(
 
 @Serializable
 data class Guardian(
+    val id: String,
     val name: String,
-    val email: String,
+    val participantId: ParticipantId,
     val status: GuardianStatus,
-    val encryptedVerificationData: String?,
+    val encryptedShard: Base64EncodedData,
+    val signature: Base64EncodedData?,
+    val timeMillis: Long?,
 )
 
 @Serializable
-data class Policy(
+data class GetPolicyApiResponse(
     val status: PolicyStatus,
-    val intermediateKey: Base58EncodedPublicKey,
+    val intermediateKey: Base58EncodedPolicyPublicKey,
     val threshold: Int,
     val guardians: List<Guardian>,
     val encryptedData: Base64EncodedData,
@@ -38,20 +43,11 @@ data class Policy(
 
 @Serializable
 data class GetPoliciesApiResponse(
-    val policies: List<Policy>,
+    val policies: List<GetPolicyApiResponse>,
 )
 
 @Serializable
 enum class PolicyStatus {
     Pending,
     Active,
-}
-
-@Serializable
-enum class GuardianStatus {
-    Invited, // initial state
-    Declined, // declined
-    Accepted, // accepted (ready for code verification)
-    Confirmed, // confirmed by owner
-    Active, // active (they have received and stored their shard)
 }

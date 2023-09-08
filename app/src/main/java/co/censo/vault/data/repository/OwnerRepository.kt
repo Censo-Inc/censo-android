@@ -9,14 +9,12 @@ import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
-import co.censo.vault.data.model.Guardian
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService
 import co.censo.vault.data.storage.Storage
 import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
 import co.censo.vault.util.vaultLog
 import kotlinx.datetime.Clock
-import okhttp3.MediaType
 import okhttp3.ResponseBody
 
 interface OwnerRepository {
@@ -30,8 +28,8 @@ interface OwnerRepository {
 
     fun checkValidTimestamp(): Boolean
     fun saveValidTimestamp()
-    suspend fun setupPolicy(threshold: Int, guardians: List<Guardian>) : PolicySetupHelper
-    suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>) : List<String>
+    suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
+    suspend fun retrieveGuardianDeepLinks(guardians: List<String>) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
 }
 
@@ -79,11 +77,11 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun setupPolicy(threshold: Int, guardians: List<Guardian>) : PolicySetupHelper {
+    override suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper {
 
         val guardianProspect = guardians.map {
             GuardianProspect(
-                label = it.name,
+                label = it,
                 participantId = generatePartitionId()
             )
         }
@@ -112,9 +110,9 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
-    override suspend fun retrieveGuardianDeepLinks(guardians: List<Guardian>): List<String> {
+    override suspend fun retrieveGuardianDeepLinks(guardians: List<String>): List<String> {
         //1. Get list of shares saved in Shared Prefs
-        val shares = guardians.map { it.name }
+        val shares = guardians.map { it }
 
         //2. Get public keys saved in shared prefs
         val policyKey = cryptographyManager.createPolicyKey()
@@ -134,8 +132,3 @@ class OwnerRepositoryImpl(
         return "$VAULT_GUARDIAN_URI$policyKey/$devicePublicKey/$participantId"
     }
 }
-
-data class ShareInfo(
-    val coefficient: String,
-    val participantId: String
-)

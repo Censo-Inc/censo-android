@@ -17,6 +17,7 @@ import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.vault.data.model.GetPoliciesApiResponse
+import co.censo.vault.data.model.GetPolicyApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.Policy
 import co.censo.vault.data.model.UpdatePolicyApiRequest
@@ -136,7 +137,7 @@ interface ApiService {
     @GET("/v1/policies/{intermediateKey}")
     suspend fun policy(
         @Path(value = "intermediateKey", encoded = true) policyKey: Base58EncodedPublicKey,
-    ): RetrofitResponse<Policy>
+    ): RetrofitResponse<GetPolicyApiResponse>
 
     @GET("/v1/policies")
     suspend fun policies(): RetrofitResponse<GetPoliciesApiResponse>
