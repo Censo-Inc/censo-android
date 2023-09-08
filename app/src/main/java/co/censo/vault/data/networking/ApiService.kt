@@ -100,10 +100,6 @@ interface ApiService {
     }
 
 
-    @POST("/v1/device")
-    suspend fun createDevice():
-            RetrofitResponse<ResponseBody>
-
     @POST("/v1/user")
     suspend fun createUser(@Body createUserApiRequest: CreateUserApiRequest):
             RetrofitResponse<CreateUserApiResponse>
@@ -131,23 +127,23 @@ interface ApiService {
         @Body createPolicyApiRequest: CreatePolicyApiRequest
     ): RetrofitResponse<ResponseBody>
 
-    @PUT("/v1/policies/{policyKey}")
+    @PUT("/v1/policies/{intermediateKey}")
     suspend fun updatePolicy(
-        @Path(value = "policyKey", encoded = true) policyKey: Base58EncodedPublicKey,
+        @Path(value = "intermediateKey", encoded = true) policyKey: Base58EncodedPublicKey,
         @Body updatePolicyApiRequest: UpdatePolicyApiRequest
     ): RetrofitResponse<ResponseBody>
 
-    @GET("/v1/policies/{policyKey}")
+    @GET("/v1/policies/{intermediateKey}")
     suspend fun policy(
-        @Path(value = "policyKey", encoded = true) policyKey: Base58EncodedPublicKey,
+        @Path(value = "intermediateKey", encoded = true) policyKey: Base58EncodedPublicKey,
     ): RetrofitResponse<Policy>
 
     @GET("/v1/policies")
     suspend fun policies(): RetrofitResponse<GetPoliciesApiResponse>
 
-    @POST("/v1/policies/{policyKey}/guardian/{participantId}/device")
+    @POST("/v1/policies/{intermediateKey}/guardian/{participantId}/device")
     suspend fun registerGuardian(
-        @Path(value = "policyKey") policyKey: String,
+        @Path(value = "intermediateKey") intermediateKey: String,
         @Path(value = "participantId") participantId: String,
     ): RetrofitResponse<ResponseBody>
 

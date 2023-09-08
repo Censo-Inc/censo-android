@@ -22,7 +22,6 @@ import okhttp3.ResponseBody
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
-    suspend fun createDevice(): Resource<ResponseBody>
     suspend fun createOwner(createUserApiRequest: CreateUserApiRequest): Resource<CreateUserApiResponse>
     suspend fun verifyContact(
         verificationId: String,
@@ -44,12 +43,6 @@ class OwnerRepositoryImpl(
     OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
         return retrieveApiResource { apiService.user() }
-    }
-
-    override suspend fun createDevice(): Resource<ResponseBody> {
-        return retrieveApiResource {
-            apiService.createDevice()
-        }
     }
 
     override suspend fun createOwner(createUserApiRequest: CreateUserApiRequest): Resource<CreateUserApiResponse> {

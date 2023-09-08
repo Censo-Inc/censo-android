@@ -46,7 +46,7 @@ import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.home.Screen.Companion.DL_DEVICE_PUBLIC_KEY_KEY
-import co.censo.vault.presentation.home.Screen.Companion.DL_POLICY_KEY_KEY
+import co.censo.vault.presentation.home.Screen.Companion.DL_INTERMEDIATE_KEY_KEY
 import co.censo.vault.presentation.home.Screen.Companion.DL_PARTICIPANT_ID_KEY
 import co.censo.vault.presentation.home.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
 import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
@@ -180,14 +180,14 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = Screen.OwnerEntrance.route) {
             composable(
-                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_POLICY_KEY_KEY={$DL_POLICY_KEY_KEY}?$DL_DEVICE_PUBLIC_KEY_KEY={$DL_DEVICE_PUBLIC_KEY_KEY}?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
+                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INTERMEDIATE_KEY_KEY={$DL_INTERMEDIATE_KEY_KEY}?$DL_DEVICE_PUBLIC_KEY_KEY={$DL_DEVICE_PUBLIC_KEY_KEY}?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
                 deepLinks = listOf(navDeepLink {
                     uriPattern =
-                        "$VAULT_GUARDIAN_URI{$DL_POLICY_KEY_KEY}/{$DL_DEVICE_PUBLIC_KEY_KEY}/{$DL_PARTICIPANT_ID_KEY}"
+                        "$VAULT_GUARDIAN_URI{$DL_INTERMEDIATE_KEY_KEY}/{$DL_DEVICE_PUBLIC_KEY_KEY}/{$DL_PARTICIPANT_ID_KEY}"
                 }),
             ) { backStackEntry ->
-                val policyKey = backStackEntry.arguments?.getString(
-                    DL_POLICY_KEY_KEY
+                val intermediateKey = backStackEntry.arguments?.getString(
+                    DL_INTERMEDIATE_KEY_KEY
                 )
                 val ownerDevicePublicKey = backStackEntry.arguments?.getString(
                     DL_DEVICE_PUBLIC_KEY_KEY
@@ -197,7 +197,7 @@ class MainActivity : FragmentActivity() {
                 val args = GuardianEntranceArgs(
                     participantId = participantId ?: "",
                     ownerDevicePublicKey = ownerDevicePublicKey ?: "",
-                    policyKey = policyKey ?: ""
+                    intermediateKey = intermediateKey ?: ""
                 )
 
                 GuardianEntranceScreen(navController = navController, args = args)

@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.repository.GuardianRepository
-import co.censo.vault.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +26,7 @@ class GuardianEntranceViewModel @Inject constructor(
         state = state.copy(
             participantId = args.participantId,
             ownerDevicePublicKey = args.ownerDevicePublicKey,
-            policyKey = args.policyKey
+            intermediateKey = args.intermediateKey
         )
 
         //TODO: Set biometry prompt to get signed timestamp for registerGuardian api call
@@ -36,7 +35,7 @@ class GuardianEntranceViewModel @Inject constructor(
     fun registerGuardian() {
         viewModelScope.launch {
             val registerGuardianResponse = guardianRepository.registerGuardian(
-                policyKey = state.policyKey,
+                intermediateKey = state.intermediateKey,
                 participantId = state.participantId
             )
 
