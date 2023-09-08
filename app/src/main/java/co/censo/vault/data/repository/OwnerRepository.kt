@@ -1,5 +1,6 @@
 package co.censo.vault.data.repository
 
+import Base58EncodedPolicyPublicKey
 import GuardianProspect
 import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.CryptographyManager
@@ -29,7 +30,7 @@ interface OwnerRepository {
     fun checkValidTimestamp(): Boolean
     fun saveValidTimestamp()
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
-    suspend fun retrieveGuardianDeepLinks(guardians: List<String>) : List<String>
+    suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedPolicyPublicKey) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
 }
 
@@ -110,12 +111,11 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
-    override suspend fun retrieveGuardianDeepLinks(guardians: List<String>): List<String> {
+    override suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedPolicyPublicKey): List<String> {
         //1. Get list of shares saved in Shared Prefs
         val shares = guardians.map { it }
 
         //2. Get public keys saved in shared prefs
-        val policyKey = cryptographyManager.createPolicyKey()
         val devicePublicKey = cryptographyManager.getDevicePublicKeyInBase58()
 
         //3. Create deep links from this: generateGuardianDeeplink

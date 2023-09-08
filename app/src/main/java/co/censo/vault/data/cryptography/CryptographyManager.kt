@@ -30,8 +30,6 @@ interface CryptographyManager {
     fun decryptData(ciphertext: ByteArray): ByteArray
     fun encryptData(plainText: String): ByteArray
     fun createAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp
-    fun createMasterEncryptionKey() : String
-    fun createPolicyKey() : String
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -62,15 +60,6 @@ class CryptographyManagerImpl : CryptographyManager {
             iso8601FormattedTimestamp
         )
         return AuthInterceptor.AuthHeadersWithTimestamp(headers, now)
-    }
-
-    override fun createMasterEncryptionKey(): String {
-        //todo: create real encryption key
-        return "masterEncryption_key"
-    }
-
-    override fun createPolicyKey(): String {
-        return "policy_key"
     }
 
     override fun signData(dataToSign: ByteArray): ByteArray {

@@ -23,7 +23,7 @@ sealed class Screen(val route: String) {
         const val GUARDIAN_DEEPLINK_ACCEPTANCE = "guardianDeepLinkAcceptance"
 
         const val DL_DEVICE_PUBLIC_KEY_KEY = "device_public_key"
-        const val DL_INTERMEDIATE_KEY_KEY = "policy_key"
+        const val DL_INTERMEDIATE_KEY_KEY = "intermediate_key"
         const val DL_PARTICIPANT_ID_KEY = "participant_id"
     }
 }

@@ -60,8 +60,6 @@ fun String.toParticipantIdAsBigInteger(): BigInteger {
 
 fun String.toParticipantIdAsHexString() = toParticipantIdAsBigInteger().toByteArrayNoSign(32).toHexString().lowercase()
 
-fun String.toShareUserId() = this.sha256()
-
 fun BigInteger.toByteArrayNoSign(): ByteArray {
     val byteArray = this.toByteArray()
     return if (byteArray[0].compareTo(0) == 0) {

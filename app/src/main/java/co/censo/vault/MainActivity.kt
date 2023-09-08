@@ -2,6 +2,7 @@ package co.censo.vault
 
 import co.censo.vault.util.BiometricUtil
 import BlockingUI
+import ParticipantId
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
@@ -195,7 +196,7 @@ class MainActivity : FragmentActivity() {
                 val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY)
 
                 val args = GuardianEntranceArgs(
-                    participantId = participantId ?: "",
+                    participantId = ParticipantId(participantId ?: ""),
                     ownerDevicePublicKey = ownerDevicePublicKey ?: "",
                     intermediateKey = intermediateKey ?: ""
                 )

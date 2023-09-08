@@ -24,6 +24,7 @@ import co.censo.vault.data.model.GetPoliciesApiResponse
 import co.censo.vault.data.model.GetPolicyApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.InviteGuardianApiRequest
+import co.censo.vault.data.model.Policy
 import co.censo.vault.data.model.UpdatePolicyApiRequest
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService.Companion.APP_VERSION_HEADER

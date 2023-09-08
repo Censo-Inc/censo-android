@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.guardian_invitation
 
+import Base58EncodedPolicyPublicKey
 import Base64EncodedData
 import ParticipantId
 import androidx.compose.runtime.getValue
@@ -89,7 +90,9 @@ class GuardianInvitationViewModel @Inject constructor(
     private fun createGuardianDeepLinks() {
 
         viewModelScope.launch {
-            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(state.potentialGuardians)
+            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(
+                state.potentialGuardians, ""
+            )
 
             state = state.copy(
                 guardianDeepLinks = guardianDeepLinks,
