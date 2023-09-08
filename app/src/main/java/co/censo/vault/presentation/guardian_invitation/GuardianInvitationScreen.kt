@@ -237,7 +237,7 @@ fun GuardianInvitationScreen(
                                     Row(modifier = Modifier.background(color = Color(0xFF4059AD))) {
                                         Text(
                                             modifier = Modifier.padding(12.dp),
-                                            text = state.potentialGuardians[index],
+                                            text = if (state.potentialGuardians.size > index) state.potentialGuardians[index] else "",
                                             color = Color.White
                                         )
 

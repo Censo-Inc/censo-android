@@ -10,6 +10,7 @@ import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
+import co.censo.vault.data.model.PolicyGuardian
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService
 import co.censo.vault.data.storage.Storage
@@ -30,7 +31,7 @@ interface OwnerRepository {
     fun checkValidTimestamp(): Boolean
     fun saveValidTimestamp()
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
-    suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedIntermediatePublicKey) : List<String>
+    suspend fun retrieveGuardianDeepLinks(guardians: List<PolicyGuardian.ProspectGuardian>, policyKey: Base58EncodedIntermediatePublicKey) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
 }
 
@@ -112,17 +113,16 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
-    override suspend fun retrieveGuardianDeepLinks(guardians: List<String>, policyKey: Base58EncodedIntermediatePublicKey): List<String> {
-        //1. Get list of shares saved in Shared Prefs
-        val shares = guardians.map { it }
-
-        //2. Get public keys saved in shared prefs
+    override suspend fun retrieveGuardianDeepLinks(
+        guardians: List<PolicyGuardian.ProspectGuardian>,
+        policyKey: Base58EncodedIntermediatePublicKey
+    ): List<String> {
         val devicePublicKey = cryptographyManager.getDevicePublicKeyInBase58()
 
         //3. Create deep links from this: generateGuardianDeeplink
-        return shares.map {
+        return guardians.map {
             generateGuardianDeeplink(
-                participantId = it,
+                participantId = it.participantId.value,
                 policyKey = policyKey,
                 devicePublicKey = devicePublicKey
             )

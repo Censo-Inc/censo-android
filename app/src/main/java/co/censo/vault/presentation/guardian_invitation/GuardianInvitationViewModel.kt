@@ -38,8 +38,19 @@ class GuardianInvitationViewModel @Inject constructor(
 
             if (userResponse is Resource.Success) {
                 val guardianInvitationStatus = if (userResponse.data?.ownerState != null) {
-                    when (userResponse.data.ownerState) {
-                        is OwnerState.PolicySetup -> GuardianInvitationStatus.POLICY_SETUP
+                    val ownerState = userResponse.data.ownerState
+                    when (ownerState) {
+                        is OwnerState.PolicySetup -> {
+                            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(
+                                ownerState.policy.guardians, policyKey = ownerState.publicMasterEncryptionKey
+                            )
+
+                            state = state.copy(
+                                potentialGuardians = ownerState.policy.guardians.map { it.participantId.value },
+                                guardianDeepLinks = guardianDeepLinks
+                            )
+                            GuardianInvitationStatus.POLICY_SETUP
+                        }
                         is OwnerState.Ready -> GuardianInvitationStatus.READY
                     }
                 } else {
@@ -124,21 +135,5 @@ class GuardianInvitationViewModel @Inject constructor(
 
     fun resetBiometryTrigger() {
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
-    }
-
-
-
-    private fun createGuardianDeepLinks() {
-
-        viewModelScope.launch {
-            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(
-                state.potentialGuardians, ""
-            )
-
-            state = state.copy(
-                guardianDeepLinks = guardianDeepLinks,
-                guardianInviteStatus = GuardianInvitationStatus.POLICY_SETUP
-            )
-        }
     }
 }
