@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
 import co.censo.vault.data.model.ContactType
 import co.censo.vault.data.model.CreateUserApiRequest
-import co.censo.vault.data.repository.BaseRepository.Companion.HTTP_401
+import co.censo.vault.data.repository.BaseRepository.Companion.HTTP_404
 import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.util.vaultLog
@@ -205,8 +205,8 @@ class OwnerEntranceViewModel @Inject constructor(
                 is Resource.Error -> {
                     vaultLog(message = "Retrieve user failed")
                     state =
-                        if (user.errorCode != null && user.errorCode == HTTP_401) {
-                            vaultLog(message = "Received 401. User not created.")
+                        if (user.errorCode != null && user.errorCode == HTTP_404) {
+                            vaultLog(message = "Received 404. User not created.")
                             state.copy(
                                 userStatus = UserStatus.CREATE_CONTACT,
                                 userResource = Resource.Uninitialized

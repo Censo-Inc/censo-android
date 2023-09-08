@@ -1,6 +1,8 @@
 package co.censo.vault.data.networking
 
+import Base58EncodedPublicKey
 import InitBiometryVerificationApiResponse
+import ParticipantId
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
@@ -10,13 +12,18 @@ import co.censo.vault.BuildConfig
 import co.censo.vault.data.Header
 import co.censo.vault.data.HeadersSerializer
 import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.model.AcceptGuardianshipApiRequest
+import co.censo.vault.data.model.ConfirmGuardianshipApiRequest
+import co.censo.vault.data.model.ConfirmShardReceiptApiRequest
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.vault.data.model.GetPoliciesApiResponse
+import co.censo.vault.data.model.GetPolicyApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
+import co.censo.vault.data.model.InviteGuardianApiRequest
 import co.censo.vault.data.model.Policy
 import co.censo.vault.data.model.UpdatePolicyApiRequest
 import co.censo.vault.data.model.VerifyContactApiRequest
@@ -52,13 +59,16 @@ interface ApiService {
 
     companion object {
 
+        const val INTERMEDIATE_KEY = "intermediateKey"
+        const val PARTICIPANT_ID = "participantId"
+
         const val IS_API = "X-IsApi"
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
-        const val AUTHORIZATION_HEADER = "Authorization"
-        const val DEVICE_PUBLIC_KEY_HEADER = "X-Censo-Device-Public-Key"
-        const val TIMESTAMP_HEADER = "X-Censo-Timestamp"
+        private const val AUTHORIZATION_HEADER = "Authorization"
+        private const val DEVICE_PUBLIC_KEY_HEADER = "X-Censo-Device-Public-Key"
+        private const val TIMESTAMP_HEADER = "X-Censo-Timestamp"
 
         fun getAuthHeaders(
             base64FormattedSignature: String,
@@ -99,10 +109,6 @@ interface ApiService {
     }
 
 
-    @POST("/v1/device")
-    suspend fun createDevice():
-            RetrofitResponse<ResponseBody>
-
     @POST("/v1/user")
     suspend fun createUser(@Body createUserApiRequest: CreateUserApiRequest):
             RetrofitResponse<CreateUserApiResponse>
@@ -130,22 +136,59 @@ interface ApiService {
         @Body createPolicyApiRequest: CreatePolicyApiRequest
     ): RetrofitResponse<ResponseBody>
 
-    @PUT("/v1/policies")
+    @PUT("/v1/policies/{$INTERMEDIATE_KEY}")
     suspend fun updatePolicy(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
         @Body updatePolicyApiRequest: UpdatePolicyApiRequest
     ): RetrofitResponse<ResponseBody>
 
-    @GET("/v1/policies")
-    suspend fun policy(): RetrofitResponse<Policy>
+    @GET("/v1/policies/{$INTERMEDIATE_KEY}")
+    suspend fun policy(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+    ): RetrofitResponse<GetPolicyApiResponse>
 
     @GET("/v1/policies")
     suspend fun policies(): RetrofitResponse<GetPoliciesApiResponse>
 
-    @DELETE("/v1/policies")
-    suspend fun cancelPolicy() : RetrofitResponse<Unit>
+    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/device")
+    suspend fun registerGuardian(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+    ): RetrofitResponse<ResponseBody>
 
-    @POST("/v1/policy/encrypted-data")
-    suspend fun storeEncryptedPhraseData(): RetrofitResponse<ResponseBody>
+    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/invitation")
+    suspend fun inviteGuardian(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Body inviteGuardianApiRequest: InviteGuardianApiRequest
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/accept")
+    suspend fun acceptGuardianship(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Body acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/decline")
+    suspend fun declineGuardianship(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")
+    suspend fun confirmShardReceipt(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Body confirmShardReceiptApiRequest: ConfirmShardReceiptApiRequest
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/confirmation")
+    suspend fun confirmGuardianship(
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
+        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
+    ): RetrofitResponse<ResponseBody>
 
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>

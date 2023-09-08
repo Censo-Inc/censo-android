@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -141,10 +142,11 @@ fun HomeScreen(
                 })
         },
         content = {
-            Box(modifier = Modifier.padding(it)) {
+            Box(modifier = Modifier.padding(it).fillMaxSize().background(color = Color.White)) {
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
+                        .background(color = Color.White)
                         .padding(horizontal = 16.dp)
                         .semantics { testTag = TestTag.phrases_list },
                 ) {
@@ -178,19 +180,38 @@ fun HomeScreen(
 
         },
         floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.semantics { testTag = TestTag.add_bip39_button },
-                onClick = {
-                    navController.navigate(Screen.AddBIP39Route.route)
-                },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
-                    contentDescription = stringResource(R.string.add_bip39_phrase),
-                    tint = Color.White,
-                )
+
+            Column {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate(Screen.GuardianInvitationRoute.route)
+                    },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Groups,
+                        contentDescription = "Guardians",
+                        tint = Color.White,
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(56.dp))
+
+                FloatingActionButton(
+                    modifier = Modifier.semantics { testTag = TestTag.add_bip39_button },
+                    onClick = {
+                        navController.navigate(Screen.AddBIP39Route.route)
+                    },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.add_bip39_phrase),
+                        tint = Color.White,
+                    )
+                }
             }
         })
 }

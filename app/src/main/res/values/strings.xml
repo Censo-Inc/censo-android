@@ -38,8 +38,18 @@
 
     <string name="network_unavailable">No network available, please check your WiFi or Data connection</string>
     <string name="default_err_message">"Unable to perform action"</string>
+
     <string name="retry">Retry</string>
     <string name="dismiss">Dismiss</string>
     <string name="create_device_call_failed">Something went wrong when attempting to register device, please try again</string>
     <string name="owner_setup">Owner Setup</string>
+
+    <string name="continue_onboarding">Continue onboarding</string>
+    <string name="add_content_desc">Add</string>
+    <string name="remove_content_desc">Remove</string>
+    <string name="threshold">Threshold</string>
+    <string name="add_guardian">Add Guardian</string>
+    <string name="guardians_empty_message">Please start adding guardians to invite to your policy</string>
+    <string name="share_guardian_deeplinks">Share these links with your guardians to continue setting up your policy</string>
+
 </resources>

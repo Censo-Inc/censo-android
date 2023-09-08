@@ -8,6 +8,7 @@ import co.censo.vault.data.networking.AuthInterceptor
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Instant
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
+import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.KeyStore
 import java.security.*

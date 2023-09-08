@@ -2,6 +2,7 @@ package co.censo.vault
 
 import co.censo.vault.util.BiometricUtil
 import BlockingUI
+import ParticipantId
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
@@ -10,7 +11,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -41,10 +41,16 @@ import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.facetec_auth.FacetecAuthScreen
+import co.censo.vault.presentation.guardian_entrance.GuardianEntranceArgs
+import co.censo.vault.presentation.guardian_entrance.GuardianEntranceScreen
+import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
-import co.censo.vault.presentation.home.Screen.Companion.DL_TOKEN_KEY
+import co.censo.vault.presentation.home.Screen.Companion.DL_DEVICE_PUBLIC_KEY_KEY
+import co.censo.vault.presentation.home.Screen.Companion.DL_INTERMEDIATE_KEY_KEY
+import co.censo.vault.presentation.home.Screen.Companion.DL_PARTICIPANT_ID_KEY
 import co.censo.vault.presentation.home.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
+import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.presentation.owner_entrance.OwnerEntranceScreen
 import co.censo.vault.ui.theme.VaultTheme
@@ -175,17 +181,28 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = Screen.OwnerEntrance.route) {
             composable(
-                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",
+                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INTERMEDIATE_KEY_KEY={$DL_INTERMEDIATE_KEY_KEY}?$DL_DEVICE_PUBLIC_KEY_KEY={$DL_DEVICE_PUBLIC_KEY_KEY}?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
                 deepLinks = listOf(navDeepLink {
-                    uriPattern = "vault://guardian/{$DL_TOKEN_KEY}"
+                    uriPattern =
+                        "$VAULT_GUARDIAN_URI{$DL_INTERMEDIATE_KEY_KEY}/{$DL_DEVICE_PUBLIC_KEY_KEY}/{$DL_PARTICIPANT_ID_KEY}"
                 }),
             ) { backStackEntry ->
-                val token = backStackEntry.arguments?.getString(DL_TOKEN_KEY)
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text("Passed in this data on deep link: $token")
-                }
-            }
+                val intermediateKey = backStackEntry.arguments?.getString(
+                    DL_INTERMEDIATE_KEY_KEY
+                )
+                val ownerDevicePublicKey = backStackEntry.arguments?.getString(
+                    DL_DEVICE_PUBLIC_KEY_KEY
+                )
+                val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY)
 
+                val args = GuardianEntranceArgs(
+                    participantId = ParticipantId(participantId ?: ""),
+                    ownerDevicePublicKey = ownerDevicePublicKey ?: "",
+                    intermediateKey = intermediateKey ?: ""
+                )
+
+                GuardianEntranceScreen(navController = navController, args = args)
+            }
             composable(route = Screen.OwnerEntrance.route) {
                 OwnerEntranceScreen(navController = navController)
             }
@@ -207,6 +224,9 @@ class MainActivity : FragmentActivity() {
                 val nameArgument =
                     backStackEntry.arguments?.getString(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) as String
                 BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
+            }
+            composable(route = Screen.GuardianInvitationRoute.route) {
+                GuardianInvitationScreen(navController = navController)
             }
         }
     }

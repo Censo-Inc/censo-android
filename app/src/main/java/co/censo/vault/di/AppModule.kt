@@ -8,6 +8,8 @@ import co.censo.vault.data.repository.OwnerRepositoryImpl
 import co.censo.vault.data.networking.ApiService
 import co.censo.vault.data.repository.FacetecRepository
 import co.censo.vault.data.repository.FacetecRepositoryImpl
+import co.censo.vault.data.repository.GuardianRepository
+import co.censo.vault.data.repository.GuardianRepositoryImpl
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.data.repository.PushRepositoryImpl
 import co.censo.vault.data.storage.SharedPrefsStorage
@@ -53,6 +55,14 @@ object AppModule {
         cryptographyManager: CryptographyManager
     ): OwnerRepository {
         return OwnerRepositoryImpl(apiService, storage, cryptographyManager)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGuardianRepository(
+        apiService: ApiService
+    ): GuardianRepository {
+        return GuardianRepositoryImpl(apiService)
     }
 
     @Singleton

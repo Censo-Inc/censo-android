@@ -10,10 +10,14 @@ import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec
 import org.bouncycastle.jce.spec.ECNamedCurveSpec
+import org.bouncycastle.jce.spec.ECPrivateKeySpec
 import org.bouncycastle.jce.spec.ECPublicKeySpec
 import org.bouncycastle.math.ec.ECCurve
 import org.bouncycastle.math.ec.ECPoint
+import java.math.BigInteger
 import java.security.*
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import java.security.spec.*
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement
@@ -48,8 +52,9 @@ object ECIESManager {
         keyPairGenerator.initialize(secp256r1)
     }
 
-    fun prepForUse() {
-        //Use this method to get the key factory and generator ready before use in biometry time period
+    fun getPrivateKeyFromECBigIntAndCurve(s: BigInteger): PrivateKey {
+        val privateKeySpec = ECPrivateKeySpec(s, spec)
+        return keyFactory.generatePrivate(privateKeySpec)
     }
 
     //region public methods
@@ -146,6 +151,20 @@ object ECIESManager {
         val pubKeySpec = ECPublicKeySpec(securityPoint, bouncyParams)
 
         return keyFactory.generatePublic(pubKeySpec)
+    }
+
+    fun getPublicKeyFromPrivateKey(privateKey: ECPrivateKey): PublicKey {
+        val q: ECPoint = spec.g.multiply(privateKey.s)
+        val pubSpec = ECPublicKeySpec(q, spec)
+        return keyFactory.generatePublic(pubSpec) as ECPublicKey
+    }
+
+    fun createSecp256R1KeyPair(): KeyPair {
+        val kpg = KeyPairGenerator.getInstance("EC", BouncyCastleProvider())
+        val secp256r1 = ECNamedCurveTable.getParameterSpec("secp256r1")
+        kpg.initialize(secp256r1)
+
+        return kpg.generateKeyPair()
     }
 
     private fun createPoint(

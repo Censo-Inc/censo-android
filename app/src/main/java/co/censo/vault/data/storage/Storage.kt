@@ -36,6 +36,7 @@ object SharedPrefsStorage : Storage {
     private const val DEVICE_CREATED_FLAG = "device_created_flag"
 
     private const val BIP39 = "bip_39"
+    private const val TEMP_ENCRYPTION_MASTER_KEY = "temp_encryption_master_key"
 
     private const val AUTH_HEADERS = "read_timestamp"
 
