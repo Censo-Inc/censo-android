@@ -1,6 +1,6 @@
 package co.censo.vault.data.networking
 
-import Base58EncodedPolicyPublicKey
+import Base58EncodedPublicKey
 import InitBiometryVerificationApiResponse
 import android.content.Context
 import android.net.ConnectivityManager
@@ -133,13 +133,13 @@ interface ApiService {
 
     @PUT("/v1/policies/{policyKey}")
     suspend fun updatePolicy(
-        @Path(value = "policyKey", encoded = true) policyKey: Base58EncodedPolicyPublicKey,
+        @Path(value = "policyKey", encoded = true) policyKey: Base58EncodedPublicKey,
         @Body updatePolicyApiRequest: UpdatePolicyApiRequest
     ): RetrofitResponse<ResponseBody>
 
     @GET("/v1/policies/{policyKey}")
     suspend fun policy(
-        @Path(value = "policyKey", encoded = true) policyKey: Base58EncodedPolicyPublicKey,
+        @Path(value = "policyKey", encoded = true) policyKey: Base58EncodedPublicKey,
     ): RetrofitResponse<Policy>
 
     @GET("/v1/policies")
