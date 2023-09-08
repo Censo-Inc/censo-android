@@ -4,6 +4,7 @@ import Base58EncodedPublicKey
 import Base64EncodedData
 import GuardianInvite
 import GuardianUpdate
+import ParticipantId
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,9 +23,11 @@ data class UpdatePolicyApiRequest(
 @Serializable
 data class Guardian(
     val name: String,
-    val email: String,
+    val participantId: ParticipantId,
     val status: GuardianStatus,
-    val encryptedVerificationData: String?,
+    val encryptedShard: Base64EncodedData,
+    val signature: Base64EncodedData?,
+    val timeMillis: Long?,
 )
 
 @Serializable

@@ -1,5 +1,7 @@
 package co.censo.vault.presentation.guardian_invitation
 
+import Base64EncodedData
+import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,7 +11,6 @@ import co.censo.vault.data.Resource
 import co.censo.vault.data.model.Guardian
 import co.censo.vault.data.model.GuardianStatus
 import co.censo.vault.data.repository.OwnerRepository
-import co.censo.vault.presentation.home.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,9 +42,11 @@ class GuardianInvitationViewModel @Inject constructor(
 
         val guardian = Guardian(
             name = "Guardian ${state.guardians.size + 1}",
-            email = "",
             status = GuardianStatus.Invited,
-            null
+            participantId = ParticipantId(),
+            encryptedShard = Base64EncodedData(),
+            signature = null,
+            timeMillis = null
         )
 
         val guardians = state.guardians.toMutableList()

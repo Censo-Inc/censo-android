@@ -11,6 +11,9 @@ import co.censo.vault.BuildConfig
 import co.censo.vault.data.Header
 import co.censo.vault.data.HeadersSerializer
 import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.model.AcceptGuardianshipApiRequest
+import co.censo.vault.data.model.ConfirmGuardianshipApiRequest
+import co.censo.vault.data.model.ConfirmShardReceiptApiRequest
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
@@ -18,6 +21,7 @@ import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.vault.data.model.GetPoliciesApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
+import co.censo.vault.data.model.InviteGuardianApiRequest
 import co.censo.vault.data.model.Policy
 import co.censo.vault.data.model.UpdatePolicyApiRequest
 import co.censo.vault.data.model.VerifyContactApiRequest
@@ -145,6 +149,40 @@ interface ApiService {
     suspend fun registerGuardian(
         @Path(value = "intermediateKey") intermediateKey: String,
         @Path(value = "participantId") participantId: String,
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{participantId}/invitation")
+    suspend fun inviteGuardian(
+        @Path(value = "intermediateKey") intermediateKey: String,
+        @Path(value = "participantId") participantId: String,
+        @Body inviteGuardianApiRequest: InviteGuardianApiRequest
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{participantId}/accept")
+    suspend fun acceptGuardianship(
+        @Path(value = "intermediateKey") intermediateKey: String,
+        @Path(value = "participantId") participantId: String,
+        @Body acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{participantId}/decline")
+    suspend fun declineGuardianship(
+        @Path(value = "intermediateKey") intermediateKey: String,
+        @Path(value = "participantId") participantId: String
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{participantId}/shard-receipt-confirmation")
+    suspend fun confirmShardReceipt(
+        @Path(value = "intermediateKey") intermediateKey: String,
+        @Path(value = "participantId") participantId: String,
+        @Body confirmShardReceiptApiRequest: ConfirmShardReceiptApiRequest
+    ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/policies/{intermediateKey}/guardian/{participantId}/confirmation")
+    suspend fun confirmGuardianship(
+        @Path(value = "intermediateKey") intermediateKey: String,
+        @Path(value = "participantId") participantId: String,
+        @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
     ): RetrofitResponse<ResponseBody>
 
     @POST("v1/notification-tokens")
