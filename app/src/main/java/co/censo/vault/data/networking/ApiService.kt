@@ -1,5 +1,6 @@
 package co.censo.vault.data.networking
 
+import Base58EncodedDevicePublicKey
 import Base58EncodedPublicKey
 import InitBiometryVerificationApiResponse
 import ParticipantId
@@ -72,12 +73,12 @@ interface ApiService {
 
         fun getAuthHeaders(
             base64FormattedSignature: String,
-            base58FormattedDevicePublicKey: String,
+            base58FormattedDevicePublicKey: Base58EncodedDevicePublicKey,
             iso8601FormattedTimestamp: String
         ): List<Header> =
             listOf(
                 Header(AUTHORIZATION_HEADER, "signature $base64FormattedSignature"),
-                Header(DEVICE_PUBLIC_KEY_HEADER, base58FormattedDevicePublicKey),
+                Header(DEVICE_PUBLIC_KEY_HEADER, base58FormattedDevicePublicKey.value),
                 Header(TIMESTAMP_HEADER, iso8601FormattedTimestamp)
             )
 

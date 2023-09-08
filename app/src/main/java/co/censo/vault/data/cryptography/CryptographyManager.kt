@@ -1,5 +1,6 @@
 package co.censo.vault.data.cryptography
 
+import Base58EncodedDevicePublicKey
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import co.censo.vault.BuildConfig
@@ -25,7 +26,7 @@ interface CryptographyManager {
     fun createDeviceKeyIfNotExists()
     fun getOrCreateDeviceKey(): PrivateKey
     fun getPublicKeyFromDeviceKey(): PublicKey
-    fun getDevicePublicKeyInBase58(): String
+    fun getDevicePublicKeyInBase58(): Base58EncodedDevicePublicKey
     fun signData(dataToSign: ByteArray): ByteArray
     fun decryptData(ciphertext: ByteArray): ByteArray
     fun encryptData(plainText: String): ByteArray
@@ -130,12 +131,14 @@ class CryptographyManagerImpl : CryptographyManager {
         return certificate.publicKey
     }
 
-    override fun getDevicePublicKeyInBase58(): String =
-        Base58.base58Encode(
-            BCECPublicKey(
-                getPublicKeyFromDeviceKey() as ECPublicKey,
-                BouncyCastleProvider.CONFIGURATION
-            ).q.getEncoded(true)
+    override fun getDevicePublicKeyInBase58(): Base58EncodedDevicePublicKey =
+        Base58EncodedDevicePublicKey(
+            Base58.base58Encode(
+                BCECPublicKey(
+                    getPublicKeyFromDeviceKey() as ECPublicKey,
+                    BouncyCastleProvider.CONFIGURATION
+                ).q.getEncoded(true)
+            )
         )
 
     override fun getCertificateFromKeystore(): Certificate {

@@ -1,5 +1,6 @@
 package co.censo.vault.data.cryptography
 
+import Base58EncodedPolicyPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import GuardianInvite
@@ -58,8 +59,8 @@ class PolicySetupHelper(
             return PolicySetupHelper(
                 shards = sharer.shards,
                 deviceKey = deviceKey,
-                masterEncryptionPublicKey = masterEncryptionKey.publicExternalRepresentation(),
-                intermediatePublicKey = intermediateEncryptionKey.publicExternalRepresentation(),
+                masterEncryptionPublicKey = Base58EncodedPolicyPublicKey(masterEncryptionKey.publicExternalRepresentation()),
+                intermediatePublicKey = Base58EncodedPolicyPublicKey(intermediateEncryptionKey.publicExternalRepresentation()),
                 encryptedMasterKey = Base64EncodedData(encryptedMasterKey),
                 threshold = threshold,
                 guardianInvites = guardianInvites
