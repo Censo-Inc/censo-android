@@ -1,5 +1,7 @@
 package co.censo.vault.presentation.guardian_invitation
 
+import Base64EncodedData
+import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,7 +11,6 @@ import co.censo.vault.data.Resource
 import co.censo.vault.data.model.Guardian
 import co.censo.vault.data.model.GuardianStatus
 import co.censo.vault.data.repository.OwnerRepository
-import co.censo.vault.presentation.home.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
