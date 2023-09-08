@@ -4,6 +4,7 @@ import Base58EncodedPublicKey
 import Base64EncodedData
 import GuardianInvite
 import GuardianProspect
+import ParticipantId
 import java.security.PrivateKey
 import java.util.Base64
 
@@ -49,8 +50,8 @@ class PolicySetupHelper(
 
                 GuardianInvite(
                     name = guardianProspect.label,
-                    participantId = "",
-                    encryptedShard = Base64.getEncoder().encodeToString(encryptedShard)
+                    participantId = ParticipantId(""),
+                    encryptedShard = Base64EncodedData(Base64.getEncoder().encodeToString(encryptedShard))
                 )
             }
 
@@ -59,7 +60,7 @@ class PolicySetupHelper(
                 deviceKey = deviceKey,
                 masterEncryptionPublicKey = masterEncryptionKey.publicExternalRepresentation(),
                 intermediatePublicKey = intermediateEncryptionKey.publicExternalRepresentation(),
-                encryptedMasterKey = encryptedMasterKey,
+                encryptedMasterKey = Base64EncodedData(encryptedMasterKey),
                 threshold = threshold,
                 guardianInvites = guardianInvites
             )

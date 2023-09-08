@@ -30,29 +30,22 @@ class GuardianInvitationViewModel @Inject constructor(
     }
 
     fun updateThreshold(value: Int) {
-        if (value > 0 && value <= state.guardians.size) {
+        if (value > 0 && value <= state.potentialGuardians.size) {
             state = state.copy(threshold = value)
         }
     }
 
     fun addGuardian() {
-        if (state.guardians.size == MAX_GUARDIAN_LIMIT) {
+        if (state.potentialGuardians.size == MAX_GUARDIAN_LIMIT) {
             return
         }
 
-        val guardian = Guardian(
-            name = "Guardian ${state.guardians.size + 1}",
-            status = GuardianStatus.Invited,
-            participantId = ParticipantId(),
-            encryptedShard = Base64EncodedData(),
-            signature = null,
-            timeMillis = null
-        )
+        val potentialGuardian = "Guardian ${state.potentialGuardians.size + 1}"
 
-        val guardians = state.guardians.toMutableList()
-        guardians.add(guardian)
+        val guardians = state.potentialGuardians.toMutableList()
+        guardians.add(potentialGuardian)
         state = state.copy(
-            guardians = guardians,
+            potentialGuardians = guardians,
             threshold = state.threshold + 1
         )
     }
@@ -81,7 +74,7 @@ class GuardianInvitationViewModel @Inject constructor(
         viewModelScope.launch {
             val policySetupHelper = ownerRepository.setupPolicy(
                 threshold = state.threshold,
-                guardians = state.guardians
+                guardians = state.potentialGuardians
             )
 
             val setupPolicyResponse = ownerRepository.createPolicy(policySetupHelper)
@@ -96,7 +89,7 @@ class GuardianInvitationViewModel @Inject constructor(
     private fun createGuardianDeepLinks() {
 
         viewModelScope.launch {
-            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(state.guardians)
+            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(state.potentialGuardians)
 
             state = state.copy(
                 guardianDeepLinks = guardianDeepLinks,
