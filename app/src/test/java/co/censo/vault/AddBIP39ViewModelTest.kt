@@ -1,8 +1,8 @@
 package co.censo.vault
 
-import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.PhraseValidator
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.presentation.add_bip39.AddBIP39ViewModel
 import co.censo.vault.data.storage.BIP39Phrases
 import co.censo.vault.data.storage.EncryptedBIP39
@@ -37,7 +37,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
     lateinit var storage: Storage
 
     @Mock
-    lateinit var cryptographyManager: CryptographyManager
+    lateinit var deviceKey: InternalDeviceKey
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -58,7 +58,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
 
         addBIP39ViewModel = AddBIP39ViewModel(
             storage = storage,
-            cryptographyManager = cryptographyManager
+            deviceKey = deviceKey
         )
     }
 
@@ -172,10 +172,10 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
         val dataToEncrypt =
             Json.encodeToString(
                 PhraseValidator.format(validBIP39Phrase).split(" ")
-            )
+            ).toByteArray(Charsets.UTF_8)
 
         whenever(storage.retrieveBIP39Phrases()).then { emptyMap<String, EncryptedBIP39>() }
-        whenever(cryptographyManager.encryptData(dataToEncrypt)).then {
+        whenever(deviceKey.encrypt(dataToEncrypt)).then {
             validBIP39Phrase.encodeToByteArray()
         }
 
@@ -184,7 +184,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
 
         addBIP39ViewModel.submit()
 
-        verify(cryptographyManager).encryptData(dataToEncrypt)
+        verify(deviceKey).encrypt(dataToEncrypt)
 
         verify(storage).saveBIP39Phrases(capture(captor))
 
@@ -199,7 +199,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
         val dataToEncrypt =
             Json.encodeToString(
                 PhraseValidator.format(validBIP39Phrase).split(" ")
-            )
+            ).toByteArray(Charsets.UTF_8)
 
         whenever(storage.retrieveBIP39Phrases()).then {
             mapOf(
@@ -209,7 +209,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
                 )
             )
         }
-        whenever(cryptographyManager.encryptData(dataToEncrypt)).then {
+        whenever(deviceKey.encrypt(dataToEncrypt)).then {
             validBIP39Phrase.encodeToByteArray()
         }
 
@@ -218,7 +218,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
 
         addBIP39ViewModel.submit()
 
-        verify(cryptographyManager).encryptData(dataToEncrypt)
+        verify(deviceKey).encrypt(dataToEncrypt)
 
         verify(storage).saveBIP39Phrases(capture(captor))
 
@@ -234,7 +234,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
         val dataToEncrypt =
             Json.encodeToString(
                 PhraseValidator.format(validBIP39Phrase).split(" ")
-            )
+            ).toByteArray()
 
         whenever(storage.retrieveBIP39Phrases()).then {
             mapOf(
@@ -244,7 +244,7 @@ class AddBIP39ViewModelTest : BaseViewModelTest() {
                 )
             )
         }
-        whenever(cryptographyManager.encryptData(dataToEncrypt)).then {
+        whenever(deviceKey.encrypt(dataToEncrypt)).then {
             validBIP39Phrase.encodeToByteArray()
         }
 

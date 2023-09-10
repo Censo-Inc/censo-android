@@ -1,6 +1,5 @@
 package co.censo.vault
 
-import co.censo.vault.data.cryptography.CryptographyManagerImpl
 import co.censo.vault.data.cryptography.ECIESManager
 import co.censo.vault.data.cryptography.SecretSharer
 import junit.framework.TestCase.assertEquals

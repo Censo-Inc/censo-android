@@ -6,12 +6,11 @@ import Base64EncodedData
 import GuardianProspect
 import ParticipantId
 import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.CryptographyManager
-import co.censo.vault.data.cryptography.CryptographyManagerImpl
 import co.censo.vault.data.cryptography.ECIESManager
 import co.censo.vault.data.cryptography.PolicySetupHelper
 import co.censo.vault.data.cryptography.generatePartitionId
 import co.censo.vault.data.model.ConfirmShardReceiptApiRequest
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
@@ -70,8 +69,7 @@ interface OwnerRepository {
 
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
-    private val storage: Storage,
-    private val cryptographyManager: CryptographyManager
+    private val storage: Storage
 ) :
     OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
@@ -105,14 +103,14 @@ class OwnerRepositoryImpl(
 
     override fun saveValidTimestamp() {
         try {
-            val cachedReadCallHeaders = cryptographyManager.createAuthHeaders(Clock.System.now())
+            val cachedReadCallHeaders = InternalDeviceKey().createAuthHeaders(Clock.System.now())
             storage.saveReadHeaders(cachedReadCallHeaders)
         } catch (e: Exception) {
             //TODO: Log exception with raygun
         }
     }
 
-    override suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper {
+    override suspend fun setupPolicy(threshold: Int, guardians: List<String>): PolicySetupHelper {
 
         val guardianProspect = guardians.map {
             GuardianProspect(
@@ -121,12 +119,14 @@ class OwnerRepositoryImpl(
             )
         }
 
+        val deviceKey = InternalDeviceKey()
+
         val policySetupHelper = PolicySetupHelper.create(
             threshold = threshold,
             guardians = guardianProspect,
-            deviceKey = cryptographyManager.getOrCreateDeviceKey()
+            deviceKey = deviceKey.key
         ) {
-            cryptographyManager.encryptData(String(it))
+            deviceKey.encrypt(it)
         }
 
         vaultLog(message = "Policy Setup Helper Created: $policySetupHelper")
@@ -152,7 +152,7 @@ class OwnerRepositoryImpl(
         guardian: PolicyGuardian.ProspectGuardian
     ): Resource<ResponseBody> {
 
-        val deviceEncryptedPin = cryptographyManager.encryptData("123456")
+        val deviceEncryptedPin = InternalDeviceKey().encrypt("123456".toByteArray(Charsets.UTF_8))
 
         return retrieveApiResource {
             apiService.inviteGuardian(
@@ -232,19 +232,23 @@ class OwnerRepositoryImpl(
         guardians: List<PolicyGuardian.ProspectGuardian>,
         policyKey: Base58EncodedIntermediatePublicKey
     ): List<String> {
-        val devicePublicKey = cryptographyManager.getDevicePublicKeyInBase58()
+        val devicePublicKey = InternalDeviceKey().publicExternalRepresentation()
 
         //3. Create deep links from this: generateGuardianDeeplink
         return guardians.map {
             generateGuardianDeeplink(
                 participantId = it.participantId.value,
-                policyKey = policyKey,
-                devicePublicKey = devicePublicKey
+                policyKey = policyKey.value,
+                devicePublicKey = devicePublicKey.value
             )
         }
     }
 
-    private fun generateGuardianDeeplink(participantId: String, policyKey: Base58EncodedIntermediatePublicKey, devicePublicKey: Base58EncodedDevicePublicKey): String {
-        return "$VAULT_GUARDIAN_URI${policyKey.value}/${devicePublicKey.value}/$participantId"
+    private fun generateGuardianDeeplink(
+        participantId: String,
+        policyKey: String,
+        devicePublicKey: String
+    ): String {
+        return "$VAULT_GUARDIAN_URI$policyKey/$devicePublicKey/$participantId"
     }
 }

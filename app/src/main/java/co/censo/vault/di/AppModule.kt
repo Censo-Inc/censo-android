@@ -1,8 +1,7 @@
 package co.censo.vault.di
 
 import android.content.Context
-import co.censo.vault.data.cryptography.CryptographyManager
-import co.censo.vault.data.cryptography.CryptographyManagerImpl
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.data.repository.OwnerRepositoryImpl
 import co.censo.vault.data.networking.ApiService
@@ -24,10 +23,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
     @Singleton
     @Provides
-    fun provideCryptographyManager(): CryptographyManager {
-        return CryptographyManagerImpl()
+    fun provideInternalDeviceKey(): InternalDeviceKey {
+        return InternalDeviceKey()
     }
 
     @Singleton
@@ -40,11 +40,10 @@ object AppModule {
     @Singleton
     @Provides
     fun provideApiService(
-        cryptographyManager: CryptographyManager,
         storage: Storage,
         @ApplicationContext applicationContext: Context
     ): ApiService {
-        return ApiService.create(cryptographyManager, storage, applicationContext)
+        return ApiService.create(storage, applicationContext)
     }
 
     @Singleton
@@ -52,18 +51,16 @@ object AppModule {
     fun provideOwnerRepository(
         apiService: ApiService,
         storage: Storage,
-        cryptographyManager: CryptographyManager
     ): OwnerRepository {
-        return OwnerRepositoryImpl(apiService, storage, cryptographyManager)
+        return OwnerRepositoryImpl(apiService, storage)
     }
 
     @Singleton
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
-        cryptographyManager: CryptographyManager,
     ): GuardianRepository {
-        return GuardianRepositoryImpl(apiService, cryptographyManager)
+        return GuardianRepositoryImpl(apiService)
     }
 
     @Singleton

@@ -4,7 +4,6 @@ import Base58EncodedPublicKey
 import Base64EncodedData
 import ParticipantId
 import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.model.AcceptGuardianshipApiRequest
 import co.censo.vault.data.model.AcceptGuardianshipApiResponse
 import co.censo.vault.data.model.GetGuardianStateApiResponse
@@ -35,7 +34,6 @@ interface GuardianRepository {
 
 class GuardianRepositoryImpl(
     private val apiService: ApiService,
-    private val cryptographyManager: CryptographyManager,
 ) : GuardianRepository, BaseRepository() {
     override suspend fun registerGuardian(
         intermediateKey: Base58EncodedPublicKey,
