@@ -131,6 +131,6 @@ class OwnerRepositoryImpl(
     }
 
     private fun generateGuardianDeeplink(participantId: String, policyKey: Base58EncodedIntermediatePublicKey, devicePublicKey: Base58EncodedDevicePublicKey): String {
-        return "$VAULT_GUARDIAN_URI$policyKey/$devicePublicKey/$participantId"
+        return "$VAULT_GUARDIAN_URI${policyKey.value}/${devicePublicKey.value}/$participantId"
     }
 }

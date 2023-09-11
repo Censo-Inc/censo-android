@@ -41,7 +41,7 @@ class GuardianInvitationViewModel @Inject constructor(
                     when (ownerState) {
                         is OwnerState.PolicySetup -> {
                             val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(
-                                ownerState.policy.guardians, policyKey = ownerState.publicMasterEncryptionKey
+                                ownerState.policy.guardians, policyKey = ownerState.policy.intermediateKey
                             )
 
                             state = state.copy(
