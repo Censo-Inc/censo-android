@@ -11,7 +11,9 @@ interface FacetecRepository {
     suspend fun startFacetecBiometry(): Resource<InitBiometryVerificationApiResponse>
     suspend fun submitResult(
         biometryId: String,
-        sessionResult: FaceTecSessionResult
+        faceScan: String,
+        auditTrailImage: String,
+        lowQualityAuditTrailImage: String,
     ): Resource<SubmitBiometryVerificationApiResponse>
 }
 
@@ -22,12 +24,14 @@ class FacetecRepositoryImpl(private val apiService: ApiService) : FacetecReposit
 
     override suspend fun submitResult(
         biometryId: String,
-        sessionResult: FaceTecSessionResult
+        faceScan: String,
+        auditTrailImage: String,
+        lowQualityAuditTrailImage: String,
     ): Resource<SubmitBiometryVerificationApiResponse> {
         val facetecResultRequest = SubmitBiometryVerificationApiRequest(
-            faceScan = sessionResult.faceScanBase64,
-            auditTrailImage = sessionResult.auditTrailCompressedBase64[0],
-            lowQualityAuditTrailImage = sessionResult.lowQualityAuditTrailCompressedBase64[0]
+            faceScan = faceScan,
+            auditTrailImage = auditTrailImage,
+            lowQualityAuditTrailImage = lowQualityAuditTrailImage
         )
 
         return retrieveApiResource {

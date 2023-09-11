@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.vault.BuildConfig
 import co.censo.vault.data.Resource
 import co.censo.vault.data.repository.FacetecRepository
 import co.censo.vault.data.repository.OwnerRepository
@@ -15,6 +16,7 @@ import com.facetec.sdk.FaceTecSessionResult
 import com.facetec.sdk.FaceTecSessionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +30,21 @@ class FacetecAuthViewModel @Inject constructor(
 
     fun onStart() {
         retrieveUserData()
+    }
+
+    private fun skipFacetec() {
+        val contactId = state.userResponse.data?.contacts?.first()?.identifier ?: ""
+
+        viewModelScope.launch {
+            val facetecResponse = facetecRepository.submitResult(
+                biometryId = state.facetecData?.id ?: "",
+                faceScan = Base64.getEncoder().encodeToString(contactId.toByteArray()),
+                auditTrailImage = Base64.getEncoder().encodeToString(contactId.toByteArray()),
+                lowQualityAuditTrailImage = Base64.getEncoder().encodeToString(contactId.toByteArray()),
+            )
+
+            state = state.copy(submitResultResponse = facetecResponse)
+        }
     }
 
     fun retry() {
@@ -71,10 +88,14 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     fun facetecSDKInitialized() {
-        state = state.copy(
-            startAuth = Resource.Success(Unit),
-            submitResultResponse = Resource.Loading()
-        )
+        if (BuildConfig.DEBUG) {
+         skipFacetec()
+        } else {
+            state = state.copy(
+                startAuth = Resource.Success(Unit),
+                submitResultResponse = Resource.Loading()
+            )
+        }
     }
 
     fun failedToInitializeSDK() {
@@ -110,8 +131,10 @@ class FacetecAuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             val submitResultResponse = facetecRepository.submitResult(
-                biometryId = state.facetecData?.id ?: "",
-                sessionResult = sessionResult
+                state.facetecData?.id ?: "",
+                sessionResult.faceScanBase64 ?: "",
+                sessionResult.auditTrailCompressedBase64[0] ?: "",
+                sessionResult.lowQualityAuditTrailCompressedBase64[0] ?: ""
             )
 
             if (submitResultResponse is Resource.Success) {
