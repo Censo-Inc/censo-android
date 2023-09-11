@@ -8,6 +8,8 @@ import kotlinx.serialization.encoding.Encoder
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.util.Base64
+import io.github.novacrypto.base58.Base58
+import java.security.interfaces.ECPublicKey
 
 @Serializable
 data class GuardianInvite(
@@ -33,10 +35,49 @@ data class GuardianProspect(
 
 
 typealias GuardianId = String
-typealias Base58EncodedPublicKey = String
-typealias Base58EncodedMasterEncryptionPublicKey = String
-typealias Base58EncodedIntermediatePublicKey = String
-typealias Base58EncodedDevicePublicKey = String
+
+interface Base58EncodedPublicKey {
+    val value: String
+
+    val ecPublicKey: ECPublicKey
+        get() = ECPublicKeyDecoder.fromBase58EncodedString(this.value)
+}
+
+@Serializable
+@JvmInline
+value class Base58EncodedDevicePublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid device public key format")
+        }
+    }
+}
+
+@Serializable
+@JvmInline
+value class Base58EncodedIntermediatePublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(this.value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid policy public key format")
+        }
+    }
+}
+
+@Serializable
+@JvmInline
+value class Base58EncodedMasterPublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(this.value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid master public key format")
+        }
+    }
+}
 
 @Serializable
 @JvmInline

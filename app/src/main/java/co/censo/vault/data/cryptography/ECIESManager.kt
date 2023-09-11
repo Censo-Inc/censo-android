@@ -146,14 +146,14 @@ object ECIESManager {
         )
     }
 
-    fun getPublicKeyFromBytes(pubKey: ByteArray): PublicKey {
+    fun getPublicKeyFromBytes(pubKey: ByteArray): ECPublicKey {
         val securityPoint: ECPoint = createPoint(params.curve, pubKey)
         val pubKeySpec = ECPublicKeySpec(securityPoint, bouncyParams)
 
-        return keyFactory.generatePublic(pubKeySpec)
+        return keyFactory.generatePublic(pubKeySpec) as ECPublicKey
     }
 
-    fun getPublicKeyFromPrivateKey(privateKey: ECPrivateKey): PublicKey {
+    fun getPublicKeyFromPrivateKey(privateKey: ECPrivateKey): ECPublicKey {
         val q: ECPoint = spec.g.multiply(privateKey.s)
         val pubSpec = ECPublicKeySpec(q, spec)
         return keyFactory.generatePublic(pubSpec) as ECPublicKey

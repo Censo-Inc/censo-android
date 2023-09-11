@@ -1,6 +1,7 @@
 package co.censo.vault.data.cryptography
 
-import Base58EncodedPublicKey
+import Base58EncodedIntermediatePublicKey
+import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import GuardianInvite
 import GuardianProspect
@@ -10,10 +11,10 @@ import java.util.Base64
 
 class PolicySetupHelper(
     val shards: List<Point>,
-    val masterEncryptionPublicKey: Base58EncodedPublicKey,
+    val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterKey: Base64EncodedData,
     val threshold: Int,
-    val intermediatePublicKey: Base58EncodedPublicKey,
+    val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val guardianInvites: List<GuardianInvite> = emptyList(),
     val deviceKey: PrivateKey
 ) {
@@ -58,8 +59,8 @@ class PolicySetupHelper(
             return PolicySetupHelper(
                 shards = sharer.shards,
                 deviceKey = deviceKey,
-                masterEncryptionPublicKey = masterEncryptionKey.publicExternalRepresentation(),
-                intermediatePublicKey = intermediateEncryptionKey.publicExternalRepresentation(),
+                masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation()),
+                intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation()),
                 encryptedMasterKey = Base64EncodedData(encryptedMasterKey),
                 threshold = threshold,
                 guardianInvites = guardianInvites

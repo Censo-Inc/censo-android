@@ -1,5 +1,7 @@
 package co.censo.vault
 
+import Base58EncodedDevicePublicKey
+import Base58EncodedIntermediatePublicKey
 import co.censo.vault.util.BiometricUtil
 import BlockingUI
 import ParticipantId
@@ -197,8 +199,8 @@ class MainActivity : FragmentActivity() {
 
                 val args = GuardianEntranceArgs(
                     participantId = ParticipantId(participantId ?: ""),
-                    ownerDevicePublicKey = ownerDevicePublicKey ?: "",
-                    intermediateKey = intermediateKey ?: ""
+                    ownerDevicePublicKey = Base58EncodedDevicePublicKey(ownerDevicePublicKey ?: ""),
+                    intermediateKey = Base58EncodedIntermediatePublicKey(intermediateKey ?: "")
                 )
 
                 GuardianEntranceScreen(args = args)

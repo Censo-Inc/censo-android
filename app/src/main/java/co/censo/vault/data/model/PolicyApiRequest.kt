@@ -1,8 +1,7 @@
 package co.censo.vault.data.model
 
 import Base58EncodedIntermediatePublicKey
-import Base58EncodedMasterEncryptionPublicKey
-import Base58EncodedPublicKey
+import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import GuardianInvite
 import GuardianUpdate
@@ -11,7 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CreatePolicyApiRequest(
-    val masterEncryptionPublicKey: Base58EncodedMasterEncryptionPublicKey,
+    val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val threshold: Int,

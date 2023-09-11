@@ -1,5 +1,6 @@
 package co.censo.vault.data.repository
 
+import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
 import GuardianProspect
 import co.censo.vault.data.Resource
@@ -129,7 +130,7 @@ class OwnerRepositoryImpl(
         }
     }
 
-    private fun generateGuardianDeeplink(participantId: String, policyKey: String, devicePublicKey: String): String {
+    private fun generateGuardianDeeplink(participantId: String, policyKey: Base58EncodedIntermediatePublicKey, devicePublicKey: Base58EncodedDevicePublicKey): String {
         return "$VAULT_GUARDIAN_URI$policyKey/$devicePublicKey/$participantId"
     }
 }
