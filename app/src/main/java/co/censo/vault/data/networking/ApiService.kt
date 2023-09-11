@@ -153,8 +153,8 @@ interface ApiService {
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/device")
     suspend fun registerGuardian(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
     ): RetrofitResponse<ResponseBody>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/invitation")
@@ -166,15 +166,15 @@ interface ApiService {
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/accept")
     suspend fun acceptGuardianship(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
         @Body acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
     ): RetrofitResponse<ResponseBody>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/decline")
     suspend fun declineGuardianship(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
     ): RetrofitResponse<ResponseBody>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")

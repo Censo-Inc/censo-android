@@ -47,8 +47,7 @@ class GuardianRepositoryImpl(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId
     ): Resource<ResponseBody> {
-        return Resource.Success("".toResponseBody())
-        return retrieveApiResource { apiService.registerGuardian(intermediateKey, participantId) }
+        return retrieveApiResource { apiService.registerGuardian(intermediateKey.value, participantId.value) }
     }
 
     override suspend fun encryptGuardianData(verificationCode: String, ownerDevicePublicKey: Base58EncodedDevicePublicKey) : Pair<ByteArray, AcceptGuardianData> {
@@ -105,11 +104,9 @@ class GuardianRepositoryImpl(
         participantId: ParticipantId,
         acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
     ): Resource<ResponseBody> {
-        return Resource.Success("".toResponseBody())
-
         return retrieveApiResource { apiService.acceptGuardianship(
-            intermediateKey = intermediateKey,
-            participantId = participantId,
+            intermediateKey = intermediateKey.value,
+            participantId = participantId.value,
             acceptGuardianshipApiRequest = acceptGuardianshipApiRequest
         ) }
     }
@@ -118,12 +115,10 @@ class GuardianRepositoryImpl(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId
     ): Resource<ResponseBody> {
-        return Resource.Success("".toResponseBody())
-
         return retrieveApiResource {
             apiService.declineGuardianship(
-                intermediateKey = intermediateKey,
-                participantId = participantId
+                intermediateKey = intermediateKey.value,
+                participantId = participantId.value
             )
         }
     }
