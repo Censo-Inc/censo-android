@@ -39,7 +39,7 @@ class GuardianRepositoryImpl(
 
         val encryptedCodeAndNonce = ECIESManager.encryptMessage(
             hashedCodeAndNonce.toByteArray(Charsets.UTF_8),
-            Base58.base58Decode(ownerDevicePublicKey)
+            Base58.base58Decode(ownerDevicePublicKey.value)
         )
 
         val guardianDevicePublicKey = cryptographyManager.getPublicKeyFromDeviceKey()
