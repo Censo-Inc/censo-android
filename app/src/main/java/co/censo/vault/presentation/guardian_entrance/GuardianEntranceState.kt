@@ -4,6 +4,10 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
 import ParticipantId
 import co.censo.vault.data.Resource
+import co.censo.vault.data.model.AcceptGuardianshipApiResponse
+import co.censo.vault.data.model.GetGuardianStateApiResponse
+import co.censo.vault.data.model.GuardianPhase
+import co.censo.vault.data.model.RegisterGuardianApiResponse
 import okhttp3.ResponseBody
 
 data class GuardianEntranceState(
@@ -11,10 +15,10 @@ data class GuardianEntranceState(
     val ownerDevicePublicKey: Base58EncodedDevicePublicKey = Base58EncodedDevicePublicKey(""),
     val intermediateKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(""),
     val verificationCode: String = "",
-    val guardianStatus: GuardianStatus = GuardianStatus.DATA_MISSING,
-    val retrieveGuardianResource: Resource<GuardianStatus> = Resource.Uninitialized,
-    val registerGuardianResource: Resource<ResponseBody> = Resource.Uninitialized,
-    val acceptGuardianshipResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val guardianStatus: GuardianStatus = GuardianStatus.UNINITIALIZED,
+    val getGuardianResource: Resource<GetGuardianStateApiResponse> = Resource.Uninitialized,
+    val registerGuardianResource: Resource<RegisterGuardianApiResponse> = Resource.Uninitialized,
+    val acceptGuardianshipResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
     val declineGuardianshipResource: Resource<ResponseBody> = Resource.Uninitialized,
     val bioPromptTrigger: Resource<BiometryAuthReason> = Resource.Uninitialized
 ) {
@@ -26,7 +30,8 @@ data class GuardianEntranceState(
 }
 
 enum class GuardianStatus {
-    DATA_MISSING, DECLINED, REGISTER_GUARDIAN, WAITING_FOR_CODE, WAITING_FOR_SHARD, SHARD_RECEIVED, COMPLETE
+    UNINITIALIZED, DATA_MISSING, DECLINED, REGISTER_GUARDIAN,
+    WAITING_FOR_CODE, WAITING_FOR_SHARD, SHARD_RECEIVED, COMPLETE
 }
 
 enum class BiometryAuthReason {

@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
 import co.censo.vault.data.model.AcceptGuardianshipApiRequest
+import co.censo.vault.data.model.GuardianPhase
+import co.censo.vault.data.model.GuardianState
+import co.censo.vault.data.repository.BaseRepository.Companion.HTTP_401
 import co.censo.vault.data.repository.ErrorInfo
 import co.censo.vault.data.repository.ErrorResponse
 import co.censo.vault.data.repository.GuardianRepository
@@ -39,13 +42,10 @@ class GuardianEntranceViewModel @Inject constructor(
         )
 
         if (ownerRepository.checkValidTimestamp()) {
-            vaultLog(message = "Valid timestamp for auth headers, registering guardian")
+            vaultLog(message = "Valid timestamp for auth headers, retrieving guardian status")
             retrieveGuardianStatus()
         } else {
-            vaultLog(message = "Invalid timestamp for auth headers, triggering biometry")
-            triggerBiometryPrompt(
-                biometryAuthReason = BiometryAuthReason.REGISTER_GUARDIAN
-            )
+            triggerBiometryPrompt(BiometryAuthReason.REGISTER_GUARDIAN)
         }
     }
 
@@ -89,23 +89,46 @@ class GuardianEntranceViewModel @Inject constructor(
 
     private fun retrieveGuardianStatus() {
         viewModelScope.launch {
-            val retrieveGuardianResponse = guardianRepository.getGuardian(
+            val getGuardianResource = guardianRepository.getGuardian(
                 intermediateKey = state.intermediateKey,
                 participantId = state.participantId,
             )
 
-            if (retrieveGuardianResponse is Resource.Success) {
-                retrieveGuardianResponse.data?.let {
-                    updateGuardianStatus(it)
-                }
+            if (getGuardianResource is Resource.Success) {
+                setGuardianStatus(getGuardianResource.data?.guardianState)
+            } else if (getGuardianResource is Resource.Error && getGuardianResource.errorCode == HTTP_401) {
+                vaultLog(message = "Get guardian status returned 401, guardian has not registered device")
+                state = state.copy(guardianStatus = GuardianStatus.REGISTER_GUARDIAN)
             }
 
-            state = state.copy(retrieveGuardianResource = retrieveGuardianResponse)
+            state = state.copy(getGuardianResource = getGuardianResource)
         }
     }
 
-    fun updateGuardianStatus(stubbedGuardianStatus: GuardianStatus) {
-        state = state.copy(guardianStatus = stubbedGuardianStatus)
+    fun setGuardianStatus(guardianState: GuardianState?) {
+        if (guardianState == null) {
+            state = state.copy(guardianStatus = GuardianStatus.DECLINED)
+            return
+        }
+
+        val guardianStatus = when (guardianState.phase) {
+            GuardianPhase.WaitingForCode -> {
+                GuardianStatus.WAITING_FOR_CODE
+            }
+            GuardianPhase.WaitingForShard -> {
+                //TODO: Mocked for now, backend will be updating and making the submitVerificationCode the last step for the guardian user
+                GuardianStatus.COMPLETE
+            }
+            else -> {
+                GuardianStatus.COMPLETE
+            }
+        }
+
+        state = state.copy(
+            participantId = guardianState.participantId,
+            intermediateKey = guardianState.intermediatePublicKey,
+            guardianStatus = guardianStatus
+        )
     }
 
     fun registerGuardian() {
@@ -118,7 +141,7 @@ class GuardianEntranceViewModel @Inject constructor(
             if (registerGuardianResponse is Resource.Success) {
                 vaultLog(message = "Guardian Registered")
                 vaultLog(message = "Response body: ${registerGuardianResponse.data}")
-                updateGuardianStatus(GuardianStatus.WAITING_FOR_CODE)
+                setGuardianStatus(registerGuardianResponse.data?.guardianState)
             } else {
                 vaultLog(message = "Guardian Registration failed")
             }
@@ -130,6 +153,7 @@ class GuardianEntranceViewModel @Inject constructor(
     }
 
     fun declineGuardianship() {
+        state = state.copy(declineGuardianshipResource = Resource.Loading())
         viewModelScope.launch {
             val declineGuardianshipResponse = guardianRepository.declineGuardianship(
                 intermediateKey = state.intermediateKey, participantId = state.participantId
@@ -167,7 +191,7 @@ class GuardianEntranceViewModel @Inject constructor(
                 if (acceptGuardianshipResponse is Resource.Success) {
                     vaultLog(message = "Guardian accepted")
                     vaultLog(message = "Response body: ${acceptGuardianshipResponse.data}")
-                    updateGuardianStatus(GuardianStatus.WAITING_FOR_SHARD)
+                    setGuardianStatus(acceptGuardianshipResponse.data?.guardianState)
                 }
 
                 state = state.copy(acceptGuardianshipResource = acceptGuardianshipResponse)

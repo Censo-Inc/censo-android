@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.vault.R
@@ -106,25 +107,60 @@ fun GuardianEntranceScreen(
                             }) {
                             Text(stringResource(id = R.string.retry))
                         }
-                    } else {
-                        Text(text = stringResource(R.string.enter_verification_code))
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        TextField(value = state.verificationCode, onValueChange = {
-                            viewModel.updateVerificationCode(it)
-                        }, singleLine = true,)
+                    } else if (state.declineGuardianshipResource is Resource.Error) {
+                        Text(text = stringResource(R.string.decline_guardianship_error))
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = state.declineGuardianshipResource.getErrorMessage(context),
+                            textAlign = TextAlign.Center
+                        )
                         Spacer(modifier = Modifier.height(24.dp))
                         OutlinedButton(
-                            enabled = state.isVerificationCodeValid,
                             onClick = {
-                                viewModel.triggerBiometryPrompt(
-                                    biometryAuthReason = BiometryAuthReason.SUBMIT_VERIFICATION_CODE
-                                )
+                                viewModel.declineGuardianship()
                             }) {
-                            if (state.acceptGuardianshipResource is Resource.Loading) {
-                                CircularProgressIndicator()
-                            } else {
-                                Text(stringResource(id = R.string.submit))
+                            Text(stringResource(id = R.string.retry))
+                        }
+                    } else {
+                        if (state.declineGuardianshipResource is Resource.Loading) {
+                            CircularProgressIndicator()
+                        } else {
+                            Text(
+                                text = stringResource(R.string.you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship),
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(text = stringResource(R.string.enter_verification_code))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            TextField(value = state.verificationCode, onValueChange = {
+                                viewModel.updateVerificationCode(it)
+                            }, singleLine = true,)
+                            Spacer(modifier = Modifier.height(24.dp))
+                            OutlinedButton(
+                                enabled = state.isVerificationCodeValid,
+                                onClick = {
+                                    viewModel.triggerBiometryPrompt(
+                                        biometryAuthReason = BiometryAuthReason.SUBMIT_VERIFICATION_CODE
+                                    )
+                                }) {
+                                if (state.acceptGuardianshipResource is Resource.Loading) {
+                                    CircularProgressIndicator()
+                                } else {
+                                    Text(stringResource(id = R.string.submit))
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(36.dp))
+
+                            Text(text = stringResource(R.string.to_decline_guardianship_tap_the_button_below))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.declineGuardianship()
+                                }) {
+                                Text(stringResource(R.string.decline))
                             }
                         }
                     }
@@ -148,31 +184,7 @@ fun GuardianEntranceScreen(
                             Text(stringResource(id = R.string.retry))
                         }
                     } else {
-                        Text(
-                            text = stringResource(R.string.you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            OutlinedButton(
-                                onClick = {
-                                    viewModel.declineGuardianship()
-                                }) {
-                                Text(stringResource(R.string.decline))
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            OutlinedButton(
-                                onClick = {
-                                    viewModel.registerGuardian()
-                                }) {
-                                Text(stringResource(R.string.register))
-                            }
-                        }
+                        CircularProgressIndicator()
                     }
                 }
 
@@ -209,6 +221,10 @@ fun GuardianEntranceScreen(
                         text = stringResource(R.string.guardian_setup_complete),
                         textAlign = TextAlign.Center
                     )
+                }
+
+                GuardianStatus.UNINITIALIZED -> {
+                    CircularProgressIndicator()
                 }
             }
         }
