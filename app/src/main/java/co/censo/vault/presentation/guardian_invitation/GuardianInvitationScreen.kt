@@ -248,8 +248,8 @@ fun GuardianInvitationScreen(
                                 if (guardian.status is GuardianStatus.Accepted) {
                                     AcceptedGuardian(guardian = guardian) {
                                         viewModel.checkGuardianCodeMatches(
-                                            guardian,
-                                            guardian.status
+                                            verificationCode = "123456",
+                                            guardianAccepted = guardian.status
                                         )
                                     }
                                 } else {

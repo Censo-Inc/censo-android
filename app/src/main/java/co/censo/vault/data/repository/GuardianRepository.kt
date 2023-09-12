@@ -12,6 +12,7 @@ import co.censo.vault.data.model.AcceptGuardianshipApiRequest
 import co.censo.vault.data.model.AcceptGuardianshipApiResponse
 import co.censo.vault.data.model.GetGuardianStateApiResponse
 import co.censo.vault.data.model.RegisterGuardianApiResponse
+import co.censo.vault.data.model.Guardian
 import co.censo.vault.data.networking.ApiService
 import co.censo.vault.presentation.guardian_entrance.GuardianStatus
 import io.github.novacrypto.base58.Base58
@@ -83,7 +84,8 @@ class GuardianRepositoryImpl(
 
     override fun signVerificationCode(verificationCode: String): Pair<Base64EncodedData, Long> {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
-        val dataToSign = verificationCode.toByteArray() + currentTimeInMillis.toString().toByteArray()
+        val dataToSign =
+            Guardian.createNonceAndCodeData(time = currentTimeInMillis, code = verificationCode)
         val signature = cryptographyManager.signData(dataToSign)
         val base64EncodedData = Base64EncodedData(Base64.getEncoder().encodeToString(signature))
         return Pair(base64EncodedData, currentTimeInMillis)

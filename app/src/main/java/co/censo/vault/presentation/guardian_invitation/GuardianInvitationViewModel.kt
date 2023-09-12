@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.CryptographyManagerImpl
+import co.censo.vault.data.cryptography.ECIESManager
+import co.censo.vault.data.model.Guardian
 import co.censo.vault.data.model.GuardianStatus
 import co.censo.vault.data.model.OwnerState
 import co.censo.vault.data.model.PolicyGuardian
@@ -128,20 +130,32 @@ class GuardianInvitationViewModel @Inject constructor(
     }
 
     fun checkGuardianCodeMatches(
-        guardian: PolicyGuardian.ProspectGuardian,
-        guardianAccepted: GuardianStatus.Accepted
+        guardianAccepted: GuardianStatus.Accepted,
+        verificationCode: String
     ) {
-        //1. Decrypt signature
+        val verified = ownerRepository.checkCodeMatches(
+            verificationCode = verificationCode,
+            transportKey = guardianAccepted.guardianTransportPublicKey,
+            timeMillis = guardianAccepted.timeMillis,
+            signature = guardianAccepted.signature
+        )
 
-        //2. Grab code from it and make sure it matches
+        if (!verified) {
+            //todo: show error to user...
+        }
 
-        //3. Possibly check timestamp info
+        val encryptedShardWithGuardianKey = ownerRepository.encryptShardWithGuardianKey(
+            deviceEncryptedShard = guardianAccepted.deviceEncryptedShard,
+            transportKey = guardianAccepted.guardianTransportPublicKey
+        )
 
-        //4. Decrypt share using device key
+        if (encryptedShardWithGuardianKey != null) {
+            //todo send to API
+        } else {
+            //todo: show error to user
+        }
 
-        //5. Use guardian transport public key to encrypt shard
-
-        //6. Send shard to Censo
+        //Todo: Add API call
     }
 
     fun createPolicy() {
