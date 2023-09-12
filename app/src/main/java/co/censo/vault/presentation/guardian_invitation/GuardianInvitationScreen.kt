@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -245,7 +246,12 @@ fun GuardianInvitationScreen(
                                 val deeplink = state.guardianDeepLinks[index]
 
                                 if (guardian.status is GuardianStatus.Accepted) {
-                                    AcceptedGuardian(guardian = guardian)
+                                    AcceptedGuardian(guardian = guardian) {
+                                        viewModel.checkGuardianCodeMatches(
+                                            guardian,
+                                            guardian.status
+                                        )
+                                    }
                                 } else {
                                     InvitedGuardian(
                                         guardian = state.prospectGuardians[index],
@@ -280,6 +286,7 @@ fun GuardianInvitationScreen(
 @Composable
 fun AcceptedGuardian(
     guardian: PolicyGuardian.ProspectGuardian,
+    checkAcceptedGuardian: () -> Unit
 ) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(
@@ -292,6 +299,12 @@ fun AcceptedGuardian(
                 color = Color.White,
                 fontSize = 24.sp
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(onClick = checkAcceptedGuardian) {
+                Text(text = "Verify Guardian Code")
+            }
         }
     }
 }

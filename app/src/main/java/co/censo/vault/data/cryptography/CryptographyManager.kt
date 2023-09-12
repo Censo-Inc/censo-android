@@ -102,7 +102,7 @@ class CryptographyManagerImpl : CryptographyManager {
         )
     }
 
-    private fun verifySignature(
+    fun verifySignature(
         dataSigned: ByteArray,
         signatureToCheck: ByteArray
     ): Boolean {

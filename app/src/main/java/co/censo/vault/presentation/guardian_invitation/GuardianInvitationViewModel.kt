@@ -6,12 +6,16 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.cryptography.CryptographyManagerImpl
+import co.censo.vault.data.model.GuardianStatus
 import co.censo.vault.data.model.OwnerState
 import co.censo.vault.data.model.PolicyGuardian
 import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -121,6 +125,23 @@ class GuardianInvitationViewModel @Inject constructor(
 
             state = state.copy(inviteGuardian = inviteResponse)
         }
+    }
+
+    fun checkGuardianCodeMatches(
+        guardian: PolicyGuardian.ProspectGuardian,
+        guardianAccepted: GuardianStatus.Accepted
+    ) {
+        //1. Decrypt signature
+
+        //2. Grab code from it and make sure it matches
+
+        //3. Possibly check timestamp info
+
+        //4. Decrypt share using device key
+
+        //5. Use guardian transport public key to encrypt shard
+
+        //6. Send shard to Censo
     }
 
     fun createPolicy() {

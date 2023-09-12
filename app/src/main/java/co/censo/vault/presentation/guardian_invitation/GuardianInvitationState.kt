@@ -27,3 +27,7 @@ data class GuardianInvitationState(
 enum class GuardianInvitationStatus {
     CREATE_POLICY, POLICY_SETUP, READY
 }
+
+enum class BiometryGuardianInvitationReason {
+    REGISTER_GUARDIAN, SUBMIT_VERIFICATION_CODE
+}
