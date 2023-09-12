@@ -159,8 +159,8 @@ interface ApiService {
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/invitation")
     suspend fun inviteGuardian(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
         @Body inviteGuardianApiRequest: InviteGuardianApiRequest
     ): RetrofitResponse<ResponseBody>
 

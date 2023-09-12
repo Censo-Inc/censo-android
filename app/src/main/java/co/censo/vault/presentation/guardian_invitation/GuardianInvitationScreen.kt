@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -38,11 +39,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.vault.data.Resource
+import co.censo.vault.data.model.GuardianStatus
+import co.censo.vault.data.model.GuardianStatus.Initial.*
+import co.censo.vault.data.model.PolicyGuardian
 import co.censo.vault.presentation.owner_entrance.DisplayError
 import co.censo.vault.util.BiometricUtil
 
@@ -125,6 +130,11 @@ fun GuardianInvitationScreen(
                         errorMessage = state.bioPromptTrigger.getErrorMessage(context),
                         dismissAction = viewModel::resetBiometryTrigger,
                     ) { viewModel.triggerBiometry() }
+                } else if (state.inviteGuardian is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.inviteGuardian.getErrorMessage(context),
+                        dismissAction = viewModel::resetInviteResource,
+                    ) { viewModel.resetInviteResource() }
                 }
             }
 
@@ -229,41 +239,26 @@ fun GuardianInvitationScreen(
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            items(state.guardianDeepLinks.size) { index ->
+                            items(state.prospectGuardians.size) { index ->
 
-                                Card(modifier = Modifier.padding(8.dp), onClick = {
-                                    clipboardManager.setText(AnnotatedString(state.guardianDeepLinks[index]))
-                                }) {
-                                    Row(modifier = Modifier.background(color = Color(0xFF4059AD))) {
-                                        Text(
-                                            modifier = Modifier.padding(12.dp),
-                                            text = if (state.potentialGuardians.size > index) state.potentialGuardians[index] else "",
-                                            color = Color.White
-                                        )
+                                val guardian = state.prospectGuardians[index]
+                                val deeplink = state.guardianDeepLinks[index]
 
-                                        IconButton(onClick = {
-                                            clipboardManager.setText(AnnotatedString(state.guardianDeepLinks[index]))
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.ContentCopy,
-                                                contentDescription = "Copy icon",
-                                                tint = Color.White
+                                if (guardian.status is GuardianStatus.Accepted) {
+                                    AcceptedGuardian(guardian = guardian)
+                                } else {
+                                    InvitedGuardian(
+                                        guardian = state.prospectGuardians[index],
+                                        deepLink = deeplink,
+                                        inviteGuardian = { viewModel.inviteGuardian(guardian) },
+                                        copyDeeplink = {
+                                            clipboardManager.setText(
+                                                AnnotatedString(
+                                                    deeplink
+                                                )
                                             )
                                         }
-
-                                        IconButton(onClick = {
-                                            shareDeeplink(
-                                                deeplink = state.guardianDeepLinks[index],
-                                                context
-                                            )
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Share,
-                                                contentDescription = "Share icon",
-                                                tint = Color.White
-                                            )
-                                        }
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -281,6 +276,87 @@ fun GuardianInvitationScreen(
         }
     }
 }
+
+@Composable
+fun AcceptedGuardian(
+    guardian: PolicyGuardian.ProspectGuardian,
+) {
+    Card(modifier = Modifier.padding(8.dp)) {
+        Column(
+            modifier = Modifier
+                .background(color = Color(0xFF4059AD))
+                .padding(vertical = 12.dp, horizontal = 36.dp)
+        ) {
+            Text(
+                text = "Guardian Accepted: ${guardian.label}",
+                color = Color.White,
+                fontSize = 24.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun InvitedGuardian(
+    guardian: PolicyGuardian.ProspectGuardian,
+    deepLink: String,
+    copyDeeplink: () -> Unit,
+    inviteGuardian: () -> Unit
+) {
+    val context = LocalContext.current as FragmentActivity
+
+    when (guardian.status) {
+        else -> {
+            Card(modifier = Modifier.padding(8.dp)) {
+                Column(modifier = Modifier
+                    .background(color = Color(0xFF4059AD))
+                    .padding(vertical = 12.dp, horizontal = 36.dp)) {
+
+                    Text(text = guardian.label, color = Color.White, fontSize = 24.sp)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row {
+                        IconButton(onClick = inviteGuardian) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "invite guardian",
+                                tint = Color.White
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(24.dp))
+
+                        IconButton(onClick = copyDeeplink) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy icon",
+                                tint = Color.White
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(24.dp))
+
+
+                        IconButton(onClick = {
+                            shareDeeplink(
+                                deeplink = deepLink,
+                                context
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share icon",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 fun shareDeeplink(deeplink: String, context: Context) {
     val sendIntent: Intent = Intent().apply {

@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
 import co.censo.vault.data.model.OwnerState
+import co.censo.vault.data.model.PolicyGuardian
 import co.censo.vault.data.repository.OwnerRepository
+import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,7 +48,9 @@ class GuardianInvitationViewModel @Inject constructor(
 
                             state = state.copy(
                                 potentialGuardians = ownerState.policy.guardians.map { it.participantId.value },
-                                guardianDeepLinks = guardianDeepLinks
+                                guardianDeepLinks = guardianDeepLinks,
+                                prospectGuardians = ownerState.policy.guardians,
+                                policyIntermediatePublicKey = ownerState.policy.intermediateKey
                             )
                             GuardianInvitationStatus.POLICY_SETUP
                         }
@@ -103,6 +107,22 @@ class GuardianInvitationViewModel @Inject constructor(
         state = state.copy(bioPromptTrigger = Resource.Error())
     }
 
+    fun inviteGuardian(guardian: PolicyGuardian.ProspectGuardian) {
+        vaultLog(message = "Inviting guardian: ${guardian.label}")
+
+        state = state.copy(inviteGuardian = Resource.Loading())
+
+        viewModelScope.launch {
+            val inviteResponse = ownerRepository.inviteGuardian(
+                participantId = guardian.participantId,
+                intermediatePublicKey = state.policyIntermediatePublicKey,
+                guardian = guardian
+            )
+
+            state = state.copy(inviteGuardian = inviteResponse)
+        }
+    }
+
     fun createPolicy() {
         viewModelScope.launch {
             try {
@@ -122,6 +142,10 @@ class GuardianInvitationViewModel @Inject constructor(
                 state = state.copy(createPolicyResponse = Resource.Error())
             }
         }
+    }
+
+    fun resetInviteResource() {
+        state = state.copy(inviteGuardian = Resource.Uninitialized)
     }
 
     fun resetUserResponse() {

@@ -2,7 +2,9 @@ package co.censo.vault.data.repository
 
 import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
+import Base64EncodedData
 import GuardianProspect
+import ParticipantId
 import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.PolicySetupHelper
@@ -11,6 +13,7 @@ import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
+import co.censo.vault.data.model.InviteGuardianApiRequest
 import co.censo.vault.data.model.PolicyGuardian
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService
@@ -19,6 +22,7 @@ import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
 import co.censo.vault.util.vaultLog
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
+import java.util.Base64
 
 interface OwnerRepository {
 
@@ -34,6 +38,11 @@ interface OwnerRepository {
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
     suspend fun retrieveGuardianDeepLinks(guardians: List<PolicyGuardian.ProspectGuardian>, policyKey: Base58EncodedIntermediatePublicKey) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
+    suspend fun inviteGuardian(
+        participantId: ParticipantId,
+        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+        guardian: PolicyGuardian.ProspectGuardian
+    ): Resource<ResponseBody>
 }
 
 class OwnerRepositoryImpl(
@@ -112,6 +121,28 @@ class OwnerRepositoryImpl(
         )
 
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
+    }
+
+    override suspend fun inviteGuardian(
+        participantId: ParticipantId,
+        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+        guardian: PolicyGuardian.ProspectGuardian
+    ): Resource<ResponseBody> {
+
+        val deviceEncryptedPin = cryptographyManager.encryptData("123456")
+
+        return retrieveApiResource {
+            apiService.inviteGuardian(
+                intermediateKey = intermediatePublicKey.value,
+                participantId = participantId.value,
+                inviteGuardianApiRequest =
+                    InviteGuardianApiRequest(
+                        deviceEncryptedPin = Base64EncodedData(
+                            Base64.getEncoder().encodeToString(deviceEncryptedPin)
+                        )
+                    )
+            )
+        }
     }
 
     override suspend fun retrieveGuardianDeepLinks(
