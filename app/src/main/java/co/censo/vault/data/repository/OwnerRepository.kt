@@ -11,6 +11,7 @@ import co.censo.vault.data.cryptography.CryptographyManagerImpl
 import co.censo.vault.data.cryptography.ECIESManager
 import co.censo.vault.data.cryptography.PolicySetupHelper
 import co.censo.vault.data.cryptography.generatePartitionId
+import co.censo.vault.data.model.ConfirmShardReceiptApiRequest
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
@@ -59,6 +60,12 @@ interface OwnerRepository {
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
     ) : ByteArray?
+
+    suspend fun confirmShardReceipt(
+        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+        participantId: ParticipantId,
+        encryptedShard: Base64EncodedData
+    ) : Resource<ResponseBody>
 }
 
 class OwnerRepositoryImpl(
@@ -204,6 +211,20 @@ class OwnerRepositoryImpl(
             )
         } catch (e: Exception) {
             null
+        }
+    }
+
+    override suspend fun confirmShardReceipt(
+        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+        participantId: ParticipantId,
+        encryptedShard: Base64EncodedData
+    ): Resource<ResponseBody> {
+        return retrieveApiResource {
+            apiService.confirmShardReceipt(
+                intermediateKey = intermediatePublicKey.value,
+                participantId = participantId.value,
+                confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
+            )
         }
     }
 

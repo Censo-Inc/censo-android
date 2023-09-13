@@ -116,7 +116,12 @@ fun GuardianInvitationScreen(
             }
 
             state.asyncError -> {
-                if (state.userResponse is Resource.Error) {
+                if (state.incorrectPinCode) {
+                    DisplayError(
+                        errorMessage = "Pin code did not match. Please try again.",
+                        dismissAction = viewModel::resetConfirmShardReceipt,
+                    ) { viewModel.resetConfirmShardReceipt() }
+                } else if (state.userResponse is Resource.Error) {
                     DisplayError(
                         errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = viewModel::resetUserResponse,
@@ -131,9 +136,9 @@ fun GuardianInvitationScreen(
                         errorMessage = state.bioPromptTrigger.getErrorMessage(context),
                         dismissAction = viewModel::resetBiometryTrigger,
                     ) { viewModel.triggerBiometry() }
-                } else if (state.inviteGuardian is Resource.Error) {
+                } else if (state.inviteGuardianResponse is Resource.Error) {
                     DisplayError(
-                        errorMessage = state.inviteGuardian.getErrorMessage(context),
+                        errorMessage = state.inviteGuardianResponse.getErrorMessage(context),
                         dismissAction = viewModel::resetInviteResource,
                     ) { viewModel.resetInviteResource() }
                 }
@@ -249,7 +254,8 @@ fun GuardianInvitationScreen(
                                     AcceptedGuardian(guardian = guardian) {
                                         viewModel.checkGuardianCodeMatches(
                                             verificationCode = "123456",
-                                            guardianAccepted = guardian.status
+                                            guardianAccepted = guardian.status,
+                                            guardian = guardian
                                         )
                                     }
                                 } else {
