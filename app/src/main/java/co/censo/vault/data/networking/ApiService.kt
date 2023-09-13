@@ -182,15 +182,15 @@ interface ApiService {
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")
     suspend fun confirmShardReceipt(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
         @Body confirmShardReceiptApiRequest: ConfirmShardReceiptApiRequest
     ): RetrofitResponse<ResponseBody>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/confirmation")
     suspend fun confirmGuardianship(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
         @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
     ): RetrofitResponse<ResponseBody>
 

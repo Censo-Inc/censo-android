@@ -31,7 +31,13 @@ data class Guardian(
     val encryptedShard: Base64EncodedData,
     val signature: Base64EncodedData?,
     val timeMillis: Long?,
-)
+) {
+    companion object {
+        fun createNonceAndCodeData(time: Long, code: String) : ByteArray {
+            return code.toByteArray() + time.toString().toByteArray()
+        }
+    }
+}
 
 @Serializable
 data class GetPolicyApiResponse(

@@ -72,7 +72,8 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val verified = verifySignature(
             dataSigned = dataToSign,
-            signatureToCheck = signedData
+            signatureToCheck = signedData,
+            publicKey = getPublicKeyFromDeviceKey()
         )
 
         if (!verified) {
@@ -102,12 +103,12 @@ class CryptographyManagerImpl : CryptographyManager {
         )
     }
 
-    private fun verifySignature(
+    fun verifySignature(
         dataSigned: ByteArray,
-        signatureToCheck: ByteArray
+        signatureToCheck: ByteArray,
+        publicKey: PublicKey
     ): Boolean {
         val signature = Signature.getInstance(SHA_256_ECDSA)
-        val publicKey = getPublicKeyFromDeviceKey()
         signature.initVerify(publicKey)
         signature.update(dataSigned)
         return signature.verify(signatureToCheck)

@@ -1,17 +1,20 @@
 package co.censo.vault.presentation.guardian_invitation
 
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.Resource
+import co.censo.vault.data.model.GuardianStatus
 import co.censo.vault.data.model.OwnerState
 import co.censo.vault.data.model.PolicyGuardian
 import co.censo.vault.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +46,8 @@ class GuardianInvitationViewModel @Inject constructor(
                     when (ownerState) {
                         is OwnerState.PolicySetup -> {
                             val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(
-                                ownerState.policy.guardians, policyKey = ownerState.policy.intermediateKey
+                                ownerState.policy.guardians,
+                                policyKey = ownerState.policy.intermediateKey
                             )
 
                             state = state.copy(
@@ -110,7 +114,7 @@ class GuardianInvitationViewModel @Inject constructor(
     fun inviteGuardian(guardian: PolicyGuardian.ProspectGuardian) {
         vaultLog(message = "Inviting guardian: ${guardian.label}")
 
-        state = state.copy(inviteGuardian = Resource.Loading())
+        state = state.copy(inviteGuardianResponse = Resource.Loading())
 
         viewModelScope.launch {
             val inviteResponse = ownerRepository.inviteGuardian(
@@ -119,7 +123,56 @@ class GuardianInvitationViewModel @Inject constructor(
                 guardian = guardian
             )
 
-            state = state.copy(inviteGuardian = inviteResponse)
+            state = state.copy(inviteGuardianResponse = inviteResponse)
+        }
+    }
+
+    fun checkGuardianCodeMatches(
+        guardian: PolicyGuardian.ProspectGuardian,
+        guardianAccepted: GuardianStatus.Accepted,
+        verificationCode: String
+    ) {
+        state = state.copy(confirmShardReceiptResponse = Resource.Uninitialized)
+
+        val verified = ownerRepository.checkCodeMatches(
+            verificationCode = verificationCode,
+            transportKey = guardianAccepted.guardianTransportPublicKey,
+            timeMillis = guardianAccepted.timeMillis,
+            signature = guardianAccepted.signature
+        )
+
+        if (!verified) {
+            state = state.copy(
+                incorrectPinCode = true,
+                confirmShardReceiptResponse = Resource.Uninitialized
+            )
+        }
+
+        val encryptedShardWithGuardianKey = ownerRepository.encryptShardWithGuardianKey(
+            deviceEncryptedShard = guardianAccepted.deviceEncryptedShard,
+            transportKey = guardianAccepted.guardianTransportPublicKey
+        )
+
+        if (encryptedShardWithGuardianKey != null) {
+
+            viewModelScope.launch {
+                val confirmShardReceiptApiResponse =
+                    ownerRepository.confirmShardReceipt(
+                        intermediatePublicKey = state.policyIntermediatePublicKey,
+                        participantId = guardian.participantId,
+                        encryptedShard = Base64EncodedData(
+                            Base64.getEncoder().encodeToString(encryptedShardWithGuardianKey)
+                        )
+                    )
+
+                state = state.copy(confirmShardReceiptResponse = confirmShardReceiptApiResponse)
+            }
+        } else {
+            state = state.copy(
+                confirmShardReceiptResponse = Resource.Error(
+                    exception = Exception("Failed to encrypt shard with guardian device key")
+                )
+            )
         }
     }
 
@@ -144,8 +197,15 @@ class GuardianInvitationViewModel @Inject constructor(
         }
     }
 
+    fun resetConfirmShardReceipt() {
+        state = state.copy(
+            confirmShardReceiptResponse = Resource.Uninitialized,
+            incorrectPinCode = false
+        )
+    }
+
     fun resetInviteResource() {
-        state = state.copy(inviteGuardian = Resource.Uninitialized)
+        state = state.copy(inviteGuardianResponse = Resource.Uninitialized)
     }
 
     fun resetUserResponse() {
