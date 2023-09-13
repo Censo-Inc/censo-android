@@ -14,11 +14,13 @@ import co.censo.vault.data.Header
 import co.censo.vault.data.HeadersSerializer
 import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.model.AcceptGuardianshipApiRequest
+import co.censo.vault.data.model.AcceptGuardianshipApiResponse
 import co.censo.vault.data.model.ConfirmGuardianshipApiRequest
 import co.censo.vault.data.model.ConfirmShardReceiptApiRequest
 import co.censo.vault.data.model.CreatePolicyApiRequest
 import co.censo.vault.data.model.CreateUserApiRequest
 import co.censo.vault.data.model.CreateUserApiResponse
+import co.censo.vault.data.model.GetGuardianStateApiResponse
 import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.vault.data.model.GetPoliciesApiResponse
@@ -26,6 +28,7 @@ import co.censo.vault.data.model.GetPolicyApiResponse
 import co.censo.vault.data.model.GetUserApiResponse
 import co.censo.vault.data.model.InviteGuardianApiRequest
 import co.censo.vault.data.model.Policy
+import co.censo.vault.data.model.RegisterGuardianApiResponse
 import co.censo.vault.data.model.UpdatePolicyApiRequest
 import co.censo.vault.data.model.VerifyContactApiRequest
 import co.censo.vault.data.networking.ApiService.Companion.APP_VERSION_HEADER
@@ -155,7 +158,7 @@ interface ApiService {
     suspend fun registerGuardian(
         @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
         @Path(value = PARTICIPANT_ID) participantId: String,
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<RegisterGuardianApiResponse>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/invitation")
     suspend fun inviteGuardian(
@@ -169,7 +172,7 @@ interface ApiService {
         @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
         @Path(value = PARTICIPANT_ID) participantId: String,
         @Body acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<AcceptGuardianshipApiResponse>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/decline")
     suspend fun declineGuardianship(
@@ -193,9 +196,9 @@ interface ApiService {
 
     @GET("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}")
     suspend fun guardian(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Path(value = PARTICIPANT_ID) participantId: ParticipantId,
-    ): RetrofitResponse<ResponseBody>
+        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+        @Path(value = PARTICIPANT_ID) participantId: String,
+    ): RetrofitResponse<GetGuardianStateApiResponse>
 
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>

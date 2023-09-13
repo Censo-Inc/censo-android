@@ -9,6 +9,9 @@ import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.cryptography.ECIESManager
 import co.censo.vault.data.cryptography.sha256
 import co.censo.vault.data.model.AcceptGuardianshipApiRequest
+import co.censo.vault.data.model.AcceptGuardianshipApiResponse
+import co.censo.vault.data.model.GetGuardianStateApiResponse
+import co.censo.vault.data.model.RegisterGuardianApiResponse
 import co.censo.vault.data.networking.ApiService
 import co.censo.vault.presentation.guardian_entrance.GuardianStatus
 import io.github.novacrypto.base58.Base58
@@ -21,18 +24,18 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import java.util.Base64
 
 interface GuardianRepository {
-    suspend fun registerGuardian(intermediateKey: Base58EncodedPublicKey, participantId: ParticipantId) : Resource<ResponseBody>
+    suspend fun registerGuardian(intermediateKey: Base58EncodedPublicKey, participantId: ParticipantId) : Resource<RegisterGuardianApiResponse>
     suspend fun encryptGuardianData(verificationCode: String, ownerDevicePublicKey: Base58EncodedDevicePublicKey) : Pair<ByteArray, AcceptGuardianData>
     fun signVerificationCode(verificationCode: String) : Pair<Base64EncodedData, Long>
     suspend fun getGuardian(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId
-    ): Resource<GuardianStatus>
+    ): Resource<GetGuardianStateApiResponse>
     suspend fun acceptGuardianship(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId,
         acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
-    ): Resource<ResponseBody>
+    ): Resource<AcceptGuardianshipApiResponse>
     suspend fun declineGuardianship(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId,
@@ -46,7 +49,7 @@ class GuardianRepositoryImpl(
     override suspend fun registerGuardian(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId
-    ): Resource<ResponseBody> {
+    ): Resource<RegisterGuardianApiResponse> {
         return retrieveApiResource { apiService.registerGuardian(intermediateKey.value, participantId.value) }
     }
 
@@ -89,21 +92,18 @@ class GuardianRepositoryImpl(
     override suspend fun getGuardian(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId,
-    ): Resource<GuardianStatus> {
-
-        return Resource.Success(GuardianStatus.REGISTER_GUARDIAN)
-
-//        return retrieveApiResource { apiService.guardian(
-//            intermediateKey = intermediateKey,
-//            participantId = participantId,
-//        ) }
+    ): Resource<GetGuardianStateApiResponse> {
+        return retrieveApiResource { apiService.guardian(
+            intermediateKey = intermediateKey.value,
+            participantId = participantId.value,
+        ) }
     }
 
     override suspend fun acceptGuardianship(
         intermediateKey: Base58EncodedPublicKey,
         participantId: ParticipantId,
         acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
-    ): Resource<ResponseBody> {
+    ): Resource<AcceptGuardianshipApiResponse> {
         return retrieveApiResource { apiService.acceptGuardianship(
             intermediateKey = intermediateKey.value,
             participantId = participantId.value,

@@ -60,10 +60,13 @@
     <string name="accept_guardianship_error">Accept Guardianship Error</string>
     <string name="successful_biometry_authentication_is_required_to_use_this_app">Successful biometry authentication is required to use this app</string>
     <string name="register">Register</string>
-    <string name="you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship">You have been invited to Vault as a guardian,\ndo you accept guardianship?</string>
+    <string name="you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship">You have been invited to Vault as a guardian,\nto accept guardianship please enter the verification code</string>
     <string name="decline">Decline</string>
     <string name="declined_guardianship">You have declined guardianship, to restart this process have the owner of the policy send you a new invite</string>
     <string name="guardian_setup_complete">Guardian setup complete, no further action required at this time</string>
     <string name="received_shard_from_owner">Received shard from owner, encrypting shard and updating policy data...</string>
+    <string name="accept_guardianship">Accept Guardianship</string>
+    <string name="decline_guardianship_error">Decline Guardianship Error</string>
+    <string name="to_decline_guardianship_tap_the_button_below">To decline Guardianship, tap the button below</string>
 
 </resources>
