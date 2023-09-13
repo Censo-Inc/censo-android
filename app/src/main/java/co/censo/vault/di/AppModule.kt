@@ -76,7 +76,6 @@ object AppModule {
     @Provides
     fun providesFacetecRepository(
         api: ApiService,
-        @ApplicationContext applicationContext: Context
     ): FacetecRepository {
         return FacetecRepositoryImpl(api)
     }

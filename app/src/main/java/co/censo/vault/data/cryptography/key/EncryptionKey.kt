@@ -2,6 +2,8 @@ package co.censo.vault.data.cryptography.key
 
 import Base58EncodedDevicePublicKey
 import Base58EncodedPublicKey
+import ECHelper
+import ECPublicKeyDecoder
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import co.censo.vault.BuildConfig
@@ -49,7 +51,7 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
     }
 
     override fun publicKeyUncompressed() =
-        ECIESManager.extractUncompressedPublicKey(key.public.encoded)
+        ECPublicKeyDecoder.extractUncompressedPublicKey(key.public.encoded)
 
     override fun privateKeyRaw(): ByteArray =
         (key.private as ECPrivateKey).s.toByteArray()
@@ -71,14 +73,14 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
 
     companion object {
         fun generateFromPrivateKeyRaw(raw: BigInteger): EncryptionKey {
-            val privateKey = ECIESManager.getPrivateKeyFromECBigIntAndCurve(raw) as ECPrivateKey
-            val publicKey = ECIESManager.getPublicKeyFromPrivateKey(privateKey)
+            val privateKey = ECHelper.getPrivateKeyFromECBigIntAndCurve(raw) as ECPrivateKey
+            val publicKey = ECPublicKeyDecoder.getPublicKeyFromPrivateKey(privateKey)
 
             return EncryptionKey(KeyPair(publicKey, privateKey))
         }
 
         fun generateRandomKey(): EncryptionKey =
-            EncryptionKey(ECIESManager.createSecp256R1KeyPair())
+            EncryptionKey(ECHelper.createECKeyPair())
     }
 
 }
@@ -101,7 +103,7 @@ class InternalDeviceKey() : VaultKey {
 
     override fun publicKeyUncompressed(): ByteArray {
         val publicKey = keystoreHelper.getPublicKeyFromDeviceKey()
-        return ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
+        return ECPublicKeyDecoder.extractUncompressedPublicKey(publicKey.encoded)
     }
 
     override fun publicExternalRepresentation(): Base58EncodedPublicKey {
@@ -115,7 +117,7 @@ class InternalDeviceKey() : VaultKey {
     override fun encrypt(data: ByteArray): ByteArray {
         val publicKey = keystoreHelper.getPublicKeyFromDeviceKey()
 
-        val compressedKey = ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
+        val compressedKey = ECPublicKeyDecoder.extractUncompressedPublicKey(publicKey.encoded)
 
         return ECIESManager.encryptMessage(
             dataToEncrypt = data,
@@ -268,7 +270,7 @@ class InternalDeviceKey() : VaultKey {
 class ExternalDeviceKey(private val publicKey: PublicKey) : VaultKey {
 
     override fun publicKeyUncompressed() =
-        ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
+        ECPublicKeyDecoder.extractUncompressedPublicKey(publicKey.encoded)
 
     override fun publicExternalRepresentation(): Base58EncodedPublicKey {
         return Base58EncodedDevicePublicKey(Base58.base58Encode(publicKeyUncompressed()))

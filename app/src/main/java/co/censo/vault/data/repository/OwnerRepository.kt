@@ -3,6 +3,7 @@ package co.censo.vault.data.repository
 import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
+import ECPublicKeyDecoder
 import GuardianProspect
 import ParticipantId
 import co.censo.vault.data.Resource
@@ -207,7 +208,7 @@ class OwnerRepositoryImpl(
 
             ECIESManager.encryptMessage(
                 dataToEncrypt = decryptedShard,
-                publicKeyBytes = ECIESManager.extractUncompressedPublicKey(
+                publicKeyBytes = ECPublicKeyDecoder.extractUncompressedPublicKey(
                     guardianDevicePublicKey.encoded
                 )
             )
