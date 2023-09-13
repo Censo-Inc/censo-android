@@ -5,11 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.ContactType
-import co.censo.vault.data.model.CreateUserApiRequest
-import co.censo.vault.data.repository.BaseRepository.Companion.HTTP_404
-import co.censo.vault.data.repository.OwnerRepository
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.ContactType
+import co.censo.shared.data.model.CreateUserApiRequest
+import co.censo.shared.data.repository.BaseRepository.Companion.HTTP_404
+import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -225,7 +225,7 @@ class OwnerEntranceViewModel @Inject constructor(
                         return@launch
                     }
 
-                    if (user.data.contacts.isEmpty()) {
+                    if (user.data!!.contacts.isEmpty()) {
                         state = state.copy(
                             userStatus = UserStatus.CONTACT_UNVERIFIED,
                             userResource = user
@@ -233,9 +233,9 @@ class OwnerEntranceViewModel @Inject constructor(
                         return@launch
                     }
 
-                    if (user.data.contacts.any { it.verified }) {
+                    if (user.data!!.contacts.any { it.verified }) {
                         val nextScreen =
-                            if (user.data.biometricVerificationRequired) Screen.FacetecAuthRoute.route else Screen.HomeRoute.route
+                            if (user.data!!.biometricVerificationRequired) Screen.FacetecAuthRoute.route else Screen.HomeRoute.route
 
                         state =
                             state.copy(

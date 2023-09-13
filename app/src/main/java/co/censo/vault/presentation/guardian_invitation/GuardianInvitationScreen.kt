@@ -45,10 +45,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.GuardianStatus
-import co.censo.vault.data.model.GuardianStatus.Initial.*
-import co.censo.vault.data.model.PolicyGuardian
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.GuardianStatus.Initial.*
+import co.censo.shared.data.model.PolicyGuardian
 import co.censo.vault.presentation.owner_entrance.DisplayError
 import co.censo.vault.util.BiometricUtil
 
@@ -254,7 +254,7 @@ fun GuardianInvitationScreen(
                                     AcceptedGuardian(guardian = guardian) {
                                         viewModel.checkGuardianCodeMatches(
                                             verificationCode = "123456",
-                                            guardianAccepted = guardian.status,
+                                            guardianAccepted = guardian.status as GuardianStatus.Accepted,
                                             guardian = guardian
                                         )
                                     }

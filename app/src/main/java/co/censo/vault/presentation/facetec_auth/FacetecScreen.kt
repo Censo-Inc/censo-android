@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.vault.data.Resource
+import co.censo.shared.data.Resource
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.util.vaultLog
 import com.facetec.sdk.FaceTecSDK

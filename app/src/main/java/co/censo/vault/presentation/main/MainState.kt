@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.main
 
-import co.censo.vault.data.Resource
+import co.censo.shared.data.Resource
 import co.censo.vault.util.BioPromptReason
 import co.censo.vault.util.BiometricUtil
 

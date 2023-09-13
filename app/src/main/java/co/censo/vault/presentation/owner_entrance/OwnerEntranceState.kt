@@ -1,10 +1,10 @@
 package co.censo.vault.presentation.owner_entrance
 
 import android.util.Patterns
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.ContactType
-import co.censo.vault.data.model.CreateUserApiResponse
-import co.censo.vault.data.model.GetUserApiResponse
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.ContactType
+import co.censo.shared.data.model.CreateUserApiResponse
+import co.censo.shared.data.model.GetUserApiResponse
 import okhttp3.ResponseBody
 
 data class OwnerEntranceState(

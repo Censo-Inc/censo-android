@@ -1,9 +1,9 @@
 package co.censo.vault.presentation.guardian_invitation
 
 import Base58EncodedIntermediatePublicKey
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.GetUserApiResponse
-import co.censo.vault.data.model.PolicyGuardian
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.PolicyGuardian
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationViewModel.Companion.MIN_GUARDIAN_LIMIT
 import okhttp3.ResponseBody
 

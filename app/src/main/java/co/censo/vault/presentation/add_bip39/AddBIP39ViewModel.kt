@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import co.censo.vault.data.PhraseValidator
-import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.key.InternalDeviceKey
-import co.censo.vault.data.storage.EncryptedBIP39
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.storage.EncryptedBIP39
+import co.censo.shared.data.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json

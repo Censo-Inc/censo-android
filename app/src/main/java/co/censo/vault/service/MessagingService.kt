@@ -9,10 +9,9 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
+import co.censo.shared.data.networking.PushBody
 import co.censo.vault.MainActivity
 import co.censo.vault.R
-import co.censo.vault.data.Resource
-import co.censo.vault.data.repository.PushBody
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
 import co.censo.vault.presentation.home.Screen
@@ -21,7 +20,6 @@ import co.censo.vault.service.MessagingService.Companion.DEFAULT_BODY
 import co.censo.vault.service.MessagingService.Companion.DEFAULT_TITLE
 import co.censo.vault.service.MessagingService.Companion.PUSH_TYPE_KEY
 import co.censo.vault.service.MessagingService.Companion.TITLE_KEY
-import co.censo.vault.util.vaultLog
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint

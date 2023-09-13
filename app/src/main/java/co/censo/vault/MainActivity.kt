@@ -1,10 +1,7 @@
 package co.censo.vault
 
-import Base58EncodedDevicePublicKey
-import Base58EncodedIntermediatePublicKey
 import co.censo.vault.util.BiometricUtil
 import BlockingUI
-import ParticipantId
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
@@ -36,23 +33,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
-import co.censo.vault.data.Resource
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.Resource
+import co.censo.shared.data.networking.AuthHeadersListener
+import co.censo.shared.data.networking.AuthHeadersState
+import co.censo.shared.data.storage.Storage
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.facetec_auth.FacetecAuthScreen
-import co.censo.vault.presentation.guardian_entrance.GuardianEntranceArgs
-import co.censo.vault.presentation.guardian_entrance.GuardianEntranceScreen
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
-import co.censo.vault.presentation.home.Screen.Companion.DL_DEVICE_PUBLIC_KEY_KEY
-import co.censo.vault.presentation.home.Screen.Companion.DL_INTERMEDIATE_KEY_KEY
-import co.censo.vault.presentation.home.Screen.Companion.DL_PARTICIPANT_ID_KEY
-import co.censo.vault.presentation.home.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
-import co.censo.vault.presentation.home.Screen.Companion.VAULT_GUARDIAN_URI
 import co.censo.vault.presentation.main.MainViewModel
 import co.censo.vault.presentation.owner_entrance.OwnerEntranceScreen
 import co.censo.vault.ui.theme.VaultTheme
@@ -182,29 +173,6 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = Screen.OwnerEntrance.route) {
-            composable(
-                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INTERMEDIATE_KEY_KEY={$DL_INTERMEDIATE_KEY_KEY}?$DL_DEVICE_PUBLIC_KEY_KEY={$DL_DEVICE_PUBLIC_KEY_KEY}?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
-                deepLinks = listOf(navDeepLink {
-                    uriPattern =
-                        "$VAULT_GUARDIAN_URI{$DL_INTERMEDIATE_KEY_KEY}/{$DL_DEVICE_PUBLIC_KEY_KEY}/{$DL_PARTICIPANT_ID_KEY}"
-                }),
-            ) { backStackEntry ->
-                val intermediateKey = backStackEntry.arguments?.getString(
-                    DL_INTERMEDIATE_KEY_KEY
-                )
-                val ownerDevicePublicKey = backStackEntry.arguments?.getString(
-                    DL_DEVICE_PUBLIC_KEY_KEY
-                )
-                val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY)
-
-                val args = GuardianEntranceArgs(
-                    participantId = ParticipantId(participantId ?: ""),
-                    ownerDevicePublicKey = Base58EncodedDevicePublicKey(ownerDevicePublicKey ?: ""),
-                    intermediateKey = Base58EncodedIntermediatePublicKey(intermediateKey ?: "")
-                )
-
-                GuardianEntranceScreen(args = args)
-            }
             composable(route = Screen.OwnerEntrance.route) {
                 OwnerEntranceScreen(navController = navController)
             }
@@ -254,12 +222,4 @@ class MainActivity : FragmentActivity() {
         )
     }
 
-}
-
-interface AuthHeadersListener {
-    fun onAuthHeadersStateChanged(authHeadersState: AuthHeadersState)
-}
-
-enum class AuthHeadersState {
-    MISSING, VALID
 }

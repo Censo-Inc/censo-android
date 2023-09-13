@@ -4,9 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import co.censo.vault.data.Resource
+import co.censo.shared.data.Resource
 import co.censo.vault.data.repository.PushRepository
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

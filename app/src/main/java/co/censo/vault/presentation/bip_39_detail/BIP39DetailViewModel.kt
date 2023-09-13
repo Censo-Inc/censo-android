@@ -4,11 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.CHANGE_AMOUNT
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.FIRST_WORD_INDEX
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.serialization.json.Json
 import java.util.Base64

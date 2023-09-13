@@ -2,11 +2,11 @@ package co.censo.vault.data.repository
 
 import android.app.NotificationManager
 import android.content.Context
-import android.provider.Settings
-import co.censo.vault.data.Resource
-import co.censo.vault.data.networking.ApiService
-import co.censo.vault.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
-import co.censo.vault.data.storage.SharedPrefsStorage
+import co.censo.shared.data.Resource
+import co.censo.shared.data.networking.ApiService
+import co.censo.shared.data.networking.PushBody
+import co.censo.shared.data.repository.BaseRepository
+import co.censo.shared.data.storage.SharedPrefsStorage
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.Serializable
@@ -58,8 +58,3 @@ class PushRepositoryImpl @Inject constructor(
         notificationManager.cancelAll()
     }
 }
-
-@Serializable
-data class PushBody(
-    val deviceType: String, val token: String
-)

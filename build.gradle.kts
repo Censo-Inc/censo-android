@@ -5,6 +5,7 @@ plugins {
     id("com.google.gms.google-services") version "4.3.15" apply false
     id("com.google.firebase.appdistribution") version "4.0.0" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10" apply false
+    id("com.android.library") version "8.1.0" apply false
 
 }
 

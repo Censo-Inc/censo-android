@@ -1,11 +1,11 @@
 package co.censo.vault.data.repository
 
 import InitBiometryVerificationApiResponse
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.SubmitBiometryVerificationApiRequest
-import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
-import co.censo.vault.data.networking.ApiService
-import com.facetec.sdk.FaceTecSessionResult
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.SubmitBiometryVerificationApiRequest
+import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
+import co.censo.shared.data.networking.ApiService
+import co.censo.shared.data.repository.BaseRepository
 
 interface FacetecRepository {
     suspend fun startFacetecBiometry(): Resource<InitBiometryVerificationApiResponse>

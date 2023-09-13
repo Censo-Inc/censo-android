@@ -1,9 +1,9 @@
 package co.censo.vault.presentation.facetec_auth
 
 import InitBiometryVerificationApiResponse
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.SubmitBiometryVerificationApiResponse
-import co.censo.vault.data.model.GetUserApiResponse
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
+import co.censo.shared.data.model.GetUserApiResponse
 
 data class FacetecAuthState(
     //Async State

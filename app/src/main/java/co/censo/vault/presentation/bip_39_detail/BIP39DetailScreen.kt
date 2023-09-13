@@ -40,7 +40,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.vault.data.Resource
+import co.censo.shared.data.Resource
 import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.components.IndexedPhraseWord
 import co.censo.vault.presentation.components.PhraseUICompanion

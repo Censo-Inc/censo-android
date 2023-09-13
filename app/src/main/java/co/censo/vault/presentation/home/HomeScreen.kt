@@ -54,7 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.vault.data.Resource
+import co.censo.shared.data.Resource
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.ui.theme.DialogMainBackground
 import co.censo.vault.ui.theme.TextBlack

@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.vault.data.Resource
-import co.censo.vault.data.model.GuardianStatus
-import co.censo.vault.data.model.OwnerState
-import co.censo.vault.data.model.PolicyGuardian
-import co.censo.vault.data.repository.OwnerRepository
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.PolicyGuardian
+import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -42,7 +42,7 @@ class GuardianInvitationViewModel @Inject constructor(
 
             if (userResponse is Resource.Success) {
                 val guardianInvitationStatus = if (userResponse.data?.ownerState != null) {
-                    val ownerState = userResponse.data.ownerState
+                    val ownerState : OwnerState = userResponse.data!!.ownerState as OwnerState
                     when (ownerState) {
                         is OwnerState.PolicySetup -> {
                             val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(

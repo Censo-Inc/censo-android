@@ -6,9 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.vault.BuildConfig
-import co.censo.vault.data.Resource
+import co.censo.shared.data.Resource
 import co.censo.vault.data.repository.FacetecRepository
-import co.censo.vault.data.repository.OwnerRepository
+import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
 import com.facetec.sdk.FaceTecFaceScanProcessor
 import com.facetec.sdk.FaceTecFaceScanResultCallback
@@ -141,7 +141,7 @@ class FacetecAuthViewModel @Inject constructor(
                 vaultLog(message = "Success sending facetec data to backend")
 
                 submitResultResponse.data?.scanResultBlob?.let {
-                    scanResultCallback?.proceedToNextStep(submitResultResponse.data?.scanResultBlob)
+                    scanResultCallback?.proceedToNextStep(it)
                 } ?: scanResultCallback?.succeed()
 
             } else if (submitResultResponse is Resource.Error) {
