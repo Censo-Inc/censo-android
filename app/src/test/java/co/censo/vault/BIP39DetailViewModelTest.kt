@@ -1,7 +1,7 @@
 package co.censo.vault
 
-import co.censo.vault.data.cryptography.CryptographyManager
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailViewModel
 import co.censo.vault.data.storage.EncryptedBIP39
 import co.censo.vault.data.storage.Storage
@@ -27,7 +27,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     lateinit var storage: Storage
 
     @Mock
-    lateinit var cryptographyManager: CryptographyManager
+    lateinit var deviceKey: InternalDeviceKey
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -67,10 +67,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        bip39DetailViewModel = BIP39DetailViewModel(
-            storage = storage,
-            cryptographyManager = cryptographyManager
-        )
+        bip39DetailViewModel = BIP39DetailViewModel(storage = storage, deviceKey = deviceKey)
     }
 
     @Test
@@ -98,7 +95,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     fun `on biometry approval we retrieve the bip 39 phrase`() = runTest {
         whenever(storage.retrieveBIP39Phrases()).then { savedPhrases }
         whenever(
-            cryptographyManager.decryptData(
+            deviceKey.decrypt(
                 Base64.getDecoder().decode(test1EncryptedBIP39)
             )
         ).then {
@@ -117,7 +114,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     fun `on biometry approval we can retrieve 12 word phrase`() = runTest {
         whenever(storage.retrieveBIP39Phrases()).then { savedPhrases }
         whenever(
-            cryptographyManager.decryptData(
+            deviceKey.decrypt(
                 Base64.getDecoder().decode(test2EncryptedBIP39)
             )
         ).then {
@@ -136,7 +133,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     fun `we can change index forward and backward when traversing a 24 word bip 39 phrase`() {
         whenever(storage.retrieveBIP39Phrases()).then { savedPhrases }
         whenever(
-            cryptographyManager.decryptData(
+            deviceKey.decrypt(
                 Base64.getDecoder().decode(test1EncryptedBIP39)
             )
         ).then {
@@ -181,7 +178,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     fun `we can change index forward and backward when traversing a 12 word bip 39 phrase`() {
         whenever(storage.retrieveBIP39Phrases()).then { savedPhrases }
         whenever(
-            cryptographyManager.decryptData(
+            deviceKey.decrypt(
                 Base64.getDecoder().decode(test2EncryptedBIP39)
             )
         ).then {

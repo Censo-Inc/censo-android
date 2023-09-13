@@ -12,7 +12,7 @@ import co.censo.vault.AuthHeadersState
 import co.censo.vault.BuildConfig
 import co.censo.vault.data.Header
 import co.censo.vault.data.HeadersSerializer
-import co.censo.vault.data.cryptography.CryptographyManager
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.data.model.AcceptGuardianshipApiRequest
 import co.censo.vault.data.model.AcceptGuardianshipApiResponse
 import co.censo.vault.data.model.ConfirmGuardianshipApiRequest
@@ -85,11 +85,11 @@ interface ApiService {
                 Header(TIMESTAMP_HEADER, iso8601FormattedTimestamp)
             )
 
-        fun create(cryptographyManager: CryptographyManager, storage: Storage, context: Context): ApiService {
+        fun create(storage: Storage, context: Context): ApiService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(ConnectivityInterceptor(context))
                 .addInterceptor(AnalyticsInterceptor())
-                .addInterceptor(AuthInterceptor(cryptographyManager, storage))
+                .addInterceptor(AuthInterceptor(storage))
                 .connectTimeout(Duration.ofSeconds(180))
                 .readTimeout(Duration.ofSeconds(180))
                 .callTimeout(Duration.ofSeconds(180))
@@ -235,10 +235,7 @@ class AnalyticsInterceptor : Interceptor {
         )
 }
 
-class AuthInterceptor(
-    private val cryptographyManager: CryptographyManager,
-    private val storage: Storage
-) : Interceptor {
+class AuthInterceptor(private val storage: Storage) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val now = Clock.System.now()
@@ -272,7 +269,7 @@ class AuthInterceptor(
         return if (cachedHeaders == null || cachedHeaders.isExpired(now)) {
             storage.clearReadHeaders()
             try {
-                cachedReadCallHeaders = cryptographyManager.createAuthHeaders(now)
+                cachedReadCallHeaders = InternalDeviceKey().createAuthHeaders(now)
                 cachedReadCallHeaders?.let { storage.saveReadHeaders(it) }
                 storage.setAuthHeadersState(AuthHeadersState.VALID)
                 cachedReadCallHeaders?.headers

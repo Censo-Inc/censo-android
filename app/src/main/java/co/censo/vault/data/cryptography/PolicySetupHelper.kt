@@ -6,6 +6,8 @@ import Base64EncodedData
 import GuardianInvite
 import GuardianProspect
 import ParticipantId
+import co.censo.vault.data.cryptography.key.EncryptionKey
+import java.math.BigInteger
 import java.security.PrivateKey
 import java.util.Base64
 
@@ -32,12 +34,12 @@ class PolicySetupHelper(
 
             val encryptedMasterKey = Base64.getEncoder().encodeToString(
                 intermediateEncryptionKey.encrypt(
-                    masterEncryptionKey.privateKeyRaw().toByteArray()
+                    masterEncryptionKey.privateKeyRaw()
                 )
             )
 
             val sharer = SecretSharer(
-                secret = intermediateEncryptionKey.privateKeyRaw(),
+                secret = BigInteger(intermediateEncryptionKey.privateKeyRaw()),
                 threshold = threshold,
                 participants = guardians.map { it.participantId }
             )
@@ -59,8 +61,8 @@ class PolicySetupHelper(
             return PolicySetupHelper(
                 shards = sharer.shards,
                 deviceKey = deviceKey,
-                masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation()),
-                intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation()),
+                masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value),
+                intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation().value),
                 encryptedMasterKey = Base64EncodedData(encryptedMasterKey),
                 threshold = threshold,
                 guardianInvites = guardianInvites

@@ -1,5 +1,7 @@
 package co.censo.vault
 
+import ECHelper
+import ECPublicKeyDecoder
 import co.censo.vault.data.cryptography.ECIESManager
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -12,8 +14,8 @@ import org.junit.Assert.assertEquals
 class ECIESTest {
     @Test
     fun encryptAndDecryptFlow() {
-        val keyPair = createSecp256R1KeyPair()
-        val publicKey = ECIESManager.extractUncompressedPublicKey(keyPair.public.encoded)
+        val keyPair = ECHelper.createECKeyPair()
+        val publicKey = ECPublicKeyDecoder.extractUncompressedPublicKey(keyPair.public.encoded)
 
         val plainTextValues = listOf(
             "Whatsupppppppppp",
@@ -39,10 +41,10 @@ class ECIESTest {
 
     @Test(expected = AEADBadTagException::class)
     fun cannotDecryptWithWrongKey() {
-        val keyPair = createSecp256R1KeyPair()
-        val publicKey = ECIESManager.extractUncompressedPublicKey(keyPair.public.encoded)
+        val keyPair = ECHelper.createECKeyPair()
+        val publicKey = ECPublicKeyDecoder.extractUncompressedPublicKey(keyPair.public.encoded)
 
-        val otherKeyPair = createSecp256R1KeyPair()
+        val otherKeyPair = ECHelper.createECKeyPair()
 
         val plainText = "Whatsupppppppppp"
 
@@ -55,13 +57,5 @@ class ECIESTest {
             cipherData = encryptedData,
             privateKey = otherKeyPair.private
         )
-    }
-
-    private fun createSecp256R1KeyPair(): KeyPair {
-        val kpg = KeyPairGenerator.getInstance("EC", BouncyCastleProvider())
-        val secp256r1 = ECNamedCurveTable.getParameterSpec("secp256r1")
-        kpg.initialize(secp256r1)
-
-        return kpg.generateKeyPair()
     }
 }

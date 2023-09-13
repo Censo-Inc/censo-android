@@ -9,9 +9,9 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import co.censo.vault.data.cryptography.CryptographyManager
-import co.censo.vault.data.cryptography.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
+import co.censo.vault.data.cryptography.key.InternalDeviceKey.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.repository.PushBody
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
@@ -24,8 +24,8 @@ import java.security.ProviderException
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val cryptographyManager: CryptographyManager,
     private val storage: Storage,
+    private val deviceKey: InternalDeviceKey,
     private val pushRepository: PushRepository
 ) :
     ViewModel() {
@@ -74,10 +74,8 @@ class MainViewModel @Inject constructor(
             return
         }
 
-        if (cryptographyManager.deviceKeyExists() && storage.storedPhrasesIsNotEmpty()) {
+        if (storage.storedPhrasesIsNotEmpty()) {
             launchBlockingForegroundBiometryRetrieval()
-        } else {
-            cryptographyManager.createDeviceKeyIfNotExists()
         }
 
     }
@@ -107,7 +105,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun signAuthHeaders() {
-        val cachedReadCallHeaders = cryptographyManager.createAuthHeaders(Clock.System.now())
+        val cachedReadCallHeaders = deviceKey.createAuthHeaders(Clock.System.now())
         storage.saveReadHeaders(cachedReadCallHeaders)
 
         state = state.copy(
@@ -120,10 +118,11 @@ class MainViewModel @Inject constructor(
     private fun checkDataAfterBiometricApproval() {
         state =
             try {
-                val encryptedData = cryptographyManager.encryptData(STATIC_DEVICE_KEY_CHECK)
+                val encryptedData =
+                    deviceKey.encrypt(STATIC_DEVICE_KEY_CHECK.toByteArray(Charsets.UTF_8))
 
                 val decryptData =
-                    String(cryptographyManager.decryptData(encryptedData))
+                    String(deviceKey.decrypt(encryptedData))
 
                 if (decryptData == STATIC_DEVICE_KEY_CHECK) {
                     biometrySuccessfulState()
@@ -147,7 +146,7 @@ class MainViewModel @Inject constructor(
         }
 
     private fun clearOutSavedData() : MainState {
-        cryptographyManager.deleteDeviceKeyIfPresent()
+        deviceKey.removeKey()
         storage.clearStoredPhrases()
          return state.copy(
             blockAppUI = BlockAppUI.NONE,

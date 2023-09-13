@@ -1,6 +1,7 @@
 package co.censo.vault
 
-import co.censo.vault.data.cryptography.CryptographyManagerImpl
+import ECHelper
+import ECPublicKeyDecoder
 import co.censo.vault.data.cryptography.ECIESManager
 import co.censo.vault.data.cryptography.SecretSharer
 import junit.framework.TestCase.assertEquals
@@ -14,13 +15,13 @@ class KeysAndShardsTest {
 
     @Test
     fun `encrypt and decrypt master private key`() {
-        val masterKeyPair = ECIESManager.createSecp256R1KeyPair()
-        val policyKeyPair = ECIESManager.createSecp256R1KeyPair()
+        val masterKeyPair = ECHelper.createECKeyPair()
+        val policyKeyPair = ECHelper.createECKeyPair()
 
         val masterPrivateKey = String(masterKeyPair.private.encoded, Charsets.UTF_8)
 
         val policyPublicKey =
-            ECIESManager.extractUncompressedPublicKey(policyKeyPair.public.encoded)
+            ECPublicKeyDecoder.extractUncompressedPublicKey(policyKeyPair.public.encoded)
 
         val encryptedMasterKey = ECIESManager.encryptMessage(
             dataToEncrypt = masterPrivateKey.toByteArray(Charsets.UTF_8),
@@ -37,7 +38,7 @@ class KeysAndShardsTest {
 
     @Test
     fun `shard and recreate private key`() {
-        val policyKeyPair = ECIESManager.createSecp256R1KeyPair()
+        val policyKeyPair = ECHelper.createECKeyPair()
 
         val secret = (policyKeyPair.private as ECPrivateKey).s
 
@@ -78,9 +79,9 @@ class KeysAndShardsTest {
 
     @Test
     fun `decrypt data from recovered secret`() {
-        val policyKeyPair = ECIESManager.createSecp256R1KeyPair()
+        val policyKeyPair = ECHelper.createECKeyPair()
         val policyPublicKey =
-            ECIESManager.extractUncompressedPublicKey(policyKeyPair.public.encoded)
+            ECPublicKeyDecoder.extractUncompressedPublicKey(policyKeyPair.public.encoded)
 
         val textToEncrypt = "some text here"
 
@@ -101,7 +102,7 @@ class KeysAndShardsTest {
             )
         )
 
-        val recoveredPrivateKey = ECIESManager.getPrivateKeyFromECBigIntAndCurve(recoveredSecret)
+        val recoveredPrivateKey = ECHelper.getPrivateKeyFromECBigIntAndCurve(recoveredSecret)
 
         val decryptedData = ECIESManager.decryptMessage(
             cipherData = encryptedData,
@@ -113,8 +114,8 @@ class KeysAndShardsTest {
 
     @Test
     fun `testing public key`() {
-        val policyKeyPair = ECIESManager.createSecp256R1KeyPair()
-        val fromPrivateKey = ECIESManager.getPublicKeyFromPrivateKey(policyKeyPair.private as ECPrivateKey)
+        val policyKeyPair = ECHelper.createECKeyPair()
+        val fromPrivateKey = ECPublicKeyDecoder.getPublicKeyFromPrivateKey(policyKeyPair.private as ECPrivateKey)
 
         assertEquals(fromPrivateKey, policyKeyPair.public)
     }

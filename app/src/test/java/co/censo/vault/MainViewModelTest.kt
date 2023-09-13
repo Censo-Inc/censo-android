@@ -2,10 +2,9 @@ package co.censo.vault
 
 import android.security.keystore.UserNotAuthenticatedException
 import androidx.biometric.BiometricPrompt
-import co.censo.vault.data.cryptography.CryptographyManager
-import co.censo.vault.data.cryptography.CryptographyManagerImpl
-import co.censo.vault.data.cryptography.CryptographyManagerImpl.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
+import co.censo.vault.data.cryptography.key.InternalDeviceKey.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.presentation.main.BlockAppUI
 import co.censo.vault.presentation.main.MainViewModel
@@ -20,6 +19,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.ByteString.Companion.toByteString
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -32,10 +32,10 @@ class MainViewModelTest : BaseViewModelTest() {
     lateinit var storage: Storage
 
     @Mock
-    lateinit var cryptographyManager: CryptographyManager
+    lateinit var pushRepository: PushRepository
 
     @Mock
-    lateinit var pushRepository: PushRepository
+    lateinit var deviceKey: InternalDeviceKey
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -48,8 +48,8 @@ class MainViewModelTest : BaseViewModelTest() {
 
         mainViewModel = MainViewModel(
             storage = storage,
-            cryptographyManager = cryptographyManager,
-            pushRepository = pushRepository
+            pushRepository = pushRepository,
+            deviceKey = deviceKey
         )
     }
 
@@ -76,30 +76,12 @@ class MainViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `if device has biometry enabled but no device key, do not trigger biometry`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { false }
-        whenever(storage.storedPhrasesIsNotEmpty()).then { true }
-
-        mainViewModel.onForeground(
-            BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED
-        )
-
-        verify(cryptographyManager).createDeviceKeyIfNotExists()
-
-        assert(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
-        assertEquals(mainViewModel.state.blockAppUI, BlockAppUI.NONE)
-    }
-
-    @Test
     fun `if device has biometry enabled but no stored phrases, do not trigger biometry`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { false }
 
         mainViewModel.onForeground(
             BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED
         )
-
-        verify(cryptographyManager).createDeviceKeyIfNotExists()
 
         assert(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
         assertEquals(mainViewModel.state.blockAppUI, BlockAppUI.NONE)
@@ -107,7 +89,6 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `if device has biometry enabled, a device key and stored phrases, then trigger biometry`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
 
         mainViewModel.onForeground(
@@ -121,7 +102,6 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `on basic biometry failure, set error state`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
 
         mainViewModel.onForeground(
@@ -140,7 +120,6 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `on lockout biometry failure, set error state and too many attempts flag`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
 
         mainViewModel.onForeground(
@@ -159,7 +138,6 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `on permanent lockout biometry failure, set error state and too many attempts flag`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
 
         mainViewModel.onForeground(
@@ -178,16 +156,15 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `device can encrypt and decrypt data with device key after biometry approval`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
         val encryptedData =
             Base64.getDecoder().decode("dQpuKzb6AU6u5HdvxJ5r5Z4Zeg6Xqdt6UllqdaR3OaBeVNwxL6N8pGju3bqXhvXoperI1iPm0tXIPSSUxxIbmfqWFy4hBfzS1hcIw9yN9xUq0t")
 
-        whenever(cryptographyManager.encryptData(CryptographyManagerImpl.STATIC_DEVICE_KEY_CHECK)).then {
+        whenever(deviceKey.encrypt(STATIC_DEVICE_KEY_CHECK.toByteArray(Charsets.UTF_8))).then {
             encryptedData
         }
 
-        whenever(cryptographyManager.decryptData(encryptedData)).then {
+        whenever(deviceKey.decrypt(encryptedData)).then {
             STATIC_DEVICE_KEY_CHECK.toByteArray()
         }
 
@@ -209,16 +186,15 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `device fails encrypt and decrypt data with device key then show blocking UI`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
         val encryptedData =
             Base64.getDecoder().decode("dQpuKzb6AU6u5HdvxJ5r5Z4Zeg6Xqdt6UllqdaR3OaBeVNwxL6N8pGju3bqXhvXoperI1iPm0tXIPSSUxxIbmfqWFy4hBfzS1hcIw9yN9xUq0t")
 
-        whenever(cryptographyManager.encryptData(STATIC_DEVICE_KEY_CHECK)).then {
+        whenever(deviceKey.encrypt(STATIC_DEVICE_KEY_CHECK.toByteArray(Charsets.UTF_8))).then {
             encryptedData
         }
 
-        whenever(cryptographyManager.decryptData(encryptedData)).then {
+        whenever(deviceKey.decrypt(encryptedData)).then {
             "not the static device key check".toByteArray()
         }
 
@@ -240,16 +216,15 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `device not authorized to encrypt or decrypt then we wipe key data`() = runTest {
-        whenever(cryptographyManager.deviceKeyExists()).then { true }
         whenever(storage.storedPhrasesIsNotEmpty()).then { true }
         val encryptedData =
             Base64.getDecoder().decode("dQpuKzb6AU6u5HdvxJ5r5Z4Zeg6Xqdt6UllqdaR3OaBeVNwxL6N8pGju3bqXhvXoperI1iPm0tXIPSSUxxIbmfqWFy4hBfzS1hcIw9yN9xUq0t")
 
-        whenever(cryptographyManager.encryptData(STATIC_DEVICE_KEY_CHECK)).then {
+        whenever(deviceKey.encrypt(STATIC_DEVICE_KEY_CHECK.toByteArray())).then {
             encryptedData
         }
 
-        whenever(cryptographyManager.decryptData(encryptedData)).then {
+        whenever(deviceKey.decrypt(encryptedData)).then {
             throw UserNotAuthenticatedException()
         }
 
@@ -266,7 +241,7 @@ class MainViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        verify(cryptographyManager).deleteDeviceKeyIfPresent()
+        verify(deviceKey).removeKey()
         verify(storage).clearStoredPhrases()
 
         assert(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
