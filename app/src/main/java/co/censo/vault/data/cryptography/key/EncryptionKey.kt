@@ -36,6 +36,12 @@ interface VaultKey {
     fun verify(signedData: ByteArray, signature: ByteArray): Boolean
 }
 
+
+/**
+ *
+ * This will represent a SECP256R1 key not stored in the Keystore or Secure Enclave
+ *
+ */
 class EncryptionKey(val key: KeyPair) : VaultKey {
 
     override fun publicExternalRepresentation(): Base58EncodedPublicKey {
@@ -78,11 +84,8 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
 }
 
 /**
- * This will represent a SECP256R1 key, currently in the system this is the Master Key and Intermediate Key
  *
- * SelfDeviceKey will be able to sign/verify data and encrypt/decrypt data.
- *
- * OtherDeviceKey will be able to encrypt data and verify data. It will not be able to decrypt or sign data.
+ * This will represent a SECP256R1 key stored on the users devices Keystore.
  *
  */
 class InternalDeviceKey() : VaultKey {
@@ -254,7 +257,15 @@ class InternalDeviceKey() : VaultKey {
 
 }
 
-class ExternalDeviceKey(val publicKey: PublicKey) : VaultKey {
+/**
+ *
+ * This will represent a SECP256R1 key stored on another devices Keystore or Secure Enclave
+ *
+ * We will never have access to this private key so it cannot decrypt or sign.
+ *
+ */
+
+class ExternalDeviceKey(private val publicKey: PublicKey) : VaultKey {
 
     override fun publicKeyUncompressed() =
         ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
@@ -282,6 +293,9 @@ class ExternalDeviceKey(val publicKey: PublicKey) : VaultKey {
     }
 
     override fun verify(signedData: ByteArray, signature: ByteArray): Boolean {
-        TODO("Not yet implemented")
+        val signatureKeystore = Signature.getInstance(InternalDeviceKey.KeystoreHelper.SHA_256_ECDSA)
+        signatureKeystore.initVerify(publicKey)
+        signatureKeystore.update(signedData)
+        return signatureKeystore.verify(signature)
     }
 }

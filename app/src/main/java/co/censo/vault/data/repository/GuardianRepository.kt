@@ -4,6 +4,7 @@ import Base58EncodedPublicKey
 import Base64EncodedData
 import ParticipantId
 import co.censo.vault.data.Resource
+import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.data.model.AcceptGuardianshipApiRequest
 import co.censo.vault.data.model.AcceptGuardianshipApiResponse
 import co.censo.vault.data.model.GetGuardianStateApiResponse
@@ -46,7 +47,7 @@ class GuardianRepositoryImpl(
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
         val dataToSign =
             Guardian.createNonceAndCodeData(time = currentTimeInMillis, code = verificationCode)
-        val signature = cryptographyManager.signData(dataToSign)
+        val signature = InternalDeviceKey().sign(dataToSign)
         val base64EncodedData = Base64EncodedData(Base64.getEncoder().encodeToString(signature))
         return Pair(base64EncodedData, currentTimeInMillis)
     }

@@ -9,6 +9,7 @@ import co.censo.vault.data.Resource
 import co.censo.vault.data.cryptography.ECIESManager
 import co.censo.vault.data.cryptography.PolicySetupHelper
 import co.censo.vault.data.cryptography.generatePartitionId
+import co.censo.vault.data.cryptography.key.ExternalDeviceKey
 import co.censo.vault.data.model.ConfirmShardReceiptApiRequest
 import co.censo.vault.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.data.model.CreatePolicyApiRequest
@@ -183,10 +184,11 @@ class OwnerRepositoryImpl(
                     code = verificationCode
                 )
 
-            CryptographyManagerImpl().verifySignature(
-                dataSigned = dataToSign,
-                signatureToCheck = Base64.getDecoder().decode(signature.base64Encoded),
-                publicKey = guardianDevicePublicKey
+            val externalDeviceKey = ExternalDeviceKey(guardianDevicePublicKey)
+
+            externalDeviceKey.verify(
+                signedData = dataToSign,
+                signature = Base64.getDecoder().decode(signature.base64Encoded),
             )
         } catch (e: Exception) {
             false
@@ -199,7 +201,7 @@ class OwnerRepositoryImpl(
         return try {
             val guardianDevicePublicKey = transportKey.ecPublicKey
 
-            val decryptedShard = CryptographyManagerImpl().decryptData(
+            val decryptedShard = InternalDeviceKey().decrypt(
                 Base64.getDecoder().decode(deviceEncryptedShard.base64Encoded)
             )
 
