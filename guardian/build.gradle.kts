@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -17,12 +20,40 @@ android {
     namespace = "co.censo.guardian"
     compileSdk = 34
 
+    var signBuild = false
+    val configProperties = Properties()
+
+    if (file("../config.properties").exists()) {
+        configProperties.load(FileInputStream(file("../config.properties")))
+
+        signBuild = (configProperties["SIGN_BUILD"] as String).toBoolean()
+    }
+
+    if (signBuild) {
+        signingConfigs {
+            create("release") {
+
+                keyAlias = configProperties["GUARDIAN_RELEASE_KEY_ALIAS"] as String
+                keyPassword = configProperties["GUARDIAN_RELEASE_STORE_PASSWORD"] as String
+                storeFile = file("keystore.jks")
+                storePassword = configProperties["GUARDIAN_RELEASE_STORE_PASSWORD"] as String
+            }
+        }
+    }
+
+
     defaultConfig {
         applicationId = "co.censo.guardian"
         minSdk = 33
         targetSdk = 33
         versionCode = 1
         versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
+
+        signingConfig = if (signBuild) {
+            signingConfigs.getByName("release")
+        } else {
+            signingConfigs.getByName("debug")
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,7 +72,7 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
         }
         create("staging") {
-            resValue("string", "app_name", "Staging Vault")
+            resValue("string", "app_name", "Staging Guardian")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
@@ -49,7 +80,7 @@ android {
             isDebuggable = false
         }
         create("aintegration") {
-            resValue("string", "app_name", "A Integration Vault")
+            resValue("string", "app_name", "A Integration Guardian")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
@@ -58,22 +89,22 @@ android {
         }
         create("bintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "B Integration Vault")
+            resValue("string", "app_name", "B Integration Guardian")
             applicationIdSuffix = ".bintegration"
         }
         create("cintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "C Integration Vault")
+            resValue("string", "app_name", "C Integration Guardian")
             applicationIdSuffix = ".cintegration"
         }
         create("dintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "D Integration Vault")
+            resValue("string", "app_name", "D Integration Guardian")
             applicationIdSuffix = ".dintegration"
         }
         debug {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "Debug Vault")
+            resValue("string", "app_name", "Debug Guardian")
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
             applicationIdSuffix = ".debug"

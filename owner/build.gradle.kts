@@ -1,4 +1,3 @@
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
 import java.util.Properties
 import java.io.FileInputStream
 
@@ -34,10 +33,10 @@ android {
         signingConfigs {
             create("release") {
 
-                keyAlias = configProperties["RELEASE_KEY_ALIAS"] as String
-                keyPassword = configProperties["RELEASE_STORE_PASSWORD"] as String
+                keyAlias = configProperties["OWNER_RELEASE_KEY_ALIAS"] as String
+                keyPassword = configProperties["OWNER_RELEASE_STORE_PASSWORD"] as String
                 storeFile = file("keystore.jks")
-                storePassword = configProperties["RELEASE_STORE_PASSWORD"] as String
+                storePassword = configProperties["OWNER_RELEASE_STORE_PASSWORD"] as String
             }
         }
     }
