@@ -30,14 +30,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,11 +43,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.GuardianStatus.Initial.*
 import co.censo.shared.data.model.PolicyGuardian
 import co.censo.vault.presentation.owner_entrance.DisplayError
-import co.censo.vault.util.BiometricUtil
+import co.censo.vault.util.vaultLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,31 +55,6 @@ fun GuardianInvitationScreen(
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
-
-    LaunchedEffect(key1 = state) {
-
-        if (state.bioPromptTrigger is Resource.Success) {
-
-            val promptInfo = BiometricUtil.createPromptInfo(context = context)
-
-            val bioPrompt = BiometricUtil.createBioPrompt(
-                fragmentActivity = context,
-                onSuccess = {
-                    viewModel.onBiometryApproved()
-                },
-                onFail = {
-                    BiometricUtil.handleBioPromptOnFail(
-                        context = context,
-                        errorCode = it
-                    ) {
-                        viewModel.onBiometryFailed()
-                    }
-                }
-            )
-
-            bioPrompt.authenticate(promptInfo)
-        }
-    }
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
@@ -125,17 +96,12 @@ fun GuardianInvitationScreen(
                     DisplayError(
                         errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = viewModel::resetUserResponse,
-                    ) { viewModel.retrieveUserState() }
+                    ) { viewModel.retrieveUserState(GuardianInvitationViewModel.createPolicyGetUserApiResponse) }
                 } else if (state.createPolicyResponse is Resource.Error) {
                     DisplayError(
                         errorMessage = state.createPolicyResponse.getErrorMessage(context),
                         dismissAction = viewModel::resetCreatePolicyResource,
                     ) { viewModel.createPolicy() }
-                } else if (state.bioPromptTrigger is Resource.Error) {
-                    DisplayError(
-                        errorMessage = state.bioPromptTrigger.getErrorMessage(context),
-                        dismissAction = viewModel::resetBiometryTrigger,
-                    ) { viewModel.triggerBiometry() }
                 } else if (state.inviteGuardianResponse is Resource.Error) {
                     DisplayError(
                         errorMessage = state.inviteGuardianResponse.getErrorMessage(context),
@@ -227,12 +193,10 @@ fun GuardianInvitationScreen(
                     }
 
                     GuardianInvitationStatus.POLICY_SETUP -> {
-                        val clipboardManager = LocalClipboardManager.current
-
                         Spacer(modifier = Modifier.height(56.dp))
 
                         Text(
-                            text = stringResource(R.string.share_guardian_deeplinks),
+                            text = stringResource(R.string.invite_guardians),
                             textAlign = TextAlign.Center,
                             color = Color.Black
                         )
@@ -241,38 +205,38 @@ fun GuardianInvitationScreen(
 
                         LazyColumn(
                             modifier = Modifier
-                                .fillMaxSize()
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             items(state.prospectGuardians.size) { index ->
-
                                 val guardian = state.prospectGuardians[index]
-                                val deeplink = state.guardianDeepLinks[index]
 
-                                if (guardian.status is GuardianStatus.Accepted) {
-                                    AcceptedGuardian(guardian = guardian) {
-                                        viewModel.checkGuardianCodeMatches(
-                                            verificationCode = "123456",
-                                            guardianAccepted = guardian.status as GuardianStatus.Accepted,
-                                            guardian = guardian
-                                        )
-                                    }
-                                } else {
-                                    InvitedGuardian(
-                                        guardian = state.prospectGuardians[index],
-                                        deepLink = deeplink,
-                                        inviteGuardian = { viewModel.inviteGuardian(guardian) },
-                                        copyDeeplink = {
-                                            clipboardManager.setText(
-                                                AnnotatedString(
-                                                    deeplink
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
+                                InvitedGuardian(
+                                    guardian = state.prospectGuardians[index],
+                                    inviteGuardian = { viewModel.inviteGuardian(guardian) },
+                                )
                             }
+                        }
+
+                        Spacer(Modifier.height(24.dp))
+
+                        Text(
+                            text = stringResource(R.string.scan_guardian_qr_code),
+                            color = Color.Black
+                        )
+
+                        Spacer(Modifier.height(12.dp))
+
+                        TextButton(
+                            onClick = {
+                                vaultLog(message = "Scanning QR code")
+                                //TODO: Implement QR code scanning
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.scan_qr_code),
+                                color = Color.Black
+                            )
                         }
                     }
 
@@ -318,8 +282,6 @@ fun AcceptedGuardian(
 @Composable
 fun InvitedGuardian(
     guardian: PolicyGuardian.ProspectGuardian,
-    deepLink: String,
-    copyDeeplink: () -> Unit,
     inviteGuardian: () -> Unit
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -335,40 +297,12 @@ fun InvitedGuardian(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Row {
-                        IconButton(onClick = inviteGuardian) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "invite guardian",
-                                tint = Color.White
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(24.dp))
-
-                        IconButton(onClick = copyDeeplink) {
-                            Icon(
-                                imageVector = Icons.Default.ContentCopy,
-                                contentDescription = "Copy icon",
-                                tint = Color.White
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(24.dp))
-
-
-                        IconButton(onClick = {
-                            shareDeeplink(
-                                deeplink = deepLink,
-                                context
-                            )
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = "Share icon",
-                                tint = Color.White
-                            )
-                        }
+                    IconButton(onClick = inviteGuardian) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "invite guardian",
+                            tint = Color.White
+                        )
                     }
                 }
             }

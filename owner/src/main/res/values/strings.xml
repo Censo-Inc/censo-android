@@ -50,7 +50,7 @@
     <string name="threshold">Threshold</string>
     <string name="add_guardian">Add Guardian</string>
     <string name="guardians_empty_message">Please start adding guardians to invite to your policy</string>
-    <string name="share_guardian_deeplinks">Share these links with your guardians to continue setting up your policy</string>
+    <string name="invite_guardians">Invite your guardians to get started on the policy setup</string>
     <string name="missing_guardian_arg_data">The invitation link used for guardianship is missing policy data.\n\nPlease request a new link from the policy owner and try again.</string>
     <string name="awaiting_confirmation_of_verification_code">Awaiting confirmation of verification code</string>
     <string name="enter_verification_code">Enter verification code</string>
@@ -69,5 +69,8 @@
     <string name="decline_guardianship_error">Decline Guardianship Error</string>
     <string name="to_decline_guardianship_tap_the_button_below">To decline Guardianship, tap the button below</string>
     <string name="onetap_login">OneTap Login</string>
+
+    <string name="scan_guardian_qr_code">Ready to scan a Guardians QR code?</string>
+    <string name="scan_qr_code">Scan QR Code</string>
 
 </resources>

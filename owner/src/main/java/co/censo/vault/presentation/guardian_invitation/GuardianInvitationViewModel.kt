@@ -1,19 +1,25 @@
 package co.censo.vault.presentation.guardian_invitation
 
+import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
+import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.Policy
 import co.censo.shared.data.model.PolicyGuardian
+import co.censo.shared.data.model.Vault
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import java.util.Base64
 import javax.inject.Inject
 
@@ -29,30 +35,76 @@ class GuardianInvitationViewModel @Inject constructor(
         //Do we want to limit how many guardians an owner can add?
         const val MAX_GUARDIAN_LIMIT = 5
         const val MIN_GUARDIAN_LIMIT = 3
+
+        //Mocks
+        val createPolicyGetUserApiResponse = GetUserApiResponse(
+            userGuid = "enim",
+            biometricVerificationRequired = false,
+            ownerState = null
+        )
+        val policySetupGetUserApiResponse = GetUserApiResponse(
+            userGuid = "enim",
+            biometricVerificationRequired = false,
+            ownerState = OwnerState.PolicySetup(
+                policy = Policy(
+                    createdAt = Clock.System.now(),
+                    guardians = listOf(
+                        PolicyGuardian.ProspectGuardian(
+                            label = "Guardian 1",
+                            participantId = ParticipantId(value = "BBBB"),
+                            status = GuardianStatus.Initial(Base64EncodedData("AAAA"))
+                        ),
+                        PolicyGuardian.ProspectGuardian(
+                            label = "Guardian 2",
+                            participantId = ParticipantId(value = "BBBB"),
+                            status = GuardianStatus.Initial(Base64EncodedData("AAAA"))
+                        ),
+                        PolicyGuardian.ProspectGuardian(
+                            label = "Guardian 3",
+                            participantId = ParticipantId(value = "BBBB"),
+                            status = GuardianStatus.Initial(Base64EncodedData("AAAA"))
+                        )
+                    ),
+                    threshold = 3u,
+                    encryptedMasterKey = Base64EncodedData(base64Encoded = "AAAA"),
+                    intermediateKey = Base58EncodedIntermediatePublicKey(value = "AAAA")
+                ), publicMasterEncryptionKey = Base58EncodedIntermediatePublicKey(value = "AAAA")
+            )
+        )
+        val readyGetUserApiResponse = GetUserApiResponse(
+            userGuid = "enim",
+            biometricVerificationRequired = false,
+            ownerState = OwnerState.Ready(
+                policy = Policy(
+                    createdAt = Clock.System.now(),
+                    guardians = listOf(),
+                    threshold = 3u,
+                    encryptedMasterKey = Base64EncodedData(base64Encoded = "AAAA"),
+                    intermediateKey = Base58EncodedIntermediatePublicKey(value = "AAAA")
+                ), vault = Vault(
+                    secrets = listOf(),
+                    publicMasterEncryptionKey = Base58EncodedIntermediatePublicKey(value = "AAAA")
+                )
+            )
+        )
     }
 
     fun onStart() {
-        retrieveUserState()
+        retrieveUserState(createPolicyGetUserApiResponse)
     }
 
-    fun retrieveUserState() {
+    fun retrieveUserState(getUserApiResponse: GetUserApiResponse) {
         state = state.copy(userResponse = Resource.Loading())
         viewModelScope.launch {
-            val userResponse = ownerRepository.retrieveUser()
+            val userResponse = ownerRepository.retrieveUser(getUserApiResponse)
 
             if (userResponse is Resource.Success) {
                 val guardianInvitationStatus = if (userResponse.data?.ownerState != null) {
                     val ownerState : OwnerState = userResponse.data!!.ownerState as OwnerState
                     when (ownerState) {
                         is OwnerState.PolicySetup -> {
-                            val guardianDeepLinks = ownerRepository.retrieveGuardianDeepLinks(
-                                ownerState.policy.guardians,
-                                policyKey = ownerState.policy.intermediateKey
-                            )
-
                             state = state.copy(
                                 potentialGuardians = ownerState.policy.guardians.map { it.participantId.value },
-                                guardianDeepLinks = guardianDeepLinks,
                                 prospectGuardians = ownerState.policy.guardians,
                                 policyIntermediatePublicKey = ownerState.policy.intermediateKey
                             )
@@ -92,23 +144,7 @@ class GuardianInvitationViewModel @Inject constructor(
     }
 
     fun userSubmitGuardianSet() {
-        triggerBiometry()
-    }
-
-    fun triggerBiometry() {
-        state = state.copy(
-            bioPromptTrigger = Resource.Success(Unit),
-        )
-    }
-
-    fun onBiometryApproved() {
-        state = state.copy(bioPromptTrigger = Resource.Uninitialized)
-
-        createPolicy()
-    }
-
-    fun onBiometryFailed() {
-        state = state.copy(bioPromptTrigger = Resource.Error())
+        retrieveUserState(policySetupGetUserApiResponse)
     }
 
     fun inviteGuardian(guardian: PolicyGuardian.ProspectGuardian) {
@@ -127,55 +163,7 @@ class GuardianInvitationViewModel @Inject constructor(
         }
     }
 
-    fun checkGuardianCodeMatches(
-        guardian: PolicyGuardian.ProspectGuardian,
-        guardianAccepted: GuardianStatus.Accepted,
-        verificationCode: String
-    ) {
-        state = state.copy(confirmShardReceiptResponse = Resource.Uninitialized)
-
-        val verified = ownerRepository.checkCodeMatches(
-            verificationCode = verificationCode,
-            transportKey = guardianAccepted.guardianTransportPublicKey,
-            timeMillis = guardianAccepted.timeMillis,
-            signature = guardianAccepted.signature
-        )
-
-        if (!verified) {
-            state = state.copy(
-                incorrectPinCode = true,
-                confirmShardReceiptResponse = Resource.Uninitialized
-            )
-        }
-
-        val encryptedShardWithGuardianKey = ownerRepository.encryptShardWithGuardianKey(
-            deviceEncryptedShard = guardianAccepted.deviceEncryptedShard,
-            transportKey = guardianAccepted.guardianTransportPublicKey
-        )
-
-        if (encryptedShardWithGuardianKey != null) {
-
-            viewModelScope.launch {
-                val confirmShardReceiptApiResponse =
-                    ownerRepository.confirmShardReceipt(
-                        intermediatePublicKey = state.policyIntermediatePublicKey,
-                        participantId = guardian.participantId,
-                        encryptedShard = Base64EncodedData(
-                            Base64.getEncoder().encodeToString(encryptedShardWithGuardianKey)
-                        )
-                    )
-
-                state = state.copy(confirmShardReceiptResponse = confirmShardReceiptApiResponse)
-            }
-        } else {
-            state = state.copy(
-                confirmShardReceiptResponse = Resource.Error(
-                    exception = Exception("Failed to encrypt shard with guardian device key")
-                )
-            )
-        }
-    }
-
+    //Policy setup should only happen at the end of the flow once all guardians have accepted
     fun createPolicy() {
         viewModelScope.launch {
             try {
@@ -189,7 +177,7 @@ class GuardianInvitationViewModel @Inject constructor(
                 state = state.copy(createPolicyResponse = setupPolicyResponse)
 
                 if (setupPolicyResponse is Resource.Success) {
-                    retrieveUserState()
+                    retrieveUserState(policySetupGetUserApiResponse)
                 }
             } catch (e: Exception) {
                 state = state.copy(createPolicyResponse = Resource.Error())
@@ -216,7 +204,4 @@ class GuardianInvitationViewModel @Inject constructor(
         state = state.copy(createPolicyResponse = Resource.Uninitialized)
     }
 
-    fun resetBiometryTrigger() {
-        state = state.copy(bioPromptTrigger = Resource.Uninitialized)
-    }
 }

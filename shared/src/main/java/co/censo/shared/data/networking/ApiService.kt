@@ -6,7 +6,6 @@ import InitBiometryVerificationApiResponse
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
-import android.security.keystore.UserNotAuthenticatedException
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.Header
 import co.censo.shared.data.HeadersSerializer
@@ -23,7 +22,6 @@ import co.censo.shared.data.model.GetPoliciesApiResponse
 import co.censo.shared.data.model.GetPolicyApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
-import co.censo.shared.data.model.RegisterGuardianApiResponse
 import co.censo.shared.data.model.UpdatePolicyApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
@@ -141,11 +139,11 @@ interface ApiService {
     @GET("/v1/policies")
     suspend fun policies(): RetrofitResponse<GetPoliciesApiResponse>
 
-    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/device")
-    suspend fun registerGuardian(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
-        @Path(value = PARTICIPANT_ID) participantId: String,
-    ): RetrofitResponse<RegisterGuardianApiResponse>
+//    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/device")
+//    suspend fun registerGuardian(
+//        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+//        @Path(value = PARTICIPANT_ID) participantId: String,
+//    ): RetrofitResponse<RegisterGuardian>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/invitation")
     suspend fun inviteGuardian(

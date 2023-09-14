@@ -5,5 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ConfirmGuardianshipApiRequest(
-    val encryptedShard: Base64EncodedData,
+    val keyConfirmationSignature: Base64EncodedData,
+    val keyConfirmationTimeMillis: Long,
+)
+
+@Serializable
+data class ConfirmGuardianshipApiResponse(
+    val ownerState: OwnerState,
 )

@@ -28,11 +28,10 @@ import java.util.Base64
 
 interface OwnerRepository {
 
-    suspend fun retrieveUser(): Resource<GetUserApiResponse>
+    suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse? = null): Resource<GetUserApiResponse>
     suspend fun createOwner(authId: String): Resource<ResponseBody>
 
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
-    suspend fun retrieveGuardianDeepLinks(guardians: List<PolicyGuardian.ProspectGuardian>, policyKey: Base58EncodedIntermediatePublicKey) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
     suspend fun inviteGuardian(
         participantId: ParticipantId,
@@ -62,15 +61,10 @@ interface OwnerRepository {
 
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
-    private val storage: Storage
-) :
-    OwnerRepository, BaseRepository() {
+) : OwnerRepository, BaseRepository() {
 
-    companion object {
-        const val GUARDIAN_URI = "guardian://guardian/"
-    }
-
-    override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
+    override suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse?): Resource<GetUserApiResponse> {
+        return Resource.Success(getUserApiResponse)
         return retrieveApiResource { apiService.user() }
     }
 
@@ -112,6 +106,7 @@ class OwnerRepositoryImpl(
             threshold = setupHelper.threshold,
         )
 
+        return Resource.Success("".toResponseBody())
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
@@ -196,29 +191,5 @@ class OwnerRepositoryImpl(
                 confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
             )
         }
-    }
-
-    override suspend fun retrieveGuardianDeepLinks(
-        guardians: List<PolicyGuardian.ProspectGuardian>,
-        policyKey: Base58EncodedIntermediatePublicKey
-    ): List<String> {
-        val devicePublicKey = InternalDeviceKey().publicExternalRepresentation()
-
-        //3. Create deep links from this: generateGuardianDeeplink
-        return guardians.map {
-            generateGuardianDeeplink(
-                participantId = it.participantId.value,
-                policyKey = policyKey.value,
-                devicePublicKey = devicePublicKey.value
-            )
-        }
-    }
-
-    private fun generateGuardianDeeplink(
-        participantId: String,
-        policyKey: String,
-        devicePublicKey: String
-    ): String {
-        return "$GUARDIAN_URI$policyKey/$devicePublicKey/$participantId"
     }
 }

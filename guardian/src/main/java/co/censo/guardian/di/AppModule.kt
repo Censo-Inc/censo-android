@@ -47,9 +47,8 @@ object AppModule {
     @Provides
     fun provideOwnerRepository(
         apiService: ApiService,
-        storage: Storage,
     ): OwnerRepository {
-        return OwnerRepositoryImpl(apiService, storage)
+        return OwnerRepositoryImpl(apiService)
     }
 
     @Singleton

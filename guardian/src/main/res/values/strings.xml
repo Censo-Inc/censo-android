@@ -30,5 +30,9 @@
     <string name="accept_guardianship">Accept Guardianship</string>
     <string name="decline_guardianship_error">Decline Guardianship Error</string>
     <string name="to_decline_guardianship_tap_the_button_below">To decline Guardianship, tap the button below</string>
+    <string name="registering_guardian">Registering Guardian</string>
+    <string name="display_qr_code">Display this QR code for the owner of social policy to scan</string>
+    <string name="login">Login</string>
+    <string name="authenticate_with_onetap">Authenticate with OneTap</string>
 
 </resources>

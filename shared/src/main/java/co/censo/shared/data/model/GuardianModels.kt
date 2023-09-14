@@ -46,6 +46,22 @@ interface Base58EncodedPublicKey {
 
 @Serializable
 @JvmInline
+value class Base58EncodedGuardianPublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(this.value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid guardian public key format")
+        }
+    }
+
+    fun getBytes(): ByteArray {
+        return Base58.base58Decode(this.value)
+    }
+}
+
+@Serializable
+@JvmInline
 value class Base58EncodedDevicePublicKey(override val value: String) : Base58EncodedPublicKey {
     init {
         runCatching {

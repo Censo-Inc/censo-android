@@ -8,7 +8,6 @@ import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiRequest
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.GetGuardianStateApiResponse
-import co.censo.shared.data.model.RegisterGuardianApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.networking.ApiService
 import kotlinx.datetime.Clock
@@ -16,7 +15,7 @@ import okhttp3.ResponseBody
 import java.util.Base64
 
 interface GuardianRepository {
-    suspend fun registerGuardian(intermediateKey: Base58EncodedPublicKey, participantId: ParticipantId) : Resource<RegisterGuardianApiResponse>
+//    suspend fun registerGuardian(intermediateKey: Base58EncodedPublicKey, participantId: ParticipantId) : Resource<RegisterGuardianApiResponse>
     fun signVerificationCode(verificationCode: String) : Pair<Base64EncodedData, Long>
     suspend fun getGuardian(
         intermediateKey: Base58EncodedPublicKey,
@@ -36,12 +35,12 @@ interface GuardianRepository {
 class GuardianRepositoryImpl(
     private val apiService: ApiService,
 ) : GuardianRepository, BaseRepository() {
-    override suspend fun registerGuardian(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId
-    ): Resource<RegisterGuardianApiResponse> {
-        return retrieveApiResource { apiService.registerGuardian(intermediateKey.value, participantId.value) }
-    }
+//    override suspend fun registerGuardian(
+//        intermediateKey: Base58EncodedPublicKey,
+//        participantId: ParticipantId
+//    ): Resource<RegisterGuardianApiResponse> {
+//        return retrieveApiResource { apiService.registerGuardian(intermediateKey.value, participantId.value) }
+//    }
 
     override fun signVerificationCode(verificationCode: String): Pair<Base64EncodedData, Long> {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
