@@ -2,9 +2,9 @@ package co.censo.vault
 
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.presentation.home.HomeViewModel
-import co.censo.vault.data.storage.BIP39Phrases
-import co.censo.vault.data.storage.EncryptedBIP39
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.storage.BIP39Phrases
+import co.censo.shared.data.storage.EncryptedBIP39
+import co.censo.shared.data.storage.Storage
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever

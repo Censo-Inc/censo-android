@@ -1,9 +1,9 @@
-package co.censo.vault
+package co.censo.guardian
 
-import ECHelper
-import ECPublicKeyDecoder
-import co.censo.vault.data.cryptography.ECIESManager
-import co.censo.vault.data.cryptography.SecretSharer
+import co.censo.shared.data.cryptography.ECHelper
+import co.censo.shared.data.cryptography.ECIESManager
+import co.censo.shared.data.cryptography.ECPublicKeyDecoder
+import co.censo.shared.data.cryptography.SecretSharer
 import junit.framework.TestCase.assertEquals
 import org.junit.Assert
 import org.junit.Test

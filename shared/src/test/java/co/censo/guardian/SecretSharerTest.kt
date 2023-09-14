@@ -1,11 +1,11 @@
-package co.censo.vault
+package co.censo.guardian
 
-import co.censo.vault.data.cryptography.Matrix
-import co.censo.vault.data.cryptography.ORDER
-import co.censo.vault.data.cryptography.Point
-import co.censo.vault.data.cryptography.SecretSharer
-import co.censo.vault.data.cryptography.SecretSharerUtils
-import co.censo.vault.data.cryptography.SecretSharerUtils.randomFieldElement
+import co.censo.shared.data.cryptography.Matrix
+import co.censo.shared.data.cryptography.ORDER
+import co.censo.shared.data.cryptography.Point
+import co.censo.shared.data.cryptography.SecretSharer
+import co.censo.shared.data.cryptography.SecretSharerUtils
+import co.censo.shared.data.cryptography.SecretSharerUtils.randomFieldElement
 import org.junit.Assert.*
 import java.math.BigInteger
 import java.util.UUID

@@ -116,4 +116,8 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
     implementation("io.github.novacrypto:Base58:2022.01.17")
 
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+    testImplementation("org.mockito:mockito-inline:4.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 }

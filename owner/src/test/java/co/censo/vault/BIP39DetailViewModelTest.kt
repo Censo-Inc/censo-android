@@ -1,10 +1,10 @@
 package co.censo.vault
 
-import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailViewModel
-import co.censo.vault.data.storage.EncryptedBIP39
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.storage.EncryptedBIP39
+import co.censo.shared.data.storage.Storage
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers

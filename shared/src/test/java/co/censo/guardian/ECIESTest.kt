@@ -1,13 +1,9 @@
-package co.censo.vault
+package co.censo.guardian
 
-import ECHelper
-import ECPublicKeyDecoder
-import co.censo.vault.data.cryptography.ECIESManager
-import org.bouncycastle.jce.ECNamedCurveTable
-import org.bouncycastle.jce.provider.BouncyCastleProvider
+import co.censo.shared.data.cryptography.ECHelper
+import co.censo.shared.data.cryptography.ECIESManager
+import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import org.junit.Test
-import java.security.KeyPair
-import java.security.KeyPairGenerator
 import javax.crypto.AEADBadTagException
 import org.junit.Assert.assertEquals
 

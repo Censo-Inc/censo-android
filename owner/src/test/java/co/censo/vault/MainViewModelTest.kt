@@ -2,13 +2,13 @@ package co.censo.vault
 
 import android.security.keystore.UserNotAuthenticatedException
 import androidx.biometric.BiometricPrompt
-import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.key.InternalDeviceKey
-import co.censo.vault.data.cryptography.key.InternalDeviceKey.Companion.STATIC_DEVICE_KEY_CHECK
+import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.cryptography.key.InternalDeviceKey.Companion.STATIC_DEVICE_KEY_CHECK
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.presentation.main.BlockAppUI
 import co.censo.vault.presentation.main.MainViewModel
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.storage.Storage
 import co.censo.vault.util.BiometricUtil
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever

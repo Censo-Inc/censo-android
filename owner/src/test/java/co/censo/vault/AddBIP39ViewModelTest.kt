@@ -1,12 +1,12 @@
 package co.censo.vault
 
 import co.censo.vault.data.PhraseValidator
-import co.censo.vault.data.Resource
-import co.censo.vault.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.presentation.add_bip39.AddBIP39ViewModel
-import co.censo.vault.data.storage.BIP39Phrases
-import co.censo.vault.data.storage.EncryptedBIP39
-import co.censo.vault.data.storage.Storage
+import co.censo.shared.data.storage.BIP39Phrases
+import co.censo.shared.data.storage.EncryptedBIP39
+import co.censo.shared.data.storage.Storage
 import com.nhaarman.mockitokotlin2.capture
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
