@@ -10,7 +10,7 @@ import kotlinx.datetime.Instant
 
 @Serializable
 data class GetUserApiResponse(
-    val contacts: List<Contact>,
+    val userGuid: String,
     val biometricVerificationRequired: Boolean,
     val ownerState: OwnerState?,
 )

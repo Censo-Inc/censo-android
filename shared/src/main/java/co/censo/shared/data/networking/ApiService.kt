@@ -16,8 +16,6 @@ import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
 import co.censo.shared.data.model.CreatePolicyApiRequest
-import co.censo.shared.data.model.CreateUserApiRequest
-import co.censo.shared.data.model.CreateUserApiResponse
 import co.censo.shared.data.model.GetGuardianStateApiResponse
 import co.censo.shared.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
@@ -27,7 +25,6 @@ import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.RegisterGuardianApiResponse
 import co.censo.shared.data.model.UpdatePolicyApiRequest
-import co.censo.shared.data.model.VerifyContactApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
@@ -110,17 +107,11 @@ interface ApiService {
 
 
     @POST("/v1/user")
-    suspend fun createUser(@Body createUserApiRequest: CreateUserApiRequest):
-            RetrofitResponse<CreateUserApiResponse>
+    suspend fun createUser():
+            RetrofitResponse<ResponseBody>
 
     @GET("/v1/user")
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
-
-    @POST("/v1/contact-verifications/{id}/code")
-    suspend fun verifyContact(
-        @Path(value = "id", encoded = true) verificationId: String,
-        @Body verifyContactApiRequest: VerifyContactApiRequest
-    ): RetrofitResponse<ResponseBody>
 
     @POST("/v1/biometry-verifications")
     suspend fun biometryVerification() : RetrofitResponse<InitBiometryVerificationApiResponse>

@@ -6,9 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.ContactType
-import co.censo.shared.data.model.CreateUserApiRequest
-import co.censo.shared.data.repository.BaseRepository.Companion.HTTP_401
 import co.censo.shared.data.repository.BaseRepository.Companion.HTTP_404
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.home.Screen
@@ -23,7 +20,7 @@ import javax.inject.Inject
  * Step 1: Check users saved timestamp
  *       - Do biometry to sign timestamp if needed
  * Step 2: Check User State: GET /user
- *      - If no user, then will create and verify contact
+ *      - If no user, then will create
  *      - If need to complete Facetec action, verify user w/ Facetec
  * Step 3: Send user to list of BIP 39 phrases
  *
@@ -32,11 +29,7 @@ import javax.inject.Inject
  *      - Do biometry to sign timestamp if needed
  * Step 2: Check User State: GET /user
  * Step 3: Receive 401
- *      - User input contact information (phone or email)
  *      - POST /user
- *      - Store returned verification id
- * Step 4: User input verification code -> POST /verifications/{id}/code
- *      - Not expecting data returned here. Looking for success.
  * Step 5: Check User State: GET /user
  * Step 6: Send user to Facetec enrollment/auth
  *      - *Not implemented yet*
@@ -77,119 +70,12 @@ class OwnerEntranceViewModel @Inject constructor(
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
     }
 
-    private fun updateVerificationCode(value: String) {
-        state = state.copy(
-            verificationCode = value,
-        )
-    }
-
-    private fun updateContactValue(value: String) {
-        state = state.copy(
-            contactValue = value,
-            validationError = "",
-        )
-    }
-
-    private fun showVerificationDialog() {
-        state = state.copy(userStatus = UserStatus.VERIFY_CODE_ENTRY)
-    }
-
-    fun ownerAction(ownerAction: OwnerAction) {
-        viewModelScope.launch {
-            when (ownerAction) {
-                OwnerAction.EmailSubmitted -> {
-                    state = state.copy(
-                        createOwnerResource = Resource.Loading(),
-                    )
-
-                    val userEnterValidEmail = state.validateEmail(state.contactValue)
-
-                    if (!userEnterValidEmail) {
-                        state = state.copy(
-                            createOwnerResource = Resource.Uninitialized,
-                            validationError = "Please enter a valid email...",
-                        )
-                        return@launch
-                    }
-
-                    registerUserToBackend(
-                        contactType = ContactType.Email,
-                        value = state.contactValue
-                    )
-
-                }
-                OwnerAction.EmailVerification -> {
-                    state = state.copy(
-                        verificationResource = Resource.Loading()
-                    )
-
-                    val verifyEmailResponse = ownerRepository.verifyContact(
-                        verificationId = state.verificationId,
-                        verificationCode = state.verificationCode
-                    )
-
-                    state = state.copy(verificationResource = verifyEmailResponse)
-
-                    if (verifyEmailResponse is Resource.Success) {
-                        checkUserState()
-                    }
-                }
-                OwnerAction.PhoneSubmitted -> {
-                    state = state.copy(
-                        createOwnerResource = Resource.Loading(),
-                    )
-
-                    val userEnteredValidPhone =
-                        state.validatePhone(state.contactValue)
-
-                    if (!userEnteredValidPhone) {
-                        state = state.copy(
-                            createOwnerResource = Resource.Uninitialized,
-                            validationError = "Please enter a valid phone...",
-                        )
-                        return@launch
-                    }
-
-                    registerUserToBackend(
-                        contactType = ContactType.Phone,
-                        value = state.contactValue
-                    )
-                }
-                OwnerAction.PhoneVerification -> {
-                    state = state.copy(verificationResource = Resource.Loading())
-
-                    val verifyPhoneResponse = ownerRepository.verifyContact(
-                        verificationId = state.verificationId,
-                        verificationCode = state.verificationCode
-                    )
-
-                    state = state.copy(verificationResource = verifyPhoneResponse)
-
-                    if (verifyPhoneResponse is Resource.Success) {
-                        checkUserState()
-                    }
-                }
-                is OwnerAction.UpdateContact -> { updateContactValue(ownerAction.value) }
-                is OwnerAction.UpdateVerificationCode -> { updateVerificationCode(ownerAction.value) }
-                OwnerAction.ShowVerificationDialog -> { showVerificationDialog() }
-            }
-        }
-    }
-
-    private suspend fun registerUserToBackend(contactType: ContactType, value: String) {
-        state = state.copy(contactType = contactType)
-
-        val createOwnerResponse = ownerRepository.createOwner(
-            createUserApiRequest = CreateUserApiRequest(
-                contactType = contactType,
-                value = value
-            )
-        )
+    private suspend fun registerUserToBackend() {
+        val createOwnerResponse = ownerRepository.createOwner()
 
         if (createOwnerResponse is Resource.Success) {
             state = state.copy(
-                verificationId = createOwnerResponse.data?.verificationId ?: "",
-                userStatus = UserStatus.CONTACT_UNVERIFIED,
+                userStatus = UserStatus.UNINITIALIZED,
                 createOwnerResource = createOwnerResponse
             )
         } else if (createOwnerResponse is Resource.Error) {
@@ -209,7 +95,6 @@ class OwnerEntranceViewModel @Inject constructor(
                         if (user.errorCode != null && user.errorCode == HTTP_404) {
                             vaultLog(message = "Received 404. User not created.")
                             state.copy(
-                                userStatus = UserStatus.CREATE_CONTACT,
                                 userResource = Resource.Uninitialized
                             )
                         } else {
@@ -226,26 +111,16 @@ class OwnerEntranceViewModel @Inject constructor(
                         return@launch
                     }
 
-                    if (user.data!!.contacts.isEmpty()) {
-                        state = state.copy(
-                            userStatus = UserStatus.CONTACT_UNVERIFIED,
+                    val nextScreen =
+                        if (user.data!!.biometricVerificationRequired) Screen.FacetecAuthRoute.route else Screen.HomeRoute.route
+
+                    state =
+                        state.copy(
+                            userStatus = UserStatus.UNINITIALIZED,
+                            userFinishedSetup = Resource.Success(nextScreen),
                             userResource = user
                         )
-                        return@launch
-                    }
-
-                    if (user.data!!.contacts.any { it.verified }) {
-                        val nextScreen =
-                            if (user.data!!.biometricVerificationRequired) Screen.FacetecAuthRoute.route else Screen.HomeRoute.route
-
-                        state =
-                            state.copy(
-                                userStatus = UserStatus.UNINITIALIZED,
-                                userFinishedSetup = Resource.Success(nextScreen),
-                                userResource = user
-                            )
-                        return@launch
-                    }
+                    return@launch
                 }
 
                 else -> {
@@ -257,7 +132,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
     fun retryCreateUser() {
         viewModelScope.launch {
-            registerUserToBackend(contactType = state.contactType, value = state.contactValue)
+            registerUserToBackend()
         }
     }
 
@@ -267,28 +142,8 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    fun retryVerifyContact() {
-        viewModelScope.launch {
-            val verifyContactResponse = ownerRepository.verifyContact(
-                verificationId = state.verificationId,
-                verificationCode = state.verificationCode
-            )
-
-            state = state.copy(verificationResource = verifyContactResponse)
-
-            if (verifyContactResponse is Resource.Success) {
-                checkUserState()
-                state = state.copy(verificationResource = Resource.Uninitialized)
-            }
-        }
-    }
-
     fun resetUserFinishedSetup() {
         state = state.copy(userFinishedSetup = Resource.Uninitialized)
-    }
-
-    fun resetVerificationResource() {
-        state = state.copy(verificationResource = Resource.Uninitialized)
     }
 
     fun resetUserResource() {

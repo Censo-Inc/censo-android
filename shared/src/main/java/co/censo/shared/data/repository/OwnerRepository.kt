@@ -14,13 +14,10 @@ import co.censo.shared.data.cryptography.key.ExternalDeviceKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
 import co.censo.shared.data.model.CreatePolicyApiRequest
-import co.censo.shared.data.model.CreateUserApiRequest
-import co.censo.shared.data.model.CreateUserApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.PolicyGuardian
-import co.censo.shared.data.model.VerifyContactApiRequest
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.log
@@ -31,11 +28,7 @@ import java.util.Base64
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
-    suspend fun createOwner(createUserApiRequest: CreateUserApiRequest): Resource<CreateUserApiResponse>
-    suspend fun verifyContact(
-        verificationId: String,
-        verificationCode: String
-    ): Resource<ResponseBody>
+    suspend fun createOwner(): Resource<ResponseBody>
 
     fun checkValidTimestamp(): Boolean
     fun saveValidTimestamp()
@@ -82,23 +75,8 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.user() }
     }
 
-    override suspend fun createOwner(createUserApiRequest: CreateUserApiRequest): Resource<CreateUserApiResponse> {
-        return retrieveApiResource { apiService.createUser(createUserApiRequest) }
-    }
-
-    override suspend fun verifyContact(
-        verificationId: String,
-        verificationCode: String
-    ): Resource<ResponseBody> {
-        val verifyContactApiRequest = VerifyContactApiRequest(
-            verificationCode = verificationCode
-        )
-        return retrieveApiResource {
-            apiService.verifyContact(
-                verificationId = verificationId,
-                verifyContactApiRequest = verifyContactApiRequest
-            )
-        }
+    override suspend fun createOwner(): Resource<ResponseBody> {
+        return retrieveApiResource { apiService.createUser() }
     }
 
     override fun checkValidTimestamp(): Boolean {

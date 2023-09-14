@@ -132,11 +132,6 @@ fun OwnerEntranceScreen(
                                 errorMessage = state.createOwnerResource.getErrorMessage(context),
                                 dismissAction = viewModel::resetCreateOwnerResource,
                             ) { viewModel.retryCreateUser() }
-                        } else if (state.verificationResource is Resource.Error) {
-                            DisplayError(
-                                errorMessage = state.verificationResource.getErrorMessage(context),
-                                dismissAction = viewModel::resetVerificationResource,
-                            ) { viewModel.retryVerifyContact() }
                         } else if (state.userResource is Resource.Error) {
                             DisplayError(
                                 errorMessage = state.userResource.getErrorMessage(context),
@@ -148,7 +143,6 @@ fun OwnerEntranceScreen(
                     else -> {
                         OwnerEntranceStandardUI(
                             state = state,
-                            ownerAction = viewModel::ownerAction
                         )
                     }
                 }
@@ -160,72 +154,8 @@ fun OwnerEntranceScreen(
 @Composable
 fun OwnerEntranceStandardUI(
     state: OwnerEntranceState,
-    ownerAction: (OwnerAction) -> Unit
 ) {
     when (state.userStatus) {
-        UserStatus.CREATE_CONTACT ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(text = "Owner Information", fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
-
-                if (state.emailContactState() == ContactState.DOES_NOT_EXIST) {
-                    OwnerInformationField(
-                        value = state.contactValue,
-                        onValueChange = { value ->
-                            ownerAction(OwnerAction.UpdateContact(value))
-                        },
-                        placeholderText = "User Contact",
-                        keyboardActions = KeyboardActions(
-                            onNext = {
-                                ownerAction(OwnerAction.EmailSubmitted)
-                            }),
-                        error = state.validationError,
-                        isLoading = state.isLoading,
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next
-                        )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-        UserStatus.CONTACT_UNVERIFIED ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(text = "Owner Information", fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OwnerInformationRow(
-                    value = "Owner Email: ${state.contactValue}",
-                    valueVerified = state.contactVerified,
-                    onVerifyClicked = {
-                        ownerAction(OwnerAction.ShowVerificationDialog)
-                    },
-                    onEditClicked = {})
-            }
-
-        UserStatus.VERIFY_CODE_ENTRY ->
-            VerifyCode(
-                value = state.verificationCode,
-                onValueChange = { value ->
-                    ownerAction(OwnerAction.UpdateVerificationCode(value))
-                },
-                onDone = { ownerAction(OwnerAction.EmailVerification) },
-                isLoading = false
-            )
-
         UserStatus.UNINITIALIZED -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(

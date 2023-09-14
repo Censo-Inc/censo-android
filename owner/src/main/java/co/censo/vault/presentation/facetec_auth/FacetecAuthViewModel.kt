@@ -33,14 +33,14 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     private fun skipFacetec() {
-        val contactId = state.userResponse.data?.contacts?.first()?.identifier ?: ""
+        val userGuid = state.userResponse.data?.userGuid ?: ""
 
         viewModelScope.launch {
             val facetecResponse = facetecRepository.submitResult(
                 biometryId = state.facetecData?.id ?: "",
-                faceScan = Base64.getEncoder().encodeToString(contactId.toByteArray()),
-                auditTrailImage = Base64.getEncoder().encodeToString(contactId.toByteArray()),
-                lowQualityAuditTrailImage = Base64.getEncoder().encodeToString(contactId.toByteArray()),
+                faceScan = Base64.getEncoder().encodeToString(userGuid.toByteArray()),
+                auditTrailImage = Base64.getEncoder().encodeToString(userGuid.toByteArray()),
+                lowQualityAuditTrailImage = Base64.getEncoder().encodeToString(userGuid.toByteArray()),
             )
 
             state = state.copy(submitResultResponse = facetecResponse)
