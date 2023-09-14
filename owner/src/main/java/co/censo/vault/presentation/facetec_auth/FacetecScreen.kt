@@ -3,7 +3,6 @@ package co.censo.vault.presentation.facetec_auth
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.vault.presentation.home.Screen
-import co.censo.vault.util.vaultLog
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
@@ -48,8 +46,9 @@ fun FacetecAuthScreen(
     LaunchedEffect(key1 = state) {
 
         if (state.initFacetecData is Resource.Success) {
-            FaceTecConfig.initializeFaceTecSDKInDevelopmentMode(
+            FaceTecSDK.initializeInProductionMode(
                 context,
+                state.facetecData?.productionKeyText ?: "",
                 state.facetecData?.deviceKeyId ?: "",
                 state.facetecData?.biometryEncryptionPublicKey ?: "",
                 object : FaceTecSDK.InitializeCallback() {

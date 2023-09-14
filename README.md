@@ -30,3 +30,17 @@ Start an emulator
 Then run the tests
 
 `./gradlew connectedCheck`
+
+## How to wipe all app data on the device
+
+Run 
+
+`adb shell pm clear co.censo.vault.debug`
+
+or
+
+`adb shell pm clear co.censo.vault.staging`
+
+depending on the build variant you are running. 
+
+Adb is a tool that is located in `~/Library/Android/sdk/platform-tools`

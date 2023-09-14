@@ -84,7 +84,7 @@ android {
         }
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
-            buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
+            buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
