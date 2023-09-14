@@ -225,11 +225,6 @@ class InternalDeviceKey() : VaultKey {
                 .setKeySize(KEY_SIZE)
                 .setIsStrongBoxBacked(BuildConfig.STRONGBOX_ENABLED)
                 .setRandomizedEncryptionRequired(true)
-                .setUserAuthenticationRequired(true)
-                .setUserAuthenticationParameters(
-                    BIOMETRY_TIMEOUT, KeyProperties.AUTH_BIOMETRIC_STRONG
-                )
-                .setInvalidatedByBiometricEnrollment(true)
                 .setDigests(
                     KeyProperties.DIGEST_SHA256
                 )

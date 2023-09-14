@@ -124,26 +124,6 @@ fun GuardianEntranceScreen(
                 }
             }
 
-            GuardianStatus.REGISTER_GUARDIAN -> {
-                if (state.registerGuardianResource is Resource.Error) {
-                    Text(text = stringResource(R.string.register_guardian_error))
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = state.registerGuardianResource.getErrorMessage(context),
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.registerGuardian()
-                        }) {
-                        Text(stringResource(id = R.string.retry))
-                    }
-                } else {
-                    CircularProgressIndicator()
-                }
-            }
-
             GuardianStatus.WAITING_FOR_SHARD -> {
                 Text(text = stringResource(R.string.awaiting_confirmation_of_verification_code))
             }

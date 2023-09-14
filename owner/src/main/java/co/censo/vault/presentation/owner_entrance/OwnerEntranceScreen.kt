@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -31,8 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
@@ -40,11 +36,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
-import co.censo.vault.presentation.components.owner_information.OwnerInformationField
-import co.censo.vault.presentation.components.owner_information.OwnerInformationRow
-import co.censo.vault.presentation.components.owner_information.VerifyCode
-import co.censo.vault.util.BiometricUtil
-import co.censo.vault.util.vaultLog
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,36 +48,24 @@ fun OwnerEntranceScreen(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    LaunchedEffect(key1 = state) {
-        if (state.bioPromptTrigger is Resource.Success) {
-            val promptInfo = BiometricUtil.createPromptInfo(context)
-
-            val bioPrompt = BiometricUtil.createBioPrompt(
-                fragmentActivity = context,
-                onSuccess = {
-                    viewModel.onBiometryApproved()
-                },
-                onFail = {
-                    BiometricUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                        viewModel.onBiometryFailed()
-                    }
-                }
-            )
-
-            bioPrompt.authenticate(promptInfo)
+    fun primaryAuthLogin() {
+        //Mocked out for now
+        val loginSuccess = true
+        val authId = "a1b2c3d4e5f6g7h"
+        if (loginSuccess) {
+            viewModel.registerUserToBackend(authId)
+        } else {
+            //TODO: Handle user failing primary auth login
         }
+    }
 
+    LaunchedEffect(key1 = state) {
         if (state.userFinishedSetup is Resource.Success) {
             state.userFinishedSetup.data?.let {
                 navController.navigate(it)
             }
             viewModel.resetUserFinishedSetup()
         }
-    }
-
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { }
     }
 
     Scaffold(
@@ -119,7 +98,9 @@ fun OwnerEntranceScreen(
                                 .background(color = Color.White)
                         ) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(72.dp).align(Alignment.Center),
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .align(Alignment.Center),
                                 strokeWidth = 8.dp,
                                 color = Color.Red
                             )
@@ -132,17 +113,12 @@ fun OwnerEntranceScreen(
                                 errorMessage = state.createOwnerResource.getErrorMessage(context),
                                 dismissAction = viewModel::resetCreateOwnerResource,
                             ) { viewModel.retryCreateUser() }
-                        } else if (state.userResource is Resource.Error) {
-                            DisplayError(
-                                errorMessage = state.userResource.getErrorMessage(context),
-                                dismissAction = viewModel::resetUserResource,
-                            ) { viewModel.retryGetUser() }
                         }
                     }
 
                     else -> {
                         OwnerEntranceStandardUI(
-                            state = state,
+                            authenticate = { primaryAuthLogin() }
                         )
                     }
                 }
@@ -153,17 +129,16 @@ fun OwnerEntranceScreen(
 
 @Composable
 fun OwnerEntranceStandardUI(
-    state: OwnerEntranceState,
+    authenticate: () -> Unit
 ) {
-    when (state.userStatus) {
-        UserStatus.UNINITIALIZED -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(72.dp).align(Alignment.Center),
-                    strokeWidth = 8.dp,
-                    color = Color.Red
-                )
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TextButton(onClick = authenticate) {
+            Text(text = stringResource(R.string.onetap_login))
         }
     }
 }

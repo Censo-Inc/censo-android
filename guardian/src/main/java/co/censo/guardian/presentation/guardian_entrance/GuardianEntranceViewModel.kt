@@ -14,15 +14,13 @@ import co.censo.shared.data.repository.ErrorInfo
 import co.censo.shared.data.repository.ErrorResponse
 import co.censo.shared.util.log
 import co.censo.shared.data.repository.GuardianRepository
-import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class GuardianEntranceViewModel @Inject constructor(
-    private val guardianRepository: GuardianRepository,
-    private val ownerRepository: OwnerRepository
+    private val guardianRepository: GuardianRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(GuardianEntranceState())
@@ -41,12 +39,7 @@ class GuardianEntranceViewModel @Inject constructor(
             intermediateKey = args.intermediateKey
         )
 
-        if (ownerRepository.checkValidTimestamp()) {
-            log(message = "Valid timestamp for auth headers, retrieving guardian status")
-            retrieveGuardianStatus()
-        } else {
-            registerGuardian()
-        }
+        retrieveGuardianStatus()
     }
 
     private fun retrieveGuardianStatus() {
@@ -57,17 +50,16 @@ class GuardianEntranceViewModel @Inject constructor(
             )
 
             if (getGuardianResource is Resource.Success) {
+                state = state.copy(getGuardianResource = getGuardianResource)
                 setGuardianStatus(getGuardianResource.data?.guardianState)
             } else if (getGuardianResource is Resource.Error && getGuardianResource.errorCode == HTTP_401) {
                 log(message = "Get guardian status returned 401, guardian has not registered device")
-                state = state.copy(guardianStatus = GuardianStatus.REGISTER_GUARDIAN)
+                registerGuardian()
             }
-
-            state = state.copy(getGuardianResource = getGuardianResource)
         }
     }
 
-    fun setGuardianStatus(guardianState: GuardianState?) {
+    private fun setGuardianStatus(guardianState: GuardianState?) {
         if (guardianState == null) {
             state = state.copy(guardianStatus = GuardianStatus.DECLINED)
             return

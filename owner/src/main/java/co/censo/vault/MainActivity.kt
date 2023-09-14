@@ -34,8 +34,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import co.censo.shared.data.Resource
-import co.censo.shared.data.networking.AuthHeadersListener
-import co.censo.shared.data.networking.AuthHeadersState
 import co.censo.shared.data.storage.Storage
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
@@ -61,8 +59,6 @@ class MainActivity : FragmentActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
 
-    private var authHeadersStateListener: AuthHeadersListener? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,9 +67,6 @@ class MainActivity : FragmentActivity() {
         setContent {
             val context = LocalContext.current
             val navController = rememberNavController()
-
-            authHeadersStateListener = setupAuthHeadersListener()
-            authHeadersStateListener?.let { storage.addAuthHeadersStateListener(it) }
 
             val mainState = mainViewModel.state
 
@@ -201,15 +194,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun setupAuthHeadersListener() =
-        object : AuthHeadersListener {
-            override fun onAuthHeadersStateChanged(authHeadersState: AuthHeadersState) {
-                if (authHeadersState == AuthHeadersState.MISSING) {
-                    mainViewModel.updateAuthHeaders()
-                }
-            }
-        }
-
     private fun setupPushChannel() {
         val channelId = getString(R.string.default_notification_channel_id)
         val channelName = getString(R.string.default_notification_channel_name)
@@ -221,5 +205,4 @@ class MainActivity : FragmentActivity() {
             )
         )
     }
-
 }

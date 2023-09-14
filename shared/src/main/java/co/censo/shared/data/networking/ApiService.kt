@@ -257,16 +257,9 @@ class AuthInterceptor(private val storage: Storage) : Interceptor {
         val cachedHeaders = storage.retrieveReadHeaders()
         return if (cachedHeaders == null || cachedHeaders.isExpired(now)) {
             storage.clearReadHeaders()
-            try {
-                cachedReadCallHeaders = InternalDeviceKey().createAuthHeaders(now)
-                cachedReadCallHeaders?.let { storage.saveReadHeaders(it) }
-                storage.setAuthHeadersState(AuthHeadersState.VALID)
-                cachedReadCallHeaders?.headers
-            } catch (e: UserNotAuthenticatedException) {
-                //User does not have biometry to complete the signing
-                storage.setAuthHeadersState(AuthHeadersState.MISSING)
-                null
-            }
+            cachedReadCallHeaders = InternalDeviceKey().createAuthHeaders(now)
+            cachedReadCallHeaders?.let { storage.saveReadHeaders(it) }
+            cachedReadCallHeaders?.headers
         } else {
             cachedHeaders.headers
         }
@@ -293,14 +286,6 @@ class ConnectivityInterceptor(private val context: Context) : Interceptor {
 class NoConnectivityException : IOException() {
     override val message: String
         get() = "No network connection established"
-}
-
-interface AuthHeadersListener {
-    fun onAuthHeadersStateChanged(authHeadersState: AuthHeadersState)
-}
-
-enum class AuthHeadersState {
-    MISSING, VALID
 }
 
 @Serializable

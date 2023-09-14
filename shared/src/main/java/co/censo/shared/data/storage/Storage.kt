@@ -2,9 +2,6 @@ package co.censo.shared.data.storage
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.annotation.AnyThread
-import co.censo.shared.data.networking.AuthHeadersListener
-import co.censo.shared.data.networking.AuthHeadersState
 import co.censo.shared.data.networking.AuthInterceptor
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -20,11 +17,6 @@ interface Storage {
     fun saveReadHeaders(authHeadersWithTimestamp: AuthInterceptor.AuthHeadersWithTimestamp)
     fun retrieveReadHeaders(): AuthInterceptor.AuthHeadersWithTimestamp?
     fun clearReadHeaders()
-
-    //Auth Headers Notifying Functionality
-    fun setAuthHeadersState(authHeadersState: AuthHeadersState)
-    fun addAuthHeadersStateListener(listener: AuthHeadersListener)
-    fun clearAllListeners()
 }
 
 object SharedPrefsStorage : Storage {
@@ -42,8 +34,6 @@ object SharedPrefsStorage : Storage {
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
-
-    private val listeners: HashMap<String, AuthHeadersListener> = hashMapOf()
 
     fun setup(context: Context) {
         appContext = context
@@ -115,27 +105,6 @@ object SharedPrefsStorage : Storage {
         val editor = sharedPrefs.edit()
         editor.putString(AUTH_HEADERS, "")
         editor.apply()
-    }
-
-    @AnyThread
-    override fun setAuthHeadersState(authHeadersState: AuthHeadersState) {
-        synchronized(listeners) {
-            for (listener in listeners.values) {
-                Thread { listener.onAuthHeadersStateChanged(authHeadersState) }.start()
-            }
-        }
-    }
-
-    @AnyThread
-    override fun addAuthHeadersStateListener(listener: AuthHeadersListener) {
-        synchronized(listeners) {
-            listeners.put(listener::class.java.name, listener)
-        }
-    }
-
-    @AnyThread
-    override fun clearAllListeners() {
-        synchronized(listeners) { listeners.clear() }
     }
     //endregion
 

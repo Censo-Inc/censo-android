@@ -23,15 +23,14 @@ import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.log
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import java.util.Base64
 
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
-    suspend fun createOwner(): Resource<ResponseBody>
+    suspend fun createOwner(authId: String): Resource<ResponseBody>
 
-    fun checkValidTimestamp(): Boolean
-    fun saveValidTimestamp()
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
     suspend fun retrieveGuardianDeepLinks(guardians: List<PolicyGuardian.ProspectGuardian>, policyKey: Base58EncodedIntermediatePublicKey) : List<String>
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
@@ -75,23 +74,9 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.user() }
     }
 
-    override suspend fun createOwner(): Resource<ResponseBody> {
+    override suspend fun createOwner(authId: String): Resource<ResponseBody> {
+        return Resource.Success("".toResponseBody())
         return retrieveApiResource { apiService.createUser() }
-    }
-
-    override fun checkValidTimestamp(): Boolean {
-        val now = Clock.System.now()
-        val cachedHeaders = storage.retrieveReadHeaders()
-        return !(cachedHeaders == null || cachedHeaders.isExpired(now))
-    }
-
-    override fun saveValidTimestamp() {
-        try {
-            val cachedReadCallHeaders = InternalDeviceKey().createAuthHeaders(Clock.System.now())
-            storage.saveReadHeaders(cachedReadCallHeaders)
-        } catch (e: Exception) {
-            //TODO: Log exception with raygun
-        }
     }
 
     override suspend fun setupPolicy(threshold: Int, guardians: List<String>): PolicySetupHelper {
