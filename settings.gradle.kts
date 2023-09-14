@@ -16,6 +16,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Vault"
-include(":app")
+include(":owner")
 include(":guardian")
 include(":shared")
