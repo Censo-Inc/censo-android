@@ -38,6 +38,30 @@ android {
                 "proguard-rules.pro"
             )
         }
+        create("staging") {
+            resValue("string", "app_name", "Staging Vault")
+            buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+        }
+        create("aintegration") {
+            resValue("string", "app_name", "A Integration Vault")
+            buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+        }
+        create("bintegration") {
+            initWith(getByName("aintegration"))
+        }
+        create("cintegration") {
+            initWith(getByName("aintegration"))
+        }
+        create("dintegration") {
+            initWith(getByName("aintegration"))
+        }
+        debug {
+            initWith(getByName("aintegration"))
+            manifestPlaceholders["STRONGBOX_ENABLED"] = false
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

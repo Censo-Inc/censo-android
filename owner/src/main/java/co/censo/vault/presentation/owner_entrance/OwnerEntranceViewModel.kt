@@ -206,8 +206,8 @@ class OwnerEntranceViewModel @Inject constructor(
                 is Resource.Error -> {
                     vaultLog(message = "Retrieve user failed")
                     state =
-                        if (user.errorCode != null && user.errorCode == HTTP_401) {
-                            vaultLog(message = "Received 401. User not created.")
+                        if (user.errorCode != null && user.errorCode == HTTP_404) {
+                            vaultLog(message = "Received 404. User not created.")
                             state.copy(
                                 userStatus = UserStatus.CREATE_CONTACT,
                                 userResource = Resource.Uninitialized

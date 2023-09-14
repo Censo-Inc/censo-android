@@ -40,6 +40,45 @@ android {
             )
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
         }
+        create("staging") {
+            resValue("string", "app_name", "Staging Vault")
+            buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
+            resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            applicationIdSuffix = ".staging"
+            isDebuggable = false
+        }
+        create("aintegration") {
+            resValue("string", "app_name", "A Integration Vault")
+            buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
+            resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            applicationIdSuffix = ".aintegration"
+            isDebuggable = false
+        }
+        create("bintegration") {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "B Integration Vault")
+            applicationIdSuffix = ".bintegration"
+        }
+        create("cintegration") {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "C Integration Vault")
+            applicationIdSuffix = ".cintegration"
+        }
+        create("dintegration") {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "D Integration Vault")
+            applicationIdSuffix = ".dintegration"
+        }
+        debug {
+            initWith(getByName("aintegration"))
+            resValue("string", "app_name", "Debug Vault")
+            manifestPlaceholders["STRONGBOX_ENABLED"] = false
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
