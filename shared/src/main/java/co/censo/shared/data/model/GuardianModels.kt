@@ -130,3 +130,7 @@ object BigIntegerSerializer : KSerializer<BigInteger> {
 
     override fun deserialize(decoder: Decoder): BigInteger = BigInteger(decoder.decodeString())
 }
+
+@Serializable
+@JvmInline
+value class InvitationId(val value: String)

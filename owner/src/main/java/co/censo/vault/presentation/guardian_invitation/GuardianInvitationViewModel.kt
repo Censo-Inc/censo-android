@@ -40,11 +40,13 @@ class GuardianInvitationViewModel @Inject constructor(
         val createPolicyGetUserApiResponse = GetUserApiResponse(
             userGuid = "enim",
             biometricVerificationRequired = false,
+            guardianStates = emptyList(),
             ownerState = null
         )
         val policySetupGetUserApiResponse = GetUserApiResponse(
             userGuid = "enim",
             biometricVerificationRequired = false,
+            guardianStates = emptyList(),
             ownerState = OwnerState.PolicySetup(
                 policy = Policy(
                     createdAt = Clock.System.now(),
@@ -74,6 +76,7 @@ class GuardianInvitationViewModel @Inject constructor(
         val readyGetUserApiResponse = GetUserApiResponse(
             userGuid = "enim",
             biometricVerificationRequired = false,
+            guardianStates = emptyList(),
             ownerState = OwnerState.Ready(
                 policy = Policy(
                     createdAt = Clock.System.now(),
@@ -155,7 +158,6 @@ class GuardianInvitationViewModel @Inject constructor(
         viewModelScope.launch {
             val inviteResponse = ownerRepository.inviteGuardian(
                 participantId = guardian.participantId,
-                intermediatePublicKey = state.policyIntermediatePublicKey,
                 guardian = guardian
             )
 
@@ -163,7 +165,6 @@ class GuardianInvitationViewModel @Inject constructor(
         }
     }
 
-    //Policy setup should only happen at the end of the flow once all guardians have accepted
     fun createPolicy() {
         viewModelScope.launch {
             try {

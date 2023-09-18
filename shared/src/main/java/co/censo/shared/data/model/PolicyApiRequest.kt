@@ -14,8 +14,17 @@ data class CreatePolicyApiRequest(
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val threshold: Int,
-    val guardiansToInvite: List<GuardianInvite>,
-)
+    val guardians: List<Guardian>,
+) {
+    @Serializable
+    data class Guardian(
+        val participantId: ParticipantId,
+        val encryptedShard: Base64EncodedData,
+    )
+}
+
+@Serializable
+data class CreatePolicyApiResponse(val ownerState: OwnerState?)
 
 @Serializable
 data class UpdatePolicyApiRequest(

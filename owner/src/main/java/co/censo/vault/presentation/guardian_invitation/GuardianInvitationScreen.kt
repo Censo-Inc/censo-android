@@ -33,8 +33,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +47,9 @@ import co.censo.vault.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GuardianStatus.Initial.*
 import co.censo.shared.data.model.PolicyGuardian
+import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.repository.OwnerRepositoryImpl
+import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
 import co.censo.vault.presentation.owner_entrance.DisplayError
 import co.censo.vault.util.vaultLog
 
@@ -193,6 +198,8 @@ fun GuardianInvitationScreen(
                     }
 
                     GuardianInvitationStatus.POLICY_SETUP -> {
+                        val clipboardManager = LocalClipboardManager.current
+
                         Spacer(modifier = Modifier.height(56.dp))
 
                         Text(
@@ -210,10 +217,19 @@ fun GuardianInvitationScreen(
                         ) {
                             items(state.prospectGuardians.size) { index ->
                                 val guardian = state.prospectGuardians[index]
+                                val deeplink = "$GUARDIAN_URI{AAAA}"
 
                                 InvitedGuardian(
                                     guardian = state.prospectGuardians[index],
                                     inviteGuardian = { viewModel.inviteGuardian(guardian) },
+                                    deepLink = deeplink,
+                                    copyDeeplink = {
+                                        clipboardManager.setText(
+                                            AnnotatedString(
+                                                deeplink
+                                            )
+                                        )
+                                    }
                                 )
                             }
                         }
@@ -282,6 +298,8 @@ fun AcceptedGuardian(
 @Composable
 fun InvitedGuardian(
     guardian: PolicyGuardian.ProspectGuardian,
+    deepLink: String,
+    copyDeeplink: () -> Unit,
     inviteGuardian: () -> Unit
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -289,27 +307,56 @@ fun InvitedGuardian(
     when (guardian.status) {
         else -> {
             Card(modifier = Modifier.padding(8.dp)) {
-                Column(modifier = Modifier
-                    .background(color = Color(0xFF4059AD))
-                    .padding(vertical = 12.dp, horizontal = 36.dp)) {
+                Column(
+                    modifier = Modifier
+                        .background(color = Color(0xFF4059AD))
+                        .padding(vertical = 12.dp, horizontal = 36.dp)
+                ) {
 
                     Text(text = guardian.label, color = Color.White, fontSize = 24.sp)
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    IconButton(onClick = inviteGuardian) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "invite guardian",
-                            tint = Color.White
-                        )
+                    Row {
+                        IconButton(onClick = inviteGuardian) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "invite guardian",
+                                tint = Color.White
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(24.dp))
+
+                        IconButton(onClick = copyDeeplink) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy icon",
+                                tint = Color.White
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(24.dp))
+
+
+                        IconButton(onClick = {
+                            shareDeeplink(
+                                deeplink = deepLink,
+                                context
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share icon",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 fun shareDeeplink(deeplink: String, context: Context) {
     val sendIntent: Intent = Intent().apply {

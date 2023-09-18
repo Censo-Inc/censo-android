@@ -2,6 +2,7 @@ package co.censo.shared.data.repository
 
 import Base58EncodedPublicKey
 import Base64EncodedData
+import InvitationId
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
@@ -15,32 +16,19 @@ import okhttp3.ResponseBody
 import java.util.Base64
 
 interface GuardianRepository {
-//    suspend fun registerGuardian(intermediateKey: Base58EncodedPublicKey, participantId: ParticipantId) : Resource<RegisterGuardianApiResponse>
     fun signVerificationCode(verificationCode: String) : Pair<Base64EncodedData, Long>
-    suspend fun getGuardian(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId
-    ): Resource<GetGuardianStateApiResponse>
     suspend fun acceptGuardianship(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId,
+        invitationId: InvitationId,
         acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
     ): Resource<AcceptGuardianshipApiResponse>
     suspend fun declineGuardianship(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId,
+        invitationId: InvitationId,
     ): Resource<ResponseBody>
 }
 
 class GuardianRepositoryImpl(
     private val apiService: ApiService,
 ) : GuardianRepository, BaseRepository() {
-//    override suspend fun registerGuardian(
-//        intermediateKey: Base58EncodedPublicKey,
-//        participantId: ParticipantId
-//    ): Resource<RegisterGuardianApiResponse> {
-//        return retrieveApiResource { apiService.registerGuardian(intermediateKey.value, participantId.value) }
-//    }
 
     override fun signVerificationCode(verificationCode: String): Pair<Base64EncodedData, Long> {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
@@ -51,36 +39,22 @@ class GuardianRepositoryImpl(
         return Pair(base64EncodedData, currentTimeInMillis)
     }
 
-    override suspend fun getGuardian(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId,
-    ): Resource<GetGuardianStateApiResponse> {
-        return retrieveApiResource { apiService.guardian(
-            intermediateKey = intermediateKey.value,
-            participantId = participantId.value,
-        ) }
-    }
-
     override suspend fun acceptGuardianship(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId,
+        invitationId: InvitationId,
         acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
     ): Resource<AcceptGuardianshipApiResponse> {
         return retrieveApiResource { apiService.acceptGuardianship(
-            intermediateKey = intermediateKey.value,
-            participantId = participantId.value,
+            invitationId = invitationId.value,
             acceptGuardianshipApiRequest = acceptGuardianshipApiRequest
         ) }
     }
 
     override suspend fun declineGuardianship(
-        intermediateKey: Base58EncodedPublicKey,
-        participantId: ParticipantId
+        invitationId: InvitationId,
     ): Resource<ResponseBody> {
         return retrieveApiResource {
             apiService.declineGuardianship(
-                intermediateKey = intermediateKey.value,
-                participantId = participantId.value
+                invitationId = invitationId.value,
             )
         }
     }

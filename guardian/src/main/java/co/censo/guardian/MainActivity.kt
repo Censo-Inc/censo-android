@@ -13,9 +13,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import co.censo.guardian.presentation.Screen
+import co.censo.guardian.presentation.Screen.Companion.DL_INVITATION_ID_KEY
+import co.censo.guardian.presentation.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
 import co.censo.guardian.presentation.guardian_entrance.GuardianEntranceScreen
 import co.censo.guardian.ui.theme.GuardianTheme
+import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -46,6 +50,17 @@ class MainActivity : FragmentActivity() {
             composable(
                 Screen.GuardianEntranceRoute.route
             ) {
+                GuardianEntranceScreen(navController = navController)
+            }
+            composable(
+                "$GUARDIAN_URI?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "$GUARDIAN_DEEPLINK_ACCEPTANCE{$DL_INVITATION_ID_KEY}"
+                    }
+                )
+            ) {
+                //TODO: Handle Deeplink args
                 GuardianEntranceScreen(navController = navController)
             }
         }

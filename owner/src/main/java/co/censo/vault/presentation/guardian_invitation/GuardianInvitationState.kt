@@ -3,6 +3,7 @@ package co.censo.vault.presentation.guardian_invitation
 import Base58EncodedIntermediatePublicKey
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.PolicyGuardian
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationViewModel.Companion.MIN_GUARDIAN_LIMIT
 import okhttp3.ResponseBody
@@ -11,7 +12,7 @@ data class GuardianInvitationState(
     val threshold: Int = 0,
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val createPolicyResponse: Resource<ResponseBody> = Resource.Uninitialized,
-    val inviteGuardianResponse: Resource<ResponseBody> = Resource.Uninitialized,
+    val inviteGuardianResponse: Resource<InviteGuardianApiResponse> = Resource.Uninitialized,
     val confirmShardReceiptResponse: Resource<ResponseBody> = Resource.Uninitialized,
     val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized,
     val policyIntermediatePublicKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(""),

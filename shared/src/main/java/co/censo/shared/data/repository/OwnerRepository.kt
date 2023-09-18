@@ -4,6 +4,7 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
 import GuardianProspect
+import InvitationId
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
@@ -17,6 +18,7 @@ import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InviteGuardianApiRequest
+import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.PolicyGuardian
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
@@ -35,9 +37,8 @@ interface OwnerRepository {
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
     suspend fun inviteGuardian(
         participantId: ParticipantId,
-        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
         guardian: PolicyGuardian.ProspectGuardian
-    ): Resource<ResponseBody>
+    ): Resource<InviteGuardianApiResponse>
 
 
     fun checkCodeMatches(
@@ -62,6 +63,9 @@ interface OwnerRepository {
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
 ) : OwnerRepository, BaseRepository() {
+    companion object {
+        const val GUARDIAN_URI = "guardian://guardian/"
+    }
 
     override suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse?): Resource<GetUserApiResponse> {
         return Resource.Success(getUserApiResponse)
@@ -102,8 +106,8 @@ class OwnerRepositoryImpl(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
-            guardiansToInvite = setupHelper.guardianInvites,
             threshold = setupHelper.threshold,
+            guardians = emptyList()
         )
 
         return Resource.Success("".toResponseBody())
@@ -112,15 +116,13 @@ class OwnerRepositoryImpl(
 
     override suspend fun inviteGuardian(
         participantId: ParticipantId,
-        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
         guardian: PolicyGuardian.ProspectGuardian
-    ): Resource<ResponseBody> {
+    ): Resource<InviteGuardianApiResponse> {
 
         val deviceEncryptedPin = InternalDeviceKey().encrypt("123456".toByteArray(Charsets.UTF_8))
 
         return retrieveApiResource {
             apiService.inviteGuardian(
-                intermediateKey = intermediatePublicKey.value,
                 participantId = participantId.value,
                 inviteGuardianApiRequest =
                     InviteGuardianApiRequest(
@@ -191,5 +193,11 @@ class OwnerRepositoryImpl(
                 confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
             )
         }
+    }
+
+    private fun generateGuardianDeeplink(
+        invitationId: InvitationId,
+    ): String {
+        return "$GUARDIAN_URI${invitationId.value}"
     }
 }
