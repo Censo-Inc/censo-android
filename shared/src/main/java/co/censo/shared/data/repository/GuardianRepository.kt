@@ -32,8 +32,7 @@ class GuardianRepositoryImpl(
 
     override fun signVerificationCode(verificationCode: String): Pair<Base64EncodedData, Long> {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
-        val dataToSign =
-            Guardian.createNonceAndCodeData(time = currentTimeInMillis, code = verificationCode)
+        val dataToSign = verificationCode.toByteArray() + currentTimeInMillis.toString().toByteArray()
         val signature = InternalDeviceKey().sign(dataToSign)
         val base64EncodedData = Base64EncodedData(Base64.getEncoder().encodeToString(signature))
         return Pair(base64EncodedData, currentTimeInMillis)

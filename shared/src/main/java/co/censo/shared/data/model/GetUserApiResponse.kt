@@ -1,8 +1,10 @@
 package co.censo.shared.data.model
 
-import Base58EncodedDevicePublicKey
+import Base58EncodedGuardianPublicKey
 import Base58EncodedIntermediatePublicKey
+import Base58EncodedMasterPublicKey
 import Base64EncodedData
+import InvitationId
 import ParticipantId
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,52 +22,46 @@ data class GetUserApiResponse(
 sealed class GuardianStatus {
     @Serializable
     @SerialName("Initial")
-    data class Initial(
-        val deviceEncryptedShard: Base64EncodedData,
-    ) : GuardianStatus()
+    object Initial : GuardianStatus()
 
     @Serializable
     @SerialName("Invited")
     data class Invited(
-        val deviceEncryptedShard: Base64EncodedData,
-        val deviceEncryptedPin: Base64EncodedData,
         val invitedAt: Instant,
     ) : GuardianStatus()
 
     @Serializable
     @SerialName("Declined")
-    data class Declined(
-        val deviceEncryptedShard: Base64EncodedData,
-    ) : GuardianStatus()
+    object Declined : GuardianStatus()
 
     @Serializable
     @SerialName("Accepted")
     data class Accepted(
-        val deviceEncryptedShard: Base64EncodedData,
         val signature: Base64EncodedData,
         val timeMillis: Long,
-        val guardianTransportPublicKey: Base58EncodedDevicePublicKey,
+        val guardianPublicKey: Base58EncodedGuardianPublicKey,
         val acceptedAt: Instant,
     ) : GuardianStatus()
 
     @Serializable
     @SerialName("Confirmed")
     data class Confirmed(
-        val guardianTransportEncryptedShard: Base64EncodedData,
-        val confirmedAt: Instant,
+        val guardianKeySignature: Base64EncodedData, // signature of guardianPublicKey + timeMillis + participantId
+        val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        val timeMillis: Long,
+        val createdAt: Instant,
     ) : GuardianStatus()
 
     @Serializable
     @SerialName("Onboarded")
     data class Onboarded(
-        val guardianEncryptedData: Base64EncodedData,
-        val passwordHash: Base64EncodedData,
+        val guardianEncryptedShard: Base64EncodedData,
         val createdAt: Instant,
     ) : GuardianStatus()
 }
 
 @Serializable
-sealed class PolicyGuardian {
+sealed class Guardian {
     abstract val label: String
     abstract val participantId: ParticipantId
 
@@ -74,8 +70,9 @@ sealed class PolicyGuardian {
     data class ProspectGuardian(
         override val label: String,
         override val participantId: ParticipantId,
+        val invitationId: InvitationId?,
         val status: GuardianStatus,
-    ) : PolicyGuardian()
+    ) : Guardian()
 
     @Serializable
     @SerialName("Trusted")
@@ -83,13 +80,13 @@ sealed class PolicyGuardian {
         override val label: String,
         override val participantId: ParticipantId,
         val attributes: GuardianStatus.Onboarded,
-    ) : PolicyGuardian()
+    ) : Guardian()
 }
 
 @Serializable
-data class Policy<T : PolicyGuardian>(
+data class Policy(
     val createdAt: Instant,
-    val guardians: List<T>,
+    val guardians: List<Guardian.TrustedGuardian>,
     val threshold: UInt,
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
@@ -106,22 +103,21 @@ data class VaultSecret(
 @Serializable
 data class Vault(
     val secrets: List<VaultSecret>,
-    val publicMasterEncryptionKey: Base58EncodedIntermediatePublicKey,
+    val publicMasterEncryptionKey: Base58EncodedMasterPublicKey,
 )
 
 @Serializable
 sealed class OwnerState {
     @Serializable
-    @SerialName("PolicySetup")
-    data class PolicySetup(
-        val policy: Policy<PolicyGuardian.ProspectGuardian>,
-        val publicMasterEncryptionKey: Base58EncodedIntermediatePublicKey,
+    @SerialName("GuardianSetup")
+    data class GuardianSetup(
+        val guardians: List<Guardian.ProspectGuardian>,
     ) : OwnerState()
 
     @Serializable
     @SerialName("Ready")
     data class Ready(
-        val policy: Policy<PolicyGuardian.TrustedGuardian>,
+        val policy: Policy,
         val vault: Vault,
     ) : OwnerState()
 }

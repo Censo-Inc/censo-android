@@ -32,23 +32,6 @@ data class UpdatePolicyApiRequest(
 )
 
 @Serializable
-data class Guardian(
-    val id: String,
-    val name: String,
-    val participantId: ParticipantId,
-    val status: GuardianStatus,
-    val encryptedShard: Base64EncodedData,
-    val signature: Base64EncodedData?,
-    val timeMillis: Long?,
-) {
-    companion object {
-        fun createNonceAndCodeData(time: Long, code: String) : ByteArray {
-            return code.toByteArray() + time.toString().toByteArray()
-        }
-    }
-}
-
-@Serializable
 data class GetPolicyApiResponse(
     val status: PolicyStatus,
     val intermediateKey: Base58EncodedIntermediatePublicKey,

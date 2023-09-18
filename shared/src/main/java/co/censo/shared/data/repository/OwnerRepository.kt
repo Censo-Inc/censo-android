@@ -14,12 +14,14 @@ import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.key.ExternalDeviceKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
+import co.censo.shared.data.model.CreateGuardianApiRequest
+import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
-import co.censo.shared.data.model.PolicyGuardian
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.log
@@ -35,19 +37,10 @@ interface OwnerRepository {
 
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
+    suspend fun createGuardian(guardianName: String, mockCreatedGuardians: List<Guardian.ProspectGuardian>) : Resource<CreateGuardianApiResponse>
     suspend fun inviteGuardian(
         participantId: ParticipantId,
-        guardian: PolicyGuardian.ProspectGuardian
     ): Resource<InviteGuardianApiResponse>
-
-
-    fun checkCodeMatches(
-        verificationCode: String,
-        transportKey: Base58EncodedDevicePublicKey,
-        timeMillis: Long,
-        signature: Base64EncodedData
-    ): Boolean
-
     fun encryptShardWithGuardianKey(
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
@@ -68,6 +61,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse?): Resource<GetUserApiResponse> {
+
         return Resource.Success(getUserApiResponse)
         return retrieveApiResource { apiService.user() }
     }
@@ -114,9 +108,22 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
+    override suspend fun createGuardian(guardianName: String, mockCreatedGuardians: List<Guardian.ProspectGuardian>): Resource<CreateGuardianApiResponse> {
+        val createGuardianApiRequest = CreateGuardianApiRequest(name = guardianName)
+
+        return Resource.Success(
+            data = CreateGuardianApiResponse(
+                ownerState = OwnerState.GuardianSetup(
+                    guardians = mockCreatedGuardians
+                )
+            )
+        )
+
+        return retrieveApiResource { apiService.createGuardian(createGuardianApiRequest) }
+    }
+
     override suspend fun inviteGuardian(
         participantId: ParticipantId,
-        guardian: PolicyGuardian.ProspectGuardian
     ): Resource<InviteGuardianApiResponse> {
 
         val deviceEncryptedPin = InternalDeviceKey().encrypt("123456".toByteArray(Charsets.UTF_8))
@@ -133,32 +140,6 @@ class OwnerRepositoryImpl(
             )
         }
     }
-    override fun checkCodeMatches(
-        verificationCode: String,
-        transportKey: Base58EncodedDevicePublicKey,
-        timeMillis: Long,
-        signature: Base64EncodedData
-    ) =
-        try {
-
-            val guardianDevicePublicKey = transportKey.ecPublicKey
-
-            val dataToSign =
-                Guardian.createNonceAndCodeData(
-                    time = timeMillis,
-                    code = verificationCode
-                )
-
-            val externalDeviceKey = ExternalDeviceKey(guardianDevicePublicKey)
-
-            externalDeviceKey.verify(
-                signedData = dataToSign,
-                signature = Base64.getDecoder().decode(signature.base64Encoded),
-            )
-        } catch (e: Exception) {
-            false
-        }
-
     override fun encryptShardWithGuardianKey(
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey

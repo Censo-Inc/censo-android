@@ -14,6 +14,8 @@ import co.censo.shared.data.model.AcceptGuardianshipApiRequest
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
+import co.censo.shared.data.model.CreateGuardianApiRequest
+import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
@@ -127,6 +129,11 @@ interface ApiService {
 
     @GET("/v1/policies")
     suspend fun policies(): RetrofitResponse<GetPoliciesApiResponse>
+
+    @POST("/v1/guardians")
+    suspend fun createGuardian(
+        @Body createGuardianApiRequest: CreateGuardianApiRequest
+    ) : RetrofitResponse<CreateGuardianApiResponse>
 
     @POST("/v1/guardians/{$PARTICIPANT_ID}/invitation")
     suspend fun inviteGuardian(
