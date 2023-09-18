@@ -6,6 +6,8 @@ import Base64EncodedData
 import GuardianProspect
 import InvitationId
 import ParticipantId
+import android.util.Log
+import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
@@ -19,25 +21,33 @@ import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.JwtToken
+import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.networking.ApiService
-import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.log
-import kotlinx.datetime.Clock
+import com.google.api.client.auth.openidconnect.IdToken
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import java.time.Clock
 import java.util.Base64
+
 
 interface OwnerRepository {
 
     suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse? = null): Resource<GetUserApiResponse>
-    suspend fun createOwner(authId: String): Resource<ResponseBody>
-
+    suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
     suspend fun createGuardian(guardianName: String, mockCreatedGuardians: List<Guardian.ProspectGuardian>) : Resource<CreateGuardianApiResponse>
+    suspend fun verifyToken(token: String) : String?
     suspend fun inviteGuardian(
         participantId: ParticipantId,
     ): Resource<InviteGuardianApiResponse>
@@ -66,10 +76,15 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.user() }
     }
 
-    override suspend fun createOwner(authId: String): Resource<ResponseBody> {
-        return Resource.Success("".toResponseBody())
-        return retrieveApiResource { apiService.createUser() }
-    }
+    override suspend fun createUser(authId: String, idToken: String) =
+        retrieveApiResource {
+            apiService.signIn(
+                SignInApiRequest(
+                    identityToken = IdentityToken(idToken),
+                    jwtToken = JwtToken(authId)
+                )
+            )
+        }
 
     override suspend fun setupPolicy(threshold: Int, guardians: List<String>): PolicySetupHelper {
 
@@ -120,6 +135,17 @@ class OwnerRepositoryImpl(
         )
 
         return retrieveApiResource { apiService.createGuardian(createGuardianApiRequest) }
+    }
+    override suspend fun verifyToken(token: String): String? {
+        val verifier = GoogleIdTokenVerifier.Builder(
+            NetHttpTransport(), GsonFactory()
+        )
+            .setAudience(BuildConfig.ONE_TAP_CLIENT_IDS.toList())
+            .build()
+
+        val verifiedIdToken: GoogleIdToken? = verifier.verify(token)
+
+        return verifiedIdToken?.payload?.subject
     }
 
     override suspend fun inviteGuardian(

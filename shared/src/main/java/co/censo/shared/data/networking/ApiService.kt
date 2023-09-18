@@ -24,6 +24,7 @@ import co.censo.shared.data.model.GetPolicyApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
+import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.UpdatePolicyApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
@@ -95,9 +96,8 @@ interface ApiService {
     }
 
 
-    @POST("/v1/user")
-    suspend fun createUser():
-            RetrofitResponse<ResponseBody>
+    @POST("/v1/sign-in")
+    suspend fun signIn(@Body signInApiRequest: SignInApiRequest): RetrofitResponse<ResponseBody>
 
     @GET("/v1/user")
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
