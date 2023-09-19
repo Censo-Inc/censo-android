@@ -17,7 +17,7 @@
     <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
     <string name="try_again">Try Again</string>
     <string name="bip39_detail">BIP39 Detail</string>
-    <string name="phrase_words_empty">Complete biometry to access BIP 39 Phrase</string>
+    <string name="phrase_words_empty">Phrase is empty</string>
     <string name="previous">Previous</string>
     <string name="previous_icon_content_desc">previous icon</string>
     <string name="next">Next</string>

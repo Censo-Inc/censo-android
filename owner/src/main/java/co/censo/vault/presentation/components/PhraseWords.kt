@@ -28,9 +28,7 @@ import co.censo.vault.util.TestTag
 
 @Composable
 fun PhraseWords(
-    phraseWords: List<IndexedPhraseWord> = emptyList(),
-    biometryError: Boolean,
-    retry: () -> Unit
+    phraseWords: List<IndexedPhraseWord> = emptyList()
 ) {
     Column(
         modifier = Modifier
@@ -41,13 +39,7 @@ fun PhraseWords(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (biometryError) {
-            Text(text = stringResource(R.string.please_complete_biometry_to_continue))
-            Spacer(modifier = Modifier.height(24.dp))
-            VaultButton(onClick = retry) {
-                Text(text = stringResource(id = R.string.try_again))
-            }
-        } else if (phraseWords.isEmpty()) {
+        if (phraseWords.isEmpty()) {
             Text(
                 modifier = Modifier.semantics { testTag = TestTag.bip_39_detail_biometry_text },
                 text = stringResource(R.string.phrase_words_empty),

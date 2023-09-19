@@ -132,11 +132,7 @@ fun BIP39DetailScreen(
                     //endregion
 
                     //Phrase words
-                    PhraseWords(
-                        phraseWords = wordsToShow,
-                        biometryError = false,
-                        retry = { viewModel.onStart(bip39Name) }
-                    )
+                    PhraseWords(phraseWords = wordsToShow)
 
                     //region Buttons
                     Spacer(
