@@ -164,6 +164,11 @@ fun OwnerEntranceScreen(
                                 errorMessage = state.createUserResource.getErrorMessage(context),
                                 dismissAction = viewModel::resetCreateOwnerResource,
                             ) { viewModel.retryCreateUser() }
+                        } else if (state.triggerOneTap is Resource.Error) {
+                            DisplayError(
+                                errorMessage = state.triggerOneTap.getErrorMessage(context),
+                                dismissAction = viewModel::resetCreateOwnerResource,
+                            ) { viewModel.retryCreateUser() }
                         }
                     }
 
