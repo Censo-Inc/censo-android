@@ -28,7 +28,9 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.networking.ApiService
+import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.log
+import com.auth0.android.jwt.JWT
 import com.google.api.client.auth.openidconnect.IdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
@@ -48,6 +50,9 @@ interface OwnerRepository {
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
     suspend fun createGuardian(guardianName: String, mockCreatedGuardians: List<Guardian.ProspectGuardian>) : Resource<CreateGuardianApiResponse>
     suspend fun verifyToken(token: String) : String?
+    suspend fun saveJWT(jwtToken: String)
+    suspend fun retrieveJWT() : String
+    suspend fun checkJWTValid(jwtToken: String) : Boolean
     suspend fun inviteGuardian(
         participantId: ParticipantId,
     ): Resource<InviteGuardianApiResponse>
@@ -65,6 +70,7 @@ interface OwnerRepository {
 
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
+    private val storage: Storage
 ) : OwnerRepository, BaseRepository() {
     companion object {
         const val GUARDIAN_URI = "guardian://guardian/"
@@ -95,12 +101,12 @@ class OwnerRepositoryImpl(
             )
         }
 
-        val deviceKey = InternalDeviceKey()
+        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
 
         val policySetupHelper = PolicySetupHelper.create(
             threshold = threshold,
             guardians = guardianProspect,
-            deviceKey = deviceKey.key
+            deviceKey = deviceKey.retrieveKey()
         ) {
             deviceKey.encrypt(it)
         }
@@ -148,21 +154,37 @@ class OwnerRepositoryImpl(
         return verifiedIdToken?.payload?.subject
     }
 
+    override suspend fun saveJWT(jwtToken: String) {
+        storage.saveJWT(jwtToken)
+    }
+
+    override suspend fun retrieveJWT() = storage.retrieveJWT()
+    override suspend fun checkJWTValid(jwtToken: String): Boolean {
+        return try {
+            val jwtDecoded = JWT(jwtToken)
+            Log.d("WaterBottle", "Jwt decoded: $jwtDecoded")
+            return true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     override suspend fun inviteGuardian(
         participantId: ParticipantId,
     ): Resource<InviteGuardianApiResponse> {
 
-        val deviceEncryptedPin = InternalDeviceKey().encrypt("123456".toByteArray(Charsets.UTF_8))
+        val deviceEncryptedPin =
+            InternalDeviceKey(storage.retrieveDeviceKeyId()).encrypt("123456".toByteArray(Charsets.UTF_8))
 
         return retrieveApiResource {
             apiService.inviteGuardian(
                 participantId = participantId.value,
                 inviteGuardianApiRequest =
-                    InviteGuardianApiRequest(
-                        deviceEncryptedPin = Base64EncodedData(
-                            Base64.getEncoder().encodeToString(deviceEncryptedPin)
-                        )
+                InviteGuardianApiRequest(
+                    deviceEncryptedPin = Base64EncodedData(
+                        Base64.getEncoder().encodeToString(deviceEncryptedPin)
                     )
+                )
             )
         }
     }
@@ -173,7 +195,7 @@ class OwnerRepositoryImpl(
         return try {
             val guardianDevicePublicKey = transportKey.ecPublicKey
 
-            val decryptedShard = InternalDeviceKey().decrypt(
+            val decryptedShard = InternalDeviceKey(storage.retrieveDeviceKeyId()).decrypt(
                 Base64.getDecoder().decode(deviceEncryptedShard.base64Encoded)
             )
 

@@ -6,7 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.vault.presentation.home.HomeScreen
+import co.censo.vault.presentation.home.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,10 +29,30 @@ import javax.inject.Inject
 @HiltViewModel
 class OwnerEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(OwnerEntranceState())
         private set
+
+    fun onStart() {
+        checkUserHasValidToken()
+    }
+
+    private fun checkUserHasValidToken() {
+        viewModelScope.launch {
+            val jwtToken = ownerRepository.retrieveJWT()
+            if (jwtToken.isNotEmpty()) {
+                val tokenValid = ownerRepository.checkJWTValid(jwtToken)
+
+                if (tokenValid) {
+                    state = state.copy(
+                        userFinishedSetup = Resource.Success(Screen.HomeRoute.route)
+                    )
+                }
+            }
+        }
+    }
 
     fun startOneTapFlow() {
         state = state.copy(triggerOneTap = Resource.Success(Unit))
@@ -48,16 +71,25 @@ class OwnerEntranceViewModel @Inject constructor(
                 return@launch
             }
 
+            if (!keyRepository.hasKeyWithId(idToken)) {
+                keyRepository.createAndSaveKeyWithId(idToken)
+            }
+
+            ownerRepository.saveJWT(googleIdCredential)
+
             val createUserResponse = ownerRepository.createUser(
                 jwtToken = googleIdCredential,
                 idToken = idToken
             )
 
-            if (createUserResponse is Resource.Success) {
-                //TODO: Next step is to create device key or re-use existing device key
+            state = if (createUserResponse is Resource.Success) {
+                state.copy(
+                    userFinishedSetup = Resource.Success(Screen.HomeRoute.route),
+                    createUserResource = createUserResponse
+                )
+            } else {
+                state.copy(createUserResource = createUserResponse)
             }
-
-            state = state.copy(createUserResource = createUserResponse)
         }
     }
     fun oneTapFailure(oneTapError: OneTapError) {

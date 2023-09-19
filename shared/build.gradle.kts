@@ -140,6 +140,9 @@ dependencies {
     //Google API Java Client
     implementation("com.google.api-client:google-api-client:1.33.0")
 
+    //auth0 JWT
+    implementation("com.auth0.android:jwtdecode:2.0.1")
+
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")

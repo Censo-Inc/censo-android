@@ -1,6 +1,5 @@
 package co.censo.shared.data.networking
 
-import Base58EncodedDevicePublicKey
 import Base58EncodedPublicKey
 import InitBiometryVerificationApiResponse
 import android.content.Context
@@ -8,7 +7,6 @@ import android.net.ConnectivityManager
 import android.os.Build
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.Header
-import co.censo.shared.data.HeadersSerializer
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiRequest
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
@@ -30,6 +28,7 @@ import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.Storage
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.datetime.Clock
@@ -50,10 +49,7 @@ import retrofit2.http.Path
 import java.io.IOException
 import java.time.Duration
 import java.util.Base64
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.minutes
 import retrofit2.Response as RetrofitResponse
-
 
 interface ApiService {
 
@@ -203,7 +199,9 @@ class AnalyticsInterceptor(
         )
 }
 
-class AuthInterceptor(private val storage: Storage) : Interceptor {
+class AuthInterceptor(
+    private val storage: Storage
+) : Interceptor {
     private val AUTHORIZATION_HEADER = "Authorization"
     private val DEVICE_PUBLIC_KEY_HEADER = "X-Censo-Device-Public-Key"
     private val TIMESTAMP_HEADER = "X-Censo-Timestamp"
@@ -223,7 +221,7 @@ class AuthInterceptor(private val storage: Storage) : Interceptor {
     }
 
     private fun getAuthHeaders(now: Instant, request: Request): List<Header> {
-        val deviceKey = InternalDeviceKey()
+        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
         val signature = Base64.getEncoder().encodeToString(deviceKey.sign(dataToSign(request, now)))
 
         return listOf(
