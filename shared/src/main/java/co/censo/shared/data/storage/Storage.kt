@@ -14,9 +14,6 @@ interface Storage {
     fun retrieveBIP39Phrases(): BIP39Phrases
     fun clearStoredPhrases()
     fun storedPhrasesIsNotEmpty() : Boolean
-    fun saveReadHeaders(authHeadersWithTimestamp: AuthInterceptor.AuthHeadersWithTimestamp)
-    fun retrieveReadHeaders(): AuthInterceptor.AuthHeadersWithTimestamp?
-    fun clearReadHeaders()
 }
 
 object SharedPrefsStorage : Storage {
@@ -29,8 +26,6 @@ object SharedPrefsStorage : Storage {
 
     private const val BIP39 = "bip_39"
     private const val TEMP_ENCRYPTION_MASTER_KEY = "temp_encryption_master_key"
-
-    private const val AUTH_HEADERS = "read_timestamp"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -82,28 +77,6 @@ object SharedPrefsStorage : Storage {
     override fun clearStoredPhrases() {
         val editor = sharedPrefs.edit()
         editor.putString(BIP39, "")
-        editor.apply()
-    }
-    //endregion
-
-    //region read auth headers
-    override fun saveReadHeaders(authHeadersWithTimestamp: AuthInterceptor.AuthHeadersWithTimestamp) {
-        val editor = sharedPrefs.edit()
-        editor.putString(AUTH_HEADERS, Json.encodeToString(authHeadersWithTimestamp))
-        editor.apply()
-    }
-
-    override fun retrieveReadHeaders(): AuthInterceptor.AuthHeadersWithTimestamp? {
-        val authHeadersWithTimestamp = sharedPrefs.getString(AUTH_HEADERS, null)
-
-        if (authHeadersWithTimestamp.isNullOrEmpty()) return null
-
-        return Json.decodeFromString(authHeadersWithTimestamp)
-    }
-
-    override fun clearReadHeaders() {
-        val editor = sharedPrefs.edit()
-        editor.putString(AUTH_HEADERS, "")
         editor.apply()
     }
     //endregion

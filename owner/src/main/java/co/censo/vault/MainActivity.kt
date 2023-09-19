@@ -141,23 +141,6 @@ class MainActivity : FragmentActivity() {
                         biometryStatus = mainState.biometryStatus,
                         retry = mainViewModel::launchBlockingForegroundBiometryRetrieval
                     )
-
-                    if (mainState.bioPromptReason == BioPromptReason.AUTH_HEADERS) {
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = getString(R.string.please_complete_biometry_to_continue),
-                                fontSize = 24.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
                 }
             }
         }

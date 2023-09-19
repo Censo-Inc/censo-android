@@ -58,14 +58,6 @@ class MainViewModel @Inject constructor(
     }
 
 
-    fun updateAuthHeaders() {
-        state = state.copy(
-            bioPromptTrigger = Resource.Success(Unit),
-            bioPromptReason = BioPromptReason.AUTH_HEADERS,
-            blockAppUI = BlockAppUI.NONE
-        )
-    }
-
     fun onForeground(biometricCapability: BiometricUtil.Companion.BiometricsStatus) {
         state = state.copy(biometryStatus = biometricCapability)
 
@@ -91,7 +83,6 @@ class MainViewModel @Inject constructor(
     fun onBiometryApproved() {
         when (state.bioPromptReason) {
             BioPromptReason.FOREGROUND_RETRIEVAL -> checkDataAfterBiometricApproval()
-            BioPromptReason.AUTH_HEADERS -> signAuthHeaders()
             BioPromptReason.UNINITIALIZED -> {}
             BioPromptReason.PUSH_NOTIFICATION -> {
                 state = state.copy(bioPromptTrigger = Resource.Uninitialized)
@@ -102,17 +93,6 @@ class MainViewModel @Inject constructor(
         }
 
         state = state.copy(bioPromptReason = BioPromptReason.UNINITIALIZED)
-    }
-
-    private fun signAuthHeaders() {
-        val cachedReadCallHeaders = deviceKey.createAuthHeaders(Clock.System.now())
-        storage.saveReadHeaders(cachedReadCallHeaders)
-
-        state = state.copy(
-            blockAppUI = BlockAppUI.NONE,
-            bioPromptTrigger = Resource.Uninitialized,
-            bioPromptReason = BioPromptReason.UNINITIALIZED
-        )
     }
 
     private fun checkDataAfterBiometricApproval() {

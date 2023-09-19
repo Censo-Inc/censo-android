@@ -15,7 +15,6 @@ import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
 import co.censo.shared.data.model.CreatePolicyApiRequest
-import co.censo.shared.data.model.GetGuardianStateApiResponse
 import co.censo.shared.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.shared.data.model.GetPoliciesApiResponse
@@ -37,6 +36,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.logging.HttpLoggingInterceptor
+import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -46,6 +46,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.io.IOException
 import java.time.Duration
+import java.util.Base64
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import retrofit2.Response as RetrofitResponse
@@ -63,20 +64,6 @@ interface ApiService {
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
-        private const val AUTHORIZATION_HEADER = "Authorization"
-        private const val DEVICE_PUBLIC_KEY_HEADER = "X-Censo-Device-Public-Key"
-        private const val TIMESTAMP_HEADER = "X-Censo-Timestamp"
-
-        fun getAuthHeaders(
-            base64FormattedSignature: String,
-            base58FormattedDevicePublicKey: Base58EncodedDevicePublicKey,
-            iso8601FormattedTimestamp: String
-        ): List<Header> =
-            listOf(
-                Header(AUTHORIZATION_HEADER, "signature $base64FormattedSignature"),
-                Header(DEVICE_PUBLIC_KEY_HEADER, base58FormattedDevicePublicKey.value),
-                Header(TIMESTAMP_HEADER, iso8601FormattedTimestamp)
-            )
 
         fun create(storage: Storage, context: Context, versionCode: String): ApiService {
             val client = OkHttpClient.Builder()
@@ -210,44 +197,44 @@ class AnalyticsInterceptor(
 }
 
 class AuthInterceptor(private val storage: Storage) : Interceptor {
+    private val AUTHORIZATION_HEADER = "Authorization"
+    private val DEVICE_PUBLIC_KEY_HEADER = "X-Censo-Device-Public-Key"
+    private val TIMESTAMP_HEADER = "X-Censo-Timestamp"
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val now = Clock.System.now()
-        val headers = getAuthHeaders(now)
+        val headers = getAuthHeaders(now, request)
 
         return chain.proceed(
             request.newBuilder().apply {
-                headers?.let {
-                    for (header in headers) {
-                        addHeader(header.name, header.value)
-                    }
+                for (header in headers) {
+                    addHeader(header.name, header.value)
                 }
             }.build()
         )
     }
 
-    @Serializable
-    data class AuthHeadersWithTimestamp(
-        @Serializable(with = HeadersSerializer::class)
-        val headers: List<Header>,
-        val createdAt: Instant
-    ) {
-        fun isExpired(now: Instant): Boolean =
-            createdAt + 1.days - 1.minutes <= now
+    private fun getAuthHeaders(now: Instant, request: Request): List<Header> {
+        val deviceKey = InternalDeviceKey()
+        val signature = Base64.getEncoder().encodeToString(deviceKey.sign(dataToSign(request, now)))
+
+        return listOf(
+            Header(AUTHORIZATION_HEADER, "signature $signature"),
+            Header(DEVICE_PUBLIC_KEY_HEADER, deviceKey.publicExternalRepresentation().value),
+            Header(TIMESTAMP_HEADER, now.toString())
+        )
     }
 
-    private var cachedReadCallHeaders: AuthHeadersWithTimestamp? = storage.retrieveReadHeaders()
+    private fun dataToSign(request: Request, timestamp: Instant): ByteArray {
+        val requestPathAndQueryParams = request.url.encodedPath + (request.url.encodedQuery?.let { "?$it" } ?: "")
+        val requestBody = request.body?.let {
+            val buffer = Buffer()
+            it.writeTo(buffer)
+            buffer.readByteArray()
+        } ?: byteArrayOf()
 
-    private fun getAuthHeaders(now: Instant): List<Header>? {
-        val cachedHeaders = storage.retrieveReadHeaders()
-        return if (cachedHeaders == null || cachedHeaders.isExpired(now)) {
-            storage.clearReadHeaders()
-            cachedReadCallHeaders = InternalDeviceKey().createAuthHeaders(now)
-            cachedReadCallHeaders?.let { storage.saveReadHeaders(it) }
-            cachedReadCallHeaders?.headers
-        } else {
-            cachedHeaders.headers
-        }
+        return (request.method + requestPathAndQueryParams + Base64.getEncoder().encodeToString(requestBody) + timestamp.toString()).toByteArray()
     }
 }
 
