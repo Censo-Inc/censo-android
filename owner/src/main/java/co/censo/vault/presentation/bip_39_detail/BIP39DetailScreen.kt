@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,12 +39,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
-import co.censo.shared.data.Resource
 import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.components.IndexedPhraseWord
 import co.censo.vault.presentation.components.PhraseUICompanion
 import co.censo.vault.presentation.components.PhraseWords
-import co.censo.vault.util.BiometricUtil
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,31 +58,6 @@ fun BIP39DetailScreen(
         viewModel.onStart(bip39Name)
         onDispose {
             viewModel.reset()
-        }
-    }
-
-    LaunchedEffect(key1 = state) {
-
-        if (state.bioPromptTrigger is Resource.Success) {
-
-            val promptInfo = BiometricUtil.createPromptInfo(context = context)
-
-            val bioPrompt = BiometricUtil.createBioPrompt(
-                fragmentActivity = context,
-                onSuccess = {
-                    viewModel.onBiometryApproved()
-                },
-                onFail = {
-                    BiometricUtil.handleBioPromptOnFail(
-                        context = context,
-                        errorCode = it
-                    ) {
-                        viewModel.onBiometryFailed()
-                    }
-                }
-            )
-
-            bioPrompt.authenticate(promptInfo)
         }
     }
 
@@ -160,11 +132,7 @@ fun BIP39DetailScreen(
                     //endregion
 
                     //Phrase words
-                    PhraseWords(
-                        phraseWords = wordsToShow,
-                        biometryError = state.bioPromptTrigger is Resource.Error,
-                        retry = { viewModel.onStart(bip39Name) }
-                    )
+                    PhraseWords(phraseWords = wordsToShow)
 
                     //region Buttons
                     Spacer(

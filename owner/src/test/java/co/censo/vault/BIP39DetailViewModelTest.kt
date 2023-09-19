@@ -1,6 +1,5 @@
 package co.censo.vault
 
-import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailViewModel
 import co.censo.shared.data.storage.EncryptedBIP39
@@ -71,28 +70,7 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `on start sets the name and triggers biometry`() = runTest {
-        assert(bip39DetailViewModel.state.name.isEmpty())
-        assert(bip39DetailViewModel.state.bioPromptTrigger is Resource.Uninitialized)
-
-        bip39DetailViewModel.onStart(test1Bip39Name)
-
-        assert(bip39DetailViewModel.state.name == test1Bip39Name)
-        assert(bip39DetailViewModel.state.bioPromptTrigger is Resource.Success)
-    }
-
-    @Test
-    fun `on biometry failure we set biometry state to error`() = runTest {
-        bip39DetailViewModel.onStart(test1Bip39Name)
-
-        bip39DetailViewModel.onBiometryFailed()
-
-        assert(bip39DetailViewModel.state.name == test1Bip39Name)
-        assert(bip39DetailViewModel.state.bioPromptTrigger is Resource.Error)
-    }
-
-    @Test
-    fun `on biometry approval we retrieve the bip 39 phrase`() = runTest {
+    fun `on start we retrieve the bip 39 phrase`() = runTest {
         whenever(storage.retrieveBIP39Phrases()).then { savedPhrases }
         whenever(
             deviceKey.decrypt(
@@ -102,16 +80,16 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
             Base64.getDecoder().decode(twentyFourWordDecryptedPhraseList)
         }
 
+        assert(bip39DetailViewModel.state.name.isEmpty())
+
         bip39DetailViewModel.onStart(test1Bip39Name)
 
-        bip39DetailViewModel.onBiometryApproved()
-
-        assert(bip39DetailViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+        assert(bip39DetailViewModel.state.name == test1Bip39Name)
         assert(bip39DetailViewModel.state.bip39Phrase == twentyFourWordBIP39Phrase)
     }
 
     @Test
-    fun `on biometry approval we can retrieve 12 word phrase`() = runTest {
+    fun `we can retrieve 12 word phrase`() = runTest {
         whenever(storage.retrieveBIP39Phrases()).then { savedPhrases }
         whenever(
             deviceKey.decrypt(
@@ -123,9 +101,6 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
 
         bip39DetailViewModel.onStart(test2Bip39Name)
 
-        bip39DetailViewModel.onBiometryApproved()
-
-        assert(bip39DetailViewModel.state.bioPromptTrigger is Resource.Uninitialized)
         assert(bip39DetailViewModel.state.bip39Phrase == twelveWordBip39Phrase)
     }
 
@@ -141,8 +116,6 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
         }
 
         bip39DetailViewModel.onStart(test1Bip39Name)
-
-        bip39DetailViewModel.onBiometryApproved()
 
         assert(bip39DetailViewModel.state.currentWordIndex == 0)
         assert(bip39DetailViewModel.state.lastWordIndex == 23)
@@ -187,8 +160,6 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
 
         bip39DetailViewModel.onStart(test2Bip39Name)
 
-        bip39DetailViewModel.onBiometryApproved()
-
         assertEquals(bip39DetailViewModel.state.currentWordIndex, 0)
         assertEquals(bip39DetailViewModel.state.lastWordIndex, 11)
         assertEquals(bip39DetailViewModel.state.lastSetStartIndex, 8)
@@ -218,8 +189,6 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
         assertEquals(bip39DetailViewModel.state.lastWordIndex, 11)
         assertEquals(bip39DetailViewModel.state.lastSetStartIndex, 8)
     }
-
-
 
     @After
     fun tearDown() {

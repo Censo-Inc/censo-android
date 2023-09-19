@@ -1,12 +1,9 @@
 package co.censo.vault.presentation.bip_39_detail
 
-import co.censo.shared.data.Resource
-
 data class BIP39DetailState(
     val name: String = "",
     val bip39Phrase: String = "",
     val currentWordIndex: Int = 0,
-    val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized,
 ) {
 
     val phraseWordCount = bip39Phrase.split(" ").size
