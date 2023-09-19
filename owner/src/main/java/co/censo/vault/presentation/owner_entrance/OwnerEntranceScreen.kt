@@ -1,6 +1,11 @@
 package co.censo.vault.presentation.owner_entrance
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_OK
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,6 +40,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
+import co.censo.vault.BuildConfig
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,19 +53,33 @@ fun OwnerEntranceScreen(
     viewModel: OwnerEntranceViewModel = hiltViewModel()
 ) {
 
-    val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    fun primaryAuthLogin() {
-        //Mocked out for now
-        val loginSuccess = true
-        val authId = "a1b2c3d4e5f6g7h"
-        if (loginSuccess) {
-            viewModel.registerUserToBackend(authId)
-        } else {
-            //TODO: Handle user failing primary auth login
+    val oneTapClient: SignInClient = Identity.getSignInClient(context)
+    lateinit var signInRequest: BeginSignInRequest
+
+    val state = viewModel.state
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { activityResult ->
+            when (activityResult.resultCode) {
+                RESULT_OK -> {
+                    try {
+                        val credential =
+                            oneTapClient.getSignInCredentialFromIntent(activityResult.data)
+                        credential.googleIdToken?.let { viewModel.oneTapSuccess(it) }
+                            ?: viewModel.oneTapFailure(OneTapError.MissingCredentialId)
+                    } catch (e: Exception) {
+                        viewModel.oneTapFailure(OneTapError.ErrorParsingIntent(e))
+                    }
+                }
+
+                RESULT_CANCELED -> viewModel.oneTapFailure(OneTapError.UserCanceledOneTap)
+                else -> viewModel.oneTapFailure(OneTapError.IntentResultFailed)
+            }
         }
-    }
+    )
 
     LaunchedEffect(key1 = state) {
         if (state.userFinishedSetup is Resource.Success) {
@@ -65,6 +87,35 @@ fun OwnerEntranceScreen(
                 navController.navigate(it)
             }
             viewModel.resetUserFinishedSetup()
+        }
+
+        if (state.triggerOneTap is Resource.Success) {
+            signInRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(
+                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        .setServerClientId(BuildConfig.ONE_TAP_SERVER_ID)
+                        .setFilterByAuthorizedAccounts(false)
+                        .build()
+                )
+                .build()
+
+            oneTapClient.beginSignIn(signInRequest)
+                .addOnSuccessListener { result ->
+                    try {
+                        launcher.launch(
+                            IntentSenderRequest.Builder(result.pendingIntent.intentSender)
+                                .build()
+                        )
+                    } catch (e: Exception) {
+                        viewModel.oneTapFailure(OneTapError.FailedToStartOneTap)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    viewModel.oneTapFailure(OneTapError.FailedToLaunchOneTapUI(e))
+                }
+
+            viewModel.resetTriggerOneTap()
         }
     }
 
@@ -108,9 +159,9 @@ fun OwnerEntranceScreen(
                     }
 
                     state.apiCallErrorOccurred -> {
-                        if (state.createOwnerResource is Resource.Error) {
+                        if (state.createUserResource is Resource.Error) {
                             DisplayError(
-                                errorMessage = state.createOwnerResource.getErrorMessage(context),
+                                errorMessage = state.createUserResource.getErrorMessage(context),
                                 dismissAction = viewModel::resetCreateOwnerResource,
                             ) { viewModel.retryCreateUser() }
                         }
@@ -118,7 +169,7 @@ fun OwnerEntranceScreen(
 
                     else -> {
                         OwnerEntranceStandardUI(
-                            authenticate = { primaryAuthLogin() }
+                            authenticate = { viewModel.startOneTapFlow() }
                         )
                     }
                 }
@@ -141,6 +192,17 @@ fun OwnerEntranceStandardUI(
             Text(text = stringResource(R.string.onetap_login))
         }
     }
+}
+
+sealed class OneTapError(val exception: Exception) {
+    object InvalidToken : OneTapError(Exception("Invalid Token"))
+    object MissingCredentialId : OneTapError(Exception("Missing Google Credential Id"))
+    object UserCanceledOneTap : OneTapError(Exception("User Canceled One Tap"))
+    object IntentResultFailed : OneTapError(Exception("Intent Result Failed"))
+    object FailedToStartOneTap : OneTapError(Exception("Failed to Start One Tap"))
+    data class ErrorParsingIntent(val e: Exception) : OneTapError(e)
+    data class FailedToLaunchOneTapUI(val e: Exception) : OneTapError(e)
+    data class FailedToVerifyId(val e: Exception) : OneTapError(e)
 }
 
 @Composable

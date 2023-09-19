@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -11,9 +14,29 @@ val versionNameMajor = 0
 val versionNameMinor = 0
 val versionNamePatch = 1
 
+fun createBuildConfigStringArray(strings: List<String>) : String {
+    val builder = StringBuilder()
+    builder.append("{")
+    for (string in strings) {
+        builder.append('"')
+        builder.append(string);
+        builder.append('"')
+        builder.append(", ")
+    }
+    builder.setLength(builder.length - 2)
+    builder.append("}")
+    return builder.toString()
+}
+
 android {
     namespace = "co.censo.shared"
     compileSdk = 34
+
+    val configProperties = Properties()
+
+    if (file("../config.properties").exists()) {
+        configProperties.load(FileInputStream(file("../config.properties")))
+    }
 
     defaultConfig {
         minSdk = 33
@@ -23,16 +46,20 @@ android {
 
         buildConfigField("String", "VERSION_NAME", "\"$versionName\"")
         buildConfigField("String", "VERSION_CODE", "\"${versionCode}\"")
-        buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
-        buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    val oneTapClientIds = (configProperties["ONE_TAP_CLIENT_IDS"] as String).split("#")
+    val oneTapClientIdsArrayRepresentation = createBuildConfigStringArray(oneTapClientIds)
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,11 +68,13 @@ android {
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
+            buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Vault")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
+            buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
         }
         create("bintegration") {
@@ -75,6 +104,11 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/*"
+        }
+    }
 }
 
 dependencies {
@@ -102,6 +136,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
     //noinspection GradleDependency
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
+
+    //Google API Java Client
+    implementation("com.google.api-client:google-api-client:1.33.0")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")

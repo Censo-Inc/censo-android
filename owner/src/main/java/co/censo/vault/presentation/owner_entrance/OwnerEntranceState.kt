@@ -4,11 +4,13 @@ import co.censo.shared.data.Resource
 import okhttp3.ResponseBody
 
 data class OwnerEntranceState(
-    val createOwnerResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val triggerOneTap: Resource<Unit> = Resource.Uninitialized,
+    val createUserResource: Resource<ResponseBody> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
     val authId: String = ""
 ) {
-    val isLoading = createOwnerResource is Resource.Loading
+    val isLoading = createUserResource is Resource.Loading
 
-    val apiCallErrorOccurred = createOwnerResource is Resource.Error
+    val apiCallErrorOccurred =
+        createUserResource is Resource.Error || triggerOneTap is Resource.Error
 }
