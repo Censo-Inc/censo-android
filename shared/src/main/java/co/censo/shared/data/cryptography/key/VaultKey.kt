@@ -160,18 +160,6 @@ class InternalDeviceKey() : VaultKey {
 
     fun removeKey() = keystoreHelper.deleteDeviceKeyIfPresent()
 
-    fun createAuthHeaders(now: Instant): AuthInterceptor.AuthHeadersWithTimestamp {
-        val iso8601FormattedTimestamp = now.toString()
-        val signature = Base64.getEncoder()
-            .encodeToString(sign(iso8601FormattedTimestamp.toByteArray()))
-        val headers = ApiService.getAuthHeaders(
-            signature,
-            Base58EncodedDevicePublicKey(publicExternalRepresentation().value),
-            iso8601FormattedTimestamp
-        )
-        return AuthInterceptor.AuthHeadersWithTimestamp(headers, now)
-    }
-
     internal class KeystoreHelper {
         companion object {
             const val BIOMETRY_TIMEOUT = 15
