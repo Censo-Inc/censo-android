@@ -23,7 +23,6 @@ import androidx.navigation.navArgument
 import co.censo.shared.data.storage.Storage
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
-import co.censo.vault.presentation.facetec_auth.FacetecAuthScreen
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
@@ -78,9 +77,6 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = Screen.AddBIP39Route.route) {
                 AddBIP39Screen(navController = navController)
-            }
-            composable(route = Screen.FacetecAuthRoute.route) {
-                FacetecAuthScreen(navController = navController)
             }
             composable(
                 route = "${Screen.BIP39DetailRoute.route}/{${Screen.BIP39DetailRoute.BIP_39_NAME_ARG}}",

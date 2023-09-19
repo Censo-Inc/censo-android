@@ -15,6 +15,9 @@ data class CreatePolicyApiRequest(
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val threshold: Int,
     val guardians: List<Guardian>,
+
+    val biometryVerificationId: BiometryVerificationId,
+    val biometryData: FacetecBiometry,
 ) {
     @Serializable
     data class Guardian(
@@ -24,7 +27,10 @@ data class CreatePolicyApiRequest(
 }
 
 @Serializable
-data class CreatePolicyApiResponse(val ownerState: OwnerState?)
+data class CreatePolicyApiResponse(
+    val ownerState: OwnerState?,
+    val scanResultBlob: BiometryScanResultBlob,
+)
 
 @Serializable
 data class UpdatePolicyApiRequest(

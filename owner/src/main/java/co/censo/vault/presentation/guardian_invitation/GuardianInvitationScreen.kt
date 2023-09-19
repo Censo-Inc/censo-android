@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,6 +48,7 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
+import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.owner_entrance.DisplayError
 import co.censo.vault.util.vaultLog
 
@@ -248,24 +248,24 @@ fun GuardianInvitationScreen(
 
                         Spacer(Modifier.height(24.dp))
 
-                        Text(
-                            text = stringResource(R.string.scan_guardian_qr_code),
-                            color = Color.Black
-                        )
-
-                        Spacer(Modifier.height(12.dp))
-
                         TextButton(
                             onClick = {
-                                vaultLog(message = "Scanning QR code")
-                                //TODO: Implement QR code scanning
+                                vaultLog(message = "Continue to policy creation")
+                                viewModel.enrollBiometry()
                             },
                         ) {
                             Text(
-                                text = stringResource(R.string.scan_qr_code),
+                                text = stringResource(R.string.create_protection_plan),
                                 color = Color.Black
                             )
                         }
+                    }
+
+                    GuardianInvitationStatus.CREATE_POLICY -> {
+                        FacetecAuth(
+                            onFaceScanReady = viewModel::onFaceScanReady,
+                            onCompletelyFinished = viewModel::onPolicySetupCompleted,
+                        )
                     }
 
                     GuardianInvitationStatus.READY -> {
