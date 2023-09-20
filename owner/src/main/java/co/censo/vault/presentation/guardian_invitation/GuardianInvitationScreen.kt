@@ -50,8 +50,8 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import co.censo.vault.util.vaultLog
 
 @Composable
 fun GuardianInvitationScreen(
@@ -300,7 +300,7 @@ fun GuardianInvitationScreen(
 
                         TextButton(
                             onClick = {
-                                vaultLog(message = "Continue to policy creation")
+                                projectLog(message = "Continue to policy creation")
                                 viewModel.enrollBiometry()
                             },
                         ) {

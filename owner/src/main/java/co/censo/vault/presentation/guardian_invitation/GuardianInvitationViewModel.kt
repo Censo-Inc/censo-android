@@ -13,7 +13,7 @@ import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.util.vaultLog
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -131,7 +131,7 @@ class GuardianInvitationViewModel @Inject constructor(
     }
 
     fun inviteGuardian(participantId: ParticipantId) {
-        vaultLog(message = "Inviting guardian: ${participantId.value}")
+        projectLog(message = "Inviting guardian: ${participantId.value}")
 
         state = state.copy(inviteGuardianResponse = Resource.Loading())
 

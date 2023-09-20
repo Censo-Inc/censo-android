@@ -17,7 +17,7 @@
     <string name="awaiting_confirmation_of_verification_code">Awaiting confirmation of verification code</string>
     <string name="enter_verification_code">Enter verification code</string>
     <string name="submit">Submit</string>
-    <string name="guardian_entrance">Guardian Entrance</string>
+    <string name="guardian_entrance">Guardian Home</string>
     <string name="register_guardian_error">Register Guardian Error</string>
     <string name="accept_guardianship_error">Accept Guardianship Error</string>
     <string name="successful_biometry_authentication_is_required_to_use_this_app">Successful biometry authentication is required to use this app</string>

@@ -55,12 +55,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
+import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.ui.theme.DialogMainBackground
 import co.censo.vault.ui.theme.TextBlack
 import co.censo.vault.ui.theme.UnfocusedGrey
 import co.censo.vault.util.TestTag
-import co.censo.vault.util.vaultLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +103,7 @@ fun HomeScreen(
             }
 
         } catch (e: Exception) {
-            vaultLog(message = "checkPermissionDialog exception caught: ${e.message}")
+            projectLog(message = "checkPermissionDialog exception caught: ${e.message}")
             //TODO: Log exception
         }
     }

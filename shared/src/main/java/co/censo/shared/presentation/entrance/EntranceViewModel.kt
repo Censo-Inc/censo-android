@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,13 +30,19 @@ import javax.inject.Inject
 @HiltViewModel
 class EntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(EntranceState())
         private set
 
-    fun onStart() {
+    fun onStart(invitationId: String, guardianEntrance: Boolean) {
+
+        if (guardianEntrance && invitationId.isNotEmpty()) {
+            guardianRepository.saveInvitationId(invitationId)
+        }
+
         checkUserHasValidToken()
     }
 

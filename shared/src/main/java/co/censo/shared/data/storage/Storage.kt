@@ -2,7 +2,6 @@ package co.censo.shared.data.storage
 
 import android.content.Context
 import android.content.SharedPreferences
-import co.censo.shared.data.networking.AuthInterceptor
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -20,6 +19,9 @@ interface Storage {
     fun saveJWT(jwt: String)
     fun retrieveJWT() : String
     fun clearJWT()
+    fun saveGuardianInvitationId(id: String)
+    fun retrieveGuardianInvitationId() : String
+    fun clearGuardianInvitationId()
 }
 
 object SharedPrefsStorage : Storage {
@@ -33,6 +35,8 @@ object SharedPrefsStorage : Storage {
     private const val BIP39 = "bip_39"
 
     private const val DEVICE_KEY = "device_key"
+
+    private const val GUARDIAN_INVITATION_ID = "guardian_invitation_id"
 
     private const val JWT = "jwt"
 
@@ -68,6 +72,19 @@ object SharedPrefsStorage : Storage {
         sharedPrefs.getString(JWT, "") ?: ""
 
     override fun clearJWT() = saveJWT("")
+    //endregion
+
+    //region Guardian Invitation Id
+    override fun saveGuardianInvitationId(id: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString(GUARDIAN_INVITATION_ID, id)
+        editor.apply()
+    }
+
+    override fun retrieveGuardianInvitationId() =
+        sharedPrefs.getString(GUARDIAN_INVITATION_ID, "") ?: ""
+
+    override fun clearGuardianInvitationId() = saveGuardianInvitationId("")
     //endregion
 
     //region push dialog

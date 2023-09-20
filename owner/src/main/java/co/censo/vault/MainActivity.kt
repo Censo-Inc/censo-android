@@ -70,7 +70,10 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = SharedScreen.EntranceRoute.route) {
             composable(route = SharedScreen.EntranceRoute.route) {
-                EntranceScreen(navController = navController)
+                EntranceScreen(
+                    navController = navController,
+                    guardianEntrance = false
+                )
             }
             composable(route = SharedScreen.HomeRoute.route) {
                 HomeScreen(navController = navController)

@@ -22,7 +22,7 @@ import androidx.navigation.NavController
 import co.censo.guardian.R
 
 @Composable
-fun GuardianEntranceScreen(
+fun GuardianHome(
     navController: NavController,
     viewModel: GuardianEntranceViewModel = hiltViewModel()
 ) {

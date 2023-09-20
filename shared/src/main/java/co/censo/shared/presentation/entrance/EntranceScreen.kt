@@ -43,6 +43,8 @@ import com.google.android.gms.auth.api.identity.SignInClient
 @Composable
 fun EntranceScreen(
     navController: NavController,
+    guardianEntrance: Boolean,
+    invitationId: String = "",
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
 
@@ -75,7 +77,7 @@ fun EntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(invitationId = invitationId, guardianEntrance = guardianEntrance)
         onDispose { }
     }
 
