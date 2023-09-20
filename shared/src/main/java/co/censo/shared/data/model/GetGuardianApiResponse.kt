@@ -2,6 +2,7 @@ package co.censo.shared.data.model
 
 import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
+import InvitationId
 import ParticipantId
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,7 +14,6 @@ data class GetGuardianStateApiResponse(
 
 @Serializable
 data class GuardianState(
-    val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val participantId: ParticipantId,
     val phase: GuardianPhase,
 )
@@ -22,20 +22,26 @@ data class GuardianState(
 sealed class GuardianPhase {
     @Serializable
     @SerialName("WaitingForCode")
-    object WaitingForCode : GuardianPhase()
+    data class WaitingForCode(
+        val invitationId: InvitationId,
+    ) : GuardianPhase()
 
     @Serializable
-    @SerialName("WaitingForShard")
-    object WaitingForShard : GuardianPhase()
-
-    @Serializable
-    @SerialName("ShardReceived")
-    data class ShardReceived(
-        val shard: Base64EncodedData,
-        val passwordHash: Base64EncodedData,
+    @SerialName("WaitingForConfirmation")
+    data class WaitingForConfirmation(
+        val invitationId: InvitationId,
+        val verificationStatus: VerificationStatus,
     ) : GuardianPhase()
 
     @Serializable
     @SerialName("Complete")
     object Complete : GuardianPhase()
+}
+
+@Serializable
+enum class VerificationStatus {
+    NotSubmitted,
+    WaitingForVerification,
+    Verified,
+    Rejected,
 }

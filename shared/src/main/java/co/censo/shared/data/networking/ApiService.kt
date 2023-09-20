@@ -8,7 +8,6 @@ import android.os.Build
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.Header
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
-import co.censo.shared.data.model.AcceptGuardianshipApiRequest
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
@@ -25,12 +24,13 @@ import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.SignInApiRequest
+import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
+import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.model.UpdatePolicyApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
-import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.Storage
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.datetime.Clock
@@ -87,7 +87,11 @@ interface ApiService {
             return Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(client.build())
-                .addConverterFactory(Json{ ignoreUnknownKeys = true }.asConverterFactory(contentType))
+                .addConverterFactory(
+                    Json { ignoreUnknownKeys = true }.asConverterFactory(
+                        contentType
+                    )
+                )
                 .build()
                 .create(ApiService::class.java)
         }
@@ -101,13 +105,13 @@ interface ApiService {
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
 
     @POST("/v1/biometry-verifications")
-    suspend fun biometryVerification() : RetrofitResponse<InitBiometryVerificationApiResponse>
+    suspend fun biometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
 
     @POST("/v1/biometry-verifications/{id}/biometry")
     suspend fun submitFacetecResult(
         @Path(value = "id", encoded = true) biometryId: BiometryVerificationId,
         @Body facetecResultRequest: SubmitBiometryVerificationApiRequest
-    ) : RetrofitResponse<SubmitBiometryVerificationApiResponse>
+    ): RetrofitResponse<SubmitBiometryVerificationApiResponse>
 
     @POST("/v1/policies")
     suspend fun createPolicy(
@@ -131,7 +135,7 @@ interface ApiService {
     @POST("/v1/guardians")
     suspend fun createGuardian(
         @Body createGuardianApiRequest: CreateGuardianApiRequest
-    ) : RetrofitResponse<CreateGuardianApiResponse>
+    ): RetrofitResponse<CreateGuardianApiResponse>
 
     @POST("/v1/guardians/{$PARTICIPANT_ID}/invitation")
     suspend fun inviteGuardian(
@@ -141,14 +145,19 @@ interface ApiService {
 
     @POST("/v1/guardianship-invitation/{$INVITATION_ID}/accept")
     suspend fun acceptGuardianship(
-        @Path(value = INVITATION_ID) invitationId: String,
-        @Body acceptGuardianshipApiRequest: AcceptGuardianshipApiRequest
+        @Path(value = INVITATION_ID) invitationId: String
     ): RetrofitResponse<AcceptGuardianshipApiResponse>
 
     @POST("/v1/guardianship-invitation/{$INVITATION_ID}/decline")
     suspend fun declineGuardianship(
         @Path(value = INVITATION_ID) invitationId: String,
     ): RetrofitResponse<ResponseBody>
+
+    @POST("v1/guardianship-invitations/${INVITATION_ID}/verification")
+    suspend fun submitGuardianVerification(
+        @Path(value = INVITATION_ID) invitationId: String,
+        @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest
+    ): RetrofitResponse<SubmitGuardianVerificationApiResponse>
 
     @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")
     suspend fun confirmShardReceipt(
@@ -170,7 +179,7 @@ interface ApiService {
     @DELETE("v1/notification-tokens/{deviceType}")
     suspend fun removePushNotificationToken(
         @Path("deviceType") deviceType: String
-    ) : RetrofitResponse<Unit>
+    ): RetrofitResponse<Unit>
 }
 
 class AnalyticsInterceptor(
@@ -234,22 +243,26 @@ class AuthInterceptor(
     }
 
     private fun dataToSign(request: Request, timestamp: Instant): ByteArray {
-        val requestPathAndQueryParams = request.url.encodedPath + (request.url.encodedQuery?.let { "?$it" } ?: "")
+        val requestPathAndQueryParams =
+            request.url.encodedPath + (request.url.encodedQuery?.let { "?$it" } ?: "")
         val requestBody = request.body?.let {
             val buffer = Buffer()
             it.writeTo(buffer)
             buffer.readByteArray()
         } ?: byteArrayOf()
 
-        return (request.method + requestPathAndQueryParams + Base64.getEncoder().encodeToString(requestBody) + timestamp.toString()).toByteArray()
+        return (request.method + requestPathAndQueryParams + Base64.getEncoder()
+            .encodeToString(requestBody) + timestamp.toString()).toByteArray()
     }
 }
 
 class ConnectivityInterceptor(private val context: Context) : Interceptor {
 
-    private fun isOnline(context: Context) : Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+    private fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         return networkInfo != null
     }
 
