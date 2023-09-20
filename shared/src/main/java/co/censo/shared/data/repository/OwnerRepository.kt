@@ -13,7 +13,6 @@ import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.generatePartitionId
-import co.censo.shared.data.cryptography.key.ExternalDeviceKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
 import co.censo.shared.data.model.CreateGuardianApiRequest
@@ -24,31 +23,26 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.log
 import com.auth0.android.jwt.JWT
-import com.google.api.client.auth.openidconnect.IdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
-import java.time.Clock
 import java.util.Base64
-
 
 interface OwnerRepository {
 
-    suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse? = null): Resource<GetUserApiResponse>
+    suspend fun retrieveUser(): Resource<GetUserApiResponse>
     suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
     suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
-    suspend fun createGuardian(guardianName: String, mockCreatedGuardians: List<Guardian.ProspectGuardian>) : Resource<CreateGuardianApiResponse>
+    suspend fun createGuardian(guardianName: String) : Resource<CreateGuardianApiResponse>
     suspend fun verifyToken(token: String) : String?
     suspend fun saveJWT(jwtToken: String)
     suspend fun retrieveJWT() : String
@@ -76,9 +70,7 @@ class OwnerRepositoryImpl(
         const val GUARDIAN_URI = "guardian://guardian/"
     }
 
-    override suspend fun retrieveUser(getUserApiResponse: GetUserApiResponse?): Resource<GetUserApiResponse> {
-
-        return Resource.Success(getUserApiResponse)
+    override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
         return retrieveApiResource { apiService.user() }
     }
 
@@ -125,21 +117,11 @@ class OwnerRepositoryImpl(
             guardians = emptyList()
         )
 
-        return Resource.Success("".toResponseBody())
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
-    override suspend fun createGuardian(guardianName: String, mockCreatedGuardians: List<Guardian.ProspectGuardian>): Resource<CreateGuardianApiResponse> {
+    override suspend fun createGuardian(guardianName: String): Resource<CreateGuardianApiResponse> {
         val createGuardianApiRequest = CreateGuardianApiRequest(name = guardianName)
-
-        return Resource.Success(
-            data = CreateGuardianApiResponse(
-                ownerState = OwnerState.GuardianSetup(
-                    guardians = mockCreatedGuardians
-                )
-            )
-        )
-
         return retrieveApiResource { apiService.createGuardian(createGuardianApiRequest) }
     }
     override suspend fun verifyToken(token: String): String? {
@@ -162,7 +144,7 @@ class OwnerRepositoryImpl(
     override suspend fun checkJWTValid(jwtToken: String): Boolean {
         return try {
             val jwtDecoded = JWT(jwtToken)
-            Log.d("WaterBottle", "Jwt decoded: $jwtDecoded")
+            //todo: See what we need to check on the token
             return true
         } catch (e: Exception) {
             false
