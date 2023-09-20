@@ -1,7 +1,6 @@
 package co.censo.vault.di
 
 import android.content.Context
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.vault.BuildConfig
@@ -11,6 +10,8 @@ import co.censo.vault.data.repository.FacetecRepository
 import co.censo.vault.data.repository.FacetecRepositoryImpl
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.GuardianRepositoryImpl
+import co.censo.shared.data.repository.KeyRepository
+import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.Storage
@@ -24,12 +25,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    @Singleton
-    @Provides
-    fun provideInternalDeviceKey(): InternalDeviceKey {
-        return InternalDeviceKey()
-    }
 
     @Singleton
     @Provides
@@ -51,16 +46,32 @@ object AppModule {
     @Provides
     fun provideOwnerRepository(
         apiService: ApiService,
+        storage: Storage
     ): OwnerRepository {
-        return OwnerRepositoryImpl(apiService)
+        return OwnerRepositoryImpl(
+            apiService = apiService,
+            storage = storage
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesKeyRepository(
+        storage: Storage
+    ): KeyRepository {
+        return KeyRepositoryImpl(storage)
     }
 
     @Singleton
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
+        storage: Storage
     ): GuardianRepository {
-        return GuardianRepositoryImpl(apiService)
+        return GuardianRepositoryImpl(
+            storage = storage,
+            apiService = apiService
+        )
     }
 
     @Singleton

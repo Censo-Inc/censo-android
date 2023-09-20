@@ -14,6 +14,12 @@ interface Storage {
     fun retrieveBIP39Phrases(): BIP39Phrases
     fun clearStoredPhrases()
     fun storedPhrasesIsNotEmpty() : Boolean
+    fun saveDeviceKeyId(id: String)
+    fun retrieveDeviceKeyId() : String
+    fun clearDeviceKeyId()
+    fun saveJWT(jwt: String)
+    fun retrieveJWT() : String
+    fun clearJWT()
 }
 
 object SharedPrefsStorage : Storage {
@@ -25,7 +31,10 @@ object SharedPrefsStorage : Storage {
     private const val DEVICE_CREATED_FLAG = "device_created_flag"
 
     private const val BIP39 = "bip_39"
-    private const val TEMP_ENCRYPTION_MASTER_KEY = "temp_encryption_master_key"
+
+    private const val DEVICE_KEY = "device_key"
+
+    private const val JWT = "jwt"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -34,6 +43,32 @@ object SharedPrefsStorage : Storage {
         appContext = context
         sharedPrefs = appContext.getSharedPreferences(MAIN_PREFS, Context.MODE_PRIVATE)
     }
+
+    //region device key id
+    override fun saveDeviceKeyId(id: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString(DEVICE_KEY, id)
+        editor.apply()
+    }
+
+    override fun retrieveDeviceKeyId() =
+        sharedPrefs.getString(DEVICE_KEY, "") ?: ""
+
+    override fun clearDeviceKeyId() = saveDeviceKeyId("")
+    //endregion
+
+    //region JWT
+    override fun saveJWT(jwt: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString(JWT, jwt)
+        editor.apply()
+    }
+
+    override fun retrieveJWT() =
+        sharedPrefs.getString(JWT, "") ?: ""
+
+    override fun clearJWT() = saveJWT("")
+    //endregion
 
     //region push dialog
     fun userHasSeenPermissionDialog(): Boolean {

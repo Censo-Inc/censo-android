@@ -18,7 +18,6 @@ import kotlinx.serialization.encodeToString
 
 @HiltViewModel
 class AddBIP39ViewModel @Inject constructor(
-    private val deviceKey: InternalDeviceKey,
     private val storage: Storage
 ) : ViewModel() {
 
@@ -76,6 +75,7 @@ class AddBIP39ViewModel @Inject constructor(
         val phraseAsList = PhraseValidator.format(state.userEnteredPhrase).split(" ")
         val phraseAsJson = Json.encodeToString(phraseAsList)
 
+        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
         val encryptedPhrase = deviceKey.encrypt(phraseAsJson.toByteArray(Charsets.UTF_8))
         val base64EncryptedPhrase = Base64.getEncoder().encodeToString(encryptedPhrase)
 

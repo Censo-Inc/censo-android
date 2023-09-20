@@ -13,7 +13,6 @@ import kotlinx.datetime.Instant
 @Serializable
 data class GetUserApiResponse(
     val userGuid: String,
-    val biometricVerificationRequired: Boolean,
     val guardianStates: List<GuardianState>,
     val ownerState: OwnerState?,
 )

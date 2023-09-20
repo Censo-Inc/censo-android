@@ -2,7 +2,6 @@ package co.censo.guardian.di
 
 import android.content.Context
 import co.censo.guardian.BuildConfig
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.GuardianRepositoryImpl
@@ -20,12 +19,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    @Singleton
-    @Provides
-    fun provideInternalDeviceKey(): InternalDeviceKey {
-        return InternalDeviceKey()
-    }
 
     @Singleton
     @Provides
@@ -47,15 +40,23 @@ object AppModule {
     @Provides
     fun provideOwnerRepository(
         apiService: ApiService,
+        storage: Storage
     ): OwnerRepository {
-        return OwnerRepositoryImpl(apiService)
+        return OwnerRepositoryImpl(
+            storage = storage,
+            apiService = apiService
+        )
     }
 
     @Singleton
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
+        storage: Storage
     ): GuardianRepository {
-        return GuardianRepositoryImpl(apiService)
+        return GuardianRepositoryImpl(
+            apiService = apiService,
+            storage = storage
+        )
     }
 }

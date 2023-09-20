@@ -45,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
@@ -228,7 +229,7 @@ fun GuardianInvitationScreen(
                         ) {
                             items(state.createdGuardians.size) { index ->
                                 val guardian = state.createdGuardians[index]
-                                val deeplink = "$GUARDIAN_URI${guardian.invitationId?.value}"
+                                val deeplink = if (guardian is Guardian.ProspectGuardian) "$GUARDIAN_URI${guardian.invitationId?.value}" else "Guardian Already Added"
 
                                 InvitedGuardian(
                                     guardian = state.createdGuardians[index].label,

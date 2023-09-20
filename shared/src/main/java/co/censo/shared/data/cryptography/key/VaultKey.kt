@@ -90,24 +90,17 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
  * This will represent a SECP256R1 key stored on the users devices Keystore.
  *
  */
-class InternalDeviceKey() : VaultKey {
+class InternalDeviceKey(private val keyId: String) : VaultKey {
 
     private val keystoreHelper = KeystoreHelper()
 
-    val key = keystoreHelper.getOrCreateDeviceKey()
-
-    companion object {
-        const val STATIC_DEVICE_KEY_CHECK = "STATIC_DEVICE_KEY_CHECK"
-        const val KEY_ID = "deviceKey"
-    }
-
     override fun publicKeyUncompressed(): ByteArray {
-        val publicKey = keystoreHelper.getPublicKeyFromDeviceKey()
+        val publicKey = keystoreHelper.getPublicKeyFromDeviceKey(keyId)
         return ECPublicKeyDecoder.extractUncompressedPublicKey(publicKey.encoded)
     }
 
     override fun publicExternalRepresentation(): Base58EncodedPublicKey {
-        return Base58EncodedDevicePublicKey(keystoreHelper.getDevicePublicKeyInBase58())
+        return Base58EncodedDevicePublicKey(keystoreHelper.getDevicePublicKeyInBase58(keyId))
     }
 
     override fun privateKeyRaw(): ByteArray {
@@ -115,7 +108,7 @@ class InternalDeviceKey() : VaultKey {
     }
 
     override fun encrypt(data: ByteArray): ByteArray {
-        val publicKey = keystoreHelper.getPublicKeyFromDeviceKey()
+        val publicKey = keystoreHelper.getPublicKeyFromDeviceKey(keyId)
 
         val compressedKey = ECPublicKeyDecoder.extractUncompressedPublicKey(publicKey.encoded)
 
@@ -128,13 +121,13 @@ class InternalDeviceKey() : VaultKey {
     override fun decrypt(data: ByteArray): ByteArray {
         return ECIESManager.decryptMessage(
             cipherData = data,
-            privateKey = key
+            privateKey = keystoreHelper.getOrCreateDeviceKey(keyId)
         )
     }
 
     override fun sign(data: ByteArray): ByteArray {
         val signature = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
-        signature.initSign(key)
+        signature.initSign(keystoreHelper.getOrCreateDeviceKey(keyId))
         signature.update(data)
         val signedData = signature.sign()
 
@@ -152,94 +145,93 @@ class InternalDeviceKey() : VaultKey {
 
     override fun verify(signedData: ByteArray, signature: ByteArray): Boolean {
         val signatureKeystore = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
-        val publicKey = keystoreHelper.getPublicKeyFromDeviceKey()
+        val publicKey = keystoreHelper.getPublicKeyFromDeviceKey(keyId)
         signatureKeystore.initVerify(publicKey)
         signatureKeystore.update(signedData)
         return signatureKeystore.verify(signature)
     }
 
-    fun removeKey() = keystoreHelper.deleteDeviceKeyIfPresent()
+    fun retrieveKey() = keystoreHelper.getOrCreateDeviceKey(keyId)
+}
 
-    internal class KeystoreHelper {
-        companion object {
-            const val BIOMETRY_TIMEOUT = 15
-            const val KEY_SIZE: Int = 256
-            const val ANDROID_KEYSTORE = "AndroidKeyStore"
-            const val SECP_256_R1 = "secp256r1"
-            const val SHA_256_ECDSA = "SHA256withECDSA"
-        }
+class KeystoreHelper {
+    companion object {
+        const val BIOMETRY_TIMEOUT = 15
+        const val KEY_SIZE: Int = 256
+        const val ANDROID_KEYSTORE = "AndroidKeyStore"
+        const val SECP_256_R1 = "secp256r1"
+        const val SHA_256_ECDSA = "SHA256withECDSA"
+    }
 
-        fun getOrCreateDeviceKey(): PrivateKey {
-            val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-            keyStore.load(null)
-            val key = keyStore.getKey(KEY_ID, null)
-            if (key != null) return key as PrivateKey
+    fun getOrCreateDeviceKey(keyId: String): PrivateKey {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+        keyStore.load(null)
+        val key = keyStore.getKey(keyId, null)
+        if (key != null) return key as PrivateKey
 
-            return createECDeviceKey()
-        }
+        return createECDeviceKey(keyId)
+    }
 
-        fun getPublicKeyFromDeviceKey(): PublicKey {
-            val certificate = getCertificateFromKeystore()
-            return certificate.publicKey
-        }
+    fun getPublicKeyFromDeviceKey(keyId: String): PublicKey {
+        val certificate = getCertificateFromKeystore(keyId)
+        return certificate.publicKey
+    }
 
-        fun getDevicePublicKeyInBase58(): String =
-            Base58.base58Encode(
-                BCECPublicKey(
-                    getPublicKeyFromDeviceKey() as ECPublicKey,
-                    BouncyCastleProvider.CONFIGURATION
-                ).q.getEncoded(true)
+    fun getDevicePublicKeyInBase58(keyId: String): String =
+        Base58.base58Encode(
+            BCECPublicKey(
+                getPublicKeyFromDeviceKey(keyId) as ECPublicKey,
+                BouncyCastleProvider.CONFIGURATION
+            ).q.getEncoded(true)
+        )
+
+    private fun getCertificateFromKeystore(keyId: String): Certificate {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        return keyStore.getCertificate(keyId)
+    }
+
+    private fun createECDeviceKey(keyId: String): PrivateKey {
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_EC,
+            ANDROID_KEYSTORE
+        )
+
+        val paramBuilder = KeyGenParameterSpec.Builder(
+            keyId,
+            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY or KeyProperties.PURPOSE_AGREE_KEY
+        )
+
+        val parameterSpec = paramBuilder
+            .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
+            .setKeySize(KEY_SIZE)
+            .setIsStrongBoxBacked(BuildConfig.STRONGBOX_ENABLED)
+            .setRandomizedEncryptionRequired(true)
+            .setDigests(
+                KeyProperties.DIGEST_SHA256
             )
+            .build()
 
-        private fun getCertificateFromKeystore(): Certificate {
-            val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-            keyStore.load(null) // Keystore must be loaded before it can be accessed
-            return keyStore.getCertificate(KEY_ID)
-        }
+        kpg.initialize(parameterSpec)
 
-        private fun createECDeviceKey(): PrivateKey {
-            val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_EC,
-                ANDROID_KEYSTORE
-            )
+        return kpg.generateKeyPair().private
+    }
 
-            val paramBuilder = KeyGenParameterSpec.Builder(
-                KEY_ID,
-                KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY or KeyProperties.PURPOSE_AGREE_KEY
-            )
+    fun deleteDeviceKeyIfPresent(keyId: String) {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+        keyStore.load(null)
+        val haveKey = keyStore.containsAlias(keyId)
 
-            val parameterSpec = paramBuilder
-                .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
-                .setKeySize(KEY_SIZE)
-                .setIsStrongBoxBacked(BuildConfig.STRONGBOX_ENABLED)
-                .setRandomizedEncryptionRequired(true)
-                .setDigests(
-                    KeyProperties.DIGEST_SHA256
-                )
-                .build()
-
-            kpg.initialize(parameterSpec)
-
-            return kpg.generateKeyPair().private
-        }
-
-        fun deleteDeviceKeyIfPresent() {
-            val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-            keyStore.load(null)
-            val haveKey = keyStore.containsAlias(KEY_ID)
-
-            if (haveKey) {
-                keyStore.deleteEntry(KEY_ID)
-            }
-        }
-
-        fun deviceKeyExists(): Boolean {
-            val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-            keyStore.load(null)
-            return keyStore.containsAlias(KEY_ID)
+        if (haveKey) {
+            keyStore.deleteEntry(keyId)
         }
     }
 
+    fun deviceKeyExists(keyId: String): Boolean {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+        keyStore.load(null)
+        return keyStore.containsAlias(keyId)
+    }
 }
 
 /**
@@ -278,7 +270,7 @@ class ExternalDeviceKey(private val publicKey: PublicKey) : VaultKey {
     }
 
     override fun verify(signedData: ByteArray, signature: ByteArray): Boolean {
-        val signatureKeystore = Signature.getInstance(InternalDeviceKey.KeystoreHelper.SHA_256_ECDSA)
+        val signatureKeystore = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
         signatureKeystore.initVerify(publicKey)
         signatureKeystore.update(signedData)
         return signatureKeystore.verify(signature)
