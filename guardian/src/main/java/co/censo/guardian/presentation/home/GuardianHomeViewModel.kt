@@ -1,4 +1,4 @@
-package co.censo.guardian.presentation.guardian_entrance
+package co.censo.guardian.presentation.home
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,11 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class GuardianEntranceViewModel @Inject constructor(
+class GuardianHomeViewModel @Inject constructor(
     private val guardianRepository: GuardianRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(GuardianEntranceState())
+    var state by mutableStateOf(GuardianHomeState())
         private set
 
     fun loginGuardian () {

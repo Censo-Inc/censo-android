@@ -1,4 +1,4 @@
-package co.censo.guardian.presentation.guardian_entrance
+package co.censo.guardian.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,9 +22,9 @@ import androidx.navigation.NavController
 import co.censo.guardian.R
 
 @Composable
-fun GuardianHome(
+fun GuardianHomeScreen(
     navController: NavController,
-    viewModel: GuardianEntranceViewModel = hiltViewModel()
+    viewModel: GuardianHomeViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity

@@ -13,7 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import co.censo.guardian.presentation.guardian_entrance.GuardianHome
+import co.censo.guardian.presentation.home.GuardianHomeScreen
 import co.censo.guardian.ui.theme.GuardianTheme
 import co.censo.shared.SharedScreen
 import co.censo.shared.SharedScreen.Companion.DL_INVITATION_ID_KEY
@@ -55,7 +55,7 @@ class MainActivity : FragmentActivity() {
             composable(
                 SharedScreen.HomeRoute.route
             ) {
-                GuardianHome(navController = navController)
+                GuardianHomeScreen(navController = navController)
             }
             composable(
                 "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",

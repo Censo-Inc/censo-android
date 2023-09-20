@@ -1,11 +1,11 @@
-package co.censo.guardian.presentation.guardian_entrance
+package co.censo.guardian.presentation.home
 
 import InvitationId
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetGuardianStateApiResponse
 
-data class GuardianEntranceState(
+data class GuardianHomeState(
     val invitationId: InvitationId = InvitationId(""),
     val participantId: ParticipantId = ParticipantId(""),
     val guardianStatus: GuardianStatus = GuardianStatus.LOGIN,
