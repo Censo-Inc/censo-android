@@ -12,7 +12,7 @@ import kotlinx.datetime.Instant
 
 @Serializable
 data class GetUserApiResponse(
-    val userGuid: String,
+    val identityToken: IdentityToken,
     val guardianStates: List<GuardianState>,
     val ownerState: OwnerState?,
 )
