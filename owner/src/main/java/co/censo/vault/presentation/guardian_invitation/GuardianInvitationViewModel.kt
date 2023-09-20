@@ -48,8 +48,7 @@ class GuardianInvitationViewModel @Inject constructor(
     }
 
     fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
-
-        // FIXME submit full blown policy creation
+        // TODO: Prepare policy request. Requires social approval VAULT-152
 
         return Resource.Success(BiometryScanResultBlob(""))
     }
