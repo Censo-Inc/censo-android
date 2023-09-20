@@ -1,6 +1,7 @@
 package co.censo.vault
 
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailViewModel
 import co.censo.shared.data.storage.EncryptedBIP39
 import co.censo.shared.data.storage.Storage
@@ -24,6 +25,9 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var storage: Storage
+
+    @Mock
+    lateinit var keyRepository: KeyRepository
 
     @Mock
     lateinit var deviceKey: InternalDeviceKey
@@ -66,7 +70,10 @@ class BIP39DetailViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        bip39DetailViewModel = BIP39DetailViewModel(storage = storage, deviceKey = deviceKey)
+        bip39DetailViewModel =
+            BIP39DetailViewModel(storage = storage, keyRepository = keyRepository)
+
+        whenever(keyRepository.retrieveInternalDeviceKey()).then { deviceKey }
     }
 
     @Test
