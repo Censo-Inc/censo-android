@@ -15,14 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -45,12 +47,12 @@ import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.owner_entrance.DisplayError
 import co.censo.vault.util.vaultLog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuardianInvitationScreen(
     navController: NavController, viewModel: GuardianInvitationViewModel = hiltViewModel()
@@ -66,7 +68,8 @@ fun GuardianInvitationScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(color = Color.White),
+            .background(color = Color.White)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -129,16 +132,65 @@ fun GuardianInvitationScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                         } else {
-                            LazyColumn {
-                                items(state.createdGuardians.size) { index ->
-                                    Text(
-                                        text = state.createdGuardians[index].label,
-                                        color = Color.Black
-                                    )
+                            val clipboardManager = LocalClipboardManager.current
+
+                            Column(modifier = Modifier.fillMaxWidth()) {
+
+                                for (guardian in state.createdGuardians) {
+                                    if (guardian is Guardian.ProspectGuardian) {
+
+                                        val guardianStatus = guardian.status
+
+                                        val deeplink =
+                                            "$GUARDIAN_URI${guardian.invitationId?.value}"
+
+                                        val copyDeeplink = {
+                                            clipboardManager.setText(
+                                                AnnotatedString(
+                                                    deeplink
+                                                )
+                                            )
+                                        }
+
+                                        val inviteGuardian = { viewModel.inviteGuardian(guardian.participantId) }
+
+                                        when (guardianStatus) {
+                                            is GuardianStatus.Invited -> {
+                                                InvitedGuardian(
+                                                    guardianLabel = guardian.label,
+                                                    deepLink = deeplink,
+                                                    copyDeeplink = copyDeeplink
+                                                )
+                                            }
+                                            is GuardianStatus.Initial -> {
+                                                InitialGuardian(
+                                                    guardianLabel = guardian.label,
+                                                    inviteGuardian = inviteGuardian,
+                                                    deepLink = deeplink,
+                                                    copyDeeplink = copyDeeplink
+                                                )
+                                            }
+                                            is GuardianStatus.Accepted -> {
+                                                AcceptedGuardian(guardianLabel = guardian.label)
+                                            }
+                                            else -> {
+                                                InitialGuardian(
+                                                    guardianLabel = guardian.label,
+                                                    inviteGuardian = inviteGuardian,
+                                                    deepLink = deeplink,
+                                                    copyDeeplink = copyDeeplink
+                                                )
+                                            }
+                                        }
+                                    } else if (guardian is Guardian.TrustedGuardian) {
+                                        Text(
+                                            text = "Trusted ${guardian.label}",
+                                            color = Color.Black
+                                        )
+                                    }
                                 }
                             }
                         }
-
                         Spacer(modifier = Modifier.height(36.dp))
 
                         Row(
@@ -229,8 +281,8 @@ fun GuardianInvitationScreen(
                                 val guardian = state.createdGuardians[index]
                                 val deeplink = if (guardian is Guardian.ProspectGuardian) "$GUARDIAN_URI${guardian.invitationId?.value}" else "Guardian Already Added"
 
-                                InvitedGuardian(
-                                    guardian = state.createdGuardians[index].label,
+                                InitialGuardian(
+                                    guardianLabel = state.createdGuardians[index].label,
                                     inviteGuardian = { viewModel.inviteGuardian(guardian.participantId) },
                                     deepLink = deeplink,
                                     copyDeeplink = {
@@ -279,36 +331,119 @@ fun GuardianInvitationScreen(
 }
 
 @Composable
-fun InvitedGuardian(
-    guardian: String,
-    deepLink: String,
-    copyDeeplink: () -> Unit,
-    inviteGuardian: () -> Unit
+fun AcceptedGuardian(
+    guardianLabel: String,
 ) {
     val context = LocalContext.current as FragmentActivity
 
-    Card(modifier = Modifier.padding(8.dp)) {
+    Card(modifier = Modifier
+        .padding(8.dp)
+        .fillMaxWidth()
+        .background(color = Color(0xFF4059AD))
+    ) {
         Column(
             modifier = Modifier
-                .background(color = Color(0xFF4059AD))
                 .padding(vertical = 12.dp, horizontal = 36.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
 
-            Text(text = guardian, color = Color.White, fontSize = 24.sp)
+            Text(text = "$guardianLabel Accepted", color = Color.White, fontSize = 24.sp)
+
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("No more actions required.", color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun InvitedGuardian(
+    guardianLabel: String,
+    deepLink: String,
+    copyDeeplink: () -> Unit,
+    ) {
+    val context = LocalContext.current as FragmentActivity
+
+    Card(modifier = Modifier
+        .padding(8.dp)
+        .fillMaxWidth()
+        .background(color = Color(0xFF4059AD))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 36.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Text(text = "$guardianLabel Invited!", color = Color.White, fontSize = 24.sp)
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Row {
-                IconButton(onClick = inviteGuardian) {
+                IconButton(onClick = copyDeeplink) {
                     Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "invite guardian",
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy icon",
                         tint = Color.White
                     )
                 }
 
                 Spacer(modifier = Modifier.width(24.dp))
 
+
+                IconButton(onClick = {
+                    shareDeeplink(
+                        deeplink = deepLink,
+                        context
+                    )
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share icon",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InitialGuardian(
+    guardianLabel: String,
+    deepLink: String,
+    copyDeeplink: () -> Unit,
+    inviteGuardian: () -> Unit
+) {
+    val context = LocalContext.current as FragmentActivity
+
+    Card(modifier = Modifier
+        .padding(8.dp)
+        .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 36.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Text(text = guardianLabel, color = Color.White, fontSize = 24.sp)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(onClick = inviteGuardian) {
+                Text("Invite", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row {
                 IconButton(onClick = copyDeeplink) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,

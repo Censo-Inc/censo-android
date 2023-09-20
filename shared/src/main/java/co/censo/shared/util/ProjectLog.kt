@@ -5,5 +5,5 @@ import co.censo.shared.BuildConfig
 
 const val TAG = "StickyLog"
 fun log(tag: String = TAG, message: String) {
-    if (BuildConfig.DEBUG) Log.d(tag, message)
+    if (BuildConfig.BUILD_TYPE == "debug") Log.d(tag, message)
 }

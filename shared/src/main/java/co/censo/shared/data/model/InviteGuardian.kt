@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InviteGuardianApiRequest(
-    val deviceEncryptedPin: Base64EncodedData,
+    val deviceEncryptedTotpSecret: Base64EncodedData,
 )
 
 @Serializable

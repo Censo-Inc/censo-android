@@ -176,7 +176,7 @@ class OwnerRepositoryImpl(
                 participantId = participantId.value,
                 inviteGuardianApiRequest =
                 InviteGuardianApiRequest(
-                    deviceEncryptedPin = Base64EncodedData(
+                    deviceEncryptedTotpSecret = Base64EncodedData(
                         Base64.getEncoder().encodeToString(deviceEncryptedPin)
                     )
                 )

@@ -5,5 +5,5 @@ import co.censo.vault.BuildConfig
 
 const val TAG = "WaterBottle"
 fun vaultLog(tag: String = TAG, message: String) {
-    if (BuildConfig.DEBUG) Log.d(tag, message)
+    if (BuildConfig.BUILD_TYPE == "debug") Log.d(tag, message)
 }

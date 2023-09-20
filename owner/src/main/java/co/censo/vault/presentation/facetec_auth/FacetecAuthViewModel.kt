@@ -87,7 +87,7 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     fun facetecSDKInitialized() {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.BUILD_TYPE == "debug") {
          skipFacetec()
         } else {
             state = state.copy(
