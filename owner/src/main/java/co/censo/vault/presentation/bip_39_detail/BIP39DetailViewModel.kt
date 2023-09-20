@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.CHANGE_AMOUNT
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailState.Companion.FIRST_WORD_INDEX
@@ -17,7 +16,8 @@ import kotlinx.serialization.decodeFromString
 
 @HiltViewModel
 class BIP39DetailViewModel @Inject constructor(
-    private val storage: Storage
+    private val storage: Storage,
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(BIP39DetailState())
@@ -27,7 +27,7 @@ class BIP39DetailViewModel @Inject constructor(
         val phrases = storage.retrieveBIP39Phrases()
         val encryptedPhrase = phrases[bip39Name]
         val encryptedData = Base64.getDecoder().decode(encryptedPhrase?.base64)
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        val deviceKey = keyRepository.retrieveInternalDeviceKey()
         val decryptedPhrase = deviceKey.decrypt(encryptedData)
         val phraseAsList: List<String> = Json.decodeFromString(String(decryptedPhrase))
 

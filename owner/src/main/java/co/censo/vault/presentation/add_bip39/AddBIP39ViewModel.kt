@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import co.censo.vault.data.PhraseValidator
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.EncryptedBIP39
 import co.censo.shared.data.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,8 @@ import kotlinx.serialization.encodeToString
 
 @HiltViewModel
 class AddBIP39ViewModel @Inject constructor(
-    private val storage: Storage
+    private val storage: Storage,
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(AddBIP39State())
@@ -75,7 +77,7 @@ class AddBIP39ViewModel @Inject constructor(
         val phraseAsList = PhraseValidator.format(state.userEnteredPhrase).split(" ")
         val phraseAsJson = Json.encodeToString(phraseAsList)
 
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        val deviceKey = keyRepository.retrieveInternalDeviceKey()
         val encryptedPhrase = deviceKey.encrypt(phraseAsJson.toByteArray(Charsets.UTF_8))
         val base64EncryptedPhrase = Base64.getEncoder().encodeToString(encryptedPhrase)
 
