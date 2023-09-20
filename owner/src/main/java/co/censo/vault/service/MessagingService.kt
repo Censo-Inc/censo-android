@@ -9,6 +9,8 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
+import co.censo.shared.SharedScreen
+import co.censo.shared.buildScreenDeepLinkUri
 import co.censo.shared.data.networking.PushBody
 import co.censo.vault.MainActivity
 import co.censo.vault.R
@@ -104,7 +106,7 @@ class MessagingService : FirebaseMessagingService() {
     private fun sendNotification(pushData: PushData) {
         val homeScreenIntent = Intent(
             Intent.ACTION_VIEW,
-            Screen.HomeRoute.buildScreenDeepLinkUri().toUri(),
+            SharedScreen.HomeRoute.buildScreenDeepLinkUri().toUri(),
             this,
             MainActivity::class.java
         )

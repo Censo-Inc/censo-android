@@ -49,8 +49,8 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import co.censo.vault.presentation.owner_entrance.DisplayError
 import co.censo.vault.util.vaultLog
 
 @Composable

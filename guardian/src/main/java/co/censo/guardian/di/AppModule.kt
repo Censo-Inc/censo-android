@@ -5,6 +5,8 @@ import co.censo.guardian.BuildConfig
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.GuardianRepositoryImpl
+import co.censo.shared.data.repository.KeyRepository
+import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
@@ -34,6 +36,14 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): ApiService {
         return ApiService.create(storage, applicationContext, BuildConfig.VERSION_CODE.toString())
+    }
+
+    @Singleton
+    @Provides
+    fun providesKeyRepository(
+        storage: Storage
+    ): KeyRepository {
+        return KeyRepositoryImpl(storage)
     }
 
     @Singleton

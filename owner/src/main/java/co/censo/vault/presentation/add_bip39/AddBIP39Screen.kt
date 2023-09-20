@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.vault.R
 import co.censo.vault.util.TestTag
@@ -42,7 +43,7 @@ fun AddBIP39Screen(
 
     LaunchedEffect(key1 = state) {
         if (state.submitStatus is Resource.Success) {
-            navController.navigate(Screen.HomeRoute.route)
+            navController.navigate(SharedScreen.HomeRoute.route)
             viewModel.reset()
         }
     }
