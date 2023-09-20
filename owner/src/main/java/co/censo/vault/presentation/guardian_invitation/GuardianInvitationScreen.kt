@@ -45,8 +45,6 @@ import androidx.navigation.NavController
 import co.censo.vault.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.owner_entrance.DisplayError

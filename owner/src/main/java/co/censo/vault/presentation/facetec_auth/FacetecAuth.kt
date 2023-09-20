@@ -46,7 +46,7 @@ fun FacetecAuth(
     val context = LocalContext.current as FragmentActivity
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(onFaceScanReady, onCompletelyFinished)
+        viewModel.onStart(onFaceScanReady)
         onDispose { }
     }
 

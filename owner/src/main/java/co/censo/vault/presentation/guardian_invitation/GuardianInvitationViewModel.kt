@@ -10,9 +10,6 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
-import co.censo.shared.data.model.GetUserApiResponse
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog

@@ -31,33 +31,28 @@ class FacetecAuthViewModel @Inject constructor(
         private set
 
     private lateinit var onFaceScanReady: (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>
-    private lateinit var onFacetecCompletelyFinished: () -> Unit
 
     fun onStart(
-        onFaceScanReady: (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
-        onFacetecCompletelyFinished: () -> Unit
+        onFaceScanReady: (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>
     ) {
         this.onFaceScanReady = onFaceScanReady
-        this.onFacetecCompletelyFinished = onFacetecCompletelyFinished
-
-        retrieveFacetecData()
+        initFacetecSession()
     }
 
     private fun skipFacetec() {
-        val userGuid = UUID.randomUUID().toString()//state.userResponse.data?.userGuid ?: ""
+        val guid = UUID.randomUUID().toString()
 
         viewModelScope.launch {
             val facetecResponse = facetecRepository.submitResult(
                 biometryId = state.facetecData?.id ?: BiometryVerificationId(""),
                 biometryData = FacetecBiometry(
-                    faceScan = Base64.getEncoder().encodeToString(userGuid.toByteArray()),
-                    auditTrailImage = Base64.getEncoder().encodeToString(userGuid.toByteArray()),
+                    faceScan = Base64.getEncoder().encodeToString(guid.toByteArray()),
+                    auditTrailImage = Base64.getEncoder().encodeToString(guid.toByteArray()),
                     lowQualityAuditTrailImage = Base64.getEncoder()
-                        .encodeToString(userGuid.toByteArray()),
+                        .encodeToString(guid.toByteArray()),
                 )
             )
 
-            // FIXME use single type for enroll and match flows
             state = state.copy(submitResultResponse = Resource.Success(facetecResponse.data?.scanResultBlob))
         }
     }
@@ -65,7 +60,7 @@ class FacetecAuthViewModel @Inject constructor(
     fun retry() {
         when {
             state.initFacetecData is Resource.Error -> {
-                retrieveFacetecData()
+                initFacetecSession()
             }
             state.submitResultResponse is Resource.Error -> {
                 facetecSDKInitialized()
@@ -73,7 +68,7 @@ class FacetecAuthViewModel @Inject constructor(
         }
     }
 
-    fun retrieveFacetecData() {
+    fun initFacetecSession() {
         viewModelScope.launch {
             state = state.copy(initFacetecData = Resource.Loading())
             val facetecDataResource = facetecRepository.startFacetecBiometry()
@@ -134,13 +129,6 @@ class FacetecAuthViewModel @Inject constructor(
         state = state.copy(submitResultResponse = Resource.Loading())
 
         viewModelScope.launch {
-            /*val submitResultResponse = facetecRepository.submitResult(
-                state.facetecData?.id ?: "",
-                sessionResult.faceScanBase64 ?: "",
-                sessionResult.auditTrailCompressedBase64[0] ?: "",
-                sessionResult.lowQualityAuditTrailCompressedBase64[0] ?: ""
-            )*/
-
             val submitResultResponse = onFaceScanReady(
                     state.facetecData?.id ?: BiometryVerificationId(""),
                     FacetecBiometry(
