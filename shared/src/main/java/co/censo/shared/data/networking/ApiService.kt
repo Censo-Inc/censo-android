@@ -77,7 +77,7 @@ interface ApiService {
                 .writeTimeout(Duration.ofSeconds(180))
 
 
-            if (BuildConfig.DEBUG) {
+            if (BuildConfig.BUILD_TYPE == "debug") {
                 val logger =
                     HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
                 client.addInterceptor(logger)

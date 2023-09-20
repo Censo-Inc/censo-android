@@ -116,8 +116,6 @@ class GuardianInvitationViewModel @Inject constructor(
         viewModelScope.launch {
             state = state.copy(createGuardianResponse = Resource.Loading())
 
-            delay(1500)
-
             val potentialGuardian = "Guardian ${state.createdGuardians.size + 1}"
 
             val createGuardianApiResponse = ownerRepository.createGuardian(
