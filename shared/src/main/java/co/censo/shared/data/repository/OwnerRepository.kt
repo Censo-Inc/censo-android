@@ -14,10 +14,13 @@ import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
 import co.censo.shared.data.model.CreateGuardianApiRequest
 import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
+import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.IdentityToken
@@ -41,7 +44,10 @@ interface OwnerRepository {
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
     suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
-    suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<ResponseBody>
+    suspend fun createPolicy(
+        setupHelper: PolicySetupHelper, biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<CreatePolicyApiResponse>
     suspend fun createGuardian(guardianName: String) : Resource<CreateGuardianApiResponse>
     suspend fun verifyToken(token: String) : String?
     suspend fun saveJWT(jwtToken: String)
@@ -108,13 +114,20 @@ class OwnerRepositoryImpl(
         return policySetupHelper
     }
 
-    override suspend fun createPolicy(setupHelper: PolicySetupHelper): Resource<ResponseBody> {
+    override suspend fun createPolicy(
+        setupHelper: PolicySetupHelper,
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<CreatePolicyApiResponse> {
         val createPolicyApiRequest = CreatePolicyApiRequest(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
             threshold = setupHelper.threshold,
-            guardians = emptyList()
+            guardians = emptyList(),
+
+            biometryVerificationId = biometryVerificationId,
+            biometryData = biometryData
         )
 
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }

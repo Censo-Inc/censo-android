@@ -3,6 +3,7 @@ package co.censo.vault.presentation.guardian_invitation
 import Base58EncodedIntermediatePublicKey
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.CreateGuardianApiResponse
+import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InviteGuardianApiResponse
@@ -14,7 +15,7 @@ data class GuardianInvitationState(
     val threshold: Int = 0,
     val ownerState: OwnerState? = null,
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
-    val createPolicyResponse: Resource<ResponseBody> = Resource.Uninitialized,
+    val createPolicyResponse: Resource<CreatePolicyApiResponse> = Resource.Uninitialized,
     val createGuardianResponse: Resource<CreateGuardianApiResponse> = Resource.Uninitialized,
     val inviteGuardianResponse: Resource<InviteGuardianApiResponse> = Resource.Uninitialized,
     val confirmShardReceiptResponse: Resource<ResponseBody> = Resource.Uninitialized,
@@ -31,5 +32,5 @@ data class GuardianInvitationState(
 }
 
 enum class GuardianInvitationStatus {
-    ENUMERATE_GUARDIANS, INVITE_GUARDIANS, READY
+    ENUMERATE_GUARDIANS, INVITE_GUARDIANS, CREATE_POLICY, READY
 }

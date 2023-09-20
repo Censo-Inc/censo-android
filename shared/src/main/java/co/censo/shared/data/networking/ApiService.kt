@@ -10,11 +10,13 @@ import co.censo.shared.data.Header
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiRequest
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
+import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
 import co.censo.shared.data.model.CreateGuardianApiRequest
 import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
+import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.SubmitBiometryVerificationApiRequest
 import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
 import co.censo.shared.data.model.GetPoliciesApiResponse
@@ -103,14 +105,14 @@ interface ApiService {
 
     @POST("/v1/biometry-verifications/{id}/biometry")
     suspend fun submitFacetecResult(
-        @Path(value = "id", encoded = true) biometryId: String,
+        @Path(value = "id", encoded = true) biometryId: BiometryVerificationId,
         @Body facetecResultRequest: SubmitBiometryVerificationApiRequest
     ) : RetrofitResponse<SubmitBiometryVerificationApiResponse>
 
     @POST("/v1/policies")
     suspend fun createPolicy(
         @Body createPolicyApiRequest: CreatePolicyApiRequest
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<CreatePolicyApiResponse>
 
     @PUT("/v1/policies/{$INTERMEDIATE_KEY}")
     suspend fun updatePolicy(

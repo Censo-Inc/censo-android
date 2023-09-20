@@ -26,22 +26,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.vault.presentation.home.Screen
+import co.censo.shared.data.model.BiometryScanResultBlob
+import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.FacetecBiometry
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FacetecAuthScreen(
-    navController: NavController,
+fun FacetecAuth(
+    onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
     viewModel: FacetecAuthViewModel = hiltViewModel()
 ) {
 
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
+
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart(onFaceScanReady)
+        onDispose { }
+    }
 
     LaunchedEffect(key1 = state) {
 
@@ -68,16 +74,6 @@ fun FacetecAuthScreen(
             FaceTecSessionActivity.createAndLaunchSession(context, viewModel, state.facetecData?.sessionToken ?: "")
             viewModel.resetStartFacetecAuth()
         }
-
-        if (state.submitResultResponse is Resource.Success) {
-            navController.navigate(Screen.HomeRoute.route)
-            viewModel.resetSubmitResult()
-        }
-    }
-
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { }
     }
 
     Scaffold(
@@ -125,14 +121,8 @@ fun FacetecAuthScreen(
                         }
                     }
 
-                    state.userResponse is Resource.Success -> {
-                        Button(onClick = { viewModel.retrieveFacetecData() }) {
-                            Text(text = "Start Facetec Auth")
-                        }
-                    }
-
                     state.submitResultResponse is Resource.Success -> {
-                        Text(text = "Result successfully sent to backend")
+                        Text(text = "Authorized")
                     }
                 }
             }
