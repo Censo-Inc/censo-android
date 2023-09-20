@@ -145,12 +145,14 @@ class FacetecAuthViewModel @Inject constructor(
                     scanResultCallback?.proceedToNextStep(it)
                 } ?: scanResultCallback?.succeed()
 
+                state = state.copy(submitResultResponse = Resource.Uninitialized)
+
             } else if (submitResultResponse is Resource.Error) {
                 scanResultCallback?.cancel()
                 vaultLog(message = "Failed to send data to backend")
+                state = state.copy(submitResultResponse = submitResultResponse)
             }
 
-            state = state.copy(submitResultResponse = submitResultResponse)
         }
     }
 }

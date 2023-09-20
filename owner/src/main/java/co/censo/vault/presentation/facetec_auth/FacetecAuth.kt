@@ -74,10 +74,6 @@ fun FacetecAuth(
             FaceTecSessionActivity.createAndLaunchSession(context, viewModel, state.facetecData?.sessionToken ?: "")
             viewModel.resetStartFacetecAuth()
         }
-
-        if (state.submitResultResponse is Resource.Success) {
-            viewModel.resetSubmitResult()
-        }
     }
 
     Scaffold(
