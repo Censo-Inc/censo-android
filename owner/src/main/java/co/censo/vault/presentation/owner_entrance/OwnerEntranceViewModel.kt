@@ -73,6 +73,8 @@ class OwnerEntranceViewModel @Inject constructor(
 
             if (!keyRepository.hasKeyWithId(idToken)) {
                 keyRepository.createAndSaveKeyWithId(idToken)
+            } else {
+                keyRepository.setSavedDeviceId(idToken)
             }
 
             ownerRepository.saveJWT(googleIdCredential)
