@@ -42,19 +42,8 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var storage: Storage
 
-    @Inject
-    lateinit var ownerRepository: OwnerRepository
-
-    @Inject
-    lateinit var keyRepository: KeyRepository
-
-    private lateinit var entranceViewModel: EntranceViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        entranceViewModel =
-            EntranceViewModel(ownerRepository = ownerRepository, keyRepository = keyRepository)
 
         setupPushChannel()
 
@@ -81,10 +70,7 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = SharedScreen.EntranceRoute.route) {
             composable(route = SharedScreen.EntranceRoute.route) {
-                EntranceScreen(
-                    navController = navController,
-                    viewModel = entranceViewModel
-                )
+                EntranceScreen(navController = navController)
             }
             composable(route = SharedScreen.HomeRoute.route) {
                 HomeScreen(navController = navController)

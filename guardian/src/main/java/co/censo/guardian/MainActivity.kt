@@ -32,18 +32,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    @Inject
-    lateinit var ownerRepository: OwnerRepository
-
-    @Inject
-    lateinit var keyRepository: KeyRepository
-
-    private lateinit var entranceViewModel: EntranceViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        entranceViewModel = EntranceViewModel(ownerRepository, keyRepository)
 
         setContent {
             val navController = rememberNavController()
@@ -64,10 +54,7 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(navController = navController, startDestination = SharedScreen.EntranceRoute.route) {
             composable(route = SharedScreen.EntranceRoute.route) {
-                EntranceScreen(
-                    navController = navController,
-                    viewModel = entranceViewModel
-                )
+                EntranceScreen(navController = navController)
             }
             composable(
                 SharedScreen.HomeRoute.route

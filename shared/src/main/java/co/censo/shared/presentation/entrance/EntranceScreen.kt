@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.BuildConfig
@@ -42,7 +43,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 @Composable
 fun EntranceScreen(
     navController: NavController,
-    viewModel: EntranceViewModel
+    viewModel: EntranceViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current as FragmentActivity
