@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="one_tap_login">One Tap Login</string>
+    <string name="entrance_screen">Entrance Screen</string>
+    <string name="retry">Retry</string>
+    <string name="dismiss">Dismiss</string>
+</resources>

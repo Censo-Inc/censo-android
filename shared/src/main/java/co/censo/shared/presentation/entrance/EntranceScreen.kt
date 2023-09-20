@@ -27,12 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.BuildConfig
+import co.censo.shared.R
 import co.censo.shared.presentation.components.DisplayError
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -130,7 +132,7 @@ fun EntranceScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Entrance Screen")
+                        Text(text = stringResource(R.string.entrance_screen))
                     }
                 })
         },
@@ -194,7 +196,7 @@ fun OwnerEntranceStandardUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextButton(onClick = authenticate) {
-            Text(text = "One Tap Login")
+            Text(text = stringResource(R.string.one_tap_login))
         }
     }
 }

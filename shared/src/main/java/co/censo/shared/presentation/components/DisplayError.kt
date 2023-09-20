@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import co.censo.shared.R
 
 @Composable
 fun DisplayError(
@@ -38,11 +40,11 @@ fun DisplayError(
         Text(modifier = Modifier.padding(16.dp), text = errorMessage, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(18.dp))
         TextButton(onClick = retryAction) {
-            Text(text = "Retry")
+            Text(text = stringResource(R.string.retry))
         }
         Spacer(modifier = Modifier.height(24.dp))
         TextButton(onClick = dismissAction) {
-            Text(text = "Dismiss")
+            Text(text = stringResource(R.string.dismiss))
         }
     }
 }
