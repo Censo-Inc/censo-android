@@ -9,11 +9,13 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.util.vaultLog
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,14 +42,24 @@ class GuardianInvitationViewModel @Inject constructor(
         state = state.copy(guardianInviteStatus = GuardianInvitationStatus.INVITE_GUARDIANS)
     }
 
-    fun onPolicySetupCompleted() {
-        state = state.copy(guardianInviteStatus = GuardianInvitationStatus.READY)
-    }
+    suspend fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
+        state = state.copy(createPolicyResponse = Resource.Loading())
 
-    fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
-        // TODO: Prepare policy request. Requires social approval VAULT-152
+        return viewModelScope.async {
 
-        return Resource.Success(BiometryScanResultBlob(""))
+            // TODO take only confirmed guardians. Requires social approval VAULT-152
+            val policySetupHelper = ownerRepository.setupPolicy(state.threshold, state.createdGuardians.map { it.label })
+
+            val createPolicyResponse: Resource<CreatePolicyApiResponse> = ownerRepository.createPolicy(policySetupHelper, verificationId, facetecData)
+
+            if (createPolicyResponse is Resource.Success) {
+                updateOwnerState(createPolicyResponse.data?.ownerState)
+            }
+
+            state = state.copy(createPolicyResponse = createPolicyResponse)
+
+            createPolicyResponse.map { it.scanResultBlob }
+        }.await()
     }
 
     fun retrieveUserState() {

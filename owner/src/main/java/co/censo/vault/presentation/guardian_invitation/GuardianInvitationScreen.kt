@@ -261,8 +261,7 @@ fun GuardianInvitationScreen(
 
                     GuardianInvitationStatus.CREATE_POLICY -> {
                         FacetecAuth(
-                            onFaceScanReady = viewModel::onFaceScanReady,
-                            onCompletelyFinished = viewModel::onPolicySetupCompleted,
+                            onFaceScanReady = viewModel::onFaceScanReady
                         )
                     }
 

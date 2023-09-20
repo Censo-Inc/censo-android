@@ -30,10 +30,10 @@ class FacetecAuthViewModel @Inject constructor(
     var state by mutableStateOf(FacetecAuthState())
         private set
 
-    private lateinit var onFaceScanReady: (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>
+    private lateinit var onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>
 
     fun onStart(
-        onFaceScanReady: (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>
+        onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>
     ) {
         this.onFaceScanReady = onFaceScanReady
         initFacetecSession()

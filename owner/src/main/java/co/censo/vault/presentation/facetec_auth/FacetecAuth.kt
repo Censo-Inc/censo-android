@@ -37,8 +37,7 @@ import com.facetec.sdk.FaceTecSessionActivity
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FacetecAuth(
-    onFaceScanReady: (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
-    onCompletelyFinished: () -> Unit,
+    onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
     viewModel: FacetecAuthViewModel = hiltViewModel()
 ) {
 
@@ -78,8 +77,6 @@ fun FacetecAuth(
 
         if (state.submitResultResponse is Resource.Success) {
             viewModel.resetSubmitResult()
-
-            onCompletelyFinished()
         }
     }
 

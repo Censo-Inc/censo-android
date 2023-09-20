@@ -44,12 +44,15 @@ interface OwnerRepository {
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
     suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
     suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
+    suspend fun createPolicy(
+        setupHelper: PolicySetupHelper, biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<CreatePolicyApiResponse>
     suspend fun createGuardian(guardianName: String) : Resource<CreateGuardianApiResponse>
     suspend fun verifyToken(token: String) : String?
     suspend fun saveJWT(jwtToken: String)
     suspend fun retrieveJWT() : String
     suspend fun checkJWTValid(jwtToken: String) : Boolean
-    suspend fun createPolicy(setupHelper: PolicySetupHelper) : Resource<CreatePolicyApiResponse>
     suspend fun inviteGuardian(
         participantId: ParticipantId,
     ): Resource<InviteGuardianApiResponse>
@@ -111,7 +114,11 @@ class OwnerRepositoryImpl(
         return policySetupHelper
     }
 
-    override suspend fun createPolicy(setupHelper: PolicySetupHelper): Resource<CreatePolicyApiResponse> {
+    override suspend fun createPolicy(
+        setupHelper: PolicySetupHelper,
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<CreatePolicyApiResponse> {
         val createPolicyApiRequest = CreatePolicyApiRequest(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
@@ -119,12 +126,8 @@ class OwnerRepositoryImpl(
             threshold = setupHelper.threshold,
             guardians = emptyList(),
 
-            biometryVerificationId = BiometryVerificationId(""),
-            biometryData = FacetecBiometry(
-                faceScan = "",
-                auditTrailImage = "",
-                lowQualityAuditTrailImage = ""
-            )
+            biometryVerificationId = biometryVerificationId,
+            biometryData = biometryData
         )
 
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
