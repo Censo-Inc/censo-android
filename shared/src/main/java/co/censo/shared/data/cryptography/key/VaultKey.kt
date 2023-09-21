@@ -63,11 +63,28 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
         ECIESManager.decryptMessage(data, key.private)
 
     override fun sign(data: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+        val signature = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
+        signature.initSign(key.private)
+        signature.update(data)
+        val signedData = signature.sign()
+
+        val verified = verify(
+            signedData = data,
+            signature = signedData
+        )
+
+        if (!verified) {
+            throw Exception("Encryption key signature invalid.")
+        }
+
+        return signedData
     }
 
     override fun verify(signedData: ByteArray, signature: ByteArray): Boolean {
-        TODO("Not yet implemented")
+        val signatureKeystore = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
+        signatureKeystore.initVerify(key.public)
+        signatureKeystore.update(signedData)
+        return signatureKeystore.verify(signature)
     }
 
 

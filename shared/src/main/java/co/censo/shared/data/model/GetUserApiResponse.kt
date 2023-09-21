@@ -36,10 +36,17 @@ sealed class GuardianStatus {
     @Serializable
     @SerialName("Accepted")
     data class Accepted(
+        val acceptedAt: Instant,
+    ) : GuardianStatus()
+
+    @Serializable
+    @SerialName("VerificationSubmitted")
+    data class VerificationSubmitted(
         val signature: Base64EncodedData,
         val timeMillis: Long,
         val guardianPublicKey: Base58EncodedGuardianPublicKey,
-        val acceptedAt: Instant,
+        val verificationStatus: VerificationStatus,
+        val submittedAt: Instant,
     ) : GuardianStatus()
 
     @Serializable
@@ -48,14 +55,14 @@ sealed class GuardianStatus {
         val guardianKeySignature: Base64EncodedData, // signature of guardianPublicKey + timeMillis + participantId
         val guardianPublicKey: Base58EncodedGuardianPublicKey,
         val timeMillis: Long,
-        val createdAt: Instant,
+        val confirmedAt: Instant,
     ) : GuardianStatus()
 
     @Serializable
     @SerialName("Onboarded")
     data class Onboarded(
         val guardianEncryptedShard: Base64EncodedData,
-        val createdAt: Instant,
+        val onboardedAt: Instant,
     ) : GuardianStatus()
 }
 

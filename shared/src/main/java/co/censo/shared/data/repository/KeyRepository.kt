@@ -1,15 +1,17 @@
 package co.censo.shared.data.repository
 
+import co.censo.shared.data.cryptography.ECHelper
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.key.KeystoreHelper
 import co.censo.shared.data.storage.Storage
-import java.security.PrivateKey
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
     fun createAndSaveKeyWithId(id: String)
     fun setSavedDeviceId(id: String)
-    fun retrieveInternalDeviceKey() : InternalDeviceKey
+    fun retrieveInternalDeviceKey(): InternalDeviceKey
+    fun createGuardianKey(): EncryptionKey
 }
 
 class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
@@ -30,4 +32,9 @@ class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
 
     override fun retrieveInternalDeviceKey() =
         InternalDeviceKey(storage.retrieveDeviceKeyId())
+
+    override fun createGuardianKey(): EncryptionKey {
+        val keyPair = ECHelper.createECKeyPair()
+        return EncryptionKey(keyPair)
+    }
 }

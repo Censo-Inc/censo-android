@@ -150,7 +150,7 @@ interface ApiService {
         @Path(value = INVITATION_ID) invitationId: String,
     ): RetrofitResponse<ResponseBody>
 
-    @POST("v1/guardianship-invitations/${INVITATION_ID}/verification")
+    @POST("v1/guardianship-invitations/{$INVITATION_ID}/verification")
     suspend fun submitGuardianVerification(
         @Path(value = INVITATION_ID) invitationId: String,
         @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest

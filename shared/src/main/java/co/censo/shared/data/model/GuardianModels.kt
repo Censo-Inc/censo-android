@@ -37,6 +37,10 @@ data class GuardianProspect(
 
 typealias GuardianId = String
 
+@Serializable
+@JvmInline
+value class Base58EncodedPrivateKey(val value: String)
+
 interface Base58EncodedPublicKey {
     val value: String
 

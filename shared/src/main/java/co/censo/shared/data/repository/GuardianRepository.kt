@@ -1,9 +1,11 @@
 package co.censo.shared.data.repository
 
 import Base58EncodedGuardianPublicKey
+import Base58EncodedPrivateKey
 import Base64EncodedData
 import InvitationId
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
@@ -25,29 +27,39 @@ interface GuardianRepository {
 
     fun saveInvitationId(invitationId: String)
     fun retrieveInvitationId(): String
-
     suspend fun submitGuardianVerification(
-        verificationCode: String, invitationId: String
+        invitationId: String,
+        submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
     ): Resource<SubmitGuardianVerificationApiResponse>
+
+    suspend fun userHasKeySavedInCloud(): Boolean
+    suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey)
+    suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey
+    fun signVerificationCode(
+        verificationCode: String,
+        encryptionKey: EncryptionKey
+    ): SubmitGuardianVerificationApiRequest
 }
 
 class GuardianRepositoryImpl(
     private val apiService: ApiService, private val storage: Storage
 ) : GuardianRepository, BaseRepository() {
 
-    private fun signVerificationCode(verificationCode: String): SubmitGuardianVerificationApiRequest {
+    override fun signVerificationCode(
+        verificationCode: String,
+        encryptionKey: EncryptionKey
+    ): SubmitGuardianVerificationApiRequest {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
         val dataToSign =
             verificationCode.toByteArray() + currentTimeInMillis.toString().toByteArray()
-        val internalDeviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
-        val signature = internalDeviceKey.sign(dataToSign)
+        val signature = encryptionKey.sign(dataToSign)
         val base64EncodedData = Base64EncodedData(Base64.getEncoder().encodeToString(signature))
 
         return SubmitGuardianVerificationApiRequest(
             signature = base64EncodedData,
             timeMillis = currentTimeInMillis,
             guardianPublicKey = Base58EncodedGuardianPublicKey(
-                internalDeviceKey.publicExternalRepresentation().value
+                encryptionKey.publicExternalRepresentation().value
             )
         )
     }
@@ -78,15 +90,26 @@ class GuardianRepositoryImpl(
 
     override fun retrieveInvitationId() = storage.retrieveGuardianInvitationId()
     override suspend fun submitGuardianVerification(
-        verificationCode: String, invitationId: String
+        invitationId: String,
+        submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
     ): Resource<SubmitGuardianVerificationApiResponse> {
-        val signedVerificationData = signVerificationCode(verificationCode)
-
         return retrieveApiResource {
             apiService.submitGuardianVerification(
                 invitationId = invitationId,
-                submitGuardianVerificationApiRequest = signedVerificationData
+                submitGuardianVerificationApiRequest = submitGuardianVerificationRequest
             )
         }
+    }
+
+    override suspend fun userHasKeySavedInCloud(): Boolean {
+        return storage.retrievePrivateKey().isNotEmpty()
+    }
+
+    override suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey) {
+        storage.savePrivateKey(key.value)
+    }
+
+    override suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey {
+        return Base58EncodedPrivateKey(storage.retrievePrivateKey())
     }
 }

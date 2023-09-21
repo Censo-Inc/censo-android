@@ -52,23 +52,69 @@ fun GuardianHomeScreen(
         if (state.apiError) {
             Text(text = "Error completing action")
         }
+        
+        Spacer(modifier = Modifier.height(48.dp))
 
-        when (state.guardianUIState) {
+        when (val guardianUIState = state.guardianUIState) {
             GuardianUIState.UNINITIALIZED -> {
-                Text("Loading...")
+                Text(
+                    "Loading...",
+                    textAlign = TextAlign.Center
+                )
             }
 
-            GuardianUIState.USER_LOADED -> {
-                Text("Welcome...")
+            GuardianUIState.WAITING_FOR_CONFIRMATION -> {
+                Text(
+                    "Code sent to owner, waiting for them to approve...",
+                    textAlign = TextAlign.Center
+                )
             }
 
-            GuardianUIState.HAS_INVITE_CODE -> {
+            GuardianUIState.MISSING_INVITE_CODE -> {
+                Text(
+                    text = "No invite code detected. Please click the invite link your Owner sent you.",
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            GuardianUIState.WAITING_FOR_CODE, GuardianUIState.NEED_SAVE_KEY -> {
+                Text(
+                    text = "You have accepted the guardianship!", fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                if (guardianUIState == GuardianUIState.NEED_SAVE_KEY) {
+                    Text(
+                        text = "We need you to create and store your Guardian key. This will be used to complete recovery if the owner loses their phrase.",
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(onClick = { viewModel.createGuardianKey() }) {
+                        Text("Create Guardian Key")
+                    }
+                } else {
+                    Text(
+                        text = "You are all set with your Guardian key. Enter your verification code below...",
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(onClick = { viewModel.submitVerificationCode() }) {
+                        Text("Submit code")
+                    }
+                }
+            }
+
+            GuardianUIState.INVITE_READY -> {
                 Text(
                     text = "Looks like you have been invited to be a guardian!", fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))
+
+
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -91,25 +137,24 @@ fun GuardianHomeScreen(
                 }
             }
 
-            GuardianUIState.ACCEPTED_INVITE -> {
-                Text(text = "Accepted Guardianship!", fontSize = 18.sp)
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(text = "Now you need to verify your identity. Please enter the code the phrase owner sent you...")
-                Button(onClick = { viewModel.submitVerificationCode() }) {
-                    Text(text = "Submit code")
-                }
+            GuardianUIState.COMPLETE -> {
+                Text(
+                    "Fully onboarded!",
+                    textAlign = TextAlign.Center
+                )
             }
 
             GuardianUIState.DECLINED_INVITE -> {
-                Text(text = "Declined Guardianship", fontSize = 18.sp)
+                Text(
+                    text = "Declined Guardianship", 
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
                 Spacer(modifier = Modifier.height(24.dp))
-                Text(text = "I said good day!")
-            }
-
-            GuardianUIState.VERIFIED -> {
-                Text(text = "Guardian Sent Verification...", fontSize = 18.sp)
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(text = "Owner needs to verify the code...")
+                Text(
+                    text = "I said good day!",
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
