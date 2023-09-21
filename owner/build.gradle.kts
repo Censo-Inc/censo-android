@@ -41,8 +41,6 @@ android {
         }
     }
 
-    val oneTapServerId = configProperties["ONE_TAP_SERVER_CLIENT_ID"] as String
-
     defaultConfig {
         applicationId = "co.censo.vault"
         minSdk = 33
@@ -79,7 +77,6 @@ android {
             resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
-            buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -90,7 +87,6 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
-            buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
             applicationIdSuffix = ".staging"
             isDebuggable = false
         }
@@ -99,7 +95,6 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
-            buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
             applicationIdSuffix = ".aintegration"
             isDebuggable = false
         }
@@ -199,10 +194,6 @@ dependencies {
     //Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
-
-    //One Tap
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-
 
     //Push Notifications
     implementation("com.google.firebase:firebase-messaging-ktx")

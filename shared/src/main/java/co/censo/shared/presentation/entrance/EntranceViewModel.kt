@@ -1,15 +1,16 @@
-package co.censo.vault.presentation.owner_entrance
+package co.censo.shared.presentation.entrance
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.presentation.home.HomeScreen
-import co.censo.vault.presentation.home.Screen
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,15 +28,21 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class OwnerEntranceViewModel @Inject constructor(
+class EntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(OwnerEntranceState())
+    var state by mutableStateOf(EntranceState())
         private set
 
-    fun onStart() {
+    fun onStart(invitationId: String, guardianEntrance: Boolean) {
+
+        if (guardianEntrance && invitationId.isNotEmpty()) {
+            guardianRepository.saveInvitationId(invitationId)
+        }
+
         checkUserHasValidToken()
     }
 
@@ -47,7 +54,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
                 if (tokenValid) {
                     state = state.copy(
-                        userFinishedSetup = Resource.Success(Screen.HomeRoute.route)
+                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
                     )
                 }
             }
@@ -57,6 +64,7 @@ class OwnerEntranceViewModel @Inject constructor(
     fun startOneTapFlow() {
         state = state.copy(triggerOneTap = Resource.Success(Unit))
     }
+
     fun oneTapSuccess(googleIdCredential: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val idToken = try {
@@ -86,7 +94,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
             state = if (createUserResponse is Resource.Success) {
                 state.copy(
-                    userFinishedSetup = Resource.Success(Screen.HomeRoute.route),
+                    userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
                     createUserResource = createUserResponse
                 )
             } else {
@@ -94,6 +102,7 @@ class OwnerEntranceViewModel @Inject constructor(
             }
         }
     }
+
     fun oneTapFailure(oneTapError: OneTapError) {
         state = state.copy(triggerOneTap = Resource.Error(exception = oneTapError.exception))
     }

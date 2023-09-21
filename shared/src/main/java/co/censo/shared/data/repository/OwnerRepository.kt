@@ -6,8 +6,8 @@ import Base64EncodedData
 import GuardianProspect
 import InvitationId
 import ParticipantId
-import android.util.Log
 import co.censo.shared.BuildConfig
+import co.censo.shared.SharedScreen.Companion.GUARDIAN_URI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
@@ -22,7 +22,6 @@ import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
-import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
@@ -30,7 +29,7 @@ import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
-import co.censo.shared.util.log
+import co.censo.shared.util.projectLog
 import com.auth0.android.jwt.JWT
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
@@ -72,10 +71,6 @@ class OwnerRepositoryImpl(
     private val apiService: ApiService,
     private val storage: Storage
 ) : OwnerRepository, BaseRepository() {
-    companion object {
-        const val GUARDIAN_URI = "guardian://guardian/"
-    }
-
     override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
         return retrieveApiResource { apiService.user() }
     }
@@ -109,7 +104,7 @@ class OwnerRepositoryImpl(
             deviceKey.encrypt(it)
         }
 
-        log(message = "Policy Setup Helper Created: $policySetupHelper")
+        projectLog(message = "Policy Setup Helper Created: $policySetupHelper")
 
         return policySetupHelper
     }
@@ -217,11 +212,5 @@ class OwnerRepositoryImpl(
                 confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
             )
         }
-    }
-
-    private fun generateGuardianDeeplink(
-        invitationId: InvitationId,
-    ): String {
-        return "$GUARDIAN_URI${invitationId.value}"
     }
 }

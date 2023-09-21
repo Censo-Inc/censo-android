@@ -20,14 +20,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import co.censo.shared.SharedScreen
+import co.censo.shared.data.repository.KeyRepository
+import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.presentation.entrance.EntranceScreen
+import co.censo.shared.presentation.entrance.EntranceViewModel
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
-import co.censo.vault.presentation.main.MainViewModel
-import co.censo.vault.presentation.owner_entrance.OwnerEntranceScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,15 +42,12 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var storage: Storage
 
-    private val mainViewModel: MainViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setupPushChannel()
 
         setContent {
-            val context = LocalContext.current
             val navController = rememberNavController()
 
             VaultTheme {
@@ -68,11 +68,14 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
-        NavHost(navController = navController, startDestination = Screen.OwnerEntrance.route) {
-            composable(route = Screen.OwnerEntrance.route) {
-                OwnerEntranceScreen(navController = navController)
+        NavHost(navController = navController, startDestination = SharedScreen.EntranceRoute.route) {
+            composable(route = SharedScreen.EntranceRoute.route) {
+                EntranceScreen(
+                    navController = navController,
+                    guardianEntrance = false
+                )
             }
-            composable(route = Screen.HomeRoute.route) {
+            composable(route = SharedScreen.HomeRoute.route) {
                 HomeScreen(navController = navController)
             }
             composable(route = Screen.AddBIP39Route.route) {

@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.owner_entrance
+package co.censo.shared.presentation.entrance
 
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
@@ -7,17 +7,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,20 +23,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.vault.R
 import co.censo.shared.data.Resource
-import co.censo.vault.BuildConfig
+import co.censo.shared.BuildConfig
+import co.censo.shared.R
+import co.censo.shared.presentation.components.DisplayError
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -49,9 +43,11 @@ import com.google.android.gms.auth.api.identity.SignInClient
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OwnerEntranceScreen(
+fun EntranceScreen(
     navController: NavController,
-    viewModel: OwnerEntranceViewModel = hiltViewModel()
+    guardianEntrance: Boolean,
+    invitationId: String = "",
+    viewModel: EntranceViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current as FragmentActivity
@@ -83,7 +79,7 @@ fun OwnerEntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(invitationId = invitationId, guardianEntrance = guardianEntrance)
         onDispose { }
     }
 
@@ -136,7 +132,7 @@ fun OwnerEntranceScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = stringResource(R.string.owner_setup))
+                        Text(text = stringResource(R.string.entrance_screen))
                     }
                 })
         },
@@ -200,7 +196,7 @@ fun OwnerEntranceStandardUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextButton(onClick = authenticate) {
-            Text(text = stringResource(R.string.onetap_login))
+            Text(text = stringResource(R.string.one_tap_login))
         }
     }
 }
@@ -214,34 +210,4 @@ sealed class OneTapError(val exception: Exception) {
     data class ErrorParsingIntent(val e: Exception) : OneTapError(e)
     data class FailedToLaunchOneTapUI(val e: Exception) : OneTapError(e)
     data class FailedToVerifyId(val e: Exception) : OneTapError(e)
-}
-
-@Composable
-fun DisplayError(
-    errorMessage: String,
-    dismissAction: () -> Unit,
-    retryAction: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) { dismissAction() },
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(modifier = Modifier.padding(16.dp), text = errorMessage, textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(18.dp))
-        TextButton(onClick = retryAction) {
-            Text(text = stringResource(R.string.retry))
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        TextButton(onClick = dismissAction) {
-            Text(text = stringResource(R.string.dismiss))
-        }
-    }
 }

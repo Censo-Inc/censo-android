@@ -1,9 +1,9 @@
-package co.censo.vault.presentation.owner_entrance
+package co.censo.shared.presentation.entrance
 
 import co.censo.shared.data.Resource
 import okhttp3.ResponseBody
 
-data class OwnerEntranceState(
+data class EntranceState(
     val triggerOneTap: Resource<Unit> = Resource.Uninitialized,
     val createUserResource: Resource<ResponseBody> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,

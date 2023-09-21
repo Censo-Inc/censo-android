@@ -44,14 +44,14 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen.Companion.GUARDIAN_URI
 import co.censo.vault.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
-import co.censo.shared.data.repository.OwnerRepositoryImpl.Companion.GUARDIAN_URI
+import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import co.censo.vault.presentation.owner_entrance.DisplayError
-import co.censo.vault.util.vaultLog
 
 @Composable
 fun GuardianInvitationScreen(
@@ -300,7 +300,7 @@ fun GuardianInvitationScreen(
 
                         TextButton(
                             onClick = {
-                                vaultLog(message = "Continue to policy creation")
+                                projectLog(message = "Continue to policy creation")
                                 viewModel.enrollBiometry()
                             },
                         ) {
