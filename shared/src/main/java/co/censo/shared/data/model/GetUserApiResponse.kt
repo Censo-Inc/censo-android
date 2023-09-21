@@ -103,6 +103,7 @@ data class VaultSecret(
 data class Vault(
     val secrets: List<VaultSecret>,
     val publicMasterEncryptionKey: Base58EncodedMasterPublicKey,
+    val unlockedForSeconds: UInt?
 )
 
 @Serializable

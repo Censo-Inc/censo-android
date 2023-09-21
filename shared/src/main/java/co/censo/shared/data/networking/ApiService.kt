@@ -23,9 +23,12 @@ import co.censo.shared.data.model.GetPolicyApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
+import co.censo.shared.data.model.LockVaultApiResponse
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.UnlockVaultApiRequest
+import co.censo.shared.data.model.UnlockVaultApiResponse
 import co.censo.shared.data.model.UpdatePolicyApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
@@ -180,6 +183,14 @@ interface ApiService {
     suspend fun removePushNotificationToken(
         @Path("deviceType") deviceType: String
     ): RetrofitResponse<Unit>
+
+    @POST("/v1/vault/unlock")
+    suspend fun unlockVault(
+        @Body apiRequest: UnlockVaultApiRequest
+    ): RetrofitResponse<UnlockVaultApiResponse>
+
+    @POST("/v1/vault/lock")
+    suspend fun lockVault(): RetrofitResponse<LockVaultApiResponse>
 }
 
 class AnalyticsInterceptor(

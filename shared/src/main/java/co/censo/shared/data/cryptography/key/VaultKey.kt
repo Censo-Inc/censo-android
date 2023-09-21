@@ -150,8 +150,6 @@ class InternalDeviceKey(private val keyId: String) : VaultKey {
         signatureKeystore.update(signedData)
         return signatureKeystore.verify(signature)
     }
-
-    fun retrieveKey() = keystoreHelper.getOrCreateDeviceKey(keyId)
 }
 
 class KeystoreHelper {

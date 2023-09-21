@@ -7,6 +7,7 @@ import GuardianInvite
 import GuardianProspect
 import ParticipantId
 import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import java.math.BigInteger
 import java.security.PrivateKey
 import java.util.Base64
@@ -18,7 +19,7 @@ class PolicySetupHelper(
     val threshold: Int,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val guardianInvites: List<GuardianInvite> = emptyList(),
-    val deviceKey: PrivateKey
+    val deviceKey: InternalDeviceKey
 ) {
 
 
@@ -26,8 +27,7 @@ class PolicySetupHelper(
         fun create(
             threshold: Int,
             guardians: List<GuardianProspect>,
-            deviceKey: PrivateKey,
-            encryptDataWithDeviceKey: (ByteArray) -> ByteArray
+            deviceKey: InternalDeviceKey
         ): PolicySetupHelper {
             val masterEncryptionKey = EncryptionKey.generateRandomKey()
             val intermediateEncryptionKey = EncryptionKey.generateRandomKey()
@@ -49,7 +49,7 @@ class PolicySetupHelper(
 
                 val shardBytes = shard?.y?.toByteArray() ?: byteArrayOf()
 
-                val encryptedShard = encryptDataWithDeviceKey(shardBytes)
+                val encryptedShard = deviceKey.encrypt(shardBytes)
 
                 GuardianInvite(
                     name = guardianProspect.label,

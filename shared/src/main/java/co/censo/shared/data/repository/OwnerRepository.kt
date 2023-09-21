@@ -26,7 +26,10 @@ import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.JwtToken
+import co.censo.shared.data.model.LockVaultApiResponse
 import co.censo.shared.data.model.SignInApiRequest
+import co.censo.shared.data.model.UnlockVaultApiRequest
+import co.censo.shared.data.model.UnlockVaultApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.projectLog
@@ -65,6 +68,13 @@ interface OwnerRepository {
         participantId: ParticipantId,
         encryptedShard: Base64EncodedData
     ) : Resource<ResponseBody>
+
+    suspend fun unlockVault(
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<UnlockVaultApiResponse>
+
+    suspend fun lockVault(): Resource<LockVaultApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -94,15 +104,11 @@ class OwnerRepositoryImpl(
             )
         }
 
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
-
         val policySetupHelper = PolicySetupHelper.create(
             threshold = threshold,
             guardians = guardianProspect,
-            deviceKey = deviceKey.retrieveKey()
-        ) {
-            deviceKey.encrypt(it)
-        }
+            deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        )
 
         projectLog(message = "Policy Setup Helper Created: $policySetupHelper")
 
@@ -212,5 +218,20 @@ class OwnerRepositoryImpl(
                 confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
             )
         }
+    }
+
+    override suspend fun unlockVault(
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<UnlockVaultApiResponse> {
+        return retrieveApiResource {
+            apiService.unlockVault(
+                UnlockVaultApiRequest(biometryVerificationId, biometryData)
+            )
+        }
+    }
+
+    override suspend fun lockVault(): Resource<LockVaultApiResponse> {
+        return retrieveApiResource { apiService.lockVault() }
     }
 }
