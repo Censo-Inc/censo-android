@@ -103,7 +103,6 @@ data class VaultSecret(
 data class Vault(
     val secrets: List<VaultSecret>,
     val publicMasterEncryptionKey: Base58EncodedMasterPublicKey,
-    val unlockedForSeconds: UInt?
 )
 
 @Serializable
@@ -119,5 +118,6 @@ sealed class OwnerState {
     data class Ready(
         val policy: Policy,
         val vault: Vault,
+        val unlockedForSeconds: UInt?
     ) : OwnerState()
 }

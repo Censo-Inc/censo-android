@@ -4,10 +4,8 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
 import GuardianProspect
-import InvitationId
 import ParticipantId
 import co.censo.shared.BuildConfig
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_URI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
@@ -26,10 +24,10 @@ import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.JwtToken
-import co.censo.shared.data.model.LockVaultApiResponse
+import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SignInApiRequest
-import co.censo.shared.data.model.UnlockVaultApiRequest
-import co.censo.shared.data.model.UnlockVaultApiResponse
+import co.censo.shared.data.model.UnlockApiRequest
+import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.projectLog
@@ -69,12 +67,12 @@ interface OwnerRepository {
         encryptedShard: Base64EncodedData
     ) : Resource<ResponseBody>
 
-    suspend fun unlockVault(
+    suspend fun unlock(
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry
-    ): Resource<UnlockVaultApiResponse>
+    ): Resource<UnlockApiResponse>
 
-    suspend fun lockVault(): Resource<LockVaultApiResponse>
+    suspend fun lock(): Resource<LockApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -220,18 +218,18 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun unlockVault(
+    override suspend fun unlock(
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry
-    ): Resource<UnlockVaultApiResponse> {
+    ): Resource<UnlockApiResponse> {
         return retrieveApiResource {
-            apiService.unlockVault(
-                UnlockVaultApiRequest(biometryVerificationId, biometryData)
+            apiService.unlock(
+                UnlockApiRequest(biometryVerificationId, biometryData)
             )
         }
     }
 
-    override suspend fun lockVault(): Resource<LockVaultApiResponse> {
-        return retrieveApiResource { apiService.lockVault() }
+    override suspend fun lock(): Resource<LockApiResponse> {
+        return retrieveApiResource { apiService.lock() }
     }
 }

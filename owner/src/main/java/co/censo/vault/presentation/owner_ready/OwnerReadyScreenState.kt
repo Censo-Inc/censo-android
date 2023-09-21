@@ -4,10 +4,10 @@ import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.LockVaultApiResponse
+import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Policy
-import co.censo.shared.data.model.UnlockVaultApiResponse
+import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.Vault
 import kotlinx.datetime.Clock
 import kotlin.time.Duration
@@ -25,20 +25,20 @@ data class OwnerReadyScreenState(
         vault = Vault(
             secrets = emptyList(),
             publicMasterEncryptionKey = Base58EncodedMasterPublicKey(""),
-            unlockedForSeconds = null
-        )
+        ),
+        unlockedForSeconds = null
     ),
-    val vaultStatus: VaultStatus = VaultStatus.fromOwnerState(ownerState)
+    val lockStatus: LockStatus = LockStatus.fromOwnerState(ownerState)
 ) {
-    sealed class VaultStatus {
-        object Locked: VaultStatus()
-        data class Unlocked(val locksIn: Duration): VaultStatus()
-        data class UnlockInProgress(val apiCall: Resource<UnlockVaultApiResponse>): VaultStatus()
-        data class LockInProgress(val apiCall: Resource<LockVaultApiResponse>): VaultStatus()
+    sealed class LockStatus {
+        object Locked: LockStatus()
+        data class Unlocked(val locksIn: Duration): LockStatus()
+        data class UnlockInProgress(val apiCall: Resource<UnlockApiResponse>): LockStatus()
+        data class LockInProgress(val apiCall: Resource<LockApiResponse>): LockStatus()
 
         companion object {
-            fun fromOwnerState(ownerState: OwnerState.Ready): VaultStatus =
-                when (val unlockedForSeconds = ownerState.vault.unlockedForSeconds) {
+            fun fromOwnerState(ownerState: OwnerState.Ready): LockStatus =
+                when (val unlockedForSeconds = ownerState.unlockedForSeconds) {
                     null -> Locked
                     else -> Unlocked(locksIn = unlockedForSeconds.toInt().seconds)
                 }
@@ -48,6 +48,6 @@ data class OwnerReadyScreenState(
     fun updateOwnerState(ownerState: OwnerState.Ready): OwnerReadyScreenState =
         copy(
             ownerState = ownerState,
-            vaultStatus = VaultStatus.fromOwnerState(ownerState)
+            lockStatus = LockStatus.fromOwnerState(ownerState)
         )
 }

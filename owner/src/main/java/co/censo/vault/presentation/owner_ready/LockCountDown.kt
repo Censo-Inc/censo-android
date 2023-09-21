@@ -14,7 +14,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
 @Composable
-fun VaultLockCountDown(timeLeft: Duration, onTimeOut: () -> Unit) {
+fun LockCountDown(timeLeft: Duration, onTimeOut: () -> Unit) {
     var secondsLeft by remember { mutableStateOf(timeLeft.inWholeSeconds) }
 
     LaunchedEffect(key1 = secondsLeft) {

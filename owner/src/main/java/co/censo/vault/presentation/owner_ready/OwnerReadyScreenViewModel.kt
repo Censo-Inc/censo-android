@@ -9,9 +9,9 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
-import co.censo.shared.data.model.LockVaultApiResponse
+import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.UnlockVaultApiResponse
+import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +34,7 @@ class OwnerReadyScreenViewModel @Inject constructor(
 
     fun initUnlock() {
         state = state.copy(
-            vaultStatus = OwnerReadyScreenState.VaultStatus.UnlockInProgress(
+            lockStatus = OwnerReadyScreenState.LockStatus.UnlockInProgress(
                 apiCall = Resource.Uninitialized
             )
         )
@@ -42,16 +42,16 @@ class OwnerReadyScreenViewModel @Inject constructor(
 
     suspend fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry, updateOwnerState: (OwnerState) -> Unit): Resource<BiometryScanResultBlob> {
         state = state.copy(
-            vaultStatus = OwnerReadyScreenState.VaultStatus.UnlockInProgress(
+            lockStatus = OwnerReadyScreenState.LockStatus.UnlockInProgress(
                 apiCall = Resource.Loading()
             )
         )
 
         return viewModelScope.async {
-            val unlockVaultResponse: Resource<UnlockVaultApiResponse> = ownerRepository.unlockVault(verificationId, facetecData)
+            val unlockVaultResponse: Resource<UnlockApiResponse> = ownerRepository.unlock(verificationId, facetecData)
 
             state = state.copy(
-                vaultStatus = OwnerReadyScreenState.VaultStatus.UnlockInProgress(
+                lockStatus = OwnerReadyScreenState.LockStatus.UnlockInProgress(
                     apiCall = unlockVaultResponse
                 )
             )
@@ -68,16 +68,16 @@ class OwnerReadyScreenViewModel @Inject constructor(
 
     fun initLock(updateOwnerState: (OwnerState) -> Unit) {
         state = state.copy(
-            vaultStatus = OwnerReadyScreenState.VaultStatus.LockInProgress(
+            lockStatus = OwnerReadyScreenState.LockStatus.LockInProgress(
                 apiCall = Resource.Loading()
             )
         )
 
         viewModelScope.launch {
-            val lockVaultResponse: Resource<LockVaultApiResponse> = ownerRepository.lockVault()
+            val lockVaultResponse: Resource<LockApiResponse> = ownerRepository.lock()
 
             state = state.copy(
-                vaultStatus = OwnerReadyScreenState.VaultStatus.LockInProgress(
+                lockStatus = OwnerReadyScreenState.LockStatus.LockInProgress(
                     apiCall = lockVaultResponse
                 )
             )

@@ -3,18 +3,18 @@ package co.censo.shared.data.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UnlockVaultApiRequest(
+data class UnlockApiRequest(
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,
 )
 
 @Serializable
-data class UnlockVaultApiResponse(
+data class UnlockApiResponse(
     val ownerState: OwnerState,
     val scanResultBlob: BiometryScanResultBlob,
 )
 
 @Serializable
-data class LockVaultApiResponse(
+data class LockApiResponse(
     val ownerState: OwnerState,
 )

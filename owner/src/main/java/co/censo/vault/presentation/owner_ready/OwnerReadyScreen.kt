@@ -50,8 +50,8 @@ fun OwnerReadyScreen(
         onDispose {}
     }
 
-    when (state.vaultStatus) {
-        is OwnerReadyScreenState.VaultStatus.Locked -> {
+    when (state.lockStatus) {
+        is OwnerReadyScreenState.LockStatus.Locked -> {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -77,7 +77,7 @@ fun OwnerReadyScreen(
                 }
             }
         }
-        is OwnerReadyScreenState.VaultStatus.Unlocked -> {
+        is OwnerReadyScreenState.LockStatus.Unlocked -> {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -93,7 +93,7 @@ fun OwnerReadyScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                VaultLockCountDown(state.vaultStatus.locksIn, onTimeOut = refreshOwnerState)
+                LockCountDown(state.lockStatus.locksIn, onTimeOut = refreshOwnerState)
 
                 Spacer(Modifier.height(24.dp))
 
@@ -115,8 +115,8 @@ fun OwnerReadyScreen(
                 }
             }
         }
-        is OwnerReadyScreenState.VaultStatus.UnlockInProgress -> {
-            when (state.vaultStatus.apiCall) {
+        is OwnerReadyScreenState.LockStatus.UnlockInProgress -> {
+            when (state.lockStatus.apiCall) {
                 is Resource.Uninitialized -> {
                     FacetecAuth(
                         onFaceScanReady = { verificationId, facetecData ->
@@ -126,7 +126,7 @@ fun OwnerReadyScreen(
                 }
                 is Resource.Error -> {
                     DisplayError(
-                        errorMessage = state.vaultStatus.apiCall.getErrorMessage(context),
+                        errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
                         dismissAction = null,
                         retryAction = viewModel::initUnlock
                     )
@@ -148,11 +148,11 @@ fun OwnerReadyScreen(
                 }
             }
         }
-        is OwnerReadyScreenState.VaultStatus.LockInProgress -> {
-            when (state.vaultStatus.apiCall) {
+        is OwnerReadyScreenState.LockStatus.LockInProgress -> {
+            when (state.lockStatus.apiCall) {
                 is Resource.Error -> {
                     DisplayError(
-                        errorMessage = state.vaultStatus.apiCall.getErrorMessage(context),
+                        errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
                         dismissAction = null,
                         retryAction = viewModel::initUnlock
                     )
