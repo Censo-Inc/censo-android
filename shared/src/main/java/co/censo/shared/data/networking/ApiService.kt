@@ -143,12 +143,12 @@ interface ApiService {
         @Body inviteGuardianApiRequest: InviteGuardianApiRequest
     ): RetrofitResponse<InviteGuardianApiResponse>
 
-    @POST("/v1/guardianship-invitation/{$INVITATION_ID}/accept")
+    @POST("/v1/guardianship-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptGuardianship(
         @Path(value = INVITATION_ID) invitationId: String
     ): RetrofitResponse<AcceptGuardianshipApiResponse>
 
-    @POST("/v1/guardianship-invitation/{$INVITATION_ID}/decline")
+    @POST("/v1/guardianship-invitations/{$INVITATION_ID}/decline")
     suspend fun declineGuardianship(
         @Path(value = INVITATION_ID) invitationId: String,
     ): RetrofitResponse<ResponseBody>
