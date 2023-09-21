@@ -1,7 +1,7 @@
 package co.censo.shared.data.repository
 
 import Base58EncodedDevicePublicKey
-import Base58EncodedIntermediatePublicKey
+import Base58EncodedGuardianPublicKey
 import Base64EncodedData
 import GuardianProspect
 import ParticipantId
@@ -11,9 +11,11 @@ import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.generatePartitionId
+import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.BiometryVerificationId
-import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
+import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
+import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreateGuardianApiRequest
 import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
@@ -56,16 +58,27 @@ interface OwnerRepository {
     suspend fun inviteGuardian(
         participantId: ParticipantId,
     ): Resource<InviteGuardianApiResponse>
+    suspend fun confirmGuardianShip(
+        participantId: ParticipantId,
+        keyConfirmationSignature: ByteArray,
+        keyConfirmationTimeMillis: Long
+    ): Resource<ConfirmGuardianshipApiResponse>
+    fun checkCodeMatches(
+        verificationCode: String,
+        transportKey: Base58EncodedGuardianPublicKey,
+        timeMillis: Long,
+        signature: Base64EncodedData
+    ) : Boolean
     fun encryptShardWithGuardianKey(
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
     ) : ByteArray?
 
-    suspend fun confirmShardReceipt(
-        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-        participantId: ParticipantId,
-        encryptedShard: Base64EncodedData
-    ) : Resource<ResponseBody>
+//    suspend fun confirmShardReceipt(
+//        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+//        participantId: ParticipantId,
+//        encryptedShard: Base64EncodedData
+//    ) : Resource<ResponseBody>
 
     suspend fun unlock(
         biometryVerificationId: BiometryVerificationId,
@@ -152,6 +165,44 @@ class OwnerRepositoryImpl(
         storage.saveJWT(jwtToken)
     }
 
+    override fun checkCodeMatches(
+        verificationCode: String,
+        transportKey: Base58EncodedGuardianPublicKey,
+        timeMillis: Long,
+        signature: Base64EncodedData
+    ) =
+        try {
+            val dataToSign = verificationCode.toByteArray() + timeMillis.toString().toByteArray()
+
+            val externalDeviceKey =
+                ExternalEncryptionKey.generateFromPublicKeyBase58(transportKey)
+
+            externalDeviceKey.verify(
+                signedData = dataToSign,
+                signature = Base64.getDecoder().decode(signature.base64Encoded),
+            )
+        } catch (e: Exception) {
+            false
+        }
+
+    override suspend fun confirmGuardianShip(
+        participantId: ParticipantId,
+        keyConfirmationSignature: ByteArray,
+        keyConfirmationTimeMillis: Long
+    ): Resource<ConfirmGuardianshipApiResponse> {
+        return retrieveApiResource {
+            apiService.confirmGuardianship(
+                participantId = participantId.value,
+                confirmGuardianshipApiRequest = ConfirmGuardianshipApiRequest(
+                    keyConfirmationSignature = Base64EncodedData(
+                        Base64.getEncoder().encodeToString(keyConfirmationSignature)
+                    ),
+                    keyConfirmationTimeMillis = keyConfirmationTimeMillis
+                )
+            )
+        }
+    }
+
     override suspend fun retrieveJWT() = storage.retrieveJWT()
     override suspend fun checkJWTValid(jwtToken: String): Boolean {
         return try {
@@ -182,6 +233,7 @@ class OwnerRepositoryImpl(
             )
         }
     }
+
     override fun encryptShardWithGuardianKey(
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
@@ -204,20 +256,6 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun confirmShardReceipt(
-        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-        participantId: ParticipantId,
-        encryptedShard: Base64EncodedData
-    ): Resource<ResponseBody> {
-        return retrieveApiResource {
-            apiService.confirmShardReceipt(
-                intermediateKey = intermediatePublicKey.value,
-                participantId = participantId.value,
-                confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
-            )
-        }
-    }
-
     override suspend fun unlock(
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry
@@ -232,4 +270,18 @@ class OwnerRepositoryImpl(
     override suspend fun lock(): Resource<LockApiResponse> {
         return retrieveApiResource { apiService.lock() }
     }
+    //This can most likely be deleted
+//    override suspend fun confirmShardReceipt(
+//        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+//        participantId: ParticipantId,
+//        encryptedShard: Base64EncodedData
+//    ): Resource<ResponseBody> {
+//        return retrieveApiResource {
+//            apiService.confirmShardReceipt(
+//                intermediateKey = intermediatePublicKey.value,
+//                participantId = participantId.value,
+//                confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
+//            )
+//        }
+//    }
 }

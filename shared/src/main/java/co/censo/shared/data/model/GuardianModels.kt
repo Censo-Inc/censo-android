@@ -110,7 +110,10 @@ value class ParticipantId(val value: String) {
             throw IllegalArgumentException("Invalid participant id format")
         }
     }
+
+    fun getBytes() = Hex.decode(value)
 }
+
 
 @Serializable
 @JvmInline

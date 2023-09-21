@@ -157,14 +157,14 @@ fun GuardianInvitationScreen(
 
                                         when (guardianStatus) {
                                             is GuardianStatus.Invited -> {
-                                                InvitedGuardian(
+                                                InvitedGuardianUI(
                                                     guardianLabel = guardian.label,
                                                     deepLink = deeplink,
                                                     copyDeeplink = copyDeeplink
                                                 )
                                             }
                                             is GuardianStatus.Initial -> {
-                                                InitialGuardian(
+                                                InitialGuardianUI(
                                                     guardianLabel = guardian.label,
                                                     inviteGuardian = inviteGuardian,
                                                     deepLink = deeplink,
@@ -172,10 +172,27 @@ fun GuardianInvitationScreen(
                                                 )
                                             }
                                             is GuardianStatus.Accepted -> {
-                                                AcceptedGuardian(guardianLabel = guardian.label)
+                                                AcceptedGuardianUI(guardianLabel = guardian.label)
                                             }
+
+                                            is GuardianStatus.VerificationSubmitted -> {
+                                                SubmittedVerificationGuardianUI(
+                                                    guardian.label,
+                                                ) {
+                                                    viewModel.verifyGuardian(
+                                                        guardian, guardianStatus
+                                                    )
+                                                }
+                                            }
+
+                                            is GuardianStatus.Confirmed -> {
+                                                ConfirmedGuardianUI(
+                                                    guardianLabel = guardian.label
+                                                )
+                                            }
+
                                             else -> {
-                                                InitialGuardian(
+                                                InitialGuardianUI(
                                                     guardianLabel = guardian.label,
                                                     inviteGuardian = inviteGuardian,
                                                     deepLink = deeplink,
@@ -282,7 +299,7 @@ fun GuardianInvitationScreen(
                                 val guardian = state.createdGuardians[index]
                                 val deeplink = if (guardian is Guardian.ProspectGuardian) "$GUARDIAN_URI${guardian.invitationId?.value}" else "Guardian Already Added"
 
-                                InitialGuardian(
+                                InitialGuardianUI(
                                     guardianLabel = state.createdGuardians[index].label,
                                     inviteGuardian = { viewModel.inviteGuardian(guardian.participantId) },
                                     deepLink = deeplink,
@@ -345,7 +362,66 @@ fun GuardianInvitationScreen(
 }
 
 @Composable
-fun AcceptedGuardian(
+fun ConfirmedGuardianUI(guardianLabel: String) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .background(color = Color(0xFF4059AD))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 36.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "$guardianLabel Confirmed",
+                color = Color.White,
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun SubmittedVerificationGuardianUI(
+    guardianLabel: String,
+    verifyGuardian: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .background(color = Color(0xFF4059AD))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 36.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "$guardianLabel Code Submitted",
+                color = Color.White,
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(onClick = verifyGuardian) {
+                Text("Verify Guardian")
+            }
+        }
+    }
+}
+
+@Composable
+fun AcceptedGuardianUI(
     guardianLabel: String,
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -373,7 +449,7 @@ fun AcceptedGuardian(
 }
 
 @Composable
-fun InvitedGuardian(
+fun InvitedGuardianUI(
     guardianLabel: String,
     deepLink: String,
     copyDeeplink: () -> Unit,
@@ -427,7 +503,7 @@ fun InvitedGuardian(
 }
 
 @Composable
-fun InitialGuardian(
+fun InitialGuardianUI(
     guardianLabel: String,
     deepLink: String,
     copyDeeplink: () -> Unit,
