@@ -74,5 +74,34 @@
     <string name="scan_guardian_qr_code">Ready to scan a Guardians QR code?</string>
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="codes_do_not_match">Codes do not match.</string>
+    <string name="select_approvers_initial_info_explainer">Select only people you trust. You will rely upon your approvers to help you access your seed phrases when you require it, although your approvers can never access your seed phrases themselves.</string>
+    <string name="select_approvers">Select Approvers</string>
+    <string name="how_does_this_work">How does this work?</string>
+    <string name="required_approvals">Required Approvals</string>
+    <string name="review">Review</string>
+    <string name="enter_nickname">Enter Nickname</string>
+    <string name="just_something_for_you_to_remember_this_approver_by">Just something for you to remember this approver by</string>
+    <string name="approver_placeholder">e.g Ben</string>
+    <string name="of">of</string>
+    <string name="to_access_your_seed_phrases">To access your seed phrases,</string>
+    <string name="approvers_are_required_for_access">approvers are required for access</string>
+    <string name="add_another_approver">add another approver</string>
+    <string name="select_another">Select Another</string>
+    <string name="you_have_selected">You have selected</string>
+    <string name="approvers_to_help_you_access_your_seed_phrases">approvers to help you access your seed phrases.</string>
+    <string name="approver">Approver</string>
+    <string name="edit_approver">edit approver</string>
+    <string name="select_first_approver_title">Select First Approver</string>
+    <string name="next_required_approvals">Next: Required Approvals</string>
+    <string name="next_review">Next: Review</string>
+    <string name="confirm">Confirm</string>
+    <string name="back">back</string>
+    <string name="setup_security_plan">Setup Security Plan</string>
+    <string name="you_have_a_single_approver_so_their_approval_will_be_required_to_access_your_seed_phrases">You have a single approver so their approval will be required to access your seed phrases.</string>
+    <string name="choose_how_many_approvals_will_be_required_for_you_to_access_your_seed_phrases_we_recommend">Choose how many approvals will be required for you to access your seed phrases.\n\nWe recommend</string>
+    <string name="but_you_can_change_it_below">but you can change it below.</string>
+    <string name="your_seed_phrases_are_secured_with">Your seed phrases are secured with\n</string>
+    <string name="approver_colon">approver:</string>
+    <string name="approvers_colon">approvers:</string>
 
 </resources>
