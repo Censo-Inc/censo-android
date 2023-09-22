@@ -69,7 +69,7 @@ android {
         }
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
-            buildConfigField("String", "BASE_URL", "\"https://staging.censo.co/\"")
+            buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
             buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")

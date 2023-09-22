@@ -50,129 +50,138 @@ fun OwnerReadyScreen(
         onDispose {}
     }
 
-    when (state.lockStatus) {
-        is OwnerReadyScreenState.LockStatus.Locked -> {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .background(color = Color.White),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                TextButton(
-                    onClick = viewModel::initUnlock,
-                    modifier = Modifier.semantics { testTag = TestTag.unlock_button },
+    if (state.ownerState == null) {
+        LoadingIndicator()
+    } else {
+        when (state.lockStatus) {
+            is OwnerReadyScreenState.LockStatus.Locked -> {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .background(color = Color.White),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row() {
-                        Icon(
-                            imageVector = Icons.Rounded.LockOpen,
-                            contentDescription = "Unlock",
-                            tint = Color.Black
-                        )
-                        Text(
-                            text = "Unlock",
-                            color = Color.Black
-                        )
-                    }
-                }
-            }
-        }
-        is OwnerReadyScreenState.LockStatus.Unlocked -> {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .background(color = Color.White),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Unlocked",
-                    textAlign = TextAlign.Center,
-                    color = Color.Black
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                LockCountDown(state.lockStatus.locksIn, onTimeOut = refreshOwnerState)
-
-                Spacer(Modifier.height(24.dp))
-
-                TextButton(
-                    onClick = { viewModel.initLock(updateOwnerState) },
-                    modifier = Modifier.semantics { testTag = TestTag.unlock_button },
-                ) {
-                    Row() {
-                        Icon(
-                            imageVector = Icons.Rounded.Lock,
-                            contentDescription = "Lock",
-                            tint = Color.Black
-                        )
-                        Text(
-                            text = "Lock",
-                            color = Color.Black
-                        )
-                    }
-                }
-            }
-        }
-        is OwnerReadyScreenState.LockStatus.UnlockInProgress -> {
-            when (state.lockStatus.apiCall) {
-                is Resource.Uninitialized -> {
-                    FacetecAuth(
-                        onFaceScanReady = { verificationId, facetecData ->
-                            viewModel.onFaceScanReady(verificationId, facetecData, updateOwnerState)
+                    TextButton(
+                        onClick = viewModel::initUnlock,
+                        modifier = Modifier.semantics { testTag = TestTag.unlock_button },
+                    ) {
+                        Row() {
+                            Icon(
+                                imageVector = Icons.Rounded.LockOpen,
+                                contentDescription = "Unlock",
+                                tint = Color.Black
+                            )
+                            Text(
+                                text = "Unlock",
+                                color = Color.Black
+                            )
                         }
-                    )
+                    }
                 }
-                is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
-                        dismissAction = null,
-                        retryAction = viewModel::initUnlock
+            }
+            is OwnerReadyScreenState.LockStatus.Unlocked -> {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .background(color = Color.White),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Unlocked",
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
-                }
-                else -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color.White)
+
+                    Spacer(Modifier.height(24.dp))
+
+                    LockCountDown(state.lockStatus.locksIn, onTimeOut = refreshOwnerState)
+
+                    Spacer(Modifier.height(24.dp))
+
+                    TextButton(
+                        onClick = { viewModel.initLock(updateOwnerState) },
+                        modifier = Modifier.semantics { testTag = TestTag.unlock_button },
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .align(Alignment.Center),
-                            strokeWidth = 8.dp,
-                            color = Color.Red
+                        Row() {
+                            Icon(
+                                imageVector = Icons.Rounded.Lock,
+                                contentDescription = "Lock",
+                                tint = Color.Black
+                            )
+                            Text(
+                                text = "Lock",
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+            }
+            is OwnerReadyScreenState.LockStatus.UnlockInProgress -> {
+                when (state.lockStatus.apiCall) {
+                    is Resource.Uninitialized -> {
+                        FacetecAuth(
+                            onFaceScanReady = { verificationId, facetecData ->
+                                viewModel.onFaceScanReady(verificationId, facetecData, updateOwnerState)
+                            }
                         )
+                    }
+                    is Resource.Error -> {
+                        DisplayError(
+                            errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
+                            dismissAction = null,
+                            retryAction = viewModel::initUnlock
+                        )
+                    }
+                    else -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = Color.White)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .align(Alignment.Center),
+                                strokeWidth = 8.dp,
+                                color = Color.Red
+                            )
+                        }
+                    }
+                }
+            }
+            is OwnerReadyScreenState.LockStatus.LockInProgress -> {
+                when (state.lockStatus.apiCall) {
+                    is Resource.Error -> {
+                        DisplayError(
+                            errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
+                            dismissAction = null,
+                            retryAction = viewModel::initUnlock
+                        )
+                    }
+                    else -> {
+                        LoadingIndicator()
                     }
                 }
             }
         }
-        is OwnerReadyScreenState.LockStatus.LockInProgress -> {
-            when (state.lockStatus.apiCall) {
-                is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
-                        dismissAction = null,
-                        retryAction = viewModel::initUnlock
-                    )
-                }
-                else -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color.White)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .align(Alignment.Center),
-                            strokeWidth = 8.dp,
-                            color = Color.Red
-                        )
-                    }
-                }
-            }
-        }
+    }
+}
+
+@Composable
+private fun LoadingIndicator() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(72.dp)
+                .align(Alignment.Center),
+            strokeWidth = 8.dp,
+            color = Color.Red
+        )
     }
 }

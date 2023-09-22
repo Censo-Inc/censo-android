@@ -110,12 +110,6 @@ interface ApiService {
     @POST("/v1/biometry-verifications")
     suspend fun biometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
 
-    @POST("/v1/biometry-verifications/{id}/biometry")
-    suspend fun submitFacetecResult(
-        @Path(value = "id", encoded = true) biometryId: BiometryVerificationId,
-        @Body facetecResultRequest: SubmitBiometryVerificationApiRequest
-    ): RetrofitResponse<SubmitBiometryVerificationApiResponse>
-
     @POST("/v1/policies")
     suspend fun createPolicy(
         @Body createPolicyApiRequest: CreatePolicyApiRequest

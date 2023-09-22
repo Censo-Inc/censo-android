@@ -43,17 +43,17 @@ class FacetecAuthViewModel @Inject constructor(
         val identityToken = UUID.randomUUID().toString().toByteArray()
 
         viewModelScope.launch {
-            val facetecResponse = facetecRepository.submitResult(
-                biometryId = state.facetecData?.id ?: BiometryVerificationId(""),
-                biometryData = FacetecBiometry(
-                    faceScan = Base64.getEncoder().encodeToString(identityToken),
-                    auditTrailImage = Base64.getEncoder().encodeToString(identityToken),
-                    lowQualityAuditTrailImage = Base64.getEncoder()
-                        .encodeToString(identityToken),
+            state = state.copy(
+                submitResultResponse = onFaceScanReady(
+                    state.facetecData?.id ?: BiometryVerificationId(""),
+                    FacetecBiometry(
+                        faceScan = Base64.getEncoder().encodeToString(identityToken),
+                        auditTrailImage = Base64.getEncoder().encodeToString(identityToken),
+                        lowQualityAuditTrailImage = Base64.getEncoder()
+                            .encodeToString(identityToken),
+                    )
                 )
             )
-
-            state = state.copy(submitResultResponse = Resource.Success(facetecResponse.data?.scanResultBlob))
         }
     }
 
@@ -88,7 +88,7 @@ class FacetecAuthViewModel @Inject constructor(
 
     fun facetecSDKInitialized() {
         if (BuildConfig.BUILD_TYPE == "debug") {
-         skipFacetec()
+            skipFacetec()
         } else {
             state = state.copy(
                 startAuth = Resource.Success(Unit),
