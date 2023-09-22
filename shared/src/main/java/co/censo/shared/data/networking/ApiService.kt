@@ -23,9 +23,12 @@ import co.censo.shared.data.model.GetPolicyApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
+import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.UnlockApiRequest
+import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.UpdatePolicyApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
@@ -107,12 +110,6 @@ interface ApiService {
     @POST("/v1/biometry-verifications")
     suspend fun biometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
 
-    @POST("/v1/biometry-verifications/{id}/biometry")
-    suspend fun submitFacetecResult(
-        @Path(value = "id", encoded = true) biometryId: BiometryVerificationId,
-        @Body facetecResultRequest: SubmitBiometryVerificationApiRequest
-    ): RetrofitResponse<SubmitBiometryVerificationApiResponse>
-
     @POST("/v1/policies")
     suspend fun createPolicy(
         @Body createPolicyApiRequest: CreatePolicyApiRequest
@@ -180,6 +177,14 @@ interface ApiService {
     suspend fun removePushNotificationToken(
         @Path("deviceType") deviceType: String
     ): RetrofitResponse<Unit>
+
+    @POST("/v1/unlock")
+    suspend fun unlock(
+        @Body apiRequest: UnlockApiRequest
+    ): RetrofitResponse<UnlockApiResponse>
+
+    @POST("/v1/lock")
+    suspend fun lock(): RetrofitResponse<LockApiResponse>
 }
 
 class AnalyticsInterceptor(

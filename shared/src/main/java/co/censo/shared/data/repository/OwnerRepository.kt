@@ -4,10 +4,8 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedIntermediatePublicKey
 import Base64EncodedData
 import GuardianProspect
-import InvitationId
 import ParticipantId
 import co.censo.shared.BuildConfig
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_URI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
@@ -26,7 +24,10 @@ import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.JwtToken
+import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SignInApiRequest
+import co.censo.shared.data.model.UnlockApiRequest
+import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.projectLog
@@ -65,6 +66,13 @@ interface OwnerRepository {
         participantId: ParticipantId,
         encryptedShard: Base64EncodedData
     ) : Resource<ResponseBody>
+
+    suspend fun unlock(
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<UnlockApiResponse>
+
+    suspend fun lock(): Resource<LockApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -94,15 +102,11 @@ class OwnerRepositoryImpl(
             )
         }
 
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
-
         val policySetupHelper = PolicySetupHelper.create(
             threshold = threshold,
             guardians = guardianProspect,
-            deviceKey = deviceKey.retrieveKey()
-        ) {
-            deviceKey.encrypt(it)
-        }
+            deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        )
 
         projectLog(message = "Policy Setup Helper Created: $policySetupHelper")
 
@@ -212,5 +216,20 @@ class OwnerRepositoryImpl(
                 confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
             )
         }
+    }
+
+    override suspend fun unlock(
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<UnlockApiResponse> {
+        return retrieveApiResource {
+            apiService.unlock(
+                UnlockApiRequest(biometryVerificationId, biometryData)
+            )
+        }
+    }
+
+    override suspend fun lock(): Resource<LockApiResponse> {
+        return retrieveApiResource { apiService.lock() }
     }
 }

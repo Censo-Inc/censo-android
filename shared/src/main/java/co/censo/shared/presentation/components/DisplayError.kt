@@ -22,7 +22,7 @@ import co.censo.shared.R
 @Composable
 fun DisplayError(
     errorMessage: String,
-    dismissAction: () -> Unit,
+    dismissAction: (() -> Unit)?,
     retryAction: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -30,10 +30,14 @@ fun DisplayError(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) { dismissAction() },
+            .let {
+                if (dismissAction != null) {
+                    it.clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { dismissAction() }
+                } else it
+            },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -42,9 +46,11 @@ fun DisplayError(
         TextButton(onClick = retryAction) {
             Text(text = stringResource(R.string.retry))
         }
-        Spacer(modifier = Modifier.height(24.dp))
-        TextButton(onClick = dismissAction) {
-            Text(text = stringResource(R.string.dismiss))
+        if (dismissAction != null) {
+            Spacer(modifier = Modifier.height(24.dp))
+            TextButton(onClick = dismissAction) {
+                Text(text = stringResource(R.string.dismiss))
+            }
         }
     }
 }

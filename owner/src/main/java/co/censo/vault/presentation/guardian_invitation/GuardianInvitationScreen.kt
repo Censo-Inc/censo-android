@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_URI
 import co.censo.vault.R
 import co.censo.shared.data.Resource
@@ -323,6 +324,19 @@ fun GuardianInvitationScreen(
                             textAlign = TextAlign.Center,
                             color = Color.Black
                         )
+
+                        Spacer(Modifier.height(24.dp))
+
+                        TextButton(
+                            onClick = {
+                                navController.navigate(SharedScreen.HomeRoute.route)
+                            },
+                        ) {
+                            Text(
+                                text = "Ok",
+                                color = Color.Black
+                            )
+                        }
                     }
                 }
             }
@@ -352,7 +366,7 @@ fun AcceptedGuardian(
             Text(text = "$guardianLabel Accepted", color = Color.White, fontSize = 24.sp)
 
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Text("No more actions required.", color = Color.White)
         }
     }

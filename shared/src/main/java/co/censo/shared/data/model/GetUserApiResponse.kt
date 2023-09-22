@@ -118,5 +118,6 @@ sealed class OwnerState {
     data class Ready(
         val policy: Policy,
         val vault: Vault,
+        val unlockedForSeconds: UInt?
     ) : OwnerState()
 }
