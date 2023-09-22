@@ -93,7 +93,14 @@ fun GuardianInvitationScreen(
             }
 
             state.asyncError -> {
-                if (state.userResponse is Resource.Error) {
+                if (state.codeNotValidError) {
+                    DisplayError(
+                        errorMessage = stringResource(R.string.codes_do_not_match),
+                        dismissAction = viewModel::resetInvalidCode,
+                    ) {
+                        viewModel.resetInvalidCode()
+                    }
+                } else if (state.userResponse is Resource.Error) {
                     DisplayError(
                         errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = viewModel::resetUserResponse,

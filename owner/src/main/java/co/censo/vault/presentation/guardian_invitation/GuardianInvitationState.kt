@@ -23,13 +23,14 @@ data class GuardianInvitationState(
     val policyIntermediatePublicKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(""),
     val createdGuardians: List<Guardian> = emptyList(),
     val guardianInviteStatus: GuardianInvitationStatus = GuardianInvitationStatus.ENUMERATE_GUARDIANS,
+    val codeNotValidError: Boolean = false
 ) {
     val canContinueOnboarding = (createdGuardians.size >= MIN_GUARDIAN_LIMIT && threshold > 0)
     val loading =
         userResponse is Resource.Loading || createPolicyResponse is Resource.Loading || inviteGuardianResponse is Resource.Loading
     val asyncError =
         userResponse is Resource.Error || createPolicyResponse is Resource.Error
-                || inviteGuardianResponse is Resource.Error || createGuardianResponse is Resource.Error
+                || inviteGuardianResponse is Resource.Error || createGuardianResponse is Resource.Error || codeNotValidError
 }
 
 enum class GuardianInvitationStatus {

@@ -165,7 +165,9 @@ class GuardianInvitationViewModel @Inject constructor(
         )
 
         if (!codeVerified) {
-            //todo: set error
+            state = state.copy(
+                codeNotValidError = true
+            )
             return
         }
 
@@ -196,6 +198,10 @@ class GuardianInvitationViewModel @Inject constructor(
 
     fun enrollBiometry() {
         state = state.copy(guardianInviteStatus = GuardianInvitationStatus.CREATE_POLICY)
+    }
+
+    fun resetInvalidCode() {
+        state = state.copy(codeNotValidError = false)
     }
 
     fun resetConfirmGuardianshipResponse() {
