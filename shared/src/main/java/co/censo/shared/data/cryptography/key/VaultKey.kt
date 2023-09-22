@@ -63,11 +63,28 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
         ECIESManager.decryptMessage(data, key.private)
 
     override fun sign(data: ByteArray): ByteArray {
-        TODO("Not yet implemented")
+        val signature = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
+        signature.initSign(key.private)
+        signature.update(data)
+        val signedData = signature.sign()
+
+        val verified = verify(
+            signedData = data,
+            signature = signedData
+        )
+
+        if (!verified) {
+            throw Exception("Encryption key signature invalid.")
+        }
+
+        return signedData
     }
 
     override fun verify(signedData: ByteArray, signature: ByteArray): Boolean {
-        TODO("Not yet implemented")
+        val signatureKeystore = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
+        signatureKeystore.initVerify(key.public)
+        signatureKeystore.update(signedData)
+        return signatureKeystore.verify(signature)
     }
 
 
@@ -82,7 +99,43 @@ class EncryptionKey(val key: KeyPair) : VaultKey {
         fun generateRandomKey(): EncryptionKey =
             EncryptionKey(ECHelper.createECKeyPair())
     }
+}
 
+class ExternalEncryptionKey(val publicKey: PublicKey) : VaultKey {
+
+    override fun publicExternalRepresentation(): Base58EncodedPublicKey {
+        return Base58EncodedDevicePublicKey(Base58.base58Encode(publicKeyUncompressed()))
+    }
+
+    override fun publicKeyUncompressed() =
+        ECPublicKeyDecoder.extractUncompressedPublicKey(publicKey.encoded)
+
+    override fun privateKeyRaw(): ByteArray {
+        throw Exception("Cannot access private key of external key")
+    }
+
+    override fun encrypt(data: ByteArray): ByteArray =
+        ECIESManager.encryptMessage(data, publicKeyUncompressed())
+
+    override fun decrypt(data: ByteArray): ByteArray {
+        throw Exception("Cannot decrypt with external key")
+    }
+
+    override fun sign(data: ByteArray): ByteArray {
+        throw Exception("Cannot sign with external key")
+    }
+
+    override fun verify(signedData: ByteArray, signature: ByteArray): Boolean {
+        val signatureKeystore = Signature.getInstance(KeystoreHelper.SHA_256_ECDSA)
+        signatureKeystore.initVerify(publicKey)
+        signatureKeystore.update(signedData)
+        return signatureKeystore.verify(signature)
+    }
+    companion object {
+        fun generateFromPublicKeyBase58(publicKey: Base58EncodedPublicKey): ExternalEncryptionKey {
+            return ExternalEncryptionKey(publicKey = publicKey.ecPublicKey)
+        }
+    }
 }
 
 /**

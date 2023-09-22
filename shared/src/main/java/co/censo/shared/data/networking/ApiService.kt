@@ -11,7 +11,7 @@ import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
-import co.censo.shared.data.model.ConfirmShardReceiptApiRequest
+import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreateGuardianApiRequest
 import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
@@ -150,25 +150,25 @@ interface ApiService {
         @Path(value = INVITATION_ID) invitationId: String,
     ): RetrofitResponse<ResponseBody>
 
-    @POST("v1/guardianship-invitations/${INVITATION_ID}/verification")
+    @POST("v1/guardianship-invitations/{$INVITATION_ID}/verification")
     suspend fun submitGuardianVerification(
         @Path(value = INVITATION_ID) invitationId: String,
         @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest
     ): RetrofitResponse<SubmitGuardianVerificationApiResponse>
 
-    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")
-    suspend fun confirmShardReceipt(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
-        @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body confirmShardReceiptApiRequest: ConfirmShardReceiptApiRequest
-    ): RetrofitResponse<ResponseBody>
+    //Can most likely be deleted
+//    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")
+//    suspend fun confirmShardReceipt(
+//        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
+//        @Path(value = PARTICIPANT_ID) participantId: String,
+//        @Body confirmShardReceiptApiRequest: ConfirmShardReceiptApiRequest
+//    ): RetrofitResponse<ResponseBody>
 
-    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/confirmation")
+    @POST("/v1/guardians/{$PARTICIPANT_ID}/confirmation")
     suspend fun confirmGuardianship(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
         @Path(value = PARTICIPANT_ID) participantId: String,
         @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<ConfirmGuardianshipApiResponse>
 
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>

@@ -11,18 +11,22 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.FacetecBiometry
+import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import javax.inject.Inject
 
 @HiltViewModel
 class GuardianInvitationViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository
+    private val ownerRepository: OwnerRepository,
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(GuardianInvitationState())
@@ -148,13 +152,61 @@ class GuardianInvitationViewModel @Inject constructor(
         }
     }
 
+    fun verifyGuardian(
+        guardian: Guardian,
+        guardianStatus: GuardianStatus.VerificationSubmitted
+    ) {
+
+        val codeVerified = ownerRepository.checkCodeMatches(
+            verificationCode = "123456",
+            transportKey = guardianStatus.guardianPublicKey,
+            signature = guardianStatus.signature,
+            timeMillis = guardianStatus.timeMillis
+        )
+
+        if (!codeVerified) {
+            state = state.copy(
+                codeNotValidError = true
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            val keyConfirmationTimeMillis = Clock.System.now().epochSeconds
+
+            val keyConfirmationMessage =
+                guardianStatus.guardianPublicKey.getBytes() + guardian.participantId.getBytes() + keyConfirmationTimeMillis.toString()
+                    .toByteArray()
+            val keyConfirmationSignature =
+                keyRepository.retrieveInternalDeviceKey().sign(keyConfirmationMessage)
+
+            val confirmGuardianShipResponse = ownerRepository.confirmGuardianShip(
+                participantId = guardian.participantId,
+                keyConfirmationSignature = keyConfirmationSignature,
+                keyConfirmationTimeMillis = keyConfirmationTimeMillis
+            )
+
+            if (confirmGuardianShipResponse is Resource.Success) {
+                updateOwnerState(confirmGuardianShipResponse.data?.ownerState)
+
+                state = state.copy(
+                    confirmGuardianshipResponse = confirmGuardianShipResponse
+                )
+            }
+        }
+    }
+
     fun enrollBiometry() {
         state = state.copy(guardianInviteStatus = GuardianInvitationStatus.CREATE_POLICY)
     }
 
-    fun resetConfirmShardReceipt() {
+    fun resetInvalidCode() {
+        state = state.copy(codeNotValidError = false)
+    }
+
+    fun resetConfirmGuardianshipResponse() {
         state = state.copy(
-            confirmShardReceiptResponse = Resource.Uninitialized,
+            confirmGuardianshipResponse = Resource.Uninitialized,
         )
     }
 

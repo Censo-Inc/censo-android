@@ -73,5 +73,6 @@
 
     <string name="scan_guardian_qr_code">Ready to scan a Guardians QR code?</string>
     <string name="scan_qr_code">Scan QR Code</string>
+    <string name="codes_do_not_match">Codes do not match.</string>
 
 </resources>

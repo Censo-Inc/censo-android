@@ -2,6 +2,7 @@ package co.censo.shared.data.storage
 
 import android.content.Context
 import android.content.SharedPreferences
+import co.censo.shared.BuildConfig
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -22,6 +23,9 @@ interface Storage {
     fun saveGuardianInvitationId(id: String)
     fun retrieveGuardianInvitationId() : String
     fun clearGuardianInvitationId()
+    fun savePrivateKey(key: String)
+    fun retrievePrivateKey() : String
+    fun clearPrivateKey()
 }
 
 object SharedPrefsStorage : Storage {
@@ -39,6 +43,8 @@ object SharedPrefsStorage : Storage {
     private const val GUARDIAN_INVITATION_ID = "guardian_invitation_id"
 
     private const val JWT = "jwt"
+
+    private const val GOOGLE_DRIVE_MOCK_KEY = "google_drive_mock_key"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -85,6 +91,28 @@ object SharedPrefsStorage : Storage {
         sharedPrefs.getString(GUARDIAN_INVITATION_ID, "") ?: ""
 
     override fun clearGuardianInvitationId() = saveGuardianInvitationId("")
+    //endregion
+
+    //region Mock Google Drive Private Key
+    override fun savePrivateKey(key: String) {
+        if(BuildConfig.BUILD_TYPE != "debug") {
+            throw Exception("This is a temporary mocking of google drive only to be used on debug builds")
+        }
+
+        val editor = sharedPrefs.edit()
+        editor.putString(GOOGLE_DRIVE_MOCK_KEY, key)
+        editor.apply()
+    }
+
+    override fun retrievePrivateKey() : String {
+        if(BuildConfig.BUILD_TYPE != "debug") {
+            throw Exception("This is a temporary mocking of google drive only to be used on debug builds")
+        }
+
+        return sharedPrefs.getString(GOOGLE_DRIVE_MOCK_KEY, "") ?: ""
+    }
+
+    override fun clearPrivateKey() = savePrivateKey("")
     //endregion
 
     //region push dialog

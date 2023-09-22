@@ -37,6 +37,10 @@ data class GuardianProspect(
 
 typealias GuardianId = String
 
+@Serializable
+@JvmInline
+value class Base58EncodedPrivateKey(val value: String)
+
 interface Base58EncodedPublicKey {
     val value: String
 
@@ -106,7 +110,10 @@ value class ParticipantId(val value: String) {
             throw IllegalArgumentException("Invalid participant id format")
         }
     }
+
+    fun getBytes() = Hex.decode(value)
 }
+
 
 @Serializable
 @JvmInline
