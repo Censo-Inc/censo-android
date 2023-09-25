@@ -122,9 +122,14 @@ data class Vault(
 @Serializable
 sealed class OwnerState {
     @Serializable
+    @SerialName("Initial")
+    object Initial: OwnerState()
+
+    @Serializable
     @SerialName("GuardianSetup")
     data class GuardianSetup(
         val guardians: List<Guardian.ProspectGuardian>,
+        val threshold: UInt?
     ) : OwnerState()
 
     @Serializable

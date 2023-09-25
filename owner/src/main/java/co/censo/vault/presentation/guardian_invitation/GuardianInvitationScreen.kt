@@ -348,9 +348,14 @@ fun GuardianInvitationScreen(
                     }
 
                     GuardianInvitationStatus.CREATE_POLICY -> {
-                        FacetecAuth(
-                            onFaceScanReady = viewModel::onPolicyCreationFaceScanReady
-                        )
+                        TextButton(
+                            onClick = { viewModel.createPolicy() }
+                        ) {
+                            Text(
+                                text = "Continue",
+                                color = Color.Black
+                            )
+                        }
                     }
 
                     GuardianInvitationStatus.READY -> {

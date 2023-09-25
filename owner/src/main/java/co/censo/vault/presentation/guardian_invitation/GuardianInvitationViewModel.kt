@@ -69,24 +69,21 @@ class GuardianInvitationViewModel @Inject constructor(
         }.await()
     }
 
-    suspend fun onPolicyCreationFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
+    fun createPolicy() {
         state = state.copy(createPolicyResponse = Resource.Loading())
 
-        return viewModelScope.async {
-
+        viewModelScope.launch {
             // TODO take only confirmed guardians. Requires social approval VAULT-152
             val policySetupHelper = ownerRepository.getPolicySetupHelper(state.threshold, state.guardians.map { it.label })
 
-            val createPolicyResponse: Resource<CreatePolicyApiResponse> = ownerRepository.createPolicy(policySetupHelper, verificationId, facetecData)
+            val createPolicyResponse: Resource<CreatePolicyApiResponse> = ownerRepository.createPolicy(policySetupHelper)
 
             if (createPolicyResponse is Resource.Success) {
                 updateOwnerState(createPolicyResponse.data?.ownerState)
             }
 
             state = state.copy(createPolicyResponse = createPolicyResponse)
-
-            createPolicyResponse.map { it.scanResultBlob }
-        }.await()
+        }
     }
 
     fun retrieveUserState() {
@@ -107,6 +104,7 @@ class GuardianInvitationViewModel @Inject constructor(
             when (ownerState) {
                 is OwnerState.Ready -> GuardianInvitationStatus.READY
                 is OwnerState.GuardianSetup -> GuardianInvitationStatus.INVITE_GUARDIANS
+                is OwnerState.Initial -> GuardianInvitationStatus.ENUMERATE_GUARDIANS
             }
         } else {
             GuardianInvitationStatus.ENUMERATE_GUARDIANS
@@ -116,6 +114,7 @@ class GuardianInvitationViewModel @Inject constructor(
             when (ownerState) {
                 is OwnerState.Ready -> ownerState.policy.guardians
                 is OwnerState.GuardianSetup -> ownerState.guardians
+                is OwnerState.Initial -> listOf()
             }
         } else {
             state.guardians
