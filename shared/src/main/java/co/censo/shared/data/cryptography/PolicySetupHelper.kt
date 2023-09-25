@@ -8,6 +8,7 @@ import GuardianProspect
 import ParticipantId
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.model.CreatePolicyApiRequest
 import java.math.BigInteger
 import java.security.PrivateKey
 import java.util.Base64
@@ -16,16 +17,17 @@ class PolicySetupHelper(
     val shards: List<Point>,
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterKey: Base64EncodedData,
-    val threshold: Int,
+    val threshold: UInt,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val guardianInvites: List<GuardianInvite> = emptyList(),
+    val guardianShards: List<CreatePolicyApiRequest.GuardianShard> = emptyList(),
     val deviceKey: InternalDeviceKey
 ) {
 
 
     companion object {
         fun create(
-            threshold: Int,
+            threshold: UInt,
             guardians: List<GuardianProspect>,
             deviceKey: InternalDeviceKey
         ): PolicySetupHelper {
@@ -40,15 +42,13 @@ class PolicySetupHelper(
 
             val sharer = SecretSharer(
                 secret = BigInteger(intermediateEncryptionKey.privateKeyRaw()),
-                threshold = threshold,
+                threshold = threshold.toInt(),
                 participants = guardians.map { it.participantId }
             )
 
             val guardianInvites = guardians.map { guardianProspect ->
                 val shard = sharer.shards.firstOrNull { it.x == guardianProspect.participantId }
-
                 val shardBytes = shard?.y?.toByteArray() ?: byteArrayOf()
-
                 val encryptedShard = deviceKey.encrypt(shardBytes)
 
                 GuardianInvite(
@@ -65,7 +65,8 @@ class PolicySetupHelper(
                 intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation().value),
                 encryptedMasterKey = Base64EncodedData(encryptedMasterKey),
                 threshold = threshold,
-                guardianInvites = guardianInvites
+                guardianInvites = guardianInvites,
+                guardianShards = guardianInvites.map { CreatePolicyApiRequest.GuardianShard(it.participantId, it.encryptedShard) }
             )
         }
     }

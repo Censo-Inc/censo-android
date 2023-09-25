@@ -16,12 +16,13 @@ import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
-import co.censo.shared.data.model.CreateGuardianApiRequest
-import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.CreatePolicySetupApiRequest
+import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
@@ -45,12 +46,17 @@ interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
     suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
-    suspend fun setupPolicy(threshold: Int, guardians: List<String>) : PolicySetupHelper
+    suspend fun createPolicySetup(
+        threshold: UInt,
+        guardians: List<Guardian.SetupGuardian>,
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry,
+    ): Resource<CreatePolicySetupApiResponse>
+    suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>) : PolicySetupHelper
     suspend fun createPolicy(
         setupHelper: PolicySetupHelper, biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry
     ): Resource<CreatePolicyApiResponse>
-    suspend fun createGuardian(guardianName: String) : Resource<CreateGuardianApiResponse>
     suspend fun verifyToken(token: String) : String?
     suspend fun saveJWT(jwtToken: String)
     suspend fun retrieveJWT() : String
@@ -73,12 +79,6 @@ interface OwnerRepository {
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
     ) : ByteArray?
-
-//    suspend fun confirmShardReceipt(
-//        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-//        participantId: ParticipantId,
-//        encryptedShard: Base64EncodedData
-//    ) : Resource<ResponseBody>
 
     suspend fun unlock(
         biometryVerificationId: BiometryVerificationId,
@@ -106,8 +106,20 @@ class OwnerRepositoryImpl(
             )
         }
 
-    override suspend fun setupPolicy(threshold: Int, guardians: List<String>): PolicySetupHelper {
+    override suspend fun createPolicySetup(
+        threshold: UInt,
+        guardians: List<Guardian.SetupGuardian>,
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry,
+    ): Resource<CreatePolicySetupApiResponse> {
+        return retrieveApiResource {
+            apiService.createOrUpdatePolicySetup(
+                CreatePolicySetupApiRequest(threshold, guardians, biometryVerificationId, biometryData)
+            )
+        }
+    }
 
+    override suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>): PolicySetupHelper {
         val guardianProspect = guardians.map {
             GuardianProspect(
                 label = it,
@@ -135,9 +147,7 @@ class OwnerRepositoryImpl(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
-            threshold = setupHelper.threshold,
-            guardians = emptyList(),
-
+            guardianShards = setupHelper.guardianShards,
             biometryVerificationId = biometryVerificationId,
             biometryData = biometryData
         )
@@ -145,10 +155,6 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
-    override suspend fun createGuardian(guardianName: String): Resource<CreateGuardianApiResponse> {
-        val createGuardianApiRequest = CreateGuardianApiRequest(name = guardianName)
-        return retrieveApiResource { apiService.createGuardian(createGuardianApiRequest) }
-    }
     override suspend fun verifyToken(token: String): String? {
         val verifier = GoogleIdTokenVerifier.Builder(
             NetHttpTransport(), GsonFactory()
@@ -270,18 +276,4 @@ class OwnerRepositoryImpl(
     override suspend fun lock(): Resource<LockApiResponse> {
         return retrieveApiResource { apiService.lock() }
     }
-    //This can most likely be deleted
-//    override suspend fun confirmShardReceipt(
-//        intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-//        participantId: ParticipantId,
-//        encryptedShard: Base64EncodedData
-//    ): Resource<ResponseBody> {
-//        return retrieveApiResource {
-//            apiService.confirmShardReceipt(
-//                intermediateKey = intermediatePublicKey.value,
-//                participantId = participantId.value,
-//                confirmShardReceiptApiRequest = ConfirmShardReceiptApiRequest(encryptedShard)
-//            )
-//        }
-//    }
 }
