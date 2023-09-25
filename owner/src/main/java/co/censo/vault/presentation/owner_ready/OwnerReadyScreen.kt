@@ -34,7 +34,6 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.LockStatus
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.Vault
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.vault.VaultSecrets

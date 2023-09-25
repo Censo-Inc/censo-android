@@ -10,4 +10,13 @@ data class VaultState(
 
     val storeSeedPhraseResource: Resource<StoreSecretApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSecretApiResponse> = Resource.Uninitialized
-)
+) {
+
+    val loading = ownerState == null ||
+            storeSeedPhraseResource is Resource.Loading ||
+            deleteSeedPhraseResource is Resource.Loading
+
+    val asyncError = storeSeedPhraseResource is Resource.Error ||
+            deleteSeedPhraseResource is Resource.Error
+
+}

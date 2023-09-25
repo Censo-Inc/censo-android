@@ -65,16 +65,24 @@ class VaultViewModel @Inject constructor(
         viewModelScope.async {
             val response: Resource<DeleteSecretApiResponse> = ownerRepository.deleteSecret(secret.guid)
 
+            state = state.copy(
+                deleteSeedPhraseResource = response
+            )
+
             if (response is Resource.Success) {
                 response.data?.ownerState?.also {
                     updateOwnerState(it)
                 }
             }
-
-            state = state.copy(
-                deleteSeedPhraseResource = response
-            )
         }
+    }
+
+    fun resetStoreSeedPhraseResponse() {
+        state.copy(storeSeedPhraseResource = Resource.Uninitialized )
+    }
+
+    fun resetDeleteSeedPhraseResponse() {
+        state.copy(deleteSeedPhraseResource = Resource.Uninitialized )
     }
 
 }
