@@ -1,6 +1,5 @@
 package co.censo.shared.data.networking
 
-import Base58EncodedPublicKey
 import InitBiometryVerificationApiResponse
 import android.content.Context
 import android.net.ConnectivityManager
@@ -9,17 +8,12 @@ import co.censo.shared.BuildConfig
 import co.censo.shared.data.Header
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
-import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
-import co.censo.shared.data.model.CreateGuardianApiRequest
-import co.censo.shared.data.model.CreateGuardianApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
-import co.censo.shared.data.model.SubmitBiometryVerificationApiRequest
-import co.censo.shared.data.model.SubmitBiometryVerificationApiResponse
-import co.censo.shared.data.model.GetPoliciesApiResponse
-import co.censo.shared.data.model.GetPolicyApiResponse
+import co.censo.shared.data.model.CreatePolicySetupApiRequest
+import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
@@ -29,7 +23,6 @@ import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
-import co.censo.shared.data.model.UpdatePolicyApiRequest
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
@@ -49,7 +42,6 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.io.IOException
 import java.time.Duration
@@ -108,31 +100,17 @@ interface ApiService {
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
 
     @POST("/v1/biometry-verifications")
-    suspend fun biometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
+    suspend fun initBiometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
+
+    @POST("/v1/policy-setup")
+    suspend fun createOrUpdatePolicySetup(
+        @Body apiRequest: CreatePolicySetupApiRequest
+    ): RetrofitResponse<CreatePolicySetupApiResponse>
 
     @POST("/v1/policies")
     suspend fun createPolicy(
         @Body createPolicyApiRequest: CreatePolicyApiRequest
     ): RetrofitResponse<CreatePolicyApiResponse>
-
-    @PUT("/v1/policies/{$INTERMEDIATE_KEY}")
-    suspend fun updatePolicy(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-        @Body updatePolicyApiRequest: UpdatePolicyApiRequest
-    ): RetrofitResponse<ResponseBody>
-
-    @GET("/v1/policies/{$INTERMEDIATE_KEY}")
-    suspend fun policy(
-        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: Base58EncodedPublicKey,
-    ): RetrofitResponse<GetPolicyApiResponse>
-
-    @GET("/v1/policies")
-    suspend fun policies(): RetrofitResponse<GetPoliciesApiResponse>
-
-    @POST("/v1/guardians")
-    suspend fun createGuardian(
-        @Body createGuardianApiRequest: CreateGuardianApiRequest
-    ): RetrofitResponse<CreateGuardianApiResponse>
 
     @POST("/v1/guardians/{$PARTICIPANT_ID}/invitation")
     suspend fun inviteGuardian(
@@ -155,14 +133,6 @@ interface ApiService {
         @Path(value = INVITATION_ID) invitationId: String,
         @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest
     ): RetrofitResponse<SubmitGuardianVerificationApiResponse>
-
-    //Can most likely be deleted
-//    @POST("/v1/policies/{intermediateKey}/guardian/{$PARTICIPANT_ID}/shard-receipt-confirmation")
-//    suspend fun confirmShardReceipt(
-//        @Path(value = INTERMEDIATE_KEY, encoded = true) intermediateKey: String,
-//        @Path(value = PARTICIPANT_ID) participantId: String,
-//        @Body confirmShardReceiptApiRequest: ConfirmShardReceiptApiRequest
-//    ): RetrofitResponse<ResponseBody>
 
     @POST("/v1/guardians/{$PARTICIPANT_ID}/confirmation")
     suspend fun confirmGuardianship(

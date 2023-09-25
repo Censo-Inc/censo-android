@@ -13,14 +13,12 @@ data class CreatePolicyApiRequest(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-    val threshold: Int,
-    val guardians: List<Guardian>,
-
+    val guardianShards: List<GuardianShard>,
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,
 ) {
     @Serializable
-    data class Guardian(
+    data class GuardianShard(
         val participantId: ParticipantId,
         val encryptedShard: Base64EncodedData,
     )
@@ -28,13 +26,22 @@ data class CreatePolicyApiRequest(
 
 @Serializable
 data class CreatePolicyApiResponse(
-    val ownerState: OwnerState?,
+    val ownerState: OwnerState,
     val scanResultBlob: BiometryScanResultBlob,
 )
 
 @Serializable
-data class UpdatePolicyApiRequest(
-    val guardians: List<GuardianUpdate>,
+data class CreatePolicySetupApiRequest(
+    val threshold: UInt,
+    val guardians: List<Guardian.SetupGuardian>,
+    val biometryVerificationId: BiometryVerificationId,
+    val biometryData: FacetecBiometry,
+)
+
+@Serializable
+data class CreatePolicySetupApiResponse(
+    val ownerState: OwnerState,
+    val scanResultBlob: BiometryScanResultBlob,
 )
 
 @Serializable
@@ -44,11 +51,6 @@ data class GetPolicyApiResponse(
     val threshold: Int,
     val guardians: List<Guardian>,
     val encryptedData: Base64EncodedData,
-)
-
-@Serializable
-data class GetPoliciesApiResponse(
-    val policies: List<GetPolicyApiResponse>,
 )
 
 @Serializable

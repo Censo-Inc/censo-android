@@ -4,18 +4,13 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +29,6 @@ import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FacetecAuth(
     onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
@@ -76,56 +70,38 @@ fun FacetecAuth(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Facetec Authorization")
-                    }
-                })
-        },
-        content = {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .background(color = Color.White),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(color = Color.White),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
-                when {
-                    state.loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(72.dp),
-                            strokeWidth = 8.dp,
-                            color = Color.Red
-                        )
-                    }
+        when {
+            state.loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(72.dp),
+                    strokeWidth = 8.dp,
+                    color = Color.Red
+                )
+            }
 
-                    state.apiError -> {
-                        Text(text = "Error Occurred")
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Button(
-                            onClick = {
-                                viewModel.retry()
-                            }
-                        ) {
-                            Text(text = "Retry")
-                        }
+            state.apiError -> {
+                Text(text = "Error Occurred")
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = {
+                        viewModel.retry()
                     }
-
-                    state.submitResultResponse is Resource.Success -> {
-                        Text(text = "Authorized")
-                    }
+                ) {
+                    Text(text = "Retry")
                 }
             }
+
+            state.submitResultResponse is Resource.Success -> {
+                Text(text = "Authorized")
+            }
         }
-    )
+    }
 }

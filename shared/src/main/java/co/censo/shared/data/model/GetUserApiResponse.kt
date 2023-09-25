@@ -72,6 +72,13 @@ sealed class Guardian {
     abstract val participantId: ParticipantId
 
     @Serializable
+    @SerialName("Setup")
+    data class SetupGuardian(
+        override val label: String,
+        override val participantId: ParticipantId,
+    ) : Guardian()
+
+    @Serializable
     @SerialName("Prospect")
     data class ProspectGuardian(
         override val label: String,
