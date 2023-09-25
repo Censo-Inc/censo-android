@@ -6,9 +6,13 @@ import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
+import VaultSecretId
+import co.censo.shared.data.Resource
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.datetime.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class GetUserApiResponse(
@@ -100,8 +104,9 @@ data class Policy(
 
 @Serializable
 data class VaultSecret(
+    val guid: VaultSecretId,
     val encryptedSeedPhrase: Base64EncodedData,
-    val seedPhraseHash: Base64EncodedData,
+    val seedPhraseHash: String,
     val label: String,
     val createdAt: Instant,
 )
@@ -127,4 +132,19 @@ sealed class OwnerState {
         val vault: Vault,
         val unlockedForSeconds: UInt?
     ) : OwnerState()
+}
+
+sealed class LockStatus {
+    object Locked: LockStatus()
+    data class Unlocked(val locksIn: Duration): LockStatus()
+    data class UnlockInProgress(val apiCall: Resource<UnlockApiResponse>): LockStatus()
+    data class LockInProgress(val apiCall: Resource<LockApiResponse>): LockStatus()
+
+    companion object {
+        fun fromOwnerState(ownerState: OwnerState.Ready): LockStatus =
+            when (val unlockedForSeconds = ownerState.unlockedForSeconds) {
+                null -> Locked
+                else -> Unlocked(locksIn = unlockedForSeconds.toInt().seconds)
+            }
+    }
 }

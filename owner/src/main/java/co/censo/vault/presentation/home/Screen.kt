@@ -2,7 +2,9 @@ package co.censo.vault.presentation.home
 
 sealed class Screen(val route: String) {
     object OwnerEntrance : Screen("owner_entrance_screen")
-    object AddBIP39Route : Screen("add_bip39_screen")
+    object AddBIP39Route : Screen("add_bip39_screen") {
+        const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"
+    }
     object BIP39DetailRoute : Screen("bip_39_detail_screen") {
         const val BIP_39_NAME_ARG = "bip39_name"
     }

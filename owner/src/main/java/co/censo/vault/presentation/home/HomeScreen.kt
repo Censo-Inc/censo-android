@@ -173,6 +173,7 @@ fun HomeScreen(
                             ownerState,
                             refreshOwnerState = viewModel::retrieveOwnerState,
                             updateOwnerState = viewModel::updateOwnerState,
+                            navController = navController
                         )
                     }
                 }

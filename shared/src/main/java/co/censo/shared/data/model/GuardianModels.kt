@@ -141,3 +141,7 @@ object BigIntegerSerializer : KSerializer<BigInteger> {
 @Serializable
 @JvmInline
 value class InvitationId(val value: String)
+
+@Serializable
+@JvmInline
+value class VaultSecretId(val value: String)

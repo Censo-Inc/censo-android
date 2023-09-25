@@ -1,26 +1,21 @@
 package co.censo.vault.presentation.add_bip39
 
+import Base58EncodedMasterPublicKey
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import co.censo.vault.data.PhraseValidator
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
-import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.data.storage.EncryptedBIP39
-import co.censo.shared.data.storage.Storage
+import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.datetime.Clock
-import kotlinx.serialization.json.Json
-import java.util.Base64
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 
 @HiltViewModel
 class AddBIP39ViewModel @Inject constructor(
-    private val storage: Storage,
-    private val keyRepository: KeyRepository
+    private val ownerRepository: OwnerRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(AddBIP39State())
@@ -31,12 +26,12 @@ class AddBIP39ViewModel @Inject constructor(
     }
 
     fun updateName(name: String) {
-        state = state.copy(name = name.lowercase().trim())
+        state = state.copy(name = name.lowercase())
     }
 
     fun updateUserEnteredPhrase(userEnteredPhrase: String) {
         state = state.copy(
-            userEnteredPhrase = userEnteredPhrase.lowercase().trim(),
+            userEnteredPhrase = userEnteredPhrase.lowercase(),
             userEnteredPhraseError = null
         )
     }
@@ -64,30 +59,18 @@ class AddBIP39ViewModel @Inject constructor(
             return
         }
 
-        val currentPhrases = storage.retrieveBIP39Phrases()
-
-        if (currentPhrases.containsKey(state.name)) {
-            state = state.copy(
-                nameError = "You already stored BIP39 phrase with this name",
-                submitStatus = Resource.Error()
+        viewModelScope.launch {
+            val response = ownerRepository.storeSecret(
+                state.masterPublicKey!!,
+                state.name.trim(),
+                state.userEnteredPhrase.trim()
             )
-            return
+
+            state = state.copy(submitStatus = response.map { })
         }
+    }
 
-        val phraseAsList = PhraseValidator.format(state.userEnteredPhrase).split(" ")
-        val phraseAsJson = Json.encodeToString(phraseAsList)
-
-        val deviceKey = keyRepository.retrieveInternalDeviceKey()
-        val encryptedPhrase = deviceKey.encrypt(phraseAsJson.toByteArray(Charsets.UTF_8))
-        val base64EncryptedPhrase = Base64.getEncoder().encodeToString(encryptedPhrase)
-
-        val newPhrase = EncryptedBIP39(
-            base64EncryptedPhrase,
-            Clock.System.now()
-        )
-
-        storage.saveBIP39Phrases(currentPhrases + mapOf(state.name to newPhrase))
-
-        state = state.copy(submitStatus = Resource.Success(Unit))
+    fun onStart(masterPublicKey: Base58EncodedMasterPublicKey) {
+        state = state.copy(masterPublicKey = masterPublicKey)
     }
 }

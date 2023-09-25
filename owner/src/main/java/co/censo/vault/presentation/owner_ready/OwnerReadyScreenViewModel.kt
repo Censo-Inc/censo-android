@@ -10,6 +10,7 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.LockStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.repository.OwnerRepository
@@ -34,7 +35,7 @@ class OwnerReadyScreenViewModel @Inject constructor(
 
     fun initUnlock() {
         state = state.copy(
-            lockStatus = OwnerReadyScreenState.LockStatus.UnlockInProgress(
+            lockStatus = LockStatus.UnlockInProgress(
                 apiCall = Resource.Uninitialized
             )
         )
@@ -42,7 +43,7 @@ class OwnerReadyScreenViewModel @Inject constructor(
 
     suspend fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry, updateOwnerState: (OwnerState) -> Unit): Resource<BiometryScanResultBlob> {
         state = state.copy(
-            lockStatus = OwnerReadyScreenState.LockStatus.UnlockInProgress(
+            lockStatus = LockStatus.UnlockInProgress(
                 apiCall = Resource.Loading()
             )
         )
@@ -51,7 +52,7 @@ class OwnerReadyScreenViewModel @Inject constructor(
             val unlockVaultResponse: Resource<UnlockApiResponse> = ownerRepository.unlock(verificationId, facetecData)
 
             state = state.copy(
-                lockStatus = OwnerReadyScreenState.LockStatus.UnlockInProgress(
+                lockStatus = LockStatus.UnlockInProgress(
                     apiCall = unlockVaultResponse
                 )
             )
@@ -68,7 +69,7 @@ class OwnerReadyScreenViewModel @Inject constructor(
 
     fun initLock(updateOwnerState: (OwnerState) -> Unit) {
         state = state.copy(
-            lockStatus = OwnerReadyScreenState.LockStatus.LockInProgress(
+            lockStatus = LockStatus.LockInProgress(
                 apiCall = Resource.Loading()
             )
         )
@@ -77,7 +78,7 @@ class OwnerReadyScreenViewModel @Inject constructor(
             val lockVaultResponse: Resource<LockApiResponse> = ownerRepository.lock()
 
             state = state.copy(
-                lockStatus = OwnerReadyScreenState.LockStatus.LockInProgress(
+                lockStatus = LockStatus.LockInProgress(
                     apiCall = lockVaultResponse
                 )
             )

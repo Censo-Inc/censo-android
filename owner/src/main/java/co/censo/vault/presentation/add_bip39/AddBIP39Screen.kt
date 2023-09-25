@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.add_bip39
 
+import Base58EncodedMasterPublicKey
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,17 +31,23 @@ import co.censo.shared.data.Resource
 import co.censo.vault.R
 import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.components.VaultButton
-import co.censo.vault.presentation.home.Screen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBIP39Screen(
-    navController: NavController, viewModel: AddBIP39ViewModel = hiltViewModel()
+    masterPublicKey: Base58EncodedMasterPublicKey,
+    navController: NavController,
+    viewModel: AddBIP39ViewModel = hiltViewModel()
 ) {
 
     val state = viewModel.state
+
+    DisposableEffect(key1 = state) {
+        viewModel.onStart(masterPublicKey)
+        onDispose {}
+    }
 
     LaunchedEffect(key1 = state) {
         if (state.submitStatus is Resource.Success) {
@@ -69,7 +77,9 @@ fun AddBIP39Screen(
                 ) {
                     Text(text = stringResource(R.string.name))
                     TextField(
-                        modifier = Modifier.semantics { testTag = TestTag.add_bip_39_name_text_field },
+                        modifier = Modifier.semantics {
+                            testTag = TestTag.add_bip_39_name_text_field
+                        },
                         value = state.name,
                         onValueChange = viewModel::updateName,
                         isError = state.nameError != null
@@ -86,7 +96,9 @@ fun AddBIP39Screen(
 
                     Text(text = stringResource(R.string.bip39))
                     TextField(
-                        modifier = Modifier.semantics { testTag = TestTag.add_bip_39_phrase_text_field },
+                        modifier = Modifier.semantics {
+                            testTag = TestTag.add_bip_39_phrase_text_field
+                        },
                         value = state.userEnteredPhrase,
                         onValueChange = viewModel::updateUserEnteredPhrase,
                         isError = state.userEnteredPhraseError != null
