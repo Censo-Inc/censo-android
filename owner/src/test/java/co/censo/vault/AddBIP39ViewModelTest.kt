@@ -4,6 +4,7 @@ import co.censo.vault.data.PhraseValidator
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.repository.KeyRepository
+import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.add_bip39.AddBIP39ViewModel
 import co.censo.shared.data.storage.BIP39Phrases
 import co.censo.shared.data.storage.EncryptedBIP39
