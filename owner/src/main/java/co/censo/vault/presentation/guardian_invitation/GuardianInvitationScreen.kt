@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -107,19 +106,17 @@ fun GuardianInvitationScreen(
                     ) {
                         viewModel.retrieveUserState()
                     }
+                } else if (state.createPolicySetupResponse is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.createPolicySetupResponse.getErrorMessage(context),
+                        dismissAction = viewModel::resetCreatePolicySetupResource,
+                    ) { }
                 } else if (state.createPolicyResponse is Resource.Error) {
                     DisplayError(
                         errorMessage = state.createPolicyResponse.getErrorMessage(context),
                         dismissAction = viewModel::resetCreatePolicyResource,
                     ) {
 //                        viewModel.createPolicy()
-                    }
-                } else if (state.createGuardianResponse is Resource.Error) {
-                    DisplayError(
-                        errorMessage = state.createGuardianResponse.getErrorMessage(context),
-                        dismissAction = viewModel::resetCreateGuardianResource
-                    ) {
-                        viewModel.addGuardian()
                     }
                 } else if (state.inviteGuardianResponse is Resource.Error) {
                     DisplayError(
@@ -132,7 +129,7 @@ fun GuardianInvitationScreen(
             else -> {
                 when (state.guardianInviteStatus) {
                     GuardianInvitationStatus.ENUMERATE_GUARDIANS -> {
-                        if (state.createdGuardians.isEmpty()) {
+                        if (state.guardians.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.guardians_empty_message),
                                 textAlign = TextAlign.Center,
@@ -144,74 +141,86 @@ fun GuardianInvitationScreen(
 
                             Column(modifier = Modifier.fillMaxWidth()) {
 
-                                for (guardian in state.createdGuardians) {
-                                    if (guardian is Guardian.ProspectGuardian) {
-
-                                        val guardianStatus = guardian.status
-
-                                        val deeplink =
-                                            "$GUARDIAN_URI${guardian.invitationId?.value}"
-
-                                        val copyDeeplink = {
-                                            clipboardManager.setText(
-                                                AnnotatedString(
-                                                    deeplink
-                                                )
+                                for (guardian in state.guardians) {
+                                    when (guardian) {
+                                        is Guardian.SetupGuardian -> {
+                                            Text(
+                                                text = guardian.label,
+                                                color = Color.Black
                                             )
                                         }
 
-                                        val inviteGuardian = { viewModel.inviteGuardian(guardian.participantId) }
+                                        is Guardian.ProspectGuardian -> {
+                                            val guardianStatus = guardian.status
 
-                                        when (guardianStatus) {
-                                            is GuardianStatus.Invited -> {
-                                                InvitedGuardianUI(
-                                                    guardianLabel = guardian.label,
-                                                    deepLink = deeplink,
-                                                    copyDeeplink = copyDeeplink
+                                            val deeplink =
+                                                "$GUARDIAN_URI${guardian.invitationId?.value}"
+
+                                            val copyDeeplink = {
+                                                clipboardManager.setText(
+                                                    AnnotatedString(
+                                                        deeplink
+                                                    )
                                                 )
                                             }
-                                            is GuardianStatus.Initial -> {
-                                                InitialGuardianUI(
-                                                    guardianLabel = guardian.label,
-                                                    inviteGuardian = inviteGuardian,
-                                                    deepLink = deeplink,
-                                                    copyDeeplink = copyDeeplink
-                                                )
-                                            }
-                                            is GuardianStatus.Accepted -> {
-                                                AcceptedGuardianUI(guardianLabel = guardian.label)
-                                            }
 
-                                            is GuardianStatus.VerificationSubmitted -> {
-                                                SubmittedVerificationGuardianUI(
-                                                    guardian.label,
-                                                ) {
-                                                    viewModel.verifyGuardian(
-                                                        guardian, guardianStatus
+                                            val inviteGuardian = { viewModel.inviteGuardian(guardian.participantId) }
+
+                                            when (guardianStatus) {
+                                                is GuardianStatus.Invited -> {
+                                                    InvitedGuardianUI(
+                                                        guardianLabel = guardian.label,
+                                                        deepLink = deeplink,
+                                                        copyDeeplink = copyDeeplink
+                                                    )
+                                                }
+
+                                                is GuardianStatus.Initial -> {
+                                                    InitialGuardianUI(
+                                                        guardianLabel = guardian.label,
+                                                        inviteGuardian = inviteGuardian,
+                                                        deepLink = deeplink,
+                                                        copyDeeplink = copyDeeplink
+                                                    )
+                                                }
+
+                                                is GuardianStatus.Accepted -> {
+                                                    AcceptedGuardianUI(guardianLabel = guardian.label)
+                                                }
+
+                                                is GuardianStatus.VerificationSubmitted -> {
+                                                    SubmittedVerificationGuardianUI(
+                                                        guardian.label,
+                                                    ) {
+                                                        viewModel.verifyGuardian(
+                                                            guardian, guardianStatus
+                                                        )
+                                                    }
+                                                }
+
+                                                is GuardianStatus.Confirmed -> {
+                                                    ConfirmedGuardianUI(
+                                                        guardianLabel = guardian.label
+                                                    )
+                                                }
+
+                                                else -> {
+                                                    InitialGuardianUI(
+                                                        guardianLabel = guardian.label,
+                                                        inviteGuardian = inviteGuardian,
+                                                        deepLink = deeplink,
+                                                        copyDeeplink = copyDeeplink
                                                     )
                                                 }
                                             }
-
-                                            is GuardianStatus.Confirmed -> {
-                                                ConfirmedGuardianUI(
-                                                    guardianLabel = guardian.label
-                                                )
-                                            }
-
-                                            else -> {
-                                                InitialGuardianUI(
-                                                    guardianLabel = guardian.label,
-                                                    inviteGuardian = inviteGuardian,
-                                                    deepLink = deeplink,
-                                                    copyDeeplink = copyDeeplink
-                                                )
-                                            }
                                         }
-                                    } else if (guardian is Guardian.TrustedGuardian) {
-                                        Text(
-                                            text = "Trusted ${guardian.label}",
-                                            color = Color.Black
-                                        )
+
+                                        is Guardian.TrustedGuardian -> {
+                                            Text(
+                                                text = "Trusted ${guardian.label}",
+                                                color = Color.Black
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -225,16 +234,11 @@ fun GuardianInvitationScreen(
                         ) {
                             TextButton(
                                 onClick = { viewModel.addGuardian() },
-                                enabled = state.createGuardianResponse !is Resource.Loading
                             ) {
-                                if (state.createGuardianResponse is Resource.Loading) {
-                                    CircularProgressIndicator()
-                                } else {
-                                    Text(
-                                        text = stringResource(R.string.add_guardian),
-                                        color = Color.Black
-                                    )
-                                }
+                                Text(
+                                    text = stringResource(R.string.add_guardian),
+                                    color = Color.Black
+                                )
                             }
 
                             Column(
@@ -247,7 +251,9 @@ fun GuardianInvitationScreen(
                                     horizontalArrangement = Arrangement.SpaceAround
                                 ) {
                                     IconButton(onClick = {
-                                        viewModel.updateThreshold(state.threshold - 1)
+                                        if (state.threshold >= 1U) {
+                                            viewModel.updateThreshold(state.threshold - 1U)
+                                        }
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.Remove,
@@ -259,7 +265,7 @@ fun GuardianInvitationScreen(
                                     Text(text = state.threshold.toString(), color = Color.Black)
 
                                     IconButton(onClick = {
-                                        viewModel.updateThreshold(state.threshold + 1)
+                                        viewModel.updateThreshold(state.threshold + 1U)
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.Add,
@@ -278,10 +284,16 @@ fun GuardianInvitationScreen(
                             enabled = state.canContinueOnboarding
                         ) {
                             Text(
-                                text = stringResource(R.string.continue_onboarding),
+                                text = "Confirm",
                                 color = Color.Black
                             )
                         }
+                    }
+
+                    GuardianInvitationStatus.CREATE_POLICY_SETUP -> {
+                        FacetecAuth(
+                            onFaceScanReady = viewModel::onPolicySetupCreationFaceScanReady
+                        )
                     }
 
                     GuardianInvitationStatus.INVITE_GUARDIANS -> {
@@ -297,17 +309,16 @@ fun GuardianInvitationScreen(
 
                         Spacer(Modifier.height(24.dp))
 
-                        LazyColumn(
+                        Column(
                             modifier = Modifier
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            items(state.createdGuardians.size) { index ->
-                                val guardian = state.createdGuardians[index]
+                            for(guardian in state.guardians) {
                                 val deeplink = if (guardian is Guardian.ProspectGuardian) "$GUARDIAN_URI${guardian.invitationId?.value}" else "Guardian Already Added"
 
                                 InitialGuardianUI(
-                                    guardianLabel = state.createdGuardians[index].label,
+                                    guardianLabel = guardian.label,
                                     inviteGuardian = { viewModel.inviteGuardian(guardian.participantId) },
                                     deepLink = deeplink,
                                     copyDeeplink = {
@@ -326,7 +337,7 @@ fun GuardianInvitationScreen(
                         TextButton(
                             onClick = {
                                 projectLog(message = "Continue to policy creation")
-                                viewModel.enrollBiometry()
+                                viewModel.initPolicyCreation()
                             },
                         ) {
                             Text(
@@ -338,13 +349,13 @@ fun GuardianInvitationScreen(
 
                     GuardianInvitationStatus.CREATE_POLICY -> {
                         FacetecAuth(
-                            onFaceScanReady = viewModel::onFaceScanReady
+                            onFaceScanReady = viewModel::onPolicyCreationFaceScanReady
                         )
                     }
 
                     GuardianInvitationStatus.READY -> {
                         Text(
-                            text = "Guardian Set Created Successfully",
+                            text = "Policy created successfully",
                             textAlign = TextAlign.Center,
                             color = Color.Black
                         )

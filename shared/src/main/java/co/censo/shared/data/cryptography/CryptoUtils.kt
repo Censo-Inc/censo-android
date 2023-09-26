@@ -23,6 +23,11 @@ fun generateRandomHex(length: Int) : String {
     return partitionId
 }
 
+fun generateHexString(length: Int = 64): String {
+    val alphaChars = ('0'..'9').toList().toTypedArray() + ('a'..'f').toList().toTypedArray() + ('A'..'F').toList().toTypedArray()
+    return (1..length).map { alphaChars.random().toChar() }.toMutableList().joinToString("")
+}
+
 fun BigInteger.toHexString(): String {
     return this.toByteArrayNoSign().toHexString().lowercase()
 }
