@@ -120,7 +120,7 @@ fun OwnerReadyScreen(
 
                         Spacer(Modifier.width(24.dp))
 
-                        LockCountDown(state.lockStatus.locksIn, onTimeOut = refreshOwnerState)
+                        LockCountDown(state.lockStatus.locksAt, onTimeOut = refreshOwnerState)
 
                         Spacer(modifier = Modifier.weight(1f))
 
