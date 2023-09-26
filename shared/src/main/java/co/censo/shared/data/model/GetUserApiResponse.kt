@@ -133,18 +133,3 @@ sealed class OwnerState {
         val unlockedForSeconds: UInt?
     ) : OwnerState()
 }
-
-sealed class LockStatus {
-    object Locked: LockStatus()
-    data class Unlocked(val locksIn: Duration): LockStatus()
-    data class UnlockInProgress(val apiCall: Resource<UnlockApiResponse>): LockStatus()
-    data class LockInProgress(val apiCall: Resource<LockApiResponse>): LockStatus()
-
-    companion object {
-        fun fromOwnerState(ownerState: OwnerState.Ready): LockStatus =
-            when (val unlockedForSeconds = ownerState.unlockedForSeconds) {
-                null -> Locked
-                else -> Unlocked(locksIn = unlockedForSeconds.toInt().seconds)
-            }
-    }
-}

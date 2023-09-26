@@ -7,19 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteSecretApiResponse
-import co.censo.shared.data.model.LockStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.StoreSecretApiResponse
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.data.storage.Storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import javax.inject.Inject
 
 @HiltViewModel
 class VaultViewModel @Inject constructor(
-    private val storage: Storage,
     private val ownerRepository: OwnerRepository
 ) : ViewModel() {
 
@@ -28,13 +25,6 @@ class VaultViewModel @Inject constructor(
 
     fun onNewOwnerState(ownerState: OwnerState.Ready) {
         state = state.copy(ownerState = ownerState)
-    }
-
-    fun isLocked(ownerState: OwnerState.Ready): Boolean {
-        return when (LockStatus.fromOwnerState(ownerState)) {
-            is LockStatus.Unlocked -> false
-            else -> true
-        }
     }
 
     fun addSecret(label: String, bipPhase: String, updateOwnerState: (OwnerState) -> Unit) {

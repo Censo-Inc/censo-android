@@ -50,7 +50,7 @@ fun VaultSecrets(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = viewModel) {
+    DisposableEffect(key1 = ownerState) {
         viewModel.onNewOwnerState(ownerState)
         onDispose { }
     }
@@ -114,26 +114,23 @@ fun VaultSecrets(
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        if (!viewModel.isLocked(ownerState)) {
-                            TextButton(
-                                onClick = { navController.navigate("${Screen.AddBIP39Route.route}/${state.ownerState!!.vault.publicMasterEncryptionKey.value}") },
-                                modifier = Modifier
-                                    .semantics { testTag = TestTag.add_phrase }
-                                    .padding(end = 8.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.AddCircle,
-                                    modifier = Modifier.padding(end = 18.dp),
-                                    contentDescription = "Unlock",
-                                    tint = Color.Black
-                                )
-                            }
+                        TextButton(
+                            onClick = { navController.navigate("${Screen.AddBIP39Route.route}/${state.ownerState!!.vault.publicMasterEncryptionKey.value}") },
+                            modifier = Modifier
+                                .semantics { testTag = TestTag.add_phrase }
+                                .padding(end = 8.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.AddCircle,
+                                modifier = Modifier.padding(end = 18.dp),
+                                contentDescription = "Unlock",
+                                tint = Color.Black
+                            )
                         }
                     }
 
                     LazyColumn(
-                        modifier = Modifier
-                            .padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val secrets = state.ownerState?.vault?.secrets ?: listOf()
@@ -141,7 +138,6 @@ fun VaultSecrets(
                         items(secrets.size) { index ->
                             VaultSecret(
                                 secret = secrets[index],
-                                isLocked = viewModel.isLocked(ownerState),
                                 onDelete = { viewModel.deleteSecret(it, updateOwnerState) }
                             )
                         }

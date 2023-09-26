@@ -30,7 +30,6 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun VaultSecret(
     secret: VaultSecret,
-    isLocked: Boolean,
     onDelete: (VaultSecret) -> Unit
 ) {
 
@@ -71,18 +70,16 @@ fun VaultSecret(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                if (!isLocked) {
-                    TextButton(
-                        onClick = { onDelete(secret) },
-                        modifier = Modifier
-                            .semantics { testTag = TestTag.delete_phrase },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Delete,
-                            contentDescription = "Delete",
-                            tint = Color.Black
-                        )
-                    }
+                TextButton(
+                    onClick = { onDelete(secret) },
+                    modifier = Modifier
+                        .semantics { testTag = TestTag.delete_phrase },
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Black
+                    )
                 }
             }
 

@@ -9,7 +9,7 @@ data class AddBIP39State(
     val nameError: String? = null,
     val userEnteredPhraseError: String? = null,
     val submitStatus: Resource<Unit> = Resource.Uninitialized,
-    val masterPublicKey: Base58EncodedMasterPublicKey? = null
+    val masterPublicKey: Base58EncodedMasterPublicKey = Base58EncodedMasterPublicKey("")
 ) {
     val nameValid = name.isNotEmpty()
 }
