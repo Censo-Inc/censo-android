@@ -54,8 +54,7 @@ interface OwnerRepository {
     ): Resource<CreatePolicySetupApiResponse>
     suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>) : PolicySetupHelper
     suspend fun createPolicy(
-        setupHelper: PolicySetupHelper, biometryVerificationId: BiometryVerificationId,
-        biometryData: FacetecBiometry
+        setupHelper: PolicySetupHelper
     ): Resource<CreatePolicyApiResponse>
     suspend fun verifyToken(token: String) : String?
     suspend fun saveJWT(jwtToken: String)
@@ -140,16 +139,12 @@ class OwnerRepositoryImpl(
 
     override suspend fun createPolicy(
         setupHelper: PolicySetupHelper,
-        biometryVerificationId: BiometryVerificationId,
-        biometryData: FacetecBiometry
     ): Resource<CreatePolicyApiResponse> {
         val createPolicyApiRequest = CreatePolicyApiRequest(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
             guardianShards = setupHelper.guardianShards,
-            biometryVerificationId = biometryVerificationId,
-            biometryData = biometryData
         )
 
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }

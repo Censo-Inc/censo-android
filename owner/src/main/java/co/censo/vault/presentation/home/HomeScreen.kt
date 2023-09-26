@@ -128,7 +128,7 @@ fun HomeScreen(
         else -> {
             state.ownerStateResource.data?.also { ownerState ->
                 when (ownerState) {
-                    is OwnerState.GuardianSetup -> {
+                    is OwnerState.GuardianSetup, OwnerState.Initial -> {
                         Column(
                             Modifier
                                 .fillMaxSize()

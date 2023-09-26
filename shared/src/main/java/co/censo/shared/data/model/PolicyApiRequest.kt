@@ -14,8 +14,6 @@ data class CreatePolicyApiRequest(
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val guardianShards: List<GuardianShard>,
-    val biometryVerificationId: BiometryVerificationId,
-    val biometryData: FacetecBiometry,
 ) {
     @Serializable
     data class GuardianShard(
@@ -27,7 +25,6 @@ data class CreatePolicyApiRequest(
 @Serializable
 data class CreatePolicyApiResponse(
     val ownerState: OwnerState,
-    val scanResultBlob: BiometryScanResultBlob,
 )
 
 @Serializable
