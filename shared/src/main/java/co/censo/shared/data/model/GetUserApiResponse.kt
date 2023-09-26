@@ -18,7 +18,7 @@ import kotlin.time.toDuration
 data class GetUserApiResponse(
     val identityToken: IdentityToken,
     val guardianStates: List<GuardianState>,
-    val ownerState: OwnerState?,
+    val ownerState: OwnerState,
 )
 
 @Serializable

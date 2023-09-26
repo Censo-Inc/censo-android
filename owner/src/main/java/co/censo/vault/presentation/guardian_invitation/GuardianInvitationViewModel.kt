@@ -59,7 +59,7 @@ class GuardianInvitationViewModel @Inject constructor(
             )
 
             if (createPolicySetupResponse is Resource.Success) {
-                updateOwnerState(createPolicySetupResponse.data?.ownerState)
+                updateOwnerState(createPolicySetupResponse.data!!.ownerState)
                 state = state.copy(guardianInviteStatus = GuardianInvitationStatus.INVITE_GUARDIANS)
             }
 
@@ -79,7 +79,7 @@ class GuardianInvitationViewModel @Inject constructor(
             val createPolicyResponse: Resource<CreatePolicyApiResponse> = ownerRepository.createPolicy(policySetupHelper)
 
             if (createPolicyResponse is Resource.Success) {
-                updateOwnerState(createPolicyResponse.data?.ownerState)
+                updateOwnerState(createPolicyResponse.data!!.ownerState)
             }
 
             state = state.copy(createPolicyResponse = createPolicyResponse)
@@ -92,34 +92,25 @@ class GuardianInvitationViewModel @Inject constructor(
             val userResponse = ownerRepository.retrieveUser()
 
             if (userResponse is Resource.Success) {
-                updateOwnerState(userResponse.data?.ownerState)
+                updateOwnerState(userResponse.data!!.ownerState)
             }
 
             state = state.copy(userResponse = userResponse)
         }
     }
 
-    private fun updateOwnerState(ownerState: OwnerState?) {
-        val guardianInvitationStatus = if (ownerState != null) {
-            when (ownerState) {
-                is OwnerState.Ready -> GuardianInvitationStatus.READY
-                is OwnerState.GuardianSetup -> GuardianInvitationStatus.INVITE_GUARDIANS
-                is OwnerState.Initial -> GuardianInvitationStatus.ENUMERATE_GUARDIANS
-            }
-        } else {
-            GuardianInvitationStatus.ENUMERATE_GUARDIANS
+    private fun updateOwnerState(ownerState: OwnerState) {
+        val guardianInvitationStatus = when (ownerState) {
+            is OwnerState.Ready -> GuardianInvitationStatus.READY
+            is OwnerState.GuardianSetup -> GuardianInvitationStatus.INVITE_GUARDIANS
+            is OwnerState.Initial -> GuardianInvitationStatus.ENUMERATE_GUARDIANS
         }
 
-        val guardians = if (ownerState != null) {
-            when (ownerState) {
-                is OwnerState.Ready -> ownerState.policy.guardians
-                is OwnerState.GuardianSetup -> ownerState.guardians
-                is OwnerState.Initial -> listOf()
-            }
-        } else {
-            state.guardians
+        val guardians = when (ownerState) {
+            is OwnerState.Ready -> ownerState.policy.guardians
+            is OwnerState.GuardianSetup -> ownerState.guardians
+            is OwnerState.Initial -> listOf()
         }
-
 
         state = state.copy(
             guardians = guardians,
@@ -156,7 +147,7 @@ class GuardianInvitationViewModel @Inject constructor(
             )
 
             if (inviteResponse is Resource.Success) {
-                updateOwnerState(inviteResponse.data?.ownerState)
+                updateOwnerState(inviteResponse.data!!.ownerState)
             }
 
             state = state.copy(inviteGuardianResponse = inviteResponse)
@@ -198,7 +189,7 @@ class GuardianInvitationViewModel @Inject constructor(
             )
 
             if (confirmGuardianShipResponse is Resource.Success) {
-                updateOwnerState(confirmGuardianShipResponse.data?.ownerState)
+                updateOwnerState(confirmGuardianShipResponse.data!!.ownerState)
 
                 state = state.copy(
                     confirmGuardianshipResponse = confirmGuardianShipResponse

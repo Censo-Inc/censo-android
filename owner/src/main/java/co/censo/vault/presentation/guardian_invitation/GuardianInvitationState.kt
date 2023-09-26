@@ -13,7 +13,7 @@ import co.censo.vault.presentation.guardian_invitation.GuardianInvitationViewMod
 
 data class GuardianInvitationState(
     val threshold: UInt = 0U,
-    val ownerState: OwnerState? = null,
+    val ownerState: OwnerState = OwnerState.Initial,
     val guardians: List<Guardian> = emptyList(),
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
