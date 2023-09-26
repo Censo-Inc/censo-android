@@ -21,7 +21,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OwnerReadyScreenViewModel @Inject constructor(
-    private val storage: Storage,
     private val ownerRepository: OwnerRepository
 ) : ViewModel() {
 

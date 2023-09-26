@@ -1,16 +1,15 @@
 package co.censo.vault
 
+import Base58EncodedMasterPublicKey
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.fragment.app.FragmentActivity
@@ -21,11 +20,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import co.censo.shared.SharedScreen
-import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.presentation.entrance.EntranceScreen
-import co.censo.shared.presentation.entrance.EntranceViewModel
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
@@ -68,7 +64,10 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
-        NavHost(navController = navController, startDestination = SharedScreen.EntranceRoute.route) {
+        NavHost(
+            navController = navController,
+            startDestination = SharedScreen.EntranceRoute.route
+        ) {
             composable(route = SharedScreen.EntranceRoute.route) {
                 EntranceScreen(
                     navController = navController,
@@ -78,8 +77,17 @@ class MainActivity : FragmentActivity() {
             composable(route = SharedScreen.HomeRoute.route) {
                 HomeScreen(navController = navController)
             }
-            composable(route = Screen.AddBIP39Route.route) {
-                AddBIP39Screen(navController = navController)
+            composable(
+                route = "${Screen.AddBIP39Route.route}/{${Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG}}"
+            ) { backStackEntry ->
+                AddBIP39Screen(
+                    navController = navController,
+                    masterPublicKey = Base58EncodedMasterPublicKey(
+                        backStackEntry.arguments?.getString(
+                            Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG
+                        )!!
+                    )
+                )
             }
             composable(
                 route = "${Screen.BIP39DetailRoute.route}/{${Screen.BIP39DetailRoute.BIP_39_NAME_ARG}}",

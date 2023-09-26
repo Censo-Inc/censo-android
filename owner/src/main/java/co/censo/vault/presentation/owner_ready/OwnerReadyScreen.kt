@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
@@ -28,10 +30,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
+import co.censo.vault.presentation.vault.VaultSecrets
 import co.censo.vault.util.TestTag
 
 @Composable
@@ -39,6 +43,7 @@ fun OwnerReadyScreen(
     ownerState: OwnerState.Ready,
     refreshOwnerState: () -> Unit,
     updateOwnerState: (OwnerState) -> Unit,
+    navController: NavController,
     viewModel: OwnerReadyScreenViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -60,13 +65,13 @@ fun OwnerReadyScreen(
                         .fillMaxSize()
                         .background(color = Color.White),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     TextButton(
                         onClick = viewModel::initUnlock,
                         modifier = Modifier.semantics { testTag = TestTag.unlock_button },
                     ) {
-                        Row() {
+                        Row {
                             Icon(
                                 imageVector = Icons.Rounded.LockOpen,
                                 contentDescription = "Unlock",
@@ -80,6 +85,7 @@ fun OwnerReadyScreen(
                     }
                 }
             }
+
             is OwnerReadyScreenState.LockStatus.Unlocked -> {
                 Column(
                     Modifier
@@ -88,45 +94,72 @@ fun OwnerReadyScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "Unlocked",
-                        textAlign = TextAlign.Center,
-                        color = Color.Black
-                    )
 
-                    Spacer(Modifier.height(24.dp))
-
-                    LockCountDown(state.lockStatus.locksIn, onTimeOut = refreshOwnerState)
-
-                    Spacer(Modifier.height(24.dp))
-
-                    TextButton(
-                        onClick = { viewModel.initLock(updateOwnerState) },
-                        modifier = Modifier.semantics { testTag = TestTag.unlock_button },
+                    Row(
+                        Modifier.fillMaxHeight(0.9f)
                     ) {
-                        Row() {
-                            Icon(
-                                imageVector = Icons.Rounded.Lock,
-                                contentDescription = "Lock",
-                                tint = Color.Black
-                            )
-                            Text(
-                                text = "Lock",
-                                color = Color.Black
-                            )
+                        VaultSecrets(
+                            state.ownerState,
+                            updateOwnerState = updateOwnerState,
+                            navController = navController
+                        )
+                    }
+
+                    Row(
+                        Modifier
+                            .fillMaxSize()
+                            .background(color = Color.White)
+                            .padding(start = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Unlocked",
+                            textAlign = TextAlign.Center,
+                            color = Color.Black,
+                        )
+
+                        Spacer(Modifier.width(24.dp))
+
+                        LockCountDown(state.lockStatus.locksAt, onTimeOut = refreshOwnerState)
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        TextButton(
+                            onClick = { viewModel.initLock(updateOwnerState) },
+                            modifier = Modifier
+                                .semantics { testTag = TestTag.unlock_button }
+                                .padding(end = 8.dp),
+                        ) {
+                            Row {
+                                Icon(
+                                    imageVector = Icons.Rounded.Lock,
+                                    contentDescription = "Lock",
+                                    tint = Color.Black
+                                )
+                                Text(
+                                    text = "Lock",
+                                    color = Color.Black
+                                )
+                            }
                         }
                     }
                 }
             }
+
             is OwnerReadyScreenState.LockStatus.UnlockInProgress -> {
                 when (state.lockStatus.apiCall) {
                     is Resource.Uninitialized -> {
                         FacetecAuth(
                             onFaceScanReady = { verificationId, facetecData ->
-                                viewModel.onFaceScanReady(verificationId, facetecData, updateOwnerState)
+                                viewModel.onFaceScanReady(
+                                    verificationId,
+                                    facetecData,
+                                    updateOwnerState
+                                )
                             }
                         )
                     }
+
                     is Resource.Error -> {
                         DisplayError(
                             errorMessage = state.lockStatus.apiCall.getErrorMessage(context),
@@ -134,6 +167,7 @@ fun OwnerReadyScreen(
                             retryAction = viewModel::initUnlock
                         )
                     }
+
                     else -> {
                         Box(
                             modifier = Modifier
@@ -151,6 +185,7 @@ fun OwnerReadyScreen(
                     }
                 }
             }
+
             is OwnerReadyScreenState.LockStatus.LockInProgress -> {
                 when (state.lockStatus.apiCall) {
                     is Resource.Error -> {
@@ -160,6 +195,7 @@ fun OwnerReadyScreen(
                             retryAction = viewModel::initUnlock
                         )
                     }
+
                     else -> {
                         LoadingIndicator()
                     }

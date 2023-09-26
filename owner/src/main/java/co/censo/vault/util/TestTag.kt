@@ -7,6 +7,8 @@ object TestTag {
     const val add_bip39_button = "add_bip39_button"
     const val phrases_list = "phrases_list"
     const val phrase_row_item = "phrase_row_item"
+    const val add_phrase = "phrase_add"
+    const val delete_phrase = "phrase_delete"
     const val unlock_button = "unlock_button"
 
     //main activity tags

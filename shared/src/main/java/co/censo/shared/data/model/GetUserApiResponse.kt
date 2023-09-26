@@ -6,9 +6,13 @@ import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
+import VaultSecretId
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.datetime.Instant
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @Serializable
 data class GetUserApiResponse(
@@ -107,8 +111,9 @@ data class Policy(
 
 @Serializable
 data class VaultSecret(
+    val guid: VaultSecretId,
     val encryptedSeedPhrase: Base64EncodedData,
-    val seedPhraseHash: Base64EncodedData,
+    val seedPhraseHash: String,
     val label: String,
     val createdAt: Instant,
 )
@@ -138,5 +143,9 @@ sealed class OwnerState {
         val policy: Policy,
         val vault: Vault,
         val unlockedForSeconds: UInt?
-    ) : OwnerState()
+    ) : OwnerState() {
+        var locksAt: Instant? = unlockedForSeconds?.let {
+            Clock.System.now().plus(it.toInt().toDuration(DurationUnit.SECONDS))
+        }
+    }
 }

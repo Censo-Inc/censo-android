@@ -1,6 +1,7 @@
 package co.censo.shared.data.networking
 
 import InitBiometryVerificationApiResponse
+import VaultSecretId
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
@@ -12,6 +13,7 @@ import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
@@ -19,6 +21,8 @@ import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SignInApiRequest
+import co.censo.shared.data.model.StoreSecretApiRequest
+import co.censo.shared.data.model.StoreSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
@@ -55,6 +59,7 @@ interface ApiService {
         const val INVITATION_ID = "invitationId"
         const val INTERMEDIATE_KEY = "intermediateKey"
         const val PARTICIPANT_ID = "participantId"
+        const val SECRET_ID = "secretId"
 
         const val IS_API = "X-IsApi"
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
@@ -155,6 +160,16 @@ interface ApiService {
 
     @POST("/v1/lock")
     suspend fun lock(): RetrofitResponse<LockApiResponse>
+
+    @POST("/v1/vault/secrets")
+    suspend fun storeSecret(
+        @Body apiRequest: StoreSecretApiRequest
+    ): RetrofitResponse<StoreSecretApiResponse>
+
+    @DELETE("/v1/vault/secrets/{$SECRET_ID}")
+    suspend fun deleteSecret(
+        @Path(value = SECRET_ID) secretId: VaultSecretId
+    ): RetrofitResponse<DeleteSecretApiResponse>
 }
 
 class AnalyticsInterceptor(

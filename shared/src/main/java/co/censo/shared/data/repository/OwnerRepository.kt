@@ -2,9 +2,11 @@ package co.censo.shared.data.repository
 
 import Base58EncodedDevicePublicKey
 import Base58EncodedGuardianPublicKey
+import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import GuardianProspect
 import ParticipantId
+import VaultSecretId
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
@@ -13,6 +15,7 @@ import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.cryptography.sha256
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
@@ -20,6 +23,7 @@ import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
+import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
@@ -29,6 +33,8 @@ import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SignInApiRequest
+import co.censo.shared.data.model.StoreSecretApiRequest
+import co.censo.shared.data.model.StoreSecretApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService
@@ -39,6 +45,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
+import io.github.novacrypto.base58.Base58
 import okhttp3.ResponseBody
 import java.util.Base64
 
@@ -52,32 +59,37 @@ interface OwnerRepository {
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicySetupApiResponse>
-    suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>) : PolicySetupHelper
+    suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>): PolicySetupHelper
     suspend fun createPolicy(
         setupHelper: PolicySetupHelper
     ): Resource<CreatePolicyApiResponse>
-    suspend fun verifyToken(token: String) : String?
+
+
+    suspend fun verifyToken(token: String): String?
     suspend fun saveJWT(jwtToken: String)
-    suspend fun retrieveJWT() : String
-    suspend fun checkJWTValid(jwtToken: String) : Boolean
+    suspend fun retrieveJWT(): String
+    suspend fun checkJWTValid(jwtToken: String): Boolean
     suspend fun inviteGuardian(
         participantId: ParticipantId,
     ): Resource<InviteGuardianApiResponse>
+
     suspend fun confirmGuardianShip(
         participantId: ParticipantId,
         keyConfirmationSignature: ByteArray,
         keyConfirmationTimeMillis: Long
     ): Resource<ConfirmGuardianshipApiResponse>
+
     fun checkCodeMatches(
         verificationCode: String,
         transportKey: Base58EncodedGuardianPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
-    ) : Boolean
+    ): Boolean
+
     fun encryptShardWithGuardianKey(
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
-    ) : ByteArray?
+    ): ByteArray?
 
     suspend fun unlock(
         biometryVerificationId: BiometryVerificationId,
@@ -85,6 +97,15 @@ interface OwnerRepository {
     ): Resource<UnlockApiResponse>
 
     suspend fun lock(): Resource<LockApiResponse>
+
+    suspend fun storeSecret(
+        masterPublicKey: Base58EncodedMasterPublicKey,
+        label: String,
+        seedPhrase: String
+    ): Resource<StoreSecretApiResponse>
+
+    suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
+
 }
 
 class OwnerRepositoryImpl(
@@ -270,5 +291,34 @@ class OwnerRepositoryImpl(
 
     override suspend fun lock(): Resource<LockApiResponse> {
         return retrieveApiResource { apiService.lock() }
+    }
+
+    override suspend fun storeSecret(
+        masterPublicKey: Base58EncodedMasterPublicKey,
+        label: String,
+        seedPhrase: String
+    ): Resource<StoreSecretApiResponse> {
+
+        val seedPhraseHash = seedPhrase.sha256()
+        val encryptedSeedPhrase = ECIESManager.encryptMessage(
+            dataToEncrypt = seedPhrase.toByteArray(),
+            publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
+        )
+
+        return retrieveApiResource {
+            apiService.storeSecret(
+                StoreSecretApiRequest(
+                    label = label,
+                    encryptedSeedPhrase = Base64EncodedData(
+                        Base64.getEncoder().encodeToString(encryptedSeedPhrase)
+                    ),
+                    seedPhraseHash = seedPhraseHash
+                )
+            )
+        }
+    }
+
+    override suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse> {
+        return retrieveApiResource { apiService.deleteSecret(guid) }
     }
 }
