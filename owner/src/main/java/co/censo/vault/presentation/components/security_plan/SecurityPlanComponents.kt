@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.PhonelinkErase
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -34,11 +37,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -51,6 +57,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.Colors.DividerGray
 import co.censo.shared.presentation.Colors.GreyText
@@ -63,18 +70,30 @@ import co.censo.vault.R
 fun AddApproverDialog(
     nickname: String,
     onDismiss: () -> Unit,
+    paddingValues: PaddingValues,
     updateApproverName: (String) -> Unit,
     submit: () -> Unit
 ) {
-    Box(
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.Black.copy(alpha = 0.25f))
+            .padding(paddingValues)
+            .background(color = Colors.BackgroundAlphaBlack)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Column(
             modifier = Modifier
-                .align(Alignment.Center)
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .background(color = Color.White, shape = RoundedCornerShape(8.dp)),
@@ -113,7 +132,8 @@ fun AddApproverDialog(
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = contentHorizontalPadding),
+                    .padding(horizontal = contentHorizontalPadding)
+                    .focusRequester(focusRequester),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = PrimaryBlue,
                     cursorColor = Colors.CursorBlue,
@@ -168,6 +188,35 @@ fun AddApproverDialog(
             }
         }
     }
+}
+
+@Composable
+fun EditOrDeleteDialog(
+    onDismiss: () -> Unit,
+    edit: () -> Unit,
+    delete: () -> Unit
+) {
+    AlertDialog(
+        title = {
+            Text(text = "Edit or Delete Approver?")
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = edit
+            ) {
+                Text("Edit")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = delete
+            ) {
+                Text("Delete")
+            }
+        }
+    )
+
 }
 
 @Composable
@@ -304,7 +353,7 @@ fun ThresholdSlider(
     sliderPosition: Float,
     totalPadding: PaddingValues = PaddingValues(),
     iconAndLabelHorizontalPadding: Dp,
-    guardians: List<String>,
+    guardians: List<Guardian>,
     onValueChange: (Float) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -409,7 +458,7 @@ fun AmountGuardiansProtectingText(amountGuardians: Int) {
 
 @Composable
 fun ApproverRow(
-    guardianName: String,
+    guardian: Guardian,
     horizontalPadding: Dp = 16.dp,
     editGuardianClick: () -> Unit
 ) {
@@ -429,7 +478,7 @@ fun ApproverRow(
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = guardianName,
+                    text = guardian.label,
                     color = Color.Black,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.W700

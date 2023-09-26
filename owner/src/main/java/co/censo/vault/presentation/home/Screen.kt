@@ -10,6 +10,7 @@ sealed class Screen(val route: String) {
     }
     object FacetecAuthRoute : Screen("facetec_auth_screen")
     object GuardianInvitationRoute : Screen("guardian_invitation_screen")
+    object PlanSetupRoute : Screen("plan_setup_route")
 
     companion object {
         const val START_DESTINATION_ID = 0
