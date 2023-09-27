@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,10 +24,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.PhonelinkErase
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -191,32 +193,34 @@ fun AddApproverDialog(
 }
 
 @Composable
-fun EditOrDeleteDialog(
+fun EditOrDeleteMenu(
     onDismiss: () -> Unit,
     edit: () -> Unit,
     delete: () -> Unit
 ) {
-    AlertDialog(
-        title = {
-            Text(text = "Edit or Delete Approver?")
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = edit
-            ) {
-                Text("Edit")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = delete
-            ) {
-                Text("Delete")
-            }
-        }
-    )
 
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+            .wrapContentSize(Alignment.TopEnd)
+    ) {
+        DropdownMenu(
+            modifier = Modifier.background(color = Color.White),
+            expanded = true,
+            onDismissRequest = onDismiss) {
+            DropdownMenuItem(
+                modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                text = { Text(stringResource(id = R.string.edit), fontSize = 20.sp, color = Color.Black) },
+                onClick = edit
+            )
+            DropdownMenuItem(
+                modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                text = { Text(stringResource(id = R.string.delete), fontSize = 20.sp, color = Color.Black) },
+                onClick = delete
+            )
+        }
+    }
 }
 
 @Composable

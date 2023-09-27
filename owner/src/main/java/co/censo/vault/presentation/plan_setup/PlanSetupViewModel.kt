@@ -16,21 +16,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-/**
- * 1. If we are actively editing the plan then take user to review screen
- */
-
 @HiltViewModel
-class PlanSetupViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository,
-    private val keyRepository: KeyRepository
-) : ViewModel() {
+class PlanSetupViewModel @Inject constructor() : ViewModel() {
 
     var state by mutableStateOf(PlanSetupState())
         private set
-
-    fun onStart() {
-    }
 
     fun onBackActionClick() {
         if (state.currentScreen == SetupSecurityPlanScreen.RequiredApprovals) {
@@ -122,8 +112,6 @@ class PlanSetupViewModel @Inject constructor(
         if (state.editingGuardian != null) {
             val index = guardians.indexOf(state.editingGuardian!!)
 
-            projectLog(message = "Index of edited guardian is: $index")
-
             if (index != -1) {
                 guardians[index] = Guardian.SetupGuardian(
                     label = state.addedApproverNickname,
@@ -176,12 +164,7 @@ class PlanSetupViewModel @Inject constructor(
         threshold: Int
     ): Int {
         val difference = previousGuardianSize - threshold
-
-        projectLog(message = "Difference: $difference")
-
         val newThreshold = currentGuardianSize - difference
-
-        projectLog(message = "New threshold: $newThreshold")
 
         return if (newThreshold >= 1) newThreshold else 1
     }

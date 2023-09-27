@@ -32,7 +32,7 @@ import androidx.navigation.NavController
 import co.censo.shared.presentation.Colors
 import co.censo.vault.R
 import co.censo.vault.presentation.components.security_plan.AddApproverDialog
-import co.censo.vault.presentation.components.security_plan.EditOrDeleteDialog
+import co.censo.vault.presentation.components.security_plan.EditOrDeleteMenu
 import co.censo.vault.presentation.components.security_plan.InitialAddApproverScreen
 import co.censo.vault.presentation.components.security_plan.RequiredApprovalsScreen
 import co.censo.vault.presentation.components.security_plan.ReviewPlanScreen
@@ -187,7 +187,7 @@ fun PlanSetupScreen(
         }
 
         if (state.showEditOrDeleteDialog) {
-            EditOrDeleteDialog(
+            EditOrDeleteMenu(
                 onDismiss = viewModel::dismissDialog,
                 edit = viewModel::editGuardian,
                 delete = viewModel::deleteGuardian
