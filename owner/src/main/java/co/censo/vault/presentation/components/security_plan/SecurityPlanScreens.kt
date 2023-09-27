@@ -449,7 +449,7 @@ fun SecureYourPlanScreen(paddingValues: PaddingValues) {
             .padding(paddingValues)
     ) {
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            Text(text = "\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n", color = Color.Black)
+            Text(text = "", color = Color.Black)
         }
 
         Column(
