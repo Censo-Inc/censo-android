@@ -103,5 +103,7 @@
     <string name="your_seed_phrases_are_secured_with">Your seed phrases are secured with\n</string>
     <string name="approver_colon">approver:</string>
     <string name="approvers_colon">approvers:</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 
 </resources>

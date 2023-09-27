@@ -138,7 +138,7 @@ fun HomeScreen(
                         ) {
 
                             TextButton(
-                                onClick = { navController.navigate(Screen.GuardianInvitationRoute.route) },
+                                onClick = { navController.navigate(Screen.PlanSetupRoute.route) },
                             ) {
                                 Row() {
                                     Icon(

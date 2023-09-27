@@ -28,6 +28,7 @@ import co.censo.vault.presentation.components.security_plan.TestableProtectionSc
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.plan_setup.PlanSetupScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
@@ -102,6 +103,9 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = Screen.GuardianInvitationRoute.route) {
                 GuardianInvitationScreen(navController = navController)
+            }
+            composable(route = Screen.PlanSetupRoute.route) {
+                PlanSetupScreen(navController = navController)
             }
         }
     }

@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.components.security_plan
 
 import FullScreenButton
+import ParticipantId
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.cryptography.generatePartitionId
+import co.censo.shared.data.cryptography.toHexString
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.presentation.Colors
 import co.censo.vault.R
 
@@ -160,9 +164,6 @@ fun SecurityPlanTopLevelContainer(
 @Composable
 fun InitialAddApproverScreen(paddingValues: PaddingValues) {
 
-    var nickname by remember { mutableStateOf("") }
-    var showApproverDialog by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -197,31 +198,16 @@ fun InitialAddApproverScreen(paddingValues: PaddingValues) {
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             Text(text = "Images down here in this container...", color = Color.Black)
         }
-
-        if (showApproverDialog) {
-            AddApproverDialog(
-                nickname = nickname,
-                onDismiss = {
-                    showApproverDialog = false
-                },
-                updateApproverName = {
-                    nickname = it
-                },
-                submit = {
-                    showApproverDialog = false
-                }
-            )
-        }
     }
 }
 
 @Composable
 fun RequiredApprovalsScreen(
     paddingValues: PaddingValues,
-    guardians: List<String>
+    guardians: List<Guardian>,
+    sliderPosition: Float,
+    updateThreshold: (Float) -> Unit
 ) {
-    var sliderPosition by remember { mutableStateOf(1f) }
-
     val oneOrFewerGuardians = guardians.size <= 1
 
     Column(
@@ -273,11 +259,11 @@ fun RequiredApprovalsScreen(
         }
 
         if (oneOrFewerGuardians) {
-            Column(
+            Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1.0f)
-            ) {}
+            )
         } else {
             Column(
                 modifier = Modifier
@@ -295,10 +281,9 @@ fun RequiredApprovalsScreen(
                 ThresholdSlider(
                     sliderPosition = sliderPosition,
                     iconAndLabelHorizontalPadding = rowHorizontalPadding,
-                    guardians = guardians
-                ) {
-                    sliderPosition = it
-                }
+                    guardians = guardians,
+                    onValueChange = updateThreshold
+                )
 
                 Spacer(modifier = Modifier.weight(2.0f))
 
@@ -318,9 +303,9 @@ fun RequiredApprovalsScreen(
 @Composable
 fun SelectApproversScreen(
     paddingValues: PaddingValues,
-    guardians: List<String>,
-    addGuardianOnClick: () -> Unit,
-    editGuardianClick: (String) -> Unit
+    guardians: List<Guardian>,
+    addApproverOnClick: () -> Unit,
+    editApproverOnClick: (Guardian) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -329,7 +314,8 @@ fun SelectApproversScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             ProtectionPlanTitle(text = stringResource(id = R.string.select_approvers))
 
@@ -339,16 +325,16 @@ fun SelectApproversScreen(
 
             for (guardian in guardians) {
                 ApproverRow(
-                    guardianName = guardian
+                    guardian = guardian,
                 ) {
-                    editGuardianClick(guardian)
+                    editApproverOnClick(guardian)
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             AddAnotherButton {
-                addGuardianOnClick()
+                addApproverOnClick()
             }
         }
     }
@@ -356,10 +342,13 @@ fun SelectApproversScreen(
 
 @Composable
 fun ReviewPlanScreen(
+    sliderPosition: Float,
     paddingValues: PaddingValues,
-    guardians: List<String>
+    guardians: List<Guardian>,
+    updateThreshold: (Float) -> Unit,
+    editApprover: (Guardian) -> Unit,
+    addApprover: () -> Unit
 ) {
-    var sliderPosition by remember { mutableStateOf(1f) }
     val oneOrFewerGuardians = guardians.size <= 1
 
     Column(
@@ -369,7 +358,7 @@ fun ReviewPlanScreen(
 
         Column(
             modifier = Modifier
-                .weight(1.5f)
+                .weight(0.75f)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -378,47 +367,9 @@ fun ReviewPlanScreen(
                 bottomPadding = 16.dp
             )
 
-            val normalStyle = SpanStyle(
-                fontSize = 18.sp,
-                color = Color.Black,
-            )
-
-            val annotatedString = buildAnnotatedString {
-                withStyle(normalStyle) {
-                    append(stringResource(R.string.your_seed_phrases_are_secured_with))
-                }
-                withStyle(
-                    style = SpanStyle(
-                        fontSize = 24.sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.W700
-                    )
-                ) {
-                    append(" ${guardians.size} ")
-                }
-                withStyle(normalStyle) {
-                    append(if (oneOrFewerGuardians) stringResource(R.string.approver_colon) else stringResource(
-                        R.string.approvers_colon
-                    )
-                    )
-                }
-            }
-
-            ProtectionPlanExplainerBox(
-                annotatedString = annotatedString,
-                paddingValues = PaddingValues(horizontal = 16.dp),
-                contentPaddingValues = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
-            )
-
             for (guardian in guardians) {
-                ApproverRow(guardianName = guardian) {
-
-                }
-                ApproverRow(guardianName = guardian) {
-
-                }
-                ApproverRow(guardianName = guardian) {
-
+                ApproverRow(guardian = guardian) {
+                    editApprover(guardian)
                 }
             }
         }
@@ -426,15 +377,15 @@ fun ReviewPlanScreen(
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = if (oneOrFewerGuardians) Arrangement.Top else Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            AddAnotherButton {
-
-            }
+            AddAnotherButton(onClick = addApprover)
 
             if (oneOrFewerGuardians) {
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 val annotatedString = buildAnnotatedString {
                     withStyle(
@@ -457,7 +408,7 @@ fun ReviewPlanScreen(
 
                 ThresholdText(
                     threshold = sliderPosition.toInt(),
-                    total = 3,
+                    total = guardians.size,
                     boxStyle = true,
                     paddingValues = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                     contentPaddingValues = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
@@ -466,16 +417,15 @@ fun ReviewPlanScreen(
 
             if (!oneOrFewerGuardians) {
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 ThresholdSlider(
                     sliderPosition = sliderPosition,
                     iconAndLabelHorizontalPadding = 8.dp,
                     totalPadding = PaddingValues(horizontal = 36.dp),
-                    guardians = guardians
-                ) {
-                    sliderPosition = it
-                }
+                    guardians = guardians,
+                    onValueChange = updateThreshold
+                )
             }
         }
     }
@@ -488,9 +438,14 @@ fun ReviewPlanScreen(
 @Composable
 fun TestableProtectionScreen(initialPosition: Int) {
 
-    val guardians = listOf("Ben", "A.L.", "Carlitos")
+    val guardians = listOf(
+        Guardian.SetupGuardian("Ben", ParticipantId(generatePartitionId().toHexString())),
+        Guardian.SetupGuardian("A.L.", ParticipantId(generatePartitionId().toHexString())),
+        Guardian.SetupGuardian("Carlitos", ParticipantId(generatePartitionId().toHexString()))
+    )
 
     var screenPosition by remember { mutableStateOf(initialPosition) }
+    var sliderPosition by remember { mutableStateOf(1.0f) }
 
     val selectedScreen: SetupSecurityPlanScreen =
         if (screenPosition >= 3) {
@@ -522,12 +477,28 @@ fun TestableProtectionScreen(initialPosition: Int) {
             1 -> SelectApproversScreen(
                 paddingValues = it,
                 guardians = guardians,
-                addGuardianOnClick = { },
-                editGuardianClick = { }
+                addApproverOnClick = { },
+                editApproverOnClick = { }
             )
 
-            2 -> RequiredApprovalsScreen(paddingValues = it, guardians = guardians)
-            3 -> ReviewPlanScreen(paddingValues = it, guardians = guardians)
+            2 -> RequiredApprovalsScreen(
+                paddingValues = it,
+                guardians = guardians,
+                sliderPosition = sliderPosition
+            ) { updatedSlider ->
+                sliderPosition = updatedSlider
+            }
+
+            3 -> ReviewPlanScreen(
+                paddingValues = it,
+                guardians = guardians,
+                sliderPosition = sliderPosition,
+                updateThreshold = { updatedPosition ->
+                    sliderPosition = updatedPosition
+                },
+                editApprover = {},
+                addApprover = {}
+            )
             else -> InitialAddApproverScreen(paddingValues = it)
         }
 
