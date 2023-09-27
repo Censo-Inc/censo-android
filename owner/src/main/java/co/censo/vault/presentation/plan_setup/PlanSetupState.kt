@@ -20,7 +20,9 @@ data class PlanSetupState(
 ) {
     val canContinueOnboarding = guardians.size >= MIN_GUARDIAN_LIMIT
 
-    val showBackIcon = currentScreen == SetupSecurityPlanScreen.RequiredApprovals
+    val showBackIcon =
+        currentScreen == SetupSecurityPlanScreen.RequiredApprovals
+                || currentScreen == SetupSecurityPlanScreen.SecureYourPlan
 
     val loading =
         userResponse is Resource.Loading

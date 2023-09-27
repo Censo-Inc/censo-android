@@ -36,6 +36,7 @@ import co.censo.vault.presentation.components.security_plan.EditOrDeleteMenu
 import co.censo.vault.presentation.components.security_plan.InitialAddApproverScreen
 import co.censo.vault.presentation.components.security_plan.RequiredApprovalsScreen
 import co.censo.vault.presentation.components.security_plan.ReviewPlanScreen
+import co.censo.vault.presentation.components.security_plan.SecureYourPlanScreen
 import co.censo.vault.presentation.components.security_plan.SelectApproversScreen
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 
@@ -51,6 +52,7 @@ fun PlanSetupScreen(
     val showTwoButtons = when (state.currentScreen) {
         SetupSecurityPlanScreen.Initial,
         SetupSecurityPlanScreen.AddApprovers,
+        SetupSecurityPlanScreen.SecureYourPlan,
         SetupSecurityPlanScreen.RequiredApprovals -> true
 
         SetupSecurityPlanScreen.Review -> false
@@ -61,6 +63,7 @@ fun PlanSetupScreen(
         SetupSecurityPlanScreen.AddApprovers -> stringResource(R.string.next_required_approvals)
         SetupSecurityPlanScreen.RequiredApprovals -> stringResource(R.string.next_review)
         SetupSecurityPlanScreen.Review -> stringResource(R.string.confirm)
+        SetupSecurityPlanScreen.SecureYourPlan -> stringResource(id = R.string.continue_text)
     }
 
     Scaffold(
@@ -142,29 +145,26 @@ fun PlanSetupScreen(
     ) { paddingValues ->
 
         when (state.currentScreen) {
-            SetupSecurityPlanScreen.Initial -> {
+            SetupSecurityPlanScreen.Initial ->
                 InitialAddApproverScreen(paddingValues = paddingValues)
-            }
 
-            SetupSecurityPlanScreen.AddApprovers -> {
+            SetupSecurityPlanScreen.AddApprovers ->
                 SelectApproversScreen(
                     paddingValues = paddingValues,
                     guardians = state.guardians,
                     addApproverOnClick = viewModel::showAddGuardianDialog,
                     editApproverOnClick = viewModel::showEditOrDeleteDialog
                 )
-            }
 
-            SetupSecurityPlanScreen.RequiredApprovals -> {
+            SetupSecurityPlanScreen.RequiredApprovals ->
                 RequiredApprovalsScreen(
                     paddingValues = paddingValues,
                     guardians = state.guardians,
                     sliderPosition = state.thresholdSliderPosition,
                     updateThreshold = viewModel::updateSliderPosition
                 )
-            }
 
-            SetupSecurityPlanScreen.Review -> {
+            SetupSecurityPlanScreen.Review ->
                 ReviewPlanScreen(
                     paddingValues = paddingValues,
                     guardians = state.guardians,
@@ -173,7 +173,9 @@ fun PlanSetupScreen(
                     editApprover = viewModel::showEditOrDeleteDialog,
                     addApprover = viewModel::showAddGuardianDialog
                 )
-            }
+
+            SetupSecurityPlanScreen.SecureYourPlan ->
+                SecureYourPlanScreen(paddingValues = paddingValues)
         }
 
         if (state.showAddGuardianDialog) {

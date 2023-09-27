@@ -105,5 +105,8 @@
     <string name="approvers_colon">approvers:</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="establish_your_identity">Establish Your Identity</string>
+    <string name="establish_identity_explainer">Access to your seed phrases always requires your approval which is obtained using an encrypted 3d face scan to confirm your identity.\n\nThis scan is not associated with any personally identifiable information and it provides a reliable way to securely control sccess to your seed phrases.</string>
+    <string name="you_must_add_at_least_one_approver">You must add at least one approver</string>
 
 </resources>

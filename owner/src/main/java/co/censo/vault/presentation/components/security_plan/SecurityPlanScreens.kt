@@ -49,7 +49,7 @@ import co.censo.shared.presentation.Colors
 import co.censo.vault.R
 
 enum class SetupSecurityPlanScreen {
-    Initial, AddApprovers, RequiredApprovals, Review
+    Initial, AddApprovers, RequiredApprovals, Review, SecureYourPlan
 }
 
 //region Security Plan Top Level Container
@@ -66,8 +66,8 @@ fun SecurityPlanTopLevelContainer(
     val showTwoButtons = when (setupSecurityPlanScreen) {
         SetupSecurityPlanScreen.Initial,
         SetupSecurityPlanScreen.AddApprovers,
-        SetupSecurityPlanScreen.RequiredApprovals -> true
-
+        SetupSecurityPlanScreen.RequiredApprovals,
+        SetupSecurityPlanScreen.SecureYourPlan -> true
         SetupSecurityPlanScreen.Review -> false
     }
 
@@ -76,6 +76,7 @@ fun SecurityPlanTopLevelContainer(
         SetupSecurityPlanScreen.AddApprovers -> stringResource(R.string.next_required_approvals)
         SetupSecurityPlanScreen.RequiredApprovals -> stringResource(R.string.next_review)
         SetupSecurityPlanScreen.Review -> stringResource(R.string.confirm)
+        SetupSecurityPlanScreen.SecureYourPlan -> stringResource(id = R.string.continue_text)
     }
 
     Scaffold(
@@ -170,6 +171,10 @@ fun InitialAddApproverScreen(paddingValues: PaddingValues) {
             .background(color = Color.White)
             .padding(paddingValues)
     ) {
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            Text(text = "Images down here in this container...", color = Color.Black)
+        }
+
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -193,10 +198,6 @@ fun InitialAddApproverScreen(paddingValues: PaddingValues) {
                 annotatedString = annotatedString,
                 contentPaddingValues = PaddingValues(vertical = 32.dp, horizontal = 20.dp)
             )
-        }
-
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            Text(text = "Images down here in this container...", color = Color.Black)
         }
     }
 }
@@ -394,7 +395,13 @@ fun ReviewPlanScreen(
                             color = Color.Black,
                         )
                     ) {
-                        append(stringResource(id = R.string.you_have_a_single_approver_so_their_approval_will_be_required_to_access_your_seed_phrases))
+                        append(
+                            if (guardians.isEmpty()) {
+                                stringResource(R.string.you_must_add_at_least_one_approver)
+                            } else {
+                                stringResource(id = R.string.you_have_a_single_approver_so_their_approval_will_be_required_to_access_your_seed_phrases)
+                            }
+                        )
                     }
                 }
 
@@ -432,6 +439,46 @@ fun ReviewPlanScreen(
 
 }
 
+@Composable
+fun SecureYourPlanScreen(paddingValues: PaddingValues) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+            .padding(paddingValues)
+    ) {
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            Text(text = "\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n\uD83E\uDD16\n", color = Color.Black)
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ProtectionPlanTitle(text = stringResource(R.string.establish_your_identity))
+
+            val textStyle = SpanStyle(
+                fontSize = 18.sp, color = Colors.GreyText
+            )
+
+            val annotatedString = buildAnnotatedString {
+                withStyle(textStyle) {
+                    append(stringResource(R.string.establish_identity_explainer))
+                }
+            }
+
+            ProtectionPlanExplainerBox(
+                annotatedString = annotatedString,
+                contentPaddingValues = PaddingValues(vertical = 32.dp, horizontal = 20.dp)
+            )
+        }
+    }
+}
+
 //endregion
 
 //region test + previews
@@ -448,6 +495,9 @@ fun TestableProtectionScreen(initialPosition: Int) {
     var sliderPosition by remember { mutableStateOf(1.0f) }
 
     val selectedScreen: SetupSecurityPlanScreen =
+        if (screenPosition >= 4) {
+            SetupSecurityPlanScreen.SecureYourPlan
+        } else
         if (screenPosition >= 3) {
             SetupSecurityPlanScreen.Review
         } else if (screenPosition == 2) {
@@ -462,8 +512,10 @@ fun TestableProtectionScreen(initialPosition: Int) {
     SecurityPlanTopLevelContainer(
         setupSecurityPlanScreen = selectedScreen,
         moveForward = {
-            screenPosition = if (screenPosition >= 3) {
+            screenPosition = if (screenPosition >= 4) {
                 0
+            } else if (screenPosition == 3) {
+                4
             } else if (screenPosition == 2) {
                 3
             } else if (screenPosition == 1) {
@@ -498,6 +550,9 @@ fun TestableProtectionScreen(initialPosition: Int) {
                 },
                 editApprover = {},
                 addApprover = {}
+            )
+            4 -> SecureYourPlanScreen(
+                paddingValues = it
             )
             else -> InitialAddApproverScreen(paddingValues = it)
         }
