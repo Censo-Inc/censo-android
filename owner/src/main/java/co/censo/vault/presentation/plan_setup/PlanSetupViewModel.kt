@@ -8,9 +8,6 @@ import androidx.lifecycle.ViewModel
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -23,10 +20,20 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
         private set
 
     fun onBackActionClick() {
-        if (state.currentScreen == SetupSecurityPlanScreen.RequiredApprovals) {
-            state = state.copy(
-                currentScreen = SetupSecurityPlanScreen.AddApprovers
-            )
+        state = when (state.currentScreen) {
+            SetupSecurityPlanScreen.RequiredApprovals -> {
+                state.copy(
+                    currentScreen = SetupSecurityPlanScreen.AddApprovers
+                )
+            }
+
+            SetupSecurityPlanScreen.SecureYourPlan -> {
+                state.copy(
+                    currentScreen = SetupSecurityPlanScreen.RequiredApprovals
+                )
+            }
+
+            else -> state
         }
     }
 
@@ -47,7 +54,12 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
             }
 
             SetupSecurityPlanScreen.Review -> {
-                //todo: Send user to facetec approval
+                state = state.copy(
+                    currentScreen = SetupSecurityPlanScreen.SecureYourPlan
+                )
+            }
+            SetupSecurityPlanScreen.SecureYourPlan -> {
+                //todo: show facetec
             }
         }
     }
