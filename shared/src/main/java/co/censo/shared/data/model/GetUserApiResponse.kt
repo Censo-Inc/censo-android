@@ -128,14 +128,17 @@ data class Vault(
 sealed class OwnerState {
     @Serializable
     @SerialName("Initial")
-    object Initial: OwnerState()
+    object Initial : OwnerState()
 
     @Serializable
     @SerialName("GuardianSetup")
     data class GuardianSetup(
         val guardians: List<Guardian.ProspectGuardian>,
-        val threshold: UInt?
-    ) : OwnerState()
+        val threshold: UInt?,
+        val unlockedForSeconds: UInt?
+    ) : OwnerState() {
+        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
+    }
 
     @Serializable
     @SerialName("Ready")
@@ -144,7 +147,11 @@ sealed class OwnerState {
         val vault: Vault,
         val unlockedForSeconds: UInt?
     ) : OwnerState() {
-        var locksAt: Instant? = unlockedForSeconds?.let {
+        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
+    }
+
+    fun UInt?.calculateLocksAt(): Instant? {
+        return this?.let {
             Clock.System.now().plus(it.toInt().toDuration(DurationUnit.SECONDS))
         }
     }
