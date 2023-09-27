@@ -22,6 +22,7 @@ import androidx.navigation.navArgument
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.presentation.entrance.EntranceScreen
+import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.components.security_plan.TestableProtectionScreen
@@ -106,6 +107,9 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = Screen.PlanSetupRoute.route) {
                 PlanSetupScreen(navController = navController)
+            }
+            composable(route = Screen.ActivateApprovers.route) {
+                ActivateApproversScreen(navController = navController)
             }
         }
     }

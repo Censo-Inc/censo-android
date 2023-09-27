@@ -3,6 +3,7 @@ package co.censo.shared.data.storage
 import android.content.Context
 import android.content.SharedPreferences
 import co.censo.shared.BuildConfig
+import co.censo.shared.data.model.SecurityPlanData
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -26,6 +27,10 @@ interface Storage {
     fun savePrivateKey(key: String)
     fun retrievePrivateKey() : String
     fun clearPrivateKey()
+    fun setEditingSecurityPlan(editingSecurityPlan: Boolean)
+    fun isEditingSecurityPlan() : Boolean
+    fun setSecurityPlan(securityPlanData: SecurityPlanData)
+    fun retrieveSecurityPlan() : SecurityPlanData?
 }
 
 object SharedPrefsStorage : Storage {
@@ -46,6 +51,10 @@ object SharedPrefsStorage : Storage {
 
     private const val GOOGLE_DRIVE_MOCK_KEY = "google_drive_mock_key"
 
+    private const val EDITING_SECURITY_PLAN = "editing_security_plan"
+
+    private const val SECURITY_PLAN = "security_plan"
+
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -53,6 +62,34 @@ object SharedPrefsStorage : Storage {
         appContext = context
         sharedPrefs = appContext.getSharedPreferences(MAIN_PREFS, Context.MODE_PRIVATE)
     }
+
+    //region editing security plan
+    override fun isEditingSecurityPlan(): Boolean {
+        return sharedPrefs.getBoolean(EDITING_SECURITY_PLAN, false)
+    }
+
+    override fun setEditingSecurityPlan(editingSecurityPlan: Boolean) {
+        val editor = sharedPrefs.edit()
+        editor.putBoolean(EDITING_SECURITY_PLAN, editingSecurityPlan)
+        editor.apply()
+    }
+    //endregion
+
+    //region security plan
+    override fun setSecurityPlan(securityPlanData: SecurityPlanData) {
+        val editor = sharedPrefs.edit()
+        editor.putString(SECURITY_PLAN, Json.encodeToString(securityPlanData))
+        editor.apply()
+    }
+
+    override fun retrieveSecurityPlan(): SecurityPlanData? {
+        val securityJson = sharedPrefs.getString(DEVICE_KEY, "") ?: ""
+
+        if (securityJson.isEmpty()) return null
+
+        return Json.decodeFromString(securityJson)
+    }
+    //endregion
 
     //region device key id
     override fun saveDeviceKeyId(id: String) {

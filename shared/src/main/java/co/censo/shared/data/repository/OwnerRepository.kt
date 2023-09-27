@@ -32,6 +32,7 @@ import co.censo.shared.data.model.InviteGuardianApiRequest
 import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
 import co.censo.shared.data.model.StoreSecretApiResponse
@@ -105,7 +106,10 @@ interface OwnerRepository {
     ): Resource<StoreSecretApiResponse>
 
     suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
-
+    suspend fun isUserEditingSecurityPlan() : Boolean
+    suspend fun setEditingSecurityPlan(editingPlan : Boolean)
+    suspend fun retrieveSecurityPlan() : SecurityPlanData?
+    suspend fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
 }
 
 class OwnerRepositoryImpl(
@@ -321,4 +325,13 @@ class OwnerRepositoryImpl(
     override suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse> {
         return retrieveApiResource { apiService.deleteSecret(guid) }
     }
+
+    override suspend fun isUserEditingSecurityPlan() = storage.isEditingSecurityPlan()
+    override suspend fun setEditingSecurityPlan(editingPlan: Boolean) =
+        storage.setEditingSecurityPlan(editingPlan)
+
+    override suspend fun retrieveSecurityPlan() = storage.retrieveSecurityPlan()
+
+    override suspend fun saveSecurityPlanData(securityPlanData: SecurityPlanData) =
+        storage.setSecurityPlan(securityPlanData)
 }

@@ -5,19 +5,58 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
+import co.censo.shared.data.model.BiometryScanResultBlob
+import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @HiltViewModel
-class PlanSetupViewModel @Inject constructor() : ViewModel() {
+class PlanSetupViewModel @Inject constructor(
+    private val ownerRepository: OwnerRepository
+) : ViewModel() {
 
     var state by mutableStateOf(PlanSetupState())
         private set
+
+    suspend fun onPolicySetupCreationFaceScanReady(
+        verificationId: BiometryVerificationId,
+        facetecData: FacetecBiometry
+    ): Resource<BiometryScanResultBlob> {
+        state = state.copy(createPolicySetupResponse = Resource.Loading())
+
+        return viewModelScope.async {
+            val createPolicySetupResponse = ownerRepository.createPolicySetup(
+                state.threshold,
+                state.guardians.map { Guardian.SetupGuardian(it.label, it.participantId) },
+                verificationId,
+                facetecData
+            )
+
+            if (createPolicySetupResponse is Resource.Success) {
+                state = state.copy(
+                    createPolicySetupResponse = createPolicySetupResponse,
+                    navigateToActivateApprovers = true
+                )
+            } else if (createPolicySetupResponse is Resource.Error) {
+                state = state.copy(
+                    createPolicySetupResponse = createPolicySetupResponse,
+                    currentScreen = SetupSecurityPlanScreen.SecureYourPlan
+                )
+            }
+
+            createPolicySetupResponse.map { it.scanResultBlob }
+        }.await()
+    }
 
     fun onBackActionClick() {
         state = when (state.currentScreen) {
@@ -58,8 +97,17 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
                     currentScreen = SetupSecurityPlanScreen.SecureYourPlan
                 )
             }
+
             SetupSecurityPlanScreen.SecureYourPlan -> {
-                //todo: show facetec
+                state = state.copy(
+                    currentScreen = SetupSecurityPlanScreen.FacetecAuth
+                )
+            }
+
+            SetupSecurityPlanScreen.FacetecAuth -> {
+                state = state.copy(
+                    navigateToActivateApprovers = true
+                )
             }
         }
     }
@@ -70,8 +118,7 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
 
     fun updateSliderPosition(updatedPosition: Float) {
         state = state.copy(
-            thresholdSliderPosition =
-            updatedPosition.roundToInt().toFloat()
+            threshold = updatedPosition.roundToInt().toUInt()
         )
     }
 
@@ -79,7 +126,7 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
 
     }
 
-    fun showEditOrDeleteDialog(guardian: Guardian) {
+    fun showEditOrDeleteDialog(guardian: Guardian.SetupGuardian) {
         state = state.copy(
             showEditOrDeleteDialog = true,
             editingGuardian = guardian
@@ -106,14 +153,14 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
             val threshold = recalculateThreshold(
                 previousGuardianSize = state.guardians.size,
                 currentGuardianSize = guardians.size,
-                threshold = state.thresholdSliderPosition.toInt()
+                threshold = state.threshold
             )
 
             state = state.copy(
                 editingGuardian = null,
                 guardians = guardians,
                 showEditOrDeleteDialog = false,
-                thresholdSliderPosition = threshold.toFloat()
+                threshold = threshold
             )
         }
     }
@@ -170,14 +217,32 @@ class PlanSetupViewModel @Inject constructor() : ViewModel() {
         )
     }
 
+    fun resetCreatePolicySetup() {
+        state = state.copy(
+            createPolicySetupResponse = Resource.Uninitialized
+        )
+    }
+
+    fun resetNavToActivateApprovers() {
+        state = state.copy(navigateToActivateApprovers = false)
+    }
+
+    fun retryFacetec() {
+        state = state.copy(
+            createPolicySetupResponse = Resource.Uninitialized
+        )
+
+        onMainActionClick()
+    }
+
     private fun recalculateThreshold(
         previousGuardianSize: Int,
         currentGuardianSize: Int,
-        threshold: Int
-    ): Int {
-        val difference = previousGuardianSize - threshold
+        threshold: UInt
+    ): UInt {
+        val difference = previousGuardianSize - threshold.toInt()
         val newThreshold = currentGuardianSize - difference
 
-        return if (newThreshold >= 1) newThreshold else 1
+        return if (newThreshold >= 1) newThreshold.toUInt() else 1u
     }
 }

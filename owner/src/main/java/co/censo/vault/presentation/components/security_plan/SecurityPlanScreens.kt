@@ -49,7 +49,7 @@ import co.censo.shared.presentation.Colors
 import co.censo.vault.R
 
 enum class SetupSecurityPlanScreen {
-    Initial, AddApprovers, RequiredApprovals, Review, SecureYourPlan
+    Initial, AddApprovers, RequiredApprovals, Review, SecureYourPlan, FacetecAuth
 }
 
 //region Security Plan Top Level Container
@@ -60,7 +60,6 @@ fun SecurityPlanTopLevelContainer(
     setupSecurityPlanScreen: SetupSecurityPlanScreen,
     content: @Composable (PaddingValues) -> Unit
 ) {
-
     val context = LocalContext.current
 
     val showTwoButtons = when (setupSecurityPlanScreen) {
@@ -68,6 +67,7 @@ fun SecurityPlanTopLevelContainer(
         SetupSecurityPlanScreen.AddApprovers,
         SetupSecurityPlanScreen.RequiredApprovals,
         SetupSecurityPlanScreen.SecureYourPlan -> true
+        SetupSecurityPlanScreen.FacetecAuth,
         SetupSecurityPlanScreen.Review -> false
     }
 
@@ -77,6 +77,7 @@ fun SecurityPlanTopLevelContainer(
         SetupSecurityPlanScreen.RequiredApprovals -> stringResource(R.string.next_review)
         SetupSecurityPlanScreen.Review -> stringResource(R.string.confirm)
         SetupSecurityPlanScreen.SecureYourPlan -> stringResource(id = R.string.continue_text)
+        SetupSecurityPlanScreen.FacetecAuth -> ""
     }
 
     Scaffold(
@@ -304,9 +305,9 @@ fun RequiredApprovalsScreen(
 @Composable
 fun SelectApproversScreen(
     paddingValues: PaddingValues,
-    guardians: List<Guardian>,
+    guardians: List<Guardian.SetupGuardian>,
     addApproverOnClick: () -> Unit,
-    editApproverOnClick: (Guardian) -> Unit
+    editApproverOnClick: (Guardian.SetupGuardian) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -345,9 +346,9 @@ fun SelectApproversScreen(
 fun ReviewPlanScreen(
     sliderPosition: Float,
     paddingValues: PaddingValues,
-    guardians: List<Guardian>,
+    guardians: List<Guardian.SetupGuardian>,
     updateThreshold: (Float) -> Unit,
-    editApprover: (Guardian) -> Unit,
+    editApprover: (Guardian.SetupGuardian) -> Unit,
     addApprover: () -> Unit
 ) {
     val oneOrFewerGuardians = guardians.size <= 1
