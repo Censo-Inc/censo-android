@@ -5,12 +5,15 @@ sealed class Screen(val route: String) {
     object AddBIP39Route : Screen("add_bip39_screen") {
         const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"
     }
+
     object BIP39DetailRoute : Screen("bip_39_detail_screen") {
         const val BIP_39_NAME_ARG = "bip39_name"
     }
+
     object FacetecAuthRoute : Screen("facetec_auth_screen")
     object GuardianInvitationRoute : Screen("guardian_invitation_screen")
     object PlanSetupRoute : Screen("plan_setup_route")
+    object ActivateApprovers : Screen("activate_approvers_screen")
 
     companion object {
         const val START_DESTINATION_ID = 0

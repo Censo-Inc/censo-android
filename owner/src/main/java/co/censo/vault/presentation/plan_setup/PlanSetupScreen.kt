@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,7 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.data.Resource
 import co.censo.shared.presentation.Colors
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.components.security_plan.AddApproverDialog
 import co.censo.vault.presentation.components.security_plan.EditOrDeleteMenu
@@ -39,6 +42,8 @@ import co.censo.vault.presentation.components.security_plan.ReviewPlanScreen
 import co.censo.vault.presentation.components.security_plan.SecureYourPlanScreen
 import co.censo.vault.presentation.components.security_plan.SelectApproversScreen
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
+import co.censo.vault.presentation.facetec_auth.FacetecAuth
+import co.censo.vault.presentation.home.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,21 +54,20 @@ fun PlanSetupScreen(
     val context = LocalContext.current
     val state = viewModel.state
 
-    val showTwoButtons = when (state.currentScreen) {
-        SetupSecurityPlanScreen.Initial,
-        SetupSecurityPlanScreen.AddApprovers,
-        SetupSecurityPlanScreen.SecureYourPlan,
-        SetupSecurityPlanScreen.RequiredApprovals -> true
-
-        SetupSecurityPlanScreen.Review -> false
-    }
-
     val bottomButtonText = when (state.currentScreen) {
         SetupSecurityPlanScreen.Initial -> stringResource(R.string.select_first_approver_title)
         SetupSecurityPlanScreen.AddApprovers -> stringResource(R.string.next_required_approvals)
         SetupSecurityPlanScreen.RequiredApprovals -> stringResource(R.string.next_review)
         SetupSecurityPlanScreen.Review -> stringResource(R.string.confirm)
         SetupSecurityPlanScreen.SecureYourPlan -> stringResource(id = R.string.continue_text)
+        SetupSecurityPlanScreen.FacetecAuth -> ""
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.navigateToActivateApprovers) {
+            navController.navigate(Screen.ActivateApprovers.route)
+            viewModel.resetNavToActivateApprovers()
+        }
     }
 
     Scaffold(
@@ -104,7 +108,7 @@ fun PlanSetupScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                if (showTwoButtons) {
+                if (state.mainButtonCount > 1) {
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
@@ -124,21 +128,24 @@ fun PlanSetupScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                FullScreenButton(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    color = Colors.PrimaryBlue,
-                    textColor = Color.White,
-                    border = false,
-                    contentPadding = PaddingValues(vertical = 12.dp),
-                    onClick = viewModel::onMainActionClick,
-                )
-                {
-                    Text(
-                        text = bottomButtonText,
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.W700
+                if (state.mainButtonCount > 0) {
+
+                    FullScreenButton(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        color = Colors.PrimaryBlue,
+                        textColor = Color.White,
+                        border = false,
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                        onClick = viewModel::onMainActionClick,
                     )
+                    {
+                        Text(
+                            text = bottomButtonText,
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
                 }
             }
         }
@@ -160,7 +167,7 @@ fun PlanSetupScreen(
                 RequiredApprovalsScreen(
                     paddingValues = paddingValues,
                     guardians = state.guardians,
-                    sliderPosition = state.thresholdSliderPosition,
+                    sliderPosition = state.threshold.toFloat(),
                     updateThreshold = viewModel::updateSliderPosition
                 )
 
@@ -168,7 +175,7 @@ fun PlanSetupScreen(
                 ReviewPlanScreen(
                     paddingValues = paddingValues,
                     guardians = state.guardians,
-                    sliderPosition = state.thresholdSliderPosition,
+                    sliderPosition = state.threshold.toFloat(),
                     updateThreshold = viewModel::updateSliderPosition,
                     editApprover = viewModel::showEditOrDeleteDialog,
                     addApprover = viewModel::showAddGuardianDialog
@@ -176,6 +183,11 @@ fun PlanSetupScreen(
 
             SetupSecurityPlanScreen.SecureYourPlan ->
                 SecureYourPlanScreen(paddingValues = paddingValues)
+
+            SetupSecurityPlanScreen.FacetecAuth ->
+                FacetecAuth(
+                    onFaceScanReady = viewModel::onPolicySetupCreationFaceScanReady
+                )
         }
 
         if (state.showAddGuardianDialog) {
@@ -194,6 +206,20 @@ fun PlanSetupScreen(
                 edit = viewModel::editGuardian,
                 delete = viewModel::deleteGuardian
             )
+        }
+
+        if (state.asyncError) {
+            if (state.createPolicySetupResponse is Resource.Error) {
+                DisplayError(
+                    errorMessage = state.createPolicySetupResponse.getErrorMessage(context),
+                    dismissAction = {
+                        viewModel.resetCreatePolicySetup()
+                    },
+                    retryAction = {
+                        viewModel.retryFacetec()
+                    }
+                )
+            }
         }
     }
 }
