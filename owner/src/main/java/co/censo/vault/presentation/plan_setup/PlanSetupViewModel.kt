@@ -13,7 +13,9 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -27,6 +29,23 @@ class PlanSetupViewModel @Inject constructor(
 
     var state by mutableStateOf(PlanSetupState())
         private set
+
+    fun onStart(existingSecurityPlanData: SecurityPlanData?) {
+
+        state = state.copy(existingSecurityPlan = existingSecurityPlanData)
+
+        if (ownerRepository.isUserEditingSecurityPlan()) {
+            val securityPlanData = ownerRepository.retrieveSecurityPlan()
+
+            securityPlanData?.let {
+                state = state.copy(
+                    currentScreen = SetupSecurityPlanScreen.Review,
+                    threshold = it.threshold,
+                    guardians = it.guardians
+                )
+            }
+        }
+    }
 
     suspend fun onPolicySetupCreationFaceScanReady(
         verificationId: BiometryVerificationId,
@@ -43,6 +62,8 @@ class PlanSetupViewModel @Inject constructor(
             )
 
             if (createPolicySetupResponse is Resource.Success) {
+                clearEditingPlanData()
+
                 state = state.copy(
                     createPolicySetupResponse = createPolicySetupResponse,
                     navigateToActivateApprovers = true
@@ -117,9 +138,14 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun updateSliderPosition(updatedPosition: Float) {
-        state = state.copy(
-            threshold = updatedPosition.roundToInt().toUInt()
-        )
+        val updatedPositionAsUInt = updatedPosition.roundToInt().toUInt()
+
+        if (updatedPositionAsUInt != state.threshold) {
+            state = state.copy(
+                threshold = updatedPositionAsUInt
+            )
+            saveCurrentPlan()
+        }
     }
 
     fun onMoreInfoClicked() {
@@ -139,7 +165,7 @@ class PlanSetupViewModel @Inject constructor(
                 showEditOrDeleteDialog = false,
                 addedApproverNickname = it.label,
                 showAddGuardianDialog = true,
-                editingGuardian = null,
+                editingGuardian = it,
             )
         }
     }
@@ -162,6 +188,8 @@ class PlanSetupViewModel @Inject constructor(
                 showEditOrDeleteDialog = false,
                 threshold = threshold
             )
+
+            saveCurrentPlan()
         }
     }
 
@@ -202,6 +230,8 @@ class PlanSetupViewModel @Inject constructor(
             showEditOrDeleteDialog = false,
             currentScreen = screen
         )
+
+        saveCurrentPlan()
     }
 
     fun updateAddedApproverNickname(updatedNickname: String) {
@@ -213,7 +243,8 @@ class PlanSetupViewModel @Inject constructor(
             addedApproverNickname = "",
             editingGuardian = null,
             showAddGuardianDialog = false,
-            showEditOrDeleteDialog = false
+            showEditOrDeleteDialog = false,
+            showCancelPlanSetupDialog = false
         )
     }
 
@@ -244,5 +275,36 @@ class PlanSetupViewModel @Inject constructor(
         val newThreshold = currentGuardianSize - difference
 
         return if (newThreshold >= 1) newThreshold.toUInt() else 1u
+    }
+
+    fun clearEditingPlanData() {
+        ownerRepository.setEditingSecurityPlan(false)
+        ownerRepository.clearSecurityPlanData()
+    }
+
+    fun showCancelDialog() {
+        val editedSecurityPlanData = SecurityPlanData(
+            guardians = state.guardians,
+            threshold = state.threshold
+        )
+
+        if (editedSecurityPlanData == state.existingSecurityPlan) {
+            clearEditingPlanData()
+            return
+        }
+
+        state = state.copy(showCancelPlanSetupDialog = true)
+    }
+
+    private fun saveCurrentPlan() {
+        val securityPlanData = SecurityPlanData(
+            guardians = state.guardians,
+            threshold = state.threshold
+        )
+
+        ownerRepository.setEditingSecurityPlan(true)
+        ownerRepository.saveSecurityPlanData(
+            securityPlanData
+        )
     }
 }

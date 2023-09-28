@@ -193,6 +193,91 @@ fun AddApproverDialog(
 }
 
 @Composable
+fun CancelEditPlanDialog(
+    paddingValues: PaddingValues,
+    onDismiss: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .background(color = Colors.BackgroundAlphaBlack)
+            .verticalScroll(rememberScrollState()),
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(horizontal = 36.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(8.dp)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Spacer(modifier = Modifier.padding(12.dp))
+
+            Text(
+                text = stringResource(R.string.are_you_sure),
+                color = Color.Black,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.W700
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                text = "Explain to user that they will either return to existing plan or restart",
+                color = Color.Black,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Divider(
+                thickness = 1.dp,
+                color = DividerGray
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = onDismiss
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.dismiss),
+                        color = PrimaryBlue,
+                        fontWeight = FontWeight.W400,
+                        fontSize = 20.sp
+                    )
+                }
+
+                TextButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = onCancel
+                ) {
+                    Text(
+                        text = stringResource(R.string.exit),
+                        color = PrimaryBlue,
+                        fontWeight = FontWeight.W700,
+                        fontSize = 20.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun EditOrDeleteMenu(
     onDismiss: () -> Unit,
     edit: () -> Unit,
@@ -208,15 +293,28 @@ fun EditOrDeleteMenu(
         DropdownMenu(
             modifier = Modifier.background(color = Color.White),
             expanded = true,
-            onDismissRequest = onDismiss) {
+            onDismissRequest = onDismiss
+        ) {
             DropdownMenuItem(
                 modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
-                text = { Text(stringResource(id = R.string.edit), fontSize = 20.sp, color = Color.Black) },
+                text = {
+                    Text(
+                        stringResource(id = R.string.edit),
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                },
                 onClick = edit
             )
             DropdownMenuItem(
                 modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
-                text = { Text(stringResource(id = R.string.delete), fontSize = 20.sp, color = Color.Black) },
+                text = {
+                    Text(
+                        stringResource(id = R.string.delete),
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                },
                 onClick = delete
             )
         }

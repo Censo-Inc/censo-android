@@ -11,6 +11,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bouncycastle.util.encoders.Hex
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -87,7 +88,8 @@ sealed class Guardian {
     data class ProspectGuardian(
         override val label: String,
         override val participantId: ParticipantId,
-        val invitationId: InvitationId?,
+        val invitationId: InvitationId? = null,
+        val deviceEncryptedTotpSecret: Base64EncodedData? = null,
         val status: GuardianStatus,
     ) : Guardian()
 
@@ -113,7 +115,7 @@ data class Policy(
 data class VaultSecret(
     val guid: VaultSecretId,
     val encryptedSeedPhrase: Base64EncodedData,
-    val seedPhraseHash: String,
+    val seedPhraseHash: HashedValue,
     val label: String,
     val createdAt: Instant,
 )
@@ -123,6 +125,16 @@ data class Vault(
     val secrets: List<VaultSecret>,
     val publicMasterEncryptionKey: Base58EncodedMasterPublicKey,
 )
+
+fun OwnerState.toSecurityPlan() : SecurityPlanData? =
+    when (this) {
+        is OwnerState.Initial, is OwnerState.Ready -> null
+        is OwnerState.GuardianSetup ->
+            SecurityPlanData(
+                guardians = this.guardians.map { Guardian.SetupGuardian(it.label, it.participantId) },
+                threshold = this.threshold ?: 0u
+            )
+    }
 
 @Serializable
 sealed class OwnerState {
@@ -134,25 +146,37 @@ sealed class OwnerState {
     @SerialName("GuardianSetup")
     data class GuardianSetup(
         val guardians: List<Guardian.ProspectGuardian>,
-        val threshold: UInt?,
-        val unlockedForSeconds: UInt?
-    ) : OwnerState() {
-        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
-    }
+        val threshold: UInt? = null,
+        val unlockedForSeconds: ULong? = null,
+    ) : OwnerState()
 
     @Serializable
     @SerialName("Ready")
     data class Ready(
         val policy: Policy,
         val vault: Vault,
-        val unlockedForSeconds: UInt?
+        val unlockedForSeconds: ULong? = null,
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
     }
+}
 
-    fun UInt?.calculateLocksAt(): Instant? {
-        return this?.let {
-            Clock.System.now().plus(it.toInt().toDuration(DurationUnit.SECONDS))
+fun ULong?.calculateLocksAt(): Instant? {
+    return this?.let {
+        Clock.System.now().plus(it.toInt().toDuration(DurationUnit.SECONDS))
+
+    }
+}
+
+@Serializable
+@JvmInline
+value class HashedValue(val value: String) {
+
+    init {
+        runCatching {
+            Hex.decode(value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid hex string")
         }
     }
 }

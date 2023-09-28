@@ -106,10 +106,11 @@ interface OwnerRepository {
     ): Resource<StoreSecretApiResponse>
 
     suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
-    suspend fun isUserEditingSecurityPlan() : Boolean
-    suspend fun setEditingSecurityPlan(editingPlan : Boolean)
-    suspend fun retrieveSecurityPlan() : SecurityPlanData?
-    suspend fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
+    fun isUserEditingSecurityPlan() : Boolean
+    fun setEditingSecurityPlan(editingPlan : Boolean)
+    fun retrieveSecurityPlan() : SecurityPlanData?
+    fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
+    fun clearSecurityPlanData()
 }
 
 class OwnerRepositoryImpl(
@@ -326,12 +327,14 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.deleteSecret(guid) }
     }
 
-    override suspend fun isUserEditingSecurityPlan() = storage.isEditingSecurityPlan()
-    override suspend fun setEditingSecurityPlan(editingPlan: Boolean) =
+    override fun isUserEditingSecurityPlan() = storage.isEditingSecurityPlan()
+    override fun setEditingSecurityPlan(editingPlan: Boolean) =
         storage.setEditingSecurityPlan(editingPlan)
 
-    override suspend fun retrieveSecurityPlan() = storage.retrieveSecurityPlan()
+    override fun retrieveSecurityPlan() = storage.retrieveSecurityPlan()
 
-    override suspend fun saveSecurityPlanData(securityPlanData: SecurityPlanData) =
+    override fun saveSecurityPlanData(securityPlanData: SecurityPlanData) =
         storage.setSecurityPlan(securityPlanData)
+
+    override fun clearSecurityPlanData() = storage.clearSecurityPlanData()
 }

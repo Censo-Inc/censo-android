@@ -25,7 +25,6 @@ import co.censo.shared.presentation.entrance.EntranceScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
-import co.censo.vault.presentation.components.security_plan.TestableProtectionScreen
 import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
@@ -33,6 +32,8 @@ import co.censo.vault.presentation.plan_setup.PlanSetupScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -105,8 +106,29 @@ class MainActivity : FragmentActivity() {
             composable(route = Screen.GuardianInvitationRoute.route) {
                 GuardianInvitationScreen(navController = navController)
             }
-            composable(route = Screen.PlanSetupRoute.route) {
-                PlanSetupScreen(navController = navController)
+            composable(
+                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG}}",
+                arguments = listOf(navArgument(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG) {
+                    type = NavType.StringType
+                })) { backStackEntry ->
+                val securityPlanData =
+                    backStackEntry.arguments?.getString(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG)
+                PlanSetupScreen(
+                    navController = navController,
+                    existingSecurityPlan = securityPlanData?.let {
+                        Json.decodeFromString(
+                            securityPlanData
+                        )
+                    }
+                )
+            }
+            composable(
+                route = Screen.PlanSetupRoute.route
+            ) {
+                PlanSetupScreen(
+                    navController = navController,
+                    existingSecurityPlan = null
+                )
             }
             composable(route = Screen.ActivateApprovers.route) {
                 ActivateApproversScreen(navController = navController)
