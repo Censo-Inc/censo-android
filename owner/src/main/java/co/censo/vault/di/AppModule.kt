@@ -39,7 +39,12 @@ object AppModule {
         storage: Storage,
         @ApplicationContext applicationContext: Context
     ): ApiService {
-        return ApiService.create(storage, applicationContext, BuildConfig.VERSION_CODE.toString())
+        return ApiService.create(
+            storage = storage,
+            context = applicationContext,
+            versionCode = BuildConfig.VERSION_CODE.toString(),
+            packageName = BuildConfig.APPLICATION_ID
+        )
     }
 
     @Singleton

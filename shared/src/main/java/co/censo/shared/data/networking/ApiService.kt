@@ -27,6 +27,7 @@ import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
+import co.censo.shared.data.networking.ApiService.Companion.APP_PACKAGE_NAME_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
@@ -62,14 +63,15 @@ interface ApiService {
         const val SECRET_ID = "secretId"
 
         const val IS_API = "X-IsApi"
+        const val APP_PACKAGE_NAME_HEADER = "X-Censo-Package-Name"
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
 
-        fun create(storage: Storage, context: Context, versionCode: String): ApiService {
+        fun create(storage: Storage, context: Context, versionCode: String, packageName: String): ApiService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(ConnectivityInterceptor(context))
-                .addInterceptor(AnalyticsInterceptor(versionCode))
+                .addInterceptor(AnalyticsInterceptor(versionCode, packageName))
                 .addInterceptor(AuthInterceptor(storage))
                 .connectTimeout(Duration.ofSeconds(180))
                 .readTimeout(Duration.ofSeconds(180))
@@ -173,7 +175,8 @@ interface ApiService {
 }
 
 class AnalyticsInterceptor(
-    val versionCode: String
+    private val versionCode: String,
+    private val packageName: String
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain) =
         chain.proceed(
@@ -182,6 +185,10 @@ class AnalyticsInterceptor(
                     addHeader(
                         IS_API,
                         "true"
+                    )
+                    addHeader(
+                        APP_PACKAGE_NAME_HEADER,
+                        packageName
                     )
                     addHeader(
                         DEVICE_TYPE_HEADER,
