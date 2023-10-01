@@ -327,7 +327,7 @@ fun SelectApproversScreen(
 
             for (guardian in guardians) {
                 ApproverRow(
-                    guardian = guardian,
+                    approver = guardian,
                 ) {
                     editApproverOnClick(guardian)
                 }
@@ -370,7 +370,7 @@ fun ReviewPlanScreen(
             )
 
             for (guardian in guardians) {
-                ApproverRow(guardian = guardian) {
+                ApproverRow(approver = guardian) {
                     editApprover(guardian)
                 }
             }

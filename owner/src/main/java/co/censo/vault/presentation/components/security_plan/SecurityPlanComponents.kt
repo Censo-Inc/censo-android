@@ -560,7 +560,7 @@ fun AmountGuardiansProtectingText(amountGuardians: Int) {
 
 @Composable
 fun ApproverRow(
-    guardian: Guardian.SetupGuardian,
+    approver: Guardian.SetupGuardian,
     horizontalPadding: Dp = 16.dp,
     editGuardianClick: () -> Unit
 ) {
@@ -580,7 +580,7 @@ fun ApproverRow(
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = guardian.label,
+                    text = approver.label,
                     color = Color.Black,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.W700

@@ -111,5 +111,6 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="exit_edit_plan">Exit edit plan</string>
     <string name="exit">Exit</string>
+    <string name="status">Status</string>
 
 </resources>
