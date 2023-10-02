@@ -30,6 +30,7 @@ interface Storage {
     fun setEditingSecurityPlan(editingSecurityPlan: Boolean)
     fun isEditingSecurityPlan() : Boolean
     fun setSecurityPlan(securityPlanData: SecurityPlanData)
+    fun clearSecurityPlanData()
     fun retrieveSecurityPlan() : SecurityPlanData?
 }
 
@@ -82,8 +83,14 @@ object SharedPrefsStorage : Storage {
         editor.apply()
     }
 
+    override fun clearSecurityPlanData() {
+        val editor = sharedPrefs.edit()
+        editor.putString(SECURITY_PLAN, "")
+        editor.apply()
+    }
+
     override fun retrieveSecurityPlan(): SecurityPlanData? {
-        val securityJson = sharedPrefs.getString(DEVICE_KEY, "") ?: ""
+        val securityJson = sharedPrefs.getString(SECURITY_PLAN, "") ?: ""
 
         if (securityJson.isEmpty()) return null
 

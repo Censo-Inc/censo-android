@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIos
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,23 +20,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.components.security_plan.AddApproverDialog
+import co.censo.vault.presentation.components.security_plan.CancelEditPlanDialog
 import co.censo.vault.presentation.components.security_plan.EditOrDeleteMenu
 import co.censo.vault.presentation.components.security_plan.InitialAddApproverScreen
 import co.censo.vault.presentation.components.security_plan.RequiredApprovalsScreen
@@ -44,11 +53,13 @@ import co.censo.vault.presentation.components.security_plan.SelectApproversScree
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.util.popUpToTop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanSetupScreen(
     navController: NavController,
+    existingSecurityPlan: SecurityPlanData?,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -70,6 +81,11 @@ fun PlanSetupScreen(
         }
     }
 
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart(existingSecurityPlan)
+        onDispose {}
+    }
+
     Scaffold(
         contentColor = Color.White,
         containerColor = Color.White,
@@ -77,18 +93,29 @@ fun PlanSetupScreen(
             TopAppBar(
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Colors.PrimaryBlue),
                 navigationIcon = {
-                    if (state.showBackIcon) {
-                        IconButton(onClick = viewModel::onBackActionClick) {
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowBackIos,
-                                stringResource(R.string.back),
-                                tint = Color.White
-                            )
-                        }
 
-                    } else {
-                        Spacer(modifier = Modifier)
+                    when (state.showBackIcon) {
+                        BackIconType.Back ->
+                            IconButton(onClick = viewModel::onBackActionClick) {
+                                Icon(
+                                    imageVector = Icons.Rounded.ArrowBackIos,
+                                    stringResource(R.string.back),
+                                    tint = Color.White
+                                )
+                            }
+
+                        BackIconType.Exit ->
+                            IconButton(onClick = viewModel::showCancelDialog) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Clear,
+                                    stringResource(R.string.exit_edit_plan),
+                                    tint = Color.White
+                                )
+                            }
+
+                        else -> Spacer(modifier = Modifier)
                     }
+
                 },
                 title = {
                     Text(
@@ -205,6 +232,21 @@ fun PlanSetupScreen(
                 onDismiss = viewModel::dismissDialog,
                 edit = viewModel::editGuardian,
                 delete = viewModel::deleteGuardian
+            )
+        }
+
+        if (state.showCancelPlanSetupDialog) {
+            CancelEditPlanDialog(
+                paddingValues = paddingValues,
+                onDismiss = viewModel::dismissDialog,
+                onCancel = {
+                    viewModel.clearEditingPlanData()
+                    viewModel.dismissDialog()
+                    navController.navigate(SharedScreen.HomeRoute.route) {
+                            launchSingleTop = true
+                            popUpToTop()
+                    }
+                }
             )
         }
 

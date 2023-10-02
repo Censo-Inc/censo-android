@@ -108,5 +108,9 @@
     <string name="establish_your_identity">Establish Your Identity</string>
     <string name="establish_identity_explainer">Access to your seed phrases always requires your approval which is obtained using an encrypted 3d face scan to confirm your identity.\n\nThis scan is not associated with any personally identifiable information and it provides a reliable way to securely control access to your seed phrases.</string>
     <string name="you_must_add_at_least_one_approver">You must add at least one approver</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="exit_edit_plan">Exit edit plan</string>
+    <string name="exit">Exit</string>
+    <string name="status">Status</string>
 
 </resources>

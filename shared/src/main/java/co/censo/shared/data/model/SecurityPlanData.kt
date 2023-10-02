@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SecurityPlanData(
     val guardians: List<Guardian.SetupGuardian>,
-    val threshold: Int
+    val threshold: UInt
 )

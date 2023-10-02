@@ -23,6 +23,12 @@ class HomeViewModel @Inject constructor(
         private set
 
     fun onStart() {
+        val userEditingPlan = ownerRepository.isUserEditingSecurityPlan()
+
+        state = state.copy(
+            userEditingPlan = userEditingPlan
+        )
+
         retrieveOwnerState()
     }
 
