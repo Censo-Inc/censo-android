@@ -25,7 +25,6 @@ import co.censo.shared.presentation.entrance.EntranceScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
-import co.censo.vault.presentation.guardian_invitation.GuardianInvitationScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
@@ -102,9 +101,6 @@ class MainActivity : FragmentActivity() {
                 val nameArgument =
                     backStackEntry.arguments?.getString(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) as String
                 BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
-            }
-            composable(route = Screen.GuardianInvitationRoute.route) {
-                GuardianInvitationScreen(navController = navController)
             }
             composable(
                 route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG}}",

@@ -43,6 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.cryptography.generateBase32
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
@@ -489,19 +490,19 @@ fun TestableProtectionScreen(initialPosition: Int) {
 
     val guardians = listOf(
         Guardian.SetupGuardian(
-            "Ben",
-            ParticipantId(generatePartitionId().toHexString()),
-            deviceEncryptedTotpSecret = Base64EncodedData("")
+            label = "Ben",
+            participantId = ParticipantId(generatePartitionId().toHexString()),
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
         ),
         Guardian.SetupGuardian(
-            "A.L.",
-            ParticipantId(generatePartitionId().toHexString()),
-            deviceEncryptedTotpSecret = Base64EncodedData("")
+            label = "A.L.",
+            participantId = ParticipantId(generatePartitionId().toHexString()),
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
         ),
         Guardian.SetupGuardian(
-            "Carlitos",
-            ParticipantId(generatePartitionId().toHexString()),
-            deviceEncryptedTotpSecret = Base64EncodedData("")
+            label = "Carlitos",
+            participantId = ParticipantId(generatePartitionId().toHexString()),
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
         ),
     )
 

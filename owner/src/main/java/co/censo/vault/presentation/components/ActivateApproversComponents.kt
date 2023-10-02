@@ -87,7 +87,7 @@ fun ActivateApproversTopBar() {
                     ).show()
                 }) {
                 Text(
-                    text = "Edit plan",
+                    text = stringResource(R.string.edit_plan),
                     color = Color.White
                 )
             }
@@ -148,6 +148,9 @@ fun ActivateApproverRow(
     approver: Guardian,
     horizontalPadding: Dp = 16.dp,
 ) {
+
+    val context = LocalContext.current
+
     Column {
         Spacer(modifier = Modifier.height(12.dp))
         Row(
@@ -169,7 +172,10 @@ fun ActivateApproverRow(
                         append(stringResource(id = R.string.status))
                         append(": ")
                     }
-                    this.appendGuardianStatusText(approver)
+                    this.appendApproverStatusText(
+                        approver = approver,
+                        context = context
+                    )
                 }
 
                 Text(
@@ -212,7 +218,7 @@ fun ActivateApproverActionItem(approver: Guardian) {
                     .background(shape = CircleShape, color = Colors.SuccessGreen)
                     .padding(all = 8.dp),
                 imageVector = Icons.Filled.Check,
-                contentDescription = "approver confirmed",
+                contentDescription = stringResource(R.string.approver_confirmed),
                 tint = Color.White
             )
         }
@@ -253,7 +259,7 @@ fun ActivateApproverActionItem(approver: Guardian) {
                             .background(shape = CircleShape, color = Colors.SuccessGreen)
                             .padding(all = 8.dp),
                         imageVector = Icons.Filled.Check,
-                        contentDescription = "approver confirmed",
+                        contentDescription = stringResource(id = R.string.approver_confirmed),
                         tint = Color.White
                     )
                 }
@@ -264,7 +270,7 @@ fun ActivateApproverActionItem(approver: Guardian) {
                             .background(shape = CircleShape, color = Color.Red)
                             .padding(all = 8.dp),
                         imageVector = Icons.Filled.Clear,
-                        contentDescription = "approver declined invitation",
+                        contentDescription = stringResource(R.string.approver_declined_invitation),
                         tint = Color.White
                     )
                 }
@@ -278,7 +284,7 @@ fun ActivateApproverActionItem(approver: Guardian) {
                                 shareDeeplink(approverStatus.deeplink(), context)
                             },
                         imageVector = Icons.Filled.IosShare,
-                        contentDescription = "share approver invite link",
+                        contentDescription = stringResource(R.string.share_approver_invite_link),
                         tint = Color.White
                     )
                 }
@@ -319,7 +325,7 @@ class TimeLeftShape(
     }
 }
 
-fun AnnotatedString.Builder.appendGuardianStatusText(guardian: Guardian) {
+fun AnnotatedString.Builder.appendApproverStatusText(context: Context, approver: Guardian) {
 
     val baseStyle =
         SpanStyle(
@@ -327,41 +333,41 @@ fun AnnotatedString.Builder.appendGuardianStatusText(guardian: Guardian) {
             color = Colors.GreyText
         )
 
-    when (guardian) {
+    when (approver) {
         is Guardian.SetupGuardian -> withStyle(baseStyle) {
-            append("Pending")
+            append(context.getString(R.string.pending))
         }
 
         is Guardian.ProspectGuardian -> {
-            when (guardian.status) {
+            when (approver.status) {
                 is GuardianStatus.Accepted ->
                     withStyle(baseStyle) {
-                        append("Awaiting Code")
+                        append(context.getString(R.string.awaiting_code))
                     }
 
                 is GuardianStatus.Confirmed,
                 is GuardianStatus.Onboarded ->
                     withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
-                        append("Completed")
+                        append(context.getString(R.string.completed))
                     }
 
                 GuardianStatus.Declined -> withStyle(baseStyle.copy(color = Color.Red)) {
-                    append("Declined")
+                    append(context.getString(R.string.declined))
                 }
 
                 is GuardianStatus.Initial -> withStyle(baseStyle) {
-                    append("Pending")
+                    append(context.getString(R.string.pending))
                 }
 
                 is GuardianStatus.VerificationSubmitted -> withStyle(baseStyle) {
-                    append("Code Submitted")
+                    append(context.getString(R.string.code_submitted))
                 }
             }
         }
 
         is Guardian.TrustedGuardian -> {
             withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
-                append("Completed")
+                append(context.getString(R.string.completed))
             }
         }
     }

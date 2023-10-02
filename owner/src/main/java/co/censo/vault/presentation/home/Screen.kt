@@ -9,9 +9,7 @@ sealed class Screen(val route: String) {
     object BIP39DetailRoute : Screen("bip_39_detail_screen") {
         const val BIP_39_NAME_ARG = "bip39_name"
     }
-
     object FacetecAuthRoute : Screen("facetec_auth_screen")
-    object GuardianInvitationRoute : Screen("guardian_invitation_screen")
     object PlanSetupRoute : Screen("plan_setup_route") {
         const val EXISTING_SECURITY_PLAN_ARG = "existing_security_plan"
     }

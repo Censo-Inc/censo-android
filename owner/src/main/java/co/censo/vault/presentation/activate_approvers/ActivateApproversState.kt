@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.guardian_invitation
+package co.censo.vault.presentation.activate_approvers
 
 import Base58EncodedIntermediatePublicKey
 import co.censo.shared.data.Resource
@@ -7,7 +7,6 @@ import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
-import co.censo.vault.presentation.guardian_invitation.ActivateApproversViewModel.Companion.MIN_GUARDIAN_LIMIT
 
 data class ActivateApproversState(
     val ownerState: OwnerState = OwnerState.Initial,
@@ -18,11 +17,8 @@ data class ActivateApproversState(
     val policyIntermediatePublicKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(
         ""
     ),
-    val guardianInviteStatus: GuardianInvitationStatus = GuardianInvitationStatus.INVITE_GUARDIANS,
     val codeNotValidError: Boolean = false
 ) {
-    val canContinueOnboarding = guardians.size >= MIN_GUARDIAN_LIMIT
-
     val loading =
         userResponse is Resource.Loading ||
                 createPolicyResponse is Resource.Loading
@@ -31,8 +27,4 @@ data class ActivateApproversState(
         userResponse is Resource.Error ||
                 createPolicyResponse is Resource.Error ||
                 codeNotValidError
-}
-
-enum class GuardianInvitationStatus {
-    INVITE_GUARDIANS, CREATE_POLICY, READY
 }

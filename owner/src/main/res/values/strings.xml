@@ -112,5 +112,15 @@
     <string name="exit_edit_plan">Exit edit plan</string>
     <string name="exit">Exit</string>
     <string name="status">Status</string>
+    <string name="activate_approvers">Activate Approvers</string>
+    <string name="edit_plan">Edit plan</string>
+    <string name="approver_confirmed">approver confirmed</string>
+    <string name="approver_declined_invitation">approver declined invitation</string>
+    <string name="share_approver_invite_link">share approver invite link</string>
+    <string name="pending">Pending</string>
+    <string name="awaiting_code">Awaiting Code</string>
+    <string name="completed">Completed</string>
+    <string name="declined">Declined</string>
+    <string name="code_submitted">Code Submitted</string>
 
 </resources>

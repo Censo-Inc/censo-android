@@ -36,7 +36,6 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
-import co.censo.vault.presentation.guardian_invitation.ActivateApproversViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,7 +103,7 @@ fun ActivateApproversScreen(
                                 .size(72.dp)
                                 .align(Alignment.Center),
                             strokeWidth = 8.dp,
-                            color = Color.Red
+                            color = Colors.PrimaryBlue
                         )
                     }
                 }
@@ -129,7 +128,7 @@ fun ActivateApproversScreen(
                             errorMessage = state.createPolicyResponse.getErrorMessage(context),
                             dismissAction = viewModel::resetCreatePolicyResource,
                         ) {
-//                        viewModel.createPolicy()
+                            viewModel.createPolicy()
                         }
                     }
                 }
@@ -140,7 +139,7 @@ fun ActivateApproversScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Activate Approvers",
+                            text = stringResource(R.string.activate_approvers),
                             fontSize = 24.sp,
                             color = Colors.PrimaryBlue,
                             textAlign = TextAlign.Center

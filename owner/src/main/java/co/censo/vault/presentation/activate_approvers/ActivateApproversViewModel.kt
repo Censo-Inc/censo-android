@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.guardian_invitation
+package co.censo.vault.presentation.activate_approvers
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,11 +77,6 @@ class ActivateApproversViewModel @Inject constructor(
     }
 
     private fun updateOwnerState(ownerState: OwnerState) {
-        val guardianInvitationStatus = when (ownerState) {
-            is OwnerState.Ready -> GuardianInvitationStatus.READY
-            is OwnerState.GuardianSetup, is OwnerState.Initial -> GuardianInvitationStatus.INVITE_GUARDIANS
-        }
-
         val guardians = when (ownerState) {
             is OwnerState.Ready -> ownerState.policy.guardians
             is OwnerState.GuardianSetup -> ownerState.guardians
@@ -91,7 +86,6 @@ class ActivateApproversViewModel @Inject constructor(
         state = state.copy(
             guardians = guardians,
             ownerState = ownerState,
-            guardianInviteStatus = guardianInvitationStatus
         )
     }
 
@@ -137,10 +131,6 @@ class ActivateApproversViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    fun initPolicyCreation() {
-        state = state.copy(guardianInviteStatus = GuardianInvitationStatus.CREATE_POLICY)
     }
 
     fun resetInvalidCode() {
