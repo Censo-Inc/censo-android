@@ -4,6 +4,8 @@ import Base58EncodedGuardianPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
+import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,13 +56,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.VerificationStatus
+import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.Colors
 import co.censo.vault.R
+import co.censo.vault.presentation.guardian_invitation.ActivateApproversViewModel
 import kotlinx.datetime.Clock
 
 //region Top Bar
@@ -142,9 +148,9 @@ fun ActivateApproversTopBar() {
 //region Approver Row
 @Composable
 fun ActivateApproverRow(
-    approver: Guardian.ProspectGuardian,
+    approver: Guardian,
+    inviteApprover: () -> Unit,
     horizontalPadding: Dp = 16.dp,
-    actionClick: () -> Unit
 ) {
     Column {
         Spacer(modifier = Modifier.height(12.dp))
@@ -167,7 +173,7 @@ fun ActivateApproverRow(
                         append(stringResource(id = R.string.status))
                         append(": ")
                     }
-                    this.appendGuardianStatusText(approver.status)
+                    this.appendGuardianStatusText(approver)
                 }
 
                 Text(
@@ -183,7 +189,10 @@ fun ActivateApproverRow(
                 )
             }
 
-            ActivateApproverActionItem(guardianStatus = approver.status)
+            ActivateApproverActionItem(
+                approver = approver,
+                inviteApprover = inviteApprover
+            )
         }
         Spacer(modifier = Modifier.height(12.dp))
         Divider(
@@ -195,77 +204,104 @@ fun ActivateApproverRow(
 }
 
 @Composable
-fun ActivateApproverActionItem(guardianStatus: GuardianStatus) {
-    when (guardianStatus) {
-        is GuardianStatus.Accepted -> {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "123-456",
-                    color = Colors.PrimaryBlue,
-                    fontWeight = FontWeight.W600,
-                    fontSize = 24.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(
-                            color = Colors.TimeLeftGray,
-                            shape = CircleShape
-                        )
-                        .background(
-                            color = Color.White,
-                            shape = TimeLeftShape(0.75f)
-                        )
-                )
-            }
+fun ActivateApproverActionItem(approver: Guardian, inviteApprover: () -> Unit) {
+
+    val context = LocalContext.current
+
+    when (approver) {
+        is Guardian.SetupGuardian -> {
+            //A setup guardian should not be shown in list, but if they do, we show no action item.
         }
 
-        is GuardianStatus.Confirmed,
-        is GuardianStatus.Onboarded -> {
+        is Guardian.TrustedGuardian -> {
             Icon(
                 modifier = Modifier
                     .background(shape = CircleShape, color = Colors.SuccessGreen)
-                    .padding(all = 8.dp)
-                    .clickable { },
+                    .padding(all = 8.dp),
                 imageVector = Icons.Filled.Check,
                 contentDescription = "approver confirmed",
                 tint = Color.White
             )
         }
 
-        GuardianStatus.Declined -> {
-            Icon(
-                modifier = Modifier
-                    .background(shape = CircleShape, color = Color.Red)
-                    .padding(all = 8.dp)
-                    .clickable { },
-                imageVector = Icons.Filled.Clear,
-                contentDescription = "approver declined invitation",
-                tint = Color.White
-            )
-        }
+        is Guardian.ProspectGuardian -> {
+            when (val approverStatus = approver.status) {
+                is GuardianStatus.Accepted -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "123-456",
+                            color = Colors.PrimaryBlue,
+                            fontWeight = FontWeight.W600,
+                            fontSize = 24.sp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    color = Colors.TimeLeftGray,
+                                    shape = CircleShape
+                                )
+                                .background(
+                                    color = Color.White,
+                                    shape = TimeLeftShape(0.75f)
+                                )
+                        )
+                    }
+                }
 
-        is GuardianStatus.Invited,
-        GuardianStatus.Initial -> {
-            Icon(
-                modifier = Modifier
-                    .background(shape = CircleShape, color = Colors.PrimaryBlue)
-                    .padding(all = 8.dp)
-                    .clickable { },
-                imageVector = Icons.Filled.IosShare,
-                contentDescription = "share approver invite link",
-                tint = Color.White
-            )
-        }
+                is GuardianStatus.Confirmed,
+                is GuardianStatus.Onboarded -> {
+                    Icon(
+                        modifier = Modifier
+                            .background(shape = CircleShape, color = Colors.SuccessGreen)
+                            .padding(all = 8.dp),
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "approver confirmed",
+                        tint = Color.White
+                    )
+                }
+
+                GuardianStatus.Declined -> {
+                    Icon(
+                        modifier = Modifier
+                            .background(shape = CircleShape, color = Color.Red)
+                            .padding(all = 8.dp),
+                        imageVector = Icons.Filled.Clear,
+                        contentDescription = "approver declined invitation",
+                        tint = Color.White
+                    )
+                }
+
+                is GuardianStatus.Invited,
+                GuardianStatus.Initial -> {
+                    Icon(
+                        modifier = Modifier
+                            .background(shape = CircleShape, color = Colors.PrimaryBlue)
+                            .padding(all = 8.dp)
+                            .clickable {
+                                if (approverStatus is GuardianStatus.Initial) {
+                                    Toast.makeText(context, "Creating invite for ${approver.label}...", Toast.LENGTH_LONG).show()
+                                    inviteApprover()
+                                } else {
+                                    shareDeeplink(approver.deeplink(), context)
+                                }
+                            },
+                        imageVector = Icons.Filled.IosShare,
+                        contentDescription = "share approver invite link",
+                        tint = Color.White
+                    )
+                }
 
 
-        is GuardianStatus.VerificationSubmitted -> {
-            Button(onClick = { }) {
-                Text(text = "Verify Code", color = Color.White)
+                is GuardianStatus.VerificationSubmitted -> {
+                    Button(onClick = { }) {
+                        Text(text = "Verify Code", color = Color.White)
+                    }
+                }
             }
         }
     }
@@ -296,7 +332,7 @@ class TimeLeftShape(
     }
 }
 
-fun AnnotatedString.Builder.appendGuardianStatusText(guardianStatus: GuardianStatus) {
+fun AnnotatedString.Builder.appendGuardianStatusText(guardian: Guardian) {
 
     val baseStyle =
         SpanStyle(
@@ -304,31 +340,56 @@ fun AnnotatedString.Builder.appendGuardianStatusText(guardianStatus: GuardianSta
             color = Colors.GreyText
         )
 
-    when (guardianStatus) {
-        is GuardianStatus.Accepted ->
-            withStyle(baseStyle) {
-                append("Awaiting Code")
-            }
-
-        is GuardianStatus.Confirmed,
-        is GuardianStatus.Onboarded ->
-            withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
-                append("Completed")
-            }
-
-        GuardianStatus.Declined -> withStyle(baseStyle.copy(color = Color.Red)) {
-            append("Declined")
-        }
-
-        is GuardianStatus.Invited,
-        GuardianStatus.Initial -> withStyle(baseStyle) {
+    when (guardian) {
+        is Guardian.SetupGuardian -> withStyle(baseStyle) {
             append("Pending")
         }
 
-        is GuardianStatus.VerificationSubmitted -> withStyle(baseStyle) {
-            append("Code Submitted")
+        is Guardian.ProspectGuardian -> {
+            when (guardian.status) {
+                is GuardianStatus.Accepted ->
+                    withStyle(baseStyle) {
+                        append("Awaiting Code")
+                    }
+
+                is GuardianStatus.Confirmed,
+                is GuardianStatus.Onboarded ->
+                    withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
+                        append("Completed")
+                    }
+
+                GuardianStatus.Declined -> withStyle(baseStyle.copy(color = Color.Red)) {
+                    append("Declined")
+                }
+
+                is GuardianStatus.Invited,
+                GuardianStatus.Initial -> withStyle(baseStyle) {
+                    append("Pending")
+                }
+
+                is GuardianStatus.VerificationSubmitted -> withStyle(baseStyle) {
+                    append("Code Submitted")
+                }
+            }
+        }
+
+        is Guardian.TrustedGuardian -> {
+            withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
+                append("Completed")
+            }
         }
     }
+}
+
+fun shareDeeplink(deeplink: String, context: Context) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, deeplink)
+        type = "text/plain"
+    }
+
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    context.startActivity(shareIntent)
 }
 //endregion
 

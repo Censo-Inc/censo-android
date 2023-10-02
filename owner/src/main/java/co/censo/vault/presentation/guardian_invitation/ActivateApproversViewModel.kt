@@ -7,30 +7,24 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.generateHexString
-import co.censo.shared.data.model.BiometryScanResultBlob
-import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.CreatePolicyApiResponse
-import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
 
 @HiltViewModel
-class GuardianInvitationViewModel @Inject constructor(
+class ActivateApproversViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(GuardianInvitationState())
+    var state by mutableStateOf(ActivateApproversState())
         private set
 
     companion object {
@@ -47,36 +41,24 @@ class GuardianInvitationViewModel @Inject constructor(
         state = state.copy(guardianInviteStatus = GuardianInvitationStatus.CREATE_POLICY_SETUP)
     }
 
-    suspend fun onPolicySetupCreationFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
-        state = state.copy(createPolicySetupResponse = Resource.Loading())
-
-        return viewModelScope.async {
-            val createPolicySetupResponse = ownerRepository.createPolicySetup(
-                state.threshold,
-                state.guardians.map { Guardian.SetupGuardian(it.label, it.participantId) },
-                verificationId,
-                facetecData
-            )
-
-            if (createPolicySetupResponse is Resource.Success) {
-                updateOwnerState(createPolicySetupResponse.data!!.ownerState)
-                state = state.copy(guardianInviteStatus = GuardianInvitationStatus.INVITE_GUARDIANS)
-            }
-
-            state = state.copy(createPolicySetupResponse = createPolicySetupResponse)
-
-            createPolicySetupResponse.map { it.scanResultBlob }
-        }.await()
-    }
-
     fun createPolicy() {
         state = state.copy(createPolicyResponse = Resource.Loading())
 
+        val ownerState = state.ownerState
+
+        if (ownerState !is OwnerState.GuardianSetup || ownerState.threshold == null) {
+            //todo throw exception here
+            return
+        }
+
         viewModelScope.launch {
             // TODO take only confirmed guardians. Requires social approval VAULT-152
-            val policySetupHelper = ownerRepository.getPolicySetupHelper(state.threshold, state.guardians.map { it.label })
+            val policySetupHelper = ownerRepository.getPolicySetupHelper(
+                ownerState.threshold!!,
+                state.guardians.map { it.label })
 
-            val createPolicyResponse: Resource<CreatePolicyApiResponse> = ownerRepository.createPolicy(policySetupHelper)
+            val createPolicyResponse: Resource<CreatePolicyApiResponse> =
+                ownerRepository.createPolicy(policySetupHelper)
 
             if (createPolicyResponse is Resource.Success) {
                 updateOwnerState(createPolicyResponse.data!!.ownerState)
@@ -109,7 +91,7 @@ class GuardianInvitationViewModel @Inject constructor(
         val guardians = when (ownerState) {
             is OwnerState.Ready -> ownerState.policy.guardians
             is OwnerState.GuardianSetup -> ownerState.guardians
-            is OwnerState.Initial -> listOf()
+            is OwnerState.Initial -> listOf<Guardian.ProspectGuardian>()
         }
 
         state = state.copy(
@@ -119,26 +101,7 @@ class GuardianInvitationViewModel @Inject constructor(
         )
     }
 
-    fun updateThreshold(value: UInt) {
-        if (value <= state.guardians.size.toUInt()) {
-            state = state.copy(threshold = value)
-        }
-    }
-
-    fun addGuardian() {
-        if (state.guardians.size == MAX_GUARDIAN_LIMIT) {
-            return
-        }
-
-        state = state.copy(guardians = state.guardians + Guardian.SetupGuardian(
-            label = "Guardian ${state.guardians.size + 1}",
-            participantId = ParticipantId(generateHexString())
-        ))
-    }
-
-    fun inviteGuardian(participantId: ParticipantId) {
-        projectLog(message = "Inviting guardian: ${participantId.value}")
-
+    fun inviteApprover(participantId: ParticipantId) {
         state = state.copy(inviteGuardianResponse = Resource.Loading())
 
         viewModelScope.launch {
@@ -150,7 +113,9 @@ class GuardianInvitationViewModel @Inject constructor(
                 updateOwnerState(inviteResponse.data!!.ownerState)
             }
 
-            state = state.copy(inviteGuardianResponse = inviteResponse)
+            state = state.copy(
+                inviteGuardianResponse = inviteResponse
+            )
         }
     }
 
@@ -212,16 +177,16 @@ class GuardianInvitationViewModel @Inject constructor(
         )
     }
 
+    fun resetInviteApproverResponse() {
+        state = state.copy(inviteGuardianResponse = Resource.Uninitialized)
+    }
+
     fun resetInviteResource() {
         state = state.copy(inviteGuardianResponse = Resource.Uninitialized)
     }
 
     fun resetUserResponse() {
         state = state.copy(userResponse = Resource.Uninitialized)
-    }
-
-    fun resetCreatePolicySetupResource() {
-        state = state.copy(createPolicySetupResponse = Resource.Uninitialized)
     }
 
     fun resetCreatePolicyResource() {

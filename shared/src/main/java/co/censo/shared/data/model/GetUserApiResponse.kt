@@ -7,6 +7,7 @@ import Base64EncodedData
 import InvitationId
 import ParticipantId
 import VaultSecretId
+import co.censo.shared.SharedScreen
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
@@ -101,6 +102,9 @@ sealed class Guardian {
         val attributes: GuardianStatus.Onboarded,
     ) : Guardian()
 }
+
+fun Guardian.ProspectGuardian.deeplink() =
+    "${SharedScreen.GUARDIAN_URI}${invitationId?.value}"
 
 @Serializable
 data class Policy(

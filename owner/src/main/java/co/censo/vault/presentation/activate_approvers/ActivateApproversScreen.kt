@@ -11,32 +11,56 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
+import co.censo.shared.data.Resource
 import co.censo.shared.presentation.Colors
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
-import co.censo.vault.presentation.components.dummyListOfApprovers
+import co.censo.vault.presentation.components.shareDeeplink
+import co.censo.vault.presentation.guardian_invitation.ActivateApproversViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivateApproversScreen(
     navController: NavController,
+    viewModel: ActivateApproversViewModel = hiltViewModel()
 ) {
 
-    val approvers = dummyListOfApprovers
+    val state = viewModel.state
+    val context = LocalContext.current as FragmentActivity
+
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
+        onDispose { }
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.inviteGuardianResponse is Resource.Success) {
+            viewModel.resetInviteApproverResponse()
+        }
+    }
 
     Scaffold(
         contentColor = Color.White,
@@ -71,28 +95,81 @@ fun ActivateApproversScreen(
             }
         }
     ) { paddingValues ->
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
 
-            Column {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "Activate Approvers",
-                    fontSize = 24.sp,
-                    color = Colors.PrimaryBlue,
-                    textAlign = TextAlign.Center
-                )
+            when {
+                state.loading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Color.White)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .align(Alignment.Center),
+                            strokeWidth = 8.dp,
+                            color = Color.Red
+                        )
+                    }
+                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                state.asyncError -> {
+                    if (state.codeNotValidError) {
+                        DisplayError(
+                            errorMessage = stringResource(R.string.codes_do_not_match),
+                            dismissAction = viewModel::resetInvalidCode,
+                        ) {
+                            viewModel.resetInvalidCode()
+                        }
+                    } else if (state.userResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = state.userResponse.getErrorMessage(context),
+                            dismissAction = viewModel::resetUserResponse,
+                        ) {
+                            viewModel.retrieveUserState()
+                        }
+                    } else if (state.createPolicyResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = state.createPolicyResponse.getErrorMessage(context),
+                            dismissAction = viewModel::resetCreatePolicyResource,
+                        ) {
+//                        viewModel.createPolicy()
+                        }
+                    } else if (state.inviteGuardianResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = state.inviteGuardianResponse.getErrorMessage(context),
+                            dismissAction = viewModel::resetInviteResource,
+                        ) { viewModel.resetInviteResource() }
+                    }
+                }
 
-                for (approver in approvers) {
-                    ActivateApproverRow(approver = approver) {
+                else -> {
 
+                    Column {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "Activate Approvers",
+                            fontSize = 24.sp,
+                            color = Colors.PrimaryBlue,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        for (approver in state.guardians) {
+                            ActivateApproverRow(
+                                approver = approver,
+                                inviteApprover = {
+                                    viewModel.inviteApprover(approver.participantId)
+                                }
+                            )
+                        }
                     }
                 }
             }
