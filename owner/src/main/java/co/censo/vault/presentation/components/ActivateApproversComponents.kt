@@ -147,6 +147,7 @@ fun ActivateApproversTopBar() {
 fun ActivateApproverRow(
     approver: Guardian,
     horizontalPadding: Dp = 16.dp,
+    verifyApprover: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -191,7 +192,10 @@ fun ActivateApproverRow(
                 )
             }
 
-            ActivateApproverActionItem(approver)
+            ActivateApproverActionItem(
+                approver = approver,
+                verifyApprover = verifyApprover
+            )
         }
         Spacer(modifier = Modifier.height(12.dp))
         Divider(
@@ -203,7 +207,10 @@ fun ActivateApproverRow(
 }
 
 @Composable
-fun ActivateApproverActionItem(approver: Guardian) {
+fun ActivateApproverActionItem(
+    approver: Guardian,
+    verifyApprover: () -> Unit
+) {
 
     val context = LocalContext.current
 
@@ -291,7 +298,9 @@ fun ActivateApproverActionItem(approver: Guardian) {
 
 
                 is GuardianStatus.VerificationSubmitted -> {
-                    Button(onClick = { }) {
+                    Button(onClick = {
+                        verifyApprover()
+                    }) {
                         Text(text = "Verify Code", color = Color.White)
                     }
                 }

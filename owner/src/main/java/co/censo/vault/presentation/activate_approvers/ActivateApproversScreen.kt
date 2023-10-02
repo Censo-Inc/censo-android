@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.activate_approvers
 
 import FullScreenButton
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
@@ -148,7 +151,23 @@ fun ActivateApproversScreen(
                         Spacer(modifier = Modifier.height(24.dp))
 
                         for (approver in state.guardians) {
-                            ActivateApproverRow(approver)
+                            ActivateApproverRow(
+                                approver = approver,
+                                verifyApprover = {
+                                    if (approver is Guardian.ProspectGuardian && approver.status is GuardianStatus.VerificationSubmitted) {
+                                        viewModel.verifyGuardian(
+                                            approver,
+                                            approver.status as GuardianStatus.VerificationSubmitted
+                                        )
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.approver_does_not_need_verification),
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                            )
                         }
                     }
                 }

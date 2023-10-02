@@ -122,5 +122,6 @@
     <string name="completed">Completed</string>
     <string name="declined">Declined</string>
     <string name="code_submitted">Code Submitted</string>
+    <string name="approver_does_not_need_verification">Approver does not need verification.</string>
 
 </resources>
