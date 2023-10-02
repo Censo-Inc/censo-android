@@ -108,11 +108,6 @@ fun GuardianInvitationScreen(
                     ) {
 //                        viewModel.createPolicy()
                     }
-                } else if (state.inviteGuardianResponse is Resource.Error) {
-                    DisplayError(
-                        errorMessage = state.inviteGuardianResponse.getErrorMessage(context),
-                        dismissAction = viewModel::resetInviteResource,
-                    ) { viewModel.resetInviteResource() }
                 }
             }
 
@@ -137,11 +132,11 @@ fun GuardianInvitationScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             for(guardian in state.guardians) {
-                                val deeplink = if (guardian is Guardian.ProspectGuardian) "$GUARDIAN_URI${guardian.invitationId?.value}" else "Guardian Already Added"
+                                val deeplink = ""
 
                                 InitialGuardianUI(
                                     guardianLabel = guardian.label,
-                                    inviteGuardian = { viewModel.inviteApprover(guardian.participantId) },
+                                    inviteGuardian = {  },
                                     deepLink = deeplink,
                                     copyDeeplink = {
                                         clipboardManager.setText(

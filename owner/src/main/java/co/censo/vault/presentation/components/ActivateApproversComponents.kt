@@ -13,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +55,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
@@ -65,7 +63,6 @@ import co.censo.shared.data.model.VerificationStatus
 import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.Colors
 import co.censo.vault.R
-import co.censo.vault.presentation.guardian_invitation.ActivateApproversViewModel
 import kotlinx.datetime.Clock
 
 //region Top Bar
@@ -149,7 +146,6 @@ fun ActivateApproversTopBar() {
 @Composable
 fun ActivateApproverRow(
     approver: Guardian,
-    inviteApprover: () -> Unit,
     horizontalPadding: Dp = 16.dp,
 ) {
     Column {
@@ -189,10 +185,7 @@ fun ActivateApproverRow(
                 )
             }
 
-            ActivateApproverActionItem(
-                approver = approver,
-                inviteApprover = inviteApprover
-            )
+            ActivateApproverActionItem(approver)
         }
         Spacer(modifier = Modifier.height(12.dp))
         Divider(
@@ -204,7 +197,7 @@ fun ActivateApproverRow(
 }
 
 @Composable
-fun ActivateApproverActionItem(approver: Guardian, inviteApprover: () -> Unit) {
+fun ActivateApproverActionItem(approver: Guardian) {
 
     val context = LocalContext.current
 
@@ -276,19 +269,13 @@ fun ActivateApproverActionItem(approver: Guardian, inviteApprover: () -> Unit) {
                     )
                 }
 
-                is GuardianStatus.Invited,
-                GuardianStatus.Initial -> {
+                is GuardianStatus.Initial -> {
                     Icon(
                         modifier = Modifier
                             .background(shape = CircleShape, color = Colors.PrimaryBlue)
                             .padding(all = 8.dp)
                             .clickable {
-                                if (approverStatus is GuardianStatus.Initial) {
-                                    Toast.makeText(context, "Creating invite for ${approver.label}...", Toast.LENGTH_LONG).show()
-                                    inviteApprover()
-                                } else {
-                                    shareDeeplink(approver.deeplink(), context)
-                                }
+                                shareDeeplink(approverStatus.deeplink(), context)
                             },
                         imageVector = Icons.Filled.IosShare,
                         contentDescription = "share approver invite link",
@@ -362,8 +349,7 @@ fun AnnotatedString.Builder.appendGuardianStatusText(guardian: Guardian) {
                     append("Declined")
                 }
 
-                is GuardianStatus.Invited,
-                GuardianStatus.Initial -> withStyle(baseStyle) {
+                is GuardianStatus.Initial -> withStyle(baseStyle) {
                     append("Pending")
                 }
 
@@ -398,46 +384,34 @@ val dummyListOfApprovers = listOf(
     Guardian.ProspectGuardian(
         "Anton",
         participantId = ParticipantId(generatePartitionId().toHexString()),
-        invitationId = InvitationId("12345"),
-        deviceEncryptedTotpSecret = Base64EncodedData(""),
-        status = GuardianStatus.Initial
-    ),
-    Guardian.ProspectGuardian(
-        "Ievgen",
-        participantId = ParticipantId(generatePartitionId().toHexString()),
-        invitationId = InvitationId("12345"),
-        deviceEncryptedTotpSecret = Base64EncodedData(""),
-        status = GuardianStatus.Invited(
-            invitedAt = Clock.System.now()
+        status = GuardianStatus.Initial(
+            invitationId = InvitationId("12345"),
+            deviceEncryptedTotpSecret = Base64EncodedData(""),
         )
     ),
     Guardian.ProspectGuardian(
         "Ata",
         participantId = ParticipantId(generatePartitionId().toHexString()),
-        invitationId = InvitationId("12345"),
-        deviceEncryptedTotpSecret = Base64EncodedData(""),
         status = GuardianStatus.Accepted(
-            acceptedAt = Clock.System.now()
-        )
+            acceptedAt = Clock.System.now(),
+            deviceEncryptedTotpSecret = Base64EncodedData(""),
+            )
     ),
     Guardian.ProspectGuardian(
         "Ben",
         participantId = ParticipantId(generatePartitionId().toHexString()),
-        invitationId = InvitationId("12345"),
-        deviceEncryptedTotpSecret = Base64EncodedData(""),
         status = GuardianStatus.VerificationSubmitted(
             signature = Base64EncodedData(""),
             timeMillis = 1L,
             guardianPublicKey = Base58EncodedGuardianPublicKey(""),
             verificationStatus = VerificationStatus.WaitingForVerification,
             submittedAt = Clock.System.now(),
-        )
+            deviceEncryptedTotpSecret = Base64EncodedData(""),
+            )
     ),
     Guardian.ProspectGuardian(
         "Brendan",
         participantId = ParticipantId(generatePartitionId().toHexString()),
-        invitationId = InvitationId("12345"),
-        deviceEncryptedTotpSecret = Base64EncodedData(""),
         status = GuardianStatus.Confirmed(
             guardianKeySignature = Base64EncodedData(""),
             guardianPublicKey = Base58EncodedGuardianPublicKey(""),
@@ -448,8 +422,6 @@ val dummyListOfApprovers = listOf(
     Guardian.ProspectGuardian(
         "Charlie",
         participantId = ParticipantId(generatePartitionId().toHexString()),
-        invitationId = InvitationId("12345"),
-        deviceEncryptedTotpSecret = Base64EncodedData(""),
         status = GuardianStatus.Declined
     ),
 )

@@ -28,8 +28,6 @@ import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.IdentityToken
-import co.censo.shared.data.model.InviteGuardianApiRequest
-import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SecurityPlanData
@@ -70,9 +68,6 @@ interface OwnerRepository {
     suspend fun saveJWT(jwtToken: String)
     suspend fun retrieveJWT(): String
     suspend fun checkJWTValid(jwtToken: String): Boolean
-    suspend fun inviteGuardian(
-        participantId: ParticipantId,
-    ): Resource<InviteGuardianApiResponse>
 
     suspend fun confirmGuardianShip(
         participantId: ParticipantId,
@@ -238,26 +233,6 @@ class OwnerRepositoryImpl(
             return true
         } catch (e: Exception) {
             false
-        }
-    }
-
-    override suspend fun inviteGuardian(
-        participantId: ParticipantId,
-    ): Resource<InviteGuardianApiResponse> {
-
-        val deviceEncryptedPin =
-            InternalDeviceKey(storage.retrieveDeviceKeyId()).encrypt("123456".toByteArray(Charsets.UTF_8))
-
-        return retrieveApiResource {
-            apiService.inviteGuardian(
-                participantId = participantId.value,
-                inviteGuardianApiRequest =
-                InviteGuardianApiRequest(
-                    deviceEncryptedTotpSecret = Base64EncodedData(
-                        Base64.getEncoder().encodeToString(deviceEncryptedPin)
-                    )
-                )
-            )
         }
     }
 

@@ -1,18 +1,27 @@
 package co.censo.shared.data.cryptography
 
 import io.github.novacrypto.base58.Base58
+import org.bouncycastle.util.encoders.Base32
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.random.Random
-import kotlin.random.nextUInt
 
 
 fun generatePartitionId() : BigInteger {
-    return BigInteger(generateRandomHex(64), 16)
+    return BigInteger(generateRandom(64), 16)
 }
-fun generateRandomHex(length: Int) : String {
-    val letters = "ABCDEF0123456789"
+
+fun generateBase32() : String {
+    return Base32.toBase32String(
+        generateRandom(
+            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            length = 10
+        ).toByteArray(Charsets.UTF_8)
+    )
+}
+
+fun generateRandom(length: Int, letters: String = "ABCDEF0123456789",) : String {
     val len = letters.count()
     var partitionId = ""
     for (i in 0..length) {

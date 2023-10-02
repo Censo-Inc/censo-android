@@ -18,7 +18,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,14 +30,12 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
-import co.censo.vault.presentation.components.shareDeeplink
 import co.censo.vault.presentation.guardian_invitation.ActivateApproversViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,12 +51,6 @@ fun ActivateApproversScreen(
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
         onDispose { }
-    }
-
-    LaunchedEffect(key1 = state) {
-        if (state.inviteGuardianResponse is Resource.Success) {
-            viewModel.resetInviteApproverResponse()
-        }
     }
 
     Scaffold(
@@ -140,11 +131,6 @@ fun ActivateApproversScreen(
                         ) {
 //                        viewModel.createPolicy()
                         }
-                    } else if (state.inviteGuardianResponse is Resource.Error) {
-                        DisplayError(
-                            errorMessage = state.inviteGuardianResponse.getErrorMessage(context),
-                            dismissAction = viewModel::resetInviteResource,
-                        ) { viewModel.resetInviteResource() }
                     }
                 }
 
@@ -163,12 +149,7 @@ fun ActivateApproversScreen(
                         Spacer(modifier = Modifier.height(24.dp))
 
                         for (approver in state.guardians) {
-                            ActivateApproverRow(
-                                approver = approver,
-                                inviteApprover = {
-                                    viewModel.inviteApprover(approver.participantId)
-                                }
-                            )
+                            ActivateApproverRow(approver)
                         }
                     }
                 }

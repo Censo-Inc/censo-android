@@ -1,6 +1,5 @@
 package co.censo.vault.presentation.guardian_invitation
 
-import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -35,10 +34,6 @@ class ActivateApproversViewModel @Inject constructor(
 
     fun onStart() {
         retrieveUserState()
-    }
-
-    fun onUserCreatedGuardianSet() {
-        state = state.copy(guardianInviteStatus = GuardianInvitationStatus.CREATE_POLICY_SETUP)
     }
 
     fun createPolicy() {
@@ -84,8 +79,7 @@ class ActivateApproversViewModel @Inject constructor(
     private fun updateOwnerState(ownerState: OwnerState) {
         val guardianInvitationStatus = when (ownerState) {
             is OwnerState.Ready -> GuardianInvitationStatus.READY
-            is OwnerState.GuardianSetup -> GuardianInvitationStatus.INVITE_GUARDIANS
-            is OwnerState.Initial -> GuardianInvitationStatus.ENUMERATE_GUARDIANS
+            is OwnerState.GuardianSetup, is OwnerState.Initial -> GuardianInvitationStatus.INVITE_GUARDIANS
         }
 
         val guardians = when (ownerState) {
@@ -99,24 +93,6 @@ class ActivateApproversViewModel @Inject constructor(
             ownerState = ownerState,
             guardianInviteStatus = guardianInvitationStatus
         )
-    }
-
-    fun inviteApprover(participantId: ParticipantId) {
-        state = state.copy(inviteGuardianResponse = Resource.Loading())
-
-        viewModelScope.launch {
-            val inviteResponse = ownerRepository.inviteGuardian(
-                participantId = participantId,
-            )
-
-            if (inviteResponse is Resource.Success) {
-                updateOwnerState(inviteResponse.data!!.ownerState)
-            }
-
-            state = state.copy(
-                inviteGuardianResponse = inviteResponse
-            )
-        }
     }
 
     fun verifyGuardian(
@@ -175,14 +151,6 @@ class ActivateApproversViewModel @Inject constructor(
         state = state.copy(
             confirmGuardianshipResponse = Resource.Uninitialized,
         )
-    }
-
-    fun resetInviteApproverResponse() {
-        state = state.copy(inviteGuardianResponse = Resource.Uninitialized)
-    }
-
-    fun resetInviteResource() {
-        state = state.copy(inviteGuardianResponse = Resource.Uninitialized)
     }
 
     fun resetUserResponse() {

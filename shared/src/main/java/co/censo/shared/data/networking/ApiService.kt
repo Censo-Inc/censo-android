@@ -17,8 +17,6 @@ import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
-import co.censo.shared.data.model.InviteGuardianApiRequest
-import co.censo.shared.data.model.InviteGuardianApiResponse
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
@@ -116,12 +114,6 @@ interface ApiService {
     suspend fun createPolicy(
         @Body createPolicyApiRequest: CreatePolicyApiRequest
     ): RetrofitResponse<CreatePolicyApiResponse>
-
-    @POST("/v1/guardians/{$PARTICIPANT_ID}/invitation")
-    suspend fun inviteGuardian(
-        @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body inviteGuardianApiRequest: InviteGuardianApiRequest
-    ): RetrofitResponse<InviteGuardianApiResponse>
 
     @POST("/v1/guardianship-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptGuardianship(

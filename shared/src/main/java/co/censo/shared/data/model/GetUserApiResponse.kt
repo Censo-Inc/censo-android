@@ -27,12 +27,9 @@ data class GetUserApiResponse(
 sealed class GuardianStatus {
     @Serializable
     @SerialName("Initial")
-    object Initial : GuardianStatus()
-
-    @Serializable
-    @SerialName("Invited")
-    data class Invited(
-        val invitedAt: Instant,
+    data class Initial(
+        val invitationId: InvitationId,
+        val deviceEncryptedTotpSecret: Base64EncodedData,
     ) : GuardianStatus()
 
     @Serializable
@@ -43,11 +40,13 @@ sealed class GuardianStatus {
     @SerialName("Accepted")
     data class Accepted(
         val acceptedAt: Instant,
-    ) : GuardianStatus()
+        val deviceEncryptedTotpSecret: Base64EncodedData,
+        ) : GuardianStatus()
 
     @Serializable
     @SerialName("VerificationSubmitted")
     data class VerificationSubmitted(
+        val deviceEncryptedTotpSecret: Base64EncodedData,
         val signature: Base64EncodedData,
         val timeMillis: Long,
         val guardianPublicKey: Base58EncodedGuardianPublicKey,
@@ -82,15 +81,14 @@ sealed class Guardian {
     data class SetupGuardian(
         override val label: String,
         override val participantId: ParticipantId,
-    ) : Guardian()
+        val deviceEncryptedTotpSecret: Base64EncodedData,
+        ) : Guardian()
 
     @Serializable
     @SerialName("Prospect")
     data class ProspectGuardian(
         override val label: String,
         override val participantId: ParticipantId,
-        val invitationId: InvitationId? = null,
-        val deviceEncryptedTotpSecret: Base64EncodedData? = null,
         val status: GuardianStatus,
     ) : Guardian()
 
@@ -103,8 +101,8 @@ sealed class Guardian {
     ) : Guardian()
 }
 
-fun Guardian.ProspectGuardian.deeplink() =
-    "${SharedScreen.GUARDIAN_URI}${invitationId?.value}"
+fun GuardianStatus.Initial.deeplink() =
+    "${SharedScreen.GUARDIAN_URI}${invitationId.value}"
 
 @Serializable
 data class Policy(
@@ -135,7 +133,13 @@ fun OwnerState.toSecurityPlan() : SecurityPlanData? =
         is OwnerState.Initial, is OwnerState.Ready -> null
         is OwnerState.GuardianSetup ->
             SecurityPlanData(
-                guardians = this.guardians.map { Guardian.SetupGuardian(it.label, it.participantId) },
+                guardians = this.guardians.map {
+                    Guardian.SetupGuardian(
+                        label = it.label,
+                        participantId = it.participantId,
+                        deviceEncryptedTotpSecret = Base64EncodedData("")
+                    )
+                                               },
                 threshold = this.threshold ?: 0u
             )
     }
