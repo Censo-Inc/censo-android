@@ -64,6 +64,13 @@ sealed class GuardianStatus {
     ) : GuardianStatus()
 
     @Serializable
+    @SerialName("ImplicitlyOwner")
+    data class ImplicitlyOwner(
+        val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        val confirmedAt: Instant,
+    ) : GuardianStatus()
+
+    @Serializable
     @SerialName("Onboarded")
     data class Onboarded(
         val guardianEncryptedShard: Base64EncodedData,
@@ -78,11 +85,26 @@ sealed class Guardian {
 
     @Serializable
     @SerialName("Setup")
-    data class SetupGuardian(
-        override val label: String,
-        override val participantId: ParticipantId,
-        val deviceEncryptedTotpSecret: Base64EncodedData,
-        ) : Guardian()
+    sealed class SetupGuardian : Guardian() {
+        abstract override val label: String
+        abstract override val participantId: ParticipantId
+
+        @Serializable
+        @SerialName("ImplicitlyOwner")
+        data class ImplicitlyOwner(
+            override val label: String,
+            override val participantId: ParticipantId,
+            val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        ) : SetupGuardian()
+
+        @Serializable
+        @SerialName("ExternalApprover")
+        data class ExternalApprover(
+            override val label: String,
+            override val participantId: ParticipantId,
+            val deviceEncryptedTotpSecret: Base64EncodedData,
+        ) : SetupGuardian()
+    }
 
     @Serializable
     @SerialName("Prospect")
@@ -134,7 +156,7 @@ fun OwnerState.toSecurityPlan() : SecurityPlanData? =
         is OwnerState.GuardianSetup ->
             SecurityPlanData(
                 guardians = this.guardians.map {
-                    Guardian.SetupGuardian(
+                    Guardian.SetupGuardian.ExternalApprover(
                         label = it.label,
                         participantId = it.participantId,
                         deviceEncryptedTotpSecret = Base64EncodedData("")

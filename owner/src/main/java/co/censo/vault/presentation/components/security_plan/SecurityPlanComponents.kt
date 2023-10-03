@@ -560,7 +560,7 @@ fun AmountGuardiansProtectingText(amountGuardians: Int) {
 
 @Composable
 fun ApproverRow(
-    approver: Guardian.SetupGuardian,
+    approver: Guardian.SetupGuardian.ExternalApprover,
     horizontalPadding: Dp = 16.dp,
     editGuardianClick: () -> Unit
 ) {

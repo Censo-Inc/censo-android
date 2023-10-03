@@ -260,6 +260,7 @@ fun ActivateApproverActionItem(
                 }
 
                 is GuardianStatus.Confirmed,
+                is GuardianStatus.ImplicitlyOwner,
                 is GuardianStatus.Onboarded -> {
                     Icon(
                         modifier = Modifier
@@ -355,6 +356,7 @@ fun AnnotatedString.Builder.appendApproverStatusText(context: Context, approver:
                     }
 
                 is GuardianStatus.Confirmed,
+                is GuardianStatus.ImplicitlyOwner,
                 is GuardianStatus.Onboarded ->
                     withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
                         append(context.getString(R.string.completed))

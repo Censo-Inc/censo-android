@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SecurityPlanData(
-    val guardians: List<Guardian.SetupGuardian>,
+    val guardians: List<Guardian.SetupGuardian.ExternalApprover>,
     val threshold: UInt
 )
