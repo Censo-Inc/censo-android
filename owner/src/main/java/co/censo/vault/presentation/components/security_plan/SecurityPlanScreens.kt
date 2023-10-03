@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.components.security_plan
 
+import Base64EncodedData
 import FullScreenButton
 import ParticipantId
 import android.widget.Toast
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.cryptography.generateBase32
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
@@ -487,9 +489,21 @@ fun SecureYourPlanScreen(paddingValues: PaddingValues) {
 fun TestableProtectionScreen(initialPosition: Int) {
 
     val guardians = listOf(
-        Guardian.SetupGuardian("Ben", ParticipantId(generatePartitionId().toHexString())),
-        Guardian.SetupGuardian("A.L.", ParticipantId(generatePartitionId().toHexString())),
-        Guardian.SetupGuardian("Carlitos", ParticipantId(generatePartitionId().toHexString()))
+        Guardian.SetupGuardian(
+            label = "Ben",
+            participantId = ParticipantId(generatePartitionId().toHexString()),
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
+        ),
+        Guardian.SetupGuardian(
+            label = "A.L.",
+            participantId = ParticipantId(generatePartitionId().toHexString()),
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
+        ),
+        Guardian.SetupGuardian(
+            label = "Carlitos",
+            participantId = ParticipantId(generatePartitionId().toHexString()),
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
+        ),
     )
 
     var screenPosition by remember { mutableStateOf(initialPosition) }

@@ -12,6 +12,7 @@ interface KeyRepository {
     fun setSavedDeviceId(id: String)
     fun retrieveInternalDeviceKey(): InternalDeviceKey
     fun createGuardianKey(): EncryptionKey
+    fun encryptWithDeviceKey(data: ByteArray) : ByteArray
 }
 
 class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
@@ -37,4 +38,7 @@ class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
         val keyPair = ECHelper.createECKeyPair()
         return EncryptionKey(keyPair)
     }
+
+    override fun encryptWithDeviceKey(data: ByteArray) =
+        retrieveInternalDeviceKey().encrypt(data)
 }

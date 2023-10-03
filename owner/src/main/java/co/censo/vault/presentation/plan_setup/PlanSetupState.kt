@@ -4,10 +4,9 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
-import co.censo.vault.presentation.guardian_invitation.GuardianInvitationViewModel.Companion.MIN_GUARDIAN_LIMIT
+import co.censo.vault.presentation.activate_approvers.ActivateApproversViewModel.Companion.MIN_GUARDIAN_LIMIT
 
 data class PlanSetupState(
     //Screen in Plan Setup Flow

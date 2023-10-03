@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.plan_setup
 
+import Base64EncodedData
 import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.generateBase32
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.BiometryScanResultBlob
@@ -14,17 +16,20 @@ import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.SecurityPlanData
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import java.util.Base64
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @HiltViewModel
 class PlanSetupViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository
+    private val ownerRepository: OwnerRepository,
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(PlanSetupState())
@@ -56,7 +61,13 @@ class PlanSetupViewModel @Inject constructor(
         return viewModelScope.async {
             val createPolicySetupResponse = ownerRepository.createPolicySetup(
                 state.threshold,
-                state.guardians.map { Guardian.SetupGuardian(it.label, it.participantId) },
+                state.guardians.map {
+                    Guardian.SetupGuardian(
+                        label = it.label,
+                        participantId = it.participantId,
+                        deviceEncryptedTotpSecret = it.deviceEncryptedTotpSecret
+                    )
+                },
                 verificationId,
                 facetecData
             )
@@ -202,15 +213,22 @@ class PlanSetupViewModel @Inject constructor(
             if (index != -1) {
                 guardians[index] = Guardian.SetupGuardian(
                     label = state.addedApproverNickname,
-                    participantId = state.editingGuardian!!.participantId
+                    participantId = state.editingGuardian!!.participantId,
+                    deviceEncryptedTotpSecret = state.editingGuardian!!.deviceEncryptedTotpSecret
                 )
             }
         } else {
+            val secret = generateBase32()
+            val encryptedSecret = keyRepository.encryptWithDeviceKey(secret.toByteArray())
+
             guardians.add(
                 Guardian.SetupGuardian(
                     label = state.addedApproverNickname,
                     participantId = ParticipantId(
                         generatePartitionId().toHexString()
+                    ),
+                    deviceEncryptedTotpSecret = Base64EncodedData(
+                        Base64.getEncoder().encodeToString(encryptedSecret)
                     )
                 )
             )
