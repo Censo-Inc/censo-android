@@ -52,7 +52,7 @@ fun ActivateApproversScreen(
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
-        onDispose { }
+        onDispose { viewModel.onStop() }
     }
 
     Scaffold(
@@ -153,6 +153,8 @@ fun ActivateApproversScreen(
                         for (approver in state.guardians) {
                             ActivateApproverRow(
                                 approver = approver,
+                                approverCode = state.approverCodes[approver.participantId] ?: "",
+                                percentageLeft = state.countdownPercentage,
                                 verifyApprover = {
                                     if (approver is Guardian.ProspectGuardian && approver.status is GuardianStatus.VerificationSubmitted) {
                                         viewModel.verifyGuardian(

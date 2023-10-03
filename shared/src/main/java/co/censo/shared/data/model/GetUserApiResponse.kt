@@ -25,6 +25,15 @@ data class GetUserApiResponse(
 
 @Serializable
 sealed class GuardianStatus {
+
+    fun resolveDeviceEncryptedTotpSecret() =
+        when (this) {
+            is Initial -> this.deviceEncryptedTotpSecret
+            is Accepted -> this.deviceEncryptedTotpSecret
+            is VerificationSubmitted -> this.deviceEncryptedTotpSecret
+            else -> null
+        }
+
     @Serializable
     @SerialName("Initial")
     data class Initial(
