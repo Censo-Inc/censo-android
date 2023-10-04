@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIos
 import androidx.compose.material.icons.rounded.Clear
@@ -27,8 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,7 +34,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
@@ -139,7 +135,7 @@ fun PlanSetupScreen(
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
-                        textColor = Colors.PrimaryBlue,
+                        borderColor = Colors.PrimaryBlue,
                         border = true,
                         contentPadding = PaddingValues(vertical = 6.dp),
                         onClick = viewModel::onMoreInfoClicked
@@ -160,7 +156,7 @@ fun PlanSetupScreen(
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Colors.PrimaryBlue,
-                        textColor = Color.White,
+                        borderColor = Color.White,
                         border = false,
                         contentPadding = PaddingValues(vertical = 12.dp),
                         onClick = viewModel::onMainActionClick,

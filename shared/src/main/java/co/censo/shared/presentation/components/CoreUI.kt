@@ -14,9 +14,10 @@ import androidx.compose.ui.unit.dp
 fun FullScreenButton(
     modifier: Modifier = Modifier,
     color: Color,
-    textColor: Color,
+    borderColor: Color,
     border: Boolean,
     contentPadding: PaddingValues,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: @Composable RowScope.() -> Unit
 ) {
@@ -27,8 +28,9 @@ fun FullScreenButton(
             containerColor = color
         ),
         contentPadding = contentPadding,
-        border = if (border) BorderStroke(1.dp, textColor) else null,
+        border = if (border) BorderStroke(1.dp, borderColor) else null,
         shape = RoundedCornerShape(4.dp),
+        enabled = enabled,
         onClick = onClick
     ) {
         content()

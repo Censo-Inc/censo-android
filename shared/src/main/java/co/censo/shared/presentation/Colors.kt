@@ -14,4 +14,5 @@ object Colors {
     val BackgroundAlphaBlack = Color.Black.copy(alpha = 0.25f)
     val SuccessGreen = Color(0xFF287317)
     val TimeLeftGray = Color(0xFFAAAAAA)
+    val ErrorRed = Color(0xFFBC1313)
 }

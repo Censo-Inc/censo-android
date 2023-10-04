@@ -25,6 +25,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.guardian.R
+import co.censo.guardian.presentation.components.ApproverCodeVerification
+import co.censo.shared.data.Resource
 
 @Composable
 fun GuardianHomeScreen(
@@ -39,21 +41,33 @@ fun GuardianHomeScreen(
         onDispose { }
     }
 
-    Text(text = stringResource(R.string.guardian_entrance))
+    val (parentColumnHorizontalPadding,
+        parentColumnVerticalPadding) =
+        if (state.guardianUIState == GuardianUIState.WAITING_FOR_CODE) {
+            Pair(0.dp, 0.dp)
+        } else {
+            Pair(16.dp, 12.dp)
+        }
+
+    if (state.guardianUIState != GuardianUIState.WAITING_FOR_CODE) {
+        Text(text = stringResource(R.string.guardian_entrance))
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 12.dp),
+            .padding(horizontal = parentColumnHorizontalPadding, vertical = parentColumnVerticalPadding),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if (state.apiError) {
+        if (state.apiError && state.guardianUIState != GuardianUIState.WAITING_FOR_CODE) {
             Text(text = "Error completing action")
         }
-        
-        Spacer(modifier = Modifier.height(48.dp))
+
+        if (state.guardianUIState != GuardianUIState.WAITING_FOR_CODE) {
+            Spacer(modifier = Modifier.height(48.dp))
+        }
 
         when (val guardianUIState = state.guardianUIState) {
             GuardianUIState.UNINITIALIZED -> {
@@ -78,14 +92,14 @@ fun GuardianHomeScreen(
             }
 
             GuardianUIState.WAITING_FOR_CODE, GuardianUIState.NEED_SAVE_KEY -> {
-                Text(
-                    text = "You have accepted the guardianship!", fontSize = 18.sp,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
                 if (guardianUIState == GuardianUIState.NEED_SAVE_KEY) {
+                    Text(
+                        text = "You have accepted the guardianship!", fontSize = 18.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(48.dp))
+
                     Text(
                         text = "We need you to create and store your Guardian key. This will be used to complete recovery if the owner loses their phrase.",
                         textAlign = TextAlign.Center
@@ -95,14 +109,13 @@ fun GuardianHomeScreen(
                         Text("Create Guardian Key")
                     }
                 } else {
-                    Text(
-                        text = "You are all set with your Guardian key. Enter your verification code below...",
-                        textAlign = TextAlign.Center
+                    ApproverCodeVerification(
+                        value = state.verificationCode,
+                        onValueChanged = viewModel::updateVerificationCode,
+                        errorResource = if (state.submitVerificationResource is Resource.Error) state.submitVerificationResource
+                            else null,
+                        isLoading = state.submitVerificationResource is Resource.Loading,
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = { viewModel.submitVerificationCode() }) {
-                        Text("Submit code")
-                    }
                 }
             }
 

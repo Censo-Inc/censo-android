@@ -1,10 +1,13 @@
 package co.censo.guardian.presentation.home
 
+import Base58EncodedGuardianPublicKey
 import Base58EncodedPrivateKey
+import Base64EncodedData
 import InvitationId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
@@ -13,13 +16,16 @@ import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
+import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -29,6 +35,10 @@ class GuardianHomeViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
+
+    companion object {
+        const val VALID_CODE_LENGTH = 6
+    }
 
     var state by mutableStateOf(GuardianHomeState())
         private set
@@ -68,7 +78,8 @@ class GuardianHomeViewModel @Inject constructor(
 
             state = state.copy(
                 guardianUIState = guardianUIState,
-                guardianState = guardianState ?: state.guardianState
+                guardianState = guardianState ?: state.guardianState,
+                invitationId = InvitationId(inviteCode)
             )
         }
     }
@@ -144,6 +155,19 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
+    fun updateVerificationCode(value: String) {
+        if (value.isDigitsOnly()) {
+            state = state.copy(verificationCode = value)
+            if (state.verificationCode.length == VALID_CODE_LENGTH) {
+                submitVerificationCode()
+            }
+        }
+
+        if (state.submitVerificationResource is Resource.Error) {
+            state = state.copy(submitVerificationResource = Resource.Uninitialized)
+        }
+    }
+
     fun submitVerificationCode() {
         state = state.copy(submitVerificationResource = Resource.Loading())
 
@@ -158,7 +182,7 @@ class GuardianHomeViewModel @Inject constructor(
             }
 
             val signedVerificationData = guardianRepository.signVerificationCode(
-                verificationCode = "123456",
+                verificationCode = state.verificationCode,
                 state.guardianEncryptionKey!!
             )
 
@@ -174,7 +198,7 @@ class GuardianHomeViewModel @Inject constructor(
                     submitVerificationResource = submitVerificationResource
                 )
             } else {
-                state.copy(submitVerificationResource = submitVerificationResource)
+                state.copy(submitVerificationResource = submitVerificationResource, verificationCode = "")
             }
         }
     }

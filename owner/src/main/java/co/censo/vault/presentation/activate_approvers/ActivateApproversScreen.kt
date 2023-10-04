@@ -72,7 +72,7 @@ fun ActivateApproversScreen(
                 FullScreenButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     color = Colors.PrimaryBlue,
-                    textColor = Color.White,
+                    borderColor = Color.White,
                     border = false,
                     contentPadding = PaddingValues(vertical = 12.dp),
                     onClick = {},

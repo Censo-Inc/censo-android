@@ -119,7 +119,7 @@ fun SecurityPlanTopLevelContainer(
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
-                        textColor = Colors.PrimaryBlue,
+                        borderColor = Colors.PrimaryBlue,
                         border = true,
                         contentPadding = PaddingValues(vertical = 6.dp),
                         onClick = {
@@ -143,7 +143,7 @@ fun SecurityPlanTopLevelContainer(
                 FullScreenButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     color = Colors.PrimaryBlue,
-                    textColor = Color.White,
+                    borderColor = Color.White,
                     border = false,
                     contentPadding = PaddingValues(vertical = 12.dp),
                     onClick = moveForward,
