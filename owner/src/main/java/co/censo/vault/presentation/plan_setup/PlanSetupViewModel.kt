@@ -62,7 +62,7 @@ class PlanSetupViewModel @Inject constructor(
             val createPolicySetupResponse = ownerRepository.createPolicySetup(
                 state.threshold,
                 state.guardians.map {
-                    Guardian.SetupGuardian(
+                    Guardian.SetupGuardian.ExternalApprover(
                         label = it.label,
                         participantId = it.participantId,
                         deviceEncryptedTotpSecret = it.deviceEncryptedTotpSecret
@@ -163,7 +163,7 @@ class PlanSetupViewModel @Inject constructor(
 
     }
 
-    fun showEditOrDeleteDialog(guardian: Guardian.SetupGuardian) {
+    fun showEditOrDeleteDialog(guardian: Guardian.SetupGuardian.ExternalApprover) {
         state = state.copy(
             showEditOrDeleteDialog = true,
             editingGuardian = guardian
@@ -211,7 +211,7 @@ class PlanSetupViewModel @Inject constructor(
             val index = guardians.indexOf(state.editingGuardian!!)
 
             if (index != -1) {
-                guardians[index] = Guardian.SetupGuardian(
+                guardians[index] = Guardian.SetupGuardian.ExternalApprover(
                     label = state.addedApproverNickname,
                     participantId = state.editingGuardian!!.participantId,
                     deviceEncryptedTotpSecret = state.editingGuardian!!.deviceEncryptedTotpSecret
@@ -222,7 +222,7 @@ class PlanSetupViewModel @Inject constructor(
             val encryptedSecret = keyRepository.encryptWithDeviceKey(secret.toByteArray())
 
             guardians.add(
-                Guardian.SetupGuardian(
+                Guardian.SetupGuardian.ExternalApprover(
                     label = state.addedApproverNickname,
                     participantId = ParticipantId(
                         generatePartitionId().toHexString()

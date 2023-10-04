@@ -15,7 +15,7 @@ data class PlanSetupState(
     //In Progress UI Data
     val navigateToActivateApprovers: Boolean = false,
     val addedApproverNickname: String = "",
-    val editingGuardian: Guardian.SetupGuardian? = null,
+    val editingGuardian: Guardian.SetupGuardian.ExternalApprover? = null,
 
     //Dialog Triggers
     val showAddGuardianDialog: Boolean = false,
@@ -23,7 +23,7 @@ data class PlanSetupState(
     val showCancelPlanSetupDialog: Boolean = false,
 
     //Plan Data
-    val guardians: List<Guardian.SetupGuardian> = emptyList(),
+    val guardians: List<Guardian.SetupGuardian.ExternalApprover> = emptyList(),
     val threshold: UInt = 1u,
     val existingSecurityPlan : SecurityPlanData? = null,
 

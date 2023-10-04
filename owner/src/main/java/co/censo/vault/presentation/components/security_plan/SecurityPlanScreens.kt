@@ -307,9 +307,9 @@ fun RequiredApprovalsScreen(
 @Composable
 fun SelectApproversScreen(
     paddingValues: PaddingValues,
-    guardians: List<Guardian.SetupGuardian>,
+    guardians: List<Guardian.SetupGuardian.ExternalApprover>,
     addApproverOnClick: () -> Unit,
-    editApproverOnClick: (Guardian.SetupGuardian) -> Unit
+    editApproverOnClick: (Guardian.SetupGuardian.ExternalApprover) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -348,9 +348,9 @@ fun SelectApproversScreen(
 fun ReviewPlanScreen(
     sliderPosition: Float,
     paddingValues: PaddingValues,
-    guardians: List<Guardian.SetupGuardian>,
+    guardians: List<Guardian.SetupGuardian.ExternalApprover>,
     updateThreshold: (Float) -> Unit,
-    editApprover: (Guardian.SetupGuardian) -> Unit,
+    editApprover: (Guardian.SetupGuardian.ExternalApprover) -> Unit,
     addApprover: () -> Unit
 ) {
     val oneOrFewerGuardians = guardians.size <= 1
@@ -489,17 +489,17 @@ fun SecureYourPlanScreen(paddingValues: PaddingValues) {
 fun TestableProtectionScreen(initialPosition: Int) {
 
     val guardians = listOf(
-        Guardian.SetupGuardian(
+        Guardian.SetupGuardian.ExternalApprover(
             label = "Ben",
             participantId = ParticipantId(generatePartitionId().toHexString()),
             deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
         ),
-        Guardian.SetupGuardian(
+        Guardian.SetupGuardian.ExternalApprover(
             label = "A.L.",
             participantId = ParticipantId(generatePartitionId().toHexString()),
             deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
         ),
-        Guardian.SetupGuardian(
+        Guardian.SetupGuardian.ExternalApprover(
             label = "Carlitos",
             participantId = ParticipantId(generatePartitionId().toHexString()),
             deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
