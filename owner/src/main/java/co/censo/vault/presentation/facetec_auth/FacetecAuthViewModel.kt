@@ -87,14 +87,10 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     fun facetecSDKInitialized() {
-        if (BuildConfig.BUILD_TYPE == "debug") {
-            skipFacetec()
-        } else {
-            state = state.copy(
-                startAuth = Resource.Success(Unit),
-                submitResultResponse = Resource.Loading()
-            )
-        }
+        state = state.copy(
+            startAuth = Resource.Success(Unit),
+            submitResultResponse = Resource.Loading()
+        )
     }
 
     fun failedToInitializeSDK() {
