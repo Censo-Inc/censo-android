@@ -133,7 +133,47 @@ data class Policy(
     val threshold: UInt,
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
+    val recovery: Recovery?
 )
+
+@Serializable
+sealed class Recovery {
+    abstract val guid: RecoveryId
+
+    @Serializable
+    @SerialName("AnotherDevice")
+    data class AnotherDevice(
+        override val guid: RecoveryId,
+    ) : Recovery()
+
+    @Serializable
+    @SerialName("ThisDevice")
+    class ThisDevice(
+        override val guid: RecoveryId,
+        val status: RecoveryStatus,
+        val createdAt: Instant,
+        val unlocksAt: Instant,
+        val expiresAt: Instant,
+        val approvals: List<Approval>,
+        val vaultSecretIds: List<VaultSecretId>,
+    ) : Recovery()
+}
+
+@Serializable
+enum class RecoveryStatus {
+    Requested, Timelocked, Available
+}
+
+@Serializable
+data class Approval(
+    val participantId: ParticipantId,
+    val status: ApprovalStatus,
+)
+
+@Serializable
+enum class ApprovalStatus {
+    Initial, WaitingForVerification, WaitingForApproval, Approved, Rejected,
+}
 
 @Serializable
 data class VaultSecret(
@@ -197,6 +237,10 @@ fun ULong?.calculateLocksAt(): Instant? {
 
     }
 }
+
+@Serializable
+@JvmInline
+value class RecoveryId(val value: String)
 
 @Serializable
 @JvmInline
