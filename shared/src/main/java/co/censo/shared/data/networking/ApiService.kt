@@ -9,6 +9,8 @@ import co.censo.shared.BuildConfig
 import co.censo.shared.data.Header
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
+import co.censo.shared.data.model.ApproveRecoveryApiRequest
+import co.censo.shared.data.model.ApproveRecoveryApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
@@ -16,13 +18,23 @@ import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
+import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.InitiateRecoveryApiRequest
+import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.RejectRecoveryApiResponse
+import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
+import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
+import co.censo.shared.data.model.StoreRecoveryTotpSecretApiRequest
+import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
 import co.censo.shared.data.model.StoreSecretApiRequest
 import co.censo.shared.data.model.StoreSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APP_PACKAGE_NAME_HEADER
@@ -164,6 +176,42 @@ interface ApiService {
     suspend fun deleteSecret(
         @Path(value = SECRET_ID) secretId: VaultSecretId
     ): RetrofitResponse<DeleteSecretApiResponse>
+
+    @POST("/v1/recovery")
+    suspend fun requestRecovery(
+        @Body apiRequest: InitiateRecoveryApiRequest
+    ): RetrofitResponse<InitiateRecoveryApiResponse>
+
+    @DELETE("/v1/recovery")
+    suspend fun deleteRecovery(): RetrofitResponse<DeleteRecoveryApiResponse>
+
+    @POST("/v1/recovery/{$PARTICIPANT_ID}/totp")
+    suspend fun storeRecoveryTotpSecret(
+        @Path(value = PARTICIPANT_ID) participantId: String,
+        @Body apiRequest: StoreRecoveryTotpSecretApiRequest
+    ): RetrofitResponse<StoreRecoveryTotpSecretApiResponse>
+
+    @POST("/v1/recovery/{$PARTICIPANT_ID}/totp-verification")
+    suspend fun submitRecoveryTotpVerification(
+        @Path(value = PARTICIPANT_ID) participantId: String,
+        @Body apiRequest: SubmitRecoveryTotpVerificationApiRequest
+    ): RetrofitResponse<SubmitRecoveryTotpVerificationApiResponse>
+
+    @POST("/v1/recovery/{$PARTICIPANT_ID}/approval")
+    suspend fun approveRecovery(
+        @Path(value = PARTICIPANT_ID) participantId: String,
+        @Body apiRequest: ApproveRecoveryApiRequest
+    ): RetrofitResponse<ApproveRecoveryApiResponse>
+
+    @POST("/v1/recovery/{$PARTICIPANT_ID}/rejection")
+    suspend fun rejectRecovery(
+        @Path(value = PARTICIPANT_ID) participantId: String
+    ): RetrofitResponse<RejectRecoveryApiResponse>
+
+    @POST("/v1/recovery/retrieval")
+    suspend fun retrieveRecoveryShards(
+        @Body apiRequest: RetrieveRecoveryShardsApiRequest
+    ): RetrofitResponse<RetrieveRecoveryShardsApiResponse>
 }
 
 class AnalyticsInterceptor(
