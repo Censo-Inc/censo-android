@@ -1,26 +1,36 @@
 package co.censo.vault.presentation.activate_approvers
 
+import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.CountDownTimerImpl
+import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.projectLog
+import co.censo.vault.presentation.activate_approvers.ActivateApproversState.Companion.CODE_EXPIRATION
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
 class ActivateApproversViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val keyRepository: KeyRepository
+    private val keyRepository: KeyRepository,
+    private val timer: VaultCountDownTimer,
 ) : ViewModel() {
 
     var state by mutableStateOf(ActivateApproversState())
@@ -34,6 +44,29 @@ class ActivateApproversViewModel @Inject constructor(
 
     fun onStart() {
         retrieveUserState()
+
+        timer.startCountDownTimer(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
+
+            val now = Clock.System.now()
+            val updatedCounter = now.epochSeconds.div(CODE_EXPIRATION)
+            val time = now.toLocalDateTime(TimeZone.UTC)
+
+            state = if (state.counter != updatedCounter) {
+                state.copy(
+                    currentSecond = time.second,
+                    counter = updatedCounter,
+                    approverCodes = generateTimeCodes(state.guardians)
+                )
+            } else {
+                state.copy(
+                    currentSecond = time.second
+                )
+            }
+        }
+    }
+
+    fun onStop() {
+        timer.stopCountDownTimer()
     }
 
     fun createPolicy() {
@@ -83,7 +116,14 @@ class ActivateApproversViewModel @Inject constructor(
             is OwnerState.Initial -> listOf<Guardian.ProspectGuardian>()
         }
 
+        val codes = if (ownerState is OwnerState.GuardianSetup && state.approverCodes.isEmpty()) {
+            generateTimeCodes(guardians)
+        } else {
+            null
+        }
+
         state = state.copy(
+            approverCodes = codes ?: state.approverCodes,
             guardians = guardians,
             ownerState = ownerState,
         )
@@ -95,7 +135,7 @@ class ActivateApproversViewModel @Inject constructor(
     ) {
 
         val codeVerified = ownerRepository.checkCodeMatches(
-            verificationCode = "123456",
+            verificationCode = state.approverCodes[guardian.participantId] ?: "",
             transportKey = guardianStatus.guardianPublicKey,
             signature = guardianStatus.signature,
             timeMillis = guardianStatus.timeMillis
@@ -131,6 +171,41 @@ class ActivateApproversViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun generateTimeCodes(guardians: List<Guardian>): Map<ParticipantId, String> {
+        val timeMillis = Clock.System.now().toEpochMilliseconds()
+
+        return guardians
+            .filter {
+                it is Guardian.ProspectGuardian && (it.status.resolveDeviceEncryptedTotpSecret() != null)
+            }.mapNotNull {
+
+                when (it) {
+                    is Guardian.ProspectGuardian -> {
+                        val totpSecret = it.status.resolveDeviceEncryptedTotpSecret()?.base64Encoded
+
+                        val code = TotpGenerator.generateCode(
+                            secret = String(
+                                keyRepository.decryptWithDeviceKey(
+                                    Base64.getDecoder().decode(totpSecret)
+                                )
+                            ),
+                            counter = timeMillis.div(CODE_EXPIRATION)
+                        )
+
+                        it.participantId to code
+                    }
+                    else -> null
+                }
+            }
+            .toMap()
+    }
+
+    private fun getSecondsLeftInMinute(): Long {
+        val timeMillis = Clock.System.now().toEpochMilliseconds()
+        val timeSeconds = timeMillis / 1000
+        return timeSeconds % 60
     }
 
     fun resetInvalidCode() {
