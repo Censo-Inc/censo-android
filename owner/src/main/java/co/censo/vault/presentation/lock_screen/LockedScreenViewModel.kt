@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.owner_ready
+package co.censo.vault.presentation.lock_screen
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

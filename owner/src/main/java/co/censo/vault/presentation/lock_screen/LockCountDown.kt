@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.owner_ready
+package co.censo.vault.presentation.lock_screen
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

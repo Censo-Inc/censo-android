@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.owner_ready
+package co.censo.vault.presentation.lock_screen
 
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.LockApiResponse
