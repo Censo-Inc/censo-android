@@ -1,6 +1,7 @@
 package co.censo.shared.data.repository
 
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.networking.NoConnectivityException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -67,5 +68,6 @@ data class ErrorResponse(val errors: List<ErrorInfo>) {
 data class ErrorInfo(
     val reason: String? = null,
     val message: String? = null,
-    val displayMessage: String? = null
+    val displayMessage: String? = null,
+    val scanResultBlob: BiometryScanResultBlob? = null,
 )
