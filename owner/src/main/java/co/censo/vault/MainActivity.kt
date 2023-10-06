@@ -27,7 +27,9 @@ import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
+import co.censo.vault.presentation.vault.VaultHomeScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
@@ -59,7 +61,13 @@ class MainActivity : FragmentActivity() {
                         },
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CensoNavHost(navController = navController)
+                    if (navController.currentDestination?.route == Screen.VaultHomeScreen.route) {
+                        LockedScreen {
+                            CensoNavHost(navController = navController)
+                        }
+                    } else {
+                        CensoNavHost(navController = navController)
+                    }
                 }
             }
         }
@@ -79,6 +87,9 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = SharedScreen.HomeRoute.route) {
                 HomeScreen(navController = navController)
+            }
+            composable(route = Screen.VaultHomeScreen.route) {
+                VaultHomeScreen(navController = navController)
             }
             composable(
                 route = "${Screen.AddBIP39Route.route}/{${Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG}}"

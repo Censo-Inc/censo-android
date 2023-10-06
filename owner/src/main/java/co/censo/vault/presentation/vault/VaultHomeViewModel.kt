@@ -6,13 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.DeleteSecretApiResponse
-import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.StoreSecretApiResponse
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,46 +21,36 @@ class VaultHomeViewModel @Inject constructor(
     var state by mutableStateOf(VaultHomeState())
         private set
 
-    fun onNewOwnerState(ownerState: OwnerState.Ready) {
-        state = state.copy(ownerState = ownerState)
+    fun onStart() {
+        retrieveOwnerState()
     }
 
-    fun addSecret(label: String, bipPhase: String, updateOwnerState: (OwnerState) -> Unit) {
-        state = state.copy(
-            storeSeedPhraseResource = Resource.Loading()
-        )
-
-        viewModelScope.async {
-            val response: Resource<StoreSecretApiResponse> = ownerRepository.storeSecret(state.ownerState!!.vault.publicMasterEncryptionKey, label, bipPhase)
-
-            if (response is Resource.Success) {
-                response.data?.ownerState?.also {
-                    updateOwnerState(it)
-                }
-            }
-
+    fun retrieveOwnerState() {
+        state = state.copy(ownerStateResource = Resource.Loading())
+        viewModelScope.launch {
+            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
             state = state.copy(
-                storeSeedPhraseResource = response
+                ownerStateResource = ownerStateResource,
             )
         }
     }
 
-    fun deleteSecret(secret: VaultSecret, updateOwnerState: (OwnerState) -> Unit) {
+    fun deleteSecret(secret: VaultSecret) {
         state = state.copy(
             deleteSeedPhraseResource = Resource.Loading()
         )
 
         viewModelScope.async {
-            val response: Resource<DeleteSecretApiResponse> = ownerRepository.deleteSecret(secret.guid)
+            val response = ownerRepository.deleteSecret(secret.guid)
 
             state = state.copy(
                 deleteSeedPhraseResource = response
             )
 
             if (response is Resource.Success) {
-                response.data?.ownerState?.also {
-                    updateOwnerState(it)
-                }
+                state = state.copy(
+                    ownerStateResource = response.map { it.ownerState },
+                )
             }
         }
     }

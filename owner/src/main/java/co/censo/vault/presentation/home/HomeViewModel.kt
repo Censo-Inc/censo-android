@@ -42,12 +42,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateOwnerState(ownerState: OwnerState) {
-        state = state.copy(
-            ownerStateResource = Resource.Success(ownerState),
-        )
-    }
-
     fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
 
     fun setUserSeenPushDialog(seenDialog: Boolean) =
@@ -59,5 +53,9 @@ class HomeViewModel @Inject constructor(
 
     fun resetPushNotificationDialog() {
         state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
+    }
+
+    fun resetOwnerState() {
+        state = state.copy(ownerStateResource = Resource.Uninitialized)
     }
 }

@@ -42,16 +42,14 @@ import co.censo.vault.util.TestTag
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun VaultHomeScreen(
-    ownerState: OwnerState.Ready,
-    updateOwnerState: (OwnerState) -> Unit,
     navController: NavController,
     viewModel: VaultHomeViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = ownerState) {
-        viewModel.onNewOwnerState(ownerState)
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
         onDispose { }
     }
 
@@ -73,74 +71,95 @@ fun VaultHomeScreen(
         }
 
         state.asyncError -> {
-            if (state.storeSeedPhraseResource is Resource.Error) {
-                DisplayError(
-                    errorMessage = state.storeSeedPhraseResource.getErrorMessage(context),
-                    dismissAction = viewModel::resetStoreSeedPhraseResponse,
-                ) {}
-            } else if (state.deleteSeedPhraseResource is Resource.Error) {
-                DisplayError(
-                    errorMessage = state.deleteSeedPhraseResource.getErrorMessage(context),
-                    dismissAction = viewModel::resetDeleteSeedPhraseResponse,
-                ) {}
+            when {
+                state.ownerStateResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.ownerStateResource.getErrorMessage(context),
+                        dismissAction = null,
+                    ) { viewModel.retrieveOwnerState() }
+                }
+                state.storeSeedPhraseResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.storeSeedPhraseResource.getErrorMessage(context),
+                        dismissAction = viewModel::resetStoreSeedPhraseResponse,
+                    ) {}
+                }
+                state.deleteSeedPhraseResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.deleteSeedPhraseResource.getErrorMessage(context),
+                        dismissAction = viewModel::resetDeleteSeedPhraseResponse,
+                    ) {}
+                }
             }
         }
 
         else -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .border(1.dp, Color.Gray)
-            ) {
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Spacer(Modifier.height(24.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Text(
-                            text = "Vault",
-                            modifier = Modifier.padding(start = 24.dp),
-                            textAlign = TextAlign.Center,
-                            color = Color.Black,
-                            fontSize = 36.sp
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        TextButton(
-                            onClick = { navController.navigate("${Screen.AddBIP39Route.route}/${state.ownerState!!.vault.publicMasterEncryptionKey.value}") },
+            state.ownerStateResource.data?.also { ownerState ->
+                when (ownerState) {
+                    is OwnerState.Ready -> {
+                        Box(
                             modifier = Modifier
-                                .semantics { testTag = TestTag.add_phrase }
-                                .padding(end = 8.dp),
+                                .fillMaxSize()
+                                .padding(16.dp)
+                                .border(1.dp, Color.Gray)
                         ) {
-                            Icon(
-                                imageVector = Icons.Rounded.AddCircle,
-                                modifier = Modifier.padding(end = 18.dp),
-                                contentDescription = "Unlock",
-                                tint = Color.Black
-                            )
+                            Column(
+                                Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                Spacer(Modifier.height(24.dp))
+
+                                Row(
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    Text(
+                                        text = "Vault",
+                                        modifier = Modifier.padding(start = 24.dp),
+                                        textAlign = TextAlign.Center,
+                                        color = Color.Black,
+                                        fontSize = 36.sp
+                                    )
+
+                                    Spacer(modifier = Modifier.weight(1f))
+
+                                    TextButton(
+                                        onClick = { navController.navigate("${Screen.AddBIP39Route.route}/${ownerState.vault.publicMasterEncryptionKey.value}") },
+                                        modifier = Modifier
+                                            .semantics { testTag = TestTag.add_phrase }
+                                            .padding(end = 8.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.AddCircle,
+                                            modifier = Modifier.padding(end = 18.dp),
+                                            contentDescription = "Unlock",
+                                            tint = Color.Black
+                                        )
+                                    }
+                                }
+
+                                LazyColumn(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    val secrets = ownerState.vault.secrets
+
+                                    items(secrets.size) { index ->
+                                        VaultSecret(
+                                            secret = secrets[index],
+                                            onDelete = {
+                                                viewModel.deleteSecret(it)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    LazyColumn(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val secrets = state.ownerState?.vault?.secrets ?: listOf()
-
-                        items(secrets.size) { index ->
-                            VaultSecret(
-                                secret = secrets[index],
-                                onDelete = { viewModel.deleteSecret(it, updateOwnerState) }
-                            )
-                        }
+                    else -> {
+                        Text(text = "Boom!")
                     }
                 }
             }

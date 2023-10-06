@@ -16,7 +16,6 @@ import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,10 +26,32 @@ class LockedScreenViewModel @Inject constructor(
     var state by mutableStateOf(LockedScreenState())
         private set
 
-    fun onInit(locksAt: Instant?) {
+    fun onStart() {
+        retrieveOwnerState()
+    }
+
+    fun retrieveOwnerState() {
+        state = state.copy(ownerStateResource = Resource.Loading())
+
+        viewModelScope.launch {
+            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
+            onOwnerState(ownerStateResource)
+        }
+    }
+
+    private fun onOwnerState(ownerStateResource: Resource<OwnerState>) {
         state = state.copy(
-            lockStatus = LockedScreenState.LockStatus.fromInstant(locksAt)
+            ownerStateResource = ownerStateResource,
         )
+
+        if (ownerStateResource is Resource.Success) {
+            val ownerState = ownerStateResource.data
+            if (ownerState is OwnerState.Ready) {
+                state = state.copy(
+                    lockStatus = LockedScreenState.LockStatus.fromInstant(ownerState.locksAt)
+                )
+            }
+        }
     }
 
     fun initUnlock() {
@@ -41,7 +62,7 @@ class LockedScreenViewModel @Inject constructor(
         )
     }
 
-    suspend fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry, updateOwnerState: (OwnerState) -> Unit): Resource<BiometryScanResultBlob> {
+    suspend fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
         state = state.copy(
             lockStatus = LockedScreenState.LockStatus.UnlockInProgress(
                 apiCall = Resource.Loading()
@@ -58,16 +79,14 @@ class LockedScreenViewModel @Inject constructor(
             )
 
             if (unlockVaultResponse is Resource.Success) {
-                unlockVaultResponse.data?.ownerState?.also {
-                    updateOwnerState(it)
-                }
+                onOwnerState(unlockVaultResponse.map { it.ownerState })
             }
 
             unlockVaultResponse.map { it.scanResultBlob }
         }.await()
     }
 
-    fun initLock(updateOwnerState: (OwnerState) -> Unit) {
+    fun initLock() {
         state = state.copy(
             lockStatus = LockedScreenState.LockStatus.LockInProgress(
                 apiCall = Resource.Loading()
@@ -84,9 +103,7 @@ class LockedScreenViewModel @Inject constructor(
             )
 
             if (lockVaultResponse is Resource.Success) {
-                lockVaultResponse.data?.ownerState?.also {
-                    updateOwnerState(it)
-                }
+                onOwnerState(lockVaultResponse.map { it.ownerState })
             }
         }
     }

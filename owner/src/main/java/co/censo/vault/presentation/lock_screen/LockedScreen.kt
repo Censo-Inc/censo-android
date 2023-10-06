@@ -27,17 +27,12 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import kotlinx.datetime.Instant
 
 @Composable
 fun LockedScreen(
-    locksAt: Instant?,
-    updateOwnerState: (OwnerState) -> Unit,
-    onUnlockedTimeOut: () -> Unit,
     viewModel: LockedScreenViewModel = hiltViewModel(),
     content: @Composable () -> Unit,
 ) {
@@ -45,8 +40,8 @@ fun LockedScreen(
 
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = locksAt) {
-        viewModel.onInit(locksAt)
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
         onDispose {}
     }
 
@@ -72,7 +67,7 @@ fun LockedScreen(
                 FullScreenButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     color = Colors.PrimaryBlue,
-                    textColor = Color.White,
+                    borderColor = Color.White,
                     border = true,
                     contentPadding = PaddingValues(vertical = 12.dp),
                     onClick = viewModel::initUnlock,
@@ -107,15 +102,15 @@ fun LockedScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    LockCountDown(lockStatus.locksAt, onTimeOut = onUnlockedTimeOut)
+                    LockCountDown(lockStatus.locksAt, onTimeOut = viewModel::retrieveOwnerState)
                     Spacer(modifier = Modifier.height(8.dp))
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Colors.PrimaryBlue,
-                        textColor = Color.White,
+                        borderColor = Color.White,
                         border = true,
                         contentPadding = PaddingValues(vertical = 12.dp),
-                        onClick = { viewModel.initLock(updateOwnerState) }
+                        onClick = viewModel::initLock
                     ) {
                         Text(
                             text = "Lock",
@@ -135,8 +130,7 @@ fun LockedScreen(
                         onFaceScanReady = { verificationId, facetecData ->
                             viewModel.onFaceScanReady(
                                 verificationId,
-                                facetecData,
-                                updateOwnerState
+                                facetecData
                             )
                         }
                     )
