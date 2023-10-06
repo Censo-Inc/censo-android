@@ -60,12 +60,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.presentation.Colors
-import co.censo.shared.presentation.Colors.DividerGray
-import co.censo.shared.presentation.Colors.GreyText
-import co.censo.shared.presentation.Colors.LabelText
-import co.censo.shared.presentation.Colors.PrimaryBlue
+import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.SharedColors.DividerGray
+import co.censo.shared.presentation.SharedColors.GreyText
+import co.censo.shared.presentation.SharedColors.LabelText
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +86,7 @@ fun AddApproverDialog(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .background(color = Colors.BackgroundAlphaBlack)
+            .background(color = SharedColors.BackgroundAlphaBlack)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -137,8 +137,8 @@ fun AddApproverDialog(
                     .padding(horizontal = contentHorizontalPadding)
                     .focusRequester(focusRequester),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = PrimaryBlue,
-                    cursorColor = Colors.CursorBlue,
+                    focusedBorderColor = VaultColors.PrimaryColor,
+                    cursorColor = SharedColors.CursorBlue,
                     textColor = Color.Black,
                     errorBorderColor = Color.Red,
                 ),
@@ -170,7 +170,7 @@ fun AddApproverDialog(
                 ) {
                     Text(
                         text = stringResource(id = R.string.cancel),
-                        color = PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         fontWeight = FontWeight.W400,
                         fontSize = 20.sp
                     )
@@ -182,7 +182,7 @@ fun AddApproverDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.continue_text),
-                        color = PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         fontWeight = FontWeight.W700,
                         fontSize = 20.sp
                     )
@@ -202,7 +202,7 @@ fun CancelEditPlanDialog(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .background(color = Colors.BackgroundAlphaBlack)
+            .background(color = SharedColors.BackgroundAlphaBlack)
             .verticalScroll(rememberScrollState()),
     ) {
 
@@ -255,7 +255,7 @@ fun CancelEditPlanDialog(
                 ) {
                     Text(
                         text = stringResource(id = R.string.dismiss),
-                        color = PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         fontWeight = FontWeight.W400,
                         fontSize = 20.sp
                     )
@@ -267,7 +267,7 @@ fun CancelEditPlanDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.exit),
-                        color = PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         fontWeight = FontWeight.W700,
                         fontSize = 20.sp
                     )
@@ -426,7 +426,7 @@ fun AddAnotherButton(
             containerColor = Color.White
         ),
         contentPadding = PaddingValues(horizontal = 48.dp),
-        border = BorderStroke(1.dp, PrimaryBlue),
+        border = BorderStroke(1.dp, VaultColors.PrimaryColor),
         shape = RoundedCornerShape(4.dp),
         onClick = onClick
     ) {
@@ -436,12 +436,12 @@ fun AddAnotherButton(
             Icon(
                 imageVector = Icons.Rounded.Add,
                 stringResource(R.string.add_another_approver),
-                tint = PrimaryBlue
+                tint = VaultColors.PrimaryColor
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = stringResource(R.string.select_another),
-                color = PrimaryBlue,
+                color = VaultColors.PrimaryColor,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.W400
             )
@@ -473,26 +473,26 @@ fun ThresholdSlider(
                     Icon(
                         imageVector = Icons.Rounded.PhoneAndroid,
                         "",
-                        tint = PrimaryBlue,
+                        tint = VaultColors.PrimaryColor,
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Rounded.PhonelinkErase,
                         "",
-                        tint = PrimaryBlue,
+                        tint = VaultColors.PrimaryColor,
                     )
                 }
             }
         }
 
         val sliderColors = SliderDefaults.colors(
-            activeTrackColor = PrimaryBlue,
-            inactiveTickColor = Colors.InactiveSliderGrey,
+            activeTrackColor = VaultColors.PrimaryColor,
+            inactiveTickColor = SharedColors.InactiveSliderGrey,
             thumbColor = Color.White,
-            activeTickColor = PrimaryBlue,
-            inactiveTrackColor = Colors.InactiveSliderGrey,
-            disabledActiveTrackColor = Colors.InactiveSliderGrey,
-            disabledInactiveTrackColor = Colors.InactiveSliderGrey
+            activeTickColor = VaultColors.PrimaryColor,
+            inactiveTrackColor = SharedColors.InactiveSliderGrey,
+            disabledActiveTrackColor = SharedColors.InactiveSliderGrey,
+            disabledInactiveTrackColor = SharedColors.InactiveSliderGrey
         )
 
         Slider(
@@ -521,7 +521,7 @@ fun ThresholdSlider(
             for ((index, _) in guardians.withIndex()) {
                 Text(
                     text = "${index + 1}",
-                    color = PrimaryBlue,
+                    color = VaultColors.PrimaryColor,
                     fontWeight = FontWeight.W700,
                     fontSize = 20.sp
                 )
@@ -590,7 +590,7 @@ fun ApproverRow(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = stringResource(R.string.edit_approver),
-                    tint = PrimaryBlue
+                    tint = VaultColors.PrimaryColor
                 )
             }
         }

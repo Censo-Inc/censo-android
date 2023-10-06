@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.activate_approvers
 
 import FullScreenButton
+import android.provider.CalendarContract
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,9 +35,9 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
-import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
 
@@ -71,7 +72,7 @@ fun ActivateApproversScreen(
             ) {
                 FullScreenButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    color = Colors.PrimaryBlue,
+                    color = VaultColors.PrimaryColor,
                     borderColor = Color.White,
                     border = false,
                     contentPadding = PaddingValues(vertical = 12.dp),
@@ -106,7 +107,7 @@ fun ActivateApproversScreen(
                                 .size(72.dp)
                                 .align(Alignment.Center),
                             strokeWidth = 8.dp,
-                            color = Colors.PrimaryBlue
+                            color = VaultColors.PrimaryColor
                         )
                     }
                 }
@@ -144,7 +145,7 @@ fun ActivateApproversScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(R.string.activate_approvers),
                             fontSize = 24.sp,
-                            color = Colors.PrimaryBlue,
+                            color = VaultColors.PrimaryColor,
                             textAlign = TextAlign.Center
                         )
 

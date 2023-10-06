@@ -25,11 +25,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.guardian.R
+import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.home.GuardianHomeViewModel.Companion.VALID_CODE_LENGTH
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
-import co.censo.shared.presentation.Colors
-import co.censo.shared.presentation.Colors.ErrorRed
+import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.SharedColors.ErrorRed
 
 @Composable
 fun ApproverCodeVerification(
@@ -50,7 +51,7 @@ fun ApproverCodeVerification(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Colors.PrimaryBlue),
+                .background(GuardianColors.PrimaryColor),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -66,7 +67,7 @@ fun ApproverCodeVerification(
         Text(
             modifier = Modifier.padding(16.dp),
             text = stringResource(R.string.approver_verification_code_text),
-            color = Colors.PrimaryBlue,
+            color = GuardianColors.PrimaryColor,
             textAlign = TextAlign.Center,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
@@ -85,7 +86,7 @@ fun ApproverCodeVerification(
         if (isLoading) {
             Text(
                 text = stringResource(R.string.waiting_for_owner_verify_code),
-                color = Colors.GreyText,
+                color = SharedColors.GreyText,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(24.dp))

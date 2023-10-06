@@ -35,9 +35,9 @@ import androidx.navigation.NavController
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.SecurityPlanData
-import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.security_plan.AddApproverDialog
 import co.censo.vault.presentation.components.security_plan.CancelEditPlanDialog
 import co.censo.vault.presentation.components.security_plan.EditOrDeleteMenu
@@ -87,7 +87,7 @@ fun PlanSetupScreen(
         containerColor = Color.White,
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Colors.PrimaryBlue),
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.PrimaryColor),
                 navigationIcon = {
 
                     when (state.showBackIcon) {
@@ -135,14 +135,14 @@ fun PlanSetupScreen(
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
-                        borderColor = Colors.PrimaryBlue,
+                        borderColor = VaultColors.PrimaryColor,
                         border = true,
                         contentPadding = PaddingValues(vertical = 6.dp),
                         onClick = viewModel::onMoreInfoClicked
                     ) {
                         Text(
                             text = stringResource(R.string.how_does_this_work),
-                            color = Colors.PrimaryBlue,
+                            color = VaultColors.PrimaryColor,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.W300
                         )
@@ -155,7 +155,7 @@ fun PlanSetupScreen(
 
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
-                        color = Colors.PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         borderColor = Color.White,
                         border = false,
                         contentPadding = PaddingValues(vertical = 12.dp),
