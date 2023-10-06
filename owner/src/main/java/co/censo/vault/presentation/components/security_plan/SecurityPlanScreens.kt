@@ -43,7 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.cryptography.generateBase32
+import co.censo.shared.data.cryptography.generateBase64
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
@@ -492,17 +492,17 @@ fun TestableProtectionScreen(initialPosition: Int) {
         Guardian.SetupGuardian.ExternalApprover(
             label = "Ben",
             participantId = ParticipantId(generatePartitionId().toHexString()),
-            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase64())
         ),
         Guardian.SetupGuardian.ExternalApprover(
             label = "A.L.",
             participantId = ParticipantId(generatePartitionId().toHexString()),
-            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase64())
         ),
         Guardian.SetupGuardian.ExternalApprover(
             label = "Carlitos",
             participantId = ParticipantId(generatePartitionId().toHexString()),
-            deviceEncryptedTotpSecret = Base64EncodedData(generateBase32())
+            deviceEncryptedTotpSecret = Base64EncodedData(generateBase64())
         ),
     )
 
