@@ -316,10 +316,36 @@ fun ActivateApproverActionItem(
 
 
                 is GuardianStatus.VerificationSubmitted -> {
+
+                    val formattedCode = if (approverCode.length == CODE_LENGTH) {
+                        "${approverCode.slice(0 until CODE_LENGTH / 2)}-${
+                            approverCode.slice(
+                                CODE_LENGTH / 2 until CODE_LENGTH
+                            )
+                        }"
+                    } else {
+                        approverCode
+                    }
+
+                    Text(text = formattedCode, color = VaultColors.PrimaryColor)
+
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .background(
+                                color = SharedColors.TimeLeftGray,
+                                shape = CircleShape
+                            )
+                            .background(
+                                color = Color.White,
+                                shape = TimeLeftShape(percentageLeft)
+                            )
+                    )
+
                     Button(onClick = {
                         verifyApprover()
                     }) {
-                        Text(text = "Verify Code", color = Color.White)
+                        Text(text = "V", color = Color.White)
                     }
                 }
             }

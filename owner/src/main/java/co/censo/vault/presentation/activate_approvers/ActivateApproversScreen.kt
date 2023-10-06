@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
@@ -40,6 +41,7 @@ import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
+import co.censo.vault.presentation.components.OnLifecycleEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,9 +53,17 @@ fun ActivateApproversScreen(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { viewModel.onStop() }
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START
+            -> {
+                viewModel.onStart()
+            }
+            Lifecycle.Event.ON_PAUSE -> {
+                viewModel.onStop()
+            }
+            else -> Unit
+        }
     }
 
     Scaffold(
