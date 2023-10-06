@@ -13,31 +13,28 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 data class ActivateApproversState(
-    val ownerState: OwnerState = OwnerState.Initial,
+    val ownerState: OwnerState? = null,
     val guardians: List<Guardian> = emptyList(),
     val counter: Long = Clock.System.now().epochSeconds.div(CODE_EXPIRATION),
     val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
     val approverCodes: Map<ParticipantId, String> = emptyMap(),
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val createPolicyResponse: Resource<CreatePolicyApiResponse> = Resource.Uninitialized,
-    val confirmGuardianshipResponse: Resource<ConfirmGuardianshipApiResponse> = Resource.Uninitialized,
     val policyIntermediatePublicKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(
         ""
     ),
-    val codeNotValidError: Boolean = false
 ) {
     companion object {
         const val CODE_EXPIRATION = 60L
     }
 
     val loading =
-        userResponse is Resource.Loading ||
+        (userResponse is Resource.Loading && ownerState == null) ||
                 createPolicyResponse is Resource.Loading
 
     val asyncError =
         userResponse is Resource.Error ||
-                createPolicyResponse is Resource.Error ||
-                codeNotValidError
+                createPolicyResponse is Resource.Error
 
     val countdownPercentage = 1.0f - (currentSecond.toFloat() / CODE_EXPIRATION.toFloat())
 }

@@ -62,6 +62,12 @@ class ActivateApproversViewModel @Inject constructor(
                     currentSecond = time.second
                 )
             }
+
+            if (time.second % 5 == 0) {
+                if (state.userResponse !is Resource.Loading) {
+                    retrieveUserState()
+                }
+            }
         }
     }
 
@@ -127,48 +133,55 @@ class ActivateApproversViewModel @Inject constructor(
             guardians = guardians,
             ownerState = ownerState,
         )
+
+        guardians.filter {
+            it is Guardian.ProspectGuardian && it.status is GuardianStatus.VerificationSubmitted
+        }.forEach {
+            verifyGuardian(
+                it.participantId,
+                (it as Guardian.ProspectGuardian).status as GuardianStatus.VerificationSubmitted
+            )
+        }
     }
 
-    fun verifyGuardian(
-        guardian: Guardian,
+    private fun verifyGuardian(
+        participantId: ParticipantId,
         guardianStatus: GuardianStatus.VerificationSubmitted
     ) {
 
         val codeVerified = ownerRepository.checkCodeMatches(
-            verificationCode = state.approverCodes[guardian.participantId] ?: "",
+            verificationCode = state.approverCodes[participantId] ?: "",
             transportKey = guardianStatus.guardianPublicKey,
             signature = guardianStatus.signature,
             timeMillis = guardianStatus.timeMillis
         )
 
-        if (!codeVerified) {
-            state = state.copy(
-                codeNotValidError = true
-            )
-            return
-        }
-
         viewModelScope.launch {
-            val keyConfirmationTimeMillis = Clock.System.now().epochSeconds
+            if (codeVerified) {
 
-            val keyConfirmationMessage =
-                guardianStatus.guardianPublicKey.getBytes() + guardian.participantId.getBytes() + keyConfirmationTimeMillis.toString()
-                    .toByteArray()
-            val keyConfirmationSignature =
-                keyRepository.retrieveInternalDeviceKey().sign(keyConfirmationMessage)
+                val keyConfirmationTimeMillis = Clock.System.now().epochSeconds
 
-            val confirmGuardianShipResponse = ownerRepository.confirmGuardianShip(
-                participantId = guardian.participantId,
-                keyConfirmationSignature = keyConfirmationSignature,
-                keyConfirmationTimeMillis = keyConfirmationTimeMillis
-            )
+                val keyConfirmationMessage =
+                    guardianStatus.guardianPublicKey.getBytes() + participantId.getBytes() + keyConfirmationTimeMillis.toString()
+                        .toByteArray()
+                val keyConfirmationSignature =
+                    keyRepository.retrieveInternalDeviceKey().sign(keyConfirmationMessage)
 
-            if (confirmGuardianShipResponse is Resource.Success) {
-                updateOwnerState(confirmGuardianShipResponse.data!!.ownerState)
-
-                state = state.copy(
-                    confirmGuardianshipResponse = confirmGuardianShipResponse
+                val confirmGuardianShipResponse = ownerRepository.confirmGuardianShip(
+                    participantId = participantId,
+                    keyConfirmationSignature = keyConfirmationSignature,
+                    keyConfirmationTimeMillis = keyConfirmationTimeMillis
                 )
+
+                if (confirmGuardianShipResponse is Resource.Success) {
+                    updateOwnerState(confirmGuardianShipResponse.data!!.ownerState)
+                }
+            } else {
+                val rejectVerificationResponse = ownerRepository.rejectVerification(participantId)
+
+                if (rejectVerificationResponse is Resource.Success) {
+                    updateOwnerState(rejectVerificationResponse.data!!.ownerState)
+                }
             }
         }
     }
@@ -200,22 +213,6 @@ class ActivateApproversViewModel @Inject constructor(
                 }
             }
             .toMap()
-    }
-
-    private fun getSecondsLeftInMinute(): Long {
-        val timeMillis = Clock.System.now().toEpochMilliseconds()
-        val timeSeconds = timeMillis / 1000
-        return timeSeconds % 60
-    }
-
-    fun resetInvalidCode() {
-        state = state.copy(codeNotValidError = false)
-    }
-
-    fun resetConfirmGuardianshipResponse() {
-        state = state.copy(
-            confirmGuardianshipResponse = Resource.Uninitialized,
-        )
     }
 
     fun resetUserResponse() {

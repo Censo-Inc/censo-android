@@ -59,7 +59,6 @@ sealed class GuardianStatus {
         val signature: Base64EncodedData,
         val timeMillis: Long,
         val guardianPublicKey: Base58EncodedGuardianPublicKey,
-        val verificationStatus: VerificationStatus,
         val submittedAt: Instant,
     ) : GuardianStatus()
 

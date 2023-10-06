@@ -123,14 +123,7 @@ fun ActivateApproversScreen(
                 }
 
                 state.asyncError -> {
-                    if (state.codeNotValidError) {
-                        DisplayError(
-                            errorMessage = stringResource(R.string.codes_do_not_match),
-                            dismissAction = viewModel::resetInvalidCode,
-                        ) {
-                            viewModel.resetInvalidCode()
-                        }
-                    } else if (state.userResponse is Resource.Error) {
+                    if (state.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = state.userResponse.getErrorMessage(context),
                             dismissAction = viewModel::resetUserResponse,
@@ -166,20 +159,6 @@ fun ActivateApproversScreen(
                                 approver = approver,
                                 approverCode = state.approverCodes[approver.participantId] ?: "",
                                 percentageLeft = state.countdownPercentage,
-                                verifyApprover = {
-                                    if (approver is Guardian.ProspectGuardian && approver.status is GuardianStatus.VerificationSubmitted) {
-                                        viewModel.verifyGuardian(
-                                            approver,
-                                            approver.status as GuardianStatus.VerificationSubmitted
-                                        )
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.approver_does_not_need_verification),
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
-                                }
                             )
                         }
                     }
