@@ -5,7 +5,7 @@ import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.StoreSecretApiResponse
 
-data class VaultState(
+data class VaultHomeState(
     val ownerState: OwnerState.Ready? = null,
 
     val storeSeedPhraseResource: Resource<StoreSecretApiResponse> = Resource.Uninitialized,

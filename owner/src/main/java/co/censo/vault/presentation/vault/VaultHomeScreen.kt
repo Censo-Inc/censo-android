@@ -41,11 +41,11 @@ import co.censo.vault.util.TestTag
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun VaultSecrets(
+fun VaultHomeScreen(
     ownerState: OwnerState.Ready,
     updateOwnerState: (OwnerState) -> Unit,
     navController: NavController,
-    viewModel: VaultViewModel = hiltViewModel()
+    viewModel: VaultHomeViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity

@@ -16,11 +16,11 @@ import kotlinx.coroutines.async
 import javax.inject.Inject
 
 @HiltViewModel
-class VaultViewModel @Inject constructor(
+class VaultHomeViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(VaultState())
+    var state by mutableStateOf(VaultHomeState())
         private set
 
     fun onNewOwnerState(ownerState: OwnerState.Ready) {

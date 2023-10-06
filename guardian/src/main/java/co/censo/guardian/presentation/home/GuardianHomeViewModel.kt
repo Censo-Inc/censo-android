@@ -8,8 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.ECHelper
-import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
@@ -62,7 +60,10 @@ class GuardianHomeViewModel @Inject constructor(
                     }
 
                     is GuardianPhase.WaitingForConfirmation -> GuardianUIState.WAITING_FOR_CONFIRMATION
-                    GuardianPhase.Complete -> GuardianUIState.COMPLETE
+                    is GuardianPhase.Complete -> GuardianUIState.COMPLETE
+                    is GuardianPhase.RecoveryConfirmation -> TODO()
+                    is GuardianPhase.RecoveryRequested -> TODO()
+                    is GuardianPhase.RecoveryVerification -> TODO()
                 }
             }
 

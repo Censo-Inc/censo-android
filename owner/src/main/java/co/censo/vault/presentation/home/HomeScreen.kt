@@ -35,7 +35,8 @@ import co.censo.shared.data.model.toSecurityPlan
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.OnLifecycleEvent
-import co.censo.vault.presentation.owner_ready.OwnerReadyScreen
+import co.censo.vault.presentation.owner_ready.LockedScreen
+import co.censo.vault.presentation.vault.VaultHomeScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -156,12 +157,17 @@ fun HomeScreen(
                     }
 
                     is OwnerState.Ready ->
-                        OwnerReadyScreen(
-                            ownerState,
-                            refreshOwnerState = viewModel::retrieveOwnerState,
+                        LockedScreen(
+                            locksAt = ownerState.locksAt,
                             updateOwnerState = viewModel::updateOwnerState,
-                            navController = navController
-                        )
+                            onUnlockedTimeOut = viewModel::retrieveOwnerState
+                        ) {
+                            VaultHomeScreen(
+                                ownerState = ownerState,
+                                updateOwnerState = viewModel::updateOwnerState,
+                                navController = navController
+                            )
+                        }
                 }
             }
         }
