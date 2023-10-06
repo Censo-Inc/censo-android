@@ -5,9 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
@@ -28,6 +30,8 @@ import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.lock_screen.LockedScreen
+import co.censo.vault.presentation.lock_screen.LockScreenState
+import co.censo.vault.presentation.lock_screen.LockScreenViewModel
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
 import co.censo.vault.presentation.vault.VaultHomeScreen
 import co.censo.vault.ui.theme.VaultTheme
@@ -39,6 +43,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
+
+    val lockViewModel: LockScreenViewModel by viewModels()
 
     @Inject
     lateinit var storage: Storage
@@ -61,12 +67,16 @@ class MainActivity : FragmentActivity() {
                         },
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if (navController.currentDestination?.route == Screen.VaultHomeScreen.route) {
-                        LockedScreen {
+                    when (lockViewModel.state.lockStatus) {
+                        is LockScreenState.LockStatus.Unlocked -> {
                             CensoNavHost(navController = navController)
                         }
-                    } else {
-                        CensoNavHost(navController = navController)
+
+                        else -> {
+                            LockedScreen {
+                                Text(text = "hello")
+                            }
+                        }
                     }
                 }
             }

@@ -7,7 +7,7 @@ import co.censo.shared.data.model.UnlockApiResponse
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
-data class LockedScreenState(
+data class LockScreenState(
     val ownerStateResource: Resource<OwnerState> = Resource.Uninitialized,
     val lockStatus: LockStatus = LockStatus.Locked
 ) {

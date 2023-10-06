@@ -33,7 +33,7 @@ import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @Composable
 fun LockedScreen(
-    viewModel: LockedScreenViewModel = hiltViewModel(),
+    viewModel: LockScreenViewModel = hiltViewModel(),
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.state
@@ -46,7 +46,7 @@ fun LockedScreen(
     }
 
     when (val lockStatus = state.lockStatus) {
-        is LockedScreenState.LockStatus.Locked -> {
+        is LockScreenState.LockStatus.Locked -> {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -82,7 +82,7 @@ fun LockedScreen(
             }
         }
 
-        is LockedScreenState.LockStatus.Unlocked -> {
+        is LockScreenState.LockStatus.Unlocked -> {
             Column(
                 Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -123,7 +123,7 @@ fun LockedScreen(
             }
         }
 
-        is LockedScreenState.LockStatus.UnlockInProgress -> {
+        is LockScreenState.LockStatus.UnlockInProgress -> {
             when (lockStatus.apiCall) {
                 is Resource.Uninitialized -> {
                     FacetecAuth(
@@ -150,7 +150,7 @@ fun LockedScreen(
             }
         }
 
-        is LockedScreenState.LockStatus.LockInProgress -> {
+        is LockScreenState.LockStatus.LockInProgress -> {
             when (lockStatus.apiCall) {
                 is Resource.Error -> {
                     DisplayError(
