@@ -15,6 +15,8 @@ import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.vault.data.repository.PushRepository
 import co.censo.vault.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.CountDownTimerImpl
+import co.censo.shared.util.VaultCountDownTimer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -94,5 +96,10 @@ object AppModule {
         api: ApiService,
     ): FacetecRepository {
         return FacetecRepositoryImpl(api)
+    }
+
+    @Provides
+    fun provideCountdownTimer() : VaultCountDownTimer {
+        return CountDownTimerImpl()
     }
 }

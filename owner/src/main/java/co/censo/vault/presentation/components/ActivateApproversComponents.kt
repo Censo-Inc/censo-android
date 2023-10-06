@@ -7,6 +7,7 @@ import ParticipantId
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.core.FloatTweenSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.cryptography.TotpGenerator.CODE_LENGTH
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
@@ -146,6 +148,8 @@ fun ActivateApproversTopBar() {
 @Composable
 fun ActivateApproverRow(
     approver: Guardian,
+    percentageLeft: Float = 0.0f,
+    approverCode: String = "",
     horizontalPadding: Dp = 16.dp,
     verifyApprover: () -> Unit
 ) {
@@ -194,7 +198,10 @@ fun ActivateApproverRow(
 
             ActivateApproverActionItem(
                 approver = approver,
-                verifyApprover = verifyApprover
+                verifyApprover = verifyApprover,
+                percentageLeft = percentageLeft,
+                approverCode = approverCode,
+
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -209,6 +216,8 @@ fun ActivateApproverRow(
 @Composable
 fun ActivateApproverActionItem(
     approver: Guardian,
+    approverCode: String,
+    percentageLeft: Float,
     verifyApprover: () -> Unit
 ) {
 
@@ -232,13 +241,21 @@ fun ActivateApproverActionItem(
 
         is Guardian.ProspectGuardian -> {
             when (val approverStatus = approver.status) {
+                is GuardianStatus.Initial,
                 is GuardianStatus.Accepted -> {
+
+                    val formattedCode = if (approverCode.length == CODE_LENGTH) {
+                        "${approverCode.slice(0 until CODE_LENGTH / 2)}-${approverCode.slice(CODE_LENGTH / 2 until CODE_LENGTH)}"
+                    } else {
+                        approverCode
+                    }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "123-456",
+                            text = formattedCode,
                             color = Colors.PrimaryBlue,
                             fontWeight = FontWeight.W600,
                             fontSize = 24.sp
@@ -253,7 +270,7 @@ fun ActivateApproverActionItem(
                                 )
                                 .background(
                                     color = Color.White,
-                                    shape = TimeLeftShape(0.75f)
+                                    shape = TimeLeftShape(percentageLeft)
                                 )
                         )
                     }

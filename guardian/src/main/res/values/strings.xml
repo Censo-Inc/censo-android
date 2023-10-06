@@ -34,5 +34,9 @@
     <string name="display_qr_code">Display this QR code for the owner of social policy to scan</string>
     <string name="login">Login</string>
     <string name="authenticate_with_onetap">Authenticate with OneTap</string>
+    <string name="become_an_approver">Become an Approver</string>
+    <string name="approver_verification_code_text">Lorem Ipsum dolor sit amet, consectetur adipiscing elit</string>
+    <string name="waiting_for_owner_verify_code">Waiting for owner to verify the code.</string>
+    <string name="submit_code_error_occurred">The code you entered is not correct. Please try again.</string>
 
 </resources>

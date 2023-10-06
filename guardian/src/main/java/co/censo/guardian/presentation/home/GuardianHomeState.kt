@@ -10,6 +10,7 @@ import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import okhttp3.ResponseBody
 
 data class GuardianHomeState(
+    val verificationCode: String = "",
     val guardianState: GuardianState? = null,
     val invitationId: InvitationId = InvitationId(""),
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,

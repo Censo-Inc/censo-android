@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.generateBase32
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
@@ -218,7 +219,7 @@ class PlanSetupViewModel @Inject constructor(
                 )
             }
         } else {
-            val secret = generateBase32()
+            val secret = TotpGenerator.generateSecret()
             val encryptedSecret = keyRepository.encryptWithDeviceKey(secret.toByteArray())
 
             guardians.add(

@@ -13,6 +13,7 @@ interface KeyRepository {
     fun retrieveInternalDeviceKey(): InternalDeviceKey
     fun createGuardianKey(): EncryptionKey
     fun encryptWithDeviceKey(data: ByteArray) : ByteArray
+    fun decryptWithDeviceKey(data: ByteArray) : ByteArray
 }
 
 class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
@@ -41,4 +42,7 @@ class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
 
     override fun encryptWithDeviceKey(data: ByteArray) =
         retrieveInternalDeviceKey().encrypt(data)
+
+    override fun decryptWithDeviceKey(data: ByteArray) =
+        retrieveInternalDeviceKey().decrypt(data)
 }
