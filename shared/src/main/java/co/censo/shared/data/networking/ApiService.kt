@@ -18,6 +18,7 @@ import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
 import co.censo.shared.data.model.StoreSecretApiResponse
@@ -138,6 +139,11 @@ interface ApiService {
         @Path(value = PARTICIPANT_ID) participantId: String,
         @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
     ): RetrofitResponse<ConfirmGuardianshipApiResponse>
+
+    @POST("/v1/guardians/{$PARTICIPANT_ID}/verification/reject")
+    suspend fun rejectVerification(
+        @Path(value = PARTICIPANT_ID) participantId: String,
+    ): RetrofitResponse<RejectGuardianVerificationApiResponse>
 
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>

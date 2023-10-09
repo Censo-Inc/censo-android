@@ -79,8 +79,15 @@ fun GuardianHomeScreen(
 
             GuardianUIState.WAITING_FOR_CONFIRMATION -> {
                 Text(
-                    "Code sent to owner, waiting for them to approve...",
+                    "Code sent to owner, waiting for them to approve. Re-send below...",
                     textAlign = TextAlign.Center
+                )
+                ApproverCodeVerification(
+                    value = state.verificationCode,
+                    onValueChanged = viewModel::updateVerificationCode,
+                    errorResource = if (state.submitVerificationResource is Resource.Error) state.submitVerificationResource
+                    else null,
+                    isLoading = state.submitVerificationResource is Resource.Loading,
                 )
             }
 

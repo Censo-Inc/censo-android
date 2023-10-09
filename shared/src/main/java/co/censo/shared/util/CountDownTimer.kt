@@ -28,5 +28,6 @@ class CountDownTimerImpl : VaultCountDownTimer {
 
     object Companion {
         const val UPDATE_COUNTDOWN = 1_000L
+        const val POLLING_VERIFICATION_COUNTDOWN = 5_000L
     }
 }

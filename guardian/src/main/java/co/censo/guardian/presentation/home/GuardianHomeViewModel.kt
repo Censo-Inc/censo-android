@@ -73,6 +73,7 @@ class GuardianHomeViewModel @Inject constructor(
 
                     is GuardianPhase.WaitingForConfirmation -> GuardianUIState.WAITING_FOR_CONFIRMATION
                     GuardianPhase.Complete -> GuardianUIState.COMPLETE
+                    is GuardianPhase.WaitingForVerification -> GuardianUIState.WAITING_FOR_CONFIRMATION
                 }
             }
 

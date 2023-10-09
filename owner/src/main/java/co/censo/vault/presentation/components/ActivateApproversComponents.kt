@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -152,7 +153,6 @@ fun ActivateApproverRow(
     percentageLeft: Float = 0.0f,
     approverCode: String = "",
     horizontalPadding: Dp = 16.dp,
-    verifyApprover: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -199,7 +199,6 @@ fun ActivateApproverRow(
 
             ActivateApproverActionItem(
                 approver = approver,
-                verifyApprover = verifyApprover,
                 percentageLeft = percentageLeft,
                 approverCode = approverCode,
 
@@ -219,7 +218,6 @@ fun ActivateApproverActionItem(
     approver: Guardian,
     approverCode: String,
     percentageLeft: Float,
-    verifyApprover: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -316,11 +314,11 @@ fun ActivateApproverActionItem(
 
 
                 is GuardianStatus.VerificationSubmitted -> {
-                    Button(onClick = {
-                        verifyApprover()
-                    }) {
-                        Text(text = "Verify Code", color = Color.White)
-                    }
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp),
+                        color = VaultColors.PrimaryColor,
+                        strokeWidth = 3.dp,
+                    )
                 }
             }
         }
@@ -438,7 +436,6 @@ val dummyListOfApprovers = listOf(
             signature = Base64EncodedData(""),
             timeMillis = 1L,
             guardianPublicKey = Base58EncodedGuardianPublicKey(""),
-            verificationStatus = VerificationStatus.WaitingForVerification,
             submittedAt = Clock.System.now(),
             deviceEncryptedTotpSecret = Base64EncodedData(""),
             )

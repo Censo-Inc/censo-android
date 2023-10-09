@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Guardian
@@ -40,6 +41,7 @@ import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
+import co.censo.vault.presentation.components.OnLifecycleEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,9 +53,17 @@ fun ActivateApproversScreen(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { viewModel.onStop() }
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START
+            -> {
+                viewModel.onStart()
+            }
+            Lifecycle.Event.ON_PAUSE -> {
+                viewModel.onStop()
+            }
+            else -> Unit
+        }
     }
 
     Scaffold(
@@ -113,14 +123,7 @@ fun ActivateApproversScreen(
                 }
 
                 state.asyncError -> {
-                    if (state.codeNotValidError) {
-                        DisplayError(
-                            errorMessage = stringResource(R.string.codes_do_not_match),
-                            dismissAction = viewModel::resetInvalidCode,
-                        ) {
-                            viewModel.resetInvalidCode()
-                        }
-                    } else if (state.userResponse is Resource.Error) {
+                    if (state.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = state.userResponse.getErrorMessage(context),
                             dismissAction = viewModel::resetUserResponse,
@@ -156,20 +159,6 @@ fun ActivateApproversScreen(
                                 approver = approver,
                                 approverCode = state.approverCodes[approver.participantId] ?: "",
                                 percentageLeft = state.countdownPercentage,
-                                verifyApprover = {
-                                    if (approver is Guardian.ProspectGuardian && approver.status is GuardianStatus.VerificationSubmitted) {
-                                        viewModel.verifyGuardian(
-                                            approver,
-                                            approver.status as GuardianStatus.VerificationSubmitted
-                                        )
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.approver_does_not_need_verification),
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
-                                }
                             )
                         }
                     }
