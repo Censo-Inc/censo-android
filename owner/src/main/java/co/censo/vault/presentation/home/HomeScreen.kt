@@ -165,18 +165,6 @@ fun HomeScreen(
                     }
 
                     is OwnerState.Ready -> {}
-                        //navController.navigate("")
-                        /*LockedScreen(
-                            locksAt = ownerState.locksAt,
-                            updateOwnerState = viewModel::updateOwnerState,
-                            onUnlockedTimeOut = viewModel::retrieveOwnerState
-                        ) {
-                            VaultHomeScreen(
-                                ownerState = ownerState,
-                                updateOwnerState = viewModel::updateOwnerState,
-                                navController = navController
-                            )
-                        }*/
                 }
             }
         }

@@ -124,7 +124,6 @@ fun LockedScreen(
                     }
 
                     Spacer(modifier = Modifier.height(18.dp))
-
                 }
             }
 
