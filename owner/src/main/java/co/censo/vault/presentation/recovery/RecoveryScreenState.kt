@@ -12,6 +12,8 @@ data class RecoveryScreenState(
     val secrets: List<VaultSecretId> = listOf(),
     val guardians: List<Guardian.TrustedGuardian> = listOf(),
     val recovery: Recovery? = null,
+    val approvalsCollected: Int = 0,
+    val approvalsRequired: Int = 0,
 
     // recovery control
     val initiateNewRecovery: Boolean = false,

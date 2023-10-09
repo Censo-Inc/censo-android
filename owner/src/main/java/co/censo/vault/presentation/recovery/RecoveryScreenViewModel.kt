@@ -6,7 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -43,7 +45,14 @@ class RecoveryScreenViewModel @Inject constructor(
             initiateNewRecovery = ownerState.policy.recovery == null,
             recovery = ownerState.policy.recovery,
             guardians = ownerState.policy.guardians,
-            secrets = ownerState.vault.secrets.map { it.guid }
+            secrets = ownerState.vault.secrets.map { it.guid },
+            approvalsCollected = ownerState.policy.recovery?.let {
+                when (it) {
+                    is Recovery.ThisDevice -> it.approvals.count { it.status == ApprovalStatus.Approved }
+                    else -> 0
+                }
+            } ?: 0,
+            approvalsRequired = ownerState.policy.threshold.toInt()
         )
     }
 
@@ -69,6 +78,10 @@ class RecoveryScreenViewModel @Inject constructor(
                 onOwnerState(ownerStateResource.data!!)
             }
         }
+    }
+
+    fun cancelRecovery() {
+        TODO("Not yet implemented")
     }
 
 }
