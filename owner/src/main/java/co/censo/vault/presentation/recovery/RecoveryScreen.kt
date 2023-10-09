@@ -46,7 +46,6 @@ import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScre
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalRow
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalsCollected
 import co.censo.vault.presentation.components.recovery.RecoveryExpirationCountDown
-import co.censo.vault.presentation.components.recovery.RequestingRecoveryScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -80,14 +79,14 @@ fun RecoveryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color.White)
+                    .background(color = Colors.PrimaryBlue)
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(72.dp)
                         .align(Alignment.Center),
                     strokeWidth = 8.dp,
-                    color = Color.Red
+                    color = Color.White
                 )
             }
         }
@@ -107,6 +106,13 @@ fun RecoveryScreen(
                         dismissAction = null,
                     ) { viewModel.initiateRecovery() }
                 }
+
+                state.cancelRecoveryResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
+                        dismissAction = null,
+                    ) { viewModel.cancelRecovery() }
+                }
             }
         }
 
@@ -114,7 +120,7 @@ fun RecoveryScreen(
 
             when (val recovery = state.recovery) {
                 null -> {
-                    RequestingRecoveryScreen()
+                    // recovery is about to be requested
                 }
 
                 is Recovery.AnotherDevice -> {
@@ -142,7 +148,7 @@ fun RecoveryScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         RecoveryExpirationCountDown(expiresAt = recovery.expiresAt) {
-                            viewModel.reloadOwnerState()
+                            viewModel.cancelRecovery()
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))

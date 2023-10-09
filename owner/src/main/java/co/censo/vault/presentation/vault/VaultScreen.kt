@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
+import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.components.vault.UnlockedVaultScreen
 import co.censo.vault.presentation.components.vault.VaultSecretListItem
@@ -73,14 +74,14 @@ fun VaultScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color.White)
+                    .background(color = Colors.PrimaryBlue)
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(72.dp)
                         .align(Alignment.Center),
                     strokeWidth = 8.dp,
-                    color = Color.Red
+                    color = Color.White
                 )
             }
         }

@@ -41,7 +41,7 @@ fun RecoveryApprovalsCollected(
             fontWeight = FontWeight.W400,
         )
 
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(18.dp))
 
         Text(
             modifier = Modifier.padding(bottom = 6.dp),
@@ -51,7 +51,7 @@ fun RecoveryApprovalsCollected(
             fontWeight = FontWeight.W400,
         )
 
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(18.dp))
 
         Text(
             text = "$required",

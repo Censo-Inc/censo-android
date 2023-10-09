@@ -10,6 +10,7 @@ import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.vault.presentation.home.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -81,7 +82,26 @@ class RecoveryScreenViewModel @Inject constructor(
     }
 
     fun cancelRecovery() {
-        TODO("Not yet implemented")
+        state = state.copy(
+            cancelRecoveryResource = Resource.Loading()
+        )
+
+        viewModelScope.launch {
+            val response = ownerRepository.cancelRecovery()
+            val ownerStateResource = response.map { it.ownerState }.asReady()
+
+            state = state.copy(
+                ownerStateResource = ownerStateResource,
+                cancelRecoveryResource = response
+            )
+
+            if (ownerStateResource is Resource.Success) {
+                state = state.copy(
+                    recovery = null,
+                    navigationResource = Resource.Success(Screen.VaultScreen.route)
+                )
+            }
+        }
     }
 
 }

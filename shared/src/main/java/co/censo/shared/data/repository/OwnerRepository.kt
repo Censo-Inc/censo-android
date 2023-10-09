@@ -23,6 +23,7 @@ import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
+import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
@@ -60,6 +61,7 @@ interface OwnerRepository {
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicySetupApiResponse>
+
     suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>): PolicySetupHelper
     suspend fun createPolicy(
         setupHelper: PolicySetupHelper
@@ -103,12 +105,13 @@ interface OwnerRepository {
     ): Resource<StoreSecretApiResponse>
 
     suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
-    fun isUserEditingSecurityPlan() : Boolean
-    fun setEditingSecurityPlan(editingPlan : Boolean)
-    fun retrieveSecurityPlan() : SecurityPlanData?
+    fun isUserEditingSecurityPlan(): Boolean
+    fun setEditingSecurityPlan(editingPlan: Boolean)
+    fun retrieveSecurityPlan(): SecurityPlanData?
     fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
     fun clearSecurityPlanData()
     suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse>
+    suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -137,12 +140,20 @@ class OwnerRepositoryImpl(
     ): Resource<CreatePolicySetupApiResponse> {
         return retrieveApiResource {
             apiService.createOrUpdatePolicySetup(
-                CreatePolicySetupApiRequest(threshold, guardians, biometryVerificationId, biometryData)
+                CreatePolicySetupApiRequest(
+                    threshold,
+                    guardians,
+                    biometryVerificationId,
+                    biometryData
+                )
             )
         }
     }
 
-    override suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>): PolicySetupHelper {
+    override suspend fun getPolicySetupHelper(
+        threshold: UInt,
+        guardians: List<String>
+    ): PolicySetupHelper {
         val guardianProspect = guardians.map {
             GuardianProspect(
                 label = it,
@@ -317,5 +328,9 @@ class OwnerRepositoryImpl(
     override fun clearSecurityPlanData() = storage.clearSecurityPlanData()
     override suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse> {
         return retrieveApiResource { apiService.requestRecovery(InitiateRecoveryApiRequest(secretIds)) }
+    }
+
+    override suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse> {
+        return retrieveApiResource { apiService.deleteRecovery() }
     }
 }

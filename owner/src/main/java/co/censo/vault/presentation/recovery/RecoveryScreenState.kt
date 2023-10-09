@@ -2,6 +2,7 @@ package co.censo.vault.presentation.recovery
 
 import VaultSecretId
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
@@ -21,12 +22,13 @@ data class RecoveryScreenState(
     // api requests
     val ownerStateResource: Resource<OwnerState.Ready> = Resource.Uninitialized,
     val initiateRecoveryResource: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
+    val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
 
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
 
-    val loading = ownerStateResource is Resource.Loading || initiateRecoveryResource is Resource.Loading
-    val asyncError = ownerStateResource is Resource.Error || initiateRecoveryResource is Resource.Error
+    val loading = ownerStateResource is Resource.Loading || initiateRecoveryResource is Resource.Loading || cancelRecoveryResource is Resource.Loading
+    val asyncError = ownerStateResource is Resource.Error || initiateRecoveryResource is Resource.Error || cancelRecoveryResource is Resource.Error
 
 }
