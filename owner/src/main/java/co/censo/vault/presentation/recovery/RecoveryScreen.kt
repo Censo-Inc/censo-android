@@ -46,6 +46,7 @@ import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScre
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalRow
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalsCollected
 import co.censo.vault.presentation.components.recovery.RecoveryExpirationCountDown
+import co.censo.vault.presentation.components.shareDeeplink
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -227,7 +228,8 @@ fun RecoveryScreen(
                                 val approval = approvals[index]
                                 RecoveryApprovalRow(
                                     guardian = state.guardians.first { it.participantId == approval.participantId },
-                                    approval = approval
+                                    approval = approval,
+                                    onShare = { shareDeeplink(recovery.deepLink(), context) }
                                 )
 
                                 if (index != approvals.size - 1)
@@ -246,5 +248,3 @@ fun RecoveryScreen(
         }
     }
 }
-
-

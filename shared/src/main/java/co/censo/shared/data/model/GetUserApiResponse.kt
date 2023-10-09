@@ -132,7 +132,7 @@ sealed class Guardian {
 }
 
 fun GuardianStatus.Initial.deeplink() =
-    "${SharedScreen.GUARDIAN_URI}${invitationId.value}"
+    "${SharedScreen.GUARDIAN_ONBOARDING_URI}${invitationId.value}"
 
 @Serializable
 data class Policy(
@@ -164,7 +164,9 @@ sealed class Recovery {
         val expiresAt: Instant,
         val approvals: List<Approval>,
         val vaultSecretIds: List<VaultSecretId>,
-    ) : Recovery()
+    ) : Recovery() {
+        fun deepLink(): String ="${SharedScreen.GUARDIAN_RECOVERY_URI}${this.guid.value}"
+    }
 }
 
 @Serializable

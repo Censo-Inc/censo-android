@@ -32,12 +32,10 @@ import kotlinx.datetime.Clock
 @Composable
 fun RecoveryApprovalRow(
     guardian: Guardian.TrustedGuardian,
-    approval: Approval
+    approval: Approval,
+    onShare: () -> Unit
 ) {
-
-    Row(
-        //modifier = Modifier.padding(all = 12.dp)
-    ) {
+    Row {
         Column {
             Row {
                 Text(
@@ -55,8 +53,6 @@ fun RecoveryApprovalRow(
                 )
             }
 
-            //Spacer(modifier = Modifier.size(8.dp))
-
             Text(
                 text = guardian.label,
                 fontSize = 24.sp,
@@ -71,13 +67,12 @@ fun RecoveryApprovalRow(
                 color = Color.White,
                 shape = CircleShape
             ),
-
-            onClick = { }
+            onClick = onShare
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
                 imageVector = Icons.Outlined.IosShare,
-                contentDescription = "Share code",
+                contentDescription = "share approver recovery link",
                 tint = VaultColors.PrimaryColor
             )
         }
@@ -99,6 +94,7 @@ fun RecoveryApprovalRowPreview() {
         approval = Approval(
             participantId = participantId,
             status = ApprovalStatus.Initial
-        )
+        ),
+        onShare = {}
     )
 }
