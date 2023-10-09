@@ -67,6 +67,12 @@ data class RetrieveRecoveryShardsApiRequest(
 @Serializable
 data class RetrieveRecoveryShardsApiResponse(
     val ownerState: OwnerState,
-    val encryptedShards: Map<ParticipantId, Base64EncodedData>,
+    val encryptedShards: List<EncryptedShard>,
     val scanResultBlob: String,
+)
+
+@Serializable
+data class EncryptedShard(
+    val participantId: ParticipantId,
+    val encryptedShard: Base64EncodedData,
 )

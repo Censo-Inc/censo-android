@@ -20,7 +20,10 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
 @Composable
-fun LockCountDown(locksAt: Instant, onTimeOut: () -> Unit) {
+fun LockCountDown(
+    locksAt: Instant,
+    onTimeOut: () -> Unit
+) {
 
     var secondsLeft by remember { mutableStateOf(secondsUntil(locksAt)) }
 

@@ -15,7 +15,9 @@ sealed class Screen(val route: String) {
     }
     object ActivateApprovers : Screen("activate_approvers_screen")
 
-    object VaultHomeScreen : Screen("vault_home_screen")
+    object VaultScreen : Screen("vault_screen")
+
+    object RecoveryScreen : Screen("recovery_screen")
 
     companion object {
         const val START_DESTINATION_ID = 0

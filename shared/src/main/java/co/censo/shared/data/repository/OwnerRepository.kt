@@ -28,6 +28,8 @@ import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.IdentityToken
+import co.censo.shared.data.model.InitiateRecoveryApiRequest
+import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.SecurityPlanData
@@ -106,6 +108,7 @@ interface OwnerRepository {
     fun retrieveSecurityPlan() : SecurityPlanData?
     fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
     fun clearSecurityPlanData()
+    suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -312,4 +315,7 @@ class OwnerRepositoryImpl(
         storage.setSecurityPlan(securityPlanData)
 
     override fun clearSecurityPlanData() = storage.clearSecurityPlanData()
+    override suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse> {
+        return retrieveApiResource { apiService.requestRecovery(InitiateRecoveryApiRequest(secretIds)) }
+    }
 }

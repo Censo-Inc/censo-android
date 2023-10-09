@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,16 +35,21 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.presentation.components.vault.UnlockedVaultScreen
+import co.censo.vault.presentation.components.vault.VaultSecretListItem
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.util.TestTag
 
+enum class VaultScreens {
+    Unlocked, EditSeedPhrases
+}
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun VaultHomeScreen(
+fun VaultScreen(
     navController: NavController,
-    viewModel: VaultHomeViewModel = hiltViewModel()
+    viewModel: VaultScreenViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
@@ -51,6 +57,15 @@ fun VaultHomeScreen(
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
         onDispose { }
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.navigationResource is Resource.Success) {
+            state.navigationResource.data?.let {
+                navController.navigate(it)
+            }
+            viewModel.reset()
+        }
     }
 
     when {
@@ -78,12 +93,14 @@ fun VaultHomeScreen(
                         dismissAction = null,
                     ) { viewModel.retrieveOwnerState() }
                 }
+
                 state.storeSeedPhraseResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.storeSeedPhraseResource.getErrorMessage(context),
                         dismissAction = viewModel::resetStoreSeedPhraseResponse,
                     ) {}
                 }
+
                 state.deleteSeedPhraseResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.deleteSeedPhraseResource.getErrorMessage(context),
@@ -94,9 +111,17 @@ fun VaultHomeScreen(
         }
 
         else -> {
-            state.ownerStateResource.data?.also { ownerState ->
-                when (ownerState) {
-                    is OwnerState.Ready -> {
+
+            when (state.screen) {
+                VaultScreens.Unlocked -> {
+                    UnlockedVaultScreen(
+                        onEditSeedPhrases = viewModel::onEditSeedPhrases,
+                        onRecoverSeedPhrases = viewModel::onRecoverPhrases
+                    )
+                }
+
+                VaultScreens.EditSeedPhrases -> {
+                    state.ownerStateResource.data?.let { ownerState ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -146,7 +171,7 @@ fun VaultHomeScreen(
                                     val secrets = ownerState.vault.secrets
 
                                     items(secrets.size) { index ->
-                                        VaultSecret(
+                                        VaultSecretListItem(
                                             secret = secrets[index],
                                             onDelete = {
                                                 viewModel.deleteSecret(it)
@@ -157,15 +182,10 @@ fun VaultHomeScreen(
                             }
                         }
                     }
-
-                    else -> {
-                        Text(text = "Boom!")
-                    }
                 }
             }
         }
     }
-
 }
 
 

@@ -103,7 +103,7 @@ fun HomeScreen(
     LaunchedEffect(key1 = state) {
         if (state.ownerStateResource is Resource.Success) {
             if (state.ownerStateResource.data is OwnerState.Ready) {
-                navController.navigate(Screen.VaultHomeScreen.route)
+                navController.navigate(Screen.VaultScreen.route)
                 viewModel.resetOwnerState()
             }
         }

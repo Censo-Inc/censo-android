@@ -43,12 +43,26 @@ sealed class Resource<out T>(
 
     class Loading<out T>(data: T? = null) : Resource<T>(data)
 
-    fun <K>map(f: (T) -> K): Resource<K> {
+    fun <K> map(f: (T) -> K): Resource<K> {
         return when (this) {
             is Success -> Success(this.data?.let { f(it) })
             is Error -> Error(this.data?.let { f(it) }, this.exception, this.errorResponse, this.errorCode)
             is Uninitialized -> Uninitialized
             is Loading -> Loading(this.data?.let { f(it) })
+        }
+    }
+
+    fun <K> flatMap(f: (T) -> Resource<K>): Resource<K> {
+        return when (this) {
+            is Success -> this.data?.let { f(it) } ?: Uninitialized
+            is Error -> this.data?.let { f(it) } ?: Error(
+                null,
+                this.exception,
+                this.errorResponse,
+                this.errorCode
+            )
+            is Uninitialized -> Uninitialized
+            is Loading -> this.data?.let { f(it) } ?: Loading(null)
         }
     }
 }

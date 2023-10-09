@@ -227,7 +227,9 @@ sealed class OwnerState {
         val guardians: List<Guardian.ProspectGuardian>,
         val threshold: UInt? = null,
         val unlockedForSeconds: ULong? = null,
-    ) : OwnerState()
+    ) : OwnerState() {
+        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
+    }
 
     @Serializable
     @SerialName("Ready")

@@ -45,12 +45,9 @@ class LockScreenViewModel @Inject constructor(
         )
 
         if (ownerStateResource is Resource.Success) {
-            val ownerState = ownerStateResource.data
-            if (ownerState is OwnerState.Ready) {
-                state = state.copy(
-                    lockStatus = LockScreenState.LockStatus.fromInstant(ownerState.locksAt)
-                )
-            }
+            state = state.copy(
+                lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerStateResource.data)
+            )
         }
     }
 
@@ -62,7 +59,10 @@ class LockScreenViewModel @Inject constructor(
         )
     }
 
-    suspend fun onFaceScanReady(verificationId: BiometryVerificationId, facetecData: FacetecBiometry): Resource<BiometryScanResultBlob> {
+    suspend fun onFaceScanReady(
+        verificationId: BiometryVerificationId,
+        facetecData: FacetecBiometry
+    ): Resource<BiometryScanResultBlob> {
         state = state.copy(
             lockStatus = LockScreenState.LockStatus.UnlockInProgress(
                 apiCall = Resource.Loading()
@@ -70,7 +70,8 @@ class LockScreenViewModel @Inject constructor(
         )
 
         return viewModelScope.async {
-            val unlockVaultResponse: Resource<UnlockApiResponse> = ownerRepository.unlock(verificationId, facetecData)
+            val unlockVaultResponse: Resource<UnlockApiResponse> =
+                ownerRepository.unlock(verificationId, facetecData)
 
             state = state.copy(
                 lockStatus = LockScreenState.LockStatus.UnlockInProgress(

@@ -6,11 +6,14 @@ import android.app.NotificationManager
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -29,11 +32,11 @@ import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
-import co.censo.vault.presentation.lock_screen.LockedScreen
-import co.censo.vault.presentation.lock_screen.LockScreenState
 import co.censo.vault.presentation.lock_screen.LockScreenViewModel
+import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
-import co.censo.vault.presentation.vault.VaultHomeScreen
+import co.censo.vault.presentation.recovery.RecoveryScreen
+import co.censo.vault.presentation.vault.VaultScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,7 +47,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    val lockViewModel: LockScreenViewModel by viewModels()
+    private val lockViewModel: LockScreenViewModel by viewModels()
 
     @Inject
     lateinit var storage: Storage
@@ -67,15 +70,23 @@ class MainActivity : FragmentActivity() {
                         },
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    when (lockViewModel.state.lockStatus) {
-                        is LockScreenState.LockStatus.Unlocked -> {
+
+                    val navHostHeight = when {
+                        lockViewModel.state.unlocked -> 0.85f
+                        else -> 1f
+                    }
+
+                    Box {
+                        Row(
+                            modifier = Modifier.fillMaxHeight(fraction = navHostHeight),
+                        ) {
                             CensoNavHost(navController = navController)
                         }
 
-                        else -> {
-                            LockedScreen {
-                                Text(text = "hello")
-                            }
+                        Row(
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        ) {
+                            LockedScreen()
                         }
                     }
                 }
@@ -98,8 +109,11 @@ class MainActivity : FragmentActivity() {
             composable(route = SharedScreen.HomeRoute.route) {
                 HomeScreen(navController = navController)
             }
-            composable(route = Screen.VaultHomeScreen.route) {
-                VaultHomeScreen(navController = navController)
+            composable(route = Screen.VaultScreen.route) {
+                VaultScreen(navController = navController)
+            }
+            composable(route = Screen.RecoveryScreen.route) {
+                RecoveryScreen(navController = navController)
             }
             composable(
                 route = "${Screen.AddBIP39Route.route}/{${Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG}}"

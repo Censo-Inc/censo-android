@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.vault
+package co.censo.vault.presentation.components.vault
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +28,7 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun VaultSecret(
+fun VaultSecretListItem(
     secret: VaultSecret,
     onDelete: (VaultSecret) -> Unit
 ) {
