@@ -45,5 +45,5 @@ fun LockCountDown(
     )
 }
 private fun secondsUntil(locksAt: Instant): Long {
-    return locksAt.minus(Clock.System.now()).inWholeSeconds
+    return maxOf(locksAt.epochSeconds - Clock.System.now().epochSeconds, 0)
 }

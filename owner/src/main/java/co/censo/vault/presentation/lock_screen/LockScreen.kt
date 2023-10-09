@@ -34,6 +34,7 @@ import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @Composable
 fun LockedScreen(
+    unlockedModifier: Modifier,
     viewModel: LockScreenViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
@@ -93,12 +94,12 @@ fun LockedScreen(
 
             is LockScreenState.LockStatus.Unlocked -> {
                 Column(
-                    Modifier.background(color = VaultColors.PrimaryColor),
+                    unlockedModifier.background(color = VaultColors.PrimaryColor),
                     verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.weight(1f))
 
                     LockCountDown(
                         lockStatus.locksAt,
@@ -123,7 +124,7 @@ fun LockedScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
 
@@ -142,6 +143,7 @@ fun LockedScreen(
 
                     is Resource.Error -> {
                         DisplayError(
+                            modifier = Modifier.background(color = VaultColors.PrimaryColor),
                             errorMessage = lockStatus.apiCall.getErrorMessage(context),
                             dismissAction = null,
                             retryAction = viewModel::initUnlock
@@ -158,6 +160,7 @@ fun LockedScreen(
                 when (lockStatus.apiCall) {
                     is Resource.Error -> {
                         DisplayError(
+                            modifier = Modifier.background(color = VaultColors.PrimaryColor),
                             errorMessage = lockStatus.apiCall.getErrorMessage(context),
                             dismissAction = null,
                             retryAction = viewModel::initUnlock
