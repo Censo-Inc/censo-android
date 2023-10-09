@@ -1,8 +1,6 @@
 package co.censo.vault.presentation.activate_approvers
 
 import FullScreenButton
-import android.provider.CalendarContract
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,14 +31,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
-import co.censo.vault.presentation.components.OnLifecycleEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,8 +1,6 @@
 package co.censo.guardian.presentation.home
 
-import Base58EncodedGuardianPublicKey
 import Base58EncodedPrivateKey
-import Base64EncodedData
 import InvitationId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,16 +12,13 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
-import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -43,6 +38,10 @@ class GuardianHomeViewModel @Inject constructor(
 
     fun onStart() {
         retrieveUserState()
+    }
+
+    fun onStop() {
+
     }
 
     private fun determineGuardianUIState(
@@ -68,13 +67,12 @@ class GuardianHomeViewModel @Inject constructor(
                             GuardianUIState.WAITING_FOR_CODE
                         }
                     }
-
-                    is GuardianPhase.WaitingForConfirmation -> GuardianUIState.WAITING_FOR_CONFIRMATION
-                    is GuardianPhase.WaitingForVerification -> GuardianUIState.WAITING_FOR_CONFIRMATION
                     GuardianPhase.Complete,
                     is GuardianPhase.RecoveryConfirmation,
                     is GuardianPhase.RecoveryRequested,
                     is GuardianPhase.RecoveryVerification -> GuardianUIState.COMPLETE
+                    is GuardianPhase.WaitingForVerification -> GuardianUIState.WAITING_FOR_CONFIRMATION
+                    is GuardianPhase.VerificationRejected -> GuardianUIState.CODE_REJECTED
                 }
             }
 
@@ -216,11 +214,11 @@ class GuardianHomeViewModel @Inject constructor(
         state = state.copy(guardianEncryptionKey = recreatedEncryptionKey)
     }
 
-    private suspend fun loadInvitationId() {
+    private fun loadInvitationId() {
         state = state.copy(
             invitationId = when (val guardianState = state.guardianState?.phase) {
                 is GuardianPhase.WaitingForCode -> guardianState.invitationId
-                is GuardianPhase.WaitingForConfirmation -> guardianState.invitationId
+                is GuardianPhase.VerificationRejected -> guardianState.invitationId
                 else -> {
                     InvitationId(guardianRepository.retrieveInvitationId())
                 }

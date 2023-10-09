@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.components
+package co.censo.shared.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
