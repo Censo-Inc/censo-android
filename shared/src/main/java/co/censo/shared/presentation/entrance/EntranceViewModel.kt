@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.repository.PushRepository
+import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +34,8 @@ import javax.inject.Inject
 class EntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val guardianRepository: GuardianRepository,
-    private val keyRepository: KeyRepository
+    private val keyRepository: KeyRepository,
+    private val pushRepository: PushRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(EntranceState())
@@ -53,10 +57,45 @@ class EntranceViewModel @Inject constructor(
                 val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
                 if (tokenValid) {
-                    state = state.copy(
-                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
-                    )
+                    checkUserHasRespondedToNotificationOptIn()
                 }
+            }
+        }
+    }
+
+    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
+
+    fun setUserSeenPushDialog(seenDialog: Boolean) =
+        pushRepository.setUserSeenPushDialog(seenDialog)
+
+    private fun checkUserHasRespondedToNotificationOptIn() {
+        viewModelScope.launch {
+            state = if (pushRepository.userHasSeenPushDialog()) {
+                submitNotificationTokenForRegistration()
+                state.copy(
+                    userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                )
+            } else {
+                state.copy(
+                    showPushNotificationsDialog = Resource.Success(Unit)
+                )
+            }
+        }
+    }
+
+    private fun submitNotificationTokenForRegistration() {
+        viewModelScope.launch {
+            try {
+                val token = pushRepository.retrievePushToken()
+                if (token.isNotEmpty()) {
+                    val pushBody = PushBody(
+                        deviceType = PushRepositoryImpl.DEVICE_TYPE,
+                        token = token
+                    )
+                    pushRepository.addPushNotification(pushBody = pushBody)
+                }
+            } catch (e: Exception) {
+                projectLog(message = "Exception caught while trying to submit notif token")
             }
         }
     }
@@ -93,8 +132,8 @@ class EntranceViewModel @Inject constructor(
             )
 
             state = if (createUserResponse is Resource.Success) {
+                checkUserHasRespondedToNotificationOptIn()
                 state.copy(
-                    userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
                     createUserResource = createUserResponse
                 )
             } else {
@@ -121,5 +160,13 @@ class EntranceViewModel @Inject constructor(
 
     fun resetCreateOwnerResource() {
         state = state.copy(createUserResource = Resource.Uninitialized)
+    }
+
+    fun finishPushNotificationDialog() {
+        submitNotificationTokenForRegistration()
+        state = state.copy(
+            userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
+            showPushNotificationsDialog = Resource.Uninitialized
+        )
     }
 }

@@ -1,20 +1,17 @@
-package co.censo.vault.data.repository
+package co.censo.shared.data.repository
 
 import android.app.NotificationManager
 import android.content.Context
 import co.censo.shared.data.Resource
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.networking.PushBody
-import co.censo.shared.data.repository.BaseRepository
 import co.censo.shared.data.storage.SharedPrefsStorage
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.Serializable
-import okhttp3.ResponseBody
 import javax.inject.Inject
 
 interface PushRepository {
-    suspend fun addPushNotification(pushBody: PushBody): Resource<ResponseBody?>
+    suspend fun addPushNotification(pushBody: PushBody): Resource<Unit>
     suspend fun removePushNotification()
     suspend fun retrievePushToken(): String
     fun userHasSeenPushDialog() : Boolean
@@ -43,7 +40,7 @@ class PushRepositoryImpl @Inject constructor(
         SharedPrefsStorage.setUserSeenPermissionDialog(seenDialog)
     }
 
-    override suspend fun addPushNotification(pushBody: PushBody): Resource<ResponseBody?> =
+    override suspend fun addPushNotification(pushBody: PushBody): Resource<Unit> =
         retrieveApiResource { api.addPushNotificationToken(pushBody) }
 
     override suspend fun removePushNotification() {

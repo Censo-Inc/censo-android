@@ -152,6 +152,10 @@ dependencies {
     //One Tap
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
+    //Push Notifications
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
     //auth0 JWT
     implementation("com.auth0.android:jwtdecode:2.0.1")
 

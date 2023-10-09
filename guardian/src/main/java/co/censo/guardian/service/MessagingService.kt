@@ -1,4 +1,4 @@
-package co.censo.vault.service
+package co.censo.guardian.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,12 +8,12 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
+import co.censo.guardian.MainActivity
+import co.censo.guardian.R
 import co.censo.shared.SharedScreen
 import co.censo.shared.buildScreenDeepLinkUri
-import co.censo.vault.MainActivity
 import co.censo.shared.service.BaseMessagingService
 import co.censo.shared.service.PushData
-import co.censo.vault.R
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 import kotlin.math.abs

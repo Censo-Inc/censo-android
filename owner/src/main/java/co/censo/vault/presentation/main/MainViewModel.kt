@@ -3,8 +3,8 @@ package co.censo.vault.presentation.main
 import androidx.lifecycle.ViewModel
 import co.censo.shared.data.networking.PushBody
 import co.censo.shared.util.projectLog
-import co.censo.vault.data.repository.PushRepository
-import co.censo.vault.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
+import co.censo.shared.data.repository.PushRepository
+import co.censo.shared.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -22,7 +22,7 @@ class MainViewModel @Inject constructor(
                     deviceType = DEVICE_TYPE,
                     token = token
                 )
-//                pushRepository.addPushNotification(pushBody = pushBody)
+                pushRepository.addPushNotification(pushBody = pushBody)
             }
         } catch (e: Exception) {
             projectLog(message = "Exception caught while trying to submit notif token")

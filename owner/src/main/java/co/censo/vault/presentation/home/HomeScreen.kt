@@ -1,10 +1,6 @@
 package co.censo.vault.presentation.home
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,18 +20,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.toSecurityPlan
-import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.projectLog
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -48,52 +39,6 @@ fun HomeScreen(
     val state = viewModel.state
 
     val context = LocalContext.current as FragmentActivity
-
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { }
-    )
-
-    fun checkPermissionDialog() {
-        try {
-            val notificationGranted =
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-
-            val shownPermissionJustOnceBefore =
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-
-            val seenDialogBefore = viewModel.userHasSeenPushDialog()
-
-            if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
-                if (shownPermissionJustOnceBefore && !seenDialogBefore) {
-                    viewModel.setUserSeenPushDialog(true)
-                    viewModel.triggerPushNotificationDialog()
-                } else if (!seenDialogBefore) {
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-
-        } catch (e: Exception) {
-            projectLog(message = "checkPermissionDialog exception caught: ${e.message}")
-            //TODO: Log exception
-        }
-    }
-
-    OnLifecycleEvent { _, event ->
-        when (event) {
-            Lifecycle.Event.ON_START -> {
-                checkPermissionDialog()
-            }
-
-            else -> Unit
-        }
-    }
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
