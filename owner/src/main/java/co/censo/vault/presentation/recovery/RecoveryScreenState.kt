@@ -3,9 +3,9 @@ package co.censo.vault.presentation.recovery
 import VaultSecretId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
+import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
 
 data class RecoveryScreenState(
@@ -20,7 +20,7 @@ data class RecoveryScreenState(
     val initiateNewRecovery: Boolean = false,
 
     // api requests
-    val ownerStateResource: Resource<OwnerState.Ready> = Resource.Uninitialized,
+    val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val initiateRecoveryResource: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
     val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
 
@@ -28,7 +28,7 @@ data class RecoveryScreenState(
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
 
-    val loading = ownerStateResource is Resource.Loading || initiateRecoveryResource is Resource.Loading || cancelRecoveryResource is Resource.Loading
-    val asyncError = ownerStateResource is Resource.Error || initiateRecoveryResource is Resource.Error || cancelRecoveryResource is Resource.Error
+    val loading = userResponse is Resource.Loading || initiateRecoveryResource is Resource.Loading || cancelRecoveryResource is Resource.Loading
+    val asyncError = userResponse is Resource.Error || initiateRecoveryResource is Resource.Error || cancelRecoveryResource is Resource.Error
 
 }

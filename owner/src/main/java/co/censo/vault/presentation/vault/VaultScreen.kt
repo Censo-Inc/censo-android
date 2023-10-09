@@ -88,9 +88,9 @@ fun VaultScreen(
 
         state.asyncError -> {
             when {
-                state.ownerStateResource is Resource.Error -> {
+                state.userResponse is Resource.Error -> {
                     DisplayError(
-                        errorMessage = state.ownerStateResource.getErrorMessage(context),
+                        errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = null,
                     ) { viewModel.retrieveOwnerState() }
                 }
@@ -122,7 +122,7 @@ fun VaultScreen(
                 }
 
                 VaultScreens.EditSeedPhrases -> {
-                    state.ownerStateResource.data?.let { ownerState ->
+                    state.ownerState?.let { ownerState ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()

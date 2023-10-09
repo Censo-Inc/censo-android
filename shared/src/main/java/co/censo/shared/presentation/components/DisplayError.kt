@@ -21,6 +21,7 @@ import co.censo.shared.R
 
 @Composable
 fun DisplayError(
+    modifier: Modifier = Modifier,
     errorMessage: String,
     dismissAction: (() -> Unit)?,
     retryAction: () -> Unit,
@@ -28,7 +29,7 @@ fun DisplayError(
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .let {
                 if (dismissAction != null) {

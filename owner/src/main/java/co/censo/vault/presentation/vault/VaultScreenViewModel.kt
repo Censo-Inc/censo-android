@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.VaultSecret
@@ -28,11 +29,18 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun retrieveOwnerState() {
-        state = state.copy(ownerStateResource = Resource.Loading())
+        state = state.copy(userResponse = Resource.Loading())
+
         viewModelScope.launch {
             val response = ownerRepository.retrieveUser()
 
-            onOwnerStateReady(response.map { it.ownerState })
+            state = state.copy(
+                userResponse = response
+            )
+
+            if (response is Resource.Success) {
+                onOwnerState(response.data!!.ownerState)
+            }
         }
     }
 
@@ -48,29 +56,32 @@ class VaultScreenViewModel @Inject constructor(
                 deleteSeedPhraseResource = response
             )
 
-            onOwnerStateReady(response.map { it.ownerState })
+            if (response is Resource.Success) {
+                onOwnerState(response.data!!.ownerState)
+            }
         }
     }
 
-    private fun onOwnerStateReady(ownerStateResource: Resource<OwnerState>) {
-        val ready = ownerStateResource.flatMap {
-            when (it) {
-                is OwnerState.Ready -> Resource.Success(it)
-                else -> Resource.Error(exception = Exception("Unexpected owner state"))
+    private fun onOwnerState(ownerState: OwnerState) {
+        when (ownerState) {
+            is OwnerState.Ready -> {
+                state = state.copy(ownerState = ownerState)
+            }
+
+            else -> {
+                // other owner states are not supported on this view
+                // navigate back to start of the app so it can fix itself
+                state = state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
             }
         }
-
-        state = state.copy(
-            ownerStateResource = ready,
-        )
     }
 
     fun resetStoreSeedPhraseResponse() {
-        state.copy(storeSeedPhraseResource = Resource.Uninitialized )
+        state = state.copy(storeSeedPhraseResource = Resource.Uninitialized)
     }
 
     fun resetDeleteSeedPhraseResponse() {
-        state.copy(deleteSeedPhraseResource = Resource.Uninitialized )
+        state = state.copy(deleteSeedPhraseResource = Resource.Uninitialized)
     }
 
     fun onEditSeedPhrases() {

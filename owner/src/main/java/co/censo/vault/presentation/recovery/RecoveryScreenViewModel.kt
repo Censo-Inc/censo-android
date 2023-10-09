@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.OwnerState
@@ -28,33 +29,45 @@ class RecoveryScreenViewModel @Inject constructor(
     }
 
     fun reloadOwnerState() {
-        state = state.copy(ownerStateResource = Resource.Loading())
+        state = state.copy(userResponse = Resource.Loading())
 
         viewModelScope.launch {
-            val response = ownerRepository.retrieveUser().map { it.ownerState }.asReady()
+            val response = ownerRepository.retrieveUser()
 
-            state = state.copy(ownerStateResource = response)
+            state = state.copy(userResponse = response)
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!)
+                onOwnerState(response.data!!.ownerState)
             }
         }
     }
 
-    private fun onOwnerState(ownerState: OwnerState.Ready) {
-        state = state.copy(
-            initiateNewRecovery = ownerState.policy.recovery == null,
-            recovery = ownerState.policy.recovery,
-            guardians = ownerState.policy.guardians,
-            secrets = ownerState.vault.secrets.map { it.guid },
-            approvalsCollected = ownerState.policy.recovery?.let {
-                when (it) {
-                    is Recovery.ThisDevice -> it.approvals.count { it.status == ApprovalStatus.Approved }
-                    else -> 0
-                }
-            } ?: 0,
-            approvalsRequired = ownerState.policy.threshold.toInt()
-        )
+    private fun onOwnerState(ownerState: OwnerState) {
+        when (ownerState) {
+            is OwnerState.Ready -> {
+                state = state.copy(
+                    initiateNewRecovery = ownerState.policy.recovery == null,
+                    recovery = ownerState.policy.recovery,
+                    guardians = ownerState.policy.guardians,
+                    secrets = ownerState.vault.secrets.map { it.guid },
+                    approvalsCollected = ownerState.policy.recovery?.let {
+                        when (it) {
+                            is Recovery.ThisDevice -> it.approvals.count { it.status == ApprovalStatus.Approved }
+                            else -> 0
+                        }
+                    } ?: 0,
+                    approvalsRequired = ownerState.policy.threshold.toInt()
+                )
+            }
+
+            else -> {
+                // other owner states are not supported on this view
+                // navigate back to start of the app so it can fix itself
+                state = state.copy(
+                    navigationResource = Resource.Success(SharedScreen.EntranceRoute.route)
+                )
+            }
+        }
     }
 
     fun reset() {
@@ -68,15 +81,13 @@ class RecoveryScreenViewModel @Inject constructor(
         )
         viewModelScope.launch {
             val response = ownerRepository.initiateRecovery(state.secrets)
-            val ownerStateResource = response.map { it.ownerState }.asReady()
 
             state = state.copy(
-                ownerStateResource = ownerStateResource,
                 initiateRecoveryResource = response
             )
 
-            if (ownerStateResource is Resource.Success) {
-                onOwnerState(ownerStateResource.data!!)
+            if (response is Resource.Success) {
+                onOwnerState(response.data!!.ownerState)
             }
         }
     }
@@ -88,14 +99,12 @@ class RecoveryScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             val response = ownerRepository.cancelRecovery()
-            val ownerStateResource = response.map { it.ownerState }.asReady()
 
             state = state.copy(
-                ownerStateResource = ownerStateResource,
                 cancelRecoveryResource = response
             )
 
-            if (ownerStateResource is Resource.Success) {
+            if (response is Resource.Success) {
                 state = state.copy(
                     recovery = null,
                     navigationResource = Resource.Success(Screen.VaultScreen.route)
@@ -103,15 +112,4 @@ class RecoveryScreenViewModel @Inject constructor(
             }
         }
     }
-
 }
-
-private fun Resource<OwnerState>.asReady(): Resource<OwnerState.Ready> {
-    return this.flatMap {
-        when (it) {
-            is OwnerState.Ready -> Resource.Success(it)
-            else -> Resource.Error(exception = Exception("Unexpected owner state"))
-        }
-    }
-}
-

@@ -97,9 +97,9 @@ fun RecoveryScreen(
 
         state.asyncError -> {
             when {
-                state.ownerStateResource is Resource.Error -> {
+                state.userResponse is Resource.Error -> {
                     DisplayError(
-                        errorMessage = state.ownerStateResource.getErrorMessage(context),
+                        errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = null,
                     ) { viewModel.reloadOwnerState() }
                 }
@@ -187,7 +187,7 @@ fun RecoveryScreen(
                             fontSize = 16.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 20.dp)
+                            modifier = Modifier.padding(horizontal = 30.dp)
                         )
 
                         Spacer(modifier = Modifier.height(24.dp))
