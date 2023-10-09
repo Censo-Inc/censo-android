@@ -70,7 +70,8 @@ class GuardianHomeViewModel @Inject constructor(
                     }
 
                     is GuardianPhase.WaitingForConfirmation -> GuardianUIState.WAITING_FOR_CONFIRMATION
-                    is GuardianPhase.Complete -> GuardianUIState.COMPLETE
+                    GuardianPhase.Complete -> GuardianUIState.COMPLETE
+                    is GuardianPhase.WaitingForVerification -> GuardianUIState.WAITING_FOR_CONFIRMATION
                     is GuardianPhase.RecoveryConfirmation -> TODO()
                     is GuardianPhase.RecoveryRequested -> TODO()
                     is GuardianPhase.RecoveryVerification -> TODO()

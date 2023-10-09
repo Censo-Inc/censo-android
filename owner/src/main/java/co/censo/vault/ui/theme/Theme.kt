@@ -9,16 +9,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import co.censo.shared.presentation.Colors.AccentBlue
-import co.censo.shared.presentation.Colors.PrimaryBlue
+import co.censo.vault.presentation.VaultColors.AccentColor
+import co.censo.vault.presentation.VaultColors.PrimaryColor
 
 @Composable
 fun VaultTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = lightColorScheme(
-        primary = PrimaryBlue,
-        secondary = AccentBlue,
+        primary = PrimaryColor,
+        secondary = AccentColor,
         tertiary = Color.White
     )
 
@@ -26,7 +26,7 @@ fun VaultTheme(
 
     SideEffect {
         val window = (view.context as Activity).window
-        window.statusBarColor = PrimaryBlue.toArgb()
+        window.statusBarColor = PrimaryColor.toArgb()
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
     }
 

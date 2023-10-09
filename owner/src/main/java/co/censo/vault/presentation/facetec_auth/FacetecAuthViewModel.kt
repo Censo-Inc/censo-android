@@ -39,24 +39,6 @@ class FacetecAuthViewModel @Inject constructor(
         initFacetecSession()
     }
 
-    private fun skipFacetec() {
-        val identityToken = UUID.randomUUID().toString().toByteArray()
-
-        viewModelScope.launch {
-            state = state.copy(
-                submitResultResponse = onFaceScanReady(
-                    state.facetecData?.id ?: BiometryVerificationId(""),
-                    FacetecBiometry(
-                        faceScan = Base64.getEncoder().encodeToString(identityToken),
-                        auditTrailImage = Base64.getEncoder().encodeToString(identityToken),
-                        lowQualityAuditTrailImage = Base64.getEncoder()
-                            .encodeToString(identityToken),
-                    )
-                )
-            )
-        }
-    }
-
     fun retry() {
         when {
             state.initFacetecData is Resource.Error -> {
@@ -87,14 +69,10 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     fun facetecSDKInitialized() {
-        if (BuildConfig.BUILD_TYPE == "debug") {
-            skipFacetec()
-        } else {
-            state = state.copy(
-                startAuth = Resource.Success(Unit),
-                submitResultResponse = Resource.Loading()
-            )
-        }
+        state = state.copy(
+            startAuth = Resource.Success(Unit),
+            submitResultResponse = Resource.Loading()
+        )
     }
 
     fun failedToInitializeSDK() {
@@ -148,9 +126,14 @@ class FacetecAuthViewModel @Inject constructor(
                 state = state.copy(submitResultResponse = Resource.Uninitialized)
 
             } else if (submitResultResponse is Resource.Error) {
-                scanResultCallback?.cancel()
-                projectLog(message = "Failed to send data to backend")
-                state = state.copy(submitResultResponse = submitResultResponse)
+                state = submitResultResponse.errorResponse?.errors?.firstOrNull()?.scanResultBlob?.let {
+                    scanResultCallback?.proceedToNextStep(it.value)
+                    state.copy(submitResultResponse = Resource.Uninitialized)
+                } ?: run {
+                    scanResultCallback?.cancel()
+                    projectLog(message = "Failed to send data to backend")
+                    state.copy(submitResultResponse = submitResultResponse)
+                }
             }
 
         }

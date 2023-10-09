@@ -47,8 +47,9 @@ import co.censo.shared.data.cryptography.generateBase64
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.presentation.Colors
+import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 
 enum class SetupSecurityPlanScreen {
     Initial, AddApprovers, RequiredApprovals, Review, SecureYourPlan, FacetecAuth
@@ -87,7 +88,7 @@ fun SecurityPlanTopLevelContainer(
         containerColor = Color.White,
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Colors.PrimaryBlue),
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.PrimaryColor),
                 navigationIcon = {
                     IconButton(onClick = { }) {
                         Icon(
@@ -119,7 +120,7 @@ fun SecurityPlanTopLevelContainer(
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
-                        borderColor = Colors.PrimaryBlue,
+                        borderColor = VaultColors.PrimaryColor,
                         border = true,
                         contentPadding = PaddingValues(vertical = 6.dp),
                         onClick = {
@@ -131,7 +132,7 @@ fun SecurityPlanTopLevelContainer(
                         }) {
                         Text(
                             text = stringResource(R.string.how_does_this_work),
-                            color = Colors.PrimaryBlue,
+                            color = VaultColors.PrimaryColor,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.W300
                         )
@@ -142,7 +143,7 @@ fun SecurityPlanTopLevelContainer(
 
                 FullScreenButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    color = Colors.PrimaryBlue,
+                    color = VaultColors.PrimaryColor,
                     borderColor = Color.White,
                     border = false,
                     contentPadding = PaddingValues(vertical = 12.dp),
@@ -188,7 +189,7 @@ fun InitialAddApproverScreen(paddingValues: PaddingValues) {
             ProtectionPlanTitle(text = stringResource(R.string.select_approvers))
 
             val textStyle = SpanStyle(
-                fontSize = 18.sp, color = Colors.GreyText
+                fontSize = 18.sp, color = SharedColors.GreyText
             )
 
             val annotatedString = buildAnnotatedString {
@@ -465,7 +466,7 @@ fun SecureYourPlanScreen(paddingValues: PaddingValues) {
             ProtectionPlanTitle(text = stringResource(R.string.establish_your_identity))
 
             val textStyle = SpanStyle(
-                fontSize = 18.sp, color = Colors.GreyText
+                fontSize = 18.sp, color = SharedColors.GreyText
             )
 
             val annotatedString = buildAnnotatedString {

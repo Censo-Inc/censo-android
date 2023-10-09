@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.Colors
+import co.censo.vault.presentation.VaultColors
 
 @Composable
 fun RequestingRecoveryScreen() {
@@ -25,7 +25,7 @@ fun RequestingRecoveryScreen() {
     Column(
         Modifier
             .fillMaxSize()
-            .background(color = Colors.PrimaryBlue),
+            .background(color = VaultColors.PrimaryColor),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
 

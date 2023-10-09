@@ -26,8 +26,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.Colors.DividerGray
-import co.censo.shared.presentation.Colors.PrimaryBlue
+import co.censo.guardian.presentation.GuardianColors.PrimaryColor
+import co.censo.shared.presentation.SharedColors.DividerGray
 
 @Composable
 fun CodeEntry(
@@ -91,7 +91,7 @@ fun CodeInputField(
 
                     val borderModifier = Modifier.border(
                         2.dp,
-                        color = if (shouldHaveFocusedBorder) PrimaryBlue else DividerGray,
+                        color = if (shouldHaveFocusedBorder) PrimaryColor else DividerGray,
                         shape = RoundedCornerShape(4.dp)
                     )
 
@@ -112,7 +112,7 @@ fun CodeInputField(
                             textAlign = TextAlign.Center,
                             fontSize = 48.nonScaledSp,
                             fontWeight = FontWeight.Bold,
-                            color = PrimaryBlue
+                            color = PrimaryColor
                         )
                     }
                 }

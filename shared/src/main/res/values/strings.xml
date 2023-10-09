@@ -4,4 +4,10 @@
     <string name="entrance_screen">Entrance Screen</string>
     <string name="retry">Retry</string>
     <string name="dismiss">Dismiss</string>
+    <string name="invalid_request">Invalid Request</string>
+    <string name="invalid_request_signature">Invalid Request Signature</string>
+    <string name="unauthorized_access">Unauthorized access</string>
+    <string name="under_maintenance">Censo is currently under maintenance, please try again in a few minutes.</string>
+    <string name="validation_error">Validation Error</string>
+    <string name="unexpected_error">Unexpected Error</string>
 </resources>

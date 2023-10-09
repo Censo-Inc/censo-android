@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -27,7 +26,7 @@ import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
-import co.censo.shared.presentation.Colors
+import co.censo.vault.presentation.VaultColors
 import kotlinx.datetime.Clock
 
 @Composable
@@ -79,7 +78,7 @@ fun RecoveryApprovalRow(
                 modifier = Modifier.size(24.dp),
                 imageVector = Icons.Outlined.IosShare,
                 contentDescription = "Share code",
-                tint = Colors.PrimaryBlue
+                tint = VaultColors.PrimaryColor
             )
         }
     }

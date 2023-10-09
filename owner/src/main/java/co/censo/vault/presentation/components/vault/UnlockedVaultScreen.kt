@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.Colors
+import co.censo.vault.presentation.VaultColors
 
 @Composable
 fun UnlockedVaultScreen(
@@ -29,7 +29,7 @@ fun UnlockedVaultScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(color = Colors.PrimaryBlue),
+            .background(color = VaultColors.PrimaryColor),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -48,7 +48,7 @@ fun UnlockedVaultScreen(
 
         FullScreenButton(
             modifier = Modifier.padding(horizontal = 24.dp),
-            color = Colors.PrimaryBlue,
+            color = VaultColors.PrimaryColor,
             borderColor = Color.White,
             border = true,
             contentPadding = PaddingValues(vertical = 12.dp),
@@ -74,7 +74,7 @@ fun UnlockedVaultScreen(
         ) {
             Text(
                 text = "Recover Phrases",
-                color = Colors.PrimaryBlue,
+                color = VaultColors.PrimaryColor,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.W700
             )

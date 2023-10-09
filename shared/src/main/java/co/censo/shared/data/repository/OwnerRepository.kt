@@ -33,6 +33,7 @@ import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
@@ -78,6 +79,10 @@ interface OwnerRepository {
         keyConfirmationSignature: ByteArray,
         keyConfirmationTimeMillis: Long
     ): Resource<ConfirmGuardianshipApiResponse>
+
+    suspend fun rejectVerification(
+        participantId: ParticipantId
+    ) : Resource<RejectGuardianVerificationApiResponse>
 
     fun checkCodeMatches(
         verificationCode: String,
@@ -236,6 +241,14 @@ class OwnerRepositoryImpl(
                     keyConfirmationTimeMillis = keyConfirmationTimeMillis
                 )
             )
+        }
+    }
+
+    override suspend fun rejectVerification(
+        participantId: ParticipantId
+    ): Resource<RejectGuardianVerificationApiResponse> {
+        return retrieveApiResource {
+            apiService.rejectVerification(participantId.value)
         }
     }
 

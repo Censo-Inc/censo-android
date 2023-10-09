@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -63,8 +64,9 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.VerificationStatus
 import co.censo.shared.data.model.deeplink
-import co.censo.shared.presentation.Colors
+import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 import kotlinx.datetime.Clock
 
 //region Top Bar
@@ -77,7 +79,7 @@ fun ActivateApproversTopBar() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Colors.PrimaryBlue)
+                .background(color = VaultColors.PrimaryColor)
         ) {
             TextButton(
                 modifier = Modifier.align(Alignment.TopEnd),
@@ -106,7 +108,7 @@ fun ActivateApproversTopBar() {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .background(color = Colors.PrimaryBlue)
+                        .background(color = VaultColors.PrimaryColor)
                 )
                 Box(
                     modifier = Modifier
@@ -151,7 +153,6 @@ fun ActivateApproverRow(
     percentageLeft: Float = 0.0f,
     approverCode: String = "",
     horizontalPadding: Dp = 16.dp,
-    verifyApprover: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -170,7 +171,7 @@ fun ActivateApproverRow(
                 val status = buildAnnotatedString {
                     withStyle(
                         SpanStyle(
-                            color = Colors.GreyText,
+                            color = SharedColors.GreyText,
                             fontSize = 16.sp
                         )
                     ) {
@@ -185,7 +186,7 @@ fun ActivateApproverRow(
 
                 Text(
                     text = status,
-                    color = Colors.LabelText,
+                    color = SharedColors.LabelText,
                     fontSize = 14.sp,
                 )
                 Text(
@@ -198,7 +199,6 @@ fun ActivateApproverRow(
 
             ActivateApproverActionItem(
                 approver = approver,
-                verifyApprover = verifyApprover,
                 percentageLeft = percentageLeft,
                 approverCode = approverCode,
 
@@ -208,7 +208,7 @@ fun ActivateApproverRow(
         Divider(
             modifier = Modifier.padding(start = horizontalPadding),
             thickness = 1.dp,
-            color = Colors.DividerGray
+            color = SharedColors.DividerGray
         )
     }
 }
@@ -218,7 +218,6 @@ fun ActivateApproverActionItem(
     approver: Guardian,
     approverCode: String,
     percentageLeft: Float,
-    verifyApprover: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -231,7 +230,7 @@ fun ActivateApproverActionItem(
         is Guardian.TrustedGuardian -> {
             Icon(
                 modifier = Modifier
-                    .background(shape = CircleShape, color = Colors.SuccessGreen)
+                    .background(shape = CircleShape, color = SharedColors.SuccessGreen)
                     .padding(all = 8.dp),
                 imageVector = Icons.Filled.Check,
                 contentDescription = stringResource(R.string.approver_confirmed),
@@ -241,7 +240,6 @@ fun ActivateApproverActionItem(
 
         is Guardian.ProspectGuardian -> {
             when (val approverStatus = approver.status) {
-                is GuardianStatus.Initial,
                 is GuardianStatus.Accepted -> {
 
                     val formattedCode = if (approverCode.length == CODE_LENGTH) {
@@ -256,7 +254,7 @@ fun ActivateApproverActionItem(
                     ) {
                         Text(
                             text = formattedCode,
-                            color = Colors.PrimaryBlue,
+                            color = VaultColors.PrimaryColor,
                             fontWeight = FontWeight.W600,
                             fontSize = 24.sp
                         )
@@ -265,7 +263,7 @@ fun ActivateApproverActionItem(
                             modifier = Modifier
                                 .size(32.dp)
                                 .background(
-                                    color = Colors.TimeLeftGray,
+                                    color = SharedColors.TimeLeftGray,
                                     shape = CircleShape
                                 )
                                 .background(
@@ -281,7 +279,7 @@ fun ActivateApproverActionItem(
                 is GuardianStatus.Onboarded -> {
                     Icon(
                         modifier = Modifier
-                            .background(shape = CircleShape, color = Colors.SuccessGreen)
+                            .background(shape = CircleShape, color = SharedColors.SuccessGreen)
                             .padding(all = 8.dp),
                         imageVector = Icons.Filled.Check,
                         contentDescription = stringResource(id = R.string.approver_confirmed),
@@ -303,7 +301,7 @@ fun ActivateApproverActionItem(
                 is GuardianStatus.Initial -> {
                     Icon(
                         modifier = Modifier
-                            .background(shape = CircleShape, color = Colors.PrimaryBlue)
+                            .background(shape = CircleShape, color = VaultColors.PrimaryColor)
                             .padding(all = 8.dp)
                             .clickable {
                                 shareDeeplink(approverStatus.deeplink(), context)
@@ -316,11 +314,11 @@ fun ActivateApproverActionItem(
 
 
                 is GuardianStatus.VerificationSubmitted -> {
-                    Button(onClick = {
-                        verifyApprover()
-                    }) {
-                        Text(text = "Verify Code", color = Color.White)
-                    }
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp),
+                        color = VaultColors.PrimaryColor,
+                        strokeWidth = 3.dp,
+                    )
                 }
             }
         }
@@ -357,7 +355,7 @@ fun AnnotatedString.Builder.appendApproverStatusText(context: Context, approver:
     val baseStyle =
         SpanStyle(
             fontWeight = FontWeight.W700,
-            color = Colors.GreyText
+            color = SharedColors.GreyText
         )
 
     when (approver) {
@@ -375,7 +373,7 @@ fun AnnotatedString.Builder.appendApproverStatusText(context: Context, approver:
                 is GuardianStatus.Confirmed,
                 is GuardianStatus.ImplicitlyOwner,
                 is GuardianStatus.Onboarded ->
-                    withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
+                    withStyle(baseStyle.copy(color = SharedColors.SuccessGreen)) {
                         append(context.getString(R.string.completed))
                     }
 
@@ -394,7 +392,7 @@ fun AnnotatedString.Builder.appendApproverStatusText(context: Context, approver:
         }
 
         is Guardian.TrustedGuardian -> {
-            withStyle(baseStyle.copy(color = Colors.SuccessGreen)) {
+            withStyle(baseStyle.copy(color = SharedColors.SuccessGreen)) {
                 append(context.getString(R.string.completed))
             }
         }
@@ -438,7 +436,6 @@ val dummyListOfApprovers = listOf(
             signature = Base64EncodedData(""),
             timeMillis = 1L,
             guardianPublicKey = Base58EncodedGuardianPublicKey(""),
-            verificationStatus = VerificationStatus.WaitingForVerification,
             submittedAt = Clock.System.now(),
             deviceEncryptedTotpSecret = Base64EncodedData(""),
             )

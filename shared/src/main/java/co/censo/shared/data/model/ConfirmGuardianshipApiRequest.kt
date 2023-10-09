@@ -13,3 +13,8 @@ data class ConfirmGuardianshipApiRequest(
 data class ConfirmGuardianshipApiResponse(
     val ownerState: OwnerState,
 )
+
+@Serializable
+data class RejectGuardianVerificationApiResponse(
+    val ownerState: OwnerState,
+)

@@ -39,9 +39,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Recovery
-import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalRow
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalsCollected
@@ -79,7 +79,7 @@ fun RecoveryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Colors.PrimaryBlue)
+                    .background(color = VaultColors.PrimaryColor)
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -131,7 +131,7 @@ fun RecoveryScreen(
                     Column(
                         Modifier
                             .fillMaxSize()
-                            .background(color = Colors.PrimaryBlue)
+                            .background(color = VaultColors.PrimaryColor)
                             .padding(all = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -155,7 +155,7 @@ fun RecoveryScreen(
 
                         FullScreenButton(
                             modifier = Modifier.padding(horizontal = 72.dp),
-                            color = Colors.PrimaryBlue,
+                            color = VaultColors.PrimaryColor,
                             borderColor = Color.White,
                             border = true,
                             contentPadding = PaddingValues(vertical = 0.dp),

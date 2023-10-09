@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.data.Resource
-import co.censo.shared.presentation.Colors
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @Composable
@@ -58,7 +58,7 @@ fun LockedScreen(
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .background(color = Colors.PrimaryBlue),
+                        .background(color = VaultColors.PrimaryColor),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -75,7 +75,7 @@ fun LockedScreen(
 
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
-                        color = Colors.PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         borderColor = Color.White,
                         border = true,
                         contentPadding = PaddingValues(vertical = 12.dp),
@@ -93,7 +93,7 @@ fun LockedScreen(
 
             is LockScreenState.LockStatus.Unlocked -> {
                 Column(
-                    Modifier.background(color = Colors.PrimaryBlue),
+                    Modifier.background(color = VaultColors.PrimaryColor),
                     verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -109,7 +109,7 @@ fun LockedScreen(
 
                     FullScreenButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
-                        color = Colors.PrimaryBlue,
+                        color = VaultColors.PrimaryColor,
                         borderColor = Color.White,
                         border = true,
                         contentPadding = PaddingValues(vertical = 12.dp),
@@ -183,7 +183,7 @@ private fun LoadingIndicator() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Colors.PrimaryBlue),
+            .background(color = VaultColors.PrimaryColor),
     ) {
         CircularProgressIndicator(
             modifier = Modifier

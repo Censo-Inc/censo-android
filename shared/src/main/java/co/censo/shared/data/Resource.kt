@@ -1,6 +1,7 @@
 package co.censo.shared.data
 
 import android.content.Context
+import co.censo.shared.R
 import co.censo.shared.data.networking.NoConnectivityException
 import co.censo.shared.data.repository.ErrorResponse
 import java.lang.Exception
@@ -24,18 +25,15 @@ sealed class Resource<out T>(
                 return "Network NA"
             }
 
-            val displayMessage = this.errorResponse?.errors?.get(0)?.displayMessage
-            val errorMessage = this.errorResponse?.errors?.get(0)?.message
-            val exceptionMessage = this.exception?.message
-
-            return if (!displayMessage.isNullOrEmpty()) {
-                displayMessage
-            } else if (!errorMessage.isNullOrEmpty()) {
-                errorMessage
-            } else if (!exceptionMessage.isNullOrEmpty()) {
-                exceptionMessage
-            } else {
-                "Default error message"
+            return when (errorCode) {
+                400 -> context.getString(R.string.invalid_request)
+                401 -> context.getString(R.string.invalid_request_signature)
+                403 -> context.getString(R.string.unauthorized_access)
+                418 -> context.getString(R.string.under_maintenance)
+                422 -> this.errorResponse?.errors?.get(0)?.displayMessage
+                        ?: this.errorResponse?.errors?.get(0)?.message
+                        ?: context.getString(R.string.validation_error)
+                else -> "${context.getString(R.string.unexpected_error)} ($errorCode)"
             }
         }
 
