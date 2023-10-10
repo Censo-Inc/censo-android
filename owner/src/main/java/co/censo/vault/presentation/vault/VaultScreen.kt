@@ -39,6 +39,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.components.vault.AddBip39PhraseUI
 import co.censo.vault.presentation.components.vault.UnlockedVaultScreen
 import co.censo.vault.presentation.components.vault.VaultSecretListItem
 import co.censo.vault.presentation.home.Screen
@@ -152,18 +153,10 @@ fun VaultScreen(
 
                                     Spacer(modifier = Modifier.weight(1f))
 
-                                    TextButton(
-                                        onClick = { navController.navigate("${Screen.AddBIP39Route.route}/${ownerState.vault.publicMasterEncryptionKey.value}") },
-                                        modifier = Modifier
-                                            .semantics { testTag = TestTag.add_phrase }
-                                            .padding(end = 8.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.AddCircle,
-                                            modifier = Modifier.padding(end = 18.dp),
-                                            contentDescription = stringResource(R.string.unlock),
-                                            tint = Color.Black
-                                        )
+                                    val publicKey = ownerState.vault.publicMasterEncryptionKey.value
+
+                                    AddBip39PhraseUI {
+                                        navController.navigate("${Screen.AddBIP39Route.route}/$publicKey")
                                     }
                                 }
 

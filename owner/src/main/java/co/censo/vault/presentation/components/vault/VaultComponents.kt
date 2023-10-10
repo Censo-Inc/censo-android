@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -106,6 +107,31 @@ fun VaultSecretListItem(
             )
         }
     }
+}
+
+@Composable
+fun AddBip39PhraseUI(
+    navigateToAddPhrase: () -> Unit
+) {
+    TextButton(
+        onClick = { navigateToAddPhrase() },
+        modifier = Modifier
+            .semantics { testTag = TestTag.add_phrase }
+            .padding(end = 8.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.AddCircle,
+            modifier = Modifier.padding(end = 18.dp),
+            contentDescription = stringResource(R.string.add_bip39_phrase),
+            tint = Color.Black
+        )
+    }
+}
+
+@Preview
+@Composable
+fun AddBip39PhraseUIPreview() {
+    AddBip39PhraseUI {}
 }
 
 @Preview

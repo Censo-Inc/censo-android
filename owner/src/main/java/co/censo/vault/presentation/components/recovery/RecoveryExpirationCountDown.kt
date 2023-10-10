@@ -49,7 +49,7 @@ fun RecoveryExpirationCountDown(
 
     Text(
         modifier = Modifier.padding(6.dp),
-        text = stringResource(R.string.expires_in_placeholder, formatDuration(durationLeft)),
+        text = "${stringResource(R.string.expires_in)}: ${formatDuration(durationLeft)}",
         color = Color.White,
         fontSize = 12.sp,
         fontWeight = FontWeight.W300,

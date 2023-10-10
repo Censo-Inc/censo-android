@@ -40,7 +40,7 @@ fun LockCountDown(
 
     Text(
         modifier = Modifier.padding(6.dp),
-        text = stringResource(R.string.locks_in_placeholder_seconds, secondsLeft),
+        text = "${stringResource(R.string.locks_in)} $secondsLeft ${stringResource(R.string.seconds)}",
         color = Color.White,
         fontSize = 12.sp,
         fontWeight = FontWeight.W300,
