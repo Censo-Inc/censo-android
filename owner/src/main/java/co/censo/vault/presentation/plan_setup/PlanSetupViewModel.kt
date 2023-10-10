@@ -84,8 +84,7 @@ class PlanSetupViewModel @Inject constructor(
 
                 // notify lock screen about facetec enrollment
                 // this will activate lock tracking
-                var result = ownerStateFlow.tryEmit(createPolicySetupResponse.map { it.ownerState })
-                result
+                ownerStateFlow.tryEmit(createPolicySetupResponse.map { it.ownerState })
             } else if (createPolicySetupResponse is Resource.Error) {
                 state = state.copy(
                     createPolicySetupResponse = createPolicySetupResponse,
