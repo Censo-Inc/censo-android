@@ -1,5 +1,9 @@
 package co.censo.vault.presentation.components.vault
 
+import Base64EncodedData
+import VaultSecretId
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,11 +24,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.cryptography.generateBase64
+import co.censo.shared.data.cryptography.generateHexString
+import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.VaultSecret
 import co.censo.vault.R
 import co.censo.vault.util.TestTag
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
@@ -96,5 +105,24 @@ fun VaultSecretListItem(
                     .fillMaxWidth()
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun VaultSecretListItemPreview() {
+    Box(
+        modifier = Modifier.background(color = Color.White)
+    ) {
+        VaultSecretListItem(
+            secret = VaultSecret(
+                guid = VaultSecretId("secret id"),
+                encryptedSeedPhrase = Base64EncodedData(generateBase64()),
+                seedPhraseHash = HashedValue(generateHexString()),
+                label = "this is a secret",
+                createdAt = Clock.System.now()
+            ),
+            onDelete = {}
+        )
     }
 }

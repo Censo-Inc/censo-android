@@ -3,6 +3,7 @@ package co.censo.vault.presentation.components.recovery
 import Base64EncodedData
 import ParticipantId
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -88,18 +89,20 @@ fun RecoveryApprovalRow(
 @Composable
 fun RecoveryApprovalRowPreview() {
     val participantId = ParticipantId(generatePartitionId().toHexString())
-    RecoveryApprovalRow(
-        guardian = Guardian.TrustedGuardian(
-            label = "Thomas Trusted",
-            participantId = participantId,
-            attributes = GuardianStatus.Onboarded(
-                guardianEncryptedShard = Base64EncodedData(""), onboardedAt = Clock.System.now()
-            )
-        ),
-        approval = Approval(
-            participantId = participantId,
-            status = ApprovalStatus.Initial
-        ),
-        onShare = {}
-    )
+    Box(modifier = Modifier.background(color = VaultColors.PrimaryColor)) {
+        RecoveryApprovalRow(
+            guardian = Guardian.TrustedGuardian(
+                label = "Thomas Trusted",
+                participantId = participantId,
+                attributes = GuardianStatus.Onboarded(
+                    guardianEncryptedShard = Base64EncodedData(""), onboardedAt = Clock.System.now()
+                )
+            ),
+            approval = Approval(
+                participantId = participantId,
+                status = ApprovalStatus.Initial
+            ),
+            onShare = {}
+        )
+    }
 }

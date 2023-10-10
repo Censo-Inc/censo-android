@@ -2,6 +2,7 @@ package co.censo.vault.presentation.components.recovery
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 
 @Composable
 fun RecoveryApprovalsCollected(
@@ -68,8 +70,12 @@ fun RecoveryApprovalsCollected(
 @Preview
 @Composable
 fun RecoveryApprovalsCollectedPreview() {
-    RecoveryApprovalsCollected(
-        collected = 1,
-        required = 3
-    )
+    Box(
+        modifier = Modifier.background(color = VaultColors.PrimaryColor)
+    ) {
+        RecoveryApprovalsCollected(
+            collected = 1,
+            required = 3
+        )
+    }
 }

@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.components.recovery
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.vault.presentation.VaultColors
 import kotlinx.coroutines.time.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -76,8 +78,10 @@ private fun durationUnit(expiresAt: Instant): Duration {
 @Preview
 @Composable
 fun RecoveryExpirationCountDownPreview() {
-    RecoveryExpirationCountDown(
-        expiresAt = Clock.System.now() + 2.days + 3.hours + 25.minutes + 5.seconds,
-        onTimeOut = {}
-    )
+    Box(modifier = Modifier.background(color = VaultColors.PrimaryColor)) {
+        RecoveryExpirationCountDown(
+            expiresAt = Clock.System.now() + 2.days + 3.hours + 25.minutes + 5.seconds,
+            onTimeOut = {}
+        )
+    }
 }

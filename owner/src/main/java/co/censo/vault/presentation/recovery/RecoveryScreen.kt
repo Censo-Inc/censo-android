@@ -1,27 +1,11 @@
 package co.censo.vault.presentation.recovery
 
-import FullScreenButton
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,29 +13,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
-import co.censo.vault.presentation.components.recovery.RecoveryApprovalRow
-import co.censo.vault.presentation.components.recovery.RecoveryApprovalsCollected
-import co.censo.vault.presentation.components.recovery.RecoveryExpirationCountDown
-import co.censo.vault.presentation.components.shareDeeplink
+import co.censo.vault.presentation.components.recovery.ThisDeviceRecoveryScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -134,134 +105,14 @@ fun RecoveryScreen(
                 }
 
                 is Recovery.ThisDevice -> {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .background(color = VaultColors.PrimaryColor)
-                            .padding(all = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(R.string.recovery_initiated),
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.W700,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        RecoveryExpirationCountDown(expiresAt = recovery.expiresAt) {
-                            viewModel.cancelRecovery()
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        FullScreenButton(
-                            modifier = Modifier.padding(horizontal = 72.dp),
-                            color = VaultColors.PrimaryColor,
-                            borderColor = Color.White,
-                            border = true,
-                            contentPadding = PaddingValues(vertical = 0.dp),
-                            onClick = viewModel::cancelRecovery,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.cancel_recovery),
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        RecoveryApprovalsCollected(
-                            collected = state.approvalsCollected,
-                            required = state.approvalsRequired
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = stringResource(R.string.required_approvals_reached_to_complete_recovery),
-                            fontSize = 16.sp,
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 30.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = buildAnnotatedString {
-                                withStyle(
-                                    SpanStyle(
-                                        color = Color.White,
-                                        fontSize = 14.sp
-                                    )
-                                ) {
-                                    append(stringResource(R.string.tap_the))
-                                    append(" ")
-                                    appendInlineContent("[icon]", "[icon]")
-                                    append(" ")
-                                    append(stringResource(R.string.icon_next_to_each_of_your_approvers_to_send_them_the_recovery_link))
-                                }
-                            },
-                            inlineContent = mapOf(
-                                Pair(
-                                    "[icon]",
-                                    InlineTextContent(
-                                        Placeholder(
-                                            width = 16.sp,
-                                            height = 16.sp,
-                                            placeholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
-                                        )
-                                    ) {
-                                        Icon(
-                                            modifier = Modifier.size(16.dp),
-                                            imageVector = Icons.Outlined.IosShare,
-                                            contentDescription = stringResource(R.string.share_approver_recovery_link),
-                                            tint = Color.White
-                                        )
-                                    }
-                                )
-                            )
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        LazyColumn(
-                            modifier = Modifier
-                                .background(
-                                    Color.White.copy(alpha = 0.05f),
-                                    RoundedCornerShape(10.dp)
-                                )
-                                .padding(all = 16.dp)
-                        ) {
-                            val approvals = recovery.approvals
-
-                            items(approvals.size) { index ->
-                                val approval = approvals[index]
-                                RecoveryApprovalRow(
-                                    guardian = state.guardians.first { it.participantId == approval.participantId },
-                                    approval = approval,
-                                    onShare = { shareDeeplink(recovery.deepLink(), context) }
-                                )
-
-                                if (index != approvals.size - 1)
-                                    Divider(
-                                        color = Color.White.copy(alpha = 0.1f),
-                                        thickness = 1.dp,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 16.dp)
-                                    )
-                            }
-                        }
-                    }
+                    ThisDeviceRecoveryScreen(
+                        recovery,
+                        guardians = state.guardians,
+                        approvalsRequired = state.approvalsRequired,
+                        approvalsCollected = state.approvalsCollected,
+                        onCancelRecovery = viewModel::cancelRecovery,
+                        context = context
+                    )
                 }
             }
         }
