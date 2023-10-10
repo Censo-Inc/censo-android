@@ -9,20 +9,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.cryptography.generateBase32
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Base64
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -30,7 +30,8 @@ import kotlin.math.roundToInt
 @HiltViewModel
 class PlanSetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val keyRepository: KeyRepository
+    private val keyRepository: KeyRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(PlanSetupState())
@@ -80,6 +81,10 @@ class PlanSetupViewModel @Inject constructor(
                     createPolicySetupResponse = createPolicySetupResponse,
                     navigateToActivateApprovers = true
                 )
+
+                // notify lock screen about facetec enrollment
+                // this will activate lock tracking
+                ownerStateFlow.tryEmit(createPolicySetupResponse.map { it.ownerState })
             } else if (createPolicySetupResponse is Resource.Error) {
                 state = state.copy(
                     createPolicySetupResponse = createPolicySetupResponse,

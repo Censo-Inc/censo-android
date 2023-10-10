@@ -1,17 +1,17 @@
 package co.censo.shared.data.cryptography
 
 import io.github.novacrypto.base58.Base58
+import org.apache.commons.codec.binary.Base32
+import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
-import java.security.MessageDigest
-import kotlin.random.Random
-
-import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
+import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.and
 import kotlin.math.pow
+import kotlin.random.Random
 
 object TotpGenerator {
     const val CODE_LENGTH = 6
@@ -62,6 +62,15 @@ fun generatePartitionId() : BigInteger {
 
 fun generateBase32() : String {
     return Base32().encodeAsString(
+        generateRandom(
+            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            length = 10
+        ).toByteArray(Charsets.UTF_8)
+    )
+}
+
+fun generateBase64() : String {
+    return Base64.toBase64String(
         generateRandom(
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             length = 10

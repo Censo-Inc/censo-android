@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +36,6 @@ import co.censo.shared.data.model.toSecurityPlan
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.components.OnLifecycleEvent
-import co.censo.vault.presentation.owner_ready.OwnerReadyScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -100,6 +100,15 @@ fun HomeScreen(
         onDispose {}
     }
 
+    LaunchedEffect(key1 = state) {
+        if (state.ownerStateResource is Resource.Success) {
+            if (state.ownerStateResource.data is OwnerState.Ready) {
+                navController.navigate(Screen.VaultScreen.route)
+                viewModel.resetOwnerState()
+            }
+        }
+    }
+
     when {
         state.loading -> {
             Box(
@@ -155,13 +164,7 @@ fun HomeScreen(
                         }
                     }
 
-                    is OwnerState.Ready ->
-                        OwnerReadyScreen(
-                            ownerState,
-                            refreshOwnerState = viewModel::retrieveOwnerState,
-                            updateOwnerState = viewModel::updateOwnerState,
-                            navController = navController
-                        )
+                    is OwnerState.Ready -> {}
                 }
             }
         }

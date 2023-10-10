@@ -18,7 +18,7 @@ import co.censo.guardian.ui.theme.GuardianTheme
 import co.censo.shared.SharedScreen
 import co.censo.shared.SharedScreen.Companion.DL_INVITATION_ID_KEY
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_URI
+import co.censo.shared.SharedScreen.Companion.GUARDIAN_ONBOARDING_URI
 import co.censo.shared.presentation.entrance.EntranceScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -61,7 +61,7 @@ class MainActivity : FragmentActivity() {
                 "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",
                 deepLinks = listOf(
                     navDeepLink {
-                        uriPattern = "$GUARDIAN_URI{$DL_INVITATION_ID_KEY}"
+                        uriPattern = "$GUARDIAN_ONBOARDING_URI{$DL_INVITATION_ID_KEY}"
                     }
 
                 )

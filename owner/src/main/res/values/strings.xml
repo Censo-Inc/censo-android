@@ -123,5 +123,24 @@
     <string name="declined">Declined</string>
     <string name="code_submitted">Code Submitted</string>
     <string name="approver_does_not_need_verification">Approver does not need verification.</string>
+    <string name="recovery_initiated_on_another_device">Recovery Initiated On Another Device</string>
+    <string name="status_colon">Status:</string>
+    <string name="share_approver_recovery_link">share approver recovery link</string>
+    <string name="tap_the">Tap the</string>
+    <string name="icon_next_to_each_of_your_approvers_to_send_them_the_recovery_link">icon next to each of your approvers to send them the recovery link</string>
+    <string name="required_approvals_reached_to_complete_recovery">required approvals reached to complete recovery</string>
+    <string name="recovery_initiated">Recovery Initiated</string>
+    <string name="cancel_recovery">Cancel Recovery</string>
+    <string name="your_seed_phrases_are_protected">Your seed phrases are protected</string>
+    <string name="edit_seed_phrases">Edit Seed Phrases</string>
+    <string name="recover_phrases">Recover Phrases</string>
+    <string name="added_on">"Added on"</string>
+    <string name="vault">Vault</string>
+    <string name="unlock">Unlock</string>
+    <string name="vault_is_locked">Vault is locked</string>
+    <string name="lock">Lock</string>
+    <string name="locks_in">Locks in</string>
+    <string name="seconds">seconds</string>
+    <string name="expires_in">Expires in</string>
 
 </resources>
