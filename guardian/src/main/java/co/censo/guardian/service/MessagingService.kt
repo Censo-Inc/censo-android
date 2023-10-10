@@ -14,6 +14,7 @@ import co.censo.shared.SharedScreen
 import co.censo.shared.buildScreenDeepLinkUri
 import co.censo.shared.service.BaseMessagingService
 import co.censo.shared.service.PushData
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 import kotlin.math.abs
@@ -28,11 +29,11 @@ class MessagingService : BaseMessagingService() {
      */
     override fun sendNotification(pushData: PushData) {
         val homeScreenIntent = Intent(
-            Intent.ACTION_VIEW,
-            SharedScreen.HomeRoute.buildScreenDeepLinkUri().toUri(),
             this,
             MainActivity::class.java
         )
+
+        projectLog(message="sendNotification - ${SharedScreen.EntranceRoute.buildScreenDeepLinkUri().toUri()}")
 
         homeScreenIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {

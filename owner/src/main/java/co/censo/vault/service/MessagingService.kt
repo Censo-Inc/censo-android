@@ -7,9 +7,6 @@ import android.content.Intent
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
-import androidx.core.net.toUri
-import co.censo.shared.SharedScreen
-import co.censo.shared.buildScreenDeepLinkUri
 import co.censo.vault.MainActivity
 import co.censo.shared.service.BaseMessagingService
 import co.censo.shared.service.PushData
@@ -28,8 +25,6 @@ class MessagingService : BaseMessagingService() {
      */
     override fun sendNotification(pushData: PushData) {
         val homeScreenIntent = Intent(
-            Intent.ACTION_VIEW,
-            SharedScreen.HomeRoute.buildScreenDeepLinkUri().toUri(),
             this,
             MainActivity::class.java
         )
