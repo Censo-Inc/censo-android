@@ -139,5 +139,7 @@
     <string name="unlock">Unlock</string>
     <string name="vault_is_locked">Vault is locked</string>
     <string name="lock">Lock</string>
+    <string name="locks_in_placeholder_seconds">Locks in %1$s seconds</string>
+    <string name="expires_in_placeholder">Expires in: %1$s</string>
 
 </resources>

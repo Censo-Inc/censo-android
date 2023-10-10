@@ -10,9 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.vault.R
 import kotlinx.coroutines.time.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -38,7 +40,7 @@ fun LockCountDown(
 
     Text(
         modifier = Modifier.padding(6.dp),
-        text = "Locks in $secondsLeft seconds",
+        text = stringResource(R.string.locks_in_placeholder_seconds, secondsLeft),
         color = Color.White,
         fontSize = 12.sp,
         fontWeight = FontWeight.W300,

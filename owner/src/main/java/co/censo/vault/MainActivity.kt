@@ -77,13 +77,13 @@ class MainActivity : FragmentActivity() {
                     }
 
                     Box {
-                        Row(
+                        Box(
                             modifier = Modifier.fillMaxHeight(fraction = navHostHeight),
                         ) {
                             CensoNavHost(navController = navController)
                         }
 
-                        Row(
+                        Box(
                             modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
                             LockedScreen(
