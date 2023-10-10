@@ -51,17 +51,18 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    val oneTapServerId = configProperties["ONE_TAP_SERVER_CLIENT_ID"] as String
-    val oneTapClientIds = (configProperties["ONE_TAP_CLIENT_IDS"] as String).split("#")
-    val oneTapClientIdsArrayRepresentation = createBuildConfigStringArray(oneTapClientIds)
+    val googleAuthClientIds = (configProperties["GOOGLE_AUTH_CLIENT_IDS"] as String).split("#")
+    val googleAuthClientIdsArrayRepresentation = createBuildConfigStringArray(googleAuthClientIds)
+
+    val googleAuthServerId = configProperties["GOOGLE_AUTH_SERVER_CLIENT_ID"] as String
 
     buildTypes {
         release {
             isMinifyEnabled = false
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
-            buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
-            buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
+            buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
+            buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -70,15 +71,15 @@ android {
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
-            buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
-            buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
+            buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
+            buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Vault")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
-            buildConfigField("String", "ONE_TAP_SERVER_ID", "\"$oneTapServerId\"")
-            buildConfigField("String[]", "ONE_TAP_CLIENT_IDS", oneTapClientIdsArrayRepresentation)
+            buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
+            buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
         }
         create("bintegration") {
@@ -152,10 +153,14 @@ dependencies {
     //One Tap
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
+    //GoogleAuth (utilizes the One Tap dependency above)
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    implementation("com.google.api-client:google-api-client-android:2.0.0")
+
     //Push Notifications
     implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
     implementation("com.google.firebase:firebase-messaging-ktx")
-
+    
     //auth0 JWT
     implementation("com.auth0.android:jwtdecode:2.0.1")
 

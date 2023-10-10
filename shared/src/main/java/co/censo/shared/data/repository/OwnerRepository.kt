@@ -74,6 +74,9 @@ interface OwnerRepository {
     suspend fun retrieveJWT(): String
     suspend fun checkJWTValid(jwtToken: String): Boolean
 
+    suspend fun saveAccessToken(accessToken: String)
+    suspend fun retrieveAccessToken(): String
+
     suspend fun confirmGuardianShip(
         participantId: ParticipantId,
         keyConfirmationSignature: ByteArray,
@@ -117,6 +120,7 @@ interface OwnerRepository {
     fun clearSecurityPlanData()
     suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse>
     suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse>
+    suspend fun signUserOut()
 }
 
 class OwnerRepositoryImpl(
@@ -194,11 +198,10 @@ class OwnerRepositoryImpl(
         val verifier = GoogleIdTokenVerifier.Builder(
             NetHttpTransport(), GsonFactory()
         )
-            .setAudience(BuildConfig.ONE_TAP_CLIENT_IDS.toList())
+            .setAudience(BuildConfig.GOOGLE_AUTH_CLIENT_IDS.toList())
             .build()
 
         val verifiedIdToken: GoogleIdToken? = verifier.verify(token)
-
         return verifiedIdToken?.payload?.subject
     }
 
@@ -261,6 +264,14 @@ class OwnerRepositoryImpl(
         } catch (e: Exception) {
             false
         }
+    }
+
+    override suspend fun saveAccessToken(accessToken: String) {
+        storage.saveAuthAccessToken(accessToken)
+    }
+
+    override suspend fun retrieveAccessToken(): String {
+        return storage.retrieveAuthAccessToken()
     }
 
     override fun encryptShardWithGuardianKey(
@@ -345,5 +356,10 @@ class OwnerRepositoryImpl(
 
     override suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse> {
         return retrieveApiResource { apiService.deleteRecovery() }
+    }
+
+    override suspend fun signUserOut() {
+        storage.clearJWT()
+        storage.clearAuthAccessToken()
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="one_tap_login">One Tap Login</string>
+    <string name="google_auth_login">Login with Google</string>
     <string name="entrance_screen">Entrance Screen</string>
     <string name="retry">Retry</string>
     <string name="dismiss">Dismiss</string>
@@ -10,4 +10,5 @@
     <string name="under_maintenance">Censo is currently under maintenance, please try again in a few minutes.</string>
     <string name="validation_error">Validation Error</string>
     <string name="unexpected_error">Unexpected Error</string>
+    <string name="sign_out">Sign Out</string>
 </resources>

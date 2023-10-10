@@ -6,7 +6,6 @@ import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,14 +35,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.data.Resource
 import co.censo.shared.BuildConfig
+import co.censo.shared.data.Resource
 import co.censo.shared.R
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,11 +52,7 @@ fun EntranceScreen(
     invitationId: String = "",
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
-
     val context = LocalContext.current as FragmentActivity
-
-    val oneTapClient: SignInClient = Identity.getSignInClient(context)
-    lateinit var signInRequest: BeginSignInRequest
 
     val state = viewModel.state
 
@@ -97,23 +91,31 @@ fun EntranceScreen(
         }
     }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
+    fun signOutFromGoogle() {
+        try {
+            val gso = GoogleSignInOptions.Builder()
+                .build()
+            val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
+            googleSignInClient.signOut()
+        } catch (e: Exception) {
+            viewModel.googleAuthFailure(GoogleAuthError.FailedToSignUserOut(e))
+        }
+        viewModel.signUserOut()
+
+    }
+
+    val googleAuthLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { activityResult ->
             when (activityResult.resultCode) {
                 RESULT_OK -> {
-                    try {
-                        val credential =
-                            oneTapClient.getSignInCredentialFromIntent(activityResult.data)
-                        credential.googleIdToken?.let { viewModel.oneTapSuccess(it) }
-                            ?: viewModel.oneTapFailure(OneTapError.MissingCredentialId)
-                    } catch (e: Exception) {
-                        viewModel.oneTapFailure(OneTapError.ErrorParsingIntent(e))
-                    }
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(activityResult.data)
+                    viewModel.handleSignInResult(task)
                 }
 
-                RESULT_CANCELED -> viewModel.oneTapFailure(OneTapError.UserCanceledOneTap)
-                else -> viewModel.oneTapFailure(OneTapError.IntentResultFailed)
+                RESULT_CANCELED -> viewModel.googleAuthFailure(GoogleAuthError.UserCanceledOneTap)
+                else -> viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
             }
         }
     )
@@ -131,33 +133,21 @@ fun EntranceScreen(
             viewModel.resetUserFinishedSetup()
         }
 
-        if (state.triggerOneTap is Resource.Success) {
-            signInRequest = BeginSignInRequest.builder()
-                .setGoogleIdTokenRequestOptions(
-                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                        .setSupported(true)
-                        .setServerClientId(BuildConfig.ONE_TAP_SERVER_ID)
-                        .setFilterByAuthorizedAccounts(false)
+        if (state.triggerGoogleSignIn is Resource.Success) {
+                try {
+                    val gso = GoogleSignInOptions.Builder()
+                        .requestIdToken(BuildConfig.GOOGLE_AUTH_SERVER_ID)
                         .build()
-                )
-                .build()
 
-            oneTapClient.beginSignIn(signInRequest)
-                .addOnSuccessListener { result ->
-                    try {
-                        launcher.launch(
-                            IntentSenderRequest.Builder(result.pendingIntent.intentSender)
-                                .build()
-                        )
-                    } catch (e: Exception) {
-                        viewModel.oneTapFailure(OneTapError.FailedToStartOneTap)
-                    }
-                }
-                .addOnFailureListener { e ->
-                    viewModel.oneTapFailure(OneTapError.FailedToLaunchOneTapUI(e))
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
+                    val intent = googleSignInClient.signInIntent
+                    googleAuthLauncher.launch(intent)
+                } catch (e: Exception) {
+                    viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
                 }
 
-            viewModel.resetTriggerOneTap()
+            viewModel.resetTriggerGoogleSignIn()
         }
 
         if (state.showPushNotificationsDialog is Resource.Success) {
@@ -210,9 +200,9 @@ fun EntranceScreen(
                                 errorMessage = state.createUserResource.getErrorMessage(context),
                                 dismissAction = viewModel::resetCreateOwnerResource,
                             ) { viewModel.retryCreateUser() }
-                        } else if (state.triggerOneTap is Resource.Error) {
+                        } else if (state.triggerGoogleSignIn is Resource.Error) {
                             DisplayError(
-                                errorMessage = state.triggerOneTap.getErrorMessage(context),
+                                errorMessage = state.triggerGoogleSignIn.getErrorMessage(context),
                                 dismissAction = viewModel::resetCreateOwnerResource,
                             ) { viewModel.retryCreateUser() }
                         }
@@ -220,7 +210,8 @@ fun EntranceScreen(
 
                     else -> {
                         OwnerEntranceStandardUI(
-                            authenticate = { viewModel.startOneTapFlow() }
+                            authenticate = { viewModel.startGoogleSignInFlow() },
+                            signOut = { signOutFromGoogle() }
                         )
                     }
                 }
@@ -231,7 +222,8 @@ fun EntranceScreen(
 
 @Composable
 fun OwnerEntranceStandardUI(
-    authenticate: () -> Unit
+    authenticate: () -> Unit,
+    signOut: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -240,18 +232,22 @@ fun OwnerEntranceStandardUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextButton(onClick = authenticate) {
-            Text(text = stringResource(R.string.one_tap_login))
+            Text(text = stringResource(R.string.google_auth_login))
+        }
+
+        TextButton(onClick = signOut) {
+            Text(text = stringResource(R.string.sign_out))
         }
     }
 }
 
-sealed class OneTapError(val exception: Exception) {
-    object InvalidToken : OneTapError(Exception("Invalid Token"))
-    object MissingCredentialId : OneTapError(Exception("Missing Google Credential Id"))
-    object UserCanceledOneTap : OneTapError(Exception("User Canceled One Tap"))
-    object IntentResultFailed : OneTapError(Exception("Intent Result Failed"))
-    object FailedToStartOneTap : OneTapError(Exception("Failed to Start One Tap"))
-    data class ErrorParsingIntent(val e: Exception) : OneTapError(e)
-    data class FailedToLaunchOneTapUI(val e: Exception) : OneTapError(e)
-    data class FailedToVerifyId(val e: Exception) : OneTapError(e)
+sealed class GoogleAuthError(val exception: Exception) {
+    object InvalidToken : GoogleAuthError(Exception("Invalid Token"))
+    object MissingCredentialId : GoogleAuthError(Exception("Missing Google Credential Id"))
+    object UserCanceledOneTap : GoogleAuthError(Exception("User Canceled Google Auth"))
+    object IntentResultFailed : GoogleAuthError(Exception("Intent Result Failed"))
+    data class ErrorParsingIntent(val e: Exception) : GoogleAuthError(e)
+    data class FailedToSignUserOut(val e: Exception) : GoogleAuthError(e)
+    data class FailedToLaunchGoogleAuthUI(val e: Exception) : GoogleAuthError(e)
+    data class FailedToVerifyId(val e: Exception) : GoogleAuthError(e)
 }

@@ -14,6 +14,9 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.util.projectLog
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,13 +25,12 @@ import javax.inject.Inject
 /**
  *
  * General Android Owner Flow
- * Step 1: Login user with Primary Auth (OneTap)
+ * Step 1: Login user with Primary Auth (Google Sign In)
  *       - If login error occurs notify user
  * Step 2: Handle Device Key Work: TODO
  * Step 3: Send user to Home screen
  *
  */
-
 
 @HiltViewModel
 class EntranceViewModel @Inject constructor(
@@ -58,6 +60,11 @@ class EntranceViewModel @Inject constructor(
 
                 if (tokenValid) {
                     checkUserHasRespondedToNotificationOptIn()
+                    state = state.copy(
+                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                    )
+                } else {
+                    //TODO: Sign out the user here
                 }
             }
         }
@@ -100,21 +107,38 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    fun startOneTapFlow() {
-        state = state.copy(triggerOneTap = Resource.Success(Unit))
+    fun startGoogleSignInFlow() {
+        state = state.copy(triggerGoogleSignIn = Resource.Success(Unit))
     }
 
-    fun oneTapSuccess(googleIdCredential: String) {
+    fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account = completedTask.getResult(ApiException::class.java)
+            createUser(account.idToken)
+        } catch (e: ApiException) {
+            googleAuthFailure(GoogleAuthError.ErrorParsingIntent(e))
+        }
+    }
+
+
+    fun createUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
+            if (jwt.isNullOrEmpty()) {
+                googleAuthFailure(GoogleAuthError.MissingCredentialId)
+                return@launch
+            }
+
+            ownerRepository.saveJWT(jwt)
+
             val idToken = try {
-                ownerRepository.verifyToken(googleIdCredential)
+                ownerRepository.verifyToken(jwt)
             } catch (e: Exception) {
-                oneTapFailure(OneTapError.FailedToVerifyId(e))
+                googleAuthFailure(GoogleAuthError.FailedToVerifyId(e))
                 return@launch
             }
 
             if (idToken == null) {
-                oneTapFailure(OneTapError.InvalidToken)
+                googleAuthFailure(GoogleAuthError.InvalidToken)
                 return@launch
             }
 
@@ -124,10 +148,8 @@ class EntranceViewModel @Inject constructor(
                 keyRepository.setSavedDeviceId(idToken)
             }
 
-            ownerRepository.saveJWT(googleIdCredential)
-
             val createUserResponse = ownerRepository.createUser(
-                jwtToken = googleIdCredential,
+                jwtToken = jwt,
                 idToken = idToken
             )
 
@@ -142,16 +164,16 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    fun oneTapFailure(oneTapError: OneTapError) {
-        state = state.copy(triggerOneTap = Resource.Error(exception = oneTapError.exception))
+    fun googleAuthFailure(googleAuthError: GoogleAuthError) {
+        state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
     fun retryCreateUser() {
-        startOneTapFlow()
+        startGoogleSignInFlow()
     }
 
-    fun resetTriggerOneTap() {
-        state = state.copy(triggerOneTap = Resource.Uninitialized)
+    fun resetTriggerGoogleSignIn() {
+        state = state.copy(triggerGoogleSignIn = Resource.Uninitialized)
     }
 
     fun resetUserFinishedSetup() {
@@ -168,5 +190,11 @@ class EntranceViewModel @Inject constructor(
             userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
             showPushNotificationsDialog = Resource.Uninitialized
         )
+    }
+
+    fun signUserOut() {
+        viewModelScope.launch {
+            ownerRepository.signUserOut()
+        }
     }
 }

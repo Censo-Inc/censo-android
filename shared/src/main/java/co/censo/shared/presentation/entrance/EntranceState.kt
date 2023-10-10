@@ -4,7 +4,7 @@ import co.censo.shared.data.Resource
 import okhttp3.ResponseBody
 
 data class EntranceState(
-    val triggerOneTap: Resource<Unit> = Resource.Uninitialized,
+    val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val createUserResource: Resource<ResponseBody> = Resource.Uninitialized,
     val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
@@ -13,5 +13,5 @@ data class EntranceState(
     val isLoading = createUserResource is Resource.Loading
 
     val apiCallErrorOccurred =
-        createUserResource is Resource.Error || triggerOneTap is Resource.Error
+        createUserResource is Resource.Error || triggerGoogleSignIn is Resource.Error
 }
