@@ -32,5 +32,6 @@ enum class GuardianUIState {
     NEED_SAVE_KEY, //Guardian state in user response is WAITING_FOR_CODE. Guardian has accepted invite. User has not saved private key.
     WAITING_FOR_CODE, //Guardian state in user response is WAITING_FOR_CODE. Guardian has accepted invite. User has saved private key.
     WAITING_FOR_CONFIRMATION, //Guardian state in user response is WAITING_FOR_CONFIRMATION.
+    CODE_REJECTED, //Guardian state in user response is VerificationRejected
     COMPLETE //Guardian state in user response is COMPLETE
 }

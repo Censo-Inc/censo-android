@@ -33,9 +33,9 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.toSecurityPlan
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
-import co.censo.vault.presentation.components.OnLifecycleEvent
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

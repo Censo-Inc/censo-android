@@ -38,5 +38,7 @@
     <string name="approver_verification_code_text">Please enter the code provided by the Vault owner</string>
     <string name="waiting_for_owner_verify_code">Waiting for owner to verify the code.</string>
     <string name="submit_code_error_occurred">The code you entered is not correct. Please try again.</string>
+    <string name="code_not_approved">Code not approved. Please send new verification code.</string>
+    <string name="code_sent_to_owner_waiting_for_them_to_approve">Code sent to owner, waiting for them to approve.</string>
 
 </resources>

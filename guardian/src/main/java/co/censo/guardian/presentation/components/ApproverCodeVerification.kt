@@ -37,6 +37,7 @@ fun ApproverCodeVerification(
     isLoading: Boolean,
     errorResource: Resource.Error<SubmitGuardianVerificationApiResponse>?,
     value: String,
+    label: String,
     onValueChanged: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -47,26 +48,12 @@ fun ApproverCodeVerification(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        //Top header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(GuardianColors.PrimaryColor),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = stringResource(R.string.become_an_approver), color = Color.White, fontSize = 24.sp,
-                textAlign = TextAlign.Center
-            )
-        }
         Spacer(modifier = Modifier.height(30.dp))
 
         //Text
         Text(
             modifier = Modifier.padding(16.dp),
-            text = stringResource(R.string.approver_verification_code_text),
+            text = label,
             color = GuardianColors.PrimaryColor,
             textAlign = TextAlign.Center,
             fontSize = 20.sp,

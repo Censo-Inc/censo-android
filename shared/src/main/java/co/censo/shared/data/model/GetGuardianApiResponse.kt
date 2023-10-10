@@ -35,10 +35,9 @@ sealed class GuardianPhase {
     ) : GuardianPhase()
 
     @Serializable
-    @SerialName("WaitingForConfirmation")
-    data class WaitingForConfirmation(
+    @SerialName("VerificationRejected")
+    data class VerificationRejected(
         val invitationId: InvitationId,
-        val verificationStatus: VerificationStatus,
     ) : GuardianPhase()
 
     @Serializable

@@ -48,9 +48,9 @@ sealed class GuardianStatus {
     @Serializable
     @SerialName("Accepted")
     data class Accepted(
-        val acceptedAt: Instant,
         val deviceEncryptedTotpSecret: Base64EncodedData,
-        ) : GuardianStatus()
+        val acceptedAt: Instant,
+    ) : GuardianStatus()
 
     @Serializable
     @SerialName("VerificationSubmitted")
