@@ -21,7 +21,7 @@ data class LockScreenState(
         data class LockInProgress(val apiCall: Resource<LockApiResponse>) : LockStatus()
 
         companion object {
-            fun fromOwnerState(ownerState: OwnerState?): LockStatus =
+            fun fromOwnerState(ownerState: OwnerState): LockStatus =
                 when (ownerState) {
                     is OwnerState.GuardianSetup -> fromLocksAt(ownerState.locksAt)
                     is OwnerState.Ready -> fromLocksAt(ownerState.locksAt)

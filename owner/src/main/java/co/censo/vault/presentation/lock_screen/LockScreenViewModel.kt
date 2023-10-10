@@ -15,12 +15,14 @@ import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LockScreenViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository
+    private val ownerRepository: OwnerRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(LockScreenState())
@@ -28,6 +30,14 @@ class LockScreenViewModel @Inject constructor(
 
     fun onStart() {
         retrieveOwnerState()
+
+        viewModelScope.launch {
+            ownerStateFlow.collect { resource: Resource<OwnerState> ->
+                if (resource is Resource.Success) {
+                    onOwnerState(resource.data!!)
+                }
+            }
+        }
     }
 
     fun retrieveOwnerState() {
@@ -35,20 +45,19 @@ class LockScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
-            onOwnerState(ownerStateResource)
+
+            state = state.copy(ownerStateResource = ownerStateResource)
+
+            if (ownerStateResource is Resource.Success) {
+                onOwnerState(ownerStateResource.data!!)
+            }
         }
     }
 
-    private fun onOwnerState(ownerStateResource: Resource<OwnerState>) {
+    private fun onOwnerState(ownerState: OwnerState) {
         state = state.copy(
-            ownerStateResource = ownerStateResource,
+            lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState)
         )
-
-        if (ownerStateResource is Resource.Success) {
-            state = state.copy(
-                lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerStateResource.data)
-            )
-        }
     }
 
     fun initUnlock() {
@@ -76,11 +85,12 @@ class LockScreenViewModel @Inject constructor(
             state = state.copy(
                 lockStatus = LockScreenState.LockStatus.UnlockInProgress(
                     apiCall = unlockVaultResponse
-                )
+                ),
+                ownerStateResource = unlockVaultResponse.map { it.ownerState },
             )
 
             if (unlockVaultResponse is Resource.Success) {
-                onOwnerState(unlockVaultResponse.map { it.ownerState })
+                onOwnerState(unlockVaultResponse.data!!.ownerState)
             }
 
             unlockVaultResponse.map { it.scanResultBlob }
@@ -100,11 +110,12 @@ class LockScreenViewModel @Inject constructor(
             state = state.copy(
                 lockStatus = LockScreenState.LockStatus.LockInProgress(
                     apiCall = lockVaultResponse
-                )
+                ),
+                ownerStateResource = lockVaultResponse.map { it.ownerState },
             )
 
             if (lockVaultResponse is Resource.Success) {
-                onOwnerState(lockVaultResponse.map { it.ownerState })
+                onOwnerState(lockVaultResponse.data!!.ownerState)
             }
         }
     }

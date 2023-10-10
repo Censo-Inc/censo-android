@@ -1,27 +1,30 @@
 package co.censo.vault.di
 
 import android.content.Context
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.networking.ApiService
-import co.censo.shared.data.storage.SharedPrefsStorage
-import co.censo.vault.BuildConfig
-import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.data.repository.OwnerRepositoryImpl
-import co.censo.vault.data.repository.FacetecRepository
-import co.censo.vault.data.repository.FacetecRepositoryImpl
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.GuardianRepositoryImpl
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
-import co.censo.vault.data.repository.PushRepository
-import co.censo.vault.data.repository.PushRepositoryImpl
+import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.repository.OwnerRepositoryImpl
+import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.vault.BuildConfig
+import co.censo.vault.data.repository.FacetecRepository
+import co.censo.vault.data.repository.FacetecRepositoryImpl
+import co.censo.vault.data.repository.PushRepository
+import co.censo.vault.data.repository.PushRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Singleton
 
 @Module
@@ -101,5 +104,11 @@ object AppModule {
     @Provides
     fun provideCountdownTimer() : VaultCountDownTimer {
         return CountDownTimerImpl()
+    }
+
+    @Singleton
+    @Provides
+    fun providesOwnerStateFlow(): MutableStateFlow<Resource<OwnerState>> {
+        return MutableStateFlow(Resource.Uninitialized)
     }
 }
