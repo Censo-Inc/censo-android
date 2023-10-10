@@ -177,7 +177,7 @@ fun ThisDeviceRecoveryScreen(
                 RecoveryApprovalRow(
                     guardian = guardians.first { it.participantId == approval.participantId },
                     approval = approval,
-                    onShare = { shareDeeplink(recovery.deepLink(), context) }
+                    onShare = { shareDeeplink(approval.deepLink(), context) }
                 )
 
                 if (index != approvals.size - 1)

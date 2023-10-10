@@ -164,9 +164,7 @@ sealed class Recovery {
         val expiresAt: Instant,
         val approvals: List<Approval>,
         val vaultSecretIds: List<VaultSecretId>,
-    ) : Recovery() {
-        fun deepLink(): String ="${SharedScreen.GUARDIAN_RECOVERY_URI}${this.guid.value}"
-    }
+    ) : Recovery()
 }
 
 @Serializable
@@ -178,7 +176,9 @@ enum class RecoveryStatus {
 data class Approval(
     val participantId: ParticipantId,
     val status: ApprovalStatus,
-)
+) {
+    fun deepLink(): String ="${SharedScreen.GUARDIAN_RECOVERY_URI}${participantId.value}"
+}
 
 @Serializable
 enum class ApprovalStatus {
