@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -36,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.vault.UnlockedVaultScreen
 import co.censo.vault.presentation.components.vault.VaultSecretListItem
@@ -141,7 +143,7 @@ fun VaultScreen(
                                     verticalAlignment = Alignment.Top
                                 ) {
                                     Text(
-                                        text = "Vault",
+                                        text = stringResource(R.string.vault),
                                         modifier = Modifier.padding(start = 24.dp),
                                         textAlign = TextAlign.Center,
                                         color = Color.Black,
@@ -159,7 +161,7 @@ fun VaultScreen(
                                         Icon(
                                             imageVector = Icons.Rounded.AddCircle,
                                             modifier = Modifier.padding(end = 18.dp),
-                                            contentDescription = "Unlock",
+                                            contentDescription = stringResource(R.string.unlock),
                                             tint = Color.Black
                                         )
                                     }

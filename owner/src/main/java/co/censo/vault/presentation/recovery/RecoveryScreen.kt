@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -44,6 +45,7 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalRow
@@ -142,7 +144,7 @@ fun RecoveryScreen(
 
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Recovery Initiated",
+                            text = stringResource(R.string.recovery_initiated),
                             fontSize = 36.sp,
                             fontWeight = FontWeight.W700,
                             color = Color.White,
@@ -166,7 +168,7 @@ fun RecoveryScreen(
                             onClick = viewModel::cancelRecovery,
                         ) {
                             Text(
-                                text = "Cancel Recovery",
+                                text = stringResource(R.string.cancel_recovery),
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.W400
@@ -183,7 +185,7 @@ fun RecoveryScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "required approvals reached to complete recovery",
+                            text = stringResource(R.string.required_approvals_reached_to_complete_recovery),
                             fontSize = 16.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -201,9 +203,11 @@ fun RecoveryScreen(
                                         fontSize = 14.sp
                                     )
                                 ) {
-                                    append("Tap the ")
+                                    append(stringResource(R.string.tap_the))
+                                    append(" ")
                                     appendInlineContent("[icon]", "[icon]")
-                                    append(" icon next to each of your approvers to send them the recovery link")
+                                    append(" ")
+                                    append(stringResource(R.string.icon_next_to_each_of_your_approvers_to_send_them_the_recovery_link))
                                 }
                             },
                             inlineContent = mapOf(
@@ -219,7 +223,7 @@ fun RecoveryScreen(
                                         Icon(
                                             modifier = Modifier.size(16.dp),
                                             imageVector = Icons.Outlined.IosShare,
-                                            contentDescription = "share approver recovery link",
+                                            contentDescription = stringResource(R.string.share_approver_recovery_link),
                                             tint = Color.White
                                         )
                                     }

@@ -10,9 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 
 @Composable
@@ -28,7 +30,7 @@ fun AnotherDeviceRecoveryScreen() {
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "Recovery Initiated On Another Device",
+            text = stringResource(R.string.recovery_initiated_on_another_device),
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.W700

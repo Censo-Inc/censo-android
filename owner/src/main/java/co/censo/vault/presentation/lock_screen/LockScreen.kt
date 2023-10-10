@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +30,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
@@ -66,7 +68,7 @@ fun LockedScreen(
                     ) {
 
                     Text(
-                        text = "Vault is locked",
+                        text = stringResource(R.string.vault_is_locked),
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.W400
@@ -83,7 +85,7 @@ fun LockedScreen(
                         onClick = viewModel::initUnlock,
                     ) {
                         Text(
-                            text = "Unlock",
+                            text = stringResource(R.string.unlock),
                             color = Color.White,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.W700
@@ -117,7 +119,7 @@ fun LockedScreen(
                         onClick = viewModel::initLock
                     ) {
                         Text(
-                            text = "Lock",
+                            text = stringResource(R.string.lock),
                             color = Color.White,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.W700
