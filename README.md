@@ -17,7 +17,13 @@ Need to pass two arguments:
 
 ## Testing Deep Link
 
-`adb shell am start -W -a android.intent.action.VIEW -d "vault://guardian/[INVITATION_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
+Onboarding case: 
+
+`adb shell am start -W -a android.intent.action.VIEW -d "censo-guardian://invite/[INVITATION_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
+
+Recovery case:
+
+`adb shell am start -W -a android.intent.action.VIEW -d "censo-guardian://recovery/[PARTICIPANT_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
 
 ## UI Tests
 

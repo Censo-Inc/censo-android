@@ -17,8 +17,11 @@ import co.censo.guardian.presentation.home.GuardianHomeScreen
 import co.censo.guardian.ui.theme.GuardianTheme
 import co.censo.shared.SharedScreen
 import co.censo.shared.SharedScreen.Companion.DL_INVITATION_ID_KEY
+import co.censo.shared.SharedScreen.Companion.DL_PARTICIPANT_ID_KEY
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
+import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_RECOVERY
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_ONBOARDING_URI
+import co.censo.shared.SharedScreen.Companion.GUARDIAN_RECOVERY_URI
 import co.censo.shared.presentation.entrance.EntranceScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -70,6 +73,21 @@ class MainActivity : FragmentActivity() {
                 EntranceScreen(
                     navController = navController,
                     invitationId = invitationId,
+                    guardianEntrance = true
+                )
+            }
+            composable(
+                "$GUARDIAN_DEEPLINK_RECOVERY?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "$GUARDIAN_RECOVERY_URI{$DL_PARTICIPANT_ID_KEY}"
+                    }
+                )
+            ) { backStackEntry ->
+                val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
+                EntranceScreen(
+                    navController = navController,
+                    participantId = participantId,
                     guardianEntrance = true
                 )
             }

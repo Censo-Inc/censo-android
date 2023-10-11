@@ -13,6 +13,8 @@ import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.CountDownTimerImpl
+import co.censo.shared.util.VaultCountDownTimer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -84,5 +86,10 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): PushRepository {
         return PushRepositoryImpl(api, applicationContext)
+    }
+
+    @Provides
+    fun provideCountdownTimer() : VaultCountDownTimer {
+        return CountDownTimerImpl()
     }
 }

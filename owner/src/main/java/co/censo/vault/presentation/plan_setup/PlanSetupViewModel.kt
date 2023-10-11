@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.generatePartitionId
+import co.censo.shared.data.cryptography.toBase64EncodedData
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -23,7 +24,6 @@ import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScr
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.util.Base64
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -233,9 +233,7 @@ class PlanSetupViewModel @Inject constructor(
                     participantId = ParticipantId(
                         generatePartitionId().toHexString()
                     ),
-                    deviceEncryptedTotpSecret = Base64EncodedData(
-                        Base64.getEncoder().encodeToString(encryptedSecret)
-                    )
+                    deviceEncryptedTotpSecret = encryptedSecret.toBase64EncodedData()
                 )
             )
         }

@@ -2,12 +2,20 @@ package co.censo.shared.data.repository
 
 import Base58EncodedGuardianPublicKey
 import Base58EncodedPrivateKey
+import Base58EncodedPublicKey
 import Base64EncodedData
 import InvitationId
+import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
+import co.censo.shared.data.model.ApproveRecoveryApiRequest
+import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.RejectRecoveryApiResponse
+import co.censo.shared.data.model.StoreRecoveryTotpSecretApiRequest
+import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
@@ -39,6 +47,30 @@ interface GuardianRepository {
         verificationCode: String,
         encryptionKey: EncryptionKey
     ): SubmitGuardianVerificationApiRequest
+
+    fun saveParticipantId(participantId: String)
+    fun retrieveParticipantId(): String
+
+    suspend fun storeRecoveryTotpSecret(
+        participantId: String,
+        encryptedTotpSecret: Base64EncodedData
+    ): Resource<StoreRecoveryTotpSecretApiResponse>
+
+    fun checkTotpMatches(
+        totp: String,
+        ownerPublicKey: Base58EncodedPublicKey,
+        timeMillis: Long,
+        signature: Base64EncodedData
+    ): Boolean
+
+    suspend fun approveRecovery(
+        participantId: ParticipantId,
+        encryptedShard: Base64EncodedData,
+    ): Resource<ApproveRecoveryApiResponse>
+
+    suspend fun rejectRecovery(
+        participantId: ParticipantId
+    ) : Resource<RejectRecoveryApiResponse>
 }
 
 class GuardianRepositoryImpl(
@@ -111,5 +143,55 @@ class GuardianRepositoryImpl(
 
     override suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey {
         return Base58EncodedPrivateKey(storage.retrievePrivateKey())
+    }
+
+    override fun saveParticipantId(participantId: String) {
+        storage.saveGuardianParticipantId(participantId)
+    }
+
+    override fun retrieveParticipantId(): String =
+        storage.retrieveGuardianParticipantId()
+
+    override suspend fun storeRecoveryTotpSecret(
+        participantId: String,
+        encryptedTotpSecret: Base64EncodedData
+    ): Resource<StoreRecoveryTotpSecretApiResponse> {
+        return retrieveApiResource {
+            apiService.storeRecoveryTotpSecret(
+                participantId,
+                StoreRecoveryTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
+            )
+        }
+    }
+
+    override fun checkTotpMatches(
+        totp: String,
+        ownerPublicKey: Base58EncodedPublicKey,
+        timeMillis: Long,
+        signature: Base64EncodedData
+    ): Boolean =
+        try {
+            val dataToSign = totp.toByteArray() + timeMillis.toString().toByteArray()
+            ExternalEncryptionKey.generateFromPublicKeyBase58(ownerPublicKey).verify(
+                signedData = dataToSign,
+                signature = Base64.getDecoder().decode(signature.base64Encoded),
+            )
+        } catch (e: Exception) {
+            false
+        }
+
+    override suspend fun approveRecovery(
+        participantId: ParticipantId,
+        encryptedShard: Base64EncodedData
+    ): Resource<ApproveRecoveryApiResponse> {
+        return retrieveApiResource {
+            apiService.approveRecovery(participantId.value, ApproveRecoveryApiRequest(encryptedShard))
+        }
+    }
+
+    override suspend fun rejectRecovery(participantId: ParticipantId): Resource<RejectRecoveryApiResponse> {
+        return retrieveApiResource {
+            apiService.rejectRecovery(participantId.value)
+        }
     }
 }

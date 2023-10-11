@@ -1,5 +1,6 @@
 package co.censo.shared.data.cryptography
 
+import Base64EncodedData
 import io.github.novacrypto.base58.Base58
 import org.apache.commons.codec.binary.Base32
 import org.bouncycastle.util.encoders.Base64
@@ -15,6 +16,7 @@ import kotlin.random.Random
 
 object TotpGenerator {
     const val CODE_LENGTH = 6
+    const val CODE_EXPIRATION = 60L
 
     fun generateSecret(): String {
         val alphaChars = ('0'..'9').toList().toTypedArray() + ('a'..'z').toList().toTypedArray() + ('A'..'Z').toList().toTypedArray()
@@ -140,3 +142,6 @@ fun BigInteger.toByteArrayNoSign(): ByteArray {
 
 fun ByteArray.toHexString(): String =
     joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
+
+fun ByteArray.toBase64EncodedData(): Base64EncodedData =
+    Base64EncodedData(java.util.Base64.getEncoder().encodeToString(this))

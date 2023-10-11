@@ -43,14 +43,21 @@ class EntranceViewModel @Inject constructor(
     var state by mutableStateOf(EntranceState())
         private set
 
-    fun onStart(invitationId: String, guardianEntrance: Boolean) {
+    fun onOwnerStart() {
+        checkUserHasValidToken()
+    }
 
-        if (guardianEntrance && invitationId.isNotEmpty()) {
+    fun onGuardianStart(invitationId: String?, participantId: String?) {
+        if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
+        }
+        if (participantId != null) {
+            guardianRepository.saveParticipantId(participantId)
         }
 
         checkUserHasValidToken()
     }
+
 
     private fun checkUserHasValidToken() {
         viewModelScope.launch {

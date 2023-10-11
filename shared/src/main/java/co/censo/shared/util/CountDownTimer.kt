@@ -12,6 +12,7 @@ class CountDownTimerImpl : VaultCountDownTimer {
     private var timer: CountDownTimer? = null
 
     override fun startCountDownTimer(countdownInterval: Long, onTickCallback: () -> Unit) {
+        stopCountDownTimer()
         timer = object : CountDownTimer(Long.MAX_VALUE, countdownInterval) {
             override fun onTick(millisUntilFinished: Long) {
                 onTickCallback()

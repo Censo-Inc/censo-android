@@ -49,7 +49,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 fun EntranceScreen(
     navController: NavController,
     guardianEntrance: Boolean,
-    invitationId: String = "",
+    invitationId: String? = null,
+    participantId: String? = null,
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -121,7 +122,11 @@ fun EntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(invitationId = invitationId, guardianEntrance = guardianEntrance)
+        if (guardianEntrance) {
+            viewModel.onGuardianStart(invitationId, participantId)
+        } else {
+            viewModel.onOwnerStart()
+        }
         onDispose { }
     }
 

@@ -125,6 +125,9 @@ value class Base64EncodedData(val base64Encoded: String) {
             throw IllegalArgumentException("Invalid encrypted data format")
         }
     }
+
+    val bytes: ByteArray
+        get() = Base64.getDecoder().decode(base64Encoded)
 }
 
 

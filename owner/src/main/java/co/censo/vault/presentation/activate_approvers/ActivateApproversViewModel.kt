@@ -17,7 +17,6 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.vault.presentation.activate_approvers.ActivateApproversState.Companion.CODE_EXPIRATION
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -49,7 +48,7 @@ class ActivateApproversViewModel @Inject constructor(
         verificationCodeTimer.startCountDownTimer(UPDATE_COUNTDOWN) {
 
             val now = Clock.System.now()
-            val updatedCounter = now.epochSeconds.div(CODE_EXPIRATION)
+            val updatedCounter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
             val time = now.toLocalDateTime(TimeZone.UTC)
 
             state = if (state.counter != updatedCounter) {
@@ -210,7 +209,7 @@ class ActivateApproversViewModel @Inject constructor(
                                     Base64.getDecoder().decode(totpSecret)
                                 )
                             ),
-                            counter = timeMillis.div(CODE_EXPIRATION)
+                            counter = timeMillis.div(TotpGenerator.CODE_EXPIRATION)
                         )
 
                         it.participantId to code

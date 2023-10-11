@@ -76,3 +76,6 @@ data class EncryptedShard(
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
 )
+
+fun List<GuardianState>.forParticipant(participantId: String): GuardianState =
+    this.first { it.participantId.value == participantId }
