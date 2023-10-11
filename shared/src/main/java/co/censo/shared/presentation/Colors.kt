@@ -2,7 +2,6 @@ package co.censo.shared.presentation
 
 import androidx.compose.ui.graphics.Color
 object SharedColors {
-    val PrimaryColor = Color(0xFF1c305c)
     val BrandGray = Color(0xFF9e9f9f)
     val GreyText = Color(0xFF666666)
     val LabelText = Color(0xFF757575)

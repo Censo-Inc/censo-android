@@ -51,7 +51,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 fun EntranceScreen(
     navController: NavController,
     guardianEntrance: Boolean,
-    invitationId: String = "",
+    invitationId: String? = null,
     participantId: String? = null,
     viewModel: EntranceViewModel = hiltViewModel()
 ) {

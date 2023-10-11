@@ -30,6 +30,7 @@ import co.censo.shared.presentation.SharedColors
 fun TotpCodeView(
     code: String,
     percentageLeft: Float,
+    primaryColor: Color
 ) {
     val formattedCode = if (code.length == CODE_LENGTH) {
         "${code.slice(0 until CODE_LENGTH / 2)}-${code.slice(CODE_LENGTH / 2 until CODE_LENGTH)}"
@@ -43,7 +44,7 @@ fun TotpCodeView(
     ) {
         Text(
             text = formattedCode,
-            color = SharedColors.PrimaryColor,
+            color = primaryColor,
             fontWeight = FontWeight.W600,
             fontSize = 24.sp
         )

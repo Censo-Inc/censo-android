@@ -45,8 +45,8 @@ class EntranceViewModel @Inject constructor(
         checkUserHasValidToken()
     }
 
-    fun onGuardianStart(invitationId: String, participantId: String?) {
-        if (invitationId.isNotEmpty()) {
+    fun onGuardianStart(invitationId: String?, participantId: String?) {
+        if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
         }
         if (participantId != null) {

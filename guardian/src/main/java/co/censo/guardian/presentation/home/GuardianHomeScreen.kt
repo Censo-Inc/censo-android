@@ -277,7 +277,7 @@ fun GuardianHomeScreen(
                             )
                         } else {
                             Text(text = "Awaiting Code")
-                            TotpCodeView(totpCode, state.recoveryTotp.countdownPercentage)
+                            TotpCodeView(totpCode, state.recoveryTotp.countdownPercentage, GuardianColors.PrimaryColor)
                         }
                     }
 
