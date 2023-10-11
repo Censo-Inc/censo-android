@@ -3,6 +3,7 @@ package co.censo.guardian.presentation.home
 import Base64EncodedData
 import InvitationId
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
@@ -41,15 +42,11 @@ data class GuardianHomeState(
 
     data class RecoveryTotpState(
         val code: String,
-        val counter: Long = Clock.System.now().epochSeconds.div(RECOVERY_TOTP_CODE_EXPIRATION),
+        val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
         val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
         val encryptedSecret: Base64EncodedData
     ) {
-        val countdownPercentage = 1.0f - (currentSecond.toFloat() / RECOVERY_TOTP_CODE_EXPIRATION.toFloat())
-
-        companion object {
-            const val RECOVERY_TOTP_CODE_EXPIRATION = 60L
-        }
+        val countdownPercentage = 1.0f - (currentSecond.toFloat() / TotpGenerator.CODE_EXPIRATION.toFloat())
     }
 }
 

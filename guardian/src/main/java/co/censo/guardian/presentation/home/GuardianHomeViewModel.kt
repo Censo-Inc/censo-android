@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.guardian.presentation.home.GuardianHomeState.RecoveryTotpState.Companion.RECOVERY_TOTP_CODE_EXPIRATION
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.key.EncryptionKey
@@ -289,7 +288,7 @@ class GuardianHomeViewModel @Inject constructor(
 
     private fun generateRecoveryTotp(encryptedTotpSecret: Base64EncodedData): GuardianHomeState.RecoveryTotpState {
         val now = Clock.System.now()
-        val counter = now.epochSeconds.div(RECOVERY_TOTP_CODE_EXPIRATION)
+        val counter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
 
         return GuardianHomeState.RecoveryTotpState(
             code = TotpGenerator.generateCode(
@@ -308,7 +307,7 @@ class GuardianHomeViewModel @Inject constructor(
             state.recoveryTotp?.also { totp ->
                 val now = Clock.System.now()
 
-                state = if (totp.counter != now.epochSeconds.div(RECOVERY_TOTP_CODE_EXPIRATION)) {
+                state = if (totp.counter != now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)) {
                     state.copy(
                         recoveryTotp = generateRecoveryTotp(totp.encryptedSecret)
                     )

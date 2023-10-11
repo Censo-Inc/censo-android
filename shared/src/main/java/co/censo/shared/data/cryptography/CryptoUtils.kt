@@ -16,6 +16,7 @@ import kotlin.random.Random
 
 object TotpGenerator {
     const val CODE_LENGTH = 6
+    const val CODE_EXPIRATION = 60L
 
     fun generateSecret(): String {
         val alphaChars = ('0'..'9').toList().toTypedArray() + ('a'..'z').toList().toTypedArray() + ('A'..'Z').toList().toTypedArray()
