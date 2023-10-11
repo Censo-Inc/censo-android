@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,13 +15,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
+import co.censo.vault.presentation.components.recovery.RecoveryApprovalCodeVerificationScreen
 import co.censo.vault.presentation.components.recovery.ThisDeviceRecoveryScreen
+import co.censo.vault.presentation.recovery.RecoveryScreenViewModel.Companion.VALID_CODE_LENGTH
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -33,9 +36,18 @@ fun RecoveryScreen(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { }
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START -> {
+                viewModel.onStart()
+            }
+
+            Lifecycle.Event.ON_PAUSE -> {
+                viewModel.onStop()
+            }
+
+            else -> Unit
+        }
     }
 
     LaunchedEffect(key1 = state) {
@@ -90,6 +102,14 @@ fun RecoveryScreen(
                         dismissAction = null,
                     ) { viewModel.cancelRecovery() }
                 }
+
+                state.submitTotpVerificationResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.submitTotpVerificationResource.getErrorMessage(context),
+                        dismissAction = viewModel::dismissVerification,
+                        retryAction = null
+                    )
+                }
             }
         }
 
@@ -105,14 +125,38 @@ fun RecoveryScreen(
                 }
 
                 is Recovery.ThisDevice -> {
-                    ThisDeviceRecoveryScreen(
-                        recovery,
-                        guardians = state.guardians,
-                        approvalsRequired = state.approvalsRequired,
-                        approvalsCollected = state.approvalsCollected,
-                        onCancelRecovery = viewModel::cancelRecovery,
-                        context = context
-                    )
+                    when (val screen = state.recoveryUIState) {
+                        RecoveryUIState.Main -> {
+                            ThisDeviceRecoveryScreen(
+                                recovery,
+                                guardians = state.guardians,
+                                approvalsRequired = state.approvalsRequired,
+                                approvalsCollected = state.approvalsCollected,
+                                onCancelRecovery = viewModel::cancelRecovery,
+                                onEnterCode = { approval ->
+                                    viewModel.onProceedWithVerification(approval)
+                                }
+                            )
+                        }
+
+                        is RecoveryUIState.EnterVerificationCodeState -> {
+                            RecoveryApprovalCodeVerificationScreen(
+                                approverLabel = screen.approverLabel,
+                                validCodeLength = VALID_CODE_LENGTH,
+                                value = state.totpVerificationCode,
+                                onValueChanged = { code: String ->
+                                    viewModel.updateVerificationCode(
+                                        screen.participantId,
+                                        code
+                                    )
+                                },
+                                onDismiss = viewModel::dismissVerification,
+                                isLoading = state.submitTotpVerificationResource is Resource.Loading,
+                                isWaitingForVerification = state.totpVerificationWaitingForApproval,
+                                isVerificationRejected = state.totpVerificationRejected
+                            )
+                        }
+                    }
                 }
             }
         }

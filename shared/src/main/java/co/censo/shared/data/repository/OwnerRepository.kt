@@ -12,6 +12,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.PolicySetupHelper
+import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
@@ -39,6 +40,8 @@ import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
 import co.censo.shared.data.model.StoreSecretApiResponse
+import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService
@@ -50,6 +53,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import io.github.novacrypto.base58.Base58
+import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 import java.util.Base64
 
@@ -122,6 +126,10 @@ interface OwnerRepository {
     suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse>
     suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse>
     suspend fun signUserOut()
+    suspend fun submitRecoveryTotpVerification(
+        participantId: ParticipantId,
+        verificationCode: String
+    ): Resource<SubmitRecoveryTotpVerificationApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -362,5 +370,29 @@ class OwnerRepositoryImpl(
     override suspend fun signUserOut() {
         storage.clearJWT()
         storage.clearAuthAccessToken()
+    }
+
+    override suspend fun submitRecoveryTotpVerification(
+        participantId: ParticipantId,
+        verificationCode: String
+    ): Resource<SubmitRecoveryTotpVerificationApiResponse> {
+        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+
+        val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
+
+        val dataToSign =
+            verificationCode.toByteArray() + currentTimeInMillis.toString().toByteArray()
+        val signature = deviceKey.sign(dataToSign).base64Encoded()
+
+        return retrieveApiResource {
+            apiService.submitRecoveryTotpVerification(
+                participantId = participantId.value,
+                apiRequest = SubmitRecoveryTotpVerificationApiRequest(
+                    signature = signature,
+                    timeMillis = currentTimeInMillis,
+                    ownerDevicePublicKey = Base58EncodedDevicePublicKey(deviceKey.publicExternalRepresentation().value)
+                )
+            )
+        }
     }
 }

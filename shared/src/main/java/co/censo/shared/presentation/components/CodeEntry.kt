@@ -1,4 +1,4 @@
-package co.censo.guardian.presentation.components
+package co.censo.shared.presentation.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,13 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.guardian.presentation.GuardianColors.PrimaryColor
 import co.censo.shared.presentation.SharedColors.DividerGray
 
 @Composable
@@ -34,7 +34,8 @@ fun CodeEntry(
     validCodeLength: Int,
     value: String,
     onValueChange: (String) -> Unit,
-    isLoading: Boolean
+    isLoading: Boolean,
+    primaryColor: Color
 ) {
     Row(
         Modifier
@@ -47,6 +48,7 @@ fun CodeEntry(
             modifier = Modifier.fillMaxWidth(),
             onValueChange = onValueChange,
             isLoading = isLoading,
+            primaryColor = primaryColor
         )
     }
 }
@@ -58,6 +60,7 @@ fun CodeInputField(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     isLoading: Boolean,
+    primaryColor: Color
 ) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(key1 = Unit) {
@@ -91,7 +94,7 @@ fun CodeInputField(
 
                     val borderModifier = Modifier.border(
                         2.dp,
-                        color = if (shouldHaveFocusedBorder) PrimaryColor else DividerGray,
+                        color = if (shouldHaveFocusedBorder) primaryColor else DividerGray,
                         shape = RoundedCornerShape(4.dp)
                     )
 
@@ -112,7 +115,7 @@ fun CodeInputField(
                             textAlign = TextAlign.Center,
                             fontSize = 48.nonScaledSp,
                             fontWeight = FontWeight.Bold,
-                            color = PrimaryColor
+                            color = primaryColor
                         )
                     }
                 }
