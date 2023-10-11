@@ -9,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
+import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.generatePartitionId
-import co.censo.shared.data.cryptography.toBase64EncodedData
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -233,7 +233,7 @@ class PlanSetupViewModel @Inject constructor(
                     participantId = ParticipantId(
                         generatePartitionId().toHexString()
                     ),
-                    deviceEncryptedTotpSecret = encryptedSecret.toBase64EncodedData()
+                    deviceEncryptedTotpSecret = encryptedSecret.base64Encoded()
                 )
             )
         }

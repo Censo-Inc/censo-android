@@ -20,9 +20,9 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Recovery
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.VaultColors
-import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalCodeVerificationScreen
 import co.censo.vault.presentation.components.recovery.ThisDeviceRecoveryScreen
