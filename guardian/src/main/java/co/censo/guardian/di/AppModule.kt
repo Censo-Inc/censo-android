@@ -11,6 +11,8 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
+import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.data.storage.SecurePreferencesImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.CountDownTimerImpl
@@ -31,6 +33,12 @@ object AppModule {
     fun provideStorage(@ApplicationContext applicationContext: Context): Storage {
         SharedPrefsStorage.setup(applicationContext)
         return SharedPrefsStorage
+    }
+
+    @Singleton
+    @Provides
+    fun provideSecureStorage(@ApplicationContext  applicationContext: Context) : SecurePreferences {
+        return SecurePreferencesImpl(applicationContext)
     }
 
     @Singleton
@@ -59,11 +67,13 @@ object AppModule {
     @Provides
     fun provideOwnerRepository(
         apiService: ApiService,
-        storage: Storage
+        storage: Storage,
+        secureStorage: SecurePreferences
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             storage = storage,
-            apiService = apiService
+            apiService = apiService,
+            secureStorage = secureStorage
         )
     }
 

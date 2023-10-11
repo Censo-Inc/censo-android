@@ -164,6 +164,9 @@ dependencies {
     //auth0 JWT
     implementation("com.auth0.android:jwtdecode:2.0.1")
 
+    //Encrypted Preferences
+    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
+
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
