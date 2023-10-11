@@ -157,5 +157,11 @@
     <string name="submit_again">Submit again</string>
     <string name="more_information">more information</string>
     <string name="save_seed_phrase">Save seed phrase</string>
+    <string name="enter_word">Enter word</string>
+    <string name="clear_word_entry">clear word entry</string>
+    <string name="valid_word">valid word</string>
+    <string name="of_2_048_potential_words">%1$s of 2,048 potential words</string>
+    <string name="sorry">"Sorry, "</string>
+    <string name="is_not_a_valid_seed_phrase_word">" is not a valid seed phrase word."</string>
 
 </resources>
