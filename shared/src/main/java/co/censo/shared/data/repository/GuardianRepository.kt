@@ -7,6 +7,7 @@ import Base64EncodedData
 import InvitationId
 import ParticipantId
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
@@ -83,7 +84,7 @@ class GuardianRepositoryImpl(
     ): SubmitGuardianVerificationApiRequest {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
         val dataToSign =
-            verificationCode.toByteArray() + currentTimeInMillis.toString().toByteArray()
+            verificationCode.generateVerificationCodeSignData(currentTimeInMillis)
         val signature = encryptionKey.sign(dataToSign)
         val base64EncodedData = Base64EncodedData(Base64.getEncoder().encodeToString(signature))
 
@@ -171,7 +172,7 @@ class GuardianRepositoryImpl(
         signature: Base64EncodedData
     ): Boolean =
         try {
-            val dataToSign = totp.toByteArray() + timeMillis.toString().toByteArray()
+            val dataToSign = totp.generateVerificationCodeSignData(timeMillis)
             ExternalEncryptionKey.generateFromPublicKeyBase58(ownerPublicKey).verify(
                 signedData = dataToSign,
                 signature = Base64.getDecoder().decode(signature.base64Encoded),

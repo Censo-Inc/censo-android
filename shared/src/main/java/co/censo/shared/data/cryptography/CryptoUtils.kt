@@ -56,6 +56,8 @@ object TotpGenerator {
     }
 }
 
+fun String.generateVerificationCodeSignData(timeMillis: Long) =
+    this.toByteArray() + timeMillis.toString().toByteArray()
 
 
 fun generatePartitionId() : BigInteger {

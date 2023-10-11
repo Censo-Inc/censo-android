@@ -13,6 +13,7 @@ import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.generatePartitionId
+import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256
@@ -216,7 +217,7 @@ class OwnerRepositoryImpl(
         signature: Base64EncodedData
     ) =
         try {
-            val dataToSign = verificationCode.toByteArray() + timeMillis.toString().toByteArray()
+            val dataToSign = verificationCode.generateVerificationCodeSignData(timeMillis)
 
             val externalDeviceKey =
                 ExternalEncryptionKey.generateFromPublicKeyBase58(transportKey)
