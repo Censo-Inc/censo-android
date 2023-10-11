@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.OwnerState
@@ -26,10 +27,6 @@ class RecoveryScreenViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val pollingVerificationTimer: VaultCountDownTimer
 ) : ViewModel() {
-
-    companion object {
-        const val VALID_CODE_LENGTH = 6
-    }
 
     var state by mutableStateOf(RecoveryScreenState())
         private set
@@ -109,19 +106,20 @@ class RecoveryScreenViewModel @Inject constructor(
         val recovery = ownerState.policy.recovery
 
         if (screen is RecoveryUIState.EnterVerificationCodeState && recovery is Recovery.ThisDevice) {
-            val approval = recovery.approvals.find { it.participantId == screen.participantId }!!
-
-            if (approval.status == ApprovalStatus.Approved) {
-                state = state.copy(
-                    recoveryUIState = RecoveryUIState.Main
-                )
-            } else if (state.totpVerificationWaitingForApproval && approval.status == ApprovalStatus.Rejected) {
-                state = state.copy(
-                    totpVerificationCode = "",
-                    totpVerificationWaitingForApproval = false,
-                    totpVerificationRejected = true,
-                )
-            }
+            recovery.approvals.find { it.participantId == screen.participantId }
+                ?.let { approval ->
+                    if (approval.status == ApprovalStatus.Approved) {
+                        state = state.copy(
+                            recoveryUIState = RecoveryUIState.Main
+                        )
+                    } else if (state.totpVerificationWaitingForApproval && approval.status == ApprovalStatus.Rejected) {
+                        state = state.copy(
+                            totpVerificationCode = "",
+                            totpVerificationWaitingForApproval = false,
+                            totpVerificationRejected = true,
+                        )
+                    }
+                }
         }
     }
 
@@ -197,7 +195,7 @@ class RecoveryScreenViewModel @Inject constructor(
                 totpVerificationWaitingForApproval = false
             )
 
-            if (code.length == VALID_CODE_LENGTH) {
+            if (code.length == TotpGenerator.CODE_LENGTH) {
                 submitVerificationCode(participantId, code)
             }
         }

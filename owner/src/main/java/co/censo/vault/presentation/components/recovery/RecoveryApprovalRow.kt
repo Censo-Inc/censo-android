@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,13 +53,18 @@ fun RecoveryApprovalRow(
 
     val context = LocalContext.current
 
+    val recoveryStatusRowStyle = TextStyle(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.W700,
+    )
+
     Row {
         Column {
             Row {
                 Text(
                     text = stringResource(R.string.status_colon),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.W400,
+                    style = recoveryStatusRowStyle
+                        .copy(fontWeight = FontWeight.W400),
                     color = SharedColors.BrandGray,
                 )
 
@@ -67,46 +73,44 @@ fun RecoveryApprovalRow(
                 when (approval.status) {
                     ApprovalStatus.Initial -> {
                         Text(
-                            text = "Pending",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.W700,
-                            color = SharedColors.BrandGray,
+                            text = stringResource(R.string.pending),
+                            style = recoveryStatusRowStyle
+                                .copy(color = SharedColors.BrandGray)
                         )
                     }
+
                     ApprovalStatus.WaitingForVerification -> {
                         Text(
-                            text = "Awaiting code",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.W700,
-                            color = Color.White,
+                            text = stringResource(R.string.awaiting_code),
+                            style = recoveryStatusRowStyle
+                                .copy(color = Color.White)
                         )
                     }
+
                     ApprovalStatus.WaitingForApproval -> {
                         Text(
-                            text = "Verifying",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.W700,
-                            color = Color.White,
+                            text = stringResource(R.string.verifying),
+                            style = recoveryStatusRowStyle
+                                .copy(color = Color.White)
                         )
                     }
+
                     ApprovalStatus.Approved -> {
                         Text(
-                            text = "Approved",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.W700,
-                            color = SharedColors.SuccessGreen,
+                            text = stringResource(R.string.approved),
+                            style = recoveryStatusRowStyle
+                                .copy(color = SharedColors.SuccessGreen)
                         )
                     }
+
                     ApprovalStatus.Rejected -> {
                         Text(
-                            text = "Incorrect Code",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.W700,
-                            color = SharedColors.ErrorRed,
+                            text = stringResource(R.string.incorrect_code),
+                            style = recoveryStatusRowStyle
+                                .copy(color = SharedColors.ErrorRed)
                         )
                     }
                 }
-
             }
 
             Text(
@@ -193,7 +197,7 @@ fun RecoveryApprovalRowPreview() {
                 participantId = participantId,
                 status = ApprovalStatus.WaitingForVerification
             ),
-            onEnterCode= {}
+            onEnterCode = {}
         )
     }
 }

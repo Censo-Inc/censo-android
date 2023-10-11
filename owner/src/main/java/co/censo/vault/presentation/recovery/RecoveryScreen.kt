@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.VaultColors
@@ -25,7 +26,6 @@ import co.censo.vault.presentation.components.OnLifecycleEvent
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
 import co.censo.vault.presentation.components.recovery.RecoveryApprovalCodeVerificationScreen
 import co.censo.vault.presentation.components.recovery.ThisDeviceRecoveryScreen
-import co.censo.vault.presentation.recovery.RecoveryScreenViewModel.Companion.VALID_CODE_LENGTH
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -142,7 +142,7 @@ fun RecoveryScreen(
                         is RecoveryUIState.EnterVerificationCodeState -> {
                             RecoveryApprovalCodeVerificationScreen(
                                 approverLabel = screen.approverLabel,
-                                validCodeLength = VALID_CODE_LENGTH,
+                                validCodeLength = TotpGenerator.CODE_LENGTH,
                                 value = state.totpVerificationCode,
                                 onValueChanged = { code: String ->
                                     viewModel.updateVerificationCode(
