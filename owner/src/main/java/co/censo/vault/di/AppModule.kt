@@ -11,14 +11,14 @@ import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
+import co.censo.shared.data.repository.PushRepository
+import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.vault.BuildConfig
 import co.censo.vault.data.repository.FacetecRepository
 import co.censo.vault.data.repository.FacetecRepositoryImpl
-import co.censo.vault.data.repository.PushRepository
-import co.censo.vault.data.repository.PushRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

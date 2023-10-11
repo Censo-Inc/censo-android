@@ -6,16 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.data.repository.PushRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val pushRepository: PushRepository,
     private val ownerRepository: OwnerRepository
 ) : ViewModel() {
 
@@ -42,18 +39,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
-
-    fun setUserSeenPushDialog(seenDialog: Boolean) =
-        pushRepository.setUserSeenPushDialog(seenDialog)
-
-    fun triggerPushNotificationDialog() {
-        state = state.copy(showPushNotificationsDialog = Resource.Success(Unit))
-    }
-
-    fun resetPushNotificationDialog() {
-        state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
-    }
 
     fun resetOwnerState() {
         state = state.copy(ownerStateResource = Resource.Uninitialized)

@@ -38,12 +38,13 @@ import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
-import co.censo.shared.data.networking.ApiService.Companion.APP_PACKAGE_NAME_HEADER
+import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.projectLog
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -74,7 +75,7 @@ interface ApiService {
         const val SECRET_ID = "secretId"
 
         const val IS_API = "X-IsApi"
-        const val APP_PACKAGE_NAME_HEADER = "X-Censo-Package-Name"
+        const val APPLICATION_IDENTIFIER = "X-Censo-App-Identifier"
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
@@ -158,7 +159,7 @@ interface ApiService {
     ): RetrofitResponse<RejectGuardianVerificationApiResponse>
 
     @POST("v1/notification-tokens")
-    suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<ResponseBody>
+    suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<Unit>
 
     @DELETE("v1/notification-tokens/{deviceType}")
     suspend fun removePushNotificationToken(
@@ -233,7 +234,7 @@ class AnalyticsInterceptor(
                         "true"
                     )
                     addHeader(
-                        APP_PACKAGE_NAME_HEADER,
+                        APPLICATION_IDENTIFIER,
                         packageName
                     )
                     addHeader(
@@ -265,17 +266,27 @@ class AuthInterceptor(
         val now = Clock.System.now()
         val headers = getAuthHeaders(now, request)
 
-        return chain.proceed(
-            request.newBuilder().apply {
-                for (header in headers) {
-                    addHeader(header.name, header.value)
-                }
-            }.build()
-        )
+        return if (headers.isEmpty()) {
+            chain.proceed(request)
+        } else {
+            chain.proceed(
+                request.newBuilder().apply {
+                    for (header in headers) {
+                        addHeader(header.name, header.value)
+                    }
+                }.build()
+            )
+        }
     }
 
     private fun getAuthHeaders(now: Instant, request: Request): List<Header> {
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        val deviceKeyId = storage.retrieveDeviceKeyId()
+
+        if (deviceKeyId.isEmpty()) {
+            return emptyList()
+        }
+
+        val deviceKey = InternalDeviceKey(deviceKeyId)
         val signature = Base64.getEncoder().encodeToString(deviceKey.sign(dataToSign(request, now)))
 
         return listOf(

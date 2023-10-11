@@ -6,6 +6,7 @@ import okhttp3.ResponseBody
 data class EntranceState(
     val triggerOneTap: Resource<Unit> = Resource.Uninitialized,
     val createUserResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
     val authId: String = ""
 ) {

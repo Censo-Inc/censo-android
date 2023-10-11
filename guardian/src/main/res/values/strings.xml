@@ -41,4 +41,6 @@
     <string name="code_not_approved">Code not approved. Please send new verification code.</string>
     <string name="code_sent_to_owner_waiting_for_them_to_approve">Code sent to owner, waiting for them to approve.</string>
 
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="default_notification_channel_name" translatable="true">Notifications</string>
 </resources>

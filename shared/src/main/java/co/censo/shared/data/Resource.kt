@@ -4,6 +4,7 @@ import android.content.Context
 import co.censo.shared.R
 import co.censo.shared.data.networking.NoConnectivityException
 import co.censo.shared.data.repository.ErrorResponse
+import com.google.android.gms.common.api.ApiException
 import java.lang.Exception
 
 sealed class Resource<out T>(
@@ -24,6 +25,9 @@ sealed class Resource<out T>(
             if (exception is NoConnectivityException) {
                 return "Network NA"
             }
+            if (exception is ApiException) {
+                return exception.message ?: "Google API Error"
+            }
 
             return when (errorCode) {
                 400 -> context.getString(R.string.invalid_request)
@@ -33,7 +37,7 @@ sealed class Resource<out T>(
                 422 -> this.errorResponse?.errors?.get(0)?.displayMessage
                         ?: this.errorResponse?.errors?.get(0)?.message
                         ?: context.getString(R.string.validation_error)
-                else -> "${context.getString(R.string.unexpected_error)} ($errorCode)"
+                else -> "${context.getString(R.string.unexpected_error)} ${errorCode?.let { "($it)"}}"
             }
         }
 

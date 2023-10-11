@@ -9,6 +9,8 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
+import co.censo.shared.data.repository.PushRepository
+import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.storage.Storage
 import dagger.Module
@@ -73,5 +75,14 @@ object AppModule {
             apiService = apiService,
             storage = storage
         )
+    }
+
+    @Singleton
+    @Provides
+    fun providesPushRepository(
+        api: ApiService,
+        @ApplicationContext applicationContext: Context
+    ): PushRepository {
+        return PushRepositoryImpl(api, applicationContext)
     }
 }
