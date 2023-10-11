@@ -35,6 +35,7 @@ import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverCodeVerification
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.components.TotpCodeView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +72,25 @@ fun GuardianHomeScreen(
             ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = stringResource(R.string.become_an_approver),
+                    text = when (state.guardianUIState) {
+                        GuardianUIState.UNINITIALIZED,
+                        GuardianUIState.WAITING_FOR_CONFIRMATION,
+                        GuardianUIState.CODE_REJECTED,
+                        GuardianUIState.MISSING_INVITE_CODE,
+                        GuardianUIState.WAITING_FOR_CODE,
+                        GuardianUIState.NEED_SAVE_KEY,
+                        GuardianUIState.INVITE_READY,
+                        GuardianUIState.COMPLETE,
+                        GuardianUIState.DECLINED_INVITE -> {
+                            stringResource(R.string.become_an_approver)
+                        }
+                        GuardianUIState.INVALID_PARTICIPANT_ID,
+                        GuardianUIState.RECOVERY_REQUESTED,
+                        GuardianUIState.RECOVERY_WAITING_FOR_TOTP_FROM_OWNER,
+                        GuardianUIState.RECOVERY_VERIFYING_TOTP_FROM_OWNER -> {
+                            stringResource(R.string.recovery_approval)
+                        }
+                    },
                     color = Color.White,
                     fontSize = 24.sp,
                     textAlign = TextAlign.Center
@@ -86,6 +105,10 @@ fun GuardianHomeScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (state.apiError && state.guardianUIState != GuardianUIState.WAITING_FOR_CODE) {
+                    Text(text = "Something went wrong")
+                }
+
                 when (val guardianUIState = state.guardianUIState) {
                     GuardianUIState.UNINITIALIZED -> {
                         Spacer(modifier = Modifier.height(56.dp))
@@ -121,6 +144,13 @@ fun GuardianHomeScreen(
                     GuardianUIState.MISSING_INVITE_CODE -> {
                         Text(
                             text = "No invite code detected. Please click the invite link your Owner sent you.",
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    GuardianUIState.INVALID_PARTICIPANT_ID -> {
+                        Text(
+                            text = "Invalid participant id. Please click the recovery link your Owner sent you.",
                             textAlign = TextAlign.Center
                         )
                     }
@@ -189,14 +219,25 @@ fun GuardianHomeScreen(
                     GuardianUIState.COMPLETE -> {
                         Spacer(modifier = Modifier.height(30.dp))
                         //Text
-                        Text(
-                            modifier = Modifier.padding(16.dp),
-                            text = "Fully onboarded!",
-                            color = GuardianColors.PrimaryColor,
-                            textAlign = TextAlign.Center,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if (state.approveRecoveryResource is Resource.Success) {
+                            Text(
+                                modifier = Modifier.padding(16.dp),
+                                text = "Recovery approved!",
+                                color = GuardianColors.PrimaryColor,
+                                textAlign = TextAlign.Center,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            Text(
+                                modifier = Modifier.padding(16.dp),
+                                text = "Fully onboarded!",
+                                color = GuardianColors.PrimaryColor,
+                                textAlign = TextAlign.Center,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                         Spacer(modifier = Modifier.height(30.dp))
                     }
 
@@ -211,6 +252,39 @@ fun GuardianHomeScreen(
                             text = "I said good day!",
                             textAlign = TextAlign.Center
                         )
+                    }
+
+                    GuardianUIState.RECOVERY_REQUESTED -> {
+                        Spacer(modifier = Modifier.height(30.dp))
+
+                        Text(text = "Recovery was requested")
+
+                        Button(onClick = {
+                            viewModel.storeRecoveryTotpSecret()
+                        }) {
+                            Text(text = "Continue", color = Color.White)
+                        }
+                    }
+
+                    GuardianUIState.RECOVERY_WAITING_FOR_TOTP_FROM_OWNER -> {
+                        Spacer(modifier = Modifier.height(30.dp))
+
+                        val totpCode = state.recoveryTotp?.code
+                        if (totpCode == null) {
+                            Text(
+                                "Loading...",
+                                textAlign = TextAlign.Center
+                            )
+                        } else {
+                            Text(text = "Awaiting Code")
+                            TotpCodeView(totpCode, state.recoveryTotp.countdownPercentage)
+                        }
+                    }
+
+                    GuardianUIState.RECOVERY_VERIFYING_TOTP_FROM_OWNER -> {
+                        Spacer(modifier = Modifier.height(30.dp))
+
+                        Text(text = "Verifying Code...")
                     }
                 }
             }

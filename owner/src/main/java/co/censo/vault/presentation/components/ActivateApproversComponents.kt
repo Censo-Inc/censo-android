@@ -7,7 +7,6 @@ import ParticipantId
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.animation.core.FloatTweenSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,14 +20,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.IosShare
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -38,12 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -52,19 +44,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.cryptography.TotpGenerator.CODE_LENGTH
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
-import co.censo.shared.data.model.VerificationStatus
 import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.components.TotpCodeView
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import kotlinx.datetime.Clock
@@ -241,37 +230,7 @@ fun ActivateApproverActionItem(
         is Guardian.ProspectGuardian -> {
             when (val approverStatus = approver.status) {
                 is GuardianStatus.Accepted -> {
-
-                    val formattedCode = if (approverCode.length == CODE_LENGTH) {
-                        "${approverCode.slice(0 until CODE_LENGTH / 2)}-${approverCode.slice(CODE_LENGTH / 2 until CODE_LENGTH)}"
-                    } else {
-                        approverCode
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = formattedCode,
-                            color = VaultColors.PrimaryColor,
-                            fontWeight = FontWeight.W600,
-                            fontSize = 24.sp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(
-                                    color = SharedColors.TimeLeftGray,
-                                    shape = CircleShape
-                                )
-                                .background(
-                                    color = Color.White,
-                                    shape = TimeLeftShape(percentageLeft)
-                                )
-                        )
-                    }
+                    TotpCodeView(approverCode, percentageLeft)
                 }
 
                 is GuardianStatus.Confirmed,
@@ -327,29 +286,6 @@ fun ActivateApproverActionItem(
 //endregion
 
 //region Smaller Composables/Utility Functions
-class TimeLeftShape(
-    percentRemaining: Float,
-) : Shape {
-
-    private val angle = percentRemaining * 360f
-    override fun createOutline(
-        size: Size,
-        layoutDirection: LayoutDirection,
-        density: Density
-    ): Outline {
-        val path = Path().apply {
-            var angle = 360f - angle
-            if (angle <= 0f) {
-                angle = 0.1f
-            }
-            moveTo(size.width / 2f, size.height / 2f)
-            arcTo(Rect(0f, 0f, size.width, size.height), 270f, angle, forceMoveTo = false)
-            close()
-        }
-        return Outline.Generic(path)
-    }
-}
-
 fun AnnotatedString.Builder.appendApproverStatusText(context: Context, approver: Guardian) {
 
     val baseStyle =

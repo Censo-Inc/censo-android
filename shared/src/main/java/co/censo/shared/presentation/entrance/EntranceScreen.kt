@@ -52,6 +52,7 @@ fun EntranceScreen(
     navController: NavController,
     guardianEntrance: Boolean,
     invitationId: String = "",
+    participantId: String? = null,
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
 
@@ -119,7 +120,11 @@ fun EntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(invitationId = invitationId, guardianEntrance = guardianEntrance)
+        if (guardianEntrance) {
+            viewModel.onGuardianStart(invitationId, participantId)
+        } else {
+            viewModel.onOwnerStart()
+        }
         onDispose { }
     }
 

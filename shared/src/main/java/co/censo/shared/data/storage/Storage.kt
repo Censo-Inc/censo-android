@@ -24,6 +24,9 @@ interface Storage {
     fun saveGuardianInvitationId(id: String)
     fun retrieveGuardianInvitationId() : String
     fun clearGuardianInvitationId()
+    fun saveGuardianParticipantId(id: String)
+    fun retrieveGuardianParticipantId() : String
+    fun clearGuardianParticipantId()
     fun savePrivateKey(key: String)
     fun retrievePrivateKey() : String
     fun clearPrivateKey()
@@ -47,6 +50,8 @@ object SharedPrefsStorage : Storage {
     private const val DEVICE_KEY = "device_key"
 
     private const val GUARDIAN_INVITATION_ID = "guardian_invitation_id"
+
+    private const val GUARDIAN_PARTICIPANT_ID = "guardian_participant_id"
 
     private const val JWT = "jwt"
 
@@ -135,6 +140,19 @@ object SharedPrefsStorage : Storage {
         sharedPrefs.getString(GUARDIAN_INVITATION_ID, "") ?: ""
 
     override fun clearGuardianInvitationId() = saveGuardianInvitationId("")
+    //endregion
+
+    //region Guardian Participant Id
+    override fun saveGuardianParticipantId(id: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString(GUARDIAN_PARTICIPANT_ID, id)
+        editor.apply()
+    }
+
+    override fun retrieveGuardianParticipantId() =
+        sharedPrefs.getString(GUARDIAN_PARTICIPANT_ID, "") ?: ""
+
+    override fun clearGuardianParticipantId() = saveGuardianParticipantId("")
     //endregion
 
     //region Mock Google Drive Private Key
