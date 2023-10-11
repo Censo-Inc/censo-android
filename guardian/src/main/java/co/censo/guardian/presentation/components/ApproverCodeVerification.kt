@@ -2,6 +2,7 @@ package co.censo.guardian.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.guardian.R
@@ -31,6 +33,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.SharedColors.ErrorRed
+import co.censo.shared.presentation.components.CodeEntry
 
 @Composable
 fun ApproverCodeVerification(
@@ -66,7 +69,8 @@ fun ApproverCodeVerification(
             validCodeLength = VALID_CODE_LENGTH,
             isLoading = isLoading,
             value = value,
-            onValueChange = onValueChanged
+            onValueChange = onValueChanged,
+            primaryColor = GuardianColors.PrimaryColor
         )
         Spacer(modifier = Modifier.height(36.dp))
 
@@ -84,4 +88,21 @@ fun ApproverCodeVerification(
             Text(text = errorResource.getErrorMessage(context = context), color = ErrorRed)
         }
     }
+}
+
+@Preview
+@Composable
+fun ApproverCodeVerificationPreview() {
+    Box(
+        modifier = Modifier.background(Color.White)
+    ) {
+        ApproverCodeVerification(
+            isLoading = false,
+            errorResource = null,
+            value = "12345",
+            label = "Enter your code",
+            onValueChanged = {}
+        )
+    }
+
 }

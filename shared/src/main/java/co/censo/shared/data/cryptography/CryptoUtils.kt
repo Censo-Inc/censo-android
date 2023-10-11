@@ -145,5 +145,5 @@ fun BigInteger.toByteArrayNoSign(): ByteArray {
 fun ByteArray.toHexString(): String =
     joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
-fun ByteArray.toBase64EncodedData(): Base64EncodedData =
+fun ByteArray.base64Encoded(): Base64EncodedData =
     Base64EncodedData(java.util.Base64.getEncoder().encodeToString(this))

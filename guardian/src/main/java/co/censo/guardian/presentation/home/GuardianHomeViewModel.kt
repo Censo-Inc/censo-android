@@ -12,9 +12,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
+import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
-import co.censo.shared.data.cryptography.toBase64EncodedData
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.forParticipant
@@ -271,7 +271,7 @@ class GuardianHomeViewModel @Inject constructor(
             val secret = TotpGenerator.generateSecret()
             val encryptedSecret = keyRepository
                 .encryptWithDeviceKey(secret.toByteArray())
-                .toBase64EncodedData()
+                .base64Encoded()
 
             val submitRecoveryTotpSecretResource = guardianRepository.storeRecoveryTotpSecret(state.participantId, encryptedSecret)
 
@@ -346,7 +346,7 @@ class GuardianHomeViewModel @Inject constructor(
                     participantId,
                     encryptedShard = ownerPublicKey.encrypt(
                         state.guardianEncryptionKey!!.decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
-                    ).toBase64EncodedData()
+                    ).base64Encoded()
                 )
                 if (response is Resource.Success) {
                     determineGuardianUIState(response.data?.guardianStates?.forParticipant(state.participantId))

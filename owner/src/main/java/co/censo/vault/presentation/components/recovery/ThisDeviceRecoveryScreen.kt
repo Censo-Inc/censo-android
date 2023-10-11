@@ -36,7 +36,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.FragmentActivity
 import co.censo.shared.data.cryptography.generateBase64
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
@@ -49,7 +48,6 @@ import co.censo.shared.data.model.RecoveryId
 import co.censo.shared.data.model.RecoveryStatus
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
-import co.censo.vault.presentation.components.shareDeeplink
 import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
@@ -60,7 +58,7 @@ fun ThisDeviceRecoveryScreen(
     approvalsCollected: Int,
     approvalsRequired: Int,
     onCancelRecovery: () -> Unit,
-    context: FragmentActivity
+    onEnterCode: (Approval) -> Unit
 ) {
 
     Column(
@@ -177,7 +175,7 @@ fun ThisDeviceRecoveryScreen(
                 RecoveryApprovalRow(
                     guardian = guardians.first { it.participantId == approval.participantId },
                     approval = approval,
-                    onShare = { shareDeeplink(approval.deepLink(), context) }
+                    onEnterCode = onEnterCode
                 )
 
                 if (index != approvals.size - 1)
@@ -196,7 +194,31 @@ fun ThisDeviceRecoveryScreen(
 @Preview
 @Composable
 fun ThisDeviceRecoveryScreenPreview() {
-    val participantId = ParticipantId(generatePartitionId().toHexString())
+    val participants = listOf(
+        ParticipantId(generatePartitionId().toHexString()),
+        ParticipantId(generatePartitionId().toHexString()),
+        ParticipantId(generatePartitionId().toHexString()),
+        ParticipantId(generatePartitionId().toHexString()),
+        ParticipantId(generatePartitionId().toHexString()),
+    )
+
+    val approvals = participants.mapIndexed { index, participantId ->
+        Approval(
+            participantId = participantId,
+            status = ApprovalStatus.values()[index]
+        )
+    }.toList()
+
+    val guardians = participants.mapIndexed { index, participantId ->
+        Guardian.TrustedGuardian(
+            label = "Approver $index",
+            participantId = participantId,
+            attributes = GuardianStatus.Onboarded(
+                guardianEncryptedShard = Base64EncodedData(generateBase64()),
+                onboardedAt = Clock.System.now()
+            )
+        )
+    }.toList()
 
     ThisDeviceRecoveryScreen(
         recovery = Recovery.ThisDevice(
@@ -205,27 +227,13 @@ fun ThisDeviceRecoveryScreenPreview() {
             createdAt = Clock.System.now(),
             unlocksAt = Clock.System.now(),
             expiresAt = Clock.System.now() + 1.days,
-            approvals = listOf(
-                Approval(
-                    participantId = participantId,
-                    status = ApprovalStatus.Initial
-                )
-            ),
+            approvals = approvals,
             vaultSecretIds = listOf()
         ),
-        guardians = listOf(
-            Guardian.TrustedGuardian(
-                label = "Approver 1",
-                participantId = participantId,
-                attributes = GuardianStatus.Onboarded(
-                    guardianEncryptedShard = Base64EncodedData(generateBase64()),
-                    onboardedAt = Clock.System.now()
-                )
-            )
-        ),
+        guardians = guardians,
         approvalsCollected = 1,
         approvalsRequired = 3,
-        onCancelRecovery = {},
-        context = FragmentActivity()
+        onCancelRecovery = { },
+        onEnterCode = { }
     )
 }

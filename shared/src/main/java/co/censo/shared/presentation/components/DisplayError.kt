@@ -24,7 +24,7 @@ fun DisplayError(
     modifier: Modifier = Modifier,
     errorMessage: String,
     dismissAction: (() -> Unit)?,
-    retryAction: () -> Unit,
+    retryAction: (() -> Unit)?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -44,8 +44,10 @@ fun DisplayError(
     ) {
         Text(modifier = Modifier.padding(16.dp), text = errorMessage, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(18.dp))
-        TextButton(onClick = retryAction) {
-            Text(text = stringResource(R.string.retry))
+        if (retryAction != null) {
+            TextButton(onClick = retryAction) {
+                Text(text = stringResource(R.string.retry))
+            }
         }
         if (dismissAction != null) {
             Spacer(modifier = Modifier.height(24.dp))
