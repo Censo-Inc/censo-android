@@ -2,22 +2,42 @@ package co.censo.vault.presentation.home
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
@@ -27,6 +47,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.toSecurityPlan
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.R
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -86,7 +107,7 @@ fun HomeScreen(
 
                 when (ownerState) {
                     is OwnerState.Initial -> {
-                        EditingSecurityPlanUI {
+                        WelcomeScreenUI {
                             navController.navigate(Screen.PlanSetupRoute.route)
                         }
                     }
@@ -157,5 +178,108 @@ fun ActivatingGuardiansUI(
             ),
             onClick = { navigateToActivateApprovers() }
         )
+    }
+}
+
+@Composable
+fun SetupStep(
+    imagePainter: Painter,
+    heading: String,
+    content: String,
+    completionText: String? = null
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier
+            .background(color = Color.LightGray, shape = RoundedCornerShape(20.dp))
+            .padding(16.dp)
+        ) {
+            Image(painter = imagePainter, contentDescription = null, modifier = Modifier.width(32.dp))
+        }
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(text = content, fontSize = 14.sp)
+            if (completionText != null) {
+                Text(
+                    text = "✓ $completionText",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Green,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WelcomeScreenUI(
+    navigateToPlanSetup: () -> Unit
+) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(color = Color.White),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(stringResource(R.string.welcome_to_censo), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Left, modifier = Modifier.padding(all = 32.dp).width(IntrinsicSize.Max))
+        Text(stringResource(id = R.string.welcome_blurb), fontSize = 16.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Left, modifier = Modifier.padding(horizontal = 32.dp))
+        Column(
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            SetupStep(
+                painterResource(id = co.censo.shared.R.drawable.google),
+                stringResource(R.string.authenticate_privately),
+                stringResource(R.string.authenticate_privately_blurb),
+                stringResource(R.string.authenticated)
+            )
+            SetupStep(
+                painterResource(id = co.censo.shared.R.drawable.small_face_scan),
+                stringResource(id = R.string.scan_your_face),
+                stringResource(id = R.string.scan_your_face_blurb),
+            )
+            SetupStep(
+                painterResource(id = co.censo.shared.R.drawable.phrase_entry),
+                stringResource(id = R.string.enter_your_phrase),
+                stringResource(id = R.string.enter_your_phrase_blurb),
+            )
+            Divider()
+            SetupStep(
+                painterResource(id = co.censo.shared.R.drawable.two_people),
+                stringResource(id = R.string.add_approvers),
+                stringResource(id = R.string.add_approvers_blurb),
+            )
+            Divider()
+        }
+        Button(onClick = navigateToPlanSetup,
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color.Black, contentColor = Color.White),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(text = stringResource(R.string.get_started), fontWeight = FontWeight.Medium, fontSize = 20.sp, modifier = Modifier.padding(all = 8.dp))
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = stringResource(R.string.info),
+                modifier = Modifier
+                    .height(26.dp)
+                    .padding(6.dp)
+            )
+            Text(stringResource(id = R.string.info))
+        }
+    }
+}
+
+@Preview
+@Composable
+fun WelcomeScreenUIPreview() {
+    WelcomeScreenUI {
+
     }
 }

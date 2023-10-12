@@ -13,4 +13,9 @@
     <string name="sign_out">Sign Out</string>
     <string name="more_information">More information</string>
     <string name="learn_more">Learn more</string>
+    <string name="tag_line">sensible crypto security</string>
+    <string name="no_personal_info">No personal info required, ever.</string>
+    <string name="multiple_layers">Multiple layers of authentication.</string>
+    <string name="terms">Terms</string>
+    <string name="privacy">Privacy</string>
 </resources>
