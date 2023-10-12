@@ -130,6 +130,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
@@ -163,6 +164,9 @@ dependencies {
     
     //auth0 JWT
     implementation("com.auth0.android:jwtdecode:2.0.1")
+
+    //Encrypted Preferences
+    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")

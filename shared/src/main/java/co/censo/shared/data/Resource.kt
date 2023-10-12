@@ -37,7 +37,7 @@ sealed class Resource<out T>(
                 422 -> this.errorResponse?.errors?.get(0)?.displayMessage
                         ?: this.errorResponse?.errors?.get(0)?.message
                         ?: context.getString(R.string.validation_error)
-                else -> "${context.getString(R.string.unexpected_error)} ${errorCode?.let { "($it)"}}"
+                else -> "${context.getString(R.string.unexpected_error)} ${errorCode?.let { "($it)"} ?: exception?.message}"
             }
         }
 

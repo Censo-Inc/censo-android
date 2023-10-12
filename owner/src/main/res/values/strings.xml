@@ -150,5 +150,31 @@
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
     <string name="incorrect_code">Incorrect Code</string>
+    <string name="seed_phrase_verified">Seed phrase verified</string>
+    <string name="review_seed_phrase">Review seed phrase</string>
+    <string name="censo_has_verified_that_this_is_a_valid_seed_phrase">Censo has verified that this is a valid seed phrase. Please review the words to make sure that you have entered them correctly.</string>
+    <string name="censo_has_detected_that_this_is_not_a_valid_seed_phrase">Censo has detected that this is not a valid seed phrase. Please make sure each word is correct and revise as needed.</string>
+    <string name="submit_again">Submit again</string>
+    <string name="more_information">more information</string>
+    <string name="save_seed_phrase">Save seed phrase</string>
+    <string name="enter_word">Enter word</string>
+    <string name="clear_word_entry">clear word entry</string>
+    <string name="valid_word">valid word</string>
+    <string name="of_2_048_potential_words">%1$s of 2,048 potential words</string>
+    <string name="sorry">"Sorry, "</string>
+    <string name="is_not_a_valid_seed_phrase_word">" is not a valid seed phrase word."</string>
+    <string name="welcome_to_censo">Welcome to Censo</string>
+    <string name="welcome_blurb">We built Censo to be a secure way to safeguard your seed phrases with multiple levels of security:</string>
+    <string name="get_started">Get started</string>
+    <string name="authenticate_privately">Authenticate privately</string>
+    <string name="authenticate_privately_blurb">Censo does not store your info.</string>
+    <string name="authenticated">Authenticated</string>
+    <string name="scan_your_face">Scan your face</string>
+    <string name="scan_your_face_blurb">Fortify your Censo account with an encrypted, 3rd-party-verified scan.</string>
+    <string name="enter_your_phrase">Enter your phrase</string>
+    <string name="enter_your_phrase_blurb">Add your seed phrase; Censo will encrypt it for your eyes only</string>
+    <string name="add_approvers">Optional: Add approvers</string>
+    <string name="add_approvers_blurb">To improve security, choose people to approve access.</string>
+    <string name="info">Learn more</string>
 
 </resources>

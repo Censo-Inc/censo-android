@@ -18,12 +18,6 @@ interface Storage {
     fun saveDeviceKeyId(id: String)
     fun retrieveDeviceKeyId() : String
     fun clearDeviceKeyId()
-    fun saveJWT(jwt: String)
-    fun retrieveJWT() : String
-    fun clearJWT()
-    fun saveAuthAccessToken(token: String)
-    fun retrieveAuthAccessToken() : String
-    fun clearAuthAccessToken()
     fun saveGuardianInvitationId(id: String)
     fun retrieveGuardianInvitationId() : String
     fun clearGuardianInvitationId()
@@ -55,9 +49,6 @@ object SharedPrefsStorage : Storage {
     private const val GUARDIAN_INVITATION_ID = "guardian_invitation_id"
 
     private const val GUARDIAN_PARTICIPANT_ID = "guardian_participant_id"
-
-    private const val JWT = "jwt"
-    private const val GOOGLE_AUTH_ACCESS_TOKEN = "google_auth_access_token"
 
     private const val GOOGLE_DRIVE_MOCK_KEY = "google_drive_mock_key"
 
@@ -118,30 +109,6 @@ object SharedPrefsStorage : Storage {
         sharedPrefs.getString(DEVICE_KEY, "") ?: ""
 
     override fun clearDeviceKeyId() = saveDeviceKeyId("")
-    //endregion
-
-    //region JWT + AccessToken
-    override fun saveJWT(jwt: String) {
-        val editor = sharedPrefs.edit()
-        editor.putString(JWT, jwt)
-        editor.apply()
-    }
-
-    override fun retrieveJWT() =
-        sharedPrefs.getString(JWT, "") ?: ""
-
-    override fun clearJWT() = saveJWT("")
-    override fun saveAuthAccessToken(token: String) {
-        val editor = sharedPrefs.edit()
-        editor.putString(GOOGLE_AUTH_ACCESS_TOKEN, token)
-        editor.apply()
-    }
-
-    override fun retrieveAuthAccessToken(): String =
-        sharedPrefs.getString(GOOGLE_AUTH_ACCESS_TOKEN, "") ?: ""
-
-
-    override fun clearAuthAccessToken() = saveAuthAccessToken("")
     //endregion
 
     //region Guardian Invitation Id
