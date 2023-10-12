@@ -1,5 +1,6 @@
 package co.censo.shared.data.repository
 
+import Base58EncodedPrivateKey
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
@@ -14,6 +15,9 @@ interface KeyRepository {
     fun createGuardianKey(): EncryptionKey
     fun encryptWithDeviceKey(data: ByteArray) : ByteArray
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
+
+    suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey)
+    suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey
 }
 
 class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
@@ -45,4 +49,12 @@ class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
 
     override fun decryptWithDeviceKey(data: ByteArray) =
         retrieveInternalDeviceKey().decrypt(data)
+
+    override suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey) {
+        storage.savePrivateKey(key.value)
+    }
+    override suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey {
+        return Base58EncodedPrivateKey(storage.retrievePrivateKey())
+    }
+
 }

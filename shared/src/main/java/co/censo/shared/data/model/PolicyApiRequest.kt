@@ -3,8 +3,6 @@ package co.censo.shared.data.model
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
-import GuardianInvite
-import GuardianUpdate
 import ParticipantId
 import kotlinx.serialization.Serializable
 

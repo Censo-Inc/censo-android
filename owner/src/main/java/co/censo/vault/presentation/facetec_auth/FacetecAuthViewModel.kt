@@ -91,6 +91,10 @@ class FacetecAuthViewModel @Inject constructor(
         state = state.copy(startAuth = Resource.Uninitialized)
     }
 
+    fun resetUserCanceled() {
+        state = state.copy(userCancelled = Resource.Uninitialized)
+    }
+
     fun resetSubmitResult() {
         state = state.copy(submitResultResponse = Resource.Uninitialized)
     }
@@ -101,8 +105,14 @@ class FacetecAuthViewModel @Inject constructor(
     ) {
         if (sessionResult?.status != FaceTecSessionStatus.SESSION_COMPLETED_SUCCESSFULLY) {
             scanResultCallback?.cancel()
-            state =
+            state = if (sessionResult?.status == FaceTecSessionStatus.USER_CANCELLED) {
+                state.copy(
+                    submitResultResponse = Resource.Uninitialized,
+                    userCancelled = Resource.Success(Unit)
+                )
+            } else {
                 state.copy(submitResultResponse = Resource.Error(exception = Exception("Facescan failed to complete. No result.")))
+            }
             return
         }
 
@@ -163,7 +173,7 @@ class FacetecAuthViewModel @Inject constructor(
         customization.guidanceCustomization.buttonBackgroundHighlightColor = Color.Black.copy(alpha = 0.9f).toArgb()
         customization.guidanceCustomization.cameraPermissionsScreenImage = R.drawable.camera
 
-        customization.guidanceCustomization.foregroundColor = Color.White.toArgb()
+        customization.guidanceCustomization.foregroundColor = Color.Black.toArgb()
         customization.guidanceCustomization.retryScreenImageBorderColor = Color.Black.toArgb()
 
         customization.ovalCustomization.strokeColor = Color.Black.toArgb()

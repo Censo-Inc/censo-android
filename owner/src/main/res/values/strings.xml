@@ -169,12 +169,17 @@
     <string name="authenticate_privately">Authenticate privately</string>
     <string name="authenticate_privately_blurb">Censo does not store your info.</string>
     <string name="authenticated">Authenticated</string>
-    <string name="scan_your_face">Scan your face</string>
     <string name="scan_your_face_blurb">Fortify your Censo account with an encrypted, 3rd-party-verified scan.</string>
     <string name="enter_your_phrase">Enter your phrase</string>
     <string name="enter_your_phrase_blurb">Add your seed phrase; Censo will encrypt it for your eyes only</string>
     <string name="add_approvers">Optional: Add approvers</string>
     <string name="add_approvers_blurb">To improve security, choose people to approve access.</string>
     <string name="info">Learn more</string>
+
+    <string name="step_1">Step 1</string>
+    <string name="scan_your_face">Scan your face</string>
+    <string name="scan_phrase_1">Access to your seed phrase is always sealed behind a live scan of your face.</string>
+    <string name="scan_phrase_2">Capture &#038; encrypt a 3D map of your face to confirm your live, physical presence with third-party-verified technology.</string>
+    <string name="begin_face_scan">Begin face scan</string>
 
 </resources>

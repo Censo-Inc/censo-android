@@ -1,5 +1,8 @@
 package co.censo.vault
 
+import ParticipantId
+import co.censo.shared.data.cryptography.generatePartitionId
+import co.censo.shared.data.cryptography.toHexString
 import co.censo.vault.data.PhraseValidator
 import org.junit.Test
 import org.junit.Assert.assertFalse

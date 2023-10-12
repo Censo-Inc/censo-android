@@ -85,7 +85,7 @@ fun generateBase64() : String {
 fun generateRandom(length: Int, letters: String = "ABCDEF0123456789",) : String {
     val len = letters.count()
     var partitionId = ""
-    for (i in 0..length) {
+    for (i in 1..length) {
         val randomIndex = Random.nextInt(until = len)
         val randomCharacter = letters[randomIndex]
         partitionId += randomCharacter
@@ -120,20 +120,6 @@ fun String.sha256(): String {
         .fold("", { str, it -> str + "%02x".format(it) })
 }
 
-fun String.toParticipantIdAsBigInteger(): BigInteger {
-    val bytes = Base58.base58Decode(this)
-    return BigInteger(
-        1,
-        when (bytes.size) {
-            32 -> bytes
-            64 -> bytes.slice(0..31).toByteArray()
-            33, 65 -> bytes.slice(1..32).toByteArray()
-            else -> throw Exception(":Invalid key")
-        }
-    )
-}
-
-fun String.toParticipantIdAsHexString() = toParticipantIdAsBigInteger().toByteArrayNoSign(32).toHexString().lowercase()
 
 fun BigInteger.toByteArrayNoSign(): ByteArray {
     val byteArray = this.toByteArray()

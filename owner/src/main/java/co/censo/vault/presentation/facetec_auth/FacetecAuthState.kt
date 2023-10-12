@@ -9,6 +9,7 @@ data class FacetecAuthState(
     val initFacetecData: Resource<InitBiometryVerificationApiResponse> = Resource.Uninitialized,
     val submitResultResponse: Resource<BiometryScanResultBlob> = Resource.Uninitialized,
     val startAuth: Resource<Unit> = Resource.Uninitialized,
+    val userCancelled: Resource<Unit> = Resource.Uninitialized,
 
     //Standard State
     val facetecData : InitBiometryVerificationApiResponse? = null

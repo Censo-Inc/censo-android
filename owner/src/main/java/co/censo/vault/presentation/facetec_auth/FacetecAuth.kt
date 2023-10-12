@@ -33,6 +33,7 @@ import com.facetec.sdk.FaceTecSessionActivity
 @Composable
 fun FacetecAuth(
     onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
+    onCancelled: () -> Unit = {},
     viewModel: FacetecAuthViewModel = hiltViewModel()
 ) {
 
@@ -70,6 +71,11 @@ fun FacetecAuth(
         if (state.startAuth is Resource.Success) {
             FaceTecSessionActivity.createAndLaunchSession(context, viewModel, state.facetecData?.sessionToken ?: "")
             viewModel.resetStartFacetecAuth()
+        }
+
+        if (state.userCancelled is Resource.Success) {
+            onCancelled()
+            viewModel.resetUserCanceled()
         }
     }
 

@@ -118,7 +118,7 @@ class GuardianHomeViewModel @Inject constructor(
     fun createGuardianKey() {
         viewModelScope.launch {
             val guardianEncryptionKey = keyRepository.createGuardianKey()
-            guardianRepository.saveKeyInCloud(
+            keyRepository.saveKeyInCloud(
                 Base58EncodedPrivateKey(
                     Base58.base58Encode(
                         guardianEncryptionKey.privateKeyRaw()
@@ -242,7 +242,7 @@ class GuardianHomeViewModel @Inject constructor(
     }
 
     private suspend fun loadPrivateKeyFromCloud() {
-        val privateKeyFromCloud = guardianRepository.retrieveKeyFromCloud()
+        val privateKeyFromCloud = keyRepository.retrieveKeyFromCloud()
 
         val privateKeyRaw = Base58.base58Decode(privateKeyFromCloud.value)
 

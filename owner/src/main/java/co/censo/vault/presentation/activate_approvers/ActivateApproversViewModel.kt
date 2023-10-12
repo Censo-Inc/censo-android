@@ -85,19 +85,21 @@ class ActivateApproversViewModel @Inject constructor(
 
         val ownerState = state.ownerState
 
-        if (ownerState !is OwnerState.GuardianSetup || ownerState.threshold == null) {
-            //todo throw exception here
+        if (ownerState !is OwnerState.GuardianSetup || ownerState.threshold == null ||
+            ownerState.guardians.any { it.status !is GuardianStatus.Confirmed }) {
+            state = state.copy(
+                createPolicyResponse = Resource.Uninitialized,
+                setupError = "Data error detected during setup"
+            )
             return
         }
 
         viewModelScope.launch {
-            // TODO take only confirmed guardians. Requires social approval VAULT-152
-            val policySetupHelper = ownerRepository.getPolicySetupHelper(
-                ownerState.threshold!!,
-                state.guardians.map { it.label })
-
             val createPolicyResponse: Resource<CreatePolicyApiResponse> =
-                ownerRepository.createPolicy(policySetupHelper)
+                ownerRepository.createPolicy(
+                    ownerState.threshold!!,
+                    ownerState.guardians
+                )
 
             if (createPolicyResponse is Resource.Success) {
                 updateOwnerState(createPolicyResponse.data!!.ownerState)
@@ -226,5 +228,9 @@ class ActivateApproversViewModel @Inject constructor(
 
     fun resetCreatePolicyResource() {
         state = state.copy(createPolicyResponse = Resource.Uninitialized)
+    }
+
+    fun resetSetupError() {
+        state = state.copy(setupError = null)
     }
 }

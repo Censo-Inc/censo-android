@@ -42,8 +42,6 @@ interface GuardianRepository {
     ): Resource<SubmitGuardianVerificationApiResponse>
 
     suspend fun userHasKeySavedInCloud(): Boolean
-    suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey)
-    suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey
     fun signVerificationCode(
         verificationCode: String,
         encryptionKey: EncryptionKey
@@ -136,14 +134,6 @@ class GuardianRepositoryImpl(
 
     override suspend fun userHasKeySavedInCloud(): Boolean {
         return storage.retrievePrivateKey().isNotEmpty()
-    }
-
-    override suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey) {
-        storage.savePrivateKey(key.value)
-    }
-
-    override suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey {
-        return Base58EncodedPrivateKey(storage.retrievePrivateKey())
     }
 
     override fun saveParticipantId(participantId: String) {

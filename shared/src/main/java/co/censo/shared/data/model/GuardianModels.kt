@@ -1,4 +1,6 @@
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
+import co.censo.shared.data.cryptography.toByteArrayNoSign
+import co.censo.shared.data.cryptography.toPaddedHexString
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -11,29 +13,6 @@ import java.math.BigInteger
 import java.util.Base64
 import io.github.novacrypto.base58.Base58
 import java.security.interfaces.ECPublicKey
-
-@Serializable
-data class GuardianInvite(
-    val name: String,
-    val participantId: ParticipantId,
-    val encryptedShard: Base64EncodedData
-)
-
-@Serializable
-data class GuardianUpdate(
-    val id: GuardianId,
-    val name: String,
-    val participantId: ParticipantId,
-    val encryptedShard: Base64EncodedData
-)
-
-@Serializable
-data class GuardianProspect(
-    val label: String,
-    @Serializable(with = BigIntegerSerializer::class)
-    val participantId: BigInteger
-)
-
 
 typealias GuardianId = String
 
@@ -111,7 +90,11 @@ value class ParticipantId(val value: String) {
         }
     }
 
+    constructor(bigInt: BigInteger): this(bigInt.toByteArrayNoSign().toPaddedHexString(32).lowercase())
+
     fun getBytes() = Hex.decode(value)
+
+    fun bigInt() = BigInteger(1, Hex.decode(this.value))
 }
 
 

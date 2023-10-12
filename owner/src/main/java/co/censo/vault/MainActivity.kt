@@ -31,6 +31,7 @@ import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.vault.presentation.lock_screen.LockScreenViewModel
 import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
@@ -160,6 +161,13 @@ class MainActivity : FragmentActivity() {
                 PlanSetupScreen(
                     navController = navController,
                     existingSecurityPlan = null
+                )
+            }
+            composable(
+                route = Screen.InitialPlanSetupRoute.route
+            ) {
+                InitialPlanSetupScreen(
+                    navController = navController
                 )
             }
             composable(route = Screen.ActivateApprovers.route) {

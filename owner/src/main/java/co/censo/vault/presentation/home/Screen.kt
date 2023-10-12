@@ -13,6 +13,9 @@ sealed class Screen(val route: String) {
     object PlanSetupRoute : Screen("plan_setup_route") {
         const val EXISTING_SECURITY_PLAN_ARG = "existing_security_plan"
     }
+
+    object InitialPlanSetupRoute : Screen("initial_plan_setup_route")
+
     object ActivateApprovers : Screen("activate_approvers_screen")
 
     object VaultScreen : Screen("vault_screen")
