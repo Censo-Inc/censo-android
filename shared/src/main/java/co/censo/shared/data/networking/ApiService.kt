@@ -43,9 +43,13 @@ import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
+import com.auth0.android.jwt.JWT
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -80,11 +84,18 @@ interface ApiService {
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
 
-        fun create(storage: Storage, context: Context, versionCode: String, packageName: String): ApiService {
+        fun create(
+            storage: Storage,
+            secureStorage: SecurePreferences,
+            context: Context,
+            versionCode: String,
+            packageName: String,
+            authUtil: AuthUtil
+        ): ApiService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(ConnectivityInterceptor(context))
                 .addInterceptor(AnalyticsInterceptor(versionCode, packageName))
-                .addInterceptor(AuthInterceptor(storage))
+                .addInterceptor(AuthInterceptor(storage, authUtil, secureStorage))
                 .connectTimeout(Duration.ofSeconds(180))
                 .readTimeout(Duration.ofSeconds(180))
                 .callTimeout(Duration.ofSeconds(180))
@@ -255,7 +266,9 @@ class AnalyticsInterceptor(
 }
 
 class AuthInterceptor(
-    private val storage: Storage
+    private val storage: Storage,
+    private val authUtil: AuthUtil,
+    private val secureStorage: SecurePreferences
 ) : Interceptor {
     private val AUTHORIZATION_HEADER = "Authorization"
     private val DEVICE_PUBLIC_KEY_HEADER = "X-Censo-Device-Public-Key"
@@ -264,7 +277,11 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val now = Clock.System.now()
-        val headers = getAuthHeaders(now, request)
+        var headers : List<Header>
+
+        runBlocking {
+            headers = getAuthHeaders(now, request)
+        }
 
         return if (headers.isEmpty()) {
             chain.proceed(request)
@@ -279,10 +296,19 @@ class AuthInterceptor(
         }
     }
 
-    private fun getAuthHeaders(now: Instant, request: Request): List<Header> {
+    private suspend fun getAuthHeaders(now: Instant, request: Request): List<Header> {
         val deviceKeyId = storage.retrieveDeviceKeyId()
+        val jwt = secureStorage.retrieveJWT()
 
-        if (deviceKeyId.isEmpty()) {
+        if (jwt.isEmpty() || deviceKeyId.isEmpty()) {
+            return emptyList()
+        }
+
+        try {
+            authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId)
+        } catch (e: Exception) {
+            //TODO: Log with raygun
+            projectLog(message = "Exception thrown: $e")
             return emptyList()
         }
 

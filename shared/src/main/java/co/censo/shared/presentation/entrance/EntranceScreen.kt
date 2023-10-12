@@ -51,7 +51,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.R
 import co.censo.shared.presentation.components.DisplayError
@@ -108,20 +107,6 @@ fun EntranceScreen(
         }
     }
 
-    fun signOutFromGoogle() {
-        try {
-            val gso = GoogleSignInOptions.Builder()
-                .build()
-            val googleSignInClient = GoogleSignIn.getClient(context, gso)
-
-            googleSignInClient.signOut()
-        } catch (e: Exception) {
-            viewModel.googleAuthFailure(GoogleAuthError.FailedToSignUserOut(e))
-        }
-        viewModel.signUserOut()
-
-    }
-
     val googleAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { activityResult ->
@@ -155,18 +140,14 @@ fun EntranceScreen(
         }
 
         if (state.triggerGoogleSignIn is Resource.Success) {
-                try {
-                    val gso = GoogleSignInOptions.Builder()
-                        .requestIdToken(BuildConfig.GOOGLE_AUTH_SERVER_ID)
-                        .build()
+            try {
+                val googleSignInClient = viewModel.getGoogleSignInClient()
 
-                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-
-                    val intent = googleSignInClient.signInIntent
-                    googleAuthLauncher.launch(intent)
-                } catch (e: Exception) {
-                    viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
-                }
+                val intent = googleSignInClient.signInIntent
+                googleAuthLauncher.launch(intent)
+            } catch (e: Exception) {
+                viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
+            }
 
             viewModel.resetTriggerGoogleSignIn()
         }
@@ -200,23 +181,23 @@ fun EntranceScreen(
             }
 
             state.apiCallErrorOccurred -> {
-                if (state.createUserResource is Resource.Error) {
+                if (state.signInUserResource is Resource.Error) {
                     DisplayError(
-                        errorMessage = state.createUserResource.getErrorMessage(context),
-                        dismissAction = viewModel::resetCreateOwnerResource,
-                    ) { viewModel.retryCreateUser() }
+                        errorMessage = state.signInUserResource.getErrorMessage(context),
+                        dismissAction = viewModel::resetSignInUserResource,
+                    ) { viewModel.retrySignIn() }
                 } else if (state.triggerGoogleSignIn is Resource.Error) {
                     DisplayError(
                         errorMessage = state.triggerGoogleSignIn.getErrorMessage(context),
-                        dismissAction = viewModel::resetCreateOwnerResource,
-                    ) { viewModel.retryCreateUser() }
+                        dismissAction = viewModel::resetSignInUserResource,
+                    ) { viewModel.retrySignIn() }
                 }
             }
 
             else -> {
                 OwnerEntranceStandardUI(
                     authenticate = { viewModel.startGoogleSignInFlow() },
-                    signOut = { signOutFromGoogle() }
+                    signOut = { viewModel.signOutFromGoogle() }
                 )
             }
         }
@@ -237,23 +218,40 @@ fun OwnerEntranceStandardUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(100.dp))
-        Image(painter = painterResource(id = R.drawable.logo),
-              contentDescription = null, Modifier.padding(all = 20.dp))
-        Image(painter = painterResource(id = R.drawable.censo_text),
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = null, Modifier.padding(all = 20.dp)
+        )
+        Image(
+            painter = painterResource(id = R.drawable.censo_text),
             contentDescription = R.string.app_name.toString(),
             Modifier.padding(all = 15.dp)
         )
-        Button(onClick = authenticate,
-               colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color.Black, contentColor = Color.White),
+        Button(
+            onClick = authenticate,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = Color.Black,
+                contentColor = Color.White
+            ),
             modifier = Modifier.padding(32.dp)
         ) {
-            Text(text = stringResource(R.string.google_auth_login), fontWeight = FontWeight.Medium, fontSize = 20.sp, modifier = Modifier.padding(all = 8.dp))
+            Text(
+                text = stringResource(R.string.google_auth_login),
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(all = 8.dp)
+            )
         }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(all = 10.dp)) {
-            Icon(Icons.Outlined.Info, contentDescription = null,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(all = 10.dp)
+        ) {
+            Icon(
+                Icons.Outlined.Info, contentDescription = null,
                 Modifier
                     .height(height = 34.dp)
-                    .padding(all = 8.dp))
+                    .padding(all = 8.dp)
+            )
             Text("Why Google?")
         }
 
@@ -266,7 +264,11 @@ fun OwnerEntranceStandardUI(
                     .padding(all = 8.dp)
                     .fillMaxWidth(0.5f)
             ) {
-                Image(painter = painterResource(id = R.drawable.eyeslash), contentDescription = null, modifier = Modifier.height(28.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.eyeslash),
+                    contentDescription = null,
+                    modifier = Modifier.height(28.dp)
+                )
                 Text(
                     text = stringResource(R.string.no_personal_info),
                     textAlign = TextAlign.Center,
@@ -279,7 +281,11 @@ fun OwnerEntranceStandardUI(
                     .padding(all = 8.dp)
                     .fillMaxWidth(1.0f)
             ) {
-                Image(painter = painterResource(id = R.drawable.safe), contentDescription = null, modifier = Modifier.height(28.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.safe),
+                    contentDescription = null,
+                    modifier = Modifier.height(28.dp)
+                )
                 Text(
                     text = stringResource(R.string.multiple_layers),
                     textAlign = TextAlign.Center,
@@ -314,6 +320,7 @@ fun OwnerEntranceStandardUIPreview() {
         OwnerEntranceStandardUI({}, {})
     }
 }
+
 sealed class GoogleAuthError(val exception: Exception) {
     object InvalidToken : GoogleAuthError(Exception("Invalid Token"))
     object MissingCredentialId : GoogleAuthError(Exception("Missing Google Credential Id"))
@@ -323,4 +330,5 @@ sealed class GoogleAuthError(val exception: Exception) {
     data class FailedToSignUserOut(val e: Exception) : GoogleAuthError(e)
     data class FailedToLaunchGoogleAuthUI(val e: Exception) : GoogleAuthError(e)
     data class FailedToVerifyId(val e: Exception) : GoogleAuthError(e)
+    data class FailedToCreateKeyWithId(val e: Exception) : GoogleAuthError(e)
 }

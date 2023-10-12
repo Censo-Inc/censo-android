@@ -13,9 +13,9 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
+import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -37,11 +37,14 @@ class EntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository,
-    private val pushRepository: PushRepository
+    private val pushRepository: PushRepository,
+    private val authUtil: AuthUtil
 ) : ViewModel() {
 
     var state by mutableStateOf(EntranceState())
         private set
+
+    fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
     fun onOwnerStart() {
         checkUserHasValidToken()
@@ -119,16 +122,20 @@ class EntranceViewModel @Inject constructor(
     }
 
     fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            val account = completedTask.getResult(ApiException::class.java)
-            createUser(account.idToken)
-        } catch (e: ApiException) {
-            googleAuthFailure(GoogleAuthError.ErrorParsingIntent(e))
-        }
+        authUtil.getAccountFromSignInTask(
+            completedTask,
+            onSuccess = { account -> signInUser(account.idToken) },
+            onException = { exception ->
+                googleAuthFailure(
+                    GoogleAuthError.ErrorParsingIntent(
+                        exception
+                    )
+                )
+            })
     }
 
 
-    fun createUser(jwt: String?) {
+    fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             if (jwt.isNullOrEmpty()) {
                 googleAuthFailure(GoogleAuthError.MissingCredentialId)
@@ -149,24 +156,29 @@ class EntranceViewModel @Inject constructor(
                 return@launch
             }
 
+
             if (!keyRepository.hasKeyWithId(idToken)) {
-                keyRepository.createAndSaveKeyWithId(idToken)
+                try {
+                    keyRepository.createAndSaveKeyWithId(idToken)
+                } catch (e: Exception) {
+                    googleAuthFailure(GoogleAuthError.FailedToCreateKeyWithId(e))
+                }
             } else {
                 keyRepository.setSavedDeviceId(idToken)
             }
 
-            val createUserResponse = ownerRepository.createUser(
+            val signInUserResponse = ownerRepository.signInUser(
                 jwtToken = jwt,
                 idToken = idToken
             )
 
-            state = if (createUserResponse is Resource.Success) {
+            state = if (signInUserResponse is Resource.Success) {
                 checkUserHasRespondedToNotificationOptIn()
                 state.copy(
-                    createUserResource = createUserResponse
+                    signInUserResource = signInUserResponse
                 )
             } else {
-                state.copy(createUserResource = createUserResponse)
+                state.copy(signInUserResource = signInUserResponse)
             }
         }
     }
@@ -175,7 +187,7 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
-    fun retryCreateUser() {
+    fun retrySignIn() {
         startGoogleSignInFlow()
     }
 
@@ -187,8 +199,8 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(userFinishedSetup = Resource.Uninitialized)
     }
 
-    fun resetCreateOwnerResource() {
-        state = state.copy(createUserResource = Resource.Uninitialized)
+    fun resetSignInUserResource() {
+        state = state.copy(signInUserResource = Resource.Uninitialized)
     }
 
     fun finishPushNotificationDialog() {
@@ -199,8 +211,13 @@ class EntranceViewModel @Inject constructor(
         )
     }
 
-    fun signUserOut() {
+    fun signOutFromGoogle() {
         viewModelScope.launch {
+            try {
+                authUtil.getGoogleSignInClient().signOut()
+            } catch (e: Exception) {
+                googleAuthFailure(GoogleAuthError.FailedToSignUserOut(e))
+            }
             ownerRepository.signUserOut()
         }
     }

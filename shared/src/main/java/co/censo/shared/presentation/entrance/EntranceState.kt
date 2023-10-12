@@ -5,13 +5,13 @@ import okhttp3.ResponseBody
 
 data class EntranceState(
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
-    val createUserResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val signInUserResource: Resource<ResponseBody> = Resource.Uninitialized,
     val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
     val authId: String = ""
 ) {
-    val isLoading = createUserResource is Resource.Loading
+    val isLoading = signInUserResource is Resource.Loading
 
     val apiCallErrorOccurred =
-        createUserResource is Resource.Error || triggerGoogleSignIn is Resource.Error
+        signInUserResource is Resource.Error || triggerGoogleSignIn is Resource.Error
 }

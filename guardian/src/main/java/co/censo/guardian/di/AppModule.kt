@@ -15,7 +15,9 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.SecurePreferencesImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CountDownTimerImpl
+import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.VaultCountDownTimer
 import dagger.Module
 import dagger.Provides
@@ -43,15 +45,28 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideAuthUtil(
+        @ApplicationContext applicationContext: Context,
+        secureStorage: SecurePreferences
+    ): AuthUtil {
+        return GoogleAuth(applicationContext, secureStorage)
+    }
+
+    @Singleton
+    @Provides
     fun provideApiService(
         storage: Storage,
-        @ApplicationContext applicationContext: Context
+        @ApplicationContext applicationContext: Context,
+        authUtil: AuthUtil,
+        secureStorage: SecurePreferences
     ): ApiService {
         return ApiService.create(
             storage = storage,
             context = applicationContext,
             versionCode = BuildConfig.VERSION_CODE.toString(),
-            packageName = BuildConfig.APPLICATION_ID
+            packageName = BuildConfig.APPLICATION_ID,
+            authUtil = authUtil,
+            secureStorage = secureStorage
         )
     }
 
@@ -68,12 +83,14 @@ object AppModule {
     fun provideOwnerRepository(
         apiService: ApiService,
         storage: Storage,
-        secureStorage: SecurePreferences
+        secureStorage: SecurePreferences,
+        authUtil: AuthUtil
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             storage = storage,
             apiService = apiService,
-            secureStorage = secureStorage
+            secureStorage = secureStorage,
+            authUtil = authUtil
         )
     }
 

@@ -7,7 +7,6 @@ import Base64EncodedData
 import GuardianProspect
 import ParticipantId
 import VaultSecretId
-import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
@@ -47,12 +46,9 @@ import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
 import com.auth0.android.jwt.JWT
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
@@ -61,7 +57,7 @@ import java.util.Base64
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
-    suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
+    suspend fun signInUser(jwtToken: String, idToken: String): Resource<ResponseBody>
     suspend fun createPolicySetup(
         threshold: UInt,
         guardians: List<Guardian.SetupGuardian>,
@@ -133,13 +129,14 @@ interface OwnerRepository {
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
     private val storage: Storage,
-    private val secureStorage: SecurePreferences
+    private val secureStorage: SecurePreferences,
+    private val authUtil: AuthUtil
 ) : OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
         return retrieveApiResource { apiService.user() }
     }
 
-    override suspend fun createUser(authId: String, idToken: String) =
+    override suspend fun signInUser(authId: String, idToken: String) =
         retrieveApiResource {
             apiService.signIn(
                 SignInApiRequest(
@@ -203,14 +200,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun verifyToken(token: String): String? {
-        val verifier = GoogleIdTokenVerifier.Builder(
-            NetHttpTransport(), GsonFactory()
-        )
-            .setAudience(BuildConfig.GOOGLE_AUTH_CLIENT_IDS.toList())
-            .build()
-
-        val verifiedIdToken: GoogleIdToken? = verifier.verify(token)
-        return verifiedIdToken?.payload?.subject
+        return authUtil.verifyToken(token)
     }
 
     override suspend fun saveJWT(jwtToken: String) {
@@ -267,8 +257,7 @@ class OwnerRepositoryImpl(
     override suspend fun checkJWTValid(jwtToken: String): Boolean {
         return try {
             val jwtDecoded = JWT(jwtToken)
-            //todo: See what we need to check on the token
-            return true
+            authUtil.isJWTValid(jwtDecoded)
         } catch (e: Exception) {
             false
         }
