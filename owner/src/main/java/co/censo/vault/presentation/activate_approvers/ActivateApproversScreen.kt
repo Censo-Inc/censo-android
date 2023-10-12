@@ -17,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,12 +32,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
+import co.censo.vault.presentation.home.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +51,12 @@ fun ActivateApproversScreen(
 
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
+
+    LaunchedEffect(key1 = state) {
+        if (state.createPolicyResponse is Resource.Success) {
+            navController.navigate(Screen.VaultScreen.route)
+        }
+    }
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -81,7 +91,8 @@ fun ActivateApproversScreen(
                     borderColor = Color.White,
                     border = false,
                     contentPadding = PaddingValues(vertical = 12.dp),
-                    onClick = {},
+                    onClick = { viewModel.createPolicy() },
+                    enabled = state.guardians.all { it is Guardian.ProspectGuardian && it.status is GuardianStatus.Confirmed }
                 )
                 {
                     Text(

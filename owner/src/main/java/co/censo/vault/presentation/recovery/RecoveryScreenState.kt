@@ -10,6 +10,15 @@ import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 
+data class TotpVerificationScreenState(
+    val verificationCode: String = "",
+    val waitingForApproval: Boolean = false,
+    val rejected: Boolean = false,
+    val showModal: Boolean = false,
+    val approverLabel: String = "",
+    val participantId: ParticipantId = ParticipantId("")
+)
+
 data class RecoveryScreenState(
     // owner state
     val secrets: List<VaultSecretId> = listOf(),
@@ -22,9 +31,7 @@ data class RecoveryScreenState(
     val initiateNewRecovery: Boolean = false,
 
     // totp code verification
-    val totpVerificationCode: String = "",
-    val totpVerificationWaitingForApproval: Boolean = false,
-    val totpVerificationRejected: Boolean = false,
+    val totpVerificationState: TotpVerificationScreenState = TotpVerificationScreenState(),
 
     // api requests
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
@@ -32,9 +39,6 @@ data class RecoveryScreenState(
     val initiateRecoveryResource: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
     val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
     val submitTotpVerificationResource: Resource<SubmitRecoveryTotpVerificationApiResponse> = Resource.Uninitialized,
-
-    // UI state
-    val recoveryUIState: RecoveryUIState = RecoveryUIState.Main,
 
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
@@ -49,12 +53,4 @@ data class RecoveryScreenState(
             || initiateRecoveryResource is Resource.Error
             || cancelRecoveryResource is Resource.Error
             || submitTotpVerificationResource is Resource.Loading
-}
-
-sealed class RecoveryUIState {
-    object Main : RecoveryUIState()
-    data class EnterVerificationCodeState(
-        val approverLabel: String,
-        val participantId: ParticipantId
-    ) : RecoveryUIState()
 }

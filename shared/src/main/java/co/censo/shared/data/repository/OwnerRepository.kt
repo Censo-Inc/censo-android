@@ -4,17 +4,20 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedGuardianPublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
-import GuardianProspect
 import ParticipantId
 import VaultSecretId
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
+import co.censo.shared.data.cryptography.ORDER
+import co.censo.shared.data.cryptography.Point
 import co.censo.shared.data.cryptography.PolicySetupHelper
+import co.censo.shared.data.cryptography.SecretSharerUtils
 import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256
@@ -27,6 +30,7 @@ import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.DeleteSecretApiResponse
+import co.censo.shared.data.model.EncryptedShard
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
@@ -35,7 +39,10 @@ import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
+import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
+import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
@@ -44,6 +51,7 @@ import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
+import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.projectLog
@@ -55,6 +63,8 @@ import com.google.api.client.json.gson.GsonFactory
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
+import java.math.BigInteger
+import java.security.PrivateKey
 import java.util.Base64
 
 interface OwnerRepository {
@@ -68,7 +78,11 @@ interface OwnerRepository {
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicySetupApiResponse>
 
-    suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>): PolicySetupHelper
+    suspend fun getPolicySetupHelper(
+        threshold: UInt,
+        prospectGuardians: List<Guardian.ProspectGuardian>
+    ): PolicySetupHelper
+
     suspend fun createPolicy(
         setupHelper: PolicySetupHelper
     ): Resource<CreatePolicyApiResponse>
@@ -90,7 +104,7 @@ interface OwnerRepository {
 
     suspend fun rejectVerification(
         participantId: ParticipantId
-    ) : Resource<RejectGuardianVerificationApiResponse>
+    ): Resource<RejectGuardianVerificationApiResponse>
 
     fun checkCodeMatches(
         verificationCode: String,
@@ -130,6 +144,17 @@ interface OwnerRepository {
         participantId: ParticipantId,
         verificationCode: String
     ): Resource<SubmitRecoveryTotpVerificationApiResponse>
+
+    suspend fun retrieveRecoveryShards(
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<RetrieveRecoveryShardsApiResponse>
+
+    fun recoverSecrets(
+        encryptedSecrets: List<VaultSecret>,
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        encryptedMasterPrivateKey: Base64EncodedData
+    ): List<RecoveredSeedPhrase>
 }
 
 class OwnerRepositoryImpl(
@@ -170,19 +195,11 @@ class OwnerRepositoryImpl(
 
     override suspend fun getPolicySetupHelper(
         threshold: UInt,
-        guardians: List<String>
+        prospectGuardians: List<Guardian.ProspectGuardian>
     ): PolicySetupHelper {
-        val guardianProspect = guardians.map {
-            GuardianProspect(
-                label = it,
-                participantId = generatePartitionId()
-            )
-        }
-
         val policySetupHelper = PolicySetupHelper.create(
             threshold = threshold,
-            guardians = guardianProspect,
-            deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+            guardians = prospectGuardians,
         )
 
         projectLog(message = "Policy Setup Helper Created: $policySetupHelper")
@@ -394,5 +411,58 @@ class OwnerRepositoryImpl(
                 )
             )
         }
+    }
+
+    override suspend fun retrieveRecoveryShards(
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<RetrieveRecoveryShardsApiResponse> {
+
+        return retrieveApiResource {
+            apiService.retrieveRecoveryShards(
+                apiRequest = RetrieveRecoveryShardsApiRequest(
+                    biometryVerificationId = biometryVerificationId,
+                    biometryData = biometryData
+                )
+            )
+        }
+    }
+
+    override fun recoverSecrets(
+        encryptedSecrets: List<VaultSecret>,
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        encryptedMasterPrivateKey: Base64EncodedData
+    ): List<RecoveredSeedPhrase> {
+        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+
+        val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
+            Point(
+                BigInteger(it.participantId.getBytes()),
+                BigInteger(deviceKey.decrypt(it.encryptedShard.bytes))
+            )
+        }
+        val intermediatePrivateKeyBigInt =
+            SecretSharerUtils.recoverSecret(intermediateKeyShares, ORDER)
+
+        val intermediatePrivateKey: PrivateKey =
+            ECHelper.getPrivateKeyFromECBigIntAndCurve(intermediatePrivateKeyBigInt)
+
+        val decryptedMasterPrivateKey: ByteArray = ECIESManager.decryptMessage(
+            cipherData = encryptedMasterPrivateKey.bytes,
+            privateKey = intermediatePrivateKey
+        )
+
+        val recreatedMasterEncryptionKey =
+            EncryptionKey.generateFromPrivateKeyRaw(BigInteger(decryptedMasterPrivateKey))
+
+        return encryptedSecrets.map {
+            RecoveredSeedPhrase(
+                guid = it.guid,
+                label = it.label,
+                seedPhrase = String(recreatedMasterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)),
+                createdAt = it.createdAt
+            )
+        }
+
     }
 }

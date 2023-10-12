@@ -3,8 +3,6 @@ package co.censo.shared.data.model
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
-import GuardianInvite
-import GuardianUpdate
 import ParticipantId
 import kotlinx.serialization.Serializable
 
@@ -41,17 +39,3 @@ data class CreatePolicySetupApiResponse(
     val scanResultBlob: BiometryScanResultBlob,
 )
 
-@Serializable
-data class GetPolicyApiResponse(
-    val status: PolicyStatus,
-    val intermediateKey: Base58EncodedIntermediatePublicKey,
-    val threshold: Int,
-    val guardians: List<Guardian>,
-    val encryptedData: Base64EncodedData,
-)
-
-@Serializable
-enum class PolicyStatus {
-    Pending,
-    Active,
-}

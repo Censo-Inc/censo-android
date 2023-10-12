@@ -13,31 +13,6 @@ import io.github.novacrypto.base58.Base58
 import java.security.interfaces.ECPublicKey
 
 @Serializable
-data class GuardianInvite(
-    val name: String,
-    val participantId: ParticipantId,
-    val encryptedShard: Base64EncodedData
-)
-
-@Serializable
-data class GuardianUpdate(
-    val id: GuardianId,
-    val name: String,
-    val participantId: ParticipantId,
-    val encryptedShard: Base64EncodedData
-)
-
-@Serializable
-data class GuardianProspect(
-    val label: String,
-    @Serializable(with = BigIntegerSerializer::class)
-    val participantId: BigInteger
-)
-
-
-typealias GuardianId = String
-
-@Serializable
 @JvmInline
 value class Base58EncodedPrivateKey(val value: String)
 
@@ -111,7 +86,9 @@ value class ParticipantId(val value: String) {
         }
     }
 
-    fun getBytes() = Hex.decode(value)
+    fun getBytes(): ByteArray = Hex.decode(value)
+
+    fun bigInt(): BigInteger = BigInteger(getBytes())
 }
 
 

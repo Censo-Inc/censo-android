@@ -15,6 +15,8 @@ sealed class Screen(val route: String) {
     }
     object ActivateApprovers : Screen("activate_approvers_screen")
 
+    object AccessSeedPhrases : Screen("access_seed_phrases")
+
     object VaultScreen : Screen("vault_screen")
 
     object RecoveryScreen : Screen("recovery_screen")

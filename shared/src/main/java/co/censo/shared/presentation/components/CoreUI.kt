@@ -25,7 +25,9 @@ fun FullScreenButton(
         modifier = modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             contentColor = color,
-            containerColor = color
+            containerColor = color,
+            disabledContentColor = color.copy(0.5f),
+            disabledContainerColor = color.copy(0.5f),
         ),
         contentPadding = contentPadding,
         border = if (border) BorderStroke(1.dp, borderColor) else null,

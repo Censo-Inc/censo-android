@@ -29,6 +29,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.math.BigInteger
@@ -73,9 +74,7 @@ class GuardianHomeViewModel @Inject constructor(
             val userSavedPrivateKey = guardianRepository.userHasKeySavedInCloud()
 
             val guardianUIState = if (guardianState == null) {
-                if (guardianRepository.retrieveParticipantId().isEmpty()) {
-                    GuardianUIState.INVALID_PARTICIPANT_ID
-                } else if (inviteCode.isEmpty()) {
+                if (inviteCode.isEmpty()) {
                     GuardianUIState.MISSING_INVITE_CODE
                 } else {
                     GuardianUIState.INVITE_READY
@@ -140,12 +139,17 @@ class GuardianHomeViewModel @Inject constructor(
             state = if (userResponse is Resource.Success) {
                 val participantId = guardianRepository.retrieveParticipantId()
 
-                val guardianState = if (participantId.isEmpty()) {
-                    userResponse.data?.guardianStates?.firstOrNull()
+                if (participantId.isEmpty()) {
+                    determineGuardianUIState(userResponse.data?.guardianStates?.firstOrNull())
                 } else {
-                    userResponse.data?.guardianStates?.firstOrNull { it.participantId.value == participantId }
+                    val guardianState =
+                        userResponse.data?.guardianStates?.firstOrNull { it.participantId.value == participantId }
+                    if (guardianState == null) {
+                        state = state.copy(guardianUIState = GuardianUIState.INVALID_PARTICIPANT_ID)
+                    } else {
+                        determineGuardianUIState(guardianState)
+                    }
                 }
-                determineGuardianUIState(guardianState)
                 projectLog(message = "User Response: ${userResponse.data}")
                 state.copy(
                     userResponse = userResponse,
@@ -286,9 +290,8 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    private fun generateRecoveryTotp(encryptedTotpSecret: Base64EncodedData): GuardianHomeState.RecoveryTotpState {
-        val now = Clock.System.now()
-        val counter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
+    private fun generateRecoveryTotp(encryptedTotpSecret: Base64EncodedData, instant: Instant = Clock.System.now()): GuardianHomeState.RecoveryTotpState {
+        val counter = instant.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
 
         return GuardianHomeState.RecoveryTotpState(
             code = TotpGenerator.generateCode(
@@ -296,7 +299,7 @@ class GuardianHomeViewModel @Inject constructor(
                 counter = counter,
             ),
             counter = counter,
-            currentSecond = now.toLocalDateTime(TimeZone.UTC).second,
+            currentSecond = instant.toLocalDateTime(TimeZone.UTC).second,
             encryptedSecret = encryptedTotpSecret
         )
     }
@@ -328,8 +331,10 @@ class GuardianHomeViewModel @Inject constructor(
     }
 
     private fun confirmOrRejectOwner(participantId: ParticipantId, recoveryConfirmation: GuardianPhase.RecoveryConfirmation) {
+        val recoveryTotp = generateRecoveryTotp(recoveryConfirmation.encryptedTotpSecret, Instant.fromEpochMilliseconds(recoveryConfirmation.ownerKeySignatureTimeMillis))
+
         val totpIsCorrect = guardianRepository.checkTotpMatches(
-            state.recoveryTotp?.code ?: "",
+            recoveryTotp.code,
             recoveryConfirmation.ownerPublicKey,
             signature = recoveryConfirmation.ownerKeySignature,
             timeMillis = recoveryConfirmation.ownerKeySignatureTimeMillis

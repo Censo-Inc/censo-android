@@ -91,10 +91,14 @@ class ActivateApproversViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            // TODO take only confirmed guardians. Requires social approval VAULT-152
+            val confirmedGuardians = state.guardians
+                .filterIsInstance<Guardian.ProspectGuardian>()
+                .filter { it.status is GuardianStatus.Confirmed }
+
             val policySetupHelper = ownerRepository.getPolicySetupHelper(
                 ownerState.threshold!!,
-                state.guardians.map { it.label })
+                confirmedGuardians
+            )
 
             val createPolicyResponse: Resource<CreatePolicyApiResponse> =
                 ownerRepository.createPolicy(policySetupHelper)

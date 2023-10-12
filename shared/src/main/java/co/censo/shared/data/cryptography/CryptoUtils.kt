@@ -85,7 +85,7 @@ fun generateBase64() : String {
 fun generateRandom(length: Int, letters: String = "ABCDEF0123456789",) : String {
     val len = letters.count()
     var partitionId = ""
-    for (i in 0..length) {
+    for (i in 0 until length) {
         val randomIndex = Random.nextInt(until = len)
         val randomCharacter = letters[randomIndex]
         partitionId += randomCharacter
