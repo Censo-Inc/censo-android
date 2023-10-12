@@ -163,5 +163,18 @@
     <string name="of_2_048_potential_words">%1$s of 2,048 potential words</string>
     <string name="sorry">"Sorry, "</string>
     <string name="is_not_a_valid_seed_phrase_word">" is not a valid seed phrase word."</string>
+    <string name="welcome_to_censo">Welcome to Censo</string>
+    <string name="welcome_blurb">We built Censo to be a secure way to safeguard your seed phrases with multiple levels of security:</string>
+    <string name="get_started">Get started</string>
+    <string name="authenticate_privately">Authenticate privately</string>
+    <string name="authenticate_privately_blurb">Censo does not store your info.</string>
+    <string name="authenticated">Authenticated</string>
+    <string name="scan_your_face">Scan your face</string>
+    <string name="scan_your_face_blurb">Fortify your Censo account with an encrypted, 3rd-party-verified scan.</string>
+    <string name="enter_your_phrase">Enter your phrase</string>
+    <string name="enter_your_phrase_blurb">Add your seed phrase; Censo will encrypt it for your eyes only</string>
+    <string name="add_approvers">Optional: Add approvers</string>
+    <string name="add_approvers_blurb">To improve security, choose people to approve access.</string>
+    <string name="info">Learn more</string>
 
 </resources>
