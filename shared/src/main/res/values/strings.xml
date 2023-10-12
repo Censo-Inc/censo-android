@@ -11,4 +11,6 @@
     <string name="validation_error">Validation Error</string>
     <string name="unexpected_error">Unexpected Error</string>
     <string name="sign_out">Sign Out</string>
+    <string name="more_information">More information</string>
+    <string name="learn_more">Learn more</string>
 </resources>
