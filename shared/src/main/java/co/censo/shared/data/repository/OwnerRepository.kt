@@ -45,6 +45,7 @@ import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.projectLog
 import com.auth0.android.jwt.JWT
@@ -78,9 +79,6 @@ interface OwnerRepository {
     suspend fun saveJWT(jwtToken: String)
     suspend fun retrieveJWT(): String
     suspend fun checkJWTValid(jwtToken: String): Boolean
-
-    suspend fun saveAccessToken(accessToken: String)
-    suspend fun retrieveAccessToken(): String
 
     suspend fun confirmGuardianShip(
         participantId: ParticipantId,
@@ -134,7 +132,8 @@ interface OwnerRepository {
 
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
-    private val storage: Storage
+    private val storage: Storage,
+    private val secureStorage: SecurePreferences
 ) : OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
         return retrieveApiResource { apiService.user() }
@@ -215,7 +214,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun saveJWT(jwtToken: String) {
-        storage.saveJWT(jwtToken)
+        secureStorage.saveJWT(jwtToken)
     }
 
     override fun checkCodeMatches(
@@ -264,7 +263,7 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun retrieveJWT() = storage.retrieveJWT()
+    override suspend fun retrieveJWT() = secureStorage.retrieveJWT()
     override suspend fun checkJWTValid(jwtToken: String): Boolean {
         return try {
             val jwtDecoded = JWT(jwtToken)
@@ -273,14 +272,6 @@ class OwnerRepositoryImpl(
         } catch (e: Exception) {
             false
         }
-    }
-
-    override suspend fun saveAccessToken(accessToken: String) {
-        storage.saveAuthAccessToken(accessToken)
-    }
-
-    override suspend fun retrieveAccessToken(): String {
-        return storage.retrieveAuthAccessToken()
     }
 
     override fun encryptShardWithGuardianKey(
@@ -368,8 +359,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun signUserOut() {
-        storage.clearJWT()
-        storage.clearAuthAccessToken()
+        secureStorage.clearJWT()
     }
 
     override suspend fun submitRecoveryTotpVerification(
