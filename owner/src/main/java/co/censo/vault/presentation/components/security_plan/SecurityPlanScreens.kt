@@ -1,7 +1,7 @@
 package co.censo.vault.presentation.components.security_plan
 
 import Base64EncodedData
-import FullScreenButton
+import StandardButton
 import ParticipantId
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -117,7 +117,7 @@ fun SecurityPlanTopLevelContainer(
             ) {
 
                 if (showTwoButtons) {
-                    FullScreenButton(
+                    StandardButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
                         borderColor = VaultColors.PrimaryColor,
@@ -141,7 +141,7 @@ fun SecurityPlanTopLevelContainer(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                FullScreenButton(
+                StandardButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     color = VaultColors.PrimaryColor,
                     borderColor = Color.White,

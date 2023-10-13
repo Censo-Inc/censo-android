@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.plan_setup
 
-import FullScreenButton
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -132,7 +132,7 @@ fun PlanSetupScreen(
             ) {
 
                 if (state.mainButtonCount > 1) {
-                    FullScreenButton(
+                    StandardButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = Color.White,
                         borderColor = VaultColors.PrimaryColor,
@@ -153,7 +153,7 @@ fun PlanSetupScreen(
 
                 if (state.mainButtonCount > 0) {
 
-                    FullScreenButton(
+                    StandardButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = VaultColors.PrimaryColor,
                         borderColor = Color.White,

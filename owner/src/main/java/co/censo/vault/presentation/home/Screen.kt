@@ -22,6 +22,10 @@ sealed class Screen(val route: String) {
 
     object RecoveryScreen : Screen("recovery_screen")
 
+    object EnterPhraseRoute: Screen("enter_phrase_screen") {
+        const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"
+    }
+
     companion object {
         const val START_DESTINATION_ID = 0
     }

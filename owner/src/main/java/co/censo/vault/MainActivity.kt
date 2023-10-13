@@ -4,6 +4,7 @@ import Base58EncodedMasterPublicKey
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import co.censo.shared.presentation.entrance.EntranceScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
+import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
 import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
@@ -56,6 +58,8 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         setupPushChannel()
+
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         setContent {
             val navController = rememberNavController()
@@ -114,6 +118,18 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = Screen.RecoveryScreen.route) {
                 RecoveryScreen(navController = navController)
+            }
+            composable(
+                route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}"
+            ) { backStackEntry ->
+                EnterPhraseScreen(
+                    navController = navController,
+                    masterPublicKey = Base58EncodedMasterPublicKey(
+                        backStackEntry.arguments?.getString(
+                            Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
+                        )!!
+                    )
+                )
             }
             composable(
                 route = "${Screen.AddBIP39Route.route}/{${Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG}}"
