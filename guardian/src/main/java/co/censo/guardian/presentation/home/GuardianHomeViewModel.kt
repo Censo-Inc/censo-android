@@ -108,7 +108,7 @@ class GuardianHomeViewModel @Inject constructor(
             )
 
             val guardianPhase = guardianState?.phase
-            if (guardianPhase is GuardianPhase.RecoveryVerification && state.recoveryTotp != null) {
+            if (guardianPhase is GuardianPhase.RecoveryVerification) {
                 startRecoveryTotpGeneration(guardianPhase.encryptedTotpSecret)
             }
         }
