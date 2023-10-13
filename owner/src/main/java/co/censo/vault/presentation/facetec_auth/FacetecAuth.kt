@@ -28,6 +28,7 @@ import co.censo.shared.data.model.FacetecBiometry
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FacetecAuth(
@@ -61,6 +62,8 @@ fun FacetecAuth(
                     }
                 }
             )
+            FaceTecSDK.setCustomization(viewModel.facetecCustomizations())
+
             viewModel.resetFacetecInitDataResource()
         }
 
@@ -83,7 +86,7 @@ fun FacetecAuth(
                 CircularProgressIndicator(
                     modifier = Modifier.size(72.dp),
                     strokeWidth = 8.dp,
-                    color = Color.Red
+                    color = Color.Black
                 )
             }
 
