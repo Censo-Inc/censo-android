@@ -15,6 +15,11 @@ data class UnlockApiResponse(
 )
 
 @Serializable
+data class ProlongUnlockApiResponse(
+    val ownerState: OwnerState,
+)
+
+@Serializable
 data class LockApiResponse(
     val ownerState: OwnerState,
 )

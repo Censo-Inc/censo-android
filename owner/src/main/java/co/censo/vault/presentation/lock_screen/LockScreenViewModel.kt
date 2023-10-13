@@ -100,27 +100,4 @@ class LockScreenViewModel @Inject constructor(
             unlockVaultResponse.map { it.scanResultBlob }
         }.await()
     }
-
-    fun initLock() {
-        state = state.copy(
-            lockStatus = LockScreenState.LockStatus.LockInProgress(
-                apiCall = Resource.Loading()
-            )
-        )
-
-        viewModelScope.launch {
-            val lockVaultResponse: Resource<LockApiResponse> = ownerRepository.lock()
-
-            state = state.copy(
-                lockStatus = LockScreenState.LockStatus.LockInProgress(
-                    apiCall = lockVaultResponse
-                ),
-                ownerStateResource = lockVaultResponse.map { it.ownerState },
-            )
-
-            if (lockVaultResponse is Resource.Success) {
-                onOwnerState(lockVaultResponse.data!!.ownerState)
-            }
-        }
-    }
 }

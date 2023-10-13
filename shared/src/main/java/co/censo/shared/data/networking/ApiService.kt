@@ -23,6 +23,7 @@ import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.RejectRecoveryApiResponse
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
@@ -181,6 +182,9 @@ interface ApiService {
     suspend fun unlock(
         @Body apiRequest: UnlockApiRequest
     ): RetrofitResponse<UnlockApiResponse>
+
+    @POST("/v1/unlock-prolongation")
+    suspend fun prolongUnlock(): RetrofitResponse<ProlongUnlockApiResponse>
 
     @POST("/v1/lock")
     suspend fun lock(): RetrofitResponse<LockApiResponse>
