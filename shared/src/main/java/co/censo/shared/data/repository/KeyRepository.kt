@@ -1,10 +1,13 @@
 package co.censo.shared.data.repository
 
 import Base58EncodedPrivateKey
+import ParticipantId
+import android.content.Context
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.key.KeystoreHelper
+import co.censo.shared.data.storage.CloudStorage
 import co.censo.shared.data.storage.Storage
 
 interface KeyRepository {
@@ -15,12 +18,17 @@ interface KeyRepository {
     fun createGuardianKey(): EncryptionKey
     fun encryptWithDeviceKey(data: ByteArray) : ByteArray
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
-
-    suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey)
-    suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey
+    suspend fun saveKeyInCloud(
+        key: Base58EncodedPrivateKey,
+        context: Context,
+        appName: String,
+        participantId: ParticipantId
+    )
+    suspend fun retrieveKeyFromCloud(participantId: ParticipantId): Base58EncodedPrivateKey
+    suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
 }
 
-class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
+class KeyRepositoryImpl(val storage: Storage, val cloudStorage: CloudStorage) : KeyRepository {
 
     private val keystoreHelper = KeystoreHelper()
     override fun hasKeyWithId(id: String): Boolean {
@@ -50,11 +58,28 @@ class KeyRepositoryImpl(val storage: Storage) : KeyRepository {
     override fun decryptWithDeviceKey(data: ByteArray) =
         retrieveInternalDeviceKey().decrypt(data)
 
-    override suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey) {
-        storage.savePrivateKey(key.value)
+    override suspend fun saveKeyInCloud(
+        key: Base58EncodedPrivateKey,
+        context: Context,
+        appName: String,
+        participantId: ParticipantId
+    ) {
+        //TODO: Save to sharedPrefs for now until Google Drive File Retrieval is in
+        storage.savePrivateKey(key = key.value)
+
+//        cloudStorage.uploadFile(
+//            fileContent = key.value,
+//            participantId = participantId,
+//            appName = appName
+//        )
     }
-    override suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey {
+
+    override suspend fun retrieveKeyFromCloud(participantId: ParticipantId): Base58EncodedPrivateKey {
+        //TODO: Retrieve from sharedPrefs for now until Google Drive File Retrieval is in
         return Base58EncodedPrivateKey(storage.retrievePrivateKey())
     }
 
+    override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
+        return retrieveKeyFromCloud(participantId).value.isNotEmpty()
+    }
 }

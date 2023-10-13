@@ -43,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -56,7 +55,6 @@ import co.censo.shared.R
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +146,6 @@ fun EntranceScreen(
             } catch (e: Exception) {
                 viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
             }
-
             viewModel.resetTriggerGoogleSignIn()
         }
 
@@ -196,8 +193,7 @@ fun EntranceScreen(
 
             else -> {
                 OwnerEntranceStandardUI(
-                    authenticate = { viewModel.startGoogleSignInFlow() },
-                    signOut = { viewModel.signOutFromGoogle() }
+                    authenticate = { viewModel.startGoogleSignInFlow() }
                 )
             }
         }
@@ -207,7 +203,6 @@ fun EntranceScreen(
 @Composable
 fun OwnerEntranceStandardUI(
     authenticate: () -> Unit,
-    signOut: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -317,7 +312,7 @@ fun OwnerEntranceStandardUI(
 @Composable
 fun OwnerEntranceStandardUIPreview() {
     Surface {
-        OwnerEntranceStandardUI({}, {})
+        OwnerEntranceStandardUI({})
     }
 }
 

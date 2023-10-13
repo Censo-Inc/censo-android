@@ -4,12 +4,14 @@ import Base58EncodedPrivateKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.guardian.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
@@ -70,7 +72,7 @@ class GuardianHomeViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val inviteCode = state.invitationId.value.ifEmpty { guardianRepository.retrieveInvitationId() }
-            val userSavedPrivateKey = guardianRepository.userHasKeySavedInCloud()
+            val userSavedPrivateKey = keyRepository.userHasKeySavedInCloud(participantId = ParticipantId(state.participantId))
 
             val guardianUIState = if (guardianState == null) {
                 if (guardianRepository.retrieveParticipantId().isEmpty()) {
@@ -115,7 +117,7 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    fun createGuardianKey() {
+    fun createGuardianKey(context: Context) {
         viewModelScope.launch {
             val guardianEncryptionKey = keyRepository.createGuardianKey()
             keyRepository.saveKeyInCloud(
@@ -123,7 +125,10 @@ class GuardianHomeViewModel @Inject constructor(
                     Base58.base58Encode(
                         guardianEncryptionKey.privateKeyRaw()
                     )
-                )
+                ),
+                context = context,
+                appName = context.getString(R.string.app_name),
+                participantId = ParticipantId(state.participantId)
             )
             state = state.copy(
                 guardianEncryptionKey = guardianEncryptionKey
@@ -242,7 +247,8 @@ class GuardianHomeViewModel @Inject constructor(
     }
 
     private suspend fun loadPrivateKeyFromCloud() {
-        val privateKeyFromCloud = keyRepository.retrieveKeyFromCloud()
+        val privateKeyFromCloud =
+            keyRepository.retrieveKeyFromCloud(participantId = ParticipantId(state.participantId))
 
         val privateKeyRaw = Base58.base58Decode(privateKeyFromCloud.value)
 

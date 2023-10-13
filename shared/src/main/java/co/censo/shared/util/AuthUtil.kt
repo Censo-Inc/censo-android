@@ -10,11 +10,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.drive.DriveScopes
 import kotlinx.datetime.Clock
 
 interface AuthUtil {
@@ -30,9 +32,15 @@ interface AuthUtil {
 }
 
 class GoogleAuth(private val context: Context, private val secureStorage: SecurePreferences) : AuthUtil {
+    companion object {
+        val DRIVE_FILE_SCOPE = Scope(DriveScopes.DRIVE_FILE)
+    }
+
     private fun createGoogleSignInOptions(): GoogleSignInOptions =
         GoogleSignInOptions.Builder()
             .requestIdToken(BuildConfig.GOOGLE_AUTH_SERVER_ID)
+            .requestEmail()
+            .requestScopes(DRIVE_FILE_SCOPE)
             .build()
 
 

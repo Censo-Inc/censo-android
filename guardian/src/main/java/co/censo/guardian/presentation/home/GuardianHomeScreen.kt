@@ -169,7 +169,7 @@ fun GuardianHomeScreen(
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            Button(onClick = { viewModel.createGuardianKey() }) {
+                            Button(onClick = { viewModel.createGuardianKey(context) }) {
                                 Text("Create Guardian Key")
                             }
                         } else {

@@ -16,6 +16,7 @@ import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -209,16 +210,5 @@ class EntranceViewModel @Inject constructor(
             userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
             showPushNotificationsDialog = Resource.Uninitialized
         )
-    }
-
-    fun signOutFromGoogle() {
-        viewModelScope.launch {
-            try {
-                authUtil.getGoogleSignInClient().signOut()
-            } catch (e: Exception) {
-                googleAuthFailure(GoogleAuthError.FailedToSignUserOut(e))
-            }
-            ownerRepository.signUserOut()
-        }
     }
 }

@@ -13,6 +13,8 @@ import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
+import co.censo.shared.data.storage.CloudStorage
+import co.censo.shared.data.storage.GoogleDriveStorage
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.SecurePreferencesImpl
 import co.censo.shared.data.storage.Storage
@@ -46,6 +48,12 @@ object AppModule {
     @Provides
     fun provideSecureStorage(@ApplicationContext applicationContext: Context): SecurePreferences {
         return SecurePreferencesImpl(applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCloudStorage(@ApplicationContext applicationContext: Context) : CloudStorage {
+        return GoogleDriveStorage(applicationContext)
     }
 
     @Singleton
@@ -94,20 +102,21 @@ object AppModule {
     @Singleton
     @Provides
     fun providesKeyRepository(
-        storage: Storage
+        storage: Storage,
+        cloudStorage: CloudStorage
     ): KeyRepository {
-        return KeyRepositoryImpl(storage)
+        return KeyRepositoryImpl(storage, cloudStorage)
     }
 
     @Singleton
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
-        storage: Storage
+        storage: Storage,
     ): GuardianRepository {
         return GuardianRepositoryImpl(
             storage = storage,
-            apiService = apiService
+            apiService = apiService,
         )
     }
 
