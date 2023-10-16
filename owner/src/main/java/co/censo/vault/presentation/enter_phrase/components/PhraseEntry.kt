@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.components.phrase_entry
+package co.censo.vault.presentation.enter_phrase.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,18 +8,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -29,22 +28,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cash.z.ecc.android.bip39.Mnemonics
+import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R
-import co.censo.vault.presentation.components.phrase_entry.Bip39Words.words
-import co.censo.vault.presentation.components.phrase_entry.PhraseWordUtil.START_FILTER_INDEX
+import co.censo.vault.presentation.enter_phrase.components.PhraseWordUtil.START_FILTER_INDEX
 import java.util.Locale
 
 object Bip39Words {
@@ -52,18 +51,16 @@ object Bip39Words {
 }
 
 object PhraseWordUtil {
-    const val START_FILTER_INDEX = 2
-}
-
-enum class PhraseEntryIcon {
-    CLEAR, ADDED
+    const val START_FILTER_INDEX = 1
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhraseEntryTextField(
-    phrase: TextFieldValue,
-    onPhraseUpdated: (String) -> Unit
+    phrase: String,
+    wordSelected: Boolean,
+    onPhraseUpdated: (String) -> Unit,
+    onWordSelected: (String) -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
     val displayAutocomplete = remember { mutableStateOf(true) }
@@ -72,62 +69,53 @@ fun PhraseEntryTextField(
         focusRequester.requestFocus()
     }
 
-    val endIconType = if (displayAutocomplete.value) {
-        PhraseEntryIcon.CLEAR
-    } else if (phrase.text in words) {
-        PhraseEntryIcon.ADDED
-    } else {
-        PhraseEntryIcon.CLEAR
-    }
-
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(36.dp))
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
                 .focusRequester(focusRequester),
             value = phrase,
             onValueChange = {
-                if (it.text != phrase.text) {
+                if (it != phrase) {
                     displayAutocomplete.value = true
-                    onPhraseUpdated(it.text)
+                    onPhraseUpdated(it)
                 }
             },
             singleLine = true,
             isError = false,
-            placeholder = {
-                Text(text = stringResource(R.string.enter_word), color = Color.Black)
-            },
             trailingIcon = {
                 Box {
-                    val iconClear = (endIconType == PhraseEntryIcon.CLEAR)
                     IconButton(onClick = { onPhraseUpdated("") }) {
                         Icon(
-                            imageVector = if (iconClear) Icons.Default.Cancel else Icons.Default.CheckCircle,
-                            contentDescription = if (iconClear) stringResource(R.string.clear_word_entry) else stringResource(
-                                R.string.valid_word
-                            ),
+                            painterResource(id = co.censo.shared.R.drawable.erase_text),
+                            contentDescription = stringResource(R.string.clear_word_entry),
                             tint = Color.Black
                         )
                     }
                 }
             },
+            textStyle = TextStyle(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.W500
+            ),
             enabled = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            shape = RoundedCornerShape(0.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black
+            )
         )
-        Spacer(modifier = Modifier.height(36.dp))
-        Divider(modifier = Modifier.height(1.dp))
         PhraseAutoCompleteWords(
-            phrase = phrase.text,
-            showAutoComplete = displayAutocomplete.value && phrase.text.length >= START_FILTER_INDEX
+            phrase = phrase,
+            showAutoComplete = phrase.length >= START_FILTER_INDEX,
+            wordSelected = wordSelected
         ) { wordTapped ->
-            onPhraseUpdated(wordTapped)
+            onWordSelected(wordTapped)
             focusRequester.freeFocus()
             displayAutocomplete.value = false
         }
@@ -138,16 +126,17 @@ fun PhraseEntryTextField(
 fun PhraseAutoCompleteWords(
     phrase: String,
     showAutoComplete: Boolean,
+    wordSelected: Boolean,
     onWordTap: (String) -> Unit
 ) {
+
+    val textStartPadding = 16.dp
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+        modifier = Modifier.verticalScroll(rememberScrollState()),
     ) {
-
         if (showAutoComplete) {
             val potentialWords =
                 Bip39Words.words.filter { it.startsWith(phrase.lowercase().trim()) }
@@ -155,10 +144,13 @@ fun PhraseAutoCompleteWords(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
+                modifier = Modifier.padding(start = textStartPadding),
                 textAlign = TextAlign.Start,
                 text = stringResource(R.string.of_2_048_potential_words, potentialWords.size),
-                fontSize = 18.sp
+                fontSize = 16.sp
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Divider(modifier = Modifier.height(1.dp))
 
@@ -182,17 +174,21 @@ fun PhraseAutoCompleteWords(
                         append(stringResource(R.string.is_not_a_valid_seed_phrase_word))
                     }
                 }
-                Text(text = annotatedString)
+                Text(
+                    modifier = Modifier.padding(start = textStartPadding),
+                    text = annotatedString
+                )
             } else {
                 for (word in potentialWords) {
 
                     val basicStyle = SpanStyle(
                         color = Color.Black,
-                        fontSize = 24.sp
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.W300
                     )
 
                     val potentialWordText = buildAnnotatedString {
-                        withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                        withStyle(basicStyle.copy(fontWeight = FontWeight.W500)) {
                             append(word.slice(phrase.indices))
                         }
 
@@ -204,9 +200,28 @@ fun PhraseAutoCompleteWords(
                     }
 
                     ClickableText(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = textStartPadding,
+                                top = 8.dp,
+                                bottom = 8.dp
+                            ),
                         text = potentialWordText,
                         onClick = { onWordTap(word) }
                     )
+
+                    if (wordSelected) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = textStartPadding),
+                            text = stringResource(R.string.valid_seed_phrase_word),
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.W500,
+                            color = SharedColors.SuccessGreen
+                        )
+                    }
                 }
             }
         }
@@ -218,7 +233,9 @@ fun PhraseAutoCompleteWords(
 @Composable
 fun PreviewPhraseEntry() {
     PhraseEntryTextField(
-        phrase = TextFieldValue("Ca", selection = TextRange(0, 1)),
+        phrase = "Ca",
+        onPhraseUpdated = {},
+        wordSelected = false,
     ) {
 
     }

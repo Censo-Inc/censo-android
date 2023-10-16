@@ -1,7 +1,7 @@
 package co.censo.vault.presentation.components.recovery
 
 import Base64EncodedData
-import FullScreenButton
+import StandardButton
 import ParticipantId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -86,7 +86,7 @@ fun ThisDeviceRecoveryScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        FullScreenButton(
+        StandardButton(
             modifier = Modifier.padding(horizontal = 72.dp),
             color = VaultColors.PrimaryColor,
             borderColor = Color.White,

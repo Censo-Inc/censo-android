@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.toSecurityPlan
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import kotlinx.serialization.encodeToString
@@ -206,7 +207,7 @@ fun SetupStep(
                     text = "✓ $completionText",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.Green,
+                    color = SharedColors.SuccessGreen,
                 )
             }
         }

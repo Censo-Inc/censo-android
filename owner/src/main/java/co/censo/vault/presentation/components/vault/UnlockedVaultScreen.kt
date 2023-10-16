@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.components.vault
 
-import FullScreenButton
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,7 +48,7 @@ fun UnlockedVaultScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        FullScreenButton(
+        StandardButton(
             modifier = Modifier.padding(horizontal = 24.dp),
             color = VaultColors.PrimaryColor,
             borderColor = Color.White,
@@ -66,7 +66,7 @@ fun UnlockedVaultScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        FullScreenButton(
+        StandardButton(
             modifier = Modifier.padding(horizontal = 24.dp),
             color = Color.White,
             borderColor = Color.White,

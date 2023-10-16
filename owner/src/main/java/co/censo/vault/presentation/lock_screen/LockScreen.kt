@@ -1,5 +1,8 @@
 package co.censo.vault.presentation.lock_screen
 
+import androidx.compose.foundation.layout.PaddingValues
+import co.censo.vault.presentation.VaultColors
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,10 +75,13 @@ fun LockedScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
+                    StandardButton(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        color = VaultColors.PrimaryColor,
+                        borderColor = Color.White,
+                        border = true,
+                        contentPadding = PaddingValues(vertical = 12.dp),
                         onClick = viewModel::initUnlock,
-                        colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color.Black, contentColor = Color.White),
-                        modifier = Modifier.padding(32.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.unlock),

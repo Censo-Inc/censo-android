@@ -1,3 +1,4 @@
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -5,11 +6,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -20,14 +19,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.censo.shared.R
+import co.censo.shared.presentation.SharedColors
 
 @Composable
-fun FullScreenButton(
+fun StandardButton(
     modifier: Modifier = Modifier,
-    color: Color,
+    color: Color = Color.Black,
+    disabledColor : Color = SharedColors.DisabledGrey,
     borderColor: Color = Color.Transparent,
     border: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(),
@@ -36,10 +41,12 @@ fun FullScreenButton(
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             contentColor = color,
-            containerColor = color
+            containerColor = color,
+            disabledContainerColor = disabledColor,
+            disabledContentColor = disabledColor
         ),
         contentPadding = contentPadding,
         border = if (border) BorderStroke(1.dp, borderColor) else null,
@@ -73,10 +80,57 @@ fun LearnMore(
     }
 }
 
+@Composable
+fun TitleText(
+    modifier: Modifier = Modifier,
+    @StringRes title: Int,
+    textAlign: TextAlign = TextAlign.Center
+) {
+    Text(
+        modifier = modifier,
+        text = stringResource(id = title),
+        color = Color.Black,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.W600,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SubTitleText(
+    modifier: Modifier = Modifier,
+    @StringRes subtitle: Int,
+    textAlign: TextAlign = TextAlign.Center
+) {
+    Text(
+        modifier = modifier,
+        text = stringResource(id = subtitle),
+        color = Color.Black,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.W600,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun MessageText(
+    modifier: Modifier = Modifier,
+    @StringRes message: Int,
+    textAlign: TextAlign = TextAlign.Center
+) {
+    Text(
+        modifier = modifier,
+        text = stringResource(id = message),
+        color = Color.Black,
+        fontSize = 16.sp,
+        textAlign = textAlign
+    )
+}
+
 @Preview
 @Composable
 fun ButtonPreview() {
-    FullScreenButton(color = Color.Black, onClick = { }) {
+    StandardButton(color = Color.Black, onClick = { }) {
         Text(text = "Hello", color = Color.White)
     }
 }
