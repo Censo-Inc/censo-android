@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.R as SharedR
@@ -40,12 +41,13 @@ import co.censo.vault.presentation.enter_phrase.components.indexToWordText
 import co.censo.vault.presentation.enter_phrase.components.EditPhraseWordUI
 import co.censo.vault.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWordUI
-import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EnterPhraseScreen(
     masterPublicKey: Base58EncodedMasterPublicKey,
+    welcomeFlow: Boolean,
     navController: NavController,
     viewModel: EnterPhraseViewModel = hiltViewModel()
 ) {
@@ -66,13 +68,20 @@ fun EnterPhraseScreen(
         else Icons.Filled.Clear to R.string.exit
 
     DisposableEffect(key1 = state) {
-        viewModel.onStart(masterPublicKey)
+        viewModel.onStart(
+            welcomeFlow = welcomeFlow,
+            masterPublicKey = masterPublicKey
+        )
         onDispose {}
     }
 
     LaunchedEffect(key1 = state) {
         if (state.phraseEntryComplete is Resource.Success) {
-            navController.navigate(Screen.VaultScreen.route)
+            if (state.welcomeFlow) {
+                //todo: send user back within welcome flow...
+            } else {
+                navController.navigate(SharedScreen.OwnerVaultScreen.route)
+            }
             viewModel.resetPhraseEntryComplete()
         }
     }
@@ -139,6 +148,7 @@ fun EnterPhraseScreen(
                     when (state.enterWordUIState) {
                         EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
                             SelectSeedPhraseEntryType(
+                                welcomeFlow = state.welcomeFlow,
                                 onManualEntrySelected = { viewModel.entrySelected(EntryType.MANUAL) },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) }
                             )

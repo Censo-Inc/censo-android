@@ -177,7 +177,13 @@ fun EntranceScreen(
             }
 
             state.apiCallErrorOccurred -> {
-                if (state.signInUserResource is Resource.Error) {
+                if (state.ownerStateResource is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.ownerStateResource.getErrorMessage(context),
+                        dismissAction = null,
+                        retryAction = viewModel::retrieveOwnerState
+                    )
+                } else if (state.signInUserResource is Resource.Error) {
                     DisplayError(
                         errorMessage = state.signInUserResource.getErrorMessage(context),
                         dismissAction = viewModel::resetSignInUserResource,

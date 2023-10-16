@@ -23,8 +23,15 @@ class EnterPhraseViewModel @Inject constructor(
     var state by mutableStateOf(EnterPhraseState())
         private set
 
-    fun onStart(masterPublicKey: Base58EncodedMasterPublicKey) {
-        state = state.copy(masterPublicKey = masterPublicKey)
+    fun onStart(
+        welcomeFlow: Boolean,
+        masterPublicKey: Base58EncodedMasterPublicKey
+    ) {
+        state =
+            state.copy(
+                welcomeFlow = welcomeFlow,
+                masterPublicKey = masterPublicKey
+            )
     }
 
     fun updateEditedWord(updatedWord: String) {

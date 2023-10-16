@@ -1,4 +1,6 @@
-package co.censo.vault.presentation.home
+package co.censo.vault.presentation
+
+import Base58EncodedMasterPublicKey
 
 sealed class Screen(val route: String) {
     object BIP39DetailRoute : Screen("bip_39_detail_screen") {
@@ -21,6 +23,14 @@ sealed class Screen(val route: String) {
 
     object EnterPhraseRoute : Screen("enter_phrase_screen") {
         const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"
+        const val WELCOME_FLOW_ARG = "welcome_flow_key"
+
+        fun buildNavRoute(
+            masterPublicKey: Base58EncodedMasterPublicKey,
+            welcomeFlow: Boolean
+        ): String {
+            return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}"
+        }
     }
 
     companion object {

@@ -27,9 +27,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.vault.R
+import kotlin.random.Random
 
 @Composable
 fun SelectSeedPhraseEntryType(
+    welcomeFlow: Boolean,
     onManualEntrySelected: () -> Unit,
     onPasteEntrySelected: () -> Unit
 ) {
@@ -44,13 +46,15 @@ fun SelectSeedPhraseEntryType(
         verticalArrangement = Arrangement.Bottom
     ) {
 
-        SubTitleText(
-            modifier = Modifier.fillMaxWidth(),
-            subtitle = R.string.step_2,
-            textAlign = TextAlign.Start
-        )
+        if (welcomeFlow) {
+            SubTitleText(
+                modifier = Modifier.fillMaxWidth(),
+                subtitle = R.string.step_2,
+                textAlign = TextAlign.Start
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
@@ -127,6 +131,7 @@ fun SelectSeedPhraseEntryType(
 fun PreviewEnterPhraseMainScreen() {
     SelectSeedPhraseEntryType(
         onManualEntrySelected = {},
-        onPasteEntrySelected = {}
+        onPasteEntrySelected = {},
+        welcomeFlow = false
     )
 }

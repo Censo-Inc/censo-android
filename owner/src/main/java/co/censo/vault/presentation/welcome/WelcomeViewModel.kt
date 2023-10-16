@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.home
+package co.censo.vault.presentation.welcome
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,20 +12,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class WelcomeViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(HomeState())
+    var state by mutableStateOf(WelcomeState())
         private set
 
     fun onStart() {
-        val userEditingPlan = ownerRepository.isUserEditingSecurityPlan()
-
-        state = state.copy(
-            userEditingPlan = userEditingPlan
-        )
-
         retrieveOwnerState()
     }
 
@@ -37,10 +31,5 @@ class HomeViewModel @Inject constructor(
                 ownerStateResource = ownerStateResource,
             )
         }
-    }
-
-
-    fun resetOwnerState() {
-        state = state.copy(ownerStateResource = Resource.Uninitialized)
     }
 }

@@ -4,6 +4,8 @@ fun SharedScreen.buildScreenDeepLinkUri() = "${SharedScreen.GUARDIAN_ONBOARDING_
 sealed class SharedScreen(val route: String) {
     object HomeRoute : SharedScreen("home_screen")
     object EntranceRoute : SharedScreen("entrance_screen")
+    object OwnerVaultScreen : SharedScreen("owner_vault_screen")
+    object OwnerWelcomeScreen : SharedScreen("owner_welcome_screen")
 
     companion object {
         const val GUARDIAN_ONBOARDING_URI = "censo-guardian://invite/"

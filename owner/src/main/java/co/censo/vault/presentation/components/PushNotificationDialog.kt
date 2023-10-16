@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.home
+package co.censo.vault.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

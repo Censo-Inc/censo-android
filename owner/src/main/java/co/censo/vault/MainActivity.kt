@@ -31,8 +31,8 @@ import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
-import co.censo.vault.presentation.home.HomeScreen
-import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.welcome.WelcomeScreen
+import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.vault.presentation.lock_screen.LockScreenViewModel
 import co.censo.vault.presentation.lock_screen.LockedScreen
@@ -102,17 +102,17 @@ class MainActivity : FragmentActivity() {
                     guardianEntrance = false
                 )
             }
-            composable(route = SharedScreen.HomeRoute.route) {
-                HomeScreen(navController = navController)
+            composable(route = SharedScreen.OwnerWelcomeScreen.route) {
+                WelcomeScreen(navController = navController)
             }
-            composable(route = Screen.VaultScreen.route) {
+            composable(route = SharedScreen.OwnerVaultScreen.route) {
                 VaultScreen(navController = navController)
             }
             composable(route = Screen.RecoveryScreen.route) {
                 RecoveryScreen(navController = navController)
             }
             composable(
-                route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}"
+                route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}/{${Screen.EnterPhraseRoute.WELCOME_FLOW_ARG}}"
             ) { backStackEntry ->
                 EnterPhraseScreen(
                     navController = navController,
@@ -120,7 +120,10 @@ class MainActivity : FragmentActivity() {
                         backStackEntry.arguments?.getString(
                             Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
                         )!!
-                    )
+                    ),
+                    welcomeFlow = backStackEntry.arguments?.getBoolean(
+                        Screen.EnterPhraseRoute.WELCOME_FLOW_ARG
+                    ) ?: false
                 )
             }
             composable(
