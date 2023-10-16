@@ -40,7 +40,7 @@ class LockScreenViewModel @Inject constructor(
         }
     }
 
-    fun retrieveOwnerState() {
+    private fun retrieveOwnerState() {
         state = state.copy(ownerStateResource = Resource.Loading())
 
         viewModelScope.launch {
@@ -55,7 +55,14 @@ class LockScreenViewModel @Inject constructor(
     }
 
     fun resetToLocked() {
-        state = state.copy(lockStatus = LockScreenState.LockStatus.Locked)
+        state = state.copy(
+            lockStatus = LockScreenState.LockStatus.Locked
+        )
+    }
+
+    fun onUnlockExpired() {
+        resetToLocked()
+        retrieveOwnerState()
     }
 
     private fun onOwnerState(ownerState: OwnerState) {

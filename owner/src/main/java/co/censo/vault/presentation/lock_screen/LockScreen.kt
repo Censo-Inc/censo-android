@@ -92,7 +92,7 @@ fun LockedScreen(
             is LockScreenState.LockStatus.Unlocked -> {
                 ProlongUnlockPrompt(
                     lockStatus.locksAt,
-                    onTimeOut = viewModel::retrieveOwnerState
+                    onTimeOut = viewModel::onUnlockExpired
                 )
             }
 
