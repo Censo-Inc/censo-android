@@ -149,7 +149,7 @@ fun VaultScreen(
                                     val publicKey = ownerState.vault.publicMasterEncryptionKey.value
 
                                     AddBip39PhraseUI {
-                                        navController.navigate("${Screen.AddBIP39Route.route}/$publicKey")
+                                        navController.navigate("${Screen.EnterPhraseRoute.route}/$publicKey")
                                     }
                                 }
 

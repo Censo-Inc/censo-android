@@ -148,7 +148,8 @@ class EnterPhraseViewModel @Inject constructor(
             )
 
             state = state.copy(
-                submitResource = response.map { }
+                submitResource = response.map { },
+                phraseEntryComplete = Resource.Success(Unit)
             )
         }
         projectLog(message = "Save this seed phrase and send user back to start...")
@@ -175,6 +176,13 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
+    fun setViewPhrase() {
+        state = state.copy(
+            editedWordIndex = 0,
+            enterWordUIState = EnterPhraseUIState.VIEW
+        )
+    }
+
     fun onBackClicked() {
         when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> {}
@@ -184,7 +192,10 @@ class EnterPhraseViewModel @Inject constructor(
             EnterPhraseUIState.REVIEW -> {}
             EnterPhraseUIState.NICKNAME -> {}
         }
+    }
 
+    fun resetPhraseEntryComplete() {
+        state = state.copy(phraseEntryComplete = Resource.Uninitialized)
     }
 
 }

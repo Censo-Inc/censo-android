@@ -29,7 +29,6 @@ import co.censo.shared.data.storage.Storage
 import co.censo.shared.presentation.entrance.EntranceScreen
 import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
-import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.home.HomeScreen
@@ -120,18 +119,6 @@ class MainActivity : FragmentActivity() {
                     masterPublicKey = Base58EncodedMasterPublicKey(
                         backStackEntry.arguments?.getString(
                             Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
-                        )!!
-                    )
-                )
-            }
-            composable(
-                route = "${Screen.AddBIP39Route.route}/{${Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG}}"
-            ) { backStackEntry ->
-                AddBIP39Screen(
-                    navController = navController,
-                    masterPublicKey = Base58EncodedMasterPublicKey(
-                        backStackEntry.arguments?.getString(
-                            Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG
                         )!!
                     )
                 )

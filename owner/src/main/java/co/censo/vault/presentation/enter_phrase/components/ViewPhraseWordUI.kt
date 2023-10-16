@@ -4,10 +4,12 @@ import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,7 +31,7 @@ import co.censo.shared.R
 import co.censo.shared.presentation.SharedColors
 
 @Composable
-fun ViewPhraseWordUI(
+fun BoxScope.ViewPhraseWordUI(
     editedWordIndex: Int,
     phraseWord: String,
     editExistingWord: () -> Unit,
@@ -39,100 +41,105 @@ fun ViewPhraseWordUI(
     submitFullPhrase: () -> Unit
 ) {
 
-    Box() {
-        Box(modifier = Modifier.align(Alignment.Center)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(modifier = Modifier
+    Box(modifier = Modifier.align(Alignment.Center)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(
+                modifier = Modifier
                     .weight(0.15f)
                     .padding(start = 8.dp),
-                    onClick = decrementEditIndex
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_left),
-                        contentDescription = stringResource(id = co.censo.vault.R.string.move_one_word_back),
-                        tint = Color.Black
-                    )
-                }
-                ViewPhraseWord(
-                    modifier = Modifier.weight(0.7f),
-                    index = editedWordIndex,
-                    phraseWord = phraseWord,
-                    editWord = editExistingWord
+                onClick = decrementEditIndex
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_left),
+                    contentDescription = stringResource(id = co.censo.vault.R.string.move_one_word_back),
+                    tint = Color.Black
                 )
-                IconButton(modifier = Modifier
+            }
+            ViewPhraseWord(
+                modifier = Modifier.weight(0.7f),
+                index = editedWordIndex,
+                phraseWord = phraseWord,
+                editWord = editExistingWord
+            )
+            IconButton(
+                modifier = Modifier
                     .weight(0.15f)
                     .padding(end = 8.dp),
-                    onClick = incrementEditIndex
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_right),
-                        contentDescription = stringResource(id = co.censo.vault.R.string.move_one_word_back),
-                        tint = Color.Black
-                    )
-                }
+                onClick = incrementEditIndex
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_right),
+                    contentDescription = stringResource(id = co.censo.vault.R.string.move_one_word_back),
+                    tint = Color.Black
+                )
             }
-        }
-
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            Divider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(color = SharedColors.DividerGray)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row {
-                Spacer(modifier = Modifier.width(12.dp))
-                StandardButton(modifier = Modifier.weight(0.65f),
-                    color = Color.Black,
-                    contentPadding = PaddingValues(
-                        horizontal = 24.dp, vertical = 16.dp
-                    ),
-                    onClick = enterNextWord
-                ) {
-                    Text(
-                        fontSize = 20.sp,
-                        text = stringResource(co.censo.vault.R.string.enter_next_word),
-                        color = Color.White
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                StandardButton(modifier = Modifier.weight(0.35f),
-                    color = Color.Black,
-                    contentPadding = PaddingValues(
-                        horizontal = 24.dp, vertical = 16.dp
-                    ),
-                    onClick = submitFullPhrase
-                ) {
-                    Text(
-                        fontSize = 20.sp,
-                        text = stringResource(co.censo.vault.R.string.finish),
-                        color = Color.White
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
         }
     }
+
+    Column(
+        modifier = Modifier.align(Alignment.BottomCenter)
+    ) {
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(color = SharedColors.DividerGray)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row {
+            Spacer(modifier = Modifier.width(12.dp))
+            StandardButton(
+                modifier = Modifier.weight(0.65f),
+                color = Color.Black,
+                contentPadding = PaddingValues(
+                    horizontal = 24.dp, vertical = 16.dp
+                ),
+                onClick = enterNextWord
+            ) {
+                Text(
+                    fontSize = 20.sp,
+                    text = stringResource(co.censo.vault.R.string.enter_next_word),
+                    color = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            StandardButton(
+                modifier = Modifier.weight(0.35f),
+                color = Color.Black,
+                contentPadding = PaddingValues(
+                    horizontal = 24.dp, vertical = 16.dp
+                ),
+                onClick = submitFullPhrase
+            ) {
+                Text(
+                    fontSize = 20.sp,
+                    text = stringResource(co.censo.vault.R.string.finish),
+                    color = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+
 }
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewViewPhraseWordUI() {
-    ViewPhraseWordUI(
-        editedWordIndex = 5,
-        phraseWord = "lounge",
-        editExistingWord = { },
-        decrementEditIndex = { },
-        incrementEditIndex = { },
-        enterNextWord = { }) {
-        
+    Box(modifier = Modifier.fillMaxSize()) {
+        ViewPhraseWordUI(
+            editedWordIndex = 5,
+            phraseWord = "lounge",
+            editExistingWord = { },
+            decrementEditIndex = { },
+            incrementEditIndex = { },
+            enterNextWord = { }) {
+
+        }
     }
 }

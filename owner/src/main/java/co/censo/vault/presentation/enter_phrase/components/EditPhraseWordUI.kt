@@ -4,9 +4,11 @@ import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Divider
@@ -24,50 +26,48 @@ import co.censo.vault.R
 import co.censo.vault.presentation.enter_phrase.EnterPhraseUIState
 
 @Composable
-fun EditPhraseWordUI(
+fun BoxScope.EditPhraseWordUI(
     phraseWord: String,
     enterWordUIState: EnterPhraseUIState,
     updateEditedWord: (String) -> Unit,
     onWordSelected: (String) -> Unit,
     wordSubmitted: () -> Unit
 ) {
-    Box {
-        PhraseEntryTextField(
-            phrase = phraseWord,
-            onPhraseUpdated = updateEditedWord,
-            onWordSelected = onWordSelected,
-            wordSelected = enterWordUIState == EnterPhraseUIState.SELECTED
-        )
+    PhraseEntryTextField(
+        phrase = phraseWord,
+        onPhraseUpdated = updateEditedWord,
+        onWordSelected = onWordSelected,
+        wordSelected = enterWordUIState == EnterPhraseUIState.SELECTED
+    )
 
-        if (enterWordUIState == EnterPhraseUIState.SELECTED) {
+    if (enterWordUIState == EnterPhraseUIState.SELECTED) {
 
-            Column(
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .background(color = Color.White),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Divider(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .background(color = Color.White),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = SharedColors.DividerGray)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            StandardButton(
+                color = Color.Black, contentPadding = PaddingValues(
+                    horizontal = 32.dp, vertical = 16.dp
+                ), onClick = wordSubmitted
             ) {
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(color = SharedColors.DividerGray)
+                Text(
+                    fontSize = 20.sp,
+                    text = stringResource(R.string.submit_word),
+                    color = Color.White
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                StandardButton(
-                    color = Color.Black, contentPadding = PaddingValues(
-                        horizontal = 32.dp, vertical = 16.dp
-                    ), onClick = wordSubmitted
-                ) {
-                    Text(
-                        fontSize = 20.sp,
-                        text = stringResource(R.string.submit_word),
-                        color = Color.White
-                    )
-                }
-                Spacer(modifier = Modifier.height(24.dp))
             }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -76,25 +76,30 @@ fun EditPhraseWordUI(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ViewPhraseWordPreview() {
-    EditPhraseWordUI(
-        phraseWord = "ban",
-        enterWordUIState = EnterPhraseUIState.EDIT,
-        updateEditedWord = {},
-        onWordSelected ={}
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        EditPhraseWordUI(
+            phraseWord = "ban",
+            enterWordUIState = EnterPhraseUIState.EDIT,
+            updateEditedWord = {},
+            onWordSelected = {}
+        ) {
 
+        }
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SelectedPhraseWordPreview() {
-    EditPhraseWordUI(
-        phraseWord = "banana",
-        enterWordUIState = EnterPhraseUIState.SELECTED,
-        updateEditedWord = {},
-        onWordSelected ={}
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
+        EditPhraseWordUI(
+            phraseWord = "banana",
+            enterWordUIState = EnterPhraseUIState.SELECTED,
+            updateEditedWord = {},
+            onWordSelected = {}
+        ) {
+
+        }
     }
 }

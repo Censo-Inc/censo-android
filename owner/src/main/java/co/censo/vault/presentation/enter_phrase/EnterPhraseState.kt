@@ -12,6 +12,7 @@ data class EnterPhraseState(
     val validPhrase: Boolean = false,
     val nickName: String = "",
     val submitResource: Resource<Unit> = Resource.Uninitialized,
+    val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized
     ) {
 
     val validName = nickName.isNotEmpty()
@@ -24,6 +25,9 @@ data class EnterPhraseState(
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.REVIEW -> BackIconType.CLOSE
     }
+
+    val error = submitResource is Resource.Error
+    val loading = submitResource is Resource.Loading
 }
 
 enum class EnterPhraseUIState {
