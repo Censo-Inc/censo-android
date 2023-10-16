@@ -499,8 +499,12 @@ class OwnerRepositoryImpl(
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
             val encryptionKey = when (it.isOwnerShard) {
                 true -> {
-                    val ownerApproverKey = keyRepository.retrieveKeyFromCloud(it.participantId)
-                    EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKey.bigInt())
+                    val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(it.participantId)
+                    if (ownerApproverKeyResource is Resource.Error) {
+                        throw ownerApproverKeyResource.exception!!
+                    } else {
+                        EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKeyResource.data!!.bigInt())
+                    }
                 }
                 else -> ownerDeviceKey
             }

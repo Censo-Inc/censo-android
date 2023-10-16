@@ -20,6 +20,7 @@ import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
+import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -137,6 +138,11 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
+    fun handleCloudStorageAccessGranted() {
+        signInUser(state.forceUserToGrantCloudStorageAccess.jwt)
+        resetForceUserToGrantCloudStorageAccess()
+    }
+
     fun startGoogleSignInFlow() {
         state = state.copy(triggerGoogleSignIn = Resource.Success(Unit))
     }
@@ -144,7 +150,18 @@ class EntranceViewModel @Inject constructor(
     fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         authUtil.getAccountFromSignInTask(
             completedTask,
-            onSuccess = { account -> signInUser(account.idToken) },
+            onSuccess = { account ->
+                if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
+                    state = state.copy(
+                        forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(
+                            requestAccess = true,
+                            jwt = account.idToken
+                        )
+                    )
+                } else {
+                    signInUser(account.idToken)
+                }
+            },
             onException = { exception ->
                 googleAuthFailure(
                     GoogleAuthError.ErrorParsingIntent(
@@ -155,7 +172,7 @@ class EntranceViewModel @Inject constructor(
     }
 
 
-    private fun signInUser(jwt: String?) {
+    fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             if (jwt.isNullOrEmpty()) {
                 googleAuthFailure(GoogleAuthError.MissingCredentialId)
@@ -254,6 +271,10 @@ class EntranceViewModel @Inject constructor(
 
     fun resetSignInUserResource() {
         state = state.copy(signInUserResource = Resource.Uninitialized)
+    }
+
+    private fun resetForceUserToGrantCloudStorageAccess() {
+        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
     }
 
     fun finishPushNotificationDialog() {

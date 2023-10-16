@@ -20,4 +20,6 @@
     <string name="privacy">Privacy</string>
     <string name="why_google">Why Google?</string>
     <string name="sensible_crypto_security">sensible crypto security</string>
+    <string name="google_drive_access_required">Google Drive access is required to be able to backup your key. This app cannot backup your key if Google Drive access is not granted</string>
+    <string name="grant_permission">Grant Permission</string>
 </resources>

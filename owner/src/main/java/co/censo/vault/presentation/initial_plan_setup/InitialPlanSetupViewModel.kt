@@ -1,13 +1,13 @@
 package co.censo.vault.presentation.initial_plan_setup
 
 import Base58EncodedGuardianPublicKey
-import Base58EncodedPrivateKey
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
@@ -16,8 +16,9 @@ import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -59,31 +60,43 @@ class InitialPlanSetupViewModel @Inject constructor(
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(saveKeyToCloudResource = Resource.Loading())
             try {
                 val approverEncryptionKey = keyRepository.createGuardianKey()
-                keyRepository.saveKeyInCloud(
-                    key = Base58EncodedPrivateKey(
-                        Base58.base58Encode(
-                            approverEncryptionKey.privateKeyRaw()
-                        )
-                    ),
-                    participantId = state.participantId
-                )
-                state = state.copy(
-                    initialPlanData = state.initialPlanData.copy(
-                        approverEncryptionKey = approverEncryptionKey
-                    ),
-                    saveKeyToCloudResource = Resource.Uninitialized,
-                )
-                determineUIStatus()
+                savePrivateKeyToCloud(approverEncryptionKey)
             } catch (e: Exception) {
                 state = state.copy(
                     saveKeyToCloudResource = Resource.Error(exception = e)
                 )
             }
         }
+    }
+
+    private fun savePrivateKeyToCloud(approverEncryptionKey: EncryptionKey) {
+        state = state.copy(
+            initialPlanData = state.initialPlanData.copy(approverEncryptionKey = approverEncryptionKey),
+            triggerCloudStorageAction = Resource.Success(CloudStorageActions.UPLOAD)
+        )
+    }
+
+    fun onKeySaved(approverEncryptionKey: EncryptionKey) {
+        state = state.copy(
+            initialPlanData = state.initialPlanData.copy(
+                approverEncryptionKey = approverEncryptionKey
+            ),
+            saveKeyToCloudResource = Resource.Uninitialized,
+            triggerCloudStorageAction = Resource.Uninitialized
+        )
+        determineUIStatus()
+    }
+
+    fun onKeySaveFailed(exception: Exception?) {
+        state = state.copy(
+            triggerCloudStorageAction = Resource.Uninitialized,
+            saveKeyToCloudResource = Resource.Error(exception = exception),
+            initialPlanData = state.initialPlanData.copy(approverEncryptionKey = null),
+        )
     }
 
     private fun createPolicyParams() {

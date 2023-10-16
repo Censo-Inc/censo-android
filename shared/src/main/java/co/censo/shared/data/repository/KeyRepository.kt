@@ -2,6 +2,7 @@ package co.censo.shared.data.repository
 
 import Base58EncodedPrivateKey
 import ParticipantId
+import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.key.EncryptionKey
@@ -14,6 +15,7 @@ import co.censo.shared.data.storage.CloudStorage
 import io.github.novacrypto.base58.Base58
 import org.bouncycastle.util.encoders.Hex
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
@@ -26,11 +28,15 @@ interface KeyRepository {
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
     suspend fun saveKeyInCloud(
         key: Base58EncodedPrivateKey,
-        participantId: ParticipantId
-    )
-    suspend fun retrieveKeyFromCloud(participantId: ParticipantId): Base58EncodedPrivateKey
+        participantId: ParticipantId,
+        bypassScopeCheck: Boolean = false
+    ) : Resource<Unit>
+    suspend fun retrieveKeyFromCloud(
+        participantId: ParticipantId,
+        bypassScopeCheck: Boolean = false
+    ): Resource<Base58EncodedPrivateKey?>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
-
+    suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
     suspend fun deleteDeviceKeyIfPresent(keyId: String)
 }
 
@@ -68,32 +74,82 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override fun decryptWithDeviceKey(data: ByteArray) =
         retrieveInternalDeviceKey().decrypt(data)
 
+    /**
+     * Can throw a CLOUD_STORAGE_PERMISSION_NOT_GRANTED_EXCEPTION,
+     * the caller should wrap this method in a try catch
+     */
     override suspend fun saveKeyInCloud(
         key: Base58EncodedPrivateKey,
-        participantId: ParticipantId
-    ) {
+        participantId: ParticipantId,
+        bypassScopeCheck: Boolean
+    ) : Resource<Unit> {
+        if (!bypassScopeCheck) {
+            if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
+                throw CloudStoragePermissionNotGrantedException()
+            }
+        }
+
         val encryptedKey = SymmetricEncryption().encrypt(
             retrieveSavedDeviceId().sha256digest(),
             key.bigInt().toByteArrayNoSign()
         )
-        //TODO: Save to sharedPrefs for now until Google Drive File Retrieval is in
-        storage.savePrivateKey(key = encryptedKey.toHexString())
 
-//        cloudStorage.uploadFile(
-//            fileContent = key.value,
-//            participantId = participantId,
-//        )
+        return try {
+            cloudStorage.uploadFile(
+                fileContent = encryptedKey.toHexString(),
+                participantId = participantId,
+            )
+        } catch (e: Exception) {
+            //TODO: Log with raygun
+            Resource.Error(exception = e)
+        }
     }
 
-    override suspend fun retrieveKeyFromCloud(participantId: ParticipantId): Base58EncodedPrivateKey {
-        //TODO: Retrieve from sharedPrefs for now until Google Drive File Retrieval is in
-        val encryptedKey = Hex.decode(storage.retrievePrivateKey())
-        val decryptedKey = SymmetricEncryption().decrypt(retrieveSavedDeviceId().sha256digest(), encryptedKey)
-        return Base58EncodedPrivateKey(Base58.base58Encode(decryptedKey))
+    /**
+     * Can throw a CLOUD_STORAGE_PERMISSION_NOT_GRANTED_EXCEPTION,
+     * the caller should wrap this method in a try catch
+     */
+    override suspend fun retrieveKeyFromCloud(
+        participantId: ParticipantId,
+        bypassScopeCheck: Boolean
+    ): Resource<Base58EncodedPrivateKey?> {
+        if (!bypassScopeCheck) {
+            if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
+                throw CloudStoragePermissionNotGrantedException()
+            }
+        }
+
+        return try {
+            val resource = cloudStorage.retrieveFileContents(participantId)
+
+            if (resource is Resource.Success) {
+                val encryptedKey = Hex.decode(resource.data)
+                val decryptedKey = SymmetricEncryption().decrypt(retrieveSavedDeviceId().sha256digest(), encryptedKey)
+                return Resource.Success(Base58EncodedPrivateKey(Base58.base58Encode(decryptedKey)))
+            } else {
+                return Resource.Error(exception = resource.exception)
+            }
+        } catch (e: Exception) {
+            //TODO: Log with raygun
+            Resource.Error(exception = e)
+        }
     }
 
+    /**
+     * Bypass scope check by default,
+     * if the user has not granted permission for GDrive access, there is no key to check for
+     */
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
-        return retrieveKeyFromCloud(participantId).value.isNotEmpty()
+        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
+        return if (downloadResource is Resource.Success) {
+            downloadResource.data?.value?.isNotEmpty() ?: false
+        } else {
+            false
+        }
+    }
+
+    override suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit> {
+        return cloudStorage.deleteFile(participantId)
     }
 
     override suspend fun deleteDeviceKeyIfPresent(keyId: String) {

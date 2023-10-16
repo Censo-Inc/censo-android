@@ -160,7 +160,6 @@ dependencies {
 
     //GoogleDrive
     implementation("com.google.android.gms:play-services-drive:17.0.0")
-    implementation("com.google.api-client:google-api-client-android:2.0.0")
     implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
         exclude("org.apache.httpcomponents")
         exclude(module = "guava-jdk5")

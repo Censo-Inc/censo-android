@@ -1,8 +1,10 @@
 package co.censo.shared.data.storage
 
+import Base58EncodedPrivateKey
 import ParticipantId
 import android.content.Context
 import co.censo.shared.data.Resource
+import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -13,6 +15,9 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -20,14 +25,16 @@ import java.util.Collections
 
 interface CloudStorage {
     suspend fun uploadFile(fileContent: String, participantId: ParticipantId) : Resource<Unit>
-    suspend fun retrieveFile()
+    suspend fun retrieveFileContents(participantId: ParticipantId) : Resource<String?>
+    suspend fun checkUserGrantedCloudStoragePermission() : Boolean
+    suspend fun deleteFile(participantId: ParticipantId) : Resource<Unit>
 }
 
 class GoogleDriveStorage(private val context: Context) : CloudStorage {
     companion object {
         const val FILE_NAME = "DO-NOT-DELETE_Censo-approver-key"
         const val FILE_EXTENSION = ".txt"
-        const val FILE_TYPE = "text/plain"
+        const val FILE_MIME_TYPE = "text/plain"
         const val ID_FIELD = "id"
 
         const val APP_NAME = "Censo"
@@ -63,7 +70,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     val fileMetaData = com.google.api.services.drive.model.File()
                     fileMetaData.name = fileName
 
-                    val mediaContent = FileContent(FILE_TYPE, localFile)
+                    val mediaContent = FileContent(FILE_MIME_TYPE, localFile)
 
                     val uploadedFile = driveService.files().create(fileMetaData, mediaContent)
                         .setFields(ID_FIELD)
@@ -92,8 +99,105 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
         }
     }
 
-    override suspend fun retrieveFile() {
-        TODO("Not yet implemented")
+    override suspend fun retrieveFileContents(participantId: ParticipantId) : Resource<String?> {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        if (account != null) {
+            val driveService = getDriveService(account, context)
+                ?: return Resource.Error(exception = Exception("Drive service was null"))
+
+            //Assemble FileName and query params
+            val fileName = "${FILE_NAME}_${participantId.value}${FILE_EXTENSION}"
+            val queryForFileWithMatchingNameAndNotTrashed = "name='$fileName' and trashed=false"
+
+            val file = try {
+                //Get the list of files
+                val fileList = driveService.files().list()
+                    .setQ(queryForFileWithMatchingNameAndNotTrashed)
+                    .execute()
+
+                //Assign the matching file
+                fileList.files.first {
+                    it.name == fileName
+                }
+            } catch (e: NoSuchElementException) {
+                return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
+            } catch (e: Exception) {
+                return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
+            }
+
+            try {
+                val outputStream = ByteArrayOutputStream()
+
+                driveService.files().get(file.id)
+                    .executeMediaAndDownloadTo(outputStream)
+
+                val fileContents = outputStream.toString()
+
+                withContext(Dispatchers.IO) {
+                    outputStream.close()
+                }
+
+                return if (fileContents.isNotEmpty()) {
+                    projectLog(message = "Successfully exported file content to outputStream, file content: $fileContents")
+                    Resource.Success(fileContents)
+                } else {
+                    Resource.Error(exception = Exception("File existed and contents were downloaded, however the contents were empty"))
+                }
+            } catch (e: GoogleJsonResponseException) {
+                return Resource.Error(exception = e)
+            } catch (e: Exception) {
+                return Resource.Error(exception = e)
+            }
+        } else {
+            return Resource.Error(exception = Exception("Users account was null"))
+        }
+    }
+
+    override suspend fun checkUserGrantedCloudStoragePermission(): Boolean {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        return account?.grantedScopes?.contains(GoogleAuth.DRIVE_FILE_SCOPE) ?: false
+    }
+
+    override suspend fun deleteFile(participantId: ParticipantId): Resource<Unit> {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        return if (account != null) {
+            val driveService = getDriveService(account, context)
+            if (driveService == null) {
+                projectLog(message = "Drive service was null")
+                return Resource.Error()
+            }
+
+            //Assemble FileName and query params
+            val fileName = "${FILE_NAME}_${participantId.value}${FILE_EXTENSION}"
+            val queryForFileWithMatchingNameAndNotTrashed = "name='$fileName' and trashed=false"
+
+            val file = try {
+                //Get the list of files
+                val fileList = driveService.files().list()
+                    .setQ(queryForFileWithMatchingNameAndNotTrashed)
+                    .execute()
+
+                //Assign the matching file
+                fileList.files.first {
+                    it.name == fileName
+                }
+            } catch (e: NoSuchElementException) {
+                return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
+            } catch (e: Exception) {
+                return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
+            }
+
+            try {
+                //Will permanently delete the users file
+                driveService.files().delete(file.id).execute()
+                return Resource.Success(Unit)
+            } catch (e: Exception) {
+                return Resource.Error(exception = e)
+            }
+        }
+        else {
+            Resource.Error(exception = Exception("Users account was null"))
+        }
     }
 
     private fun getDriveService(
@@ -118,5 +222,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
             null
         }
     }
-
 }
+
+class CloudStoragePermissionNotGrantedException(override val message: String = "User did not grant cloud storage permissions") :
+    Exception()

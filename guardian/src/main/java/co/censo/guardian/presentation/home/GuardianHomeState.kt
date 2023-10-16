@@ -8,10 +8,12 @@ import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.RejectRecoveryApiResponse
 import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -40,7 +42,14 @@ data class GuardianHomeState(
 
     // UI state
     val guardianUIState: GuardianUIState = GuardianUIState.MISSING_INVITE_CODE,
-    val showTopBarCancelConfirmationDialog: Boolean = false
+    val showTopBarCancelConfirmationDialog: Boolean = false,
+
+    //Cloud Storage
+    val retrievePrivateKeyFailed: Resource<Unit> = Resource.Uninitialized,
+    val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
+    val triggerCloudStorageAction: Resource<CloudStorageActions> = Resource.Uninitialized,
+    val actionToResumeAfterLoadingKey: GuardianHomeActions = GuardianHomeActions.NONE,
+    val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null
 ) {
 
     val loading = userResponse is Resource.Loading
@@ -56,6 +65,7 @@ data class GuardianHomeState(
             || storeRecoveryTotpSecretResource is Resource.Error
             || approveRecoveryResource is Resource.Error
             || rejectRecoveryResource is Resource.Error
+            || saveKeyToCloudResource is Resource.Error
 
     data class RecoveryTotpState(
         val code: String,
@@ -81,5 +91,9 @@ enum class GuardianUIState {
     ACCESS_REQUESTED,
     ACCESS_WAITING_FOR_TOTP_FROM_OWNER,
     ACCESS_VERIFYING_TOTP_FROM_OWNER,
-    ACCESS_APPROVED
+    ACCESS_APPROVED,
+}
+
+enum class GuardianHomeActions {
+    NONE, CONFIRM_OR_REJECT_OWNER, SUBMIT_VERIFICATION_CODE
 }

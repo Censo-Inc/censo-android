@@ -6,6 +6,7 @@ import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.repository.CreatePolicyParams
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 
 data class InitialPlanSetupScreenState(
     val initialPlanSetupStep: InitialPlanSetupStep = InitialPlanSetupStep.Initial,
@@ -14,7 +15,8 @@ data class InitialPlanSetupScreenState(
     val createPolicyParams: Resource<CreatePolicyParams> = Resource.Uninitialized,
     val createPolicyResponse: Resource<CreatePolicyApiResponse> = Resource.Uninitialized,
     val initialPlanData: InitialPlanData = InitialPlanData(),
-    val complete: Boolean = false
+    val complete: Boolean = false,
+    val triggerCloudStorageAction: Resource<CloudStorageActions> = Resource.Uninitialized,
 ) {
     val apiError = createPolicyParams is Resource.Error
         || createPolicyResponse is Resource.Error
