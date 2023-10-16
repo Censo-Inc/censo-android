@@ -85,5 +85,5 @@ data class RecoveredSeedPhrase(
     val createdAt: Instant
 )
 
-fun List<GuardianState>.forParticipant(participantId: String): GuardianState =
-    this.first { it.participantId.value == participantId }
+fun List<GuardianState>.forParticipant(participantId: String): GuardianState? =
+    this.find { it.participantId.value == participantId }

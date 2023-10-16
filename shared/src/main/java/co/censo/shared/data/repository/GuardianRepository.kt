@@ -36,6 +36,7 @@ interface GuardianRepository {
 
     fun saveInvitationId(invitationId: String)
     fun retrieveInvitationId(): String
+    fun clearInvitationId()
     suspend fun submitGuardianVerification(
         invitationId: String,
         submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
@@ -51,6 +52,7 @@ interface GuardianRepository {
 
     fun saveParticipantId(participantId: String)
     fun retrieveParticipantId(): String
+    fun clearParticipantId()
 
     suspend fun storeRecoveryTotpSecret(
         participantId: String,
@@ -122,6 +124,8 @@ class GuardianRepositoryImpl(
     }
 
     override fun retrieveInvitationId() = storage.retrieveGuardianInvitationId()
+    override fun clearInvitationId() = storage.clearGuardianInvitationId()
+
     override suspend fun submitGuardianVerification(
         invitationId: String,
         submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
@@ -152,6 +156,8 @@ class GuardianRepositoryImpl(
 
     override fun retrieveParticipantId(): String =
         storage.retrieveGuardianParticipantId()
+
+    override fun clearParticipantId() = storage.clearGuardianParticipantId()
 
     override suspend fun storeRecoveryTotpSecret(
         participantId: String,

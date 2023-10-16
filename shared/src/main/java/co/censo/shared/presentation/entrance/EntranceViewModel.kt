@@ -47,12 +47,12 @@ class EntranceViewModel @Inject constructor(
         checkUserHasValidToken()
     }
 
-    fun onGuardianStart(invitationId: String?, participantId: String?) {
+    fun onGuardianStart(invitationId: String?, recoveryParticipantId: String?) {
         if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
         }
-        if (participantId != null) {
-            guardianRepository.saveParticipantId(participantId)
+        if (recoveryParticipantId != null) {
+            guardianRepository.saveParticipantId(recoveryParticipantId)
         }
 
         checkUserHasValidToken()
@@ -154,6 +154,8 @@ class EntranceViewModel @Inject constructor(
             } else {
                 keyRepository.setSavedDeviceId(idToken)
             }
+
+            state = state.copy(createUserResource = Resource.Loading())
 
             val createUserResponse = ownerRepository.createUser(
                 jwtToken = jwt,

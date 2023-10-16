@@ -43,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -66,7 +65,7 @@ fun EntranceScreen(
     navController: NavController,
     guardianEntrance: Boolean,
     invitationId: String? = null,
-    participantId: String? = null,
+    recoveryParticipantId: String? = null,
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -139,7 +138,7 @@ fun EntranceScreen(
 
     DisposableEffect(key1 = viewModel) {
         if (guardianEntrance) {
-            viewModel.onGuardianStart(invitationId, participantId)
+            viewModel.onGuardianStart(invitationId, recoveryParticipantId)
         } else {
             viewModel.onOwnerStart()
         }
@@ -194,7 +193,7 @@ fun EntranceScreen(
                             .size(72.dp)
                             .align(Alignment.Center),
                         strokeWidth = 8.dp,
-                        color = Color.Red
+                        color = Color.Black
                     )
                 }
             }
