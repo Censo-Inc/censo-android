@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import co.censo.guardian.BuildConfig
 import co.censo.guardian.R
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverCodeVerification
@@ -169,7 +170,9 @@ fun GuardianHomeScreen(
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            Button(onClick = { viewModel.createGuardianKey(context) }) {
+                            Button(onClick = {
+                                viewModel.createGuardianKey(context.getString(R.string.app_name))
+                            }) {
                                 Text("Create Guardian Key")
                             }
                         } else {
