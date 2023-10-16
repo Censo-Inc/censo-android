@@ -32,23 +32,25 @@ class InitialPlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(InitialPlanSetupScreenState())
         private set
 
-    fun onStart() {
-        state.copy(
+    fun onStart(appName: String) {
+        state = state.copy(
             initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial
         )
-        createApproverKey()
+        createApproverKey(appName)
     }
 
-    fun createApproverKey() {
+    fun createApproverKey(appName: String) {
         viewModelScope.launch {
             state = try {
                 val approverEncryptionKey = keyRepository.createGuardianKey()
                 keyRepository.saveKeyInCloud(
-                    Base58EncodedPrivateKey(
+                    key = Base58EncodedPrivateKey(
                         Base58.base58Encode(
                             approverEncryptionKey.privateKeyRaw()
                         )
-                    )
+                    ),
+                    appName = appName,
+                    participantId = state.participantId
                 )
                 state.copy(
                     approverEncryptionKey = approverEncryptionKey,

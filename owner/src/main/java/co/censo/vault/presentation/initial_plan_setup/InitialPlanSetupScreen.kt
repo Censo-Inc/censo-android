@@ -62,7 +62,7 @@ fun InitialPlanSetupScreen(
     val state = viewModel.state
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(context.getString(R.string.app_name))
         onDispose {}
     }
 
@@ -113,7 +113,7 @@ fun InitialPlanSetupScreen(
                         errorMessage = "Error Occurred trying to save your approver key",
                         dismissAction = null,
                         retryAction = {
-                            viewModel.createApproverKey()
+                            viewModel.createApproverKey(context.getString(R.string.app_name))
                         }
                     )
                 }
@@ -186,7 +186,9 @@ fun InitialPlanSetupStandardUI(
 ) {
 
     Column(
-        modifier = Modifier.fillMaxSize().background(color = Color.White),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -266,7 +268,9 @@ fun InitialPlanSetupStandardUI(
         }
 
         Column(
-            modifier = Modifier.fillMaxSize().background(color = Color.White),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(

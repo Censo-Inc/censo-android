@@ -20,7 +20,6 @@ interface KeyRepository {
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
     suspend fun saveKeyInCloud(
         key: Base58EncodedPrivateKey,
-        context: Context,
         appName: String,
         participantId: ParticipantId
     )
@@ -60,7 +59,6 @@ class KeyRepositoryImpl(val storage: Storage, val cloudStorage: CloudStorage) : 
 
     override suspend fun saveKeyInCloud(
         key: Base58EncodedPrivateKey,
-        context: Context,
         appName: String,
         participantId: ParticipantId
     ) {
