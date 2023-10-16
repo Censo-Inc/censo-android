@@ -2,6 +2,7 @@ package co.censo.shared.data.storage
 
 import ParticipantId
 import android.content.Context
+import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -19,7 +20,7 @@ import java.io.IOException
 import java.util.Collections
 
 interface CloudStorage {
-    suspend fun uploadFile(fileContent: String, participantId: ParticipantId, appName: String) : Resource<Unit>
+    suspend fun uploadFile(fileContent: String, participantId: ParticipantId) : Resource<Unit>
     suspend fun retrieveFile()
 }
 
@@ -29,13 +30,15 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
         const val FILE_EXTENSION = ".txt"
         const val FILE_TYPE = "text/plain"
         const val ID_FIELD = "id"
+
+        const val APP_NAME = "Censo"
     }
 
-    override suspend fun uploadFile(fileContent: String, participantId: ParticipantId, appName: String) : Resource<Unit> {
+    override suspend fun uploadFile(fileContent: String, participantId: ParticipantId) : Resource<Unit> {
         projectLog(message = "Starting file upload")
         val account = GoogleSignIn.getLastSignedInAccount(context)
         return if (account != null) {
-            val driveService = getDriveService(account, context, appName)
+            val driveService = getDriveService(account, context)
             if (driveService == null) {
                 projectLog(message = "Drive service was null")
                 return Resource.Error()
@@ -97,7 +100,6 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
     private fun getDriveService(
         account: GoogleSignInAccount,
         context: Context,
-        appName: String
     ): Drive? {
         val credential: GoogleAccountCredential?
         try {
@@ -111,7 +113,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
 
         return if (credential != null) {
             Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
-                .setApplicationName(appName)
+                .setApplicationName(APP_NAME)
                 .build()
         } else {
             null

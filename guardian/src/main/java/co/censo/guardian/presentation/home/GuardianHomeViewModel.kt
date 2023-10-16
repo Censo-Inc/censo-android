@@ -117,8 +117,12 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    fun createGuardianKey(appName: String) {
+    fun createGuardianKey() {
+        if (state.saveKeyToCloudResource is Resource.Loading) {
+            return
+        }
         viewModelScope.launch {
+            state = state.copy(saveKeyToCloudResource = Resource.Loading())
             val guardianEncryptionKey = keyRepository.createGuardianKey()
             keyRepository.saveKeyInCloud(
                 Base58EncodedPrivateKey(
@@ -126,11 +130,11 @@ class GuardianHomeViewModel @Inject constructor(
                         guardianEncryptionKey.privateKeyRaw()
                     )
                 ),
-                appName = appName,
                 participantId = ParticipantId(state.participantId)
             )
             state = state.copy(
-                guardianEncryptionKey = guardianEncryptionKey
+                guardianEncryptionKey = guardianEncryptionKey,
+                saveKeyToCloudResource = Resource.Uninitialized
             )
             determineGuardianUIState(state.guardianState)
         }

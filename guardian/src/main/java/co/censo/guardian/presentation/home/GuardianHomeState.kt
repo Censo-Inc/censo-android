@@ -26,6 +26,7 @@ data class GuardianHomeState(
     val acceptGuardianResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
     val declineGuardianResource: Resource<ResponseBody> = Resource.Uninitialized,
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
+    val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
     val guardianUIState: GuardianUIState = GuardianUIState.UNINITIALIZED,
     val guardianEncryptionKey: EncryptionKey? = null,
 

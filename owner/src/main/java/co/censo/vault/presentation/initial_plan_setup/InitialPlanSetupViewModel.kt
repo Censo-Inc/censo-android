@@ -16,6 +16,7 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.vault.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.async
@@ -32,15 +33,19 @@ class InitialPlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(InitialPlanSetupScreenState())
         private set
 
-    fun onStart(appName: String) {
+    fun onStart() {
         state = state.copy(
             initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial
         )
-        createApproverKey(appName)
+        createApproverKey()
     }
 
-    fun createApproverKey(appName: String) {
+    fun createApproverKey() {
+        if (state.saveKeyToCloudResource is Resource.Loading) {
+            return
+        }
         viewModelScope.launch {
+            state = state.copy(saveKeyToCloudResource = Resource.Loading())
             state = try {
                 val approverEncryptionKey = keyRepository.createGuardianKey()
                 keyRepository.saveKeyInCloud(
@@ -49,16 +54,17 @@ class InitialPlanSetupViewModel @Inject constructor(
                             approverEncryptionKey.privateKeyRaw()
                         )
                     ),
-                    appName = appName,
                     participantId = state.participantId
                 )
                 state.copy(
                     approverEncryptionKey = approverEncryptionKey,
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial
+                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial,
+                    saveKeyToCloudResource = Resource.Uninitialized
                 )
             } catch (e: Exception) {
                 state.copy(
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed
+                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed,
+                    saveKeyToCloudResource = Resource.Uninitialized
                 )
             }
         }

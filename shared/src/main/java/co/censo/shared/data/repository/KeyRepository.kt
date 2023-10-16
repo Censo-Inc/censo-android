@@ -20,7 +20,6 @@ interface KeyRepository {
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
     suspend fun saveKeyInCloud(
         key: Base58EncodedPrivateKey,
-        appName: String,
         participantId: ParticipantId
     )
     suspend fun retrieveKeyFromCloud(participantId: ParticipantId): Base58EncodedPrivateKey
@@ -59,7 +58,6 @@ class KeyRepositoryImpl(val storage: Storage, val cloudStorage: CloudStorage) : 
 
     override suspend fun saveKeyInCloud(
         key: Base58EncodedPrivateKey,
-        appName: String,
         participantId: ParticipantId
     ) {
         //TODO: Save to sharedPrefs for now until Google Drive File Retrieval is in
@@ -68,7 +66,6 @@ class KeyRepositoryImpl(val storage: Storage, val cloudStorage: CloudStorage) : 
 //        cloudStorage.uploadFile(
 //            fileContent = key.value,
 //            participantId = participantId,
-//            appName = appName
 //        )
     }
 

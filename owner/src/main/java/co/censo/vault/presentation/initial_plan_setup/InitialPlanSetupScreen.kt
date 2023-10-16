@@ -62,7 +62,7 @@ fun InitialPlanSetupScreen(
     val state = viewModel.state
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(context.getString(R.string.app_name))
+        viewModel.onStart()
         onDispose {}
     }
 
@@ -113,7 +113,7 @@ fun InitialPlanSetupScreen(
                         errorMessage = "Error Occurred trying to save your approver key",
                         dismissAction = null,
                         retryAction = {
-                            viewModel.createApproverKey(context.getString(R.string.app_name))
+                            viewModel.createApproverKey()
                         }
                     )
                 }

@@ -23,6 +23,7 @@ data class InitialPlanSetupScreenState(
     val initialPlanSetupStatus: InitialPlanSetupStatus = InitialPlanSetupStatus.None,
     val participantId: ParticipantId = ParticipantId(generatePartitionId()),
     val approverEncryptionKey: EncryptionKey? = null,
+    val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
     val complete: Boolean = false
 ) {
 

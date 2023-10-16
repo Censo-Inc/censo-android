@@ -170,9 +170,11 @@ fun GuardianHomeScreen(
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            Button(onClick = {
-                                viewModel.createGuardianKey(context.getString(R.string.app_name))
-                            }) {
+                            Button(
+                                enabled = state.saveKeyToCloudResource !is Resource.Loading,
+                                onClick = {
+                                    viewModel.createGuardianKey()
+                                }) {
                                 Text("Create Guardian Key")
                             }
                         } else {
