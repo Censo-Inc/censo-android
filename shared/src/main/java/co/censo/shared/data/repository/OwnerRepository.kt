@@ -4,7 +4,6 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedGuardianPublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
-import GuardianProspect
 import ParticipantId
 import VaultSecretId
 import co.censo.shared.data.Resource
@@ -12,7 +11,6 @@ import co.censo.shared.data.cryptography.ECIESManager
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
@@ -47,7 +45,6 @@ import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.AuthUtil
-import co.censo.shared.util.projectLog
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
@@ -65,9 +62,9 @@ interface OwnerRepository {
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicySetupApiResponse>
 
-    suspend fun getPolicySetupHelper(threshold: UInt, guardians: List<String>): PolicySetupHelper
     suspend fun createPolicy(
-        setupHelper: PolicySetupHelper
+        threshold: UInt,
+        guardians: List<Guardian.ProspectGuardian>
     ): Resource<CreatePolicyApiResponse>
 
 
@@ -164,31 +161,20 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun getPolicySetupHelper(
+    override suspend fun createPolicy(
         threshold: UInt,
-        guardians: List<String>
-    ): PolicySetupHelper {
-        val guardianProspect = guardians.map {
-            GuardianProspect(
-                label = it,
-                participantId = generatePartitionId()
+        guardians: List<Guardian.ProspectGuardian>
+    ): Resource<CreatePolicyApiResponse> {
+
+        val setupHelper =  try {
+            PolicySetupHelper.create(
+                threshold = threshold,
+                guardians = guardians
             )
+        } catch (e: Exception) {
+            return Resource.Error(exception = e)
         }
 
-        val policySetupHelper = PolicySetupHelper.create(
-            threshold = threshold,
-            guardians = guardianProspect,
-            deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
-        )
-
-        projectLog(message = "Policy Setup Helper Created: $policySetupHelper")
-
-        return policySetupHelper
-    }
-
-    override suspend fun createPolicy(
-        setupHelper: PolicySetupHelper,
-    ): Resource<CreatePolicyApiResponse> {
         val createPolicyApiRequest = CreatePolicyApiRequest(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,

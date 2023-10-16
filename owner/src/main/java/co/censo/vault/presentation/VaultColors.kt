@@ -5,4 +5,5 @@ import androidx.compose.ui.graphics.Color
 object VaultColors {
     val PrimaryColor = Color(0xFF1c305c)
     val AccentColor = Color(0xFF47f7f7)
+    val NavbarColor = Color(0xFFF2F2F2)
 }

@@ -139,6 +139,9 @@ fun LockedScreen(
                                     verificationId,
                                     facetecData
                                 )
+                            },
+                            onCancelled = {
+                                viewModel.resetToLocked()
                             }
                         )
                     }

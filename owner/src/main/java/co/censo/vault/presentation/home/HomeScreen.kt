@@ -108,7 +108,7 @@ fun HomeScreen(
                 when (ownerState) {
                     is OwnerState.Initial -> {
                         WelcomeScreenUI {
-                            navController.navigate(Screen.PlanSetupRoute.route)
+                            navController.navigate(Screen.InitialPlanSetupRoute.route)
                         }
                     }
 

@@ -24,6 +24,7 @@ data class ActivateApproversState(
     val policyIntermediatePublicKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(
         ""
     ),
+    val setupError: String? = null
 ) {
     val loading =
         (userResponse is Resource.Loading && ownerState == null) ||
@@ -31,7 +32,7 @@ data class ActivateApproversState(
 
     val asyncError =
         userResponse is Resource.Error ||
-                createPolicyResponse is Resource.Error
+                createPolicyResponse is Resource.Error || setupError != null
 
     val countdownPercentage = 1.0f - (currentSecond.toFloat() / TotpGenerator.CODE_EXPIRATION.toFloat())
 }

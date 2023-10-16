@@ -132,6 +132,13 @@ fun ActivateApproversScreen(
                         ) {
                             viewModel.createPolicy()
                         }
+                    } else if (state.setupError != null) {
+                        DisplayError(
+                            errorMessage = state.setupError,
+                            dismissAction = viewModel::resetSetupError,
+                        ) {
+                            viewModel.createPolicy()
+                        }
                     }
                 }
 

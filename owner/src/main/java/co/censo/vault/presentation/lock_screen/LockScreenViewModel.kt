@@ -54,6 +54,10 @@ class LockScreenViewModel @Inject constructor(
         }
     }
 
+    fun resetToLocked() {
+        state = state.copy(lockStatus = LockScreenState.LockStatus.Locked)
+    }
+
     private fun onOwnerState(ownerState: OwnerState) {
         state = state.copy(
             lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState)
