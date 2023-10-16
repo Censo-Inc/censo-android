@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.SharedColors
@@ -92,14 +93,14 @@ fun WelcomeScreen(
 
                 when (ownerState) {
                     is OwnerState.Initial, is OwnerState.GuardianSetup -> {
-                        WelcomeScreenUI {
+                        WelcomeScreenUI(currentStep = WelcomeStep.Authenticated) {
                             navController.navigate(Screen.InitialPlanSetupRoute.route)
                         }
                     }
 
                     is OwnerState.Ready -> {
                         if (ownerState.vault.secrets.isEmpty()) {
-                            WelcomeScreenUI {
+                            WelcomeScreenUI(currentStep = WelcomeStep.FaceScanned) {
                                 navController.navigate(
                                     Screen.EnterPhraseRoute.buildNavRoute(
                                         masterPublicKey = ownerState.vault.publicMasterEncryptionKey,
@@ -108,8 +109,10 @@ fun WelcomeScreen(
                                 )
                             }
                         } else {
-                            WelcomeScreenUI {
-                                //todo: Put back in the add approvers flow...
+                            WelcomeScreenUI(currentStep = WelcomeStep.PhraseEntered) {
+                                navController.navigate(
+                                    SharedScreen.OwnerVaultScreen.route
+                                )
                             }
                         }
                     }
@@ -158,6 +161,7 @@ fun SetupStep(
 
 @Composable
 fun WelcomeScreenUI(
+    currentStep: WelcomeStep,
     navigateToPlanSetup: () -> Unit
 ) {
     Column(
@@ -189,29 +193,38 @@ fun WelcomeScreenUI(
             modifier = Modifier.padding(32.dp)
         ) {
             SetupStep(
-                painterResource(id = co.censo.shared.R.drawable.google),
-                stringResource(R.string.authenticate_privately),
-                stringResource(R.string.authenticate_privately_blurb),
-                stringResource(R.string.authenticated)
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.google),
+                heading = stringResource(R.string.authenticate_privately),
+                content = stringResource(R.string.authenticate_privately_blurb),
+                completionText = stringResource(R.string.authenticated)
             )
             SetupStep(
-                painterResource(id = co.censo.shared.R.drawable.small_face_scan),
-                stringResource(id = R.string.scan_your_face),
-                stringResource(id = R.string.scan_your_face_blurb),
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.small_face_scan),
+                heading = stringResource(id = R.string.scan_your_face),
+                content = stringResource(id = R.string.scan_your_face_blurb),
+                completionText = if (currentStep.order >= WelcomeStep.FaceScanned.order) stringResource(R.string.authenticated) else null
             )
             SetupStep(
-                painterResource(id = co.censo.shared.R.drawable.phrase_entry),
-                stringResource(id = R.string.enter_your_phrase),
-                stringResource(id = R.string.enter_your_phrase_blurb),
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
+                heading = stringResource(id = R.string.enter_your_phrase),
+                content = stringResource(id = R.string.enter_your_phrase_blurb),
+                completionText = if (currentStep.order >= WelcomeStep.PhraseEntered.order) stringResource(R.string.authenticated) else null
             )
             Divider()
             SetupStep(
-                painterResource(id = co.censo.shared.R.drawable.two_people),
-                stringResource(id = R.string.add_approvers),
-                stringResource(id = R.string.add_approvers_blurb),
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.two_people),
+                heading = stringResource(id = R.string.add_approvers),
+                content = stringResource(id = R.string.add_approvers_blurb),
             )
             Divider()
         }
+
+        val buttonText = when (currentStep) {
+            WelcomeStep.Authenticated -> stringResource(id = R.string.get_started)
+            WelcomeStep.FaceScanned -> stringResource(id = R.string.scan_your_face)
+            WelcomeStep.PhraseEntered -> stringResource(id = R.string.enter_your_phrase)
+        }
+
         Button(
             onClick = navigateToPlanSetup,
             colors = ButtonDefaults.filledTonalButtonColors(
@@ -221,7 +234,7 @@ fun WelcomeScreenUI(
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = stringResource(R.string.get_started),
+                text = buttonText,
                 fontWeight = FontWeight.Medium,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(all = 8.dp)
@@ -245,7 +258,7 @@ fun WelcomeScreenUI(
 @Preview
 @Composable
 fun WelcomeScreenUIPreview() {
-    WelcomeScreenUI {
+    WelcomeScreenUI(currentStep = WelcomeStep.FaceScanned) {
 
     }
 }
