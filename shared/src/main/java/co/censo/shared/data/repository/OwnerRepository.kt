@@ -32,6 +32,7 @@ import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
@@ -99,6 +100,8 @@ interface OwnerRepository {
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry
     ): Resource<UnlockApiResponse>
+
+    suspend fun prolongUnlock(): Resource<ProlongUnlockApiResponse>
 
     suspend fun lock(): Resource<LockApiResponse>
 
@@ -280,6 +283,10 @@ class OwnerRepositoryImpl(
                 UnlockApiRequest(biometryVerificationId, biometryData)
             )
         }
+    }
+
+    override suspend fun prolongUnlock(): Resource<ProlongUnlockApiResponse> {
+        return retrieveApiResource { apiService.prolongUnlock() }
     }
 
     override suspend fun lock(): Resource<LockApiResponse> {

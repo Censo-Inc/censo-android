@@ -40,7 +40,7 @@ class LockScreenViewModel @Inject constructor(
         }
     }
 
-    fun retrieveOwnerState() {
+    private fun retrieveOwnerState() {
         state = state.copy(ownerStateResource = Resource.Loading())
 
         viewModelScope.launch {
@@ -55,7 +55,14 @@ class LockScreenViewModel @Inject constructor(
     }
 
     fun resetToLocked() {
-        state = state.copy(lockStatus = LockScreenState.LockStatus.Locked)
+        state = state.copy(
+            lockStatus = LockScreenState.LockStatus.Locked
+        )
+    }
+
+    fun onUnlockExpired() {
+        resetToLocked()
+        retrieveOwnerState()
     }
 
     private fun onOwnerState(ownerState: OwnerState) {
@@ -99,28 +106,5 @@ class LockScreenViewModel @Inject constructor(
 
             unlockVaultResponse.map { it.scanResultBlob }
         }.await()
-    }
-
-    fun initLock() {
-        state = state.copy(
-            lockStatus = LockScreenState.LockStatus.LockInProgress(
-                apiCall = Resource.Loading()
-            )
-        )
-
-        viewModelScope.launch {
-            val lockVaultResponse: Resource<LockApiResponse> = ownerRepository.lock()
-
-            state = state.copy(
-                lockStatus = LockScreenState.LockStatus.LockInProgress(
-                    apiCall = lockVaultResponse
-                ),
-                ownerStateResource = lockVaultResponse.map { it.ownerState },
-            )
-
-            if (lockVaultResponse is Resource.Success) {
-                onOwnerState(lockVaultResponse.data!!.ownerState)
-            }
-        }
     }
 }

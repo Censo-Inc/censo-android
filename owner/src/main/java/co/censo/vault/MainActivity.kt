@@ -86,9 +86,7 @@ class MainActivity : FragmentActivity() {
                         Box(
                             modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
-                            LockedScreen(
-                                unlockedModifier = Modifier.fillMaxHeight(fraction = (1 - navHostHeight)),
-                            )
+                            LockedScreen()
                         }
                     }
                 }
