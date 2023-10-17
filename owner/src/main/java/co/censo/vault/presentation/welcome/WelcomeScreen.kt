@@ -72,7 +72,7 @@ fun WelcomeScreen(
                         .size(72.dp)
                         .align(Alignment.Center),
                     strokeWidth = 8.dp,
-                    color = Color.Red
+                    color = Color.Black
                 )
             }
         }

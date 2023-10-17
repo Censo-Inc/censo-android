@@ -202,5 +202,6 @@
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
+    <string name="failed_save_seed">Failed to save seed, please ensure you have entered it correctly.</string>
 
 </resources>

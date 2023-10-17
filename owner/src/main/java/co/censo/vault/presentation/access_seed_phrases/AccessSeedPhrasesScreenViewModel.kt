@@ -16,7 +16,7 @@ import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.model.RecoveryStatus
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

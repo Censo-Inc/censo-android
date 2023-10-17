@@ -37,10 +37,10 @@ import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
+import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.ActivateApproverRow
 import co.censo.vault.presentation.components.ActivateApproversTopBar
-import co.censo.vault.presentation.home.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

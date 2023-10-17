@@ -41,7 +41,6 @@ import co.censo.vault.presentation.enter_phrase.components.indexToWordText
 import co.censo.vault.presentation.enter_phrase.components.EditPhraseWordUI
 import co.censo.vault.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWordUI
-import co.censo.vault.presentation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,11 +76,8 @@ fun EnterPhraseScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.phraseEntryComplete is Resource.Success) {
-            if (state.welcomeFlow) {
-                //todo: send user back within welcome flow...
-            } else {
-                navController.navigate(SharedScreen.OwnerVaultScreen.route)
-            }
+            //TODO: Add add approvers flow if welcome flow is enabled
+            navController.navigate(SharedScreen.OwnerVaultScreen.route)
             viewModel.resetPhraseEntryComplete()
         }
     }
@@ -138,7 +134,7 @@ fun EnterPhraseScreen(
 
                 state.error -> {
                     DisplayError(
-                        errorMessage = "Failed to save seed, please ensure you have entered it correctly.",
+                        errorMessage = stringResource(R.string.failed_save_seed),
                         dismissAction = viewModel::setViewPhrase,
                         retryAction = viewModel::setViewPhrase
                     )
