@@ -28,10 +28,12 @@ import co.censo.shared.data.model.FacetecBiometry
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FacetecAuth(
     onFaceScanReady: suspend (BiometryVerificationId, FacetecBiometry) -> Resource<BiometryScanResultBlob>,
+    onCancelled: () -> Unit = {},
     viewModel: FacetecAuthViewModel = hiltViewModel()
 ) {
 
@@ -61,12 +63,19 @@ fun FacetecAuth(
                     }
                 }
             )
+            FaceTecSDK.setCustomization(viewModel.facetecCustomizations())
+
             viewModel.resetFacetecInitDataResource()
         }
 
         if (state.startAuth is Resource.Success) {
             FaceTecSessionActivity.createAndLaunchSession(context, viewModel, state.facetecData?.sessionToken ?: "")
             viewModel.resetStartFacetecAuth()
+        }
+
+        if (state.userCancelled is Resource.Success) {
+            onCancelled()
+            viewModel.resetUserCanceled()
         }
     }
 
@@ -83,7 +92,7 @@ fun FacetecAuth(
                 CircularProgressIndicator(
                     modifier = Modifier.size(72.dp),
                     strokeWidth = 8.dp,
-                    color = Color.Red
+                    color = Color.Black
                 )
             }
 

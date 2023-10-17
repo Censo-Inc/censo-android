@@ -49,7 +49,7 @@ class VaultScreenViewModel @Inject constructor(
             deleteSeedPhraseResource = Resource.Loading()
         )
 
-        viewModelScope.async {
+        viewModelScope.launch {
             val response = ownerRepository.deleteSecret(secret.guid)
 
             state = state.copy(

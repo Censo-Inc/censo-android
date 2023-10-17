@@ -1,7 +1,7 @@
 package co.censo.vault.presentation.components.recovery
 
 import Base64EncodedData
-import FullScreenButton
+import StandardButton
 import ParticipantId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

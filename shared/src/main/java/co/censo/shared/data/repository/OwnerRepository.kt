@@ -6,7 +6,6 @@ import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import ParticipantId
 import VaultSecretId
-import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.ECIESManager
@@ -39,6 +38,7 @@ import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
@@ -55,12 +55,8 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.Storage
-import co.censo.shared.util.projectLog
+import co.censo.shared.util.AuthUtil
 import com.auth0.android.jwt.JWT
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
@@ -71,7 +67,7 @@ import java.util.Base64
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
-    suspend fun createUser(jwtToken: String, idToken: String): Resource<ResponseBody>
+    suspend fun signInUser(jwtToken: String, idToken: String): Resource<ResponseBody>
     suspend fun createPolicySetup(
         threshold: UInt,
         guardians: List<Guardian.SetupGuardian>,
@@ -79,13 +75,9 @@ interface OwnerRepository {
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicySetupApiResponse>
 
-    suspend fun getPolicySetupHelper(
-        threshold: UInt,
-        prospectGuardians: List<Guardian.ProspectGuardian>
-    ): PolicySetupHelper
-
     suspend fun createPolicy(
-        setupHelper: PolicySetupHelper
+        threshold: UInt,
+        guardians: List<Guardian.ProspectGuardian>
     ): Resource<CreatePolicyApiResponse>
 
 
@@ -121,6 +113,8 @@ interface OwnerRepository {
         biometryData: FacetecBiometry
     ): Resource<UnlockApiResponse>
 
+    suspend fun prolongUnlock(): Resource<ProlongUnlockApiResponse>
+
     suspend fun lock(): Resource<LockApiResponse>
 
     suspend fun storeSecret(
@@ -148,7 +142,7 @@ interface OwnerRepository {
         biometryData: FacetecBiometry
     ): Resource<RetrieveRecoveryShardsApiResponse>
 
-    fun recoverSecrets(
+    suspend fun recoverSecrets(
         encryptedSecrets: List<VaultSecret>,
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData
@@ -158,13 +152,15 @@ interface OwnerRepository {
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
     private val storage: Storage,
-    private val secureStorage: SecurePreferences
+    private val secureStorage: SecurePreferences,
+    private val authUtil: AuthUtil,
+    private val keyRepository: KeyRepository
 ) : OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
         return retrieveApiResource { apiService.user() }
     }
 
-    override suspend fun createUser(authId: String, idToken: String) =
+    override suspend fun signInUser(authId: String, idToken: String) =
         retrieveApiResource {
             apiService.signIn(
                 SignInApiRequest(
@@ -192,23 +188,20 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun getPolicySetupHelper(
-        threshold: UInt,
-        prospectGuardians: List<Guardian.ProspectGuardian>
-    ): PolicySetupHelper {
-        val policySetupHelper = PolicySetupHelper.create(
-            threshold = threshold,
-            guardians = prospectGuardians,
-        )
-
-        projectLog(message = "Policy Setup Helper Created: $policySetupHelper")
-
-        return policySetupHelper
-    }
-
     override suspend fun createPolicy(
-        setupHelper: PolicySetupHelper,
+        threshold: UInt,
+        guardians: List<Guardian.ProspectGuardian>
     ): Resource<CreatePolicyApiResponse> {
+
+        val setupHelper =  try {
+            PolicySetupHelper.create(
+                threshold = threshold,
+                guardians = guardians
+            )
+        } catch (e: Exception) {
+            return Resource.Error(exception = e)
+        }
+
         val createPolicyApiRequest = CreatePolicyApiRequest(
             masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
@@ -220,14 +213,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun verifyToken(token: String): String? {
-        val verifier = GoogleIdTokenVerifier.Builder(
-            NetHttpTransport(), GsonFactory()
-        )
-            .setAudience(BuildConfig.GOOGLE_AUTH_CLIENT_IDS.toList())
-            .build()
-
-        val verifiedIdToken: GoogleIdToken? = verifier.verify(token)
-        return verifiedIdToken?.payload?.subject
+        return authUtil.verifyToken(token)
     }
 
     override suspend fun saveJWT(jwtToken: String) {
@@ -284,8 +270,7 @@ class OwnerRepositoryImpl(
     override suspend fun checkJWTValid(jwtToken: String): Boolean {
         return try {
             val jwtDecoded = JWT(jwtToken)
-            //todo: See what we need to check on the token
-            return true
+            authUtil.isJWTValid(jwtDecoded)
         } catch (e: Exception) {
             false
         }
@@ -322,6 +307,10 @@ class OwnerRepositoryImpl(
                 UnlockApiRequest(biometryVerificationId, biometryData)
             )
         }
+    }
+
+    override suspend fun prolongUnlock(): Resource<ProlongUnlockApiResponse> {
+        return retrieveApiResource { apiService.prolongUnlock() }
     }
 
     override suspend fun lock(): Resource<LockApiResponse> {
@@ -418,41 +407,47 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override fun recoverSecrets(
+    override suspend fun recoverSecrets(
         encryptedSecrets: List<VaultSecret>,
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
-        encryptedMasterPrivateKey: Base64EncodedData
+        encryptedMasterPrivateKey: Base64EncodedData,
     ): List<RecoveredSeedPhrase> {
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        val ownerDeviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
 
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
+            val encryptionKey = when (it.isOwnerShard) {
+                true -> {
+                    val ownerApproverKey = keyRepository.retrieveKeyFromCloud(it.participantId)
+                    EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKey.bigInt())
+                }
+                else -> ownerDeviceKey
+            }
             Point(
                 BigInteger(it.participantId.getBytes()),
-                BigInteger(deviceKey.decrypt(it.encryptedShard.bytes))
+                BigInteger(encryptionKey.decrypt(it.encryptedShard.bytes))
             )
         }
-        val intermediatePrivateKeyBigInt =
+
+        val intermediatePrivateKey: PrivateKey = ECHelper.getPrivateKeyFromECBigIntAndCurve(
             SecretSharerUtils.recoverSecret(intermediateKeyShares, ORDER)
-
-        val intermediatePrivateKey: PrivateKey =
-            ECHelper.getPrivateKeyFromECBigIntAndCurve(intermediatePrivateKeyBigInt)
-
-        val decryptedMasterPrivateKey: ByteArray = ECIESManager.decryptMessage(
-            cipherData = encryptedMasterPrivateKey.bytes,
-            privateKey = intermediatePrivateKey
         )
 
-        val recreatedMasterEncryptionKey =
-            EncryptionKey.generateFromPrivateKeyRaw(BigInteger(decryptedMasterPrivateKey))
+        val masterPrivateKey = EncryptionKey.generateFromPrivateKeyRaw(
+            BigInteger(
+                ECIESManager.decryptMessage(
+                    cipherData = encryptedMasterPrivateKey.bytes,
+                    privateKey = intermediatePrivateKey
+                )
+            )
+        )
 
         return encryptedSecrets.map {
             RecoveredSeedPhrase(
                 guid = it.guid,
                 label = it.label,
-                seedPhrase = String(recreatedMasterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)),
+                seedPhrase = String(masterPrivateKey.decrypt(it.encryptedSeedPhrase.bytes)),
                 createdAt = it.createdAt
             )
         }
-
     }
 }

@@ -61,7 +61,7 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
         }.await()
     }
 
-    private fun recoverSecrets(response: RetrieveRecoveryShardsApiResponse) {
+    private suspend fun recoverSecrets(response: RetrieveRecoveryShardsApiResponse) {
         val ownerState = response.ownerState
         val encryptedShards = response.encryptedShards
 
@@ -71,9 +71,11 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
 
                 when {
                     recovery is Recovery.ThisDevice && recovery.status == RecoveryStatus.Available -> {
-                        val requestedSecrets = ownerState.vault.secrets.filter { recovery.vaultSecretIds.contains(it.guid) }
+                        state = state.copy(recoveredPhrases = Resource.Loading())
 
                         runCatching {
+                            val requestedSecrets = ownerState.vault.secrets.filter { recovery.vaultSecretIds.contains(it.guid) }
+
                             val recoveredSecrets: List<RecoveredSeedPhrase> = ownerRepository.recoverSecrets(
                                 requestedSecrets,
                                 encryptedShards,
@@ -108,5 +110,11 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun resetNavigationResource() {
+        state = state.copy(
+            navigationResource = Resource.Uninitialized
+        )
     }
 }

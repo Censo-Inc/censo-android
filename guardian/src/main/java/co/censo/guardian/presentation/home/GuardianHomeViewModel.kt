@@ -157,7 +157,7 @@ class GuardianHomeViewModel @Inject constructor(
             )
 
             if (acceptResource is Resource.Success) {
-                if (!guardianRepository.userHasKeySavedInCloud()) {
+                if (!keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))) {
                     createAndSaveGuardianKey()
                 }
                 determineGuardianUIState(acceptResource.data?.guardianState)
@@ -169,12 +169,13 @@ class GuardianHomeViewModel @Inject constructor(
 
     private suspend fun createAndSaveGuardianKey() {
         val guardianEncryptionKey = keyRepository.createGuardianKey()
-        guardianRepository.saveKeyInCloud(
+        keyRepository.saveKeyInCloud(
             Base58EncodedPrivateKey(
                 Base58.base58Encode(
                     guardianEncryptionKey.privateKeyRaw()
                 )
-            )
+            ),
+            participantId = ParticipantId(state.participantId)
         )
         state = state.copy(
             guardianEncryptionKey = guardianEncryptionKey
@@ -231,7 +232,8 @@ class GuardianHomeViewModel @Inject constructor(
     }
 
     private suspend fun loadPrivateKeyFromCloud() {
-        val privateKeyFromCloud = guardianRepository.retrieveKeyFromCloud()
+        val privateKeyFromCloud =
+            keyRepository.retrieveKeyFromCloud(participantId = ParticipantId(state.participantId))
 
         val privateKeyRaw = Base58.base58Decode(privateKeyFromCloud.value)
 
@@ -357,10 +359,6 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    fun resetApproveRecoveryResource() {
-        state = state.copy(approveRecoveryResource = Resource.Uninitialized)
-    }
-
     fun showCloseConfirmationDialog() {
         state = state.copy(
             showTopBarCancelConfirmationDialog = true
@@ -413,5 +411,31 @@ class GuardianHomeViewModel @Inject constructor(
             invitationId = InvitationId(""),
             guardianUIState = GuardianUIState.MISSING_INVITE_CODE
         )
+    }
+
+    fun resetAcceptGuardianResource() {
+        state = state.copy(
+            acceptGuardianResource = Resource.Uninitialized
+        )
+    }
+
+    fun resetSubmitVerificationResource() {
+        state = state.copy(
+            submitVerificationResource = Resource.Uninitialized
+        )
+    }
+
+    fun resetStoreRecoveryTotpSecretResource() {
+        state = state.copy(
+            storeRecoveryTotpSecretResource = Resource.Uninitialized
+        )
+    }
+
+    fun resetApproveRecoveryResource() {
+        state = state.copy(approveRecoveryResource = Resource.Uninitialized)
+    }
+
+    fun resetRejectRecoveryResource() {
+        state = state.copy(rejectRecoveryResource = Resource.Uninitialized)
     }
 }

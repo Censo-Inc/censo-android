@@ -4,6 +4,7 @@ import Base58EncodedMasterPublicKey
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
@@ -30,8 +31,10 @@ import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
 import co.censo.vault.presentation.add_bip39.AddBIP39Screen
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
+import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.home.HomeScreen
 import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.vault.presentation.lock_screen.LockScreenViewModel
 import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
@@ -47,8 +50,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    private val lockViewModel: LockScreenViewModel by viewModels()
-
     @Inject
     lateinit var storage: Storage
 
@@ -56,6 +57,8 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         setupPushChannel()
+
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         setContent {
             val navController = rememberNavController()
@@ -70,15 +73,9 @@ class MainActivity : FragmentActivity() {
                         },
                     color = MaterialTheme.colorScheme.background
                 ) {
-
-                    val navHostHeight = when {
-                        lockViewModel.state.unlocked -> 0.85f
-                        else -> 1f
-                    }
-
                     Box {
                         Box(
-                            modifier = Modifier.fillMaxHeight(fraction = navHostHeight),
+                            modifier = Modifier.fillMaxHeight(),
                         ) {
                             CensoNavHost(navController = navController)
                         }
@@ -86,9 +83,7 @@ class MainActivity : FragmentActivity() {
                         Box(
                             modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
-                            LockedScreen(
-                                unlockedModifier = Modifier.fillMaxHeight(fraction = (1 - navHostHeight)),
-                            )
+                            LockedScreen()
                         }
                     }
                 }
@@ -116,6 +111,18 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = Screen.RecoveryScreen.route) {
                 RecoveryScreen(navController = navController)
+            }
+            composable(
+                route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}"
+            ) { backStackEntry ->
+                EnterPhraseScreen(
+                    navController = navController,
+                    masterPublicKey = Base58EncodedMasterPublicKey(
+                        backStackEntry.arguments?.getString(
+                            Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
+                        )!!
+                    )
+                )
             }
             composable(
                 route = "${Screen.AddBIP39Route.route}/{${Screen.AddBIP39Route.MASTER_PUBLIC_KEY_NAME_ARG}}"
@@ -161,6 +168,13 @@ class MainActivity : FragmentActivity() {
                 PlanSetupScreen(
                     navController = navController,
                     existingSecurityPlan = null
+                )
+            }
+            composable(
+                route = Screen.InitialPlanSetupRoute.route
+            ) {
+                InitialPlanSetupScreen(
+                    navController = navController
                 )
             }
             composable(route = Screen.ActivateApprovers.route) {

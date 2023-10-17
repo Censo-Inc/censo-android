@@ -1,4 +1,6 @@
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
+import co.censo.shared.data.cryptography.toByteArrayNoSign
+import co.censo.shared.data.cryptography.toPaddedHexString
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -12,9 +14,13 @@ import java.util.Base64
 import io.github.novacrypto.base58.Base58
 import java.security.interfaces.ECPublicKey
 
+typealias GuardianId = String
+
 @Serializable
 @JvmInline
-value class Base58EncodedPrivateKey(val value: String)
+value class Base58EncodedPrivateKey(val value: String) {
+    fun bigInt() = BigInteger(1, Base58.base58Decode(this.value))
+}
 
 interface Base58EncodedPublicKey {
     val value: String
@@ -86,9 +92,11 @@ value class ParticipantId(val value: String) {
         }
     }
 
-    fun getBytes(): ByteArray = Hex.decode(value)
+    constructor(bigInt: BigInteger): this(bigInt.toByteArrayNoSign().toPaddedHexString(32).lowercase())
 
-    fun bigInt(): BigInteger = BigInteger(getBytes())
+    fun getBytes() = Hex.decode(value)
+
+    fun bigInt() = BigInteger(1, Hex.decode(this.value))
 }
 
 

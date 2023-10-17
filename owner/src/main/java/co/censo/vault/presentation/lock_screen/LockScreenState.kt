@@ -18,7 +18,6 @@ data class LockScreenState(
         object Locked : LockStatus()
         data class Unlocked(val locksAt: Instant) : LockStatus()
         data class UnlockInProgress(val apiCall: Resource<UnlockApiResponse>) : LockStatus()
-        data class LockInProgress(val apiCall: Resource<LockApiResponse>) : LockStatus()
 
         companion object {
             fun fromOwnerState(ownerState: OwnerState): LockStatus =

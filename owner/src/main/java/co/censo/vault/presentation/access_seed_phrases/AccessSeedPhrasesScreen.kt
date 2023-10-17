@@ -57,6 +57,7 @@ fun AccessSeedPhrasesScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
                 navController.navigate(it)
+                viewModel.resetNavigationResource()
             }
         }
     }
@@ -86,6 +87,13 @@ fun AccessSeedPhrasesScreen(
                         dismissAction = null,
                     ) { viewModel.reset() }
                 }
+
+                state.recoveredPhrases is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.recoveredPhrases.getErrorMessage(context),
+                        dismissAction = null,
+                    ) { viewModel.reset() }
+                }
             }
         }
 
@@ -104,68 +112,58 @@ fun AccessSeedPhrasesScreen(
                 }
 
                 is Resource.Success -> {
-                    when (val recoveredPhrases = state.recoveredPhrases) {
-                        is Resource.Success -> {
+                    if (state.recoveredPhrases is Resource.Success) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
 
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.Top,
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Text(
+                                text = stringResource(R.string.your_seed_phrases),
+                                textAlign = TextAlign.Center,
+                                color = Color.Black,
+                                fontSize = 36.sp
+                            )
+
+                            Spacer(Modifier.height(12.dp))
+
+                            LazyColumn(
+                                horizontalAlignment = Alignment.Start
                             ) {
+                                val phrases = state.recoveredPhrases.data!!
 
-                                Text(
-                                    text = "Your Seed Phrases",
-                                    textAlign = TextAlign.Center,
-                                    color = Color.Black,
-                                    fontSize = 36.sp
-                                )
+                                items(phrases.size) { index ->
+                                    Column {
+                                        Text(
+                                            text = "${stringResource(R.string.added_on)}: ${
+                                                phrases[index].createdAt.toLocalDateTime(
+                                                    TimeZone.currentSystemDefault()
+                                                ).toJavaLocalDateTime()
+                                                    .format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                            }", color = Color.Gray, fontSize = 14.sp
+                                        )
+                                        Text(
+                                            text = "${stringResource(R.string.label)}: ${phrases[index].label}",
+                                            color = Color.Gray,
+                                            fontSize = 18.sp
+                                        )
+                                        Text(
+                                            text = phrases[index].seedPhrase,
+                                            color = Color.Gray,
+                                            fontSize = 12.sp,
+                                            overflow = TextOverflow.Visible,
+                                            modifier = Modifier.wrapContentWidth(),
+                                        )
 
-                                Spacer(Modifier.height(12.dp))
-
-                                LazyColumn(
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    val phrases = recoveredPhrases.data!!
-
-                                    items(phrases.size) { index ->
-                                        Column {
-                                            Text(
-                                                text = "${stringResource(R.string.added_on)}: ${phrases[index].createdAt.toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)}", color = Color.Gray, fontSize = 14.sp
-                                            )
-                                            Text(
-                                                text = "Label: ${phrases[index].label}", color = Color.Gray, fontSize = 18.sp
-                                            )
-                                            Text(
-                                                text = phrases[index].seedPhrase,
-                                                color = Color.Gray,
-                                                fontSize = 12.sp,
-                                                overflow = TextOverflow.Visible,
-                                                modifier = Modifier.wrapContentWidth(),
-                                            )
-
-                                            Spacer(Modifier.height(12.dp))
-                                        }
+                                        Spacer(Modifier.height(12.dp))
                                     }
                                 }
                             }
                         }
-
-                        is Resource.Error -> {
-
-                        }
-
-                        is Resource.Loading -> {
-                            // decrypting
-                        }
-
-                        else -> {
-
-                        }
                     }
-
-
                 }
 
                 else -> {}

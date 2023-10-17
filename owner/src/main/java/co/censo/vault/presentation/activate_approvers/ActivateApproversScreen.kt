@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.activate_approvers
 
-import FullScreenButton
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,6 +55,7 @@ fun ActivateApproversScreen(
     LaunchedEffect(key1 = state) {
         if (state.createPolicyResponse is Resource.Success) {
             navController.navigate(Screen.VaultScreen.route)
+            viewModel.resetCreatePolicyResource()
         }
     }
 
@@ -85,7 +86,7 @@ fun ActivateApproversScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FullScreenButton(
+                StandardButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     color = VaultColors.PrimaryColor,
                     borderColor = Color.White,
@@ -140,6 +141,13 @@ fun ActivateApproversScreen(
                         DisplayError(
                             errorMessage = state.createPolicyResponse.getErrorMessage(context),
                             dismissAction = viewModel::resetCreatePolicyResource,
+                        ) {
+                            viewModel.createPolicy()
+                        }
+                    } else if (state.setupError != null) {
+                        DisplayError(
+                            errorMessage = state.setupError,
+                            dismissAction = viewModel::resetSetupError,
                         ) {
                             viewModel.createPolicy()
                         }

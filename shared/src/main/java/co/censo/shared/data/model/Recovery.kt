@@ -76,6 +76,7 @@ data class RetrieveRecoveryShardsApiResponse(
 data class EncryptedShard(
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
+    val isOwnerShard: Boolean
 )
 
 data class RecoveredSeedPhrase(

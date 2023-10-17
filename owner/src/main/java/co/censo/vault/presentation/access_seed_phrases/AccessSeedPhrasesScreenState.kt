@@ -17,5 +17,9 @@ data class AccessSeedPhrasesScreenState(
 ) {
 
     val loading = retrieveShardsResponse is Resource.Loading
+            || recoveredPhrases is Resource.Loading
+
     val asyncError = retrieveShardsResponse is Resource.Error
+            || recoveredPhrases is Resource.Error
+
 }

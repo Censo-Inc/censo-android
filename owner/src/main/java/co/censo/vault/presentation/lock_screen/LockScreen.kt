@@ -1,13 +1,14 @@
 package co.censo.vault.presentation.lock_screen
 
-import FullScreenButton
+import androidx.compose.foundation.layout.PaddingValues
+import co.censo.vault.presentation.VaultColors
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -31,12 +32,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
-import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @Composable
 fun LockedScreen(
-    unlockedModifier: Modifier,
     viewModel: LockScreenViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
@@ -61,7 +60,7 @@ fun LockedScreen(
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .background(color = VaultColors.PrimaryColor),
+                        .background(color = Color.White),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -69,65 +68,36 @@ fun LockedScreen(
 
                     Text(
                         text = stringResource(R.string.vault_is_locked),
-                        color = Color.White,
+                        color = Color.Black,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.W400
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    FullScreenButton(
+                    StandardButton(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         color = VaultColors.PrimaryColor,
                         borderColor = Color.White,
                         border = true,
-                        contentPadding = PaddingValues(vertical = 12.dp),
+                        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
                         onClick = viewModel::initUnlock,
                     ) {
                         Text(
                             text = stringResource(R.string.unlock),
                             color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W700
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 20.sp,
                         )
                     }
                 }
             }
 
             is LockScreenState.LockStatus.Unlocked -> {
-                Column(
-                    unlockedModifier.background(color = VaultColors.PrimaryColor),
-                    verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    LockCountDown(
-                        lockStatus.locksAt,
-                        onTimeOut = viewModel::retrieveOwnerState
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    FullScreenButton(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = VaultColors.PrimaryColor,
-                        borderColor = Color.White,
-                        border = true,
-                        contentPadding = PaddingValues(vertical = 12.dp),
-                        onClick = viewModel::initLock
-                    ) {
-                        Text(
-                            text = stringResource(R.string.lock),
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+                ProlongUnlockPrompt(
+                    lockStatus.locksAt,
+                    onTimeOut = viewModel::onUnlockExpired
+                )
             }
 
             is LockScreenState.LockStatus.UnlockInProgress -> {
@@ -139,30 +109,16 @@ fun LockedScreen(
                                     verificationId,
                                     facetecData
                                 )
+                            },
+                            onCancelled = {
+                                viewModel.resetToLocked()
                             }
                         )
                     }
 
                     is Resource.Error -> {
                         DisplayError(
-                            modifier = Modifier.background(color = VaultColors.PrimaryColor),
-                            errorMessage = lockStatus.apiCall.getErrorMessage(context),
-                            dismissAction = null,
-                            retryAction = viewModel::initUnlock
-                        )
-                    }
-
-                    else -> {
-                        LoadingIndicator()
-                    }
-                }
-            }
-
-            is LockScreenState.LockStatus.LockInProgress -> {
-                when (lockStatus.apiCall) {
-                    is Resource.Error -> {
-                        DisplayError(
-                            modifier = Modifier.background(color = VaultColors.PrimaryColor),
+                            modifier = Modifier.background(color = Color.White),
                             errorMessage = lockStatus.apiCall.getErrorMessage(context),
                             dismissAction = null,
                             retryAction = viewModel::initUnlock
@@ -187,14 +143,14 @@ private fun LoadingIndicator() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VaultColors.PrimaryColor),
+            .background(color = Color.White),
     ) {
         CircularProgressIndicator(
             modifier = Modifier
                 .size(72.dp)
                 .align(Alignment.Center),
             strokeWidth = 8.dp,
-            color = Color.White
+            color = Color.Black
         )
     }
 }

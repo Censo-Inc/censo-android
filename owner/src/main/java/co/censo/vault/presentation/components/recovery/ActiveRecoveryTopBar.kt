@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.components.recovery
 
-import FullScreenButton
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -58,12 +58,12 @@ fun ActiveRecoveryTopBar(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        FullScreenButton(
+        StandardButton(
             modifier = Modifier.padding(horizontal = 72.dp),
             color = VaultColors.PrimaryColor,
             borderColor = Color.White,
             border = true,
-            contentPadding = PaddingValues(vertical = 0.dp),
+            contentPadding = PaddingValues(vertical = 0.dp, horizontal = 20.dp),
             onClick = onCancelRecovery,
         ) {
             Text(

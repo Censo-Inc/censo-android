@@ -1,14 +1,16 @@
-package co.censo.vault.presentation.components
+package co.censo.vault.presentation.enter_phrase.components
 
-import FullScreenButton
+import StandardButton
 import LearnMore
+import MessageText
+import TitleText
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,11 +25,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -46,27 +43,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cash.z.ecc.android.bip39.Mnemonics
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.util.projectLog
-import co.censo.vault.R
-import kotlinx.coroutines.coroutineScope
+import co.censo.vault.R as VaultR
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SeedPhraseVerificationReview(
+fun ReviewSeedPhraseUI(
     valid: Boolean,
     phraseWords: List<String>,
-    flipPhraseValidity: () -> Unit
+    saveSeedPhrase: () -> Unit,
+    editSeedPhrase: () -> Unit
 ) {
 
-    val drawableResource = if (valid) R.drawable.check_circle else R.drawable.warning
-    val title = if (valid) R.string.seed_phrase_verified else R.string.review_seed_phrase
+    val drawableResource = if (valid) VaultR.drawable.check_circle else VaultR.drawable.warning
+    val title = if (valid) VaultR.string.seed_phrase_verified else VaultR.string.review_seed_phrase
 
     val message =
-        if (valid) R.string.censo_has_verified_that_this_is_a_valid_seed_phrase
-        else R.string.censo_has_detected_that_this_is_not_a_valid_seed_phrase
+        if (valid) VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase
+        else VaultR.string.censo_has_detected_that_this_is_not_a_valid_seed_phrase
 
-    val buttonText = if (valid) R.string.save_seed_phrase else R.string.submit_again
+    val buttonText = if (valid) VaultR.string.save_seed_phrase else VaultR.string.submit_again
+
+    val buttonAction = if (valid) saveSeedPhrase else editSeedPhrase
 
     val horizontalPadding = 32.dp
 
@@ -89,23 +87,16 @@ fun SeedPhraseVerificationReview(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            modifier = Modifier.padding(horizontal = horizontalPadding).clickable { flipPhraseValidity() },
-            text = stringResource(id = title),
-            color = Color.Black,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W600,
-            textAlign = TextAlign.Center
+        TitleText(
+            modifier = Modifier.padding(horizontal = horizontalPadding),
+            title = title
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
+        MessageText(
             modifier = Modifier.padding(horizontal = horizontalPadding),
-            text = stringResource(id = message),
-            color = Color.Black,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center
+            message = message
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -117,7 +108,9 @@ fun SeedPhraseVerificationReview(
             val coroutineScope = rememberCoroutineScope()
 
             IconButton(
-                modifier = Modifier.weight(0.1f).padding(start = 8.dp),
+                modifier = Modifier
+                    .weight(0.1f)
+                    .padding(start = 8.dp),
                 onClick = {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
@@ -125,7 +118,7 @@ fun SeedPhraseVerificationReview(
                 }) {
                 Icon(
                     painter = painterResource(co.censo.shared.R.drawable.arrow_left),
-                    contentDescription = "scroll one word left",
+                    contentDescription = stringResource(VaultR.string.move_one_word_back),
                     tint = Color.Black
                 )
             }
@@ -136,39 +129,15 @@ fun SeedPhraseVerificationReview(
                 pageCount = phraseWords.size,
                 state = pagerState
             ) { page ->
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
-                        .background(
-                            color = Color.Transparent,
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                        .border(
-                            border = BorderStroke(1.dp, Color.Black),
-                            shape = RoundedCornerShape(24.dp)
-                        ),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceAround
-                ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${page + 1}${getSuffixForWordIndex(page + 1)} word",
-                        fontSize = 20.sp
-                    )
-                    Text(
-                        text = phraseWords[page],
-                        modifier = Modifier
-                            .padding(all = 48.dp)
-                            .fillMaxWidth(),
-                        fontSize = 28.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.W600
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+                ViewPhraseWord(
+                    index = page,
+                    phraseWord = phraseWords[page]
+                )
             }
             IconButton(
-                modifier = Modifier.weight(0.1f).padding(end = 8.dp),
+                modifier = Modifier
+                    .weight(0.1f)
+                    .padding(end = 8.dp),
                 onClick = {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -176,7 +145,7 @@ fun SeedPhraseVerificationReview(
                 }) {
                 Icon(
                     painter = painterResource(co.censo.shared.R.drawable.arrow_right),
-                    contentDescription = "scroll one word right",
+                    contentDescription = stringResource(VaultR.string.move_one_word_forward),
                     tint = Color.Black
                 )
             }
@@ -184,11 +153,11 @@ fun SeedPhraseVerificationReview(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        FullScreenButton(
-            modifier = Modifier.padding(horizontal = horizontalPadding + 12.dp),
+        StandardButton(
+            modifier = Modifier.padding(horizontal = horizontalPadding + 12.dp).fillMaxWidth(),
             color = Color.Black,
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-            onClick = { /*TODO*/ }) {
+            onClick = buttonAction) {
             Text(
                 text = stringResource(id = buttonText),
                 color = Color.White,
@@ -221,9 +190,78 @@ fun PreviewSeedPhraseVerification() {
 
     val words = String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars).split(" ")
 
-    SeedPhraseVerificationReview(
+    ReviewSeedPhraseUI(
         valid = true,
-        phraseWords = words.toList()
+        phraseWords = words.toList(),
+        saveSeedPhrase = {},
+        editSeedPhrase = {}
+    )
+}
+
+@Composable
+fun ViewPhraseWord(
+    modifier: Modifier = Modifier,
+    index: Int,
+    phraseWord: String,
+    editWord: (() -> Unit)? = null
+) {
+
+    val context = LocalContext.current
+
+    Column(
+        modifier = modifier
+            .padding(horizontal = 12.dp, vertical = 12.dp)
+            .background(
+                color = SharedColors.WordBoxBackground,
+                shape = RoundedCornerShape(24.dp)
+            )
+            .border(
+                border = BorderStroke(1.dp, SharedColors.BorderGrey),
+                shape = RoundedCornerShape(24.dp)
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceAround
+    ) {
+        val verticalSpacing = 20.dp
+
+        Spacer(modifier = Modifier.height(verticalSpacing))
+        Text(
+            text = index.indexToWordText(context),
+            fontSize = 20.sp
+        )
+        Spacer(modifier = Modifier.height(verticalSpacing))
+        Text(
+            text = phraseWord,
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+            fontSize = 28.sp,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.W600
+        )
+        Spacer(modifier = Modifier.height(verticalSpacing))
+        editWord?.let {
+            IconButton(onClick = it) {
+                Icon(
+                    painter = painterResource(id = co.censo.shared.R.drawable.edit_icon),
+                    contentDescription = stringResource(VaultR.string.edit_word),
+                    tint = SharedColors.IconGrey
+                )
+            }
+            Spacer(modifier = Modifier.height(verticalSpacing))
+        } ?: Spacer(modifier = Modifier.height(verticalSpacing / 4))
+    }
+}
+
+fun Int.indexToWordText(context: Context) =
+    context.getString(VaultR.string.word, this + 1, getSuffixForWordIndex(this + 1))
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewViewPhraseWord() {
+    ViewPhraseWord(
+        index = 3,
+        phraseWord = "carbon"
     ) {
 
     }

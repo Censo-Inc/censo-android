@@ -1,6 +1,6 @@
 package co.censo.vault.presentation.components.recovery
 
-import FullScreenButton
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,12 +54,13 @@ fun AccessPhrasesScreen(
 
         val available = recovery.status == RecoveryStatus.Available
 
-        FullScreenButton(
+        StandardButton(
             modifier = Modifier.padding(horizontal = 24.dp),
             color = Color.White,
+            disabledColor = Color.White.copy(alpha = 0.5f),
             borderColor = Color.White,
             border = false,
-            contentPadding = PaddingValues(vertical = 12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             onClick = onRecoverPhrases,
             enabled = available
         ) {

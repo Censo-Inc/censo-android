@@ -1,6 +1,6 @@
 package co.censo.guardian.presentation.home
 
-import FullScreenButton
+import StandardButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -95,36 +95,42 @@ fun GuardianHomeScreen(
                 state.acceptGuardianResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.acceptGuardianResource.getErrorMessage(context),
-                        dismissAction = { viewModel.showCloseConfirmationDialog() },
+                        dismissAction = { viewModel.resetAcceptGuardianResource() },
                     ) { viewModel.acceptGuardianship() }
                 }
 
                 state.submitVerificationResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.submitVerificationResource.getErrorMessage(context),
-                        dismissAction = { viewModel.showCloseConfirmationDialog() },
+                        dismissAction = { viewModel.resetSubmitVerificationResource() },
                     ) { viewModel.submitVerificationCode() }
                 }
 
                 state.storeRecoveryTotpSecretResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(context),
-                        dismissAction = { viewModel.showCloseConfirmationDialog() },
+                        dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
                     ) { viewModel.storeRecoveryTotpSecret() }
                 }
 
                 state.approveRecoveryResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.approveRecoveryResource.getErrorMessage(context),
-                        dismissAction = { viewModel.showCloseConfirmationDialog() },
-                    ) { viewModel.retrieveApproverState() }
+                        dismissAction = { viewModel.resetApproveRecoveryResource() },
+                    ) {
+                        viewModel.resetApproveRecoveryResource()
+                        viewModel.retrieveApproverState()
+                    }
                 }
 
                 state.rejectRecoveryResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
-                        dismissAction = { viewModel.showCloseConfirmationDialog() },
-                    ) { viewModel.retrieveApproverState() }
+                        dismissAction = { viewModel.resetRejectRecoveryResource() },
+                    ) {
+                        viewModel.resetRejectRecoveryResource()
+                        viewModel.retrieveApproverState()
+                    }
                 }
 
                 else -> {
@@ -195,7 +201,8 @@ fun GuardianHomeScreen(
                             GuardianUIState.INVITE_READY -> {
                                 InviteReady(
                                     onAccept = viewModel::acceptGuardianship,
-                                    onCancel = viewModel::cancelOnboarding
+                                    onCancel = viewModel::cancelOnboarding,
+                                    enabled = state.acceptGuardianResource !is Resource.Loading
                                 )
                             }
 
@@ -377,7 +384,8 @@ private fun InvitesOnly() {
 @Composable
 private fun InviteReady(
     onAccept: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    enabled: Boolean
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 30.dp),
@@ -389,13 +397,14 @@ private fun InviteReady(
 
     Spacer(modifier = Modifier.height(48.dp))
 
-    FullScreenButton(
+    StandardButton(
         modifier = Modifier.padding(horizontal = 24.dp),
         color = GuardianColors.PrimaryColor,
         borderColor = Color.White,
         border = false,
-        contentPadding = PaddingValues(vertical = 12.dp),
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
         onClick = onAccept,
+        enabled = enabled
     )
     {
         Text(
@@ -427,12 +436,12 @@ private fun RecoveryRequested(
 
     Spacer(modifier = Modifier.height(48.dp))
 
-    FullScreenButton(
+    StandardButton(
         modifier = Modifier.padding(horizontal = 24.dp),
         color = GuardianColors.PrimaryColor,
         borderColor = Color.White,
         border = false,
-        contentPadding = PaddingValues(vertical = 12.dp),
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
         onClick = onContinue,
     )
     {

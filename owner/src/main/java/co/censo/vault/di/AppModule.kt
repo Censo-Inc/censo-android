@@ -13,10 +13,14 @@ import co.censo.shared.data.repository.OwnerRepositoryImpl
 import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
+import co.censo.shared.data.storage.CloudStorage
+import co.censo.shared.data.storage.GoogleDriveStorage
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.SecurePreferencesImpl
 import co.censo.shared.data.storage.Storage
+import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CountDownTimerImpl
+import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.vault.BuildConfig
 import co.censo.vault.data.repository.FacetecRepository
@@ -42,21 +46,40 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSecureStorage(@ApplicationContext  applicationContext: Context) : SecurePreferences {
+    fun provideSecureStorage(@ApplicationContext applicationContext: Context): SecurePreferences {
         return SecurePreferencesImpl(applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCloudStorage(@ApplicationContext applicationContext: Context) : CloudStorage {
+        return GoogleDriveStorage(applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAuthUtil(
+        @ApplicationContext applicationContext: Context,
+        secureStorage: SecurePreferences
+    ): AuthUtil {
+        return GoogleAuth(applicationContext, secureStorage)
     }
 
     @Singleton
     @Provides
     fun provideApiService(
         storage: Storage,
-        @ApplicationContext applicationContext: Context
+        @ApplicationContext applicationContext: Context,
+        authUtil: AuthUtil,
+        secureStorage: SecurePreferences
     ): ApiService {
         return ApiService.create(
             storage = storage,
             context = applicationContext,
             versionCode = BuildConfig.VERSION_CODE.toString(),
-            packageName = BuildConfig.APPLICATION_ID
+            packageName = BuildConfig.APPLICATION_ID,
+            authUtil = authUtil,
+            secureStorage = secureStorage
         )
     }
 
@@ -65,32 +88,37 @@ object AppModule {
     fun provideOwnerRepository(
         apiService: ApiService,
         storage: Storage,
-        secureStorage: SecurePreferences
+        secureStorage: SecurePreferences,
+        authUtil: AuthUtil,
+        keyRepository: KeyRepository
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             apiService = apiService,
             storage = storage,
-            secureStorage = secureStorage
+            secureStorage = secureStorage,
+            authUtil = authUtil,
+            keyRepository = keyRepository
         )
     }
 
     @Singleton
     @Provides
     fun providesKeyRepository(
-        storage: Storage
+        storage: Storage,
+        cloudStorage: CloudStorage
     ): KeyRepository {
-        return KeyRepositoryImpl(storage)
+        return KeyRepositoryImpl(storage, cloudStorage)
     }
 
     @Singleton
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
-        storage: Storage
+        storage: Storage,
     ): GuardianRepository {
         return GuardianRepositoryImpl(
             storage = storage,
-            apiService = apiService
+            apiService = apiService,
         )
     }
 
@@ -112,7 +140,7 @@ object AppModule {
     }
 
     @Provides
-    fun provideCountdownTimer() : VaultCountDownTimer {
+    fun provideCountdownTimer(): VaultCountDownTimer {
         return CountDownTimerImpl()
     }
 

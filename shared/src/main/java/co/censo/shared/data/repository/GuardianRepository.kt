@@ -1,7 +1,6 @@
 package co.censo.shared.data.repository
 
 import Base58EncodedGuardianPublicKey
-import Base58EncodedPrivateKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import InvitationId
@@ -10,7 +9,6 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiRequest
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
@@ -42,9 +40,6 @@ interface GuardianRepository {
         submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
     ): Resource<SubmitGuardianVerificationApiResponse>
 
-    suspend fun userHasKeySavedInCloud(): Boolean
-    suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey)
-    suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey
     fun signVerificationCode(
         verificationCode: String,
         encryptionKey: EncryptionKey
@@ -77,7 +72,8 @@ interface GuardianRepository {
 }
 
 class GuardianRepositoryImpl(
-    private val apiService: ApiService, private val storage: Storage
+    private val apiService: ApiService,
+    private val storage: Storage
 ) : GuardianRepository, BaseRepository() {
 
     override fun signVerificationCode(
@@ -136,18 +132,6 @@ class GuardianRepositoryImpl(
                 submitGuardianVerificationApiRequest = submitGuardianVerificationRequest
             )
         }
-    }
-
-    override suspend fun userHasKeySavedInCloud(): Boolean {
-        return storage.retrievePrivateKey().isNotEmpty()
-    }
-
-    override suspend fun saveKeyInCloud(key: Base58EncodedPrivateKey) {
-        storage.savePrivateKey(key.value)
-    }
-
-    override suspend fun retrieveKeyFromCloud(): Base58EncodedPrivateKey {
-        return Base58EncodedPrivateKey(storage.retrievePrivateKey())
     }
 
     override fun saveParticipantId(participantId: String) {

@@ -3,23 +3,26 @@ package co.censo.vault.presentation.facetec_auth
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.vault.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.projectLog
+import co.censo.vault.R
 import co.censo.vault.data.repository.FacetecRepository
+import com.facetec.sdk.FaceTecCancelButtonCustomization
+import com.facetec.sdk.FaceTecCustomization
 import com.facetec.sdk.FaceTecFaceScanProcessor
 import com.facetec.sdk.FaceTecFaceScanResultCallback
 import com.facetec.sdk.FaceTecSessionResult
 import com.facetec.sdk.FaceTecSessionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.util.Base64
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -88,6 +91,10 @@ class FacetecAuthViewModel @Inject constructor(
         state = state.copy(startAuth = Resource.Uninitialized)
     }
 
+    fun resetUserCanceled() {
+        state = state.copy(userCancelled = Resource.Uninitialized)
+    }
+
     fun resetSubmitResult() {
         state = state.copy(submitResultResponse = Resource.Uninitialized)
     }
@@ -98,8 +105,14 @@ class FacetecAuthViewModel @Inject constructor(
     ) {
         if (sessionResult?.status != FaceTecSessionStatus.SESSION_COMPLETED_SUCCESSFULLY) {
             scanResultCallback?.cancel()
-            state =
+            state = if (sessionResult?.status == FaceTecSessionStatus.USER_CANCELLED) {
+                state.copy(
+                    submitResultResponse = Resource.Uninitialized,
+                    userCancelled = Resource.Success(Unit)
+                )
+            } else {
                 state.copy(submitResultResponse = Resource.Error(exception = Exception("Facescan failed to complete. No result.")))
+            }
             return
         }
 
@@ -137,5 +150,43 @@ class FacetecAuthViewModel @Inject constructor(
             }
 
         }
+    }
+
+    fun facetecCustomizations(): FaceTecCustomization {
+        val customization = FaceTecCustomization()
+
+        customization.frameCustomization.borderColor = Color.Black.toArgb()
+        customization.frameCustomization.cornerRadius = 20
+
+        customization.overlayCustomization.showBrandingImage = false
+
+        customization.feedbackCustomization.textColor = Color.White.toArgb()
+        customization.feedbackCustomization.backgroundColors = Color.Black.toArgb()
+        customization.feedbackCustomization.cornerRadius = 20;
+
+        // guidance screen
+        customization.guidanceCustomization.buttonTextNormalColor = Color.White.toArgb()
+        customization.guidanceCustomization.buttonBackgroundNormalColor = Color.Black.toArgb()
+        customization.guidanceCustomization.buttonTextDisabledColor = Color.White.toArgb()
+        customization.guidanceCustomization.buttonBackgroundDisabledColor = SharedColors.GreyText.toArgb()
+        customization.guidanceCustomization.buttonTextHighlightColor = Color.White.toArgb()
+        customization.guidanceCustomization.buttonBackgroundHighlightColor = Color.Black.copy(alpha = 0.9f).toArgb()
+        customization.guidanceCustomization.cameraPermissionsScreenImage = R.drawable.camera
+
+        customization.guidanceCustomization.foregroundColor = Color.Black.toArgb()
+        customization.guidanceCustomization.retryScreenImageBorderColor = Color.Black.toArgb()
+
+        customization.ovalCustomization.strokeColor = Color.Black.toArgb()
+        customization.ovalCustomization.progressColor1 = Color.Black.toArgb()
+        customization.ovalCustomization.progressColor2 = Color.Black.copy(alpha = 0.9f).toArgb()
+
+        customization.resultScreenCustomization.foregroundColor = Color.Black.toArgb()
+        customization.resultScreenCustomization.uploadProgressFillColor = Color.Black.toArgb()
+        customization.resultScreenCustomization.uploadProgressTrackColor = Color.Black.copy(alpha = 0.5f).toArgb()
+        customization.resultScreenCustomization.activityIndicatorColor = Color.Black.toArgb()
+        customization.resultScreenCustomization.resultAnimationBackgroundColor = Color.Black.toArgb()
+        customization.resultScreenCustomization.resultAnimationForegroundColor = Color.White.toArgb()
+
+        return customization
     }
 }
