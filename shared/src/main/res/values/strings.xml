@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="google_auth_login">Login with Google</string>
+    <string name="google_auth_login">Sign in with Google</string>
     <string name="entrance_screen">Entrance Screen</string>
     <string name="retry">Retry</string>
     <string name="dismiss">Dismiss</string>
@@ -14,8 +14,10 @@
     <string name="more_information">More information</string>
     <string name="learn_more">Learn more</string>
     <string name="tag_line">sensible crypto security</string>
-    <string name="no_personal_info">No personal info required, ever.</string>
-    <string name="multiple_layers">Multiple layers of authentication.</string>
+    <string name="no_personal_info">No personal info\nrequired, ever.</string>
+    <string name="multiple_layers">Multiple layers of\nauthentication.</string>
     <string name="terms">Terms</string>
     <string name="privacy">Privacy</string>
+    <string name="why_google">Why Google?</string>
+    <string name="sensible_crypto_security">sensible crypto security</string>
 </resources>

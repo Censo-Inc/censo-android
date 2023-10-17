@@ -1,5 +1,6 @@
 package co.censo.shared.presentation.entrance
 
+import StandardButton
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
@@ -13,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,13 +22,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,7 +57,6 @@ import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntranceScreen(
     navController: NavController,
@@ -172,7 +171,7 @@ fun EntranceScreen(
                             .size(72.dp)
                             .align(Alignment.Center),
                         strokeWidth = 8.dp,
-                        color = Color.Red
+                        color = Color.Black
                     )
                 }
             }
@@ -209,33 +208,53 @@ fun OwnerEntranceStandardUI(
     Column(
         modifier = Modifier
             .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(100.dp))
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = null, Modifier.padding(all = 20.dp)
+            contentDescription = null,
         )
+        Spacer(modifier = Modifier.height(24.dp))
         Image(
             painter = painterResource(id = R.drawable.censo_text),
-            contentDescription = R.string.app_name.toString(),
-            Modifier.padding(all = 15.dp)
+            contentDescription = null,
         )
-        Button(
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(R.string.sensible_crypto_security),
+            fontWeight = FontWeight.W600,
+            fontSize = 24.sp,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        StandardButton(
             onClick = authenticate,
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = Color.Black,
-                contentColor = Color.White
+            contentPadding = PaddingValues(
+                horizontal = 48.dp,
+                vertical = 16.dp
             ),
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(vertical = 12.dp)
         ) {
-            Text(
-                text = stringResource(R.string.google_auth_login),
-                fontWeight = FontWeight.Medium,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(all = 8.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    modifier = Modifier.size(16.dp),
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = stringResource(R.string.google_auth_login),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -247,17 +266,25 @@ fun OwnerEntranceStandardUI(
                     .height(height = 34.dp)
                     .padding(all = 8.dp)
             )
-            Text("Why Google?")
+            Text(
+                text = stringResource(R.string.why_google),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.W500
+            )
         }
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.weight(0.1f))
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(all = 8.dp)
-                    .fillMaxWidth(0.5f)
+                    .weight(0.7f)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.eyeslash),
@@ -273,8 +300,7 @@ fun OwnerEntranceStandardUI(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(all = 8.dp)
-                    .fillMaxWidth(1.0f)
+                    .weight(0.7f)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.safe),
@@ -287,21 +313,26 @@ fun OwnerEntranceStandardUI(
                     modifier = Modifier.padding(all = 12.dp)
                 )
             }
+            Spacer(modifier = Modifier.weight(0.1f))
         }
-        Divider(modifier = Modifier.padding(all = 32.dp))
-        Row {
+        Divider(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp))
+        Row(
+            modifier = Modifier.padding(
+                start = 32.dp,
+                end = 32.dp,
+                top = 20.dp,
+                bottom = 32.dp
+            )
+        ) {
             Text(
                 text = stringResource(R.string.terms),
-                modifier = Modifier
-                    .clickable { uriHandler.openUri("https://censo.co/terms/") }
-                    .padding(all = 16.dp),
+                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/terms/") },
                 fontWeight = FontWeight.SemiBold
             )
+            Spacer(modifier = Modifier.width(24.dp))
             Text(
                 text = stringResource(R.string.privacy),
-                modifier = Modifier
-                    .clickable { uriHandler.openUri("https://censo.co/privacy/") }
-                    .padding(all = 16.dp),
+                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/privacy/") },
                 fontWeight = FontWeight.SemiBold
             )
         }
