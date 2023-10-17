@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors.ErrorRed
 import co.censo.shared.presentation.components.CodeEntry
 import co.censo.vault.R
-import co.censo.vault.presentation.VaultColors
 import androidx.compose.material3.Surface
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun RecoveryApprovalCodeVerificationModal(
@@ -48,7 +48,7 @@ fun RecoveryApprovalCodeVerificationModal(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .background(color = VaultColors.PrimaryColor),
+                .background(color = Color.White),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -57,7 +57,7 @@ fun RecoveryApprovalCodeVerificationModal(
                 Text(
                     modifier = Modifier.padding(16.dp),
                     text = "${stringResource(R.string.enter_code_you_got_from)} $approverLabel",
-                    color = Color.White,
+                    color = Color.Black,
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -70,7 +70,9 @@ fun RecoveryApprovalCodeVerificationModal(
                     isLoading = isLoading,
                     value = value,
                     onValueChange = onValueChanged,
-                    primaryColor = Color.White
+                    primaryColor = Color.Black,
+                    borderColor = SharedColors.BorderGrey,
+                    backgroundColor = SharedColors.WordBoxBackground
                 )
 
                 Spacer(modifier = Modifier.height(36.dp))
@@ -79,13 +81,13 @@ fun RecoveryApprovalCodeVerificationModal(
             if (isWaitingForVerification) {
                 Text(
                     text = stringResource(R.string.waiting_for_approver_to_verify_the_code),
-                    color = Color.White,
+                    color = Color.Black,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 CircularProgressIndicator(
                     modifier = Modifier.size(32.dp),
-                    color = Color.White
+                    color = Color.Black
                 )
             }
 
@@ -104,7 +106,7 @@ fun RecoveryApprovalCodeVerificationModal(
             TextButton(onClick = onDismiss) {
                 Text(
                     text = stringResource(R.string.dismiss),
-                    color = Color.White
+                    color = Color.Black
                 )
             }
         }
@@ -120,7 +122,7 @@ fun RecoveryApprovalCodeVerificationScreenPreview() {
         isWaitingForVerification = false,
         isVerificationRejected = false,
         validCodeLength = 6,
-        value = "1234",
+        value = "123",
         onValueChanged = {},
         onDismiss = {}
     )

@@ -1,10 +1,12 @@
 package co.censo.shared.presentation.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,7 +29,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.SharedColors.DividerGray
 
 @Composable
 fun CodeEntry(
@@ -35,7 +36,9 @@ fun CodeEntry(
     value: String,
     onValueChange: (String) -> Unit,
     isLoading: Boolean,
-    primaryColor: Color
+    primaryColor: Color,
+    borderColor: Color,
+    backgroundColor: Color
 ) {
     Row(
         Modifier
@@ -48,7 +51,9 @@ fun CodeEntry(
             modifier = Modifier.fillMaxWidth(),
             onValueChange = onValueChange,
             isLoading = isLoading,
-            primaryColor = primaryColor
+            primaryColor = primaryColor,
+            borderColor = borderColor,
+            backgroundColor = backgroundColor
         )
     }
 }
@@ -60,17 +65,20 @@ fun CodeInputField(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     isLoading: Boolean,
-    primaryColor: Color
+    primaryColor: Color,
+    borderColor: Color,
+    backgroundColor: Color
 ) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(key1 = Unit) {
             focusRequester.requestFocus()
     }
 
-    val boxHeight = 82.dp
-    val boxWidth = 44.dp
+    val boxHeight = 88.dp
+    val boxWidth = 40.dp
+    val spaceBetweenBoxes = 14.dp
 
-    val spaceBetweenBoxes = 16.dp
+    val roundCorner = 20.dp
 
     BasicTextField(
         modifier = modifier.focusRequester(focusRequester),
@@ -85,37 +93,59 @@ fun CodeInputField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         decorationBox = {
             Row(
-                Modifier.size(width = (boxWidth + spaceBetweenBoxes) * length, height = boxHeight),
+                Modifier
+                    .size(width = (boxWidth * length + spaceBetweenBoxes * (length - 1) + roundCorner * 2), height = boxHeight)
+                    .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(roundCorner))
+                    .background(color = backgroundColor, shape = RoundedCornerShape(roundCorner)),
                 horizontalArrangement = Arrangement.SpaceBetween,
+
             ) {
                 repeat(length) { index ->
                     val shouldHaveFocusedBorder =
                         index == value.length || !value.getOrNull(index)?.toString().isNullOrEmpty()
 
-                    val borderModifier = Modifier.border(
-                        2.dp,
-                        color = if (shouldHaveFocusedBorder) primaryColor else DividerGray,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-
-                    // To achieve increased space between the 3rd and 4th boxes
-                    val fourthBoxIndex = 3
-                    if (index == fourthBoxIndex) {
-                        Spacer(modifier = Modifier.width(1.dp))
+                    // spacer in front
+                    if (index == 0) {
+                        Spacer(
+                            modifier = Modifier.width(roundCorner),
+                        )
                     }
 
+                    // separator between numbers
+                    if (index != 0) {
+                        Box(
+                            modifier = Modifier.size(spaceBetweenBoxes, boxHeight),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxHeight().padding(vertical = 22.dp)
+                                    .width(1.dp)
+                                    .background(color = borderColor)
+                            )
+                        }
+                    }
+
+                    // number
                     Box(
-                        modifier = borderModifier
-                            .size(boxWidth, boxHeight),
+                        modifier = Modifier.size(boxWidth, boxHeight),
                         contentAlignment = Alignment.Center
                     ) {
+                        val isFilled = value.getOrNull(index) != null
                         Text(
                             modifier = Modifier.padding(2.dp),
-                            text = value.getOrNull(index)?.toString() ?: "",
+                            text = value.getOrNull(index)?.toString() ?: "_",
                             textAlign = TextAlign.Center,
-                            fontSize = 48.nonScaledSp,
-                            fontWeight = FontWeight.Bold,
-                            color = primaryColor
+                            fontSize = 40.nonScaledSp,
+                            fontWeight = if (isFilled) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isFilled || shouldHaveFocusedBorder) primaryColor else borderColor
+                        )
+                    }
+
+                    // spacer in the end
+                    if (index == length - 1) {
+                        Spacer(
+                            modifier = Modifier.width(roundCorner),
                         )
                     }
                 }

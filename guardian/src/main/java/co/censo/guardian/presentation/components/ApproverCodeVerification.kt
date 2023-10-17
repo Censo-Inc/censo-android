@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.guardian.R
 import co.censo.guardian.presentation.GuardianColors
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.SharedColors.ErrorRed
 import co.censo.shared.presentation.components.CodeEntry
 
@@ -60,7 +61,9 @@ fun ApproverCodeVerification(
                 isLoading = isLoading,
                 value = value,
                 onValueChange = onValueChanged,
-                primaryColor = GuardianColors.PrimaryColor
+                primaryColor = GuardianColors.PrimaryColor,
+                borderColor = SharedColors.BorderGrey,
+                backgroundColor = SharedColors.WordBoxBackground
             )
         } else {
             Spacer(modifier = Modifier.height(36.dp))
