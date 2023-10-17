@@ -99,13 +99,17 @@ class EntranceViewModel @Inject constructor(
 
     private fun checkUserHasRespondedToNotificationOptIn() {
         viewModelScope.launch {
-            state = if (pushRepository.userHasSeenPushDialog()) {
+            if (pushRepository.userHasSeenPushDialog()) {
                 submitNotificationTokenForRegistration()
-                state.copy(
-                    userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
-                )
+                if (state.ownerApp) {
+                    retrieveOwnerState()
+                } else {
+                    state = state.copy(
+                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                    )
+                }
             } else {
-                state.copy(
+                state = state.copy(
                     showPushNotificationsDialog = Resource.Success(Unit)
                 )
             }
@@ -206,7 +210,20 @@ class EntranceViewModel @Inject constructor(
                 val ownerState = ownerStateResource.data
 
                 val destination =
-                    if (ownerState is OwnerState.Ready) {
+                    when (ownerState) {
+                        is OwnerState.Ready -> {
+                            if (ownerState.vault.secrets.isNotEmpty()) {
+                                SharedScreen.OwnerVaultScreen.route
+                            } else {
+                                SharedScreen.OwnerWelcomeScreen.route
+                            }
+                        }
+
+                        else -> {
+                            SharedScreen.OwnerWelcomeScreen.route
+                        }
+                    }
+                    if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
                         SharedScreen.OwnerVaultScreen.route
                     } else {
                         SharedScreen.OwnerWelcomeScreen.route

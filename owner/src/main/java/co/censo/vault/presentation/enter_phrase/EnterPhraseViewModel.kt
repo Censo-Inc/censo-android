@@ -172,7 +172,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun updateNickname(updatedNickName: String) {
-        state = state.copy(nickName = updatedNickName.trim())
+        state = state.copy(nickName = updatedNickName)
 
     }
 

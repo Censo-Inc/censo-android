@@ -1,25 +1,24 @@
 package co.censo.vault.presentation.welcome
 
+import LearnMore
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -90,7 +89,6 @@ fun WelcomeScreen(
 
         else -> {
             state.ownerStateResource.data?.also { ownerState ->
-
                 when (ownerState) {
                     is OwnerState.Initial, is OwnerState.GuardianSetup -> {
                         WelcomeScreenUI(currentStep = WelcomeStep.Authenticated) {
@@ -166,29 +164,29 @@ fun WelcomeScreenUI(
 ) {
     Column(
         Modifier
-            .fillMaxSize()
-            .background(color = Color.White),
-        verticalArrangement = Arrangement.Center,
+            .background(color = Color.White)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             stringResource(R.string.welcome_to_censo),
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Left,
+            textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(all = 32.dp)
-                .width(IntrinsicSize.Max)
+                .fillMaxWidth()
         )
         Text(
             stringResource(id = R.string.welcome_blurb),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Left,
+            textAlign = TextAlign.Start,
             modifier = Modifier.padding(horizontal = 32.dp)
         )
         Column(
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(32.dp)
         ) {
@@ -218,40 +216,35 @@ fun WelcomeScreenUI(
             )
             Divider()
         }
-
+        
         val buttonText = when (currentStep) {
             WelcomeStep.Authenticated -> stringResource(id = R.string.get_started)
-            WelcomeStep.FaceScanned -> stringResource(id = R.string.scan_your_face)
-            WelcomeStep.PhraseEntered -> stringResource(id = R.string.enter_your_phrase)
+            WelcomeStep.FaceScanned -> stringResource(id = R.string.enter_your_phrase)
+            WelcomeStep.PhraseEntered -> stringResource(id = R.string.add_approvers)
         }
 
-        Button(
+        StandardButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(vertical = 8.dp),
             onClick = navigateToPlanSetup,
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = Color.Black,
-                contentColor = Color.White
-            ),
-            modifier = Modifier.padding(32.dp)
+            color = Color.Black
         ) {
             Text(
                 text = buttonText,
+                color = Color.White,
                 fontWeight = FontWeight.Medium,
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 modifier = Modifier.padding(all = 8.dp)
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = stringResource(R.string.info),
-                modifier = Modifier
-                    .height(26.dp)
-                    .padding(6.dp)
-            )
-            Text(stringResource(id = R.string.info))
+
+        LearnMore {
+
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 

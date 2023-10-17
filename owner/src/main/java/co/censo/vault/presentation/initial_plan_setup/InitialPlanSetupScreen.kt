@@ -47,7 +47,6 @@ import androidx.navigation.NavController
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
@@ -68,7 +67,7 @@ fun InitialPlanSetupScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
-            navController.navigate(SharedScreen.HomeRoute.route)
+            navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
             viewModel.resetComplete()
         }
     }
@@ -130,7 +129,7 @@ fun InitialPlanSetupScreen(
                             FacetecAuth(
                                 onFaceScanReady = viewModel::onPolicySetupCreationFaceScanReady,
                                 onCancelled = {
-                                    navController.navigate(SharedScreen.HomeRoute.route)
+                                    navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
                                     viewModel.resetComplete()
                                 }
                             )
