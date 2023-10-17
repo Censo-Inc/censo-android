@@ -34,7 +34,7 @@
     <string name="display_qr_code">Display this QR code for the owner of social policy to scan</string>
     <string name="login">Login</string>
     <string name="authenticate_with_onetap">Authenticate with OneTap</string>
-    <string name="become_an_approver">Become an Approver</string>
+    <string name="become_an_approver">Become an approver</string>
     <string name="approver_verification_code_text">Please enter the code provided by the Vault owner</string>
     <string name="waiting_for_owner_verify_code">Waiting for owner to verify the code.</string>
     <string name="submit_code_error_occurred">The code you entered is not correct. Please try again.</string>
@@ -45,4 +45,22 @@
     <string name="default_notification_channel_name" translatable="true">Notifications</string>
 
     <string name="access_approval">Access Approval</string>
+    <string name="the_code_you_entered_in_not_correct_please_try_again">The code you entered in not correct. Please try again.</string>
+    <string name="close">Close</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="do_you_really_want_to_cancel">Do you really want to cancel?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="enter_the_digit_code_from_the_seed_phrase_owner">Enter the %1$s-digit code from the seed phrase owner</string>
+    <string name="verifying_code">Verifying Code...</string>
+    <string name="loading">Loading...</string>
+    <string name="tell_seed_phrase_owner_this_digit_code_to_approve_their_access">Tell seed phrase owner this %1$s-digit code to approve their access</string>
+    <string name="link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner">Link you have opened does not appear to be correct. Please contact seed phrase owner</string>
+    <string name="access_approved">Access approved!</string>
+    <string name="you_are_fully_set">You are fully set!</string>
+    <string name="when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access">When needed, the seed phrase owner will get in touch with you to approve their access</string>
+    <string name="this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner">This application can only be used by invitation. Please click the invite link you received from the seed phrase owner.</string>
+    <string name="you_have_been_invited_to_become_an_approver">You have been invited to become an approver!</string>
+    <string name="accept_invitation">Accept Invitation</string>
+    <string name="seed_phrase_owner_has_requested_access_approval">Seed phrase owner has requested access approval</string>
 </resources>

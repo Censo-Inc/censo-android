@@ -34,7 +34,7 @@ fun ApproverCodeVerification(
 ) {
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
-            text = "Become an approver",
+            text = stringResource(R.string.become_an_approver),
             color = GuardianColors.PrimaryColor,
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
@@ -83,7 +83,7 @@ fun ApproverCodeVerification(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "The code you entered in not correct. Please try again.",
+                text = stringResource(R.string.the_code_you_entered_in_not_correct_please_try_again),
                 textAlign = TextAlign.Center,
                 color = ErrorRed,
                 modifier = Modifier.padding(horizontal = 24.dp)

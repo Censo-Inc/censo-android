@@ -135,7 +135,7 @@ fun GuardianHomeScreen(
 
                 else -> {
                     DisplayError(
-                        errorMessage = "Something went wrong",
+                        errorMessage = stringResource(R.string.something_went_wrong),
                         dismissAction = null,
                     ) { viewModel.retrieveApproverState() }
                 }
@@ -150,7 +150,7 @@ fun GuardianHomeScreen(
                     text = {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = "Do you really want to cancel?",
+                            text = stringResource(R.string.do_you_really_want_to_cancel),
                             color = GuardianColors.PrimaryColor,
                             textAlign = TextAlign.Center,
                             fontSize = 18.sp,
@@ -161,14 +161,14 @@ fun GuardianHomeScreen(
                         Button(
                             onClick = viewModel::onTopBarCloseConfirmed
                         ) {
-                            Text("Yes")
+                            Text(stringResource(R.string.yes))
                         }
                     },
                     dismissButton = {
                         Button(
                             onClick = viewModel::hideCloseConfirmationDialog
                         ) {
-                            Text("No")
+                            Text(stringResource(R.string.no))
                         }
                     }
                 )
@@ -211,7 +211,10 @@ fun GuardianHomeScreen(
                                     value = state.verificationCode,
                                     onValueChanged = viewModel::updateVerificationCode,
                                     validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = "Enter the ${TotpGenerator.CODE_LENGTH}-digit code from the seed phrase owner",
+                                    label = stringResource(
+                                        R.string.enter_the_digit_code_from_the_seed_phrase_owner,
+                                        TotpGenerator.CODE_LENGTH
+                                    ),
                                     isLoading = state.submitVerificationResource is Resource.Loading,
                                     isVerificationRejected = false,
                                     isWaitingForVerification = false,
@@ -284,7 +287,7 @@ fun GuardianHomeScreen(
 private fun VerifyingOwnerCode() {
     Text(
         modifier = Modifier.padding(horizontal = 30.dp),
-        text = "Verifying Code...",
+        text = stringResource(R.string.verifying_code),
         textAlign = TextAlign.Center,
         fontSize = 18.sp
     )
@@ -297,14 +300,17 @@ private fun OwnerCodeVerification(
 ) {
     if (totpCode == null || countdownPercentage == null) {
         Text(
-            text = "Loading...",
+            text = stringResource(R.string.loading),
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
     } else {
         Text(
             modifier = Modifier.padding(horizontal = 30.dp),
-            text = "Tell seed phrase owner this ${TotpGenerator.CODE_LENGTH}-digit code to approve their access",
+            text = stringResource(
+                R.string.tell_seed_phrase_owner_this_digit_code_to_approve_their_access,
+                TotpGenerator.CODE_LENGTH
+            ),
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
@@ -323,7 +329,7 @@ private fun OwnerCodeVerification(
 private fun InvalidParticipantId() {
     Text(
         modifier = Modifier.padding(horizontal = 30.dp),
-        text = "Link you have opened does not appear to be correct. Please contact seed phrase owner",
+        text = stringResource(R.string.link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner),
         textAlign = TextAlign.Center,
         fontSize = 18.sp
     )
@@ -340,7 +346,7 @@ private fun AccessApproved(
 
     Text(
         modifier = Modifier.padding(16.dp),
-        text = "Access approved!",
+        text = stringResource(R.string.access_approved),
         color = GuardianColors.PrimaryColor,
         textAlign = TextAlign.Center,
         fontSize = 24.sp,
@@ -352,7 +358,7 @@ private fun AccessApproved(
 private fun Onboarded() {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
-        text = "You are fully set!",
+        text = stringResource(R.string.you_are_fully_set),
         color = GuardianColors.PrimaryColor,
         textAlign = TextAlign.Center,
         fontSize = 24.sp,
@@ -363,7 +369,7 @@ private fun Onboarded() {
 
     Text(
         modifier = Modifier.padding(horizontal = 40.dp),
-        text = "When needed, the seed phrase owner will get in touch with you to approve their access",
+        text = stringResource(R.string.when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access),
         color = GuardianColors.PrimaryColor,
         textAlign = TextAlign.Center,
         fontSize = 18.sp,
@@ -375,7 +381,7 @@ private fun Onboarded() {
 private fun InvitesOnly() {
     Text(
         modifier = Modifier.padding(horizontal = 30.dp),
-        text = "This application can only be used by invitation. Please click the invite link you received from the seed phrase owner.",
+        text = stringResource(R.string.this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner),
         textAlign = TextAlign.Center,
         fontSize = 18.sp
     )
@@ -389,7 +395,7 @@ private fun InviteReady(
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 30.dp),
-        text = "You have been invited to become an approver!",
+        text = stringResource(R.string.you_have_been_invited_to_become_an_approver),
         textAlign = TextAlign.Center,
         fontSize = 18.sp,
         fontWeight = FontWeight.Medium
@@ -408,7 +414,7 @@ private fun InviteReady(
     )
     {
         Text(
-            text = "Accept Invitation",
+            text = stringResource(R.string.accept_invitation),
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium
@@ -418,7 +424,10 @@ private fun InviteReady(
     Spacer(modifier = Modifier.height(24.dp))
 
     TextButton(onClick = onCancel) {
-        Text(text = "Close", color = Color.Black)
+        Text(
+            text = stringResource(R.string.close),
+            color = Color.Black
+        )
     }
 }
 
@@ -428,7 +437,7 @@ private fun RecoveryRequested(
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 30.dp),
-        text = "Seed phrase owner has requested access approval",
+        text = stringResource(R.string.seed_phrase_owner_has_requested_access_approval),
         textAlign = TextAlign.Center,
         fontSize = 18.sp,
         fontWeight = FontWeight.Medium
