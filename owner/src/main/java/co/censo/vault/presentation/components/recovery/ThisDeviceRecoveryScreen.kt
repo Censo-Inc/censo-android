@@ -69,54 +69,11 @@ fun ThisDeviceRecoveryScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(R.string.recovery_initiated),
-            fontSize = 36.sp,
-            fontWeight = FontWeight.W700,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        RecoveryExpirationCountDown(expiresAt = recovery.expiresAt) {
-            onCancelRecovery()
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        StandardButton(
-            modifier = Modifier.padding(horizontal = 72.dp),
-            color = VaultColors.PrimaryColor,
-            borderColor = Color.White,
-            border = true,
-            contentPadding = PaddingValues(vertical = 0.dp),
-            onClick = onCancelRecovery,
-        ) {
-            Text(
-                text = stringResource(R.string.cancel_recovery),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.W400
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        RecoveryApprovalsCollected(
-            collected = approvalsCollected,
-            required = approvalsRequired
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.required_approvals_reached_to_complete_recovery),
-            fontSize = 16.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 30.dp)
+        ActiveRecoveryTopBar(
+            recovery,
+            approvalsCollected,
+            approvalsRequired,
+            onCancelRecovery,
         )
 
         Spacer(modifier = Modifier.height(24.dp))

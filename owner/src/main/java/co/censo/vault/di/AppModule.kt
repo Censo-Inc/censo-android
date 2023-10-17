@@ -89,13 +89,15 @@ object AppModule {
         apiService: ApiService,
         storage: Storage,
         secureStorage: SecurePreferences,
-        authUtil: AuthUtil
+        authUtil: AuthUtil,
+        keyRepository: KeyRepository
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             apiService = apiService,
             storage = storage,
             secureStorage = secureStorage,
-            authUtil = authUtil
+            authUtil = authUtil,
+            keyRepository = keyRepository
         )
     }
 

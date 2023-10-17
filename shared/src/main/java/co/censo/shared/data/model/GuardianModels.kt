@@ -18,7 +18,9 @@ typealias GuardianId = String
 
 @Serializable
 @JvmInline
-value class Base58EncodedPrivateKey(val value: String)
+value class Base58EncodedPrivateKey(val value: String) {
+    fun bigInt() = BigInteger(1, Base58.base58Decode(this.value))
+}
 
 interface Base58EncodedPublicKey {
     val value: String

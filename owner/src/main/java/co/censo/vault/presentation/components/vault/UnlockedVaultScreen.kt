@@ -53,7 +53,7 @@ fun UnlockedVaultScreen(
             color = VaultColors.PrimaryColor,
             borderColor = Color.White,
             border = true,
-            contentPadding = PaddingValues(vertical = 12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             onClick = onEditSeedPhrases,
         ) {
             Text(
@@ -71,7 +71,7 @@ fun UnlockedVaultScreen(
             color = Color.White,
             borderColor = Color.White,
             border = true,
-            contentPadding = PaddingValues(vertical = 12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             onClick = onRecoverSeedPhrases,
         ) {
             Text(

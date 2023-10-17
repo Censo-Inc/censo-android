@@ -102,21 +102,25 @@ class RecoveryScreenViewModel @Inject constructor(
 
     private fun determineCodeVerificationState(ownerState: OwnerState.Ready) {
         // navigate out of verification code screen once approved
-        val screen = state.recoveryUIState
         val recovery = ownerState.policy.recovery
+        val totpVerificationState = state.totpVerificationState
 
-        if (screen is RecoveryUIState.EnterVerificationCodeState && recovery is Recovery.ThisDevice) {
-            recovery.approvals.find { it.participantId == screen.participantId }
+        if (totpVerificationState.showModal && recovery is Recovery.ThisDevice) {
+            recovery.approvals.find { it.participantId == totpVerificationState.participantId }
                 ?.let { approval ->
                     if (approval.status == ApprovalStatus.Approved) {
                         state = state.copy(
-                            recoveryUIState = RecoveryUIState.Main
+                            totpVerificationState = totpVerificationState.copy(
+                                showModal = false
+                            )
                         )
-                    } else if (state.totpVerificationWaitingForApproval && approval.status == ApprovalStatus.Rejected) {
+                    } else if (totpVerificationState.waitingForApproval && approval.status == ApprovalStatus.Rejected) {
                         state = state.copy(
-                            totpVerificationCode = "",
-                            totpVerificationWaitingForApproval = false,
-                            totpVerificationRejected = true,
+                            totpVerificationState = totpVerificationState.copy(
+                                verificationCode = "",
+                                waitingForApproval = false,
+                                rejected = true,
+                            )
                         )
                     }
                 }
@@ -166,18 +170,16 @@ class RecoveryScreenViewModel @Inject constructor(
         }
     }
 
-    fun onProceedWithVerification(approval: Approval) {
+    fun showCodeEntryModal(approval: Approval) {
         val guardian = state.guardians.find { it.participantId == approval.participantId }!!
         state = state.copy(
-            recoveryUIState = RecoveryUIState.EnterVerificationCodeState(
-                approverLabel = guardian.label,
-                participantId = approval.participantId
-            ),
+            // reset verification state on re-entry
+            totpVerificationState = TotpVerificationScreenState(
+                showModal = true,
 
-            // update verification state on re-entry
-            totpVerificationCode = "",
-            totpVerificationWaitingForApproval = approval.status == ApprovalStatus.WaitingForApproval,
-            totpVerificationRejected = false
+                approverLabel = guardian.label,
+                participantId = approval.participantId,
+            )
         )
     }
 
@@ -190,9 +192,11 @@ class RecoveryScreenViewModel @Inject constructor(
 
         if (code.isDigitsOnly()) {
             state = state.copy(
-                totpVerificationCode = code,
-                totpVerificationRejected = false,
-                totpVerificationWaitingForApproval = false
+                totpVerificationState = state.totpVerificationState.copy(
+                    verificationCode = code,
+                    rejected = false,
+                    waitingForApproval = false
+                )
             )
 
             if (code.length == TotpGenerator.CODE_LENGTH) {
@@ -217,7 +221,9 @@ class RecoveryScreenViewModel @Inject constructor(
             if (submitVerificationResource is Resource.Success) {
                 state = state.copy(
                     submitTotpVerificationResource = submitVerificationResource,
-                    totpVerificationWaitingForApproval = true,
+                    totpVerificationState = state.totpVerificationState.copy(
+                        waitingForApproval = true
+                    )
                 )
             }
         }
@@ -225,7 +231,15 @@ class RecoveryScreenViewModel @Inject constructor(
 
     fun dismissVerification() {
         state = state.copy(
-            recoveryUIState = RecoveryUIState.Main
+            totpVerificationState = state.totpVerificationState.copy(
+                showModal = false
+            )
+        )
+    }
+
+    fun onRecoverPhrases() {
+        state = state.copy(
+            navigationResource = Resource.Success(Screen.AccessSeedPhrases.route)
         )
     }
 

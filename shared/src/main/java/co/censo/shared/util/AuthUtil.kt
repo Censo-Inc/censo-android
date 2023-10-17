@@ -3,7 +3,6 @@ package co.censo.shared.util
 import android.content.Context
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.storage.SecurePreferences
-import co.censo.shared.data.storage.Storage
 import com.auth0.android.jwt.JWT
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount

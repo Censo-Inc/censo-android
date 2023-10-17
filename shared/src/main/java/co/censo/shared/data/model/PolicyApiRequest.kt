@@ -39,17 +39,3 @@ data class CreatePolicySetupApiResponse(
     val scanResultBlob: BiometryScanResultBlob,
 )
 
-@Serializable
-data class GetPolicyApiResponse(
-    val status: PolicyStatus,
-    val intermediateKey: Base58EncodedIntermediatePublicKey,
-    val threshold: Int,
-    val guardians: List<Guardian>,
-    val encryptedData: Base64EncodedData,
-)
-
-@Serializable
-enum class PolicyStatus {
-    Pending,
-    Active,
-}

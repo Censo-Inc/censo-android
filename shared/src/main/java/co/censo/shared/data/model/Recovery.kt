@@ -4,6 +4,7 @@ import Base58EncodedDevicePublicKey
 import Base64EncodedData
 import ParticipantId
 import VaultSecretId
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -68,13 +69,21 @@ data class RetrieveRecoveryShardsApiRequest(
 data class RetrieveRecoveryShardsApiResponse(
     val ownerState: OwnerState,
     val encryptedShards: List<EncryptedShard>,
-    val scanResultBlob: String,
+    val scanResultBlob: BiometryScanResultBlob,
 )
 
 @Serializable
 data class EncryptedShard(
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
+    val isOwnerShard: Boolean
+)
+
+data class RecoveredSeedPhrase(
+    val guid: VaultSecretId,
+    val label: String,
+    val seedPhrase: String,
+    val createdAt: Instant
 )
 
 fun List<GuardianState>.forParticipant(participantId: String): GuardianState =

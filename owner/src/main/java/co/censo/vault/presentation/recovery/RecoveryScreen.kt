@@ -20,11 +20,13 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Recovery
+import co.censo.shared.data.model.RecoveryStatus
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.components.recovery.AccessPhrasesScreen
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
-import co.censo.vault.presentation.components.recovery.RecoveryApprovalCodeVerificationScreen
+import co.censo.vault.presentation.components.recovery.RecoveryApprovalCodeVerificationModal
 import co.censo.vault.presentation.components.recovery.ThisDeviceRecoveryScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -125,8 +127,9 @@ fun RecoveryScreen(
                 }
 
                 is Recovery.ThisDevice -> {
-                    when (val screen = state.recoveryUIState) {
-                        RecoveryUIState.Main -> {
+
+                    when (recovery.status) {
+                        RecoveryStatus.Requested -> {
                             ThisDeviceRecoveryScreen(
                                 recovery,
                                 guardians = state.guardians,
@@ -134,26 +137,36 @@ fun RecoveryScreen(
                                 approvalsCollected = state.approvalsCollected,
                                 onCancelRecovery = viewModel::cancelRecovery,
                                 onEnterCode = { approval ->
-                                    viewModel.onProceedWithVerification(approval)
+                                    viewModel.showCodeEntryModal(approval)
                                 }
                             )
+
+                            if (state.totpVerificationState.showModal) {
+                                RecoveryApprovalCodeVerificationModal(
+                                    approverLabel = state.totpVerificationState.approverLabel,
+                                    validCodeLength = TotpGenerator.CODE_LENGTH,
+                                    value = state.totpVerificationState.verificationCode,
+                                    onValueChanged = { code: String ->
+                                        viewModel.updateVerificationCode(
+                                            state.totpVerificationState.participantId,
+                                            code
+                                        )
+                                    },
+                                    onDismiss = viewModel::dismissVerification,
+                                    isLoading = state.submitTotpVerificationResource is Resource.Loading,
+                                    isWaitingForVerification = state.totpVerificationState.waitingForApproval,
+                                    isVerificationRejected = state.totpVerificationState.rejected
+                                )
+                            }
                         }
 
-                        is RecoveryUIState.EnterVerificationCodeState -> {
-                            RecoveryApprovalCodeVerificationScreen(
-                                approverLabel = screen.approverLabel,
-                                validCodeLength = TotpGenerator.CODE_LENGTH,
-                                value = state.totpVerificationCode,
-                                onValueChanged = { code: String ->
-                                    viewModel.updateVerificationCode(
-                                        screen.participantId,
-                                        code
-                                    )
-                                },
-                                onDismiss = viewModel::dismissVerification,
-                                isLoading = state.submitTotpVerificationResource is Resource.Loading,
-                                isWaitingForVerification = state.totpVerificationWaitingForApproval,
-                                isVerificationRejected = state.totpVerificationRejected
+                        else -> {
+                            AccessPhrasesScreen(
+                                recovery,
+                                approvalsRequired = state.approvalsRequired,
+                                approvalsCollected = state.approvalsCollected,
+                                onCancelRecovery = viewModel::cancelRecovery,
+                                onRecoverPhrases = viewModel::onRecoverPhrases
                             )
                         }
                     }

@@ -2,7 +2,6 @@ package co.censo.shared.data.storage
 
 import ParticipantId
 import android.content.Context
-import co.censo.shared.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn

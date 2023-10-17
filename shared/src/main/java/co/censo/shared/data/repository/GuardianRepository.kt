@@ -1,18 +1,14 @@
 package co.censo.shared.data.repository
 
 import Base58EncodedGuardianPublicKey
-import Base58EncodedPrivateKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
-import android.content.Context
-import co.censo.shared.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiRequest
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
@@ -22,26 +18,10 @@ import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
-import co.censo.shared.data.storage.CloudStorage
 import co.censo.shared.data.storage.Storage
-import co.censo.shared.util.projectLog
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.http.FileContent
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
-import com.google.api.services.drive.Drive
-import com.google.api.services.drive.DriveScopes
-import com.google.api.services.drive.model.File as DriveFile
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.Base64
-import java.util.Collections
 
 interface GuardianRepository {
     suspend fun acceptGuardianship(

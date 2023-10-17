@@ -80,14 +80,14 @@ fun LockedScreen(
                         color = VaultColors.PrimaryColor,
                         borderColor = Color.White,
                         border = true,
-                        contentPadding = PaddingValues(vertical = 12.dp),
+                        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
                         onClick = viewModel::initUnlock,
                     ) {
                         Text(
                             text = stringResource(R.string.unlock),
+                            color = Color.White,
                             fontWeight = FontWeight.Medium,
                             fontSize = 20.sp,
-                            modifier = Modifier.padding(all = 8.dp)
                         )
                     }
                 }
