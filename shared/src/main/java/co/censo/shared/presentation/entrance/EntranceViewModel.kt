@@ -5,8 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.shared.BuildConfig
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
@@ -48,6 +50,8 @@ class EntranceViewModel @Inject constructor(
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
     fun onOwnerStart() {
+        state = state.copy(ownerApp = true)
+
         checkUserHasValidToken()
     }
 
@@ -58,6 +62,8 @@ class EntranceViewModel @Inject constructor(
         if (recoveryParticipantId != null) {
             guardianRepository.saveParticipantId(recoveryParticipantId)
         }
+
+        state = state.copy(ownerApp = false)
 
         checkUserHasValidToken()
     }
@@ -71,9 +77,14 @@ class EntranceViewModel @Inject constructor(
 
                 if (tokenValid) {
                     checkUserHasRespondedToNotificationOptIn()
-                    state = state.copy(
-                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
-                    )
+
+                    if (state.ownerApp) {
+                        retrieveOwnerState()
+                    } else {
+                        state = state.copy(
+                            userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                        )
+                    }
                 } else {
                     //TODO: Sign out the user here
                 }
@@ -88,13 +99,17 @@ class EntranceViewModel @Inject constructor(
 
     private fun checkUserHasRespondedToNotificationOptIn() {
         viewModelScope.launch {
-            state = if (pushRepository.userHasSeenPushDialog()) {
+            if (pushRepository.userHasSeenPushDialog()) {
                 submitNotificationTokenForRegistration()
-                state.copy(
-                    userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
-                )
+                if (state.ownerApp) {
+                    retrieveOwnerState()
+                } else {
+                    state = state.copy(
+                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                    )
+                }
             } else {
-                state.copy(
+                state = state.copy(
                     showPushNotificationsDialog = Resource.Success(Unit)
                 )
             }
@@ -186,8 +201,39 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
+    fun retrieveOwnerState() {
+        state = state.copy(ownerStateResource = Resource.Loading())
+        viewModelScope.launch {
+            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
+
+            if (ownerStateResource is Resource.Success) {
+                val ownerState = ownerStateResource.data
+
+                val destination =
+                    if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
+                        SharedScreen.OwnerVaultScreen.route
+                    } else {
+                        SharedScreen.OwnerWelcomeScreen.route
+                    }
+
+
+                state = state.copy(
+                    userFinishedSetup = Resource.Success(destination),
+                    ownerStateResource = ownerStateResource
+                )
+            } else {
+                state = state.copy(ownerStateResource = ownerStateResource)
+            }
+        }
+    }
+
+    fun resetOwnerState() {
+        state = state.copy(ownerStateResource = Resource.Uninitialized)
+    }
+
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
-        state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
+        state =
+            state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
     fun retrySignIn() {
@@ -208,9 +254,14 @@ class EntranceViewModel @Inject constructor(
 
     fun finishPushNotificationDialog() {
         submitNotificationTokenForRegistration()
-        state = state.copy(
-            userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
-            showPushNotificationsDialog = Resource.Uninitialized
-        )
+
+        if (state.ownerApp) {
+            retrieveOwnerState()
+        } else {
+            state = state.copy(
+                userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
+                showPushNotificationsDialog = Resource.Uninitialized
+            )
+        }
     }
 }

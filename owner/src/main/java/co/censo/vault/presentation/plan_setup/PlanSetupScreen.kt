@@ -48,7 +48,7 @@ import co.censo.vault.presentation.components.security_plan.SecureYourPlanScreen
 import co.censo.vault.presentation.components.security_plan.SelectApproversScreen
 import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.Screen
 import co.censo.vault.util.popUpToTop
 
 @OptIn(ExperimentalMaterial3Api::class)

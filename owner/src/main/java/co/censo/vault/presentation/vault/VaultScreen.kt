@@ -33,10 +33,9 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
-import co.censo.vault.presentation.components.vault.AddBip39PhraseUI
 import co.censo.vault.presentation.components.vault.UnlockedVaultScreen
 import co.censo.vault.presentation.components.vault.VaultSecretListItem
-import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 
 enum class VaultScreens {
     Unlocked, EditSeedPhrases
@@ -146,11 +145,13 @@ fun VaultScreen(
 
                                     Spacer(modifier = Modifier.weight(1f))
 
-                                    val publicKey = ownerState.vault.publicMasterEncryptionKey.value
+                                    val publicKey = ownerState.vault.publicMasterEncryptionKey
 
-                                    AddBip39PhraseUI {
-                                        navController.navigate("${Screen.AddBIP39Route.route}/$publicKey")
-                                    }
+                                    EnterPhraseScreen(
+                                        masterPublicKey = publicKey,
+                                        welcomeFlow = false,
+                                        navController = navController
+                                    )
                                 }
 
                                 LazyColumn(

@@ -23,8 +23,15 @@ class EnterPhraseViewModel @Inject constructor(
     var state by mutableStateOf(EnterPhraseState())
         private set
 
-    fun onStart(masterPublicKey: Base58EncodedMasterPublicKey) {
-        state = state.copy(masterPublicKey = masterPublicKey)
+    fun onStart(
+        welcomeFlow: Boolean,
+        masterPublicKey: Base58EncodedMasterPublicKey
+    ) {
+        state =
+            state.copy(
+                welcomeFlow = welcomeFlow,
+                masterPublicKey = masterPublicKey
+            )
     }
 
     fun updateEditedWord(updatedWord: String) {
@@ -148,7 +155,8 @@ class EnterPhraseViewModel @Inject constructor(
             )
 
             state = state.copy(
-                submitResource = response.map { }
+                submitResource = response.map { },
+                phraseEntryComplete = Resource.Success(Unit)
             )
         }
         projectLog(message = "Save this seed phrase and send user back to start...")
@@ -164,7 +172,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun updateNickname(updatedNickName: String) {
-        state = state.copy(nickName = updatedNickName.trim())
+        state = state.copy(nickName = updatedNickName)
 
     }
 
@@ -173,6 +181,13 @@ class EnterPhraseViewModel @Inject constructor(
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
         }
+    }
+
+    fun setViewPhrase() {
+        state = state.copy(
+            editedWordIndex = 0,
+            enterWordUIState = EnterPhraseUIState.VIEW
+        )
     }
 
     fun onBackClicked() {
@@ -184,7 +199,10 @@ class EnterPhraseViewModel @Inject constructor(
             EnterPhraseUIState.REVIEW -> {}
             EnterPhraseUIState.NICKNAME -> {}
         }
+    }
 
+    fun resetPhraseEntryComplete() {
+        state = state.copy(phraseEntryComplete = Resource.Uninitialized)
     }
 
 }

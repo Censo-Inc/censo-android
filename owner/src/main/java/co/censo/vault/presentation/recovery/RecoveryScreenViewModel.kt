@@ -17,7 +17,7 @@ import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.vault.presentation.home.Screen
+import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -164,7 +164,7 @@ class RecoveryScreenViewModel @Inject constructor(
             if (response is Resource.Success) {
                 state = state.copy(
                     recovery = null,
-                    navigationResource = Resource.Success(Screen.VaultScreen.route)
+                    navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
                 )
             }
         }

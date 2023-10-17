@@ -5,9 +5,11 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,13 +19,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.SharedScreen
+import co.censo.shared.data.Resource
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.R as SharedR
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
@@ -38,6 +46,7 @@ import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWordUI
 @Composable
 fun EnterPhraseScreen(
     masterPublicKey: Base58EncodedMasterPublicKey,
+    welcomeFlow: Boolean,
     navController: NavController,
     viewModel: EnterPhraseViewModel = hiltViewModel()
 ) {
@@ -58,8 +67,19 @@ fun EnterPhraseScreen(
         else Icons.Filled.Clear to R.string.exit
 
     DisposableEffect(key1 = state) {
-        viewModel.onStart(masterPublicKey)
+        viewModel.onStart(
+            welcomeFlow = welcomeFlow,
+            masterPublicKey = masterPublicKey
+        )
         onDispose {}
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.phraseEntryComplete is Resource.Success) {
+            //TODO: Add add approvers flow if welcome flow is enabled
+            navController.navigate(SharedScreen.OwnerVaultScreen.route)
+            viewModel.resetPhraseEntryComplete()
+        }
     }
 
     Scaffold(topBar = {
@@ -101,53 +121,76 @@ fun EnterPhraseScreen(
                 .padding(paddingValues)
         ) {
 
-            when (state.enterWordUIState) {
-                EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
-                    SelectSeedPhraseEntryType(
-                        onManualEntrySelected = { viewModel.entrySelected(EntryType.MANUAL) },
-                        onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) }
+            when {
+
+                state.loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(72.dp),
+                        strokeWidth = 5.dp
                     )
                 }
 
-                EnterPhraseUIState.EDIT, EnterPhraseUIState.SELECTED -> {
-                    EditPhraseWordUI(
-                        phraseWord = state.editedWord,
-                        enterWordUIState = state.enterWordUIState,
-                        updateEditedWord = viewModel::updateEditedWord,
-                        onWordSelected = viewModel::wordSelected,
-                        wordSubmitted = viewModel::wordSubmitted
+                state.error -> {
+                    DisplayError(
+                        errorMessage = stringResource(R.string.failed_save_seed),
+                        dismissAction = viewModel::setViewPhrase,
+                        retryAction = viewModel::setViewPhrase
                     )
                 }
 
-                EnterPhraseUIState.VIEW -> {
-                    ViewPhraseWordUI(
-                        editedWordIndex = state.editedWordIndex,
-                        phraseWord = state.enteredWords[state.editedWordIndex],
-                        editExistingWord = viewModel::editExistingWord,
-                        decrementEditIndex = viewModel::decrementEditIndex,
-                        incrementEditIndex = viewModel::incrementEditIndex,
-                        enterNextWord = viewModel::enterNextWord,
-                        submitFullPhrase = viewModel::submitFullPhrase
-                    )
-                }
+                else -> {
+                    when (state.enterWordUIState) {
+                        EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
+                            SelectSeedPhraseEntryType(
+                                welcomeFlow = state.welcomeFlow,
+                                onManualEntrySelected = { viewModel.entrySelected(EntryType.MANUAL) },
+                                onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) }
+                            )
+                        }
 
-                EnterPhraseUIState.REVIEW -> {
-                    ReviewSeedPhraseUI(
-                        valid = state.validPhrase,
-                        phraseWords = state.enteredWords,
-                        saveSeedPhrase = viewModel::moveToNickname,
-                        editSeedPhrase = viewModel::editEntirePhrase
+                        EnterPhraseUIState.EDIT, EnterPhraseUIState.SELECTED -> {
+                            EditPhraseWordUI(
+                                phraseWord = state.editedWord,
+                                enterWordUIState = state.enterWordUIState,
+                                updateEditedWord = viewModel::updateEditedWord,
+                                onWordSelected = viewModel::wordSelected,
+                                wordSubmitted = viewModel::wordSubmitted
+                            )
+                        }
 
-                    )
-                }
+                        EnterPhraseUIState.VIEW -> {
+                            ViewPhraseWordUI(
+                                editedWordIndex = state.editedWordIndex,
+                                phraseWord = state.enteredWords[state.editedWordIndex],
+                                editExistingWord = viewModel::editExistingWord,
+                                decrementEditIndex = viewModel::decrementEditIndex,
+                                incrementEditIndex = viewModel::incrementEditIndex,
+                                enterNextWord = viewModel::enterNextWord,
+                                submitFullPhrase = viewModel::submitFullPhrase
+                            )
+                        }
 
-                EnterPhraseUIState.NICKNAME -> {
-                    AddPhraseNicknameUI(
-                        nickname = state.nickName,
-                        enabled = state.validName,
-                        onNicknameChanged = viewModel::updateNickname,
-                        onSavePhrase = viewModel::saveSeedPhrase
-                    )
+                        EnterPhraseUIState.REVIEW -> {
+                            ReviewSeedPhraseUI(
+                                valid = state.validPhrase,
+                                phraseWords = state.enteredWords,
+                                saveSeedPhrase = viewModel::moveToNickname,
+                                editSeedPhrase = viewModel::editEntirePhrase
+
+                            )
+                        }
+
+                        EnterPhraseUIState.NICKNAME -> {
+                            AddPhraseNicknameUI(
+                                nickname = state.nickName,
+                                enabled = state.validName,
+                                onNicknameChanged = viewModel::updateNickname,
+                                onSavePhrase = viewModel::saveSeedPhrase
+                            )
+                        }
+                    }
                 }
             }
         }
