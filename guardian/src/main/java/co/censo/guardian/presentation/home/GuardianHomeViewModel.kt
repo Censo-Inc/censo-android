@@ -44,19 +44,15 @@ class GuardianHomeViewModel @Inject constructor(
     private val userStatePollingTimer: VaultCountDownTimer
 ) : ViewModel() {
 
-    companion object {
-        const val VALID_CODE_LENGTH = 6
-    }
-
     var state by mutableStateOf(GuardianHomeState())
         private set
 
     fun onStart() {
-        retrieveUserState()
+        retrieveApproverState()
 
         userStatePollingTimer.startCountDownTimer(POLLING_VERIFICATION_COUNTDOWN) {
             if (state.userResponse !is Resource.Loading) {
-                retrieveUserState()
+                silentRetrieveApproverState()
             }
         }
     }
@@ -66,42 +62,80 @@ class GuardianHomeViewModel @Inject constructor(
         stopRecoveryTotpGeneration()
     }
 
+    fun retrieveApproverState() {
+        state = state.copy(userResponse = Resource.Loading())
+
+        silentRetrieveApproverState()
+    }
+
+    private fun silentRetrieveApproverState() {
+        viewModelScope.launch {
+            val userResponse = ownerRepository.retrieveUser()
+
+            if (userResponse is Resource.Success) {
+                val participantId = guardianRepository.retrieveParticipantId()
+                val guardianStates = userResponse.data!!.guardianStates
+
+                if (participantId.isEmpty()) {
+                    determineGuardianUIState(guardianStates.firstOrNull())
+                } else {
+                    when (val guardianState = guardianStates.forParticipant(participantId)) {
+                        null -> {
+                            guardianRepository.clearParticipantId()
+                            state = state.copy(guardianUIState = GuardianUIState.INVALID_PARTICIPANT_ID)
+                        }
+                        else -> determineGuardianUIState(guardianState)
+                    }
+                }
+            }
+
+            projectLog(message = "User Response: ${userResponse.data}")
+
+            state = state.copy(userResponse = userResponse)
+        }
+    }
+
     private fun determineGuardianUIState(
         guardianState: GuardianState?,
     ) {
         viewModelScope.launch {
             val inviteCode = state.invitationId.value.ifEmpty { guardianRepository.retrieveInvitationId() }
-            val userSavedPrivateKey = keyRepository.userHasKeySavedInCloud(participantId = ParticipantId(state.participantId))
+            val participantId = guardianRepository.retrieveParticipantId()
 
-            val guardianUIState = if (guardianState == null) {
+            val guardianUIStateNewNew = if (guardianState == null) { // new onboarding
                 if (inviteCode.isEmpty()) {
                     GuardianUIState.MISSING_INVITE_CODE
                 } else {
                     GuardianUIState.INVITE_READY
                 }
             } else {
-                when (val phase = guardianState.phase) {
-                    is GuardianPhase.WaitingForCode -> {
-                        if (!userSavedPrivateKey) {
-                            GuardianUIState.NEED_SAVE_KEY
-                        } else {
-                            GuardianUIState.WAITING_FOR_CODE
+                when (val phase = guardianState.phase) {            // existing approver
+
+                    // Onboarding, invitationId is mandatory
+                    is GuardianPhase.WaitingForCode -> if (inviteCode.isEmpty()) GuardianUIState.MISSING_INVITE_CODE else GuardianUIState.WAITING_FOR_CODE
+                    is GuardianPhase.WaitingForVerification -> if (inviteCode.isEmpty()) GuardianUIState.MISSING_INVITE_CODE else GuardianUIState.WAITING_FOR_CONFIRMATION
+                    is GuardianPhase.VerificationRejected -> if (inviteCode.isEmpty()) GuardianUIState.MISSING_INVITE_CODE else GuardianUIState.CODE_REJECTED
+
+                    // No action needed
+                    is GuardianPhase.Complete -> {
+                        when (state.approveRecoveryResource) {
+                            is Resource.Success -> GuardianUIState.ACCESS_APPROVED
+                            else -> GuardianUIState.COMPLETE
                         }
                     }
-                    is GuardianPhase.Complete -> GuardianUIState.COMPLETE
-                    is GuardianPhase.WaitingForVerification -> GuardianUIState.WAITING_FOR_CONFIRMATION
-                    is GuardianPhase.VerificationRejected -> GuardianUIState.CODE_REJECTED
-                    is GuardianPhase.RecoveryRequested -> GuardianUIState.RECOVERY_REQUESTED
-                    is GuardianPhase.RecoveryVerification -> GuardianUIState.RECOVERY_WAITING_FOR_TOTP_FROM_OWNER
-                    is GuardianPhase.RecoveryConfirmation -> {
+
+                    // recovery, participantId is mandatory
+                    is GuardianPhase.RecoveryRequested -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_REQUESTED
+                    is GuardianPhase.RecoveryVerification -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER
+                    is GuardianPhase.RecoveryConfirmation -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else {
                         confirmOrRejectOwner(guardianState.participantId, phase)
-                        GuardianUIState.RECOVERY_VERIFYING_TOTP_FROM_OWNER
+                        GuardianUIState.ACCESS_VERIFYING_TOTP_FROM_OWNER
                     }
                 }
             }
 
             state = state.copy(
-                guardianUIState = guardianUIState,
+                guardianUIState = guardianUIStateNewNew,
                 guardianState = guardianState ?: state.guardianState,
                 invitationId = InvitationId(inviteCode),
                 participantId = guardianState?.participantId?.value ?: state.participantId
@@ -114,58 +148,6 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    fun createGuardianKey() {
-        if (state.saveKeyToCloudResource is Resource.Loading) {
-            return
-        }
-        viewModelScope.launch {
-            state = state.copy(saveKeyToCloudResource = Resource.Loading())
-            val guardianEncryptionKey = keyRepository.createGuardianKey()
-            keyRepository.saveKeyInCloud(
-                Base58EncodedPrivateKey(
-                    Base58.base58Encode(
-                        guardianEncryptionKey.privateKeyRaw()
-                    )
-                ),
-                participantId = ParticipantId(state.participantId)
-            )
-            state = state.copy(
-                guardianEncryptionKey = guardianEncryptionKey,
-                saveKeyToCloudResource = Resource.Uninitialized
-            )
-            determineGuardianUIState(state.guardianState)
-        }
-    }
-
-    private fun retrieveUserState() {
-        state = state.copy(userResponse = Resource.Loading())
-        viewModelScope.launch {
-            val userResponse = ownerRepository.retrieveUser()
-
-            state = if (userResponse is Resource.Success) {
-                val participantId = guardianRepository.retrieveParticipantId()
-
-                if (participantId.isEmpty()) {
-                    determineGuardianUIState(userResponse.data?.guardianStates?.firstOrNull())
-                } else {
-                    val guardianState =
-                        userResponse.data?.guardianStates?.firstOrNull { it.participantId.value == participantId }
-                    if (guardianState == null) {
-                        state = state.copy(guardianUIState = GuardianUIState.INVALID_PARTICIPANT_ID)
-                    } else {
-                        determineGuardianUIState(guardianState)
-                    }
-                }
-                projectLog(message = "User Response: ${userResponse.data}")
-                state.copy(
-                    userResponse = userResponse,
-                )
-            } else {
-                state.copy(userResponse = userResponse)
-            }
-        }
-    }
-
     fun acceptGuardianship() {
         state = state.copy(acceptGuardianResource = Resource.Loading())
 
@@ -174,49 +156,47 @@ class GuardianHomeViewModel @Inject constructor(
                 invitationId = state.invitationId,
             )
 
-            state = if (acceptResource is Resource.Success) {
+            if (acceptResource is Resource.Success) {
+                if (!keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))) {
+                    createAndSaveGuardianKey()
+                }
                 determineGuardianUIState(acceptResource.data?.guardianState)
-                state.copy(
-                    acceptGuardianResource = acceptResource
-                )
-            } else {
-                state.copy(acceptGuardianResource = acceptResource)
             }
+
+            state = state.copy(acceptGuardianResource = acceptResource)
         }
     }
 
-    fun declineGuardianship() {
-        state = state.copy(declineGuardianResource = Resource.Loading())
-
-        viewModelScope.launch {
-            val declineResource = guardianRepository.declineGuardianship(
-                invitationId = state.invitationId,
-            )
-
-            state = if (declineResource is Resource.Success) {
-                state.copy(
-                    declineGuardianResource = declineResource
+    private suspend fun createAndSaveGuardianKey() {
+        val guardianEncryptionKey = keyRepository.createGuardianKey()
+        keyRepository.saveKeyInCloud(
+            Base58EncodedPrivateKey(
+                Base58.base58Encode(
+                    guardianEncryptionKey.privateKeyRaw()
                 )
-            } else {
-                state.copy(declineGuardianResource = declineResource)
-            }
-        }
+            ),
+            participantId = ParticipantId(state.participantId)
+        )
+        state = state.copy(
+            guardianEncryptionKey = guardianEncryptionKey
+        )
     }
 
     fun updateVerificationCode(value: String) {
-        if (value.isDigitsOnly()) {
-            state = state.copy(verificationCode = value)
-            if (state.verificationCode.length == VALID_CODE_LENGTH) {
-                submitVerificationCode()
-            }
-        }
-
         if (state.submitVerificationResource is Resource.Error) {
             state = state.copy(submitVerificationResource = Resource.Uninitialized)
         }
+
+        if (value.isDigitsOnly()) {
+            state = state.copy(verificationCode = value)
+
+            if (state.verificationCode.length == TotpGenerator.CODE_LENGTH) {
+                submitVerificationCode()
+            }
+        }
     }
 
-    private fun submitVerificationCode() {
+    fun submitVerificationCode() {
         state = state.copy(submitVerificationResource = Resource.Loading())
 
         viewModelScope.launch {
@@ -234,7 +214,6 @@ class GuardianHomeViewModel @Inject constructor(
                 state.guardianEncryptionKey!!
             )
 
-            //todo: Have user input this
             val submitVerificationResource = guardianRepository.submitGuardianVerification(
                 invitationId = state.invitationId.value,
                 submitGuardianVerificationRequest = signedVerificationData
@@ -243,10 +222,11 @@ class GuardianHomeViewModel @Inject constructor(
             state = if (submitVerificationResource is Resource.Success) {
                 determineGuardianUIState(submitVerificationResource.data?.guardianState)
                 state.copy(
-                    submitVerificationResource = submitVerificationResource
+                    submitVerificationResource = submitVerificationResource,
+                    verificationCode = ""
                 )
             } else {
-                state.copy(submitVerificationResource = submitVerificationResource, verificationCode = "")
+                state.copy(submitVerificationResource = submitVerificationResource)
             }
         }
     }
@@ -360,12 +340,15 @@ class GuardianHomeViewModel @Inject constructor(
                         state.guardianEncryptionKey!!.decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
                     ).base64Encoded()
                 )
+
+                state = state.copy(approveRecoveryResource = response)
+
                 if (response is Resource.Success) {
+                    guardianRepository.clearParticipantId()
                     determineGuardianUIState(response.data?.guardianStates?.forParticipant(state.participantId))
                 }
 
                 stopRecoveryTotpGeneration()
-                state = state.copy(approveRecoveryResource = response)
             } else {
                 val response = guardianRepository.rejectRecovery(participantId)
                 if (response is Resource.Success) {
@@ -374,5 +357,85 @@ class GuardianHomeViewModel @Inject constructor(
                 state = state.copy(rejectRecoveryResource = response)
             }
         }
+    }
+
+    fun showCloseConfirmationDialog() {
+        state = state.copy(
+            showTopBarCancelConfirmationDialog = true
+        )
+    }
+
+    fun hideCloseConfirmationDialog() {
+        state = state.copy(
+            showTopBarCancelConfirmationDialog = false
+        )
+    }
+
+    fun onTopBarCloseConfirmed() {
+        hideCloseConfirmationDialog()
+
+        when (state.guardianUIState) {
+            // onboarding
+            GuardianUIState.INVITE_READY,
+            GuardianUIState.WAITING_FOR_CODE,
+            GuardianUIState.WAITING_FOR_CONFIRMATION,
+            GuardianUIState.CODE_REJECTED -> cancelOnboarding()
+
+            // recovery
+            GuardianUIState.INVALID_PARTICIPANT_ID,
+            GuardianUIState.ACCESS_REQUESTED,
+            GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER,
+            GuardianUIState.ACCESS_VERIFYING_TOTP_FROM_OWNER -> cancelRecovery()
+
+            // no "Close" button for these states
+            GuardianUIState.MISSING_INVITE_CODE,
+            GuardianUIState.COMPLETE,
+            GuardianUIState.ACCESS_APPROVED -> {
+            }
+        }
+    }
+
+    private fun cancelRecovery() {
+        guardianRepository.clearParticipantId()
+
+        state = state.copy(
+            participantId = "",
+            guardianUIState = GuardianUIState.COMPLETE
+        )
+    }
+
+    fun cancelOnboarding() {
+        guardianRepository.clearInvitationId()
+
+        state = state.copy(
+            invitationId = InvitationId(""),
+            guardianUIState = GuardianUIState.MISSING_INVITE_CODE
+        )
+    }
+
+    fun resetAcceptGuardianResource() {
+        state = state.copy(
+            acceptGuardianResource = Resource.Uninitialized
+        )
+    }
+
+    fun resetSubmitVerificationResource() {
+        state = state.copy(
+            submitVerificationResource = Resource.Uninitialized
+        )
+    }
+
+    fun resetStoreRecoveryTotpSecretResource() {
+        state = state.copy(
+            storeRecoveryTotpSecretResource = Resource.Uninitialized
+        )
+    }
+
+    fun resetApproveRecoveryResource() {
+        state = state.copy(approveRecoveryResource = Resource.Uninitialized)
+    }
+
+    fun resetRejectRecoveryResource() {
+        state = state.copy(rejectRecoveryResource = Resource.Uninitialized)
     }
 }

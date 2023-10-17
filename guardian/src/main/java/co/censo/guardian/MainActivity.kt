@@ -87,7 +87,7 @@ class MainActivity : FragmentActivity() {
                 val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
                 EntranceScreen(
                     navController = navController,
-                    participantId = participantId,
+                    recoveryParticipantId = participantId,
                     guardianEntrance = true
                 )
             }

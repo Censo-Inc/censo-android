@@ -1,22 +1,24 @@
 package co.censo.guardian.presentation.home
 
-import androidx.compose.foundation.background
+import StandardButton
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,13 +32,16 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import co.censo.guardian.BuildConfig
 import co.censo.guardian.R
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverCodeVerification
+import co.censo.guardian.presentation.components.GuardianTopBar
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.TotpCodeView
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,238 +67,398 @@ fun GuardianHomeScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(GuardianColors.PrimaryColor),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+    when {
+
+        state.loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = when (state.guardianUIState) {
-                        GuardianUIState.UNINITIALIZED,
-                        GuardianUIState.WAITING_FOR_CONFIRMATION,
-                        GuardianUIState.CODE_REJECTED,
-                        GuardianUIState.MISSING_INVITE_CODE,
-                        GuardianUIState.WAITING_FOR_CODE,
-                        GuardianUIState.NEED_SAVE_KEY,
-                        GuardianUIState.INVITE_READY,
-                        GuardianUIState.COMPLETE,
-                        GuardianUIState.DECLINED_INVITE -> {
-                            stringResource(R.string.become_an_approver)
-                        }
-                        GuardianUIState.INVALID_PARTICIPANT_ID,
-                        GuardianUIState.RECOVERY_REQUESTED,
-                        GuardianUIState.RECOVERY_WAITING_FOR_TOTP_FROM_OWNER,
-                        GuardianUIState.RECOVERY_VERIFYING_TOTP_FROM_OWNER -> {
-                            stringResource(R.string.recovery_approval)
-                        }
-                    },
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.Center
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .align(Alignment.Center),
+                    strokeWidth = 8.dp,
+                    color = Color.Black
                 )
             }
-        },
-        content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (state.apiError && state.guardianUIState != GuardianUIState.WAITING_FOR_CODE) {
-                    Text(text = "Something went wrong")
+        }
+
+        state.asyncError -> {
+            when {
+                state.userResponse is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.userResponse.getErrorMessage(context),
+                        dismissAction = null,
+                    ) { viewModel.retrieveApproverState()}
                 }
 
-                when (val guardianUIState = state.guardianUIState) {
-                    GuardianUIState.UNINITIALIZED -> {
-                        Spacer(modifier = Modifier.height(56.dp))
-                        CircularProgressIndicator(
-                            color = GuardianColors.PrimaryColor,
-                            modifier = Modifier.size(64.dp),
-                            strokeWidth = 5.dp,
-                        )
+                state.acceptGuardianResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.acceptGuardianResource.getErrorMessage(context),
+                        dismissAction = { viewModel.resetAcceptGuardianResource() },
+                    ) { viewModel.acceptGuardianship() }
+                }
+
+                state.submitVerificationResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.submitVerificationResource.getErrorMessage(context),
+                        dismissAction = { viewModel.resetSubmitVerificationResource() },
+                    ) { viewModel.submitVerificationCode() }
+                }
+
+                state.storeRecoveryTotpSecretResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(context),
+                        dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
+                    ) { viewModel.storeRecoveryTotpSecret() }
+                }
+
+                state.approveRecoveryResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.approveRecoveryResource.getErrorMessage(context),
+                        dismissAction = { viewModel.resetApproveRecoveryResource() },
+                    ) {
+                        viewModel.resetApproveRecoveryResource()
+                        viewModel.retrieveApproverState()
                     }
+                }
 
-                    GuardianUIState.WAITING_FOR_CONFIRMATION -> {
-                        ApproverCodeVerification(
-                            value = state.verificationCode,
-                            onValueChanged = viewModel::updateVerificationCode,
-                            errorResource = if (state.submitVerificationResource is Resource.Error) state.submitVerificationResource
-                            else null,
-                            label = stringResource(R.string.code_sent_to_owner_waiting_for_them_to_approve),
-                            isLoading = state.submitVerificationResource is Resource.Loading,
-                        )
+                state.rejectRecoveryResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
+                        dismissAction = { viewModel.resetRejectRecoveryResource() },
+                    ) {
+                        viewModel.resetRejectRecoveryResource()
+                        viewModel.retrieveApproverState()
                     }
+                }
 
-                    GuardianUIState.CODE_REJECTED -> {
-                        ApproverCodeVerification(
-                            value = state.verificationCode,
-                            onValueChanged = viewModel::updateVerificationCode,
-                            errorResource = if (state.submitVerificationResource is Resource.Error) state.submitVerificationResource
-                            else null,
-                            label = stringResource(R.string.code_not_approved),
-                            isLoading = state.submitVerificationResource is Resource.Loading,
-                        )
-                    }
-
-                    GuardianUIState.MISSING_INVITE_CODE -> {
-                        Text(
-                            text = "No invite code detected. Please click the invite link your Owner sent you.",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    GuardianUIState.INVALID_PARTICIPANT_ID -> {
-                        Text(
-                            text = "Invalid participant id. Please click the recovery link your Owner sent you.",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    GuardianUIState.WAITING_FOR_CODE, GuardianUIState.NEED_SAVE_KEY -> {
-                        if (guardianUIState == GuardianUIState.NEED_SAVE_KEY) {
-                            Text(
-                                text = "You have accepted the guardianship!", fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(48.dp))
-
-                            Text(
-                                text = "We need you to create and store your Guardian key. This will be used to complete recovery if the owner loses their phrase.",
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Button(
-                                enabled = state.saveKeyToCloudResource !is Resource.Loading,
-                                onClick = {
-                                    viewModel.createGuardianKey()
-                                }) {
-                                Text("Create Guardian Key")
-                            }
-                        } else {
-                            ApproverCodeVerification(
-                                value = state.verificationCode,
-                                onValueChanged = viewModel::updateVerificationCode,
-                                errorResource = if (state.submitVerificationResource is Resource.Error) state.submitVerificationResource
-                                else null,
-                                label = stringResource(R.string.approver_verification_code_text),
-                                isLoading = state.submitVerificationResource is Resource.Loading,
-                            )
-                        }
-                    }
-
-                    GuardianUIState.INVITE_READY -> {
-                        Text(
-                            text = "Looks like you have been invited to be a guardian!",
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(48.dp))
-
-
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Button(onClick = {
-                                viewModel.declineGuardianship()
-                            }) {
-                                Text(text = "Decline", color = Color.White)
-                            }
-
-                            Spacer(modifier = Modifier.width(36.dp))
-
-                            Button(onClick = {
-                                viewModel.acceptGuardianship()
-                            }) {
-                                Text(text = "Accept", color = Color.White)
-                            }
-                        }
-                    }
-
-                    GuardianUIState.COMPLETE -> {
-                        Spacer(modifier = Modifier.height(30.dp))
-                        //Text
-                        if (state.approveRecoveryResource is Resource.Success) {
-                            Text(
-                                modifier = Modifier.padding(16.dp),
-                                text = "Recovery approved!",
-                                color = GuardianColors.PrimaryColor,
-                                textAlign = TextAlign.Center,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.padding(16.dp),
-                                text = "Fully onboarded!",
-                                color = GuardianColors.PrimaryColor,
-                                textAlign = TextAlign.Center,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(30.dp))
-                    }
-
-                    GuardianUIState.DECLINED_INVITE -> {
-                        Text(
-                            text = "Declined Guardianship",
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = "I said good day!",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    GuardianUIState.RECOVERY_REQUESTED -> {
-                        Spacer(modifier = Modifier.height(30.dp))
-
-                        Text(text = "Recovery was requested")
-
-                        Button(onClick = {
-                            viewModel.storeRecoveryTotpSecret()
-                        }) {
-                            Text(text = "Continue", color = Color.White)
-                        }
-                    }
-
-                    GuardianUIState.RECOVERY_WAITING_FOR_TOTP_FROM_OWNER -> {
-                        Spacer(modifier = Modifier.height(30.dp))
-
-                        val totpCode = state.recoveryTotp?.code
-                        if (totpCode == null) {
-                            Text(
-                                "Loading...",
-                                textAlign = TextAlign.Center
-                            )
-                        } else {
-                            Text(text = "Awaiting Code")
-                            TotpCodeView(totpCode, state.recoveryTotp.countdownPercentage, GuardianColors.PrimaryColor)
-                        }
-                    }
-
-                    GuardianUIState.RECOVERY_VERIFYING_TOTP_FROM_OWNER -> {
-                        Spacer(modifier = Modifier.height(30.dp))
-
-                        Text(text = "Verifying Code...")
-                    }
+                else -> {
+                    DisplayError(
+                        errorMessage = stringResource(R.string.something_went_wrong),
+                        dismissAction = null,
+                    ) { viewModel.retrieveApproverState() }
                 }
             }
-
         }
+
+        else -> {
+
+            if (state.showTopBarCancelConfirmationDialog) {
+                AlertDialog(
+                    onDismissRequest = viewModel::hideCloseConfirmationDialog,
+                    text = {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = stringResource(R.string.do_you_really_want_to_cancel),
+                            color = GuardianColors.PrimaryColor,
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = viewModel::onTopBarCloseConfirmed
+                        ) {
+                            Text(stringResource(R.string.yes))
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = viewModel::hideCloseConfirmationDialog
+                        ) {
+                            Text(stringResource(R.string.no))
+                        }
+                    }
+                )
+            }
+
+            Scaffold(
+                topBar = {
+                    GuardianTopBar(
+                        uiState = state.guardianUIState,
+                        onClose = viewModel::showCloseConfirmationDialog
+                    )
+                },
+                content = { contentPadding ->
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.weight(0.3f))
+
+                        when (state.guardianUIState) {
+
+                            GuardianUIState.MISSING_INVITE_CODE -> {
+                                InvitesOnly()
+                            }
+
+                            GuardianUIState.INVITE_READY -> {
+                                InviteReady(
+                                    onAccept = viewModel::acceptGuardianship,
+                                    onCancel = viewModel::cancelOnboarding,
+                                    enabled = state.acceptGuardianResource !is Resource.Loading
+                                )
+                            }
+
+                            GuardianUIState.WAITING_FOR_CODE -> {
+                                ApproverCodeVerification(
+                                    value = state.verificationCode,
+                                    onValueChanged = viewModel::updateVerificationCode,
+                                    validCodeLength = TotpGenerator.CODE_LENGTH,
+                                    label = stringResource(
+                                        R.string.enter_the_digit_code_from_the_seed_phrase_owner,
+                                        TotpGenerator.CODE_LENGTH
+                                    ),
+                                    isLoading = state.submitVerificationResource is Resource.Loading,
+                                    isVerificationRejected = false,
+                                    isWaitingForVerification = false,
+                                )
+                            }
+
+                            GuardianUIState.WAITING_FOR_CONFIRMATION -> {
+                                ApproverCodeVerification(
+                                    value = state.verificationCode,
+                                    onValueChanged = viewModel::updateVerificationCode,
+                                    validCodeLength = TotpGenerator.CODE_LENGTH,
+                                    label = stringResource(R.string.code_sent_to_owner_waiting_for_them_to_approve),
+                                    isLoading = state.submitVerificationResource is Resource.Loading,
+                                    isVerificationRejected = false,
+                                    isWaitingForVerification = true,
+                                )
+                            }
+
+                            GuardianUIState.CODE_REJECTED -> {
+                                ApproverCodeVerification(
+                                    value = state.verificationCode,
+                                    onValueChanged = viewModel::updateVerificationCode,
+                                    validCodeLength = TotpGenerator.CODE_LENGTH,
+                                    label = stringResource(R.string.code_not_approved),
+                                    isLoading = state.submitVerificationResource is Resource.Loading,
+                                    isVerificationRejected = true,
+                                    isWaitingForVerification = false,
+                                )
+                            }
+
+                            GuardianUIState.COMPLETE -> {
+                                Onboarded()
+                            }
+
+                            GuardianUIState.INVALID_PARTICIPANT_ID -> {
+                                InvalidParticipantId()
+                            }
+
+                            GuardianUIState.ACCESS_REQUESTED -> {
+                                RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret )
+                            }
+
+                            GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER -> {
+                                OwnerCodeVerification(
+                                    totpCode = state.recoveryTotp?.code,
+                                    countdownPercentage = state.recoveryTotp?.countdownPercentage
+                                )
+                            }
+
+                            GuardianUIState.ACCESS_VERIFYING_TOTP_FROM_OWNER -> {
+                                VerifyingOwnerCode()
+                            }
+
+                            GuardianUIState.ACCESS_APPROVED -> {
+                                AccessApproved(
+                                    onClose = viewModel::resetApproveRecoveryResource
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(0.7f))
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun VerifyingOwnerCode() {
+    Text(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        text = stringResource(R.string.verifying_code),
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp
     )
+}
+
+@Composable
+private fun OwnerCodeVerification(
+    totpCode: String?,
+    countdownPercentage: Float?
+) {
+    if (totpCode == null || countdownPercentage == null) {
+        Text(
+            text = stringResource(R.string.loading),
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp
+        )
+    } else {
+        Text(
+            modifier = Modifier.padding(horizontal = 30.dp),
+            text = stringResource(
+                R.string.tell_seed_phrase_owner_this_digit_code_to_approve_their_access,
+                TotpGenerator.CODE_LENGTH
+            ),
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        TotpCodeView(
+            totpCode,
+            countdownPercentage,
+            GuardianColors.PrimaryColor
+        )
+    }
+}
+
+@Composable
+private fun InvalidParticipantId() {
+    Text(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        text = stringResource(R.string.link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner),
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp
+    )
+}
+
+@Composable
+private fun AccessApproved(
+    onClose: () -> Unit
+) {
+    LaunchedEffect(Unit) {
+        delay(5000)
+        onClose()
+    }
+
+    Text(
+        modifier = Modifier.padding(16.dp),
+        text = stringResource(R.string.access_approved),
+        color = GuardianColors.PrimaryColor,
+        textAlign = TextAlign.Center,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+private fun Onboarded() {
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = stringResource(R.string.you_are_fully_set),
+        color = GuardianColors.PrimaryColor,
+        textAlign = TextAlign.Center,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(modifier = Modifier.height(30.dp))
+
+    Text(
+        modifier = Modifier.padding(horizontal = 40.dp),
+        text = stringResource(R.string.when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access),
+        color = GuardianColors.PrimaryColor,
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Normal
+    )
+}
+
+@Composable
+private fun InvitesOnly() {
+    Text(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        text = stringResource(R.string.this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner),
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp
+    )
+}
+
+@Composable
+private fun InviteReady(
+    onAccept: () -> Unit,
+    onCancel: () -> Unit,
+    enabled: Boolean
+) {
+    Text(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        text = stringResource(R.string.you_have_been_invited_to_become_an_approver),
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Medium
+    )
+
+    Spacer(modifier = Modifier.height(48.dp))
+
+    StandardButton(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        color = GuardianColors.PrimaryColor,
+        borderColor = Color.White,
+        border = false,
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
+        onClick = onAccept,
+        enabled = enabled
+    )
+    {
+        Text(
+            text = stringResource(R.string.accept_invitation),
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    TextButton(onClick = onCancel) {
+        Text(
+            text = stringResource(R.string.close),
+            color = Color.Black
+        )
+    }
+}
+
+@Composable
+private fun RecoveryRequested(
+    onContinue: () -> Unit
+) {
+    Text(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        text = stringResource(R.string.seed_phrase_owner_has_requested_access_approval),
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Medium
+    )
+
+    Spacer(modifier = Modifier.height(48.dp))
+
+    StandardButton(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        color = GuardianColors.PrimaryColor,
+        borderColor = Color.White,
+        border = false,
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
+        onClick = onContinue,
+    )
+    {
+        Text(
+            text = "Continue",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }

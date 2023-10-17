@@ -38,8 +38,8 @@ import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
-import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.ProlongUnlockApiResponse
+import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse

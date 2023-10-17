@@ -62,7 +62,7 @@ fun EntranceScreen(
     navController: NavController,
     guardianEntrance: Boolean,
     invitationId: String? = null,
-    participantId: String? = null,
+    recoveryParticipantId: String? = null,
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -121,7 +121,7 @@ fun EntranceScreen(
 
     DisposableEffect(key1 = viewModel) {
         if (guardianEntrance) {
-            viewModel.onGuardianStart(invitationId, participantId)
+            viewModel.onGuardianStart(invitationId, recoveryParticipantId)
         } else {
             viewModel.onOwnerStart()
         }

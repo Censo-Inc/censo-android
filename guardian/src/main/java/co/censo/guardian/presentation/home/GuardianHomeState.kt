@@ -15,28 +15,44 @@ import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import okhttp3.ResponseBody
 
 data class GuardianHomeState(
-    val verificationCode: String = "",
+
+    // guardian state
     val guardianState: GuardianState? = null,
+
+    // deep links data
     val invitationId: InvitationId = InvitationId(""),
     val participantId: String = "",
+
+    // onboarding
+    val verificationCode: String = "",
+    val guardianEncryptionKey: EncryptionKey? = null,
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val acceptGuardianResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
-    val declineGuardianResource: Resource<ResponseBody> = Resource.Uninitialized,
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
-    val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val guardianUIState: GuardianUIState = GuardianUIState.UNINITIALIZED,
-    val guardianEncryptionKey: EncryptionKey? = null,
 
-    val storeRecoveryTotpSecretResource: Resource<StoreRecoveryTotpSecretApiResponse> = Resource.Uninitialized,
+    // recovery
     val recoveryTotp: RecoveryTotpState? = null,
+    val storeRecoveryTotpSecretResource: Resource<StoreRecoveryTotpSecretApiResponse> = Resource.Uninitialized,
     val approveRecoveryResource: Resource<ApproveRecoveryApiResponse> = Resource.Uninitialized,
     val rejectRecoveryResource: Resource<RejectRecoveryApiResponse> = Resource.Uninitialized,
+
+    // UI state
+    val guardianUIState: GuardianUIState = GuardianUIState.MISSING_INVITE_CODE,
+    val showTopBarCancelConfirmationDialog: Boolean = false
 ) {
-    val apiError = userResponse is Resource.Error || acceptGuardianResource is Resource.Error
-            || declineGuardianResource is Resource.Error || submitVerificationResource is Resource.Error
+
+    val loading = userResponse is Resource.Loading
+            || acceptGuardianResource is Resource.Loading
+            || submitVerificationResource is Resource.Loading
+            || storeRecoveryTotpSecretResource is Resource.Loading
+            || approveRecoveryResource is Resource.Loading
+            || rejectRecoveryResource is Resource.Loading
+
+    val asyncError = userResponse is Resource.Error
+            || acceptGuardianResource is Resource.Error
+            || submitVerificationResource is Resource.Error
             || storeRecoveryTotpSecretResource is Resource.Error
             || approveRecoveryResource is Resource.Error
             || rejectRecoveryResource is Resource.Error
@@ -52,17 +68,20 @@ data class GuardianHomeState(
 }
 
 enum class GuardianUIState {
-    UNINITIALIZED,
-    INVITE_READY, //There is no guardian state in the user response.
-    MISSING_INVITE_CODE,  //There is no guardian state in the user response, and app did not persist invite code.
+    // Default
+    MISSING_INVITE_CODE,        // There is no guardian state in the user response, and app did not persist invite code.
+
+    // Onboarding
+    INVITE_READY,               //There is no guardian state in the user response.
+    WAITING_FOR_CODE,           //Guardian state in user response is WAITING_FOR_CODE. Guardian has accepted invite. User has saved private key.
+    WAITING_FOR_CONFIRMATION,   //Guardian state in user response is WAITING_FOR_CONFIRMATION.
+    CODE_REJECTED,              //Guardian state in user response is VerificationRejected
+    COMPLETE,                   //Guardian state in user response is COMPLETE
+
+    // Access
     INVALID_PARTICIPANT_ID,
-    DECLINED_INVITE, //Guardian declined invite. Temporary state until Guardian leaves app. Maybe just kick them out...
-    NEED_SAVE_KEY, //Guardian state in user response is WAITING_FOR_CODE. Guardian has accepted invite. User has not saved private key.
-    WAITING_FOR_CODE, //Guardian state in user response is WAITING_FOR_CODE. Guardian has accepted invite. User has saved private key.
-    WAITING_FOR_CONFIRMATION, //Guardian state in user response is WAITING_FOR_CONFIRMATION.
-    CODE_REJECTED, //Guardian state in user response is VerificationRejected
-    COMPLETE, //Guardian state in user response is COMPLETE
-    RECOVERY_REQUESTED,
-    RECOVERY_WAITING_FOR_TOTP_FROM_OWNER,
-    RECOVERY_VERIFYING_TOTP_FROM_OWNER,
+    ACCESS_REQUESTED,
+    ACCESS_WAITING_FOR_TOTP_FROM_OWNER,
+    ACCESS_VERIFYING_TOTP_FROM_OWNER,
+    ACCESS_APPROVED
 }
