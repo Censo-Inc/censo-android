@@ -57,7 +57,7 @@ class PlanSetupViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         facetecData: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        state = state.copy(createPolicySetupResponse = Resource.Loading())
+        /*state = state.copy(createPolicySetupResponse = Resource.Loading())
 
         return viewModelScope.async {
             val createPolicySetupResponse = ownerRepository.createPolicySetup(
@@ -92,7 +92,9 @@ class PlanSetupViewModel @Inject constructor(
             }
 
             createPolicySetupResponse.map { it.scanResultBlob }
-        }.await()
+        }.await()*/
+
+        return Resource.Success(BiometryScanResultBlob(""))
     }
 
     fun onBackActionClick() {

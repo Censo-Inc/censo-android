@@ -26,6 +26,8 @@ import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.RejectRecoveryApiResponse
+import co.censo.shared.data.model.ReplacePolicyApiRequest
+import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
@@ -48,7 +50,6 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
-import com.auth0.android.jwt.JWT
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -64,6 +65,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.io.IOException
 import java.time.Duration
@@ -138,10 +140,15 @@ interface ApiService {
         @Body apiRequest: CreatePolicySetupApiRequest
     ): RetrofitResponse<CreatePolicySetupApiResponse>
 
-    @POST("/v1/policies")
+    @POST("/v1/policy")
     suspend fun createPolicy(
         @Body createPolicyApiRequest: CreatePolicyApiRequest
     ): RetrofitResponse<CreatePolicyApiResponse>
+
+    @PUT("/v1/policy")
+    suspend fun replacePolicy(
+        @Body createPolicyApiRequest: ReplacePolicyApiRequest
+    ): RetrofitResponse<ReplacePolicyApiResponse>
 
     @POST("/v1/guardianship-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptGuardianship(

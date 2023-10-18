@@ -6,6 +6,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
@@ -20,7 +21,7 @@ data class ActivateApproversState(
     val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
     val approverCodes: Map<ParticipantId, String> = emptyMap(),
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
-    val createPolicyResponse: Resource<CreatePolicyApiResponse> = Resource.Uninitialized,
+    val createPolicyResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
     val policyIntermediatePublicKey: Base58EncodedIntermediatePublicKey = Base58EncodedIntermediatePublicKey(
         ""
     ),

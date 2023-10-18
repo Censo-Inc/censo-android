@@ -123,39 +123,17 @@ fun InitialPlanSetupScreen(
                     }
 
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.SetupInProgress ->
+                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress ->
                     when (val resourceStatus = setupStatus.apiCall) {
                         is Resource.Uninitialized ->
                             FacetecAuth(
-                                onFaceScanReady = viewModel::onPolicySetupCreationFaceScanReady,
+                                onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
                                     navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
                                     viewModel.resetComplete()
                                 }
                             )
 
-                        is Resource.Loading ->
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                color = VaultColors.PrimaryColor,
-                                strokeWidth = 3.dp,
-                            )
-
-                        is Resource.Error ->
-                            DisplayError(
-                                errorMessage = resourceStatus.getErrorMessage(context),
-                                dismissAction = null,
-                                retryAction = {
-                                    viewModel.reset()
-                                }
-                            )
-
-                        else -> {}
-                    }
-
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress ->
-                    when (val resourceStatus = setupStatus.apiCall) {
-                        is Resource.Uninitialized,
                         is Resource.Loading ->
                             CircularProgressIndicator(
                                 modifier = Modifier.size(28.dp),
