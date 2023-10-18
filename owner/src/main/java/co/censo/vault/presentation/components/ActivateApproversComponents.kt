@@ -230,7 +230,7 @@ fun ActivateApproverActionItem(
         is Guardian.ProspectGuardian -> {
             when (val approverStatus = approver.status) {
                 is GuardianStatus.Accepted -> {
-                    TotpCodeView(approverCode, percentageLeft, VaultColors.PrimaryColor)
+                    TotpCodeView(approverCode, percentageLeft.toInt(), VaultColors.PrimaryColor)
                 }
 
                 is GuardianStatus.Confirmed,

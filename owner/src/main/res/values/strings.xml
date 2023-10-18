@@ -209,5 +209,23 @@
     <string name="add_approver_nickname_message">Give your approver a nickname of your choice so you can identify them in the future.\n\nThis will be visible only to you.</string>
     <string name="get_live_with_your_approver">Get live with your approver</string>
     <string name="get_live_with_your_approver_message">For maximum security, it\'s best to be face-to-face with the person you\'re adding as an approver in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
+    <string name="invite_approver">Invite approver</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="activate_primary_approver">Activate primary approver</string>
+    <string name="approver_do_3_things">Now, your approver must do three things:</string>
+    <string name="download_the_app_title">1. Download the app</string>
+    <string name="share_the_link_title">2. Share the link</string>
+    <string name="share_the_code_title">3. Share the code</string>
+    <string name="dowloand_the_app_message">They must download Censo from the Apple App Store or Google Play Store.</string>
+    <string name="share_the_link_message">After they have installed Censo, send them this unique, secret link.</string>
+    <string name="share_the_code_message">They must enter this 6-digit code to become your primary approver.</string>
+    <string name="activate_backup_approver">Activate Backup Approver</string>
+    <string name="edit_approver_name">edit approver name</string>
+    <string name="primary_approver">Primary approver</string>
+    <string name="backup_approver">Backup approver</string>
+    <string name="activated">Activated</string>
+    <string name="not_yet_active">Not yet active</string>
+    <string name="share_app_link">Share app link</string>
+    <string name="share_unique_link">Share unique link</string>
 
 </resources>
