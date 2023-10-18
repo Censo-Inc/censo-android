@@ -11,6 +11,9 @@ sealed class SharedScreen(val route: String) {
         const val GUARDIAN_ONBOARDING_URI = "censo-guardian://invite/"
         const val GUARDIAN_RECOVERY_URI = "censo-guardian://recovery/"
 
+        const val VAULT_PLAN_SETUP_URI = "censo-vault://plan_setup_route/"
+
+
         const val GUARDIAN_DEEPLINK_ACCEPTANCE = "guardianDeepLinkAcceptance"
         const val DL_INVITATION_ID_KEY = "invitation_id_key"
 

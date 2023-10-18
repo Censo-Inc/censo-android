@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.storage.Storage
 import co.censo.shared.presentation.entrance.EntranceScreen
@@ -141,15 +142,15 @@ class MainActivity : FragmentActivity() {
                 arguments = listOf(navArgument(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG) {
                     type = NavType.StringType
                 })) { backStackEntry ->
-                val securityPlanData =
-                    backStackEntry.arguments?.getString(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG)
+                /*val securityPlanData =
+                    backStackEntry.arguments?.getString(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG)*/
                 PlanSetupScreen(
                     navController = navController,
-                    existingSecurityPlan = securityPlanData?.let {
+                    /*existingSecurityPlan = securityPlanData?.let {
                         Json.decodeFromString(
                             securityPlanData
                         )
-                    }
+                    }*/
                 )
             }
             composable(
@@ -157,7 +158,20 @@ class MainActivity : FragmentActivity() {
             ) {
                 PlanSetupScreen(
                     navController = navController,
-                    existingSecurityPlan = null
+                   /* existingSecurityPlan = null*/
+                )
+            }
+            composable(
+                route = SharedScreen.VAULT_PLAN_SETUP_URI,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = SharedScreen.VAULT_PLAN_SETUP_URI
+                    }
+                )
+            ) { _ ->
+                PlanSetupScreen(
+                    navController = navController,
+                    /* existingSecurityPlan = null*/
                 )
             }
             composable(

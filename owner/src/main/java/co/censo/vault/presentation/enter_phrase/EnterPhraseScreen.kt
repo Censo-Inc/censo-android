@@ -34,6 +34,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.R as SharedR
 import co.censo.vault.R
+import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.enter_phrase.components.AddPhraseNicknameUI
 import co.censo.vault.presentation.enter_phrase.components.ReviewSeedPhraseUI
@@ -77,7 +78,7 @@ fun EnterPhraseScreen(
     LaunchedEffect(key1 = state) {
         if (state.phraseEntryComplete is Resource.Success) {
             //TODO: Add add approvers flow if welcome flow is enabled
-            navController.navigate(SharedScreen.OwnerVaultScreen.route)
+            navController.navigate(Screen.PlanSetupRoute.route)
             viewModel.resetPhraseEntryComplete()
         }
     }
