@@ -25,7 +25,7 @@ interface CloudStorage {
 
 class GoogleDriveStorage(private val context: Context) : CloudStorage {
     companion object {
-        const val FILE_NAME = "encrypted_file"
+        const val FILE_NAME = "DO-NOT-DELETE_Censo-approver-key"
         const val FILE_EXTENSION = ".txt"
         const val FILE_TYPE = "text/plain"
         const val ID_FIELD = "id"

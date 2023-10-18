@@ -113,10 +113,14 @@ fun BigInteger.toByteArrayNoSign(len: Int): ByteArray {
     }
 }
 
-fun String.sha256(): String {
+fun String.sha256digest(): ByteArray {
     return MessageDigest
         .getInstance("SHA-256")
         .digest(this.toByteArray())
+}
+
+fun String.sha256(): String {
+    return this.sha256digest()
         .fold("", { str, it -> str + "%02x".format(it) })
 }
 
