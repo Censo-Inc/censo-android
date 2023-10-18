@@ -13,7 +13,8 @@ data class EnterPhraseState(
     val nickName: String = "",
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
-    val welcomeFlow: Boolean = false
+    val welcomeFlow: Boolean = false,
+    val exitFlow: Boolean = false
 ) {
 
     val validName = nickName.isNotEmpty()

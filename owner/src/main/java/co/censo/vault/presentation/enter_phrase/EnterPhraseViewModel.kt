@@ -46,7 +46,6 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun wordSubmitted() {
-
         projectLog(message = "Inserting ${state.editedWord} in ${state.editedWordIndex}")
 
         val phrase = state.enteredWords.toMutableList()
@@ -191,14 +190,53 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun onBackClicked() {
-        when (state.enterWordUIState) {
-            EnterPhraseUIState.SELECT_ENTRY_TYPE -> {}
-            EnterPhraseUIState.EDIT -> {}
-            EnterPhraseUIState.SELECTED -> {}
-            EnterPhraseUIState.VIEW -> {}
-            EnterPhraseUIState.REVIEW -> {}
-            EnterPhraseUIState.NICKNAME -> {}
+        state = when (state.enterWordUIState) {
+            EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
+            EnterPhraseUIState.SELECTED,
+            EnterPhraseUIState.EDIT -> {
+                if (state.editedWordIndex == 0 && state.enteredWords.isEmpty()) {
+                    state.copy(
+                        enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                        editedWord = ""
+                    )
+                } else {
+                    val index = if (state.editedWordIndex >= state.enteredWords.size) {
+                        state.editedWordIndex - 1
+                    } else {
+                        state.editedWordIndex
+                    }
+
+                    state.copy(
+                        editedWordIndex = index,
+                        editedWord = "",
+                        enterWordUIState = EnterPhraseUIState.VIEW
+                    )
+                }
+            }
+            EnterPhraseUIState.VIEW ->
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                    editedWordIndex = 0,
+                    editedWord = "",
+                    enteredWords = emptyList()
+                )
+            EnterPhraseUIState.REVIEW ->
+                 state.copy(
+                    editedWord = "",
+                    enterWordUIState = EnterPhraseUIState.VIEW,
+                    editedWordIndex = 0
+                )
+            EnterPhraseUIState.NICKNAME ->
+                 state.copy(
+                    editedWord = "",
+                    enterWordUIState = EnterPhraseUIState.REVIEW,
+                    editedWordIndex = 0
+                )
         }
+    }
+
+    fun resetExitFlow() {
+        state = state.copy(exitFlow = false)
     }
 
     fun resetPhraseEntryComplete() {

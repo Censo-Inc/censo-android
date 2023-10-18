@@ -88,6 +88,10 @@ class EntranceViewModel @Inject constructor(
                 } else {
                     //TODO: Sign out the user here
                 }
+            } else {
+                state = state.copy(
+                    signInUserResource = Resource.Uninitialized
+                )
             }
         }
     }
@@ -151,7 +155,7 @@ class EntranceViewModel @Inject constructor(
     }
 
 
-    fun signInUser(jwt: String?) {
+    private fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             if (jwt.isNullOrEmpty()) {
                 googleAuthFailure(GoogleAuthError.MissingCredentialId)
