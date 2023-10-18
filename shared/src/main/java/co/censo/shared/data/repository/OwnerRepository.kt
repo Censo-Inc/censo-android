@@ -57,7 +57,6 @@ import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
-import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.AuthUtil
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
@@ -157,7 +156,6 @@ interface OwnerRepository {
 
 class OwnerRepositoryImpl(
     private val apiService: ApiService,
-    private val storage: Storage,
     private val secureStorage: SecurePreferences,
     private val authUtil: AuthUtil,
     private val keyRepository: KeyRepository
@@ -318,7 +316,7 @@ class OwnerRepositoryImpl(
         return try {
             val guardianDevicePublicKey = transportKey.ecPublicKey
 
-            val decryptedShard = InternalDeviceKey(storage.retrieveDeviceKeyId()).decrypt(
+            val decryptedShard = InternalDeviceKey(secureStorage.retrieveDeviceKeyId()).decrypt(
                 Base64.getDecoder().decode(deviceEncryptedShard.base64Encoded)
             )
 
@@ -381,16 +379,16 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.deleteSecret(guid) }
     }
 
-    override fun isUserEditingSecurityPlan() = storage.isEditingSecurityPlan()
+    override fun isUserEditingSecurityPlan() = secureStorage.isEditingSecurityPlan()
     override fun setEditingSecurityPlan(editingPlan: Boolean) =
-        storage.setEditingSecurityPlan(editingPlan)
+        secureStorage.setEditingSecurityPlan(editingPlan)
 
-    override fun retrieveSecurityPlan() = storage.retrieveSecurityPlan()
+    override fun retrieveSecurityPlan() = secureStorage.retrieveSecurityPlan()
 
     override fun saveSecurityPlanData(securityPlanData: SecurityPlanData) =
-        storage.setSecurityPlan(securityPlanData)
+        secureStorage.setSecurityPlan(securityPlanData)
 
-    override fun clearSecurityPlanData() = storage.clearSecurityPlanData()
+    override fun clearSecurityPlanData() = secureStorage.clearSecurityPlanData()
     override suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse> {
         return retrieveApiResource { apiService.requestRecovery(InitiateRecoveryApiRequest(secretIds)) }
     }
@@ -407,7 +405,7 @@ class OwnerRepositoryImpl(
         participantId: ParticipantId,
         verificationCode: String
     ): Resource<SubmitRecoveryTotpVerificationApiResponse> {
-        val deviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        val deviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
 
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
 
@@ -447,7 +445,7 @@ class OwnerRepositoryImpl(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
     ): List<RecoveredSeedPhrase> {
-        val ownerDeviceKey = InternalDeviceKey(storage.retrieveDeviceKeyId())
+        val ownerDeviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
 
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
             val encryptionKey = when (it.isOwnerShard) {

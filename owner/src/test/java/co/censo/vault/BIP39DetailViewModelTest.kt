@@ -4,7 +4,7 @@ import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.vault.presentation.bip_39_detail.BIP39DetailViewModel
 import co.censo.shared.data.storage.EncryptedBIP39
-import co.censo.shared.data.storage.Storage
+import co.censo.shared.data.storage.SecurePreferences
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ import java.util.Base64
 class BIP39DetailViewModelTest : BaseViewModelTest() {
 
     @Mock
-    lateinit var storage: Storage
+    lateinit var storage: SecurePreferences
 
     @Mock
     lateinit var keyRepository: KeyRepository

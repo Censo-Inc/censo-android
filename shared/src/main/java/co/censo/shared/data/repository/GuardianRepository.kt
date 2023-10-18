@@ -18,7 +18,7 @@ import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
-import co.censo.shared.data.storage.Storage
+import co.censo.shared.data.storage.SecurePreferences
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 import java.util.Base64
@@ -73,7 +73,7 @@ interface GuardianRepository {
 
 class GuardianRepositoryImpl(
     private val apiService: ApiService,
-    private val storage: Storage
+    private val secureStorage: SecurePreferences
 ) : GuardianRepository, BaseRepository() {
 
     override fun signVerificationCode(
@@ -116,11 +116,11 @@ class GuardianRepositoryImpl(
     }
 
     override fun saveInvitationId(invitationId: String) {
-        storage.saveGuardianInvitationId(invitationId)
+        secureStorage.saveGuardianInvitationId(invitationId)
     }
 
-    override fun retrieveInvitationId() = storage.retrieveGuardianInvitationId()
-    override fun clearInvitationId() = storage.clearGuardianInvitationId()
+    override fun retrieveInvitationId() = secureStorage.retrieveGuardianInvitationId()
+    override fun clearInvitationId() = secureStorage.clearGuardianInvitationId()
 
     override suspend fun submitGuardianVerification(
         invitationId: String,
@@ -135,13 +135,13 @@ class GuardianRepositoryImpl(
     }
 
     override fun saveParticipantId(participantId: String) {
-        storage.saveGuardianParticipantId(participantId)
+        secureStorage.saveGuardianParticipantId(participantId)
     }
 
     override fun retrieveParticipantId(): String =
-        storage.retrieveGuardianParticipantId()
+        secureStorage.retrieveGuardianParticipantId()
 
-    override fun clearParticipantId() = storage.clearGuardianParticipantId()
+    override fun clearParticipantId() = secureStorage.clearGuardianParticipantId()
 
     override suspend fun storeRecoveryTotpSecret(
         participantId: String,

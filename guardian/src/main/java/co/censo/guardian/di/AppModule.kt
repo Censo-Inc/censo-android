@@ -15,8 +15,6 @@ import co.censo.shared.data.storage.CloudStorage
 import co.censo.shared.data.storage.GoogleDriveStorage
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.SecurePreferencesImpl
-import co.censo.shared.data.storage.SharedPrefsStorage
-import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.GoogleAuth
@@ -31,13 +29,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    @Singleton
-    @Provides
-    fun provideStorage(@ApplicationContext applicationContext: Context): Storage {
-        SharedPrefsStorage.setup(applicationContext)
-        return SharedPrefsStorage
-    }
 
     @Singleton
     @Provides
@@ -63,13 +54,11 @@ object AppModule {
     @Singleton
     @Provides
     fun provideApiService(
-        storage: Storage,
         @ApplicationContext applicationContext: Context,
         authUtil: AuthUtil,
         secureStorage: SecurePreferences
     ): ApiService {
         return ApiService.create(
-            storage = storage,
             context = applicationContext,
             versionCode = BuildConfig.VERSION_CODE.toString(),
             packageName = BuildConfig.APPLICATION_ID,
@@ -81,23 +70,21 @@ object AppModule {
     @Singleton
     @Provides
     fun providesKeyRepository(
-        storage: Storage,
+        secureStorage: SecurePreferences,
         cloudStorage: CloudStorage
     ): KeyRepository {
-        return KeyRepositoryImpl(storage, cloudStorage)
+        return KeyRepositoryImpl(secureStorage, cloudStorage)
     }
 
     @Singleton
     @Provides
     fun provideOwnerRepository(
         apiService: ApiService,
-        storage: Storage,
         secureStorage: SecurePreferences,
         authUtil: AuthUtil,
         keyRepository: KeyRepository
     ): OwnerRepository {
         return OwnerRepositoryImpl(
-            storage = storage,
             apiService = apiService,
             secureStorage = secureStorage,
             authUtil = authUtil,
@@ -109,11 +96,11 @@ object AppModule {
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
-        storage: Storage,
+        secureStorage: SecurePreferences,
     ): GuardianRepository {
         return GuardianRepositoryImpl(
             apiService = apiService,
-            storage = storage,
+            secureStorage = secureStorage,
         )
     }
 
@@ -121,9 +108,14 @@ object AppModule {
     @Provides
     fun providesPushRepository(
         api: ApiService,
-        @ApplicationContext applicationContext: Context
+        @ApplicationContext applicationContext: Context,
+        secureStorage: SecurePreferences
     ): PushRepository {
-        return PushRepositoryImpl(api, applicationContext)
+        return PushRepositoryImpl(
+            api = api,
+            applicationContext = applicationContext,
+            secureStorage = secureStorage
+        )
     }
 
     @Provides

@@ -10,14 +10,12 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
-import co.censo.shared.data.storage.SharedPrefsStorage
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.CloudStorage
 import co.censo.shared.data.storage.GoogleDriveStorage
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.SecurePreferencesImpl
-import co.censo.shared.data.storage.Storage
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.GoogleAuth
@@ -36,13 +34,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    @Singleton
-    @Provides
-    fun provideStorage(@ApplicationContext applicationContext: Context): Storage {
-        SharedPrefsStorage.setup(applicationContext)
-        return SharedPrefsStorage
-    }
 
     @Singleton
     @Provides
@@ -68,13 +59,11 @@ object AppModule {
     @Singleton
     @Provides
     fun provideApiService(
-        storage: Storage,
         @ApplicationContext applicationContext: Context,
         authUtil: AuthUtil,
         secureStorage: SecurePreferences
     ): ApiService {
         return ApiService.create(
-            storage = storage,
             context = applicationContext,
             versionCode = BuildConfig.VERSION_CODE.toString(),
             packageName = BuildConfig.APPLICATION_ID,
@@ -87,14 +76,12 @@ object AppModule {
     @Provides
     fun provideOwnerRepository(
         apiService: ApiService,
-        storage: Storage,
         secureStorage: SecurePreferences,
         authUtil: AuthUtil,
         keyRepository: KeyRepository
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             apiService = apiService,
-            storage = storage,
             secureStorage = secureStorage,
             authUtil = authUtil,
             keyRepository = keyRepository
@@ -104,7 +91,7 @@ object AppModule {
     @Singleton
     @Provides
     fun providesKeyRepository(
-        storage: Storage,
+        storage: SecurePreferences,
         cloudStorage: CloudStorage
     ): KeyRepository {
         return KeyRepositoryImpl(storage, cloudStorage)
@@ -114,10 +101,10 @@ object AppModule {
     @Provides
     fun provideGuardianRepository(
         apiService: ApiService,
-        storage: Storage,
+        storage: SecurePreferences,
     ): GuardianRepository {
         return GuardianRepositoryImpl(
-            storage = storage,
+            secureStorage = storage,
             apiService = apiService,
         )
     }
@@ -126,9 +113,10 @@ object AppModule {
     @Provides
     fun providesPushRepository(
         api: ApiService,
+        secureStorage: SecurePreferences,
         @ApplicationContext applicationContext: Context
     ): PushRepository {
-        return PushRepositoryImpl(api, applicationContext)
+        return PushRepositoryImpl(api, secureStorage, applicationContext)
     }
 
     @Singleton

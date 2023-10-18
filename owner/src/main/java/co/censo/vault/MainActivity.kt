@@ -26,7 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import co.censo.shared.SharedScreen
-import co.censo.shared.data.storage.Storage
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.presentation.entrance.EntranceScreen
 import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
@@ -35,7 +35,6 @@ import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.welcome.WelcomeScreen
 import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
-import co.censo.vault.presentation.lock_screen.LockScreenViewModel
 import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
 import co.censo.vault.presentation.recovery.RecoveryScreen
@@ -51,7 +50,7 @@ import javax.inject.Inject
 class MainActivity : FragmentActivity() {
 
     @Inject
-    lateinit var storage: Storage
+    lateinit var storage: SecurePreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

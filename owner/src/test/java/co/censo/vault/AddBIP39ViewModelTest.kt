@@ -7,7 +7,6 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.BIP39Phrases
 import co.censo.shared.data.storage.EncryptedBIP39
-import co.censo.shared.data.storage.Storage
 import com.nhaarman.mockitokotlin2.capture
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
