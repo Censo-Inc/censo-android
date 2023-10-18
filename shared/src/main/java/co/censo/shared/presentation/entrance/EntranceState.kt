@@ -6,7 +6,7 @@ import okhttp3.ResponseBody
 
 data class EntranceState(
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
-    val signInUserResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val signInUserResource: Resource<ResponseBody> = Resource.Loading(),
     val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val ownerStateResource: Resource<OwnerState> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,

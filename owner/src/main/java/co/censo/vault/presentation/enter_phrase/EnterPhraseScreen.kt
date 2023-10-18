@@ -81,6 +81,11 @@ fun EnterPhraseScreen(
             navController.navigate(Screen.PlanSetupRoute.route)
             viewModel.resetPhraseEntryComplete()
         }
+
+        if (state.exitFlow) {
+            navController.navigate(SharedScreen.EntranceRoute.route)
+            viewModel.resetExitFlow()
+        }
     }
 
     Scaffold(topBar = {
