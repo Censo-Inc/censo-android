@@ -2,21 +2,18 @@ package co.censo.shared.data.repository
 
 import Base58EncodedPrivateKey
 import ParticipantId
-import android.content.Context
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.key.KeystoreHelper
-import co.censo.shared.data.cryptography.sha256
 import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.cryptography.toHexString
-import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.storage.CloudStorage
-import co.censo.shared.data.storage.Storage
 import io.github.novacrypto.base58.Base58
 import org.bouncycastle.util.encoders.Hex
+import co.censo.shared.data.storage.SecurePreferences
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
@@ -35,7 +32,7 @@ interface KeyRepository {
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
 }
 
-class KeyRepositoryImpl(val storage: Storage, val cloudStorage: CloudStorage) : KeyRepository {
+class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudStorage) : KeyRepository {
 
     private val keystoreHelper = KeystoreHelper()
     override fun hasKeyWithId(id: String): Boolean {

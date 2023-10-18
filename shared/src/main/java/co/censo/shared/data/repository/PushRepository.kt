@@ -5,7 +5,7 @@ import android.content.Context
 import co.censo.shared.data.Resource
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.networking.PushBody
-import co.censo.shared.data.storage.SharedPrefsStorage
+import co.censo.shared.data.storage.SecurePreferences
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -21,7 +21,8 @@ interface PushRepository {
 
 class PushRepositoryImpl @Inject constructor(
     private val api: ApiService,
-    private val applicationContext: Context
+    private val secureStorage: SecurePreferences,
+    applicationContext: Context
 ) : PushRepository, BaseRepository() {
 
     private val notificationManager =
@@ -34,10 +35,10 @@ class PushRepositoryImpl @Inject constructor(
     override suspend fun retrievePushToken(): String =
         FirebaseMessaging.getInstance().token.await()
 
-    override fun userHasSeenPushDialog(): Boolean = SharedPrefsStorage.userHasSeenPermissionDialog()
+    override fun userHasSeenPushDialog(): Boolean = secureStorage.userHasSeenPermissionDialog()
 
     override fun setUserSeenPushDialog(seenDialog: Boolean) {
-        SharedPrefsStorage.setUserSeenPermissionDialog(seenDialog)
+        secureStorage.setUserSeenPermissionDialog(seenDialog)
     }
 
     override suspend fun addPushNotification(pushBody: PushBody): Resource<Unit> =
