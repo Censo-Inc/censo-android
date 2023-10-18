@@ -1,21 +1,18 @@
 package co.censo.vault.presentation.plan_setup
 
-import StandardButton
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIos
-import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -23,52 +20,34 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.SharedScreen
-import co.censo.shared.data.Resource
-import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
-import co.censo.vault.presentation.components.security_plan.AddApproverDialog
-import co.censo.vault.presentation.components.security_plan.CancelEditPlanDialog
-import co.censo.vault.presentation.components.security_plan.EditOrDeleteMenu
-import co.censo.vault.presentation.components.security_plan.InitialAddApproverScreen
-import co.censo.vault.presentation.components.security_plan.RequiredApprovalsScreen
-import co.censo.vault.presentation.components.security_plan.ReviewPlanScreen
-import co.censo.vault.presentation.components.security_plan.SecureYourPlanScreen
-import co.censo.vault.presentation.components.security_plan.SelectApproversScreen
-import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
-import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.Screen
-import co.censo.vault.util.popUpToTop
+import co.censo.vault.presentation.enter_phrase.BackIconType
+import co.censo.vault.presentation.plan_setup.components.AddApproverNicknameUI
+import co.censo.vault.presentation.plan_setup.components.AddTrustedApproversUI
+import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanSetupScreen(
     navController: NavController,
-    existingSecurityPlan: SecurityPlanData?,
+    welcomeFlow: Boolean = true,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val state = viewModel.state
 
-    val bottomButtonText = when (state.currentScreen) {
-        SetupSecurityPlanScreen.Initial -> stringResource(R.string.select_first_approver_title)
-        SetupSecurityPlanScreen.AddApprovers -> stringResource(R.string.next_required_approvals)
-        SetupSecurityPlanScreen.RequiredApprovals -> stringResource(R.string.next_review)
-        SetupSecurityPlanScreen.Review -> stringResource(R.string.confirm)
-        SetupSecurityPlanScreen.SecureYourPlan -> stringResource(id = R.string.continue_text)
-        SetupSecurityPlanScreen.FacetecAuth -> ""
-    }
+    val iconPair =
+        if (state.backArrowType == BackIconType.BACK) Icons.Filled.ArrowBack to R.string.back
+        else Icons.Filled.Clear to R.string.exit
 
     LaunchedEffect(key1 = state) {
         if (state.navigateToActivateApprovers) {
@@ -78,185 +57,186 @@ fun PlanSetupScreen(
     }
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(existingSecurityPlan)
+        viewModel.onStart(/*existingSecurityPlan*/)
         onDispose {}
     }
 
-    Scaffold(
-        contentColor = Color.White,
-        containerColor = Color.White,
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.PrimaryColor),
-                navigationIcon = {
+    Scaffold(topBar = {
+        TopAppBar(
+            colors = TopAppBarDefaults.smallTopAppBarColors(
+                containerColor = VaultColors.NavbarColor
+            ),
+            navigationIcon = {
+                IconButton(onClick = {
+                    viewModel.onBackActionClick()
+                }) {
+                    Icon(
+                        imageVector = iconPair.first,
+                        contentDescription = stringResource(id = iconPair.second),
+                    )
+                }
+            },
+            title = {
+                // Title is a part of bottom aligned screen content
+            },
+            actions = {
+                IconButton(onClick = {
+                    Toast.makeText(context, "Show FAQ Web View", Toast.LENGTH_LONG).show()
+                }) {
+                    Icon(
+                        painterResource(id = co.censo.shared.R.drawable.question),
+                        contentDescription = "learn more"
+                    )
+                }
+            })
+    }) { paddingValues ->
 
-                    when (state.showBackIcon) {
-                        BackIconType.Back ->
-                            IconButton(onClick = viewModel::onBackActionClick) {
-                                Icon(
-                                    imageVector = Icons.Rounded.ArrowBackIos,
-                                    stringResource(R.string.back),
-                                    tint = Color.White
-                                )
-                            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-                        BackIconType.Exit ->
-                            IconButton(onClick = viewModel::showCancelDialog) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Clear,
-                                    stringResource(R.string.exit_edit_plan),
-                                    tint = Color.White
-                                )
-                            }
+            when {
+                state.loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(72.dp),
+                        strokeWidth = 5.dp
+                    )
+                }
 
-                        else -> Spacer(modifier = Modifier)
+                state.asyncError -> {
+                    // FIXME add error cases with appropriate actions
+                    DisplayError(
+                        errorMessage = "Failed to invite approvers",
+                        dismissAction = { viewModel.reset() },
+                        retryAction = { viewModel.reset() },
+                    )
+                }
+
+                else -> {
+                    when (state.planSetupUIState) {
+                        PlanSetupUIState.InviteApprovers ->
+                            AddTrustedApproversUI(
+                                welcomeFlow = welcomeFlow,
+                                onInviteApproverSelected = { viewModel.onInvitePrimaryApprover() },
+                                onSkipForNowSelected = { viewModel.skip() }
+                            )
+
+
+                        PlanSetupUIState.PrimaryApproverNickname -> {
+                            AddApproverNicknameUI(
+                                nickname = state.primaryApproverNickname,
+                                enabled = state.primaryApproverNickname.isNotBlank(),
+                                onNicknameChanged = viewModel::primaryAppoverNicknameChanged,
+                                onSaveNickname = viewModel::onContinueWithPrimaryApprover
+                            )
+                        }
+                        
+                        
+                        PlanSetupUIState.PrimaryApproverGettingLive -> {
+                            GetLiveWithApproverUI(
+                                nickname = state.primaryApproverNickname,
+                                onContinueLive = {},
+                                onResumeLater = {}
+                            )
+                        }
+
+                        PlanSetupUIState.PrimaryApproverActivation -> TODO()
+                        PlanSetupUIState.AddBackupApprover -> TODO()
+                        PlanSetupUIState.BackupApproverNickname -> TODO()
+                        PlanSetupUIState.BackupApproverGettingLive -> TODO()
+                        PlanSetupUIState.BackupApproverActivation -> TODO()
+                        PlanSetupUIState.Completed -> TODO()
+
+                        /*SetupSecurityPlanScreen.AddApprovers ->
+                            SelectApproversScreen(
+                                paddingValues = paddingValues,
+                                guardians = state.guardians,
+                                addApproverOnClick = viewModel::showAddGuardianDialog,
+                                editApproverOnClick = viewModel::showEditOrDeleteDialog
+                            )
+
+                        SetupSecurityPlanScreen.RequiredApprovals ->
+                            RequiredApprovalsScreen(
+                                paddingValues = paddingValues,
+                                guardians = state.guardians,
+                                sliderPosition = state.threshold.toFloat(),
+                                updateThreshold = viewModel::updateSliderPosition
+                            )
+
+                        SetupSecurityPlanScreen.Review ->
+                            ReviewPlanScreen(
+                                paddingValues = paddingValues,
+                                guardians = state.guardians,
+                                sliderPosition = state.threshold.toFloat(),
+                                updateThreshold = viewModel::updateSliderPosition,
+                                editApprover = viewModel::showEditOrDeleteDialog,
+                                addApprover = viewModel::showAddGuardianDialog
+                            )
+
+                        SetupSecurityPlanScreen.SecureYourPlan ->
+                            SecureYourPlanScreen(paddingValues = paddingValues)
+
+                        SetupSecurityPlanScreen.FacetecAuth ->
+                            FacetecAuth(
+                                onFaceScanReady = viewModel::onPolicySetupCreationFaceScanReady
+                            )
                     }
 
-                },
-                title = {
-                    Text(
-                        text = stringResource(R.string.setup_security_plan),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                },
-            )
-        },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 12.dp)
-                    .background(color = Color.White),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                if (state.mainButtonCount > 1) {
-                    StandardButton(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = Color.White,
-                        borderColor = VaultColors.PrimaryColor,
-                        border = true,
-                        contentPadding = PaddingValues(vertical = 6.dp),
-                        onClick = viewModel::onMoreInfoClicked
-                    ) {
-                        Text(
-                            text = stringResource(R.string.how_does_this_work),
-                            color = VaultColors.PrimaryColor,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W300
+                    if (state.showAddGuardianDialog) {
+                        AddApproverDialog(
+                            paddingValues = paddingValues,
+                            nickname = state.addedApproverNickname,
+                            onDismiss = viewModel::dismissDialog,
+                            updateApproverName = viewModel::updateAddedApproverNickname,
+                            submit = viewModel::submitNewApprover
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                if (state.mainButtonCount > 0) {
-
-                    StandardButton(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = VaultColors.PrimaryColor,
-                        borderColor = Color.White,
-                        border = false,
-                        contentPadding = PaddingValues(vertical = 12.dp),
-                        onClick = viewModel::onMainActionClick,
-                    )
-                    {
-                        Text(
-                            text = bottomButtonText,
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.W700
+                    if (state.showEditOrDeleteDialog) {
+                        EditOrDeleteMenu(
+                            onDismiss = viewModel::dismissDialog,
+                            edit = viewModel::editGuardian,
+                            delete = viewModel::deleteGuardian
                         )
                     }
-                }
-            }
-        }
-    ) { paddingValues ->
 
-        when (state.currentScreen) {
-            SetupSecurityPlanScreen.Initial ->
-                InitialAddApproverScreen(paddingValues = paddingValues)
+                    if (state.showCancelPlanSetupDialog) {
+                        CancelEditPlanDialog(
+                            paddingValues = paddingValues,
+                            onDismiss = viewModel::dismissDialog,
+                            onCancel = {
+                                viewModel.clearEditingPlanData()
+                                viewModel.dismissDialog()
+                                navController.navigate(SharedScreen.HomeRoute.route) {
+                                    launchSingleTop = true
+                                    popUpToTop()
+                                }
+                            }
+                        )
+                    }
 
-            SetupSecurityPlanScreen.AddApprovers ->
-                SelectApproversScreen(
-                    paddingValues = paddingValues,
-                    guardians = state.guardians,
-                    addApproverOnClick = viewModel::showAddGuardianDialog,
-                    editApproverOnClick = viewModel::showEditOrDeleteDialog
-                )
+                    if (state.asyncError) {
+                        if (state.createPolicySetupResponse is Resource.Error) {
+                            DisplayError(
+                                errorMessage = state.createPolicySetupResponse.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = {
+                                    viewModel.resetCreatePolicySetup()
+                                },
+                                retryAction = {
+                                    viewModel.retryFacetec()
+                                }
+                            )
+                        }
+                    }*/
 
-            SetupSecurityPlanScreen.RequiredApprovals ->
-                RequiredApprovalsScreen(
-                    paddingValues = paddingValues,
-                    guardians = state.guardians,
-                    sliderPosition = state.threshold.toFloat(),
-                    updateThreshold = viewModel::updateSliderPosition
-                )
-
-            SetupSecurityPlanScreen.Review ->
-                ReviewPlanScreen(
-                    paddingValues = paddingValues,
-                    guardians = state.guardians,
-                    sliderPosition = state.threshold.toFloat(),
-                    updateThreshold = viewModel::updateSliderPosition,
-                    editApprover = viewModel::showEditOrDeleteDialog,
-                    addApprover = viewModel::showAddGuardianDialog
-                )
-
-            SetupSecurityPlanScreen.SecureYourPlan ->
-                SecureYourPlanScreen(paddingValues = paddingValues)
-
-            SetupSecurityPlanScreen.FacetecAuth ->
-                FacetecAuth(
-                    onFaceScanReady = viewModel::onPolicySetupCreationFaceScanReady
-                )
-        }
-
-        if (state.showAddGuardianDialog) {
-            AddApproverDialog(
-                paddingValues = paddingValues,
-                nickname = state.addedApproverNickname,
-                onDismiss = viewModel::dismissDialog,
-                updateApproverName = viewModel::updateAddedApproverNickname,
-                submit = viewModel::submitNewApprover
-            )
-        }
-
-        if (state.showEditOrDeleteDialog) {
-            EditOrDeleteMenu(
-                onDismiss = viewModel::dismissDialog,
-                edit = viewModel::editGuardian,
-                delete = viewModel::deleteGuardian
-            )
-        }
-
-        if (state.showCancelPlanSetupDialog) {
-            CancelEditPlanDialog(
-                paddingValues = paddingValues,
-                onDismiss = viewModel::dismissDialog,
-                onCancel = {
-                    viewModel.clearEditingPlanData()
-                    viewModel.dismissDialog()
-                    navController.navigate(SharedScreen.HomeRoute.route) {
-                            launchSingleTop = true
-                            popUpToTop()
                     }
                 }
-            )
-        }
-
-        if (state.asyncError) {
-            if (state.createPolicySetupResponse is Resource.Error) {
-                DisplayError(
-                    errorMessage = state.createPolicySetupResponse.getErrorMessage(context),
-                    dismissAction = {
-                        viewModel.resetCreatePolicySetup()
-                    },
-                    retryAction = {
-                        viewModel.retryFacetec()
-                    }
-                )
             }
         }
     }

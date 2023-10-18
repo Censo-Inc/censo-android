@@ -56,7 +56,7 @@ enum class SetupSecurityPlanScreen {
 }
 
 //region Security Plan Top Level Container
-@OptIn(ExperimentalMaterial3Api::class)
+/*@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecurityPlanTopLevelContainer(
     moveForward: () -> Unit,
@@ -70,6 +70,7 @@ fun SecurityPlanTopLevelContainer(
         SetupSecurityPlanScreen.AddApprovers,
         SetupSecurityPlanScreen.RequiredApprovals,
         SetupSecurityPlanScreen.SecureYourPlan -> true
+
         SetupSecurityPlanScreen.FacetecAuth,
         SetupSecurityPlanScreen.Review -> false
     }
@@ -162,7 +163,7 @@ fun SecurityPlanTopLevelContainer(
     ) { paddingValues ->
         content(paddingValues)
     }
-}
+}*/
 //endregion
 
 //region Security Plan Content Screens
@@ -486,7 +487,7 @@ fun SecureYourPlanScreen(paddingValues: PaddingValues) {
 //endregion
 
 //region test + previews
-@Composable
+/*@Composable
 fun TestableProtectionScreen(initialPosition: Int) {
 
     val guardians = listOf(
@@ -514,15 +515,15 @@ fun TestableProtectionScreen(initialPosition: Int) {
         if (screenPosition >= 4) {
             SetupSecurityPlanScreen.SecureYourPlan
         } else
-        if (screenPosition >= 3) {
-            SetupSecurityPlanScreen.Review
-        } else if (screenPosition == 2) {
-            SetupSecurityPlanScreen.RequiredApprovals
-        } else if (screenPosition == 1) {
-            SetupSecurityPlanScreen.AddApprovers
-        } else {
-            SetupSecurityPlanScreen.Initial
-        }
+            if (screenPosition >= 3) {
+                SetupSecurityPlanScreen.Review
+            } else if (screenPosition == 2) {
+                SetupSecurityPlanScreen.RequiredApprovals
+            } else if (screenPosition == 1) {
+                SetupSecurityPlanScreen.AddApprovers
+            } else {
+                SetupSecurityPlanScreen.Initial
+            }
 
 
     SecurityPlanTopLevelContainer(
@@ -567,18 +568,20 @@ fun TestableProtectionScreen(initialPosition: Int) {
                 editApprover = {},
                 addApprover = {}
             )
+
             4 -> SecureYourPlanScreen(
                 paddingValues = it
             )
+
             else -> InitialAddApproverScreen(paddingValues = it)
         }
 
     }
-}
+}*/
 
-@Preview
+/*@Preview
 @Composable
 fun Preview() {
     TestableProtectionScreen(0)
-}
+}*/
 //endregion

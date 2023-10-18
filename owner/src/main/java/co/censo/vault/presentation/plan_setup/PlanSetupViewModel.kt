@@ -1,30 +1,16 @@
 package co.censo.vault.presentation.plan_setup
 
-import Base64EncodedData
-import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.cryptography.generatePartitionId
-import co.censo.shared.data.model.BiometryScanResultBlob
-import co.censo.shared.data.model.BiometryVerificationId
-import co.censo.shared.data.model.FacetecBiometry
-import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.presentation.components.security_plan.SetupSecurityPlanScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @HiltViewModel
 class PlanSetupViewModel @Inject constructor(
@@ -36,11 +22,8 @@ class PlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(PlanSetupState())
         private set
 
-    fun onStart(existingSecurityPlanData: SecurityPlanData?) {
-
-        state = state.copy(existingSecurityPlan = existingSecurityPlanData)
-
-        if (ownerRepository.isUserEditingSecurityPlan()) {
+    fun onStart() {
+        /*if (ownerRepository.isUserEditingSecurityPlan()) {
             val securityPlanData = ownerRepository.retrieveSecurityPlan()
 
             securityPlanData?.let {
@@ -50,10 +33,10 @@ class PlanSetupViewModel @Inject constructor(
                     guardians = it.guardians
                 )
             }
-        }
+        }*/
     }
 
-    suspend fun onPolicySetupCreationFaceScanReady(
+    /*suspend fun onPolicySetupCreationFaceScanReady(
         verificationId: BiometryVerificationId,
         facetecData: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
@@ -96,9 +79,11 @@ class PlanSetupViewModel @Inject constructor(
 
         return Resource.Success(BiometryScanResultBlob(""))
     }
-
+*/
     fun onBackActionClick() {
-        state = when (state.currentScreen) {
+        // FIXME
+/*
+        state = when (state.planSetupUIState) {
             SetupSecurityPlanScreen.RequiredApprovals -> {
                 state.copy(
                     currentScreen = SetupSecurityPlanScreen.AddApprovers
@@ -112,10 +97,10 @@ class PlanSetupViewModel @Inject constructor(
             }
 
             else -> state
-        }
+        }*/
     }
 
-    fun onMainActionClick() {
+   /* fun onMainActionClick() {
         when (state.currentScreen) {
             SetupSecurityPlanScreen.Initial -> showAddGuardianDialog()
 
@@ -275,13 +260,13 @@ class PlanSetupViewModel @Inject constructor(
         state = state.copy(
             createPolicySetupResponse = Resource.Uninitialized
         )
-    }
+    }*/
 
     fun resetNavToActivateApprovers() {
         state = state.copy(navigateToActivateApprovers = false)
     }
 
-    fun retryFacetec() {
+   /* fun retryFacetec() {
         state = state.copy(
             createPolicySetupResponse = Resource.Uninitialized
         )
@@ -311,10 +296,10 @@ class PlanSetupViewModel @Inject constructor(
             threshold = state.threshold
         )
 
-        if (editedSecurityPlanData == state.existingSecurityPlan) {
+        /*if (editedSecurityPlanData == state.existingSecurityPlan) {
             clearEditingPlanData()
             return
-        }
+        }*/
 
         state = state.copy(showCancelPlanSetupDialog = true)
     }
@@ -329,5 +314,57 @@ class PlanSetupViewModel @Inject constructor(
         ownerRepository.saveSecurityPlanData(
             securityPlanData
         )
+    }
+    */
+
+    fun reset() {
+        state = PlanSetupState()
+    }
+
+    fun onInvitePrimaryApprover() {
+        state = state.copy(
+            planSetupUIState = PlanSetupUIState.PrimaryApproverNickname
+        )
+    }
+
+    fun skip() {
+        TODO("Not yet implemented")
+    }
+
+    fun primaryAppoverNicknameChanged(nickname: String) {
+        state = state.copy(
+            primaryApproverNickname = nickname
+        )
+    }
+
+    fun onContinueWithPrimaryApprover() {
+
+        state = state.copy(
+            planSetupUIState = PlanSetupUIState.PrimaryApproverGettingLive
+        )
+
+        /*// FIXME activate resource
+
+        val secret = TotpGenerator.generateSecret()
+        val encryptedSecret = keyRepository.encryptWithDeviceKey(secret.toByteArray())
+
+        val primaryApprover = Guardian.SetupGuardian.ExternalApprover(
+            label = state.primaryApproverNickname,
+            participantId = ParticipantId(
+                generatePartitionId()
+            ),
+            deviceEncryptedTotpSecret = encryptedSecret.base64Encoded()
+        )
+
+        state = state.copy(
+            primaryApprover = primaryApprover
+        )
+
+        // FIXME submit policy setup*/
+
+        /*ownerRepository.createPolicySetup(
+            threshold = 2,
+            guardians =
+        )*/
     }
 }
