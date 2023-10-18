@@ -5,8 +5,8 @@ import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
-import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianShard
 import co.censo.shared.data.model.GuardianStatus
 import java.math.BigInteger
 import java.util.Base64
@@ -16,7 +16,7 @@ class PolicySetupHelper(
     val encryptedMasterKey: Base64EncodedData,
     val threshold: UInt,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-    val guardianShards: List<CreatePolicyApiRequest.GuardianShard> = emptyList(),
+    val guardianShards: List<GuardianShard> = emptyList(),
 ) {
 
 
@@ -51,7 +51,7 @@ class PolicySetupHelper(
                 }
                 val encryptedShard = ExternalEncryptionKey.generateFromPublicKeyBase58(guardianPublicKey).encrypt(shardBytes)
 
-                CreatePolicyApiRequest.GuardianShard(
+                GuardianShard(
                     participantId = guardian.participantId,
                     encryptedShard = Base64EncodedData(Base64.getEncoder().encodeToString(encryptedShard))
                 )

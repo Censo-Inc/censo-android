@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
@@ -95,10 +96,16 @@ class ActivateApproversViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val createPolicyResponse: Resource<CreatePolicyApiResponse> =
-                ownerRepository.createPolicy(
+            val createPolicyResponse: Resource<CreatePolicySetupApiResponse> =
+                ownerRepository.createPolicySetup(
                     ownerState.threshold!!,
-                    ownerState.guardians
+                    ownerState.guardians.map {
+                        Guardian.SetupGuardian.ExternalApprover(
+                            label = it.label,
+                            participantId = it.participantId,
+                            deviceEncryptedTotpSecret = it.status.resolveDeviceEncryptedTotpSecret()!!
+                        )
+                    }
                 )
 
             if (createPolicyResponse is Resource.Success) {

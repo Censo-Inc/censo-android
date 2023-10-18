@@ -10,13 +10,11 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
-import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.async
@@ -72,7 +70,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
     fun startPolicySetup() {
         state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.SetupInProgress(
+            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
                 apiCall = Resource.Uninitialized
             )
         )
@@ -94,74 +92,38 @@ class InitialPlanSetupViewModel @Inject constructor(
     }
 
 
-    suspend fun onPolicySetupCreationFaceScanReady(
+    suspend fun onPolicyCreationFaceScanReady(
         verificationId: BiometryVerificationId,
         facetecData: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.SetupInProgress(
-                apiCall = Resource.Loading()
-            )
-        )
-
-        return viewModelScope.async {
-            val createPolicySetupResponse = ownerRepository.createPolicySetup(
-                1U,
-                listOf(
-                    Guardian.SetupGuardian.ImplicitlyOwner(
-                        label = "Me",
-                        participantId = state.participantId,
-                        guardianPublicKey = Base58EncodedGuardianPublicKey(
-                            state.approverEncryptionKey!!.publicExternalRepresentation().value
-                        )
-                    )
-                ),
-                verificationId,
-                facetecData
-            )
-
-            if (createPolicySetupResponse is Resource.Success) {
-                createPolicy()
-            } else {
-                state = state.copy(
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.SetupInProgress(
-                        apiCall = createPolicySetupResponse
-                    )
-                )
-            }
-
-            createPolicySetupResponse.map { it.scanResultBlob }
-        }.await()
-    }
-
-    fun createPolicy() {
         state = state.copy(
             initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
                 apiCall = Resource.Loading()
             )
         )
 
-        viewModelScope.launch {
-            val createPolicyResponse: Resource<CreatePolicyApiResponse> =
-                ownerRepository.createPolicy(
-                    1u,
-                    listOf(
-                        Guardian.ProspectGuardian(
-                            label = "Me",
-                            participantId = state.participantId,
-                            status = GuardianStatus.ImplicitlyOwner(
-                                Base58EncodedGuardianPublicKey(state.approverEncryptionKey!!.publicExternalRepresentation().value),
-                                Clock.System.now()
-                            )
-                        )
+        return viewModelScope.async {
+            val createPolicyResponse = ownerRepository.createPolicy(
+                Guardian.ProspectGuardian(
+                    label = "Me",
+                    participantId = state.participantId,
+                    status = GuardianStatus.ImplicitlyOwner(
+                        Base58EncodedGuardianPublicKey(state.approverEncryptionKey!!.publicExternalRepresentation().value),
+                        Clock.System.now()
                     )
-                )
+                ),
+                verificationId,
+                facetecData
+            )
+
             state = state.copy(
                 initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
                     apiCall = createPolicyResponse
                 ),
                 complete = createPolicyResponse is Resource.Success
             )
-        }
+
+            createPolicyResponse.map { it.scanResultBlob }
+        }.await()
     }
 }
