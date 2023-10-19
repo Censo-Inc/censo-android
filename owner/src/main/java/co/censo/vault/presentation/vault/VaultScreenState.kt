@@ -17,6 +17,7 @@ data class VaultScreenState(
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val storeSeedPhraseResource: Resource<StoreSecretApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSecretApiResponse> = Resource.Uninitialized,
+    val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
@@ -24,11 +25,13 @@ data class VaultScreenState(
 
     val loading = userResponse is Resource.Loading ||
             storeSeedPhraseResource is Resource.Loading ||
-            deleteSeedPhraseResource is Resource.Loading
+            deleteSeedPhraseResource is Resource.Loading ||
+            deleteUserResource is Resource.Loading
 
     val asyncError =
         userResponse is Resource.Error ||
                 storeSeedPhraseResource is Resource.Error ||
-                deleteSeedPhraseResource is Resource.Error
+                deleteSeedPhraseResource is Resource.Error ||
+                deleteUserResource is Resource.Error
 
 }

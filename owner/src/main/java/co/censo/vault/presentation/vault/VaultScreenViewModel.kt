@@ -61,6 +61,24 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
+    fun deleteUser() {
+        state = state.copy(
+            deleteUserResource = Resource.Loading()
+        )
+
+        viewModelScope.launch {
+            val response = ownerRepository.deleteUser()
+
+            state = state.copy(
+                deleteUserResource = response
+            )
+
+            if (response is Resource.Success) {
+                onOwnerState(OwnerState.Initial)
+            }
+        }
+    }
+
     private fun onOwnerState(ownerState: OwnerState) {
         when (ownerState) {
             is OwnerState.Ready -> {
@@ -89,6 +107,14 @@ class VaultScreenViewModel @Inject constructor(
 
     fun onRecoverPhrases() {
         state = state.copy(navigationResource = Resource.Success(Screen.RecoveryScreen.route))
+    }
+
+    fun onResetUser() {
+        state = state.copy(screen = VaultScreens.ResetUser)
+    }
+
+    fun onCancelResetUser() {
+        state = state.copy(screen = VaultScreens.Unlocked)
     }
 
     fun reset() {

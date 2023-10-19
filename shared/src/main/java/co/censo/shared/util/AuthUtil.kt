@@ -16,6 +16,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.DriveScopes
+import kotlinx.coroutines.tasks.await
 import kotlinx.datetime.Clock
 
 interface AuthUtil {
@@ -28,6 +29,8 @@ interface AuthUtil {
         onException: (Exception) -> Unit
     )
     fun verifyToken(jwt: String) : String?
+
+    suspend fun signOut()
 }
 
 class GoogleAuth(private val context: Context, private val secureStorage: SecurePreferences) : AuthUtil {
@@ -84,6 +87,16 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
                 }
             )
         }
+    }
+
+    override suspend fun signOut() {
+        getGoogleSignInClient().signOut().addOnCompleteListener {
+            if (it.isSuccessful) {
+                projectLog(message = " signOut completed successfully")
+            } else {
+                projectLog(message = "signOut failed, ${it.exception?.message}")
+            }
+        }.await()
     }
 
     override fun getGoogleSignInClient(): GoogleSignInClient = GoogleSignIn.getClient(context, createGoogleSignInOptions())

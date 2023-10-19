@@ -130,6 +130,9 @@ interface ApiService {
     @GET("/v1/user")
     suspend fun user(): RetrofitResponse<GetUserApiResponse>
 
+    @DELETE("/v1/user")
+    suspend fun deleteUser(): RetrofitResponse<Unit>
+
     @POST("/v1/biometry-verifications")
     suspend fun initBiometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
 
