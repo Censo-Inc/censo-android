@@ -417,7 +417,6 @@ class OwnerRepositoryImpl(
         if (response is Resource.Success) {
             try {
                 signUserOut() // clears the JWT from storage
-                secureStorage.clearDeviceKeyId()
                 keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
                 secureStorage.clearDeviceKeyId()
                 authUtil.signOut()
