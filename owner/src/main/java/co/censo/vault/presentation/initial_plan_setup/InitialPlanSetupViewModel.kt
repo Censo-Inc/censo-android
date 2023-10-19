@@ -35,10 +35,17 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = state.copy(
             initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial
         )
-        createApproverKey()
+        createApproverKeyAndPolicyParams()
     }
 
-    fun createApproverKey() {
+    fun createApproverKeyAndPolicyParams() {
+        createApproverKey()
+        if (state.approverEncryptionKey != null) {
+            createPolicyParams()
+        }
+    }
+
+    private fun createApproverKey() {
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
         }
@@ -56,8 +63,8 @@ class InitialPlanSetupViewModel @Inject constructor(
                 )
                 state.copy(
                     approverEncryptionKey = approverEncryptionKey,
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial,
-                    saveKeyToCloudResource = Resource.Uninitialized
+                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatingPolicyParams,
+                    saveKeyToCloudResource = Resource.Uninitialized,
                 )
             } catch (e: Exception) {
                 state.copy(
@@ -65,6 +72,29 @@ class InitialPlanSetupViewModel @Inject constructor(
                     saveKeyToCloudResource = Resource.Uninitialized
                 )
             }
+        }
+    }
+
+    fun createPolicyParams() {
+        if (state.createPolicyParams is Resource.Loading) {
+            return
+        }
+        viewModelScope.launch {
+            state = state.copy(createPolicyParams = Resource.Loading())
+            val createPolicyParams = ownerRepository.getCreatePolicyParams(
+                Guardian.ProspectGuardian(
+                    label = "Me",
+                    participantId = state.participantId,
+                    status = GuardianStatus.ImplicitlyOwner(
+                        Base58EncodedGuardianPublicKey(state.approverEncryptionKey!!.publicExternalRepresentation().value),
+                        Clock.System.now()
+                    )
+                )
+            )
+            state = state.copy(
+                createPolicyParams = createPolicyParams,
+                initialPlanSetupStatus = if (createPolicyParams is Resource.Success) InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial else InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatePolicyParamsFailed
+            )
         }
     }
 
@@ -80,7 +110,8 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = state.copy(
             initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.None,
             approverEncryptionKey = null,
-            complete = false
+            complete = false,
+            createPolicyParams = Resource.Uninitialized
         )
     }
 
@@ -104,14 +135,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
         return viewModelScope.async {
             val createPolicyResponse = ownerRepository.createPolicy(
-                Guardian.ProspectGuardian(
-                    label = "Me",
-                    participantId = state.participantId,
-                    status = GuardianStatus.ImplicitlyOwner(
-                        Base58EncodedGuardianPublicKey(state.approverEncryptionKey!!.publicExternalRepresentation().value),
-                        Clock.System.now()
-                    )
-                ),
+                state.createPolicyParams.data!!,
                 verificationId,
                 facetecData
             )
