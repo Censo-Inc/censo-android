@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.plan_setup
 
+import Base58EncodedGuardianPublicKey
 import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,9 +12,11 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -30,11 +33,46 @@ class PlanSetupViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        // FIXME listen to the owner state updates
+        retrieveOwnerState()
+        // FIXME listen to the owner state updates instead of api call
     }
 
     fun onBackActionClick() {
         // FIXME
+    }
+
+    private fun retrieveOwnerState() {
+        state = state.copy(ownerStateResource = Resource.Loading())
+        viewModelScope.launch {
+            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
+            state = state.copy(
+                ownerStateResource = ownerStateResource,
+            )
+            updateOwnerState(ownerStateResource.data!!)
+        }
+    }
+
+    private fun updateOwnerState(ownerState: OwnerState) {
+        //todo: Should always be ready, kick out if not
+        if (ownerState is OwnerState.Ready) {
+            val guardians = ownerState.guardianSetup?.guardians
+
+            if (guardians.isNullOrEmpty()) {
+                state = state.copy(
+                    planSetupUIState = PlanSetupUIState.InviteApprovers
+                )
+                return
+            }
+
+            if (guardians.size == 2) {
+                //either adding backup approver or primary is in progress
+
+                val primaryGuardian = guardians.filter { it.label != "Me" }
+
+                projectLog(message = "Primary guardian: $primaryGuardian")
+            }
+
+        }
     }
 
     fun onInvitePrimaryApprover() {
@@ -76,20 +114,22 @@ class PlanSetupViewModel @Inject constructor(
                 )
             )
 
+            val primaryGuardian =
+                (state.ownerStateResource.data!! as OwnerState.Ready).policy.guardians.first()
+
             val response = ownerRepository.createPolicySetup(
                 threshold = 1U,
                 guardians = listOf(
-                    // FIXME proper ImplicitlyOwner setup
-                    /*Guardian.SetupGuardian.ImplicitlyOwner(
-                        label = "Me",
-                        participantId = ParticipantId(""),
-                        guardianPublicKey = Base58EncodedGuardianPublicKey("")
-                    ),*/
+                    Guardian.SetupGuardian.ImplicitlyOwner(
+                        label = primaryGuardian.label,
+                        participantId = ParticipantId.generate(),
+                        guardianPublicKey = primaryGuardian.attributes.guardianPublicKey
+                    ),
                     Guardian.SetupGuardian.ExternalApprover(
                         label = state.primaryApprover.nickname,
                         participantId = participantId,
                         deviceEncryptedTotpSecret = encryptedTotpSecret
-                    )
+                    ),
                 )
             )
 

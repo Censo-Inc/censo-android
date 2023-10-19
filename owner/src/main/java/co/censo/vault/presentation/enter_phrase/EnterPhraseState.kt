@@ -1,13 +1,14 @@
 package co.censo.vault.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
+import cash.z.ecc.android.bip39.Mnemonics
 import co.censo.shared.data.Resource
 
 data class EnterPhraseState(
     val masterPublicKey: Base58EncodedMasterPublicKey? = null,
-    val enteredWords: List<String> = emptyList(),
-    val editedWord: String = "",
-    val editedWordIndex: Int = 0,
+    val enteredWords: List<String> = String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_12).chars).split(" "),
+    val editedWord: String = enteredWords[11],
+    val editedWordIndex: Int = 11,
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
     val validPhrase: Boolean = false,
     val nickName: String = "",

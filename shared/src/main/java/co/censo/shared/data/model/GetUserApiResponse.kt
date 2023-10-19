@@ -82,6 +82,8 @@ sealed class GuardianStatus {
     @SerialName("Onboarded")
     data class Onboarded(
         val onboardedAt: Instant,
+        val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        val isOwner: Boolean,
     ) : GuardianStatus()
 }
 

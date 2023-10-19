@@ -79,11 +79,11 @@ class MainActivity : FragmentActivity() {
                             CensoNavHost(navController = navController)
                         }
 
-                        Box(
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        ) {
-                            LockedScreen()
-                        }
+//                        Box(
+//                            modifier = Modifier.align(Alignment.BottomCenter)
+//                        ) {
+//                            LockedScreen()
+//                        }
                     }
                 }
             }

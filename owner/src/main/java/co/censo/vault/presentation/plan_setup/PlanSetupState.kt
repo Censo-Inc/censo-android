@@ -7,12 +7,14 @@ import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.OwnerState
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 
 data class PlanSetupState(
+    val ownerStateResource: Resource<OwnerState> = Resource.Uninitialized,
     // Screen in Plan Setup Flow
     val planSetupUIState: PlanSetupUIState = PlanSetupUIState.InviteApprovers,
 

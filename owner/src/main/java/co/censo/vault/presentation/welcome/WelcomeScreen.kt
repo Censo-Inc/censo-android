@@ -109,7 +109,7 @@ fun WelcomeScreen(
                         } else {
                             WelcomeScreenUI(currentStep = WelcomeStep.PhraseEntered) {
                                 navController.navigate(
-                                    SharedScreen.OwnerVaultScreen.route
+                                    Screen.PlanSetupRoute.route
                                 )
                             }
                         }

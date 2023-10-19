@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.components.recovery
 
+import Base58EncodedGuardianPublicKey
 import Base64EncodedData
 import StandardButton
 import ParticipantId
@@ -171,7 +172,9 @@ fun ThisDeviceRecoveryScreenPreview() {
             label = "Approver $index",
             participantId = participantId,
             attributes = GuardianStatus.Onboarded(
-                onboardedAt = Clock.System.now()
+                onboardedAt = Clock.System.now(),
+                isOwner = false,
+                guardianPublicKey = Base58EncodedGuardianPublicKey("")
             )
         )
     }.toList()
