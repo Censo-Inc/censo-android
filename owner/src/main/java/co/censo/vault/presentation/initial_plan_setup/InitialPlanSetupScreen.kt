@@ -102,7 +102,8 @@ fun InitialPlanSetupScreen(
                 .padding(paddingValues)
         ) {
             when (val setupStatus = state.initialPlanSetupStatus) {
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.None -> {
+                is InitialPlanSetupScreenState.InitialPlanSetupStatus.None,
+                    InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatingPolicyParams -> {
                     CircularProgressIndicator(
                         modifier = Modifier.size(28.dp),
                         color = VaultColors.PrimaryColor,
@@ -112,10 +113,20 @@ fun InitialPlanSetupScreen(
 
                 is InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed -> {
                     DisplayError(
-                        errorMessage = "Error Occurred trying to save your approver key",
+                        errorMessage = "Error occurred trying to save your approver key",
                         dismissAction = null,
                         retryAction = {
-                            viewModel.createApproverKey()
+                            viewModel.createApproverKeyAndPolicyParams()
+                        }
+                    )
+                }
+
+                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatePolicyParamsFailed -> {
+                    DisplayError(
+                        errorMessage = "Error occurred trying to create plan data",
+                        dismissAction = null,
+                        retryAction = {
+                            viewModel.createPolicyParams()
                         }
                     )
                 }

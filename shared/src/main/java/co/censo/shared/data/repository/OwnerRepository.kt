@@ -2,6 +2,7 @@ package co.censo.shared.data.repository
 
 import Base58EncodedDevicePublicKey
 import Base58EncodedGuardianPublicKey
+import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import ParticipantId
@@ -66,17 +67,31 @@ import java.math.BigInteger
 import java.security.PrivateKey
 import java.util.Base64
 
+data class CreatePolicyParams(
+    val guardianPublicKey: Base58EncodedGuardianPublicKey,
+    val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+    val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
+    val encryptedMasterPrivateKey: Base64EncodedData,
+    val encryptedShard: Base64EncodedData,
+    val participantId: ParticipantId
+)
+
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
     suspend fun signInUser(jwtToken: String, idToken: String): Resource<ResponseBody>
+
+    suspend fun getCreatePolicyParams(
+        ownerApprover: Guardian.ProspectGuardian
+    ): Resource<CreatePolicyParams>
+
     suspend fun createPolicySetup(
         threshold: UInt,
         guardians: List<Guardian.SetupGuardian>,
     ): Resource<CreatePolicySetupApiResponse>
 
     suspend fun createPolicy(
-        ownerApprover: Guardian.ProspectGuardian,
+        createPolicyParams: CreatePolicyParams,
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicyApiResponse>
@@ -188,31 +203,45 @@ class OwnerRepositoryImpl(
         }
     }
 
+    override suspend fun getCreatePolicyParams(
+        ownerApprover: Guardian.ProspectGuardian
+    ): Resource<CreatePolicyParams> {
+        return try {
+            PolicySetupHelper.create(
+                threshold = 1U,
+                guardians = listOf(ownerApprover)
+            ). let {
+                Resource.Success(
+                    CreatePolicyParams(
+                        guardianPublicKey = (ownerApprover.status as GuardianStatus.ImplicitlyOwner).guardianPublicKey,
+                        intermediatePublicKey = it.intermediatePublicKey,
+                        masterEncryptionPublicKey = it.masterEncryptionPublicKey,
+                        encryptedMasterPrivateKey = it.encryptedMasterKey,
+                        encryptedShard = it.guardianShards.first().encryptedShard,
+                        participantId = it.guardianShards.first().participantId
+                    )
+                )
+            }
+
+        } catch (e: Exception) {
+            Resource.Error(exception = e)
+        }
+    }
+
     override suspend fun createPolicy(
-        ownerApprover: Guardian.ProspectGuardian,
+        createPolicyParams: CreatePolicyParams,
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicyApiResponse> {
 
-        val setupHelper =  try {
-            PolicySetupHelper.create(
-                threshold = 1U,
-                guardians = listOf(ownerApprover)
-            )
-        } catch (e: Exception) {
-            return Resource.Error(exception = e)
-        }
-
-        val ownerApporverShard = setupHelper.guardianShards.first()
-        val ownerApproverPublicKey = (ownerApprover.status as GuardianStatus.ImplicitlyOwner).guardianPublicKey
 
         val createPolicyApiRequest = CreatePolicyApiRequest(
-            masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
-            encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
-            intermediatePublicKey = setupHelper.intermediatePublicKey,
-            participantId = ownerApporverShard.participantId,
-            encryptedShard = ownerApporverShard.encryptedShard,
-            guardianPublicKey = ownerApproverPublicKey,
+            masterEncryptionPublicKey = createPolicyParams.masterEncryptionPublicKey,
+            encryptedMasterPrivateKey = createPolicyParams.encryptedMasterPrivateKey,
+            intermediatePublicKey = createPolicyParams.intermediatePublicKey,
+            participantId = createPolicyParams.participantId,
+            encryptedShard = createPolicyParams.encryptedShard,
+            guardianPublicKey = createPolicyParams.guardianPublicKey,
             biometryVerificationId = biometryVerificationId,
             biometryData = biometryData,
         )
