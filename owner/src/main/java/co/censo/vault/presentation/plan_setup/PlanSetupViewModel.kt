@@ -327,21 +327,42 @@ class PlanSetupViewModel @Inject constructor(
         )
     }
 
-    fun skip() {
-        TODO("Not yet implemented")
-    }
-
-    fun primaryAppoverNicknameChanged(nickname: String) {
+    fun primaryApproverNicknameChanged(nickname: String) {
         state = state.copy(
             primaryApproverNickname = nickname
         )
     }
 
-    fun onContinueWithPrimaryApprover() {
+    fun backupApproverNicknameChanged(nickname: String) {
+        state = state.copy(
+            backupApproverNickname = nickname
+        )
+    }
 
+    fun onContinueWithPrimaryApprover() {
         state = state.copy(
             planSetupUIState = PlanSetupUIState.PrimaryApproverGettingLive
         )
+    }
+
+    fun onContinueWithBackupApprover() {
+        state = state.copy(
+            planSetupUIState = PlanSetupUIState.BackupApproverGettingLive
+        )
+    }
+
+    fun onInviteBackupApprover() {
+        state = state.copy(
+            planSetupUIState = PlanSetupUIState.AddBackupApprover
+        )
+    }
+
+    fun saveAndFinish() {
+
+    }
+
+    fun onPrimaryApproverVerification() {
+
 
         /*// FIXME activate resource
 
@@ -366,5 +387,18 @@ class PlanSetupViewModel @Inject constructor(
             threshold = 2,
             guardians =
         )*/
+
+        // FIXME initialize code, timer. Send request to the server
+        state = state.copy(
+            planSetupUIState = PlanSetupUIState.PrimaryApproverActivation
+        )
     }
+
+    fun onBackupApproverVerification() {
+        state = state.copy(
+            // FIXME go first to the backup approver activation
+            planSetupUIState = PlanSetupUIState.Completed
+        )
+    }
+
 }

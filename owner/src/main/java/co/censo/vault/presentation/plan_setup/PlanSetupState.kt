@@ -28,6 +28,9 @@ data class PlanSetupState(
     val primaryApproverNickname: String = "",
     val primaryApprover: Guardian.SetupGuardian.ExternalApprover? = null,
 
+    val backupApproverNickname: String = "",
+    val backupApprover: Guardian.SetupGuardian.ExternalApprover? = null,
+
     val guardians: List<Guardian.SetupGuardian.ExternalApprover> = emptyList(),
     val threshold: UInt = 1u,
 

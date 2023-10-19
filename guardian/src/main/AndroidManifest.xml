@@ -38,8 +38,6 @@
 
                 <data android:scheme="censo-guardian" android:host="invite" />
                 <data android:scheme="censo-guardian" android:host="recovery" />
-
-                <data android:scheme="censo-vault" android:host="plan_setup_route" />
             </intent-filter>
         </activity>
 

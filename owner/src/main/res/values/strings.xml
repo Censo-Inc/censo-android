@@ -207,10 +207,8 @@
     <string name="invite_trusted_approvers_message">Invite up to two trusted approvers for an additional layer of security.\n\nYou can use either your primary or your backup approver along with your face scan to access your seed phrase. They help you keep the key but can never unlock the door.</string>
     <string name="add_approver_nickname">Add approver nickname</string>
     <string name="add_approver_nickname_message">Give your approver a nickname of your choice so you can identify them in the future.\n\nThis will be visible only to you.</string>
-    <string name="get_live_with_your_approver">Get live with your approver</string>
+    <string name="get_live_with">Get live with</string>
     <string name="get_live_with_your_approver_message">For maximum security, it\'s best to be face-to-face with the person you\'re adding as an approver in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
-    <string name="invite_approver">Invite approver</string>
-    <string name="skip_for_now">Skip for now</string>
     <string name="activate_primary_approver">Activate primary approver</string>
     <string name="approver_do_3_things">Now, your approver must do three things:</string>
     <string name="download_the_app_title">1. Download the app</string>
@@ -227,5 +225,12 @@
     <string name="not_yet_active">Not yet active</string>
     <string name="share_app_link">Share app link</string>
     <string name="share_unique_link">Share unique link</string>
+    <string name="add_a_backup_approver">Add a backup approver?</string>
+    <string name="add_a_backup_approver_message">For added peace of mind, add a backup approver. You can use either your primary or your backup approver along with your face scan to access your seed phrase.</string>
+    <string name="save_finish"><![CDATA[Save & finish]]></string>
+    <string name="invite_backup">Invite backup</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="invite_approver">Invite approver</string>
+    <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
 
 </resources>

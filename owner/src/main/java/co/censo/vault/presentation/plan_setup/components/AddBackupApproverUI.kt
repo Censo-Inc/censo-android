@@ -3,21 +3,19 @@ package co.censo.vault.presentation.plan_setup.components
 import LearnMore
 import MessageText
 import StandardButton
+import SubTitleText
 import TitleText
-import androidx.compose.foundation.background
+import android.app.backup.BackupAgent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,14 +28,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R
 
 @Composable
-fun GetLiveWithApproverUI(
-    nickname: String,
-    onContinueLive: () -> Unit,
-    onResumeLater: () -> Unit
+fun AddBackupApproverUI(
+    onInviteBackupSelected: () -> Unit,
+    onSaveAndFinishSelected: () -> Unit
 ) {
 
     val verticalSpacingHeight = 28.dp
@@ -52,15 +48,16 @@ fun GetLiveWithApproverUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = "${stringResource(R.string.get_live_with)} $nickname",
+            title = R.string.add_a_backup_approver,
             textAlign = TextAlign.Start
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
+
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.get_live_with_your_approver_message,
+            message = R.string.add_a_backup_approver_message,
             textAlign = TextAlign.Start
         )
 
@@ -69,14 +66,22 @@ fun GetLiveWithApproverUI(
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
-            onClick = onContinueLive,
+            onClick = onInviteBackupSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
-            Text(
-                text = "Continue live",
-                color = Color.White,
-                fontSize = 24.sp
-            )
+            Row {
+                Icon(
+                    painter = painterResource(id = R.drawable.approvers),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.invite_backup),
+                    color = Color.White,
+                    fontSize = 24.sp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
@@ -84,11 +89,11 @@ fun GetLiveWithApproverUI(
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
-            onClick = onResumeLater,
+            onClick = onSaveAndFinishSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Text(
-                text = "Resume later",
+                text = stringResource(R.string.save_finish),
                 color = Color.White,
                 fontSize = 24.sp
             )
@@ -106,10 +111,9 @@ fun GetLiveWithApproverUI(
 
 @Preview(showBackground = true)
 @Composable
-fun GetLiveWithApproverUIPreview() {
-    GetLiveWithApproverUI(
-        nickname = "Neo",
-        onContinueLive = {},
-        onResumeLater = {},
+fun AddBackupApproverUIPreview() {
+    AddBackupApproverUI(
+        onInviteBackupSelected = {},
+        onSaveAndFinishSelected = {},
     )
 }

@@ -82,14 +82,30 @@ fun LearnMore(
 fun TitleText(
     modifier: Modifier = Modifier,
     @StringRes title: Int,
-    textAlign: TextAlign = TextAlign.Center
+    textAlign: TextAlign = TextAlign.Center,
+    fontWeight: FontWeight = FontWeight.W600
+) {
+    TitleText(
+        modifier = modifier,
+        title = stringResource(id = title),
+        textAlign = textAlign,
+        fontWeight = fontWeight
+    )
+}
+
+@Composable
+fun TitleText(
+    modifier: Modifier = Modifier,
+    title: String,
+    textAlign: TextAlign = TextAlign.Center,
+    fontWeight: FontWeight = FontWeight.W600
 ) {
     Text(
         modifier = modifier,
-        text = stringResource(id = title),
+        text = title,
         color = Color.Black,
         fontSize = 24.sp,
-        fontWeight = FontWeight.W600,
+        fontWeight = fontWeight,
         textAlign = textAlign
     )
 }

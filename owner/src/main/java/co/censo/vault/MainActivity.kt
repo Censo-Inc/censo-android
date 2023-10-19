@@ -137,40 +137,10 @@ class MainActivity : FragmentActivity() {
                 BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
             }
             composable(
-                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG}}",
-                arguments = listOf(navArgument(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG) {
-                    type = NavType.StringType
-                })) { backStackEntry ->
-                /*val securityPlanData =
-                    backStackEntry.arguments?.getString(Screen.PlanSetupRoute.EXISTING_SECURITY_PLAN_ARG)*/
-                PlanSetupScreen(
-                    navController = navController,
-                    /*existingSecurityPlan = securityPlanData?.let {
-                        Json.decodeFromString(
-                            securityPlanData
-                        )
-                    }*/
-                )
-            }
-            composable(
                 route = Screen.PlanSetupRoute.route
             ) {
                 PlanSetupScreen(
                     navController = navController,
-                   /* existingSecurityPlan = null*/
-                )
-            }
-            composable(
-                route = SharedScreen.VAULT_PLAN_SETUP_URI,
-                deepLinks = listOf(
-                    navDeepLink {
-                        uriPattern = SharedScreen.VAULT_PLAN_SETUP_URI
-                    }
-                )
-            ) { _ ->
-                PlanSetupScreen(
-                    navController = navController,
-                    /* existingSecurityPlan = null*/
                 )
             }
             composable(
