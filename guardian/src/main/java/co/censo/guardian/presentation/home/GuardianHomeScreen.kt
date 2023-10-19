@@ -260,7 +260,7 @@ fun GuardianHomeScreen(
                             GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER -> {
                                 OwnerCodeVerification(
                                     totpCode = state.recoveryTotp?.code,
-                                    countdownPercentage = state.recoveryTotp?.countdownPercentage
+                                    secondsLeft = state.recoveryTotp?.currentSecond
                                 )
                             }
 
@@ -296,9 +296,9 @@ private fun VerifyingOwnerCode() {
 @Composable
 private fun OwnerCodeVerification(
     totpCode: String?,
-    countdownPercentage: Float?
+    secondsLeft: Int?
 ) {
-    if (totpCode == null || countdownPercentage == null) {
+    if (totpCode == null || secondsLeft == null) {
         Text(
             text = stringResource(R.string.loading),
             textAlign = TextAlign.Center,
@@ -319,7 +319,7 @@ private fun OwnerCodeVerification(
 
         TotpCodeView(
             totpCode,
-            countdownPercentage,
+            secondsLeft,
             GuardianColors.PrimaryColor
         )
     }
