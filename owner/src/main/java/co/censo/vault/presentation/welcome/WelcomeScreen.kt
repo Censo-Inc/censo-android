@@ -90,7 +90,7 @@ fun WelcomeScreen(
         else -> {
             state.ownerStateResource.data?.also { ownerState ->
                 when (ownerState) {
-                    is OwnerState.Initial, is OwnerState.GuardianSetup -> {
+                    is OwnerState.Initial -> {
                         WelcomeScreenUI(currentStep = WelcomeStep.Authenticated) {
                             navController.navigate(Screen.InitialPlanSetupRoute.route)
                         }

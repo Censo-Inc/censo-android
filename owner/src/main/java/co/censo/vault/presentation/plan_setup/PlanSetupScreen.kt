@@ -28,13 +28,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.SharedScreen
+import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
-import co.censo.vault.presentation.Screen
-import co.censo.vault.presentation.enter_phrase.BackIconType
 import co.censo.vault.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.vault.presentation.plan_setup.components.AddApproverNicknameUI
 import co.censo.vault.presentation.plan_setup.components.AddBackupApproverUI
@@ -54,13 +52,15 @@ fun PlanSetupScreen(
     val state = viewModel.state
 
     val iconPair =
-        if (state.backArrowType == BackIconType.BACK) Icons.Filled.ArrowBack to R.string.back
+        if (state.backArrowType == PlanSetupState.BackIconType.Back) Icons.Filled.ArrowBack to R.string.back
         else Icons.Filled.Clear to R.string.exit
 
     LaunchedEffect(key1 = state) {
-        if (state.navigateToActivateApprovers) {
-            navController.navigate(Screen.ActivateApprovers.route)
-            viewModel.resetNavToActivateApprovers()
+        if (state.navigationResource is Resource.Success) {
+            state.navigationResource.data?.let {
+                navController.navigate(it)
+                viewModel.resetNavigationResource()
+            }
         }
     }
 
@@ -145,18 +145,18 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.PrimaryApproverNickname -> {
                             AddApproverNicknameUI(
-                                nickname = state.primaryApproverNickname,
-                                enabled = state.primaryApproverNickname.isNotBlank(),
+                                nickname = state.primaryApprover.nickname,
+                                enabled = state.primaryApprover.nickname.isNotBlank(),
                                 onNicknameChanged = viewModel::primaryApproverNicknameChanged,
-                                onSaveNickname = viewModel::onContinueWithPrimaryApprover
+                                onSaveNickname = viewModel::onSavePrimaryApprover
                             )
                         }
                         
                         
                         PlanSetupUIState.PrimaryApproverGettingLive -> {
                             GetLiveWithApproverUI(
-                                nickname = state.primaryApproverNickname,
-                                onContinueLive = viewModel::onPrimaryApproverVerification,
+                                nickname = state.primaryApprover.nickname,
+                                onContinueLive = viewModel::onGoLiveWithPrimaryApprover,
                                 onResumeLater = {
                                     Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
                                 }
@@ -166,12 +166,12 @@ fun PlanSetupScreen(
                         PlanSetupUIState.PrimaryApproverActivation -> {
                             ActivateApproverUI(
                                 isPrimaryApprover = true,
-                                nickName = state.primaryApproverNickname,
-                                secondsLeft = 0,
-                                verificationCode = "",
+                                nickName = state.primaryApprover.nickname,
+                                secondsLeft = state.primaryApprover.secondsLeft,
+                                verificationCode = state.primaryApprover.totpCode,
                                 guardianPhase = GuardianPhase.WaitingForCode(InvitationId("")),
                                 deeplink = "",
-                                storesLink = ""
+                                storesLink = "Universal link to the App/Play stores"
                             )
                         }
 
@@ -184,8 +184,8 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.BackupApproverNickname -> {
                             AddApproverNicknameUI(
-                                nickname = state.backupApproverNickname,
-                                enabled = state.backupApproverNickname.isNotBlank(),
+                                nickname = state.backupApprover.nickname,
+                                enabled = state.backupApprover.nickname.isNotBlank(),
                                 onNicknameChanged = viewModel::backupApproverNicknameChanged,
                                 onSaveNickname = viewModel::onContinueWithBackupApprover
                             )
@@ -193,7 +193,7 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.BackupApproverGettingLive -> {
                             GetLiveWithApproverUI(
-                                nickname = state.backupApproverNickname,
+                                nickname = state.backupApprover.nickname,
                                 onContinueLive = viewModel::onBackupApproverVerification,
                                 onResumeLater = {
                                     Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
@@ -206,14 +206,13 @@ fun PlanSetupScreen(
                         PlanSetupUIState.Completed -> {
                             SavedAndShardedUI(
                                 seedPhraseNickname = "Yankee Hotel Foxtrot",
-                                primaryApproverNickname = state.primaryApproverNickname,
-                                backupApproverNickname = state.backupApproverNickname
+                                primaryApproverNickname = state.primaryApprover.nickname,
+                                backupApproverNickname = state.backupApprover.nickname
                             )
 
                             LaunchedEffect(Unit) {
                                 delay(5000)
-                                navController.navigate(SharedScreen.OwnerVaultScreen.route)
-                                viewModel.reset()
+                                viewModel.onFullyCompleted()
                             }
                         }
                     }

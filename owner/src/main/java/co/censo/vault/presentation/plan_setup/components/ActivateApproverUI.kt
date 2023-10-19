@@ -339,7 +339,7 @@ fun ActivatePreview() {
         nickName = "Neo",
         isPrimaryApprover = true,
         secondsLeft = 43,
-        verificationCode = "3458191",
+        verificationCode = "345819",
         guardianPhase = GuardianPhase.WaitingForCode(invitationId = InvitationId("123456")),
         deeplink = "deeplink",
         storesLink = "link"

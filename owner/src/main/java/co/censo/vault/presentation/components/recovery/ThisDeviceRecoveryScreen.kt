@@ -171,7 +171,6 @@ fun ThisDeviceRecoveryScreenPreview() {
             label = "Approver $index",
             participantId = participantId,
             attributes = GuardianStatus.Onboarded(
-                guardianEncryptedShard = Base64EncodedData(generateBase64()),
                 onboardedAt = Clock.System.now()
             )
         )

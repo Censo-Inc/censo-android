@@ -82,7 +82,7 @@ class ActivateApproversViewModel @Inject constructor(
     }
 
     fun createPolicy() {
-        state = state.copy(createPolicyResponse = Resource.Loading())
+        /*state = state.copy(createPolicyResponse = Resource.Loading())
 
         val ownerState = state.ownerState
 
@@ -113,7 +113,7 @@ class ActivateApproversViewModel @Inject constructor(
             }
 
             state = state.copy(createPolicyResponse = createPolicyResponse)
-        }
+        }*/
     }
 
     fun retrieveUserState() {
@@ -132,11 +132,11 @@ class ActivateApproversViewModel @Inject constructor(
     private fun updateOwnerState(ownerState: OwnerState) {
         val guardians = when (ownerState) {
             is OwnerState.Ready -> ownerState.policy.guardians
-            is OwnerState.GuardianSetup -> ownerState.guardians
+            //is OwnerState.GuardianSetup -> ownerState.guardians
             is OwnerState.Initial -> listOf<Guardian.ProspectGuardian>()
         }
 
-        val codes = if (ownerState is OwnerState.GuardianSetup && state.approverCodes.isEmpty()) {
+        val codes = if (ownerState is OwnerState.Ready && state.approverCodes.isEmpty()) {
             generateTimeCodes(guardians)
         } else {
             null

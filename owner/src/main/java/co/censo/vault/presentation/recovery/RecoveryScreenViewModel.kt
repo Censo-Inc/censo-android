@@ -74,11 +74,11 @@ class RecoveryScreenViewModel @Inject constructor(
         when (ownerState) {
             is OwnerState.Ready -> {
                 state = state.copy(
-                    initiateNewRecovery = ownerState.policy.recovery == null,
-                    recovery = ownerState.policy.recovery,
+                    initiateNewRecovery = ownerState.recovery == null,
+                    recovery = ownerState.recovery,
                     guardians = ownerState.policy.guardians,
                     secrets = ownerState.vault.secrets.map { it.guid },
-                    approvalsCollected = ownerState.policy.recovery?.let {
+                    approvalsCollected = ownerState.recovery?.let {
                         when (it) {
                             is Recovery.ThisDevice -> it.approvals.count { it.status == ApprovalStatus.Approved }
                             else -> 0
@@ -102,7 +102,7 @@ class RecoveryScreenViewModel @Inject constructor(
 
     private fun determineCodeVerificationState(ownerState: OwnerState.Ready) {
         // navigate out of verification code screen once approved
-        val recovery = ownerState.policy.recovery
+        val recovery = ownerState.recovery
         val totpVerificationState = state.totpVerificationState
 
         if (totpVerificationState.showModal && recovery is Recovery.ThisDevice) {

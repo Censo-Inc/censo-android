@@ -190,7 +190,7 @@ fun RecoveryApprovalRowPreview() {
                 label = "Thomas Trusted",
                 participantId = participantId,
                 attributes = GuardianStatus.Onboarded(
-                    guardianEncryptedShard = Base64EncodedData(""), onboardedAt = Clock.System.now()
+                    onboardedAt = Clock.System.now()
                 )
             ),
             approval = Approval(

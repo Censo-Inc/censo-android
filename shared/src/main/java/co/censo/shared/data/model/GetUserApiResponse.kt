@@ -81,7 +81,6 @@ sealed class GuardianStatus {
     @Serializable
     @SerialName("Onboarded")
     data class Onboarded(
-        val guardianEncryptedShard: Base64EncodedData,
         val onboardedAt: Instant,
     ) : GuardianStatus()
 }
@@ -141,7 +140,6 @@ data class Policy(
     val threshold: UInt,
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
-    val recovery: Recovery?
 )
 
 @Serializable
@@ -200,21 +198,12 @@ data class Vault(
     val publicMasterEncryptionKey: Base58EncodedMasterPublicKey,
 )
 
-fun OwnerState.toSecurityPlan() : SecurityPlanData? =
-    when (this) {
-        is OwnerState.Initial, is OwnerState.Ready -> null
-        is OwnerState.GuardianSetup ->
-            SecurityPlanData(
-                guardians = this.guardians.map {
-                    Guardian.SetupGuardian.ExternalApprover(
-                        label = it.label,
-                        participantId = it.participantId,
-                        deviceEncryptedTotpSecret = Base64EncodedData("")
-                    )
-                                               },
-                threshold = this.threshold ?: 0u
-            )
-    }
+@Serializable
+data class GuardianSetup(
+    val guardians: List<Guardian.ProspectGuardian>,
+    val threshold: UInt? = null,
+    val unlockedForSeconds: ULong? = null,
+)
 
 @Serializable
 sealed class OwnerState {
@@ -223,21 +212,13 @@ sealed class OwnerState {
     object Initial : OwnerState()
 
     @Serializable
-    @SerialName("GuardianSetup")
-    data class GuardianSetup(
-        val guardians: List<Guardian.ProspectGuardian>,
-        val threshold: UInt? = null,
-        val unlockedForSeconds: ULong? = null,
-    ) : OwnerState() {
-        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
-    }
-
-    @Serializable
     @SerialName("Ready")
     data class Ready(
         val policy: Policy,
         val vault: Vault,
         val unlockedForSeconds: ULong? = null,
+        val recovery: Recovery?,
+        val guardianSetup: GuardianSetup?
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
     }
