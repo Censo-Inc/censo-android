@@ -1,4 +1,5 @@
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
+import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.cryptography.toPaddedHexString
 import kotlinx.serialization.KSerializer
@@ -97,6 +98,10 @@ value class ParticipantId(val value: String) {
     fun getBytes() = Hex.decode(value)
 
     fun bigInt() = BigInteger(1, Hex.decode(this.value))
+
+    companion object {
+        fun generate(): ParticipantId = ParticipantId(generatePartitionId())
+    }
 }
 
 

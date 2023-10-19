@@ -67,7 +67,7 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
 
         when (ownerState) {
             is OwnerState.Ready -> {
-                val recovery = ownerState.policy.recovery
+                val recovery = ownerState.recovery
 
                 when {
                     recovery is Recovery.ThisDevice && recovery.status == RecoveryStatus.Available -> {

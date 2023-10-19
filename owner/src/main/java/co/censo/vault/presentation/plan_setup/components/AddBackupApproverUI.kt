@@ -5,6 +5,7 @@ import MessageText
 import StandardButton
 import SubTitleText
 import TitleText
+import android.app.backup.BackupAgent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,10 +31,9 @@ import androidx.compose.ui.unit.sp
 import co.censo.vault.R
 
 @Composable
-fun AddTrustedApproversUI(
-    welcomeFlow: Boolean,
-    onInviteApproverSelected: () -> Unit,
-    onSkipForNowSelected: () -> Unit
+fun AddBackupApproverUI(
+    onInviteBackupSelected: () -> Unit,
+    onSaveAndFinishSelected: () -> Unit
 ) {
 
     val verticalSpacingHeight = 28.dp
@@ -46,19 +46,9 @@ fun AddTrustedApproversUI(
         verticalArrangement = Arrangement.Bottom
     ) {
 
-        if (welcomeFlow) {
-            SubTitleText(
-                modifier = Modifier.fillMaxWidth(),
-                subtitle = R.string.optional_increase_security,
-                textAlign = TextAlign.Start
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.invite_trusted_approvers,
+            title = R.string.add_a_backup_approver,
             textAlign = TextAlign.Start
         )
 
@@ -67,7 +57,7 @@ fun AddTrustedApproversUI(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.invite_trusted_approvers_message,
+            message = R.string.add_a_backup_approver_message,
             textAlign = TextAlign.Start
         )
 
@@ -76,7 +66,7 @@ fun AddTrustedApproversUI(
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
-            onClick = onInviteApproverSelected,
+            onClick = onInviteBackupSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Row {
@@ -87,7 +77,7 @@ fun AddTrustedApproversUI(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.invite_approver),
+                    text = stringResource(R.string.invite_backup),
                     color = Color.White,
                     fontSize = 24.sp
                 )
@@ -99,11 +89,11 @@ fun AddTrustedApproversUI(
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
-            onClick = onSkipForNowSelected,
+            onClick = onSaveAndFinishSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Text(
-                text = stringResource(R.string.skip_for_now),
+                text = stringResource(R.string.save_finish),
                 color = Color.White,
                 fontSize = 24.sp
             )
@@ -121,10 +111,9 @@ fun AddTrustedApproversUI(
 
 @Preview(showBackground = true)
 @Composable
-fun AddTrustedApproversUIPreview() {
-    AddTrustedApproversUI(
-        welcomeFlow = true,
-        onInviteApproverSelected = {},
-        onSkipForNowSelected = {},
+fun AddBackupApproverUIPreview() {
+    AddBackupApproverUI(
+        onInviteBackupSelected = {},
+        onSaveAndFinishSelected = {},
     )
 }

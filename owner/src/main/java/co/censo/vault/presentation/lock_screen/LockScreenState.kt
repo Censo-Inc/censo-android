@@ -22,7 +22,6 @@ data class LockScreenState(
         companion object {
             fun fromOwnerState(ownerState: OwnerState): LockStatus =
                 when (ownerState) {
-                    is OwnerState.GuardianSetup -> fromLocksAt(ownerState.locksAt)
                     is OwnerState.Ready -> fromLocksAt(ownerState.locksAt)
                     else -> None
                 }

@@ -12,6 +12,7 @@ object SharedColors {
     val SuccessGreen = Color(0xFF00D890)
     val TimeLeftGray = Color(0xFFAAAAAA)
     val ErrorRed = Color(0xFFBC1313)
+    val WarningYellow = Color.Yellow
     val WordBoxBackground = Color(0xFFF2F2F2)
     val BorderGrey = Color(0xFFBDBDBD)
     val IconGrey = Color(0xFFBDBDBD)

@@ -109,7 +109,7 @@ fun AddApproverNicknameUI(
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
             Text(
-                text = "Save",
+                text = stringResource(id = R.string.save),
                 color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
                 fontSize = 24.sp
             )
