@@ -62,9 +62,7 @@ data class GuardianHomeState(
         val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
         val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
         val encryptedSecret: Base64EncodedData
-    ) {
-        val countdownPercentage = 1.0f - (currentSecond.toFloat() / TotpGenerator.CODE_EXPIRATION.toFloat())
-    }
+    )
 }
 
 enum class GuardianUIState {
