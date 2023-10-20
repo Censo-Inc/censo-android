@@ -42,26 +42,38 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
+import co.censo.vault.util.BIP39InvalidReason
+import co.censo.vault.util.errorMessage
+import co.censo.vault.util.errorTitle
 import co.censo.vault.R as VaultR
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReviewSeedPhraseUI(
-    valid: Boolean,
+    invalidReason: BIP39InvalidReason?,
     phraseWords: List<String>,
     saveSeedPhrase: () -> Unit,
     editSeedPhrase: () -> Unit
 ) {
+    val valid = invalidReason == null
 
     val drawableResource = if (valid) VaultR.drawable.check_circle else VaultR.drawable.warning
-    val title = if (valid) VaultR.string.seed_phrase_verified else VaultR.string.review_seed_phrase
+
+    val title = if (valid) {
+        stringResource(id = VaultR.string.seed_phrase_verified)
+    } else {
+        invalidReason!!.errorTitle()
+    }
 
     val message =
-        if (valid) VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase
-        else VaultR.string.censo_has_detected_that_this_is_not_a_valid_seed_phrase
+        if (valid) {
+            stringResource(id = VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase)
+        } else {
+            invalidReason!!.errorMessage()
+        }
 
-    val buttonText = if (valid) VaultR.string.save_seed_phrase else VaultR.string.submit_again
+    val buttonText = if (valid) VaultR.string.save_seed_phrase else VaultR.string.review_phrase
 
     val buttonAction = if (valid) saveSeedPhrase else editSeedPhrase
 
@@ -153,7 +165,9 @@ fun ReviewSeedPhraseUI(
         Spacer(modifier = Modifier.height(24.dp))
 
         StandardButton(
-            modifier = Modifier.padding(horizontal = horizontalPadding + 12.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(horizontal = horizontalPadding + 12.dp)
+                .fillMaxWidth(),
             color = Color.Black,
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
             onClick = buttonAction) {
@@ -190,7 +204,7 @@ fun PreviewSeedPhraseVerification() {
     val words = "grocery crush fantasy pulse struggle brain federal equip remember figure lyrics afraid tape ugly gold yard way isolate drill lawn daughter either supply student".split(" ")
 
     ReviewSeedPhraseUI(
-        valid = true,
+        invalidReason = null,
         phraseWords = words.toList(),
         saveSeedPhrase = {},
         editSeedPhrase = {}

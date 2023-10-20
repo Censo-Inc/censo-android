@@ -189,7 +189,7 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.REVIEW -> {
                             ReviewSeedPhraseUI(
-                                valid = state.validPhrase,
+                                invalidReason = state.phraseInvalidReason,
                                 phraseWords = state.enteredWords,
                                 saveSeedPhrase = viewModel::moveToNickname,
                                 editSeedPhrase = viewModel::editEntirePhrase

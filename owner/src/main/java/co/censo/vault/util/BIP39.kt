@@ -16,6 +16,24 @@ sealed class BIP39InvalidReason {
     object InvalidChecksum: BIP39InvalidReason()
 }
 
+fun BIP39InvalidReason.errorTitle() =
+    when (this) {
+        is BIP39InvalidReason.BadLength -> "Seed phrase is incorrect length"
+        BIP39InvalidReason.InvalidChecksum -> "Seed phrase is invalid"
+        is BIP39InvalidReason.InvalidWords -> "Seed phrase contains invalid words"
+        is BIP39InvalidReason.TooLong -> "Seed phrase too long"
+        is BIP39InvalidReason.TooShort -> "Seed phrase too short"
+    }
+
+fun BIP39InvalidReason.errorMessage() =
+    when (this) {
+        is BIP39InvalidReason.BadLength -> "Censo detected that you entered a seed phrase of the wrong size.\n\nSeed phrases are typically 12 or 24 words long."
+        BIP39InvalidReason.InvalidChecksum -> "Censo detected that you entered a seed phrase that is invalid."
+        is BIP39InvalidReason.InvalidWords -> "Censo detected that you entered a seed phrase that contains invalid words."
+        is BIP39InvalidReason.TooLong -> "Censo detected that you entered a seed phrase that was ${this.wordCount - 24} words long.\n\nSeed phrases are typically 12 or 24 words long."
+        is BIP39InvalidReason.TooShort -> "Censo detected that you entered a seed phrase that was ${12 - this.wordCount} words short.\n\nSeed phrases are typically 12 or 24 words long."
+    }
+
 object BIP39 {
     enum class WordList {
         English

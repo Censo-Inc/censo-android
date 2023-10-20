@@ -66,23 +66,10 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun submitFullPhrase() {
-
         projectLog(message = "Phrase submitted: ${state.enteredWords}")
 
-        val validPhrase = when (val invalidReason = BIP39.validateSeedPhrase(state.enteredWords)) {
-            null -> {
-                projectLog(message = "Seed valid")
-                true
-            }
-
-            else -> {
-                projectLog(message = "Seed invalid: $invalidReason")
-                false
-            }
-        }
-
         state = state.copy(
-            validPhrase = validPhrase,
+            phraseInvalidReason = BIP39.validateSeedPhrase(state.enteredWords),
             enterWordUIState = EnterPhraseUIState.REVIEW
         )
     }
@@ -260,8 +247,12 @@ class EnterPhraseViewModel @Inject constructor(
                 listOf("Unable to create phrase...")
             }
 
+        val editedWordIndex = if (words.size > 1) words.size - 1 else 0
+
         state = state.copy(
-            enteredWords = words
+            enteredWords = words,
+            editedWordIndex = editedWordIndex,
+            editedWord = words[editedWordIndex],
         )
 
         submitFullPhrase()
