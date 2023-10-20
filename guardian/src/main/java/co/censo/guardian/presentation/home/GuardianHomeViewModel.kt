@@ -157,8 +157,11 @@ class GuardianHomeViewModel @Inject constructor(
             )
 
             if (acceptResource is Resource.Success) {
-                if (!keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))) {
-                    createAndSaveGuardianKey()
+                val participantId = acceptResource.data!!.guardianState.participantId
+                state = state.copy(participantId = participantId.value)
+
+                if (!keyRepository.userHasKeySavedInCloud(participantId)) {
+                    createAndSaveGuardianKey(participantId)
                 }
                 determineGuardianUIState(acceptResource.data?.guardianState)
             }
@@ -167,7 +170,7 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun createAndSaveGuardianKey() {
+    private suspend fun createAndSaveGuardianKey(participantId: ParticipantId) {
         val guardianEncryptionKey = keyRepository.createGuardianKey()
         keyRepository.saveKeyInCloud(
             Base58EncodedPrivateKey(
@@ -175,7 +178,7 @@ class GuardianHomeViewModel @Inject constructor(
                     guardianEncryptionKey.privateKeyRaw()
                 )
             ),
-            participantId = ParticipantId(state.participantId)
+            participantId = participantId
         )
         state = state.copy(
             guardianEncryptionKey = guardianEncryptionKey

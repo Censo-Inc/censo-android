@@ -8,19 +8,17 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 
 data class PlanSetupState(
-    val ownerState: OwnerState? = null,
+    val ownerState: OwnerState.Ready? = null,
     // Screen in Plan Setup Flow
     val planSetupUIState: PlanSetupUIState = PlanSetupUIState.InviteApprovers,
-    val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
     val guardians: List<Guardian.ProspectGuardian> = emptyList(),
-    val approverCodes: Map<ParticipantId, String> = emptyMap(),
 
-    val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
+    val secondsLeft: Int = 0,
+    val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
+    val approverCodes: Map<ParticipantId, String> = emptyMap(),
 
     val editedNickname: String = "",
 
@@ -46,7 +44,11 @@ data class PlanSetupState(
         PlanSetupUIState.Completed -> BackIconType.Exit
     }
 
-    val activatingApprover = guardians.firstOrNull { it.label != "Me" && it.status !is GuardianStatus.Confirmed }
+    val activatingApprover = guardians.firstOrNull {
+        it.status !is GuardianStatus.ImplicitlyOwner
+                && it.status !is GuardianStatus.Confirmed
+                && it.status !is GuardianStatus.Onboarded
+    }
 
     val loading =
         userResponse is Resource.Loading || createPolicySetupResponse is Resource.Loading
@@ -55,19 +57,11 @@ data class PlanSetupState(
         userResponse is Resource.Error || createPolicySetupResponse is Resource.Error
 
     //Fixme: this is not nice code!
-    val approverType =
-        if (guardians.size < 2) {
-            ApproverType.Primary
-        } else if (guardians.size == 3) {
-            ApproverType.Backup
-        } else {
-            val nonOwnerGuardian = guardians.first { it.label != "me" }
-            if (nonOwnerGuardian.status is GuardianStatus.Confirmed) {
-                ApproverType.Backup
-            } else {
-                ApproverType.Primary
-            }
-        }
+    val approverType = if (guardians.size <= 2) {
+        ApproverType.Primary
+    } else {
+        ApproverType.Backup
+    }
 
     enum class BackIconType {
         Back, Exit

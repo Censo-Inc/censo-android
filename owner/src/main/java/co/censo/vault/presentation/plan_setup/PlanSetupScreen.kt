@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +45,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlanSetupScreen(
     navController: NavController,
-    welcomeFlow: Boolean = true,
+    welcomeFlow: Boolean,
+    seedPhraseNickname: String,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -164,7 +164,7 @@ fun PlanSetupScreen(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNickname.isNotBlank(),
                                 onNicknameChanged = viewModel::primaryApproverNicknameChanged,
-                                onSaveNickname = viewModel::onSavePrimaryApprover
+                                onSaveNickname = viewModel::onSaveApprover
                             )
                         }
                         
@@ -180,12 +180,12 @@ fun PlanSetupScreen(
                         }
 
                         PlanSetupUIState.ApproverActivation -> {
-                            projectLog(message = "Seconds left: ${state.currentSecond}")
+                            projectLog(message = "Seconds left: ${state.secondsLeft}")
 
                             ActivateApproverUI(
                                 isPrimaryApprover = true,
                                 prospectGuardian = state.activatingApprover,
-                                secondsLeft = state.currentSecond,
+                                secondsLeft = state.secondsLeft,
                                 verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
                                 storesLink = "Universal link to the App/Play stores"
                             )
@@ -203,14 +203,14 @@ fun PlanSetupScreen(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNickname.isNotBlank(),
                                 onNicknameChanged = viewModel::backupApproverNicknameChanged,
-                                onSaveNickname = viewModel::onContinueWithBackupApprover
+                                onSaveNickname = viewModel::onSaveApprover
                             )
                         }
 
                         PlanSetupUIState.BackupApproverGettingLive -> {
                             GetLiveWithApproverUI(
                                 nickname = state.editedNickname,
-                                onContinueLive = viewModel::onBackupApproverVerification,
+                                onContinueLive = viewModel::onGoLiveWithBackupApprover,
                                 onResumeLater = {
                                     Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
                                 }
@@ -220,7 +220,7 @@ fun PlanSetupScreen(
                         //Fixme: Can we get this from the setup policy plan at this point...
                         PlanSetupUIState.Completed -> {
                             SavedAndShardedUI(
-                                seedPhraseNickname = "Yankee Hotel Foxtrot",
+                                seedPhraseNickname = seedPhraseNickname,
                                 primaryApproverNickname = "PRIMARY",
                                 backupApproverNickname = "BACKUP"
                             )

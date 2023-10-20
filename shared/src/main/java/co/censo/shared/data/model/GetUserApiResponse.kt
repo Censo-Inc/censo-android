@@ -82,8 +82,6 @@ sealed class GuardianStatus {
     @SerialName("Onboarded")
     data class Onboarded(
         val onboardedAt: Instant,
-        val guardianPublicKey: Base58EncodedGuardianPublicKey,
-        val isOwner: Boolean,
     ) : GuardianStatus()
 }
 
@@ -213,7 +211,6 @@ data class Vault(
 data class GuardianSetup(
     val guardians: List<Guardian.ProspectGuardian>,
     val threshold: UInt? = null,
-    val unlockedForSeconds: ULong? = null,
 )
 
 @Serializable

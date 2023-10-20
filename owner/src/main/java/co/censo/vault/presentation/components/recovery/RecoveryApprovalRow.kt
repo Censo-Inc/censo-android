@@ -192,8 +192,6 @@ fun RecoveryApprovalRowPreview() {
                 participantId = participantId,
                 attributes = GuardianStatus.Onboarded(
                     onboardedAt = Clock.System.now(),
-                    isOwner = true,
-                    guardianPublicKey = Base58EncodedGuardianPublicKey("")
                 )
             ),
             approval = Approval(

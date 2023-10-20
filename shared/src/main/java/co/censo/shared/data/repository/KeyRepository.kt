@@ -91,6 +91,6 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     }
 
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
-        return retrieveKeyFromCloud(participantId).value.isNotEmpty()
+        return storage.retrievePrivateKey().isNotEmpty()
     }
 }

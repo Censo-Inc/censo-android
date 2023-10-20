@@ -66,13 +66,15 @@ fun SavedAndShardedUI(
             title = R.string.saved_sharded,
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        if (seedPhraseNickname.isNotBlank()) {
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = seedPhraseNickname,
-            fontWeight = FontWeight.W400
-        )
+            TitleText(
+                modifier = Modifier.fillMaxWidth(),
+                title = seedPhraseNickname,
+                fontWeight = FontWeight.W400
+            )
+        }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
@@ -122,9 +124,19 @@ fun SavedAndShardedUI(
 
 @Preview(showBackground = true)
 @Composable
-fun SavedAndShardedUIPreview() {
+fun SavedAndShardedUIWithSeedPhrasePreview() {
     SavedAndShardedUI(
         seedPhraseNickname = "Yankee Hotel Foxtrot",
+        primaryApproverNickname = "Neo",
+        backupApproverNickname = "John Wick"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SavedAndShardedUIWithoutSeedPhrasePreview() {
+    SavedAndShardedUI(
+        seedPhraseNickname = "",
         primaryApproverNickname = "Neo",
         backupApproverNickname = "John Wick"
     )

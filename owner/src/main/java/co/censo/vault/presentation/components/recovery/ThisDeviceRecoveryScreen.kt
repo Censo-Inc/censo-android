@@ -173,8 +173,6 @@ fun ThisDeviceRecoveryScreenPreview() {
             participantId = participantId,
             attributes = GuardianStatus.Onboarded(
                 onboardedAt = Clock.System.now(),
-                isOwner = false,
-                guardianPublicKey = Base58EncodedGuardianPublicKey("")
             )
         )
     }.toList()

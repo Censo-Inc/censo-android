@@ -64,10 +64,10 @@ fun ActivateApproverUI(
     val nickName: String = prospectGuardian?.label ?: ""
     val guardianStatus = prospectGuardian?.status
     val deeplink = prospectGuardian?.status?.deeplink() ?: ""
+    val buttonEnabled = prospectGuardian?.status is GuardianStatus.Confirmed
 
     val context = LocalContext.current
 
-    val buttonEnabled = remember { mutableStateOf(false) }
 
     fun shareLink(link: String) {
         val sendIntent: Intent = Intent().apply {
@@ -162,7 +162,7 @@ fun ActivateApproverUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            enabled = buttonEnabled.value,
+            enabled = buttonEnabled,
             disabledColor = SharedColors.DisabledGrey,
             color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp),
@@ -170,7 +170,7 @@ fun ActivateApproverUI(
             Text(
                 fontSize = 20.sp,
                 text = stringResource(id = R.string.continue_text),
-                color = if (buttonEnabled.value) Color.White else SharedColors.DisabledFontGrey
+                color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey
             )
         }
 
