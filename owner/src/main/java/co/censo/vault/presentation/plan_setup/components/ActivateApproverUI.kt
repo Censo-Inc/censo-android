@@ -1,6 +1,5 @@
 package co.censo.vault.presentation.plan_setup.components
 
-import InvitationId
 import LearnMore
 import MessageText
 import StandardButton
@@ -43,22 +42,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianPhase
+import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.TotpCodeView
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
+import kotlinx.datetime.Instant
 
 @Composable
 fun ActivateApproverUI(
     isPrimaryApprover: Boolean = true,
-    nickName: String,
+    prospectGuardian: Guardian.ProspectGuardian?,
     secondsLeft: Int,
     verificationCode: String,
-    guardianPhase: GuardianPhase,
-    deeplink: String,
     storesLink: String //This should contain both links since approver could be either
 ) {
+
+    val nickName: String = prospectGuardian?.label ?: ""
+    val guardianStatus = prospectGuardian?.status
+    val deeplink = prospectGuardian?.status?.deeplink() ?: ""
 
     val context = LocalContext.current
 
@@ -150,7 +155,7 @@ fun ActivateApproverUI(
         ApproverInfoBox(
             nickName = nickName,
             primaryApprover = isPrimaryApprover,
-            phase = guardianPhase
+            status = guardianStatus
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -183,7 +188,7 @@ fun ActivateApproverUI(
 fun ApproverInfoBox(
     nickName: String,
     primaryApprover: Boolean,
-    phase: GuardianPhase
+    status: GuardianStatus?
 ) {
 
     val context = LocalContext.current
@@ -222,7 +227,7 @@ fun ApproverInfoBox(
                 fontSize = 24.sp
             )
 
-            val activatedUIData = phase.activatedUIData(context)
+            val activatedUIData : ApproverActivatedUIData = activatedUIData(status, context)
 
             Text(
                 text = activatedUIData.text,
@@ -243,19 +248,23 @@ fun ApproverInfoBox(
 
 }
 
-fun GuardianPhase.activatedUIData(context: Context) =
-    when (this) {
-        is GuardianPhase.WaitingForCode ->
+fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
+    when (guardianStatus) {
+        is GuardianStatus.Initial,
+        is GuardianStatus.Accepted,
+        GuardianStatus.Declined -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.not_yet_active),
                 color = SharedColors.ErrorRed
             )
+        }
 
-        else ->
+        else -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.activated),
                 color = SharedColors.SuccessGreen
             )
+        }
     }
 
 data class ApproverActivatedUIData(
@@ -299,7 +308,7 @@ fun ApproverStep(
                 Box(modifier = Modifier.padding(vertical = 12.dp)) {
                     TotpCodeView(
                         code = it.code,
-                        secondsLeft = 6,//it.timeLeft,
+                        secondsLeft = it.timeLeft,
                         primaryColor = VaultColors.PrimaryColor
                     )
                 }
@@ -336,12 +345,10 @@ data class VerificationCodeUIData(
 @Composable
 fun ActivatePreview() {
     ActivateApproverUI(
-        nickName = "Neo",
         isPrimaryApprover = true,
         secondsLeft = 43,
         verificationCode = "345819",
-        guardianPhase = GuardianPhase.WaitingForCode(invitationId = InvitationId("123456")),
-        deeplink = "deeplink",
-        storesLink = "link"
+        storesLink = "link",
+        prospectGuardian = null
     )
 }

@@ -135,6 +135,15 @@ sealed class Guardian {
 fun GuardianStatus.Initial.deeplink() =
     "${SharedScreen.GUARDIAN_ONBOARDING_URI}${invitationId.value}"
 
+fun GuardianStatus.deeplink(): String {
+    val invitationId = when (this) {
+        is GuardianStatus.Initial -> this.invitationId.value
+        else -> ""
+    }
+
+    return "${SharedScreen.GUARDIAN_ONBOARDING_URI}${invitationId}"
+}
+
 @Serializable
 data class Policy(
     val createdAt: Instant,

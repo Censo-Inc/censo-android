@@ -1,6 +1,5 @@
 package co.censo.vault.presentation.plan_setup
 
-import InvitationId
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,10 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.GuardianPhase
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.plan_setup.components.ActivateApproverUI
@@ -64,9 +65,16 @@ fun PlanSetupScreen(
         }
     }
 
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(/*existingSecurityPlan*/)
-        onDispose {}
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START
+            -> {
+                viewModel.onStart()
+            }
+            Lifecycle.Event.ON_PAUSE -> {
+            }
+            else -> Unit
+        }
     }
 
     Scaffold(topBar = {
@@ -88,8 +96,16 @@ fun PlanSetupScreen(
                 Text(
                     text =
                     when (state.planSetupUIState) {
-                        PlanSetupUIState.PrimaryApproverActivation -> stringResource(id = R.string.primary_approver)
-                        PlanSetupUIState.BackupApproverActivation -> stringResource(id = R.string.backup_approver)
+                        PlanSetupUIState.ApproverActivation ->
+                            if (state.approverType == ApproverType.Primary) {
+                                stringResource(id = R.string.primary_approver)
+                            } else {
+                                stringResource(
+                                    id =
+                                    R.string.backup_approver
+                                )
+                            }
+
                         else -> ""
                     }
                 )
@@ -145,8 +161,8 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.PrimaryApproverNickname -> {
                             AddApproverNicknameUI(
-                                nickname = state.primaryApprover.nickname,
-                                enabled = state.primaryApprover.nickname.isNotBlank(),
+                                nickname = state.editedNickname,
+                                enabled = state.editedNickname.isNotBlank(),
                                 onNicknameChanged = viewModel::primaryApproverNicknameChanged,
                                 onSaveNickname = viewModel::onSavePrimaryApprover
                             )
@@ -155,7 +171,7 @@ fun PlanSetupScreen(
                         
                         PlanSetupUIState.PrimaryApproverGettingLive -> {
                             GetLiveWithApproverUI(
-                                nickname = state.primaryApprover.nickname,
+                                nickname = state.editedNickname,
                                 onContinueLive = viewModel::onGoLiveWithPrimaryApprover,
                                 onResumeLater = {
                                     Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
@@ -163,14 +179,14 @@ fun PlanSetupScreen(
                             )
                         }
 
-                        PlanSetupUIState.PrimaryApproverActivation -> {
+                        PlanSetupUIState.ApproverActivation -> {
+                            projectLog(message = "Seconds left: ${state.currentSecond}")
+
                             ActivateApproverUI(
                                 isPrimaryApprover = true,
-                                nickName = state.primaryApprover.nickname,
-                                secondsLeft = state.primaryApprover.secondsLeft,
-                                verificationCode = state.primaryApprover.totpCode,
-                                guardianPhase = GuardianPhase.WaitingForCode(InvitationId("")),
-                                deeplink = "",
+                                prospectGuardian = state.activatingApprover,
+                                secondsLeft = state.currentSecond,
+                                verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
                                 storesLink = "Universal link to the App/Play stores"
                             )
                         }
@@ -184,8 +200,8 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.BackupApproverNickname -> {
                             AddApproverNicknameUI(
-                                nickname = state.backupApprover.nickname,
-                                enabled = state.backupApprover.nickname.isNotBlank(),
+                                nickname = state.editedNickname,
+                                enabled = state.editedNickname.isNotBlank(),
                                 onNicknameChanged = viewModel::backupApproverNicknameChanged,
                                 onSaveNickname = viewModel::onContinueWithBackupApprover
                             )
@@ -193,7 +209,7 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.BackupApproverGettingLive -> {
                             GetLiveWithApproverUI(
-                                nickname = state.backupApprover.nickname,
+                                nickname = state.editedNickname,
                                 onContinueLive = viewModel::onBackupApproverVerification,
                                 onResumeLater = {
                                     Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
@@ -201,13 +217,12 @@ fun PlanSetupScreen(
                             )
                         }
 
-                        PlanSetupUIState.BackupApproverActivation -> TODO()
-
+                        //Fixme: Can we get this from the setup policy plan at this point...
                         PlanSetupUIState.Completed -> {
                             SavedAndShardedUI(
                                 seedPhraseNickname = "Yankee Hotel Foxtrot",
-                                primaryApproverNickname = state.primaryApprover.nickname,
-                                backupApproverNickname = state.backupApprover.nickname
+                                primaryApproverNickname = "PRIMARY",
+                                backupApproverNickname = "BACKUP"
                             )
 
                             LaunchedEffect(Unit) {
