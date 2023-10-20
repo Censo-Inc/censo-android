@@ -1,31 +1,5 @@
 package co.censo.vault
 
-import co.censo.vault.data.PhraseValidator
-import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.key.InternalDeviceKey
-import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.data.storage.BIP39Phrases
-import co.censo.shared.data.storage.EncryptedBIP39
-import com.nhaarman.mockitokotlin2.capture
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
-import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.Clock
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import org.mockito.Mock
-
 
 /*
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -1,6 +1,6 @@
 package co.censo.vault
 
-import co.censo.vault.util.BIP39Validation
+import co.censo.vault.util.BIP39InvalidReason
 import co.censo.vault.util.BIP39
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
@@ -9,27 +9,27 @@ import org.junit.Test
 class BIP39ValidationTest {
     @Test
     fun `test bip39 too short`() {
-        assertEquals(BIP39Validation.TooShort, BIP39.validateSeedPhrase("wrong"))
+        assertEquals(BIP39InvalidReason.TooShort(1), BIP39.validateSeedPhrase("wrong"))
     }
 
     @Test
     fun `test bip39 too long`() {
-        assertEquals(BIP39Validation.TooLong, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
+        assertEquals(BIP39InvalidReason.TooLong(25), BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
     }
 
     @Test
     fun `test bip39 bad length`() {
-        assertEquals(BIP39Validation.BadLength, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
+        assertEquals(BIP39InvalidReason.BadLength(13), BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
     }
 
     @Test
     fun `test bip39 invalid words`() {
-        assertEquals(BIP39Validation.InvalidWords(wordsByIndex = mapOf(10 to "wronger", 11 to "wrongest")), BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wronger wrongest"))
+        assertEquals(BIP39InvalidReason.InvalidWords(wordsByIndex = mapOf(10 to "wronger", 11 to "wrongest")), BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wronger wrongest"))
     }
 
     @Test
     fun `test bip39 invalid checksum`() {
-        assertEquals(BIP39Validation.InvalidChecksum, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
+        assertEquals(BIP39InvalidReason.InvalidChecksum, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
     }
 
     @Test

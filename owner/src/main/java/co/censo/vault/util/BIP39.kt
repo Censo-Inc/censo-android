@@ -5,15 +5,15 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.experimental.and
 
-sealed class BIP39Validation {
-    object TooShort: BIP39Validation()
-    object TooLong: BIP39Validation()
+sealed class BIP39InvalidReason {
+     data class TooShort(val wordCount: Int): BIP39InvalidReason()
+    data class TooLong(val wordCount: Int): BIP39InvalidReason()
 
-    object BadLength: BIP39Validation()
+    data class BadLength(val wordCount: Int): BIP39InvalidReason()
 
-    data class InvalidWords(val wordsByIndex: Map<Int, String>): BIP39Validation()
+    data class InvalidWords(val wordsByIndex: Map<Int, String>): BIP39InvalidReason()
 
-    object InvalidChecksum: BIP39Validation()
+    object InvalidChecksum: BIP39InvalidReason()
 }
 
 object BIP39 {
@@ -26,18 +26,21 @@ object BIP39 {
         return (((1 shl bits) - 1) shl (8 - bits)).toByte()
     }
 
-    fun validateSeedPhrase(phrase: String): BIP39Validation? {
+    fun validateSeedPhrase(phrase: String): BIP39InvalidReason? {
         val normalizedPhrase = phrase.trim().lowercase()
         val words = normalizedPhrase.split(Regex("\\s+"))
+        return validateSeedPhrase(words)
+    }
 
+    fun validateSeedPhrase(words: List<String>): BIP39InvalidReason? {
         if (words.size < 12) {
-            return BIP39Validation.TooShort
+            return BIP39InvalidReason.TooShort(words.size)
         }
         if (words.size > 24) {
-            return BIP39Validation.TooLong
+            return BIP39InvalidReason.TooLong(words.size)
         }
         if (words.size.mod(3) != 0) {
-            return BIP39Validation.BadLength
+            return BIP39InvalidReason.BadLength(words.size)
         }
 
         // 1-of-2048 is 11 bits
@@ -58,7 +61,7 @@ object BIP39 {
             }
         }
         if (invalidWords.isNotEmpty()) {
-            return BIP39Validation.InvalidWords(invalidWords)
+            return BIP39InvalidReason.InvalidWords(invalidWords)
         }
 
         // the layout of binaryPhrase is the entropy bits first followed by the checksum bits
@@ -72,7 +75,7 @@ object BIP39 {
 
         // Compare the calculated checksum with the expected checksum
         if (checksum != expectedChecksum) {
-            return BIP39Validation.InvalidChecksum
+            return BIP39InvalidReason.InvalidChecksum
         }
 
         return null

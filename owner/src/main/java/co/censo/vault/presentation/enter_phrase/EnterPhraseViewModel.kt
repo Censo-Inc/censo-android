@@ -6,11 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toSeed
 import co.censo.shared.data.Resource
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
+import co.censo.vault.util.BIP39
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -70,17 +69,20 @@ class EnterPhraseViewModel @Inject constructor(
 
         projectLog(message = "Phrase submitted: ${state.enteredWords}")
 
-        val phraseValid = try {
-            Mnemonics.MnemonicCode(state.enteredWords.joinToString(" ")).toSeed(validate = true)
-            projectLog(message = "Seed valid")
-            true
-        } catch (e: Exception) {
-            projectLog(message = "Seed invalid: $e")
-            false
+        val validPhrase = when (val invalidReason = BIP39.validateSeedPhrase(state.enteredWords)) {
+            null -> {
+                projectLog(message = "Seed valid")
+                true
+            }
+
+            else -> {
+                projectLog(message = "Seed invalid: $invalidReason")
+                false
+            }
         }
 
         state = state.copy(
-            validPhrase = phraseValid,
+            validPhrase = validPhrase,
             enterWordUIState = EnterPhraseUIState.REVIEW
         )
     }

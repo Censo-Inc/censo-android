@@ -188,9 +188,6 @@ dependencies {
     //Biometrics
     implementation("androidx.biometric:biometric:1.1.0")
 
-    // BIP39
-    implementation("cash.z.ecc.android:kotlin-bip39:1.0.2")
-
     //Raygun crash reporting
     implementation("com.raygun:raygun4android:4.0.1")
 
