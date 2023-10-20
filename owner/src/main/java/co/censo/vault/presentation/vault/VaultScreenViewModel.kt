@@ -12,12 +12,14 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class VaultScreenViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository
+    private val ownerRepository: OwnerRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(VaultScreenState())
@@ -75,6 +77,7 @@ class VaultScreenViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 onOwnerState(OwnerState.Initial)
+                ownerStateFlow.tryEmit(Resource.Success(OwnerState.Initial))
             }
         }
     }
