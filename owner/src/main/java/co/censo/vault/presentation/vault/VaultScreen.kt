@@ -146,7 +146,7 @@ fun VaultScreen(
                         onEditSeedPhrases = viewModel::onEditSeedPhrases,
                         onRecoverSeedPhrases = viewModel::onRecoverPhrases,
                         onResetUser = viewModel::onResetUser,
-                        (state.ownerState?.policy?.guardians?.size ?: 0) == 1
+                        showAddApprovers = (state.ownerState?.policy?.guardians?.size ?: 0) == 1
                     )
                 }
 
