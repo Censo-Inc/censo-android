@@ -22,6 +22,7 @@ data class EnterPhraseState(
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.NICKNAME,
         EnterPhraseUIState.EDIT,
+        EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.SELECTED -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
@@ -34,7 +35,7 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, EDIT, SELECTED, VIEW, REVIEW, NICKNAME
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, NICKNAME
 }
 
 enum class BackIconType {

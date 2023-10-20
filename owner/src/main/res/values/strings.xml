@@ -236,5 +236,6 @@
     <string name="skip_for_now">Skip for now</string>
     <string name="invite_approver">Invite approver</string>
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
+    <string name="paste_your_phrase">Paste your phrase</string>
 
 </resources>

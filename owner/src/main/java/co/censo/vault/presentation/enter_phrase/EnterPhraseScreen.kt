@@ -40,6 +40,7 @@ import co.censo.vault.presentation.enter_phrase.components.AddPhraseNicknameUI
 import co.censo.vault.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.vault.presentation.enter_phrase.components.indexToWordText
 import co.censo.vault.presentation.enter_phrase.components.EditPhraseWordUI
+import co.censo.vault.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.vault.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWordUI
 
@@ -57,6 +58,7 @@ fun EnterPhraseScreen(
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
+        EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.NICKNAME,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.VIEW,
@@ -153,6 +155,13 @@ fun EnterPhraseScreen(
                                 welcomeFlow = state.welcomeFlow,
                                 onManualEntrySelected = { viewModel.entrySelected(EntryType.MANUAL) },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) }
+                            )
+                        }
+
+                        EnterPhraseUIState.PASTE_ENTRY -> {
+                            PastePhraseUI(
+                                pastedPhrase = state.editedWord,
+                                onPhraseEntered = viewModel::onPhrasePasted,
                             )
                         }
 

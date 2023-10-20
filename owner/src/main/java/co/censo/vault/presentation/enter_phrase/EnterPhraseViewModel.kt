@@ -180,7 +180,7 @@ class EnterPhraseViewModel @Inject constructor(
     fun entrySelected(entryType: EntryType) {
         state = when (entryType) {
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
-            EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
+            EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
         }
     }
 
@@ -194,6 +194,13 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
+            EnterPhraseUIState.PASTE_ENTRY -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                    editedWord = "",
+                    enteredWords = emptyList(),
+                )
+            }
             EnterPhraseUIState.SELECTED,
             EnterPhraseUIState.EDIT -> {
                 if (state.editedWordIndex == 0 && state.enteredWords.isEmpty()) {
@@ -243,6 +250,21 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun resetPhraseEntryComplete() {
         state = state.copy(phraseEntryComplete = Resource.Uninitialized)
+    }
+
+    fun onPhrasePasted(pastedPhrase: String) {
+        val words =
+            try {
+                pastedPhrase.split(" ")
+            } catch (e: Exception) {
+                listOf("Unable to create phrase...")
+            }
+
+        state = state.copy(
+            enteredWords = words
+        )
+
+        submitFullPhrase()
     }
 
 }
