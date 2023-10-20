@@ -182,9 +182,6 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
-    // BIP39
-    implementation("cash.z.ecc.android:kotlin-bip39:1.0.2")
-
     // Base58
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
     implementation("io.github.novacrypto:Base58:2022.01.17")

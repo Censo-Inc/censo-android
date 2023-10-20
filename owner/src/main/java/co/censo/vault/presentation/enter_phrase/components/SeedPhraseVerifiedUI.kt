@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cash.z.ecc.android.bip39.Mnemonics
 import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R as VaultR
 import kotlinx.coroutines.launch
@@ -188,7 +187,7 @@ fun getSuffixForWordIndex(index: Int): String =
 @Composable
 fun PreviewSeedPhraseVerification() {
 
-    val words = String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars).split(" ")
+    val words = "grocery crush fantasy pulse struggle brain federal equip remember figure lyrics afraid tape ugly gold yard way isolate drill lawn daughter either supply student".split(" ")
 
     ReviewSeedPhraseUI(
         valid = true,
