@@ -1,56 +1,45 @@
 package co.censo.vault
 
-import androidx.test.core.app.ApplicationProvider
 import co.censo.vault.util.BIP39Validation
-import co.censo.vault.util.BIP39Validator
+import co.censo.vault.util.BIP39
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
-import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class BIP39ValidationTest {
-
-    @Before
-    fun setup() {
-        BIP39Validator.setup(ApplicationProvider.getApplicationContext())
-    }
-
     @Test
     fun `test bip39 too short`() {
-        assertEquals(BIP39Validation.TooShort, BIP39Validator.validateSeedPhrase("wrong"))
+        assertEquals(BIP39Validation.TooShort, BIP39.validateSeedPhrase("wrong"))
     }
 
     @Test
     fun `test bip39 too long`() {
-        assertEquals(BIP39Validation.TooLong, BIP39Validator.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
+        assertEquals(BIP39Validation.TooLong, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
     }
 
     @Test
     fun `test bip39 bad length`() {
-        assertEquals(BIP39Validation.BadLength, BIP39Validator.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
+        assertEquals(BIP39Validation.BadLength, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
     }
 
     @Test
     fun `test bip39 invalid words`() {
-        assertEquals(BIP39Validation.InvalidWords(wordsByIndex = mapOf(10 to "wronger", 11 to "wrongest")), BIP39Validator.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wronger wrongest"))
+        assertEquals(BIP39Validation.InvalidWords(wordsByIndex = mapOf(10 to "wronger", 11 to "wrongest")), BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wronger wrongest"))
     }
 
     @Test
     fun `test bip39 invalid checksum`() {
-        assertEquals(BIP39Validation.InvalidChecksum, BIP39Validator.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
+        assertEquals(BIP39Validation.InvalidChecksum, BIP39.validateSeedPhrase("wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong wrong"))
     }
 
     @Test
     fun `test bip39 trims whitespace`() {
-        assertNull(BIP39Validator.validateSeedPhrase("   lizard size puppy joke venue census need net produce age all proof opinion promote setup flight tortoise multiply blanket problem defy arrest switch also   "))
+        assertNull(BIP39.validateSeedPhrase("   lizard size puppy joke venue census need net produce age all proof opinion promote setup flight tortoise multiply blanket problem defy arrest switch also   "))
     }
 
     @Test
     fun `test bip39 handles multiple spaces`() {
-        assertNull(BIP39Validator.validateSeedPhrase("lizard   size  puppy  joke venue census need\nnet produce age all proof opinion promote setup flight tortoise multiply   blanket problem defy arrest switch also"))
+        assertNull(BIP39.validateSeedPhrase("lizard   size  puppy  joke venue census need\nnet produce age all proof opinion promote setup flight tortoise multiply   blanket problem defy arrest switch also"))
     }
 
     @Test
@@ -163,7 +152,7 @@ class BIP39ValidationTest {
             "okay screen blood six hybrid episode surface carbon silk valid alien street emotion echo magnet because velvet vast evoke health million vintage oxygen fit",
             "link rescue thunder service access kitchen original rotate tunnel have erode seed wage merge march nature hold build purity dial evidence topic planet between",
         ).forEach { phrase ->
-            assertNull(BIP39Validator.validateSeedPhrase(phrase))
+            assertNull(BIP39.validateSeedPhrase(phrase))
         }
     }
 }

@@ -225,6 +225,4 @@ dependencies {
     androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestUtil("androidx.test:orchestrator:1.4.2")
-
-    testImplementation("org.robolectric:robolectric:4.9")
 }
