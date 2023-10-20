@@ -63,7 +63,7 @@ fun InitialPlanSetupScreen(
     LaunchedEffect(key1 = state) {
         if (state.complete) {
             navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
-            viewModel.resetComplete()
+            viewModel.reset()
         }
     }
 
@@ -96,31 +96,24 @@ fun InitialPlanSetupScreen(
 
             when {
                 state.apiError -> {
-                    if (state.saveKeyToCloudResource is Resource.Error) {
-                        DisplayError(
-                            errorMessage = "Error occurred trying to save your approver key",
-                            dismissAction = null,
-                            retryAction = {
-                                viewModel.createApproverKey()
-                            }
-                        )
-                    } else if (state.createPolicyParams is Resource.Error) {
-                        DisplayError(
-                            errorMessage = "Error occurred trying to create policy params",
-                            dismissAction = null,
-                            retryAction = {
-                                viewModel.createPolicyParams()
-                            }
-                        )
-                    } else if (state.createPolicyResponse is Resource.Error) {
-                        DisplayError(
-                            errorMessage = "Error occurred trying to create policy",
-                            dismissAction = null,
-                            retryAction = {
-                                viewModel.startFacetec()
-                            }
-                        )
-                    }
+                    val errorText =
+                        if (state.saveKeyToCloudResource is Resource.Error) {
+                            "Error occurred trying to save your approver key"
+                        } else if (state.createPolicyParams is Resource.Error) {
+                            "Error occurred trying to create policy params"
+                        } else if (state.createPolicyResponse is Resource.Error) {
+                            "Error occurred trying to create policy"
+                        } else {
+                            "Failed to complete facetec, try again."
+                        }
+
+                    DisplayError(
+                        errorMessage = errorText,
+                        dismissAction = null,
+                        retryAction = {
+                            viewModel.moveToNextAction()
+                        }
+                    )
                 }
 
                 else -> {
@@ -131,7 +124,9 @@ fun InitialPlanSetupScreen(
                         InitialPlanSetupStep.PolicyCreation ->
                             Box(modifier = Modifier.fillMaxSize()) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(72.dp).align(Alignment.Center),
+                                    modifier = Modifier
+                                        .size(72.dp)
+                                        .align(Alignment.Center),
                                     color = VaultColors.PrimaryColor,
                                     strokeWidth = 8.dp,
                                 )
@@ -148,7 +143,7 @@ fun InitialPlanSetupScreen(
                                 onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
                                     navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
-                                    viewModel.resetComplete()
+                                    viewModel.reset()
                                 }
                             )
                     }

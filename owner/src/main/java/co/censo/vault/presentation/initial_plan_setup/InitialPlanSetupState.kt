@@ -16,8 +16,9 @@ data class InitialPlanSetupScreenState(
     val initialPlanData: InitialPlanData = InitialPlanData(),
     val complete: Boolean = false
 ) {
-    val apiError =
-        createPolicyParams is Resource.Error || createPolicyResponse is Resource.Error || saveKeyToCloudResource is Resource.Error
+    val apiError = createPolicyParams is Resource.Error
+        || createPolicyResponse is Resource.Error
+        || saveKeyToCloudResource is Resource.Error
 }
 
 sealed class InitialPlanSetupStep {

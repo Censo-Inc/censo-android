@@ -55,7 +55,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         moveToNextAction()
     }
 
-    fun createApproverKey() {
+    private fun createApproverKey() {
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
         }
@@ -86,7 +86,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun createPolicyParams() {
+    private fun createPolicyParams() {
         if (state.createPolicyParams is Resource.Loading) {
             return
         }
@@ -119,11 +119,11 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun startFacetec() {
+    private fun startFacetec() {
         state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
     }
 
-    fun resetComplete() {
+    fun reset() {
         state = InitialPlanSetupScreenState()
     }
 
@@ -137,7 +137,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
         return viewModelScope.async {
             val createPolicyResponse = ownerRepository.createPolicy(
-                state.createPolicyParams.data!!,
+                state.initialPlanData.createPolicyParams!!,
                 verificationId,
                 facetecData
             )
