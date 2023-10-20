@@ -13,11 +13,13 @@ import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -26,6 +28,7 @@ import javax.inject.Inject
 class InitialPlanSetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(InitialPlanSetupScreenState())
@@ -146,6 +149,11 @@ class InitialPlanSetupViewModel @Inject constructor(
                 ),
                 complete = createPolicyResponse is Resource.Success
             )
+
+
+            if (createPolicyResponse is Resource.Success) {
+                ownerStateFlow.tryEmit(createPolicyResponse.map { it.ownerState })
+            }
 
             createPolicyResponse.map { it.scanResultBlob }
         }.await()

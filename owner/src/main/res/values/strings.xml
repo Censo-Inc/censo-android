@@ -135,7 +135,8 @@
     <string name="enter_code">Enter code</string>
     <string name="your_seed_phrases_are_protected">Your seed phrases are protected</string>
     <string name="edit_seed_phrases">Edit Seed Phrases</string>
-    <string name="recover_phrases">Recover Phrases</string>
+    <string name="access_phrases">Access phrases</string>
+    <string name="reset_user_data">Reset user data</string>
     <string name="added_on">"Added on"</string>
     <string name="vault">Vault</string>
     <string name="unlock">Unlock</string>
@@ -177,6 +178,7 @@
     <string name="scan_your_face_blurb">Fortify your Censo account with an encrypted, 3rd-party-verified scan.</string>
     <string name="enter_your_phrase">Enter your phrase</string>
     <string name="enter_your_phrase_blurb">Add your seed phrase; Censo will encrypt it for your eyes only</string>
+    <string name="invite_approvers">Invite approvers</string>
     <string name="add_approvers">Optional: Add approvers</string>
     <string name="add_approvers_blurb">To improve security, choose people to approve access.</string>
     <string name="info">Learn more</string>
@@ -191,9 +193,11 @@
     <string name="add_a_nickname">Add a nickname</string>
     <string name="nickname_message">Now, give your seed phrase a nickname of your choice so you can identify it in the future.\n\nThis will be secured within your face scan encryption and not shared with anyone.</string>
     <string name="enter_a_nickname">Enter a nickname…</string>
+    <string name="add_seed_phrases">Add seed phrases</string>
     <string name="add_first_seed_phrase">Add your first seed phrase</string>
     <string name="add_seed_phrase_message">Add a seed phrase to store it safely with Censo. Your seed phrase is sharded and encrypted for ultimate security.\n\nOnly you can retrieve your seed phrase. Neither Censo nor trusted approvers can access it.</string>
     <string name="step_2">Step 2</string>
+    <string name="you_are_about_to_delete_user">You are about to delete your user and associated data. This action cannot be reversed. \nAre you sure?</string>
 
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Scan your face</string>

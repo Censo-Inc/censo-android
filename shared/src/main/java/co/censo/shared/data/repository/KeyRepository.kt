@@ -30,6 +30,8 @@ interface KeyRepository {
     )
     suspend fun retrieveKeyFromCloud(participantId: ParticipantId): Base58EncodedPrivateKey
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
+
+    suspend fun deleteDeviceKeyIfPresent(keyId: String)
 }
 
 class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudStorage) : KeyRepository {
@@ -92,5 +94,9 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
 
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
         return retrieveKeyFromCloud(participantId).value.isNotEmpty()
+    }
+
+    override suspend fun deleteDeviceKeyIfPresent(keyId: String) {
+        KeystoreHelper().deleteDeviceKeyIfPresent(keyId)
     }
 }
