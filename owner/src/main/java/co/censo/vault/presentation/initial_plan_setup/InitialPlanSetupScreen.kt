@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,13 +58,7 @@ fun InitialPlanSetupScreen(
     navController: NavController,
     viewModel: InitialPlanSetupViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val state = viewModel.state
-
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose {}
-    }
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
@@ -95,51 +87,63 @@ fun InitialPlanSetupScreen(
             )
         },
 
-    ) { paddingValues ->
+        ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (val setupStatus = state.initialPlanSetupStatus) {
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.None,
-                    InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatingPolicyParams -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(28.dp),
-                        color = VaultColors.PrimaryColor,
-                        strokeWidth = 3.dp,
-                    )
-                }
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed -> {
-                    DisplayError(
-                        errorMessage = "Error occurred trying to save your approver key",
-                        dismissAction = null,
-                        retryAction = {
-                            viewModel.createApproverKeyAndPolicyParams()
-                        }
-                    )
-                }
-
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatePolicyParamsFailed -> {
-                    DisplayError(
-                        errorMessage = "Error occurred trying to create plan data",
-                        dismissAction = null,
-                        retryAction = {
-                            viewModel.createPolicyParams()
-                        }
-                    )
-                }
-
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial ->
-                    InitialPlanSetupStandardUI {
-                        viewModel.startPolicySetup()
+            when {
+                state.apiError -> {
+                    if (state.saveKeyToCloudResource is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Error occurred trying to save your approver key",
+                            dismissAction = null,
+                            retryAction = {
+                                viewModel.createApproverKey()
+                            }
+                        )
+                    } else if (state.createPolicyParams is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Error occurred trying to create policy params",
+                            dismissAction = null,
+                            retryAction = {
+                                viewModel.createPolicyParams()
+                            }
+                        )
+                    } else if (state.createPolicyResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Error occurred trying to create policy",
+                            dismissAction = null,
+                            retryAction = {
+                                viewModel.startFacetec()
+                            }
+                        )
                     }
+                }
+
+                else -> {
+
+                    when (state.initialPlanSetupStep) {
+                        InitialPlanSetupStep.CreateApproverKey,
+                        InitialPlanSetupStep.CreatePolicyParams,
+                        InitialPlanSetupStep.PolicyCreation ->
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(72.dp).align(Alignment.Center),
+                                    color = VaultColors.PrimaryColor,
+                                    strokeWidth = 8.dp,
+                                )
+                            }
+
+                        is InitialPlanSetupStep.Initial ->
+                            InitialPlanSetupStandardUI {
+                                viewModel.moveToNextAction()
+                            }
 
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress ->
-                    when (val resourceStatus = setupStatus.apiCall) {
-                        is Resource.Uninitialized ->
+                        is InitialPlanSetupStep.Facetec ->
                             FacetecAuth(
                                 onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
@@ -147,25 +151,8 @@ fun InitialPlanSetupScreen(
                                     viewModel.resetComplete()
                                 }
                             )
-
-                        is Resource.Loading ->
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                color = VaultColors.PrimaryColor,
-                                strokeWidth = 3.dp,
-                            )
-
-                        is Resource.Error ->
-                            DisplayError(
-                                errorMessage = resourceStatus.getErrorMessage(context),
-                                dismissAction = null,
-                                retryAction = {
-                                    viewModel.reset()
-                                }
-                            )
-
-                        else -> {}
                     }
+                }
             }
         }
     }
@@ -246,13 +233,13 @@ fun InitialPlanSetupStandardUI(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         LearnMore {
-            
+
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
     }
 }

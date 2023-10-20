@@ -34,27 +34,34 @@ class InitialPlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(InitialPlanSetupScreenState())
         private set
 
-    fun onStart() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial
-        )
-        createApproverKeyAndPolicyParams()
-    }
-
-    fun createApproverKeyAndPolicyParams() {
-        createApproverKey()
-        if (state.approverEncryptionKey != null) {
-            createPolicyParams()
+    fun moveToNextAction() {
+        when {
+            state.initialPlanData.approverEncryptionKey == null -> createApproverKey()
+            state.initialPlanData.createPolicyParams == null -> createPolicyParams()
+            else -> startFacetec()
         }
     }
 
-    private fun createApproverKey() {
+
+    private fun determineUIStatus() {
+        val uiStatus = when {
+            state.initialPlanData.approverEncryptionKey == null -> InitialPlanSetupStep.CreateApproverKey
+            state.initialPlanData.createPolicyParams == null -> InitialPlanSetupStep.CreatePolicyParams
+            else -> InitialPlanSetupStep.Facetec
+        }
+
+        state = state.copy(initialPlanSetupStep = uiStatus)
+
+        moveToNextAction()
+    }
+
+    fun createApproverKey() {
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
         }
         viewModelScope.launch {
             state = state.copy(saveKeyToCloudResource = Resource.Loading())
-            state = try {
+            try {
                 val approverEncryptionKey = keyRepository.createGuardianKey()
                 keyRepository.saveKeyInCloud(
                     key = Base58EncodedPrivateKey(
@@ -64,15 +71,16 @@ class InitialPlanSetupViewModel @Inject constructor(
                     ),
                     participantId = state.participantId
                 )
-                state.copy(
-                    approverEncryptionKey = approverEncryptionKey,
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatingPolicyParams,
+                state = state.copy(
+                    initialPlanData = state.initialPlanData.copy(
+                        approverEncryptionKey = approverEncryptionKey
+                    ),
                     saveKeyToCloudResource = Resource.Uninitialized,
                 )
+                determineUIStatus()
             } catch (e: Exception) {
-                state.copy(
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed,
-                    saveKeyToCloudResource = Resource.Uninitialized
+                state = state.copy(
+                    saveKeyToCloudResource = Resource.Error(exception = e)
                 )
             }
         }
@@ -89,51 +97,42 @@ class InitialPlanSetupViewModel @Inject constructor(
                     label = "Me",
                     participantId = state.participantId,
                     status = GuardianStatus.ImplicitlyOwner(
-                        Base58EncodedGuardianPublicKey(state.approverEncryptionKey!!.publicExternalRepresentation().value),
+                        Base58EncodedGuardianPublicKey(state.initialPlanData.approverEncryptionKey!!.publicExternalRepresentation().value),
                         Clock.System.now()
                     )
                 )
             )
-            state = state.copy(
-                createPolicyParams = createPolicyParams,
-                initialPlanSetupStatus = if (createPolicyParams is Resource.Success) InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial else InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatePolicyParamsFailed
-            )
+
+            if (createPolicyParams is Resource.Success) {
+                state = state.copy(
+                    initialPlanData = state.initialPlanData.copy(
+                        createPolicyParams = createPolicyParams.data
+                    ),
+                    createPolicyParams = createPolicyParams,
+                )
+                determineUIStatus()
+            } else {
+                state = state.copy(
+                    createPolicyParams = createPolicyParams,
+                )
+            }
         }
     }
 
-    fun startPolicySetup() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
-                apiCall = Resource.Uninitialized
-            )
-        )
+    fun startFacetec() {
+        state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
     }
 
     fun resetComplete() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.None,
-            approverEncryptionKey = null,
-            complete = false,
-            createPolicyParams = Resource.Uninitialized
-        )
+        state = InitialPlanSetupScreenState()
     }
-
-    fun reset() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial,
-            complete = false
-        )
-    }
-
 
     suspend fun onPolicyCreationFaceScanReady(
         verificationId: BiometryVerificationId,
         facetecData: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
         state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
-                apiCall = Resource.Loading()
-            )
+            initialPlanSetupStep = InitialPlanSetupStep.PolicyCreation
         )
 
         return viewModelScope.async {
@@ -144,9 +143,7 @@ class InitialPlanSetupViewModel @Inject constructor(
             )
 
             state = state.copy(
-                initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
-                    apiCall = createPolicyResponse
-                ),
+                createPolicyResponse = createPolicyResponse,
                 complete = createPolicyResponse is Resource.Success
             )
 
