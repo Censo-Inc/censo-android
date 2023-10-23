@@ -185,6 +185,7 @@ class EnterPhraseViewModel @Inject constructor(
                 state.copy(
                     enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
                     editedWord = "",
+                    editedWordIndex = 0,
                     enteredWords = emptyList(),
                 )
             }
