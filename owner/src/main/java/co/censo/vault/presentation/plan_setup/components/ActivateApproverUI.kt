@@ -1,5 +1,7 @@
 package co.censo.vault.presentation.plan_setup.components
 
+import Base58EncodedGuardianPublicKey
+import Base64EncodedData
 import LearnMore
 import MessageText
 import StandardButton
@@ -28,8 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,28 +43,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.TotpCodeView
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 @Composable
 fun ActivateApproverUI(
     isPrimaryApprover: Boolean = true,
-    prospectGuardian: Guardian.ProspectGuardian?,
+    prospectApprover: Guardian.ProspectGuardian?,
     secondsLeft: Int,
     verificationCode: String,
-    storesLink: String //This should contain both links since approver could be either
+    storesLink: String, //This should contain both links since approver could be either
+    onContinue: () -> Unit
 ) {
 
-    val nickName: String = prospectGuardian?.label ?: ""
-    val guardianStatus = prospectGuardian?.status
-    val deeplink = prospectGuardian?.status?.deeplink() ?: ""
-    val buttonEnabled = prospectGuardian?.status is GuardianStatus.Confirmed
+    val nickName: String = prospectApprover?.label ?: ""
+    val guardianStatus = prospectApprover?.status
+    val deeplink = prospectApprover?.status?.deeplink() ?: ""
+    val buttonEnabled = prospectApprover?.status is GuardianStatus.Confirmed
 
     val context = LocalContext.current
 
@@ -166,7 +167,8 @@ fun ActivateApproverUI(
             disabledColor = SharedColors.DisabledGrey,
             color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp),
-            onClick = { /*TODO*/ }) {
+            onClick = onContinue
+        ) {
             Text(
                 fontSize = 20.sp,
                 text = stringResource(id = R.string.continue_text),
@@ -349,6 +351,16 @@ fun ActivatePreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectGuardian = null
+        prospectApprover = Guardian.ProspectGuardian(
+            label = "Neo",
+            participantId = ParticipantId.generate(),
+            status = GuardianStatus.Confirmed(
+                guardianPublicKey = Base58EncodedGuardianPublicKey(""),
+                guardianKeySignature = Base64EncodedData(""),
+                timeMillis = 0,
+                confirmedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {}
     )
 }

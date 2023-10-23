@@ -97,6 +97,9 @@ interface OwnerRepository {
     ): Resource<CreatePolicyApiResponse>
 
     suspend fun replacePolicy(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        encryptedMasterPrivateKey: Base64EncodedData,
+
         threshold: UInt,
         guardians: List<Guardian.ProspectGuardian>
     ): Resource<ReplacePolicyApiResponse>
@@ -250,14 +253,20 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun replacePolicy(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        encryptedMasterPrivateKey: Base64EncodedData,
         threshold: UInt,
         guardians: List<Guardian.ProspectGuardian>,
     ): Resource<ReplacePolicyApiResponse> {
+        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
 
-        val setupHelper =  try {
+        val setupHelper = try {
             PolicySetupHelper.create(
                 threshold = threshold,
-                guardians = guardians
+                guardians = guardians,
+                masterEncryptionKey = masterEncryptionKey,
+                previousIntermediateKey = intermediateEncryptionKey
             )
         } catch (e: Exception) {
             return Resource.Error(exception = e)
@@ -268,7 +277,7 @@ class OwnerRepositoryImpl(
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
             guardianShards = setupHelper.guardianShards,
-            signatureByPreviousIntermediateKey = Base64EncodedData("")
+            signatureByPreviousIntermediateKey = setupHelper.signatureByPreviousIntermediateKey!!
         )
 
         return retrieveApiResource { apiService.replacePolicy(replacePolicyApiRequest) }
@@ -474,6 +483,20 @@ class OwnerRepositoryImpl(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
     ): List<RecoveredSeedPhrase> {
+        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
+
+        return encryptedSecrets.map {
+            RecoveredSeedPhrase(
+                guid = it.guid,
+                label = it.label,
+                seedPhrase = String(masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)),
+                createdAt = it.createdAt
+            )
+        }
+    }
+
+    private suspend fun recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>): PrivateKey {
         val ownerDeviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
 
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
@@ -490,26 +513,20 @@ class OwnerRepositoryImpl(
             )
         }
 
-        val intermediatePrivateKey: PrivateKey = ECHelper.getPrivateKeyFromECBigIntAndCurve(
+        return ECHelper.getPrivateKeyFromECBigIntAndCurve(
             SecretSharerUtils.recoverSecret(intermediateKeyShares, ORDER)
         )
+    }
 
-        val masterPrivateKey = EncryptionKey.generateFromPrivateKeyRaw(
-            BigInteger(
-                ECIESManager.decryptMessage(
-                    cipherData = encryptedMasterPrivateKey.bytes,
-                    privateKey = intermediatePrivateKey
-                )
+    private fun recoverMasterEncryptionKey(
+        encryptedMasterKey: Base64EncodedData,
+        intermediateKey: PrivateKey
+    ) = EncryptionKey.generateFromPrivateKeyRaw(
+        BigInteger(
+            ECIESManager.decryptMessage(
+                cipherData = encryptedMasterKey.bytes,
+                privateKey = intermediateKey
             )
         )
-
-        return encryptedSecrets.map {
-            RecoveredSeedPhrase(
-                guid = it.guid,
-                label = it.label,
-                seedPhrase = String(masterPrivateKey.decrypt(it.encryptedSeedPhrase.bytes)),
-                createdAt = it.createdAt
-            )
-        }
-    }
+    )
 }

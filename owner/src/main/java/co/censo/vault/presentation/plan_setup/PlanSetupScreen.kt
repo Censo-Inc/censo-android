@@ -33,6 +33,7 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.vault.presentation.plan_setup.components.AddApproverNicknameUI
 import co.censo.vault.presentation.plan_setup.components.AddBackupApproverUI
@@ -84,7 +85,7 @@ fun PlanSetupScreen(
             ),
             navigationIcon = {
                 IconButton(onClick = {
-                    viewModel.onBackActionClick()
+                    Toast.makeText(context, "Back or Close button clicked", Toast.LENGTH_LONG).show()
                 }) {
                     Icon(
                         imageVector = iconPair.first,
@@ -100,10 +101,7 @@ fun PlanSetupScreen(
                             if (state.approverType == ApproverType.Primary) {
                                 stringResource(id = R.string.primary_approver)
                             } else {
-                                stringResource(
-                                    id =
-                                    R.string.backup_approver
-                                )
+                                stringResource(id = R.string.backup_approver)
                             }
 
                         else -> ""
@@ -159,20 +157,20 @@ fun PlanSetupScreen(
                             )
 
 
-                        PlanSetupUIState.PrimaryApproverNickname -> {
+                        PlanSetupUIState.ApproverNickname -> {
                             AddApproverNicknameUI(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNickname.isNotBlank(),
-                                onNicknameChanged = viewModel::primaryApproverNicknameChanged,
+                                onNicknameChanged = viewModel::approverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApprover
                             )
                         }
                         
                         
-                        PlanSetupUIState.PrimaryApproverGettingLive -> {
+                        PlanSetupUIState.ApproverGettingLive -> {
                             GetLiveWithApproverUI(
                                 nickname = state.editedNickname,
-                                onContinueLive = viewModel::onGoLiveWithPrimaryApprover,
+                                onContinueLive = viewModel::onGoLiveWithApprover,
                                 onResumeLater = {
                                     Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
                                 }
@@ -183,11 +181,12 @@ fun PlanSetupScreen(
                             projectLog(message = "Seconds left: ${state.secondsLeft}")
 
                             ActivateApproverUI(
-                                isPrimaryApprover = true,
-                                prospectGuardian = state.activatingApprover,
+                                isPrimaryApprover = state.approverType == ApproverType.Primary,
+                                prospectApprover = state.activatingApprover,
                                 secondsLeft = state.secondsLeft,
                                 verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
-                                storesLink = "Universal link to the App/Play stores"
+                                storesLink = "Universal link to the App/Play stores",
+                                onContinue = viewModel::onApproverConfirmed
                             )
                         }
 
@@ -198,22 +197,12 @@ fun PlanSetupScreen(
                             )
                         }
 
-                        PlanSetupUIState.BackupApproverNickname -> {
-                            AddApproverNicknameUI(
-                                nickname = state.editedNickname,
-                                enabled = state.editedNickname.isNotBlank(),
-                                onNicknameChanged = viewModel::backupApproverNicknameChanged,
-                                onSaveNickname = viewModel::onSaveApprover
-                            )
-                        }
-
-                        PlanSetupUIState.BackupApproverGettingLive -> {
-                            GetLiveWithApproverUI(
-                                nickname = state.editedNickname,
-                                onContinueLive = viewModel::onGoLiveWithBackupApprover,
-                                onResumeLater = {
-                                    Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
-                                }
+                        PlanSetupUIState.ReShardingSecrets -> {
+                            FacetecAuth(
+                                onFaceScanReady = { verificationId, biometry ->
+                                    viewModel.onFaceScanReady(verificationId, biometry)
+                                },
+                                onCancelled = { viewModel.onBackActionClick() }
                             )
                         }
 
@@ -226,7 +215,7 @@ fun PlanSetupScreen(
                             )
 
                             LaunchedEffect(Unit) {
-                                delay(5000)
+                                delay(8000)
                                 viewModel.onFullyCompleted()
                             }
                         }
