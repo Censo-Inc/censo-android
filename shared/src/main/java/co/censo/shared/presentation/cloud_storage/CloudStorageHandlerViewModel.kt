@@ -16,11 +16,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CloudStorageViewModel @Inject constructor(
+class CloudStorageHandlerViewModel @Inject constructor(
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(CloudStorageState())
+    var state by mutableStateOf(CloudStorageHandlerState())
         private set
 
     fun onStart(
@@ -154,6 +154,6 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     fun onDispose() {
-        state = CloudStorageState()
+        state = CloudStorageHandlerState()
     }
 }

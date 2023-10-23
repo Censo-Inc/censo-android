@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.initial_plan_setup
 
 import Base58EncodedGuardianPublicKey
+import Base58EncodedPrivateKey
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,8 +17,10 @@ import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,8 +79,17 @@ class InitialPlanSetupViewModel @Inject constructor(
     private fun savePrivateKeyToCloud(approverEncryptionKey: EncryptionKey) {
         state = state.copy(
             initialPlanData = state.initialPlanData.copy(approverEncryptionKey = approverEncryptionKey),
-            triggerCloudStorageAction = Resource.Success(CloudStorageActions.UPLOAD)
+            cloudStorageAction = CloudStorageActionData(
+                triggerAction = true,
+                action = CloudStorageActions.UPLOAD,
+                reason = null
+            )
         )
+    }
+
+    fun getPrivateKeyForUpload() : Base58EncodedPrivateKey? {
+        val encryptionKey = state.initialPlanData.approverEncryptionKey ?: return null
+        return Base58EncodedPrivateKey(Base58.base58Encode(encryptionKey.privateKeyRaw()))
     }
 
     fun onKeySaved(approverEncryptionKey: EncryptionKey) {
@@ -86,14 +98,14 @@ class InitialPlanSetupViewModel @Inject constructor(
                 approverEncryptionKey = approverEncryptionKey
             ),
             saveKeyToCloudResource = Resource.Uninitialized,
-            triggerCloudStorageAction = Resource.Uninitialized
+            cloudStorageAction = CloudStorageActionData()
         )
         determineUIStatus()
     }
 
     fun onKeySaveFailed(exception: Exception?) {
         state = state.copy(
-            triggerCloudStorageAction = Resource.Uninitialized,
+            cloudStorageAction = CloudStorageActionData(),
             saveKeyToCloudResource = Resource.Error(exception = exception),
             initialPlanData = state.initialPlanData.copy(approverEncryptionKey = null),
         )

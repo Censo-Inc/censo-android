@@ -46,7 +46,6 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.TotpCodeView
 import kotlinx.coroutines.delay
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
-import co.censo.shared.presentation.cloud_storage.CloudStorageViewModel
 import co.censo.shared.util.projectLog
 import io.github.novacrypto.base58.Base58
 
@@ -140,9 +139,9 @@ fun GuardianHomeScreen(
                     }
                 }
 
-                state.saveKeyToCloudResource is Resource.Error -> {
+                state.savePrivateKeyToCloudResource is Resource.Error -> {
                     DisplayError(
-                        errorMessage = state.saveKeyToCloudResource.getErrorMessage(context),
+                        errorMessage = state.savePrivateKeyToCloudResource.getErrorMessage(context),
                         dismissAction = { viewModel.createAndSaveGuardianKey() }
                     ) { viewModel.createAndSaveGuardianKey() }
                 }
@@ -294,32 +293,25 @@ fun GuardianHomeScreen(
                 }
             )
 
-            if (state.triggerCloudStorageAction is Resource.Success) {
-
+            if (state.cloudStorageAction.triggerAction) {
                 val privateKey =
-                    if (state.triggerCloudStorageAction.data!! == CloudStorageActions.UPLOAD && state.guardianEncryptionKey != null) {
-                        Base58EncodedPrivateKey(
-                            Base58.base58Encode(
-                                state.guardianEncryptionKey.privateKeyRaw()
-                            )
-                        )
-                    } else {
-                        null
-                    }
+                    if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
+                        viewModel.getPrivateKeyForUpload()
+                    } else null
 
                 CloudStorageHandler(
-                    actionToPerform = state.triggerCloudStorageAction.data!!,
+                    actionToPerform = state.cloudStorageAction.action,
                     participantId = ParticipantId(state.participantId),
                     privateKey = privateKey,
                     onActionSuccess = { base58EncodedPrivateKey ->
                         projectLog(message = "Cloud Storage action success")
-                        viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.triggerCloudStorageAction.data!!)
+                        viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.cloudStorageAction.action)
                     },
                     onActionFailed = { exception ->
                         projectLog(message = "Cloud Storage action failed")
-                        viewModel.handleCLoudStorageActionFailure(
+                        viewModel.handleCloudStorageActionFailure(
                             exception,
-                            state.triggerCloudStorageAction.data!!
+                            state.cloudStorageAction.action
                         )
                     },
                 )
