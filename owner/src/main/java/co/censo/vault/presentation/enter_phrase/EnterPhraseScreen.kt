@@ -40,6 +40,7 @@ import co.censo.vault.presentation.enter_phrase.components.AddPhraseNicknameUI
 import co.censo.vault.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.vault.presentation.enter_phrase.components.indexToWordText
 import co.censo.vault.presentation.enter_phrase.components.EditPhraseWordUI
+import co.censo.vault.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.vault.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWordUI
 
@@ -57,6 +58,7 @@ fun EnterPhraseScreen(
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
+        EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.NICKNAME,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.VIEW,
@@ -156,6 +158,13 @@ fun EnterPhraseScreen(
                             )
                         }
 
+                        EnterPhraseUIState.PASTE_ENTRY -> {
+                            PastePhraseUI(
+                                pastedPhrase = state.editedWord,
+                                onPhraseEntered = viewModel::onPhrasePasted,
+                            )
+                        }
+
                         EnterPhraseUIState.EDIT, EnterPhraseUIState.SELECTED -> {
                             EditPhraseWordUI(
                                 phraseWord = state.editedWord,
@@ -180,7 +189,7 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.REVIEW -> {
                             ReviewSeedPhraseUI(
-                                valid = state.validPhrase,
+                                invalidReason = state.phraseInvalidReason,
                                 phraseWords = state.enteredWords,
                                 saveSeedPhrase = viewModel::moveToNickname,
                                 editSeedPhrase = viewModel::editEntirePhrase

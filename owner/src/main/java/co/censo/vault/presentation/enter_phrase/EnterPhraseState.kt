@@ -2,6 +2,7 @@ package co.censo.vault.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import co.censo.shared.data.Resource
+import co.censo.vault.util.BIP39InvalidReason
 
 data class EnterPhraseState(
     val masterPublicKey: Base58EncodedMasterPublicKey? = null,
@@ -9,7 +10,7 @@ data class EnterPhraseState(
     val editedWord: String = "",
     val editedWordIndex: Int = 0,
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
-    val validPhrase: Boolean = false,
+    val phraseInvalidReason: BIP39InvalidReason? = null,
     val nickName: String = "",
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
@@ -22,6 +23,7 @@ data class EnterPhraseState(
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.NICKNAME,
         EnterPhraseUIState.EDIT,
+        EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.SELECTED -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
@@ -34,7 +36,7 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, EDIT, SELECTED, VIEW, REVIEW, NICKNAME
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, NICKNAME
 }
 
 enum class BackIconType {

@@ -79,6 +79,7 @@
     <string name="how_does_this_work">How does this work?</string>
     <string name="required_approvals">Required Approvals</string>
     <string name="review">Review</string>
+    <string name="review_phrase">Review Phrase</string>
     <string name="enter_nickname">Enter Nickname</string>
     <string name="just_something_for_you_to_remember_this_approver_by">Just something for you to remember this approver by</string>
     <string name="approver_placeholder">e.g Ben</string>
@@ -236,5 +237,6 @@
     <string name="skip_for_now">Skip for now</string>
     <string name="invite_approver">Invite approver</string>
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
+    <string name="paste_your_phrase">Paste your phrase</string>
 
 </resources>

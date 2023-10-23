@@ -1,6 +1,8 @@
 package co.censo.vault.util
 
 import co.censo.shared.data.cryptography.toByteArrayNoSign
+import co.censo.vault.util.BIP39.MAX_LENGTH
+import co.censo.vault.util.BIP39.MIN_LENGTH
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.experimental.and
@@ -16,10 +18,32 @@ sealed class BIP39InvalidReason {
     object InvalidChecksum: BIP39InvalidReason()
 }
 
+fun BIP39InvalidReason.errorTitle() =
+    when (this) {
+        is BIP39InvalidReason.BadLength -> "Seed phrase is incorrect length"
+        BIP39InvalidReason.InvalidChecksum -> "Seed phrase is invalid"
+        is BIP39InvalidReason.InvalidWords -> "Seed phrase contains invalid words"
+        is BIP39InvalidReason.TooLong -> "Seed phrase too long"
+        is BIP39InvalidReason.TooShort -> "Seed phrase too short"
+    }
+
+fun BIP39InvalidReason.errorMessage() =
+    when (this) {
+        is BIP39InvalidReason.BadLength -> "Censo detected that you entered a seed phrase of the wrong size.\n\nSeed phrases are typically 12 or 24 words long."
+        BIP39InvalidReason.InvalidChecksum -> "Censo detected that you entered a seed phrase that is invalid."
+        is BIP39InvalidReason.InvalidWords -> "Censo detected that you entered a seed phrase that contains invalid words."
+        is BIP39InvalidReason.TooLong -> "Censo detected that you entered a seed phrase that was ${this.wordCount - MAX_LENGTH} words long.\n\nSeed phrases are typically 12 or 24 words long."
+        is BIP39InvalidReason.TooShort -> "Censo detected that you entered a seed phrase that was ${MIN_LENGTH - this.wordCount} words short.\n\nSeed phrases are typically 12 or 24 words long."
+    }
+
 object BIP39 {
     enum class WordList {
         English
     }
+
+    const val MAX_LENGTH = 24
+    const val MIN_LENGTH = 12
+    const val COMMON_DENOMINATOR = 3
 
     // Returns a byte with the MSB bits set
     private fun getUpperMask(bits: Int): Byte {
@@ -33,19 +57,19 @@ object BIP39 {
     }
 
     fun validateSeedPhrase(words: List<String>): BIP39InvalidReason? {
-        if (words.size < 12) {
+        if (words.size < MIN_LENGTH) {
             return BIP39InvalidReason.TooShort(words.size)
         }
-        if (words.size > 24) {
+        if (words.size > MAX_LENGTH) {
             return BIP39InvalidReason.TooLong(words.size)
         }
-        if (words.size.mod(3) != 0) {
+        if (words.size.mod(COMMON_DENOMINATOR) != 0) {
             return BIP39InvalidReason.BadLength(words.size)
         }
 
         // 1-of-2048 is 11 bits
         val totalBits = words.size * 11
-        val checksumBits = words.size / 3
+        val checksumBits = words.size / COMMON_DENOMINATOR
         val entropyBits = totalBits - checksumBits
 
         // calculate the binary representation of the phrase

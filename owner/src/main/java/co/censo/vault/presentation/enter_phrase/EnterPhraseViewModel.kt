@@ -66,23 +66,10 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun submitFullPhrase() {
-
         projectLog(message = "Phrase submitted: ${state.enteredWords}")
 
-        val validPhrase = when (val invalidReason = BIP39.validateSeedPhrase(state.enteredWords)) {
-            null -> {
-                projectLog(message = "Seed valid")
-                true
-            }
-
-            else -> {
-                projectLog(message = "Seed invalid: $invalidReason")
-                false
-            }
-        }
-
         state = state.copy(
-            validPhrase = validPhrase,
+            phraseInvalidReason = BIP39.validateSeedPhrase(state.enteredWords),
             enterWordUIState = EnterPhraseUIState.REVIEW
         )
     }
@@ -180,7 +167,7 @@ class EnterPhraseViewModel @Inject constructor(
     fun entrySelected(entryType: EntryType) {
         state = when (entryType) {
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
-            EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
+            EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
         }
     }
 
@@ -194,6 +181,14 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
+            EnterPhraseUIState.PASTE_ENTRY -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                    editedWord = "",
+                    editedWordIndex = 0,
+                    enteredWords = emptyList(),
+                )
+            }
             EnterPhraseUIState.SELECTED,
             EnterPhraseUIState.EDIT -> {
                 if (state.editedWordIndex == 0 && state.enteredWords.isEmpty()) {
@@ -243,6 +238,25 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun resetPhraseEntryComplete() {
         state = state.copy(phraseEntryComplete = Resource.Uninitialized)
+    }
+
+    fun onPhrasePasted(pastedPhrase: String) {
+        val words =
+            try {
+                pastedPhrase.split(" ")
+            } catch (e: Exception) {
+                listOf("Unable to create phrase...")
+            }
+
+        val editedWordIndex = if (words.size > 1) words.size - 1 else 0
+
+        state = state.copy(
+            enteredWords = words,
+            editedWordIndex = editedWordIndex,
+            editedWord = words[editedWordIndex],
+        )
+
+        submitFullPhrase()
     }
 
 }
