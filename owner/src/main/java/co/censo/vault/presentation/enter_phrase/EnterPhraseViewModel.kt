@@ -243,7 +243,7 @@ class EnterPhraseViewModel @Inject constructor(
     fun onPhrasePasted(pastedPhrase: String) {
         val words =
             try {
-                pastedPhrase.split(" ")
+                pastedPhrase.trim().split(" ")
             } catch (e: Exception) {
                 listOf("Unable to create phrase...")
             }

@@ -19,4 +19,6 @@ object SharedColors {
     val DisabledGrey = Color(0xFFEDEDED)
     val DisabledFontGrey = Color(0xFFD3D3D3)
     val PlaceholderTextGrey = Color(0xFF999999)
+    val ButtonGrey = Color(0xFFF2F2F2)
+    val BackgroundGrey = Color(0xFFF2F2F2)
 }
