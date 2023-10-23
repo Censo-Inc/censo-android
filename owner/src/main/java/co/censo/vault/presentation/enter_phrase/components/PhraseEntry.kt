@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R
 import co.censo.vault.presentation.enter_phrase.components.PhraseWordUtil.START_FILTER_INDEX
-import co.censo.vault.util.BIP39
+import co.censo.shared.util.BIP39
 
 object PhraseWordUtil {
     const val START_FILTER_INDEX = 1
@@ -134,7 +134,7 @@ fun PhraseAutoCompleteWords(
     ) {
         if (showAutoComplete) {
             val potentialWords =
-                BIP39.wordlists[BIP39.WordList.English]!!.filter { it.startsWith(phrase.lowercase().trim()) }
+                BIP39.wordlists[BIP39.WordListLanguage.English]!!.filter { it.startsWith(phrase.lowercase().trim()) }
 
             Spacer(modifier = Modifier.height(12.dp))
 

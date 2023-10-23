@@ -59,6 +59,7 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
+import co.censo.shared.util.BIP39
 import co.censo.shared.util.projectLog
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
@@ -397,9 +398,10 @@ class OwnerRepositoryImpl(
         seedPhrase: String
     ): Resource<StoreSecretApiResponse> {
 
-        val seedPhraseHash = seedPhrase.sha256()
+        val encodedData = BIP39.phraseToBinaryData(seedPhrase)
+        val seedPhraseHash = encodedData.sha256()
         val encryptedSeedPhrase = ECIESManager.encryptMessage(
-            dataToEncrypt = seedPhrase.toByteArray(),
+            dataToEncrypt = encodedData,
             publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
         )
 
@@ -513,7 +515,9 @@ class OwnerRepositoryImpl(
             RecoveredSeedPhrase(
                 guid = it.guid,
                 label = it.label,
-                seedPhrase = String(masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)),
+                seedPhrase = BIP39.binaryDataToWords(
+                    masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)
+                ).joinToString(" "),
                 createdAt = it.createdAt
             )
         }

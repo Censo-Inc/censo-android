@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.shared.util.BIP39
 import co.censo.vault.R
 import co.censo.vault.util.TestTag
 import co.censo.vault.presentation.components.IndexedPhraseWord
@@ -83,7 +84,7 @@ fun BIP39DetailScreen(
             val phrase = state.bip39Phrase
             val phraseSize = state.phraseWordCount
 
-            val splitWords = state.bip39Phrase.split(" ")
+            val splitWords = BIP39.splitToWords(state.bip39Phrase)
             val wordsToShow = mutableListOf<IndexedPhraseWord>()
 
             if (splitWords.size >= index + PhraseUICompanion.DISPLAY_RANGE_SET) {

@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
-import co.censo.vault.util.BIP39
+import co.censo.shared.util.BIP39
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -243,7 +243,7 @@ class EnterPhraseViewModel @Inject constructor(
     fun onPhrasePasted(pastedPhrase: String) {
         val words =
             try {
-                pastedPhrase.trim().split(" ")
+                BIP39.splitToWords(pastedPhrase)
             } catch (e: Exception) {
                 listOf("Unable to create phrase...")
             }
