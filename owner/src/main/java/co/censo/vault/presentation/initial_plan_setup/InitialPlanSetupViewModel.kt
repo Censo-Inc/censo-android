@@ -1,7 +1,6 @@
 package co.censo.vault.presentation.initial_plan_setup
 
 import Base58EncodedGuardianPublicKey
-import Base58EncodedPrivateKey
 import InvitationId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,16 +8,20 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -27,56 +30,77 @@ import javax.inject.Inject
 class InitialPlanSetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(InitialPlanSetupScreenState())
         private set
 
-    fun onStart() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial
-        )
-        createApproverKeyAndPolicyParams()
+    fun moveToNextAction() {
+        when {
+            state.initialPlanData.approverEncryptionKey == null -> createApproverKey()
+            state.initialPlanData.createPolicyParams == null -> createPolicyParams()
+            else -> startFacetec()
+        }
     }
 
-    fun createApproverKeyAndPolicyParams() {
-        createApproverKey()
-        if (state.approverEncryptionKey != null) {
-            createPolicyParams()
+
+    private fun determineUIStatus() {
+        val uiStatus = when {
+            state.initialPlanData.approverEncryptionKey == null -> InitialPlanSetupStep.CreateApproverKey
+            state.initialPlanData.createPolicyParams == null -> InitialPlanSetupStep.CreatePolicyParams
+            else -> InitialPlanSetupStep.Facetec
         }
+
+        state = state.copy(initialPlanSetupStep = uiStatus)
+
+        moveToNextAction()
     }
 
     private fun createApproverKey() {
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(saveKeyToCloudResource = Resource.Loading())
-            state = try {
+            try {
                 val approverEncryptionKey = keyRepository.createGuardianKey()
-                keyRepository.saveKeyInCloud(
-                    key = Base58EncodedPrivateKey(
-                        Base58.base58Encode(
-                            approverEncryptionKey.privateKeyRaw()
-                        )
-                    ),
-                    participantId = state.participantId
-                )
-                state.copy(
-                    approverEncryptionKey = approverEncryptionKey,
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatingPolicyParams,
-                    saveKeyToCloudResource = Resource.Uninitialized,
-                )
+                savePrivateKeyToCloud(approverEncryptionKey)
             } catch (e: Exception) {
-                state.copy(
-                    initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed,
-                    saveKeyToCloudResource = Resource.Uninitialized
+                state = state.copy(
+                    saveKeyToCloudResource = Resource.Error(exception = e)
                 )
             }
         }
     }
 
-    fun createPolicyParams() {
+    private fun savePrivateKeyToCloud(approverEncryptionKey: EncryptionKey) {
+        state = state.copy(
+            initialPlanData = state.initialPlanData.copy(approverEncryptionKey = approverEncryptionKey),
+            triggerCloudStorageAction = Resource.Success(CloudStorageActions.UPLOAD)
+        )
+    }
+
+    fun onKeySaved(approverEncryptionKey: EncryptionKey) {
+        state = state.copy(
+            initialPlanData = state.initialPlanData.copy(
+                approverEncryptionKey = approverEncryptionKey
+            ),
+            saveKeyToCloudResource = Resource.Uninitialized,
+            triggerCloudStorageAction = Resource.Uninitialized
+        )
+        determineUIStatus()
+    }
+
+    fun onKeySaveFailed(exception: Exception?) {
+        state = state.copy(
+            triggerCloudStorageAction = Resource.Uninitialized,
+            saveKeyToCloudResource = Resource.Error(exception = exception),
+            initialPlanData = state.initialPlanData.copy(approverEncryptionKey = null),
+        )
+    }
+
+    private fun createPolicyParams() {
         if (state.createPolicyParams is Resource.Loading) {
             return
         }
@@ -88,66 +112,60 @@ class InitialPlanSetupViewModel @Inject constructor(
                     label = "Me",
                     participantId = state.participantId,
                     status = GuardianStatus.ImplicitlyOwner(
-                        Base58EncodedGuardianPublicKey(state.approverEncryptionKey!!.publicExternalRepresentation().value),
+                        Base58EncodedGuardianPublicKey(state.initialPlanData.approverEncryptionKey!!.publicExternalRepresentation().value),
                         Clock.System.now()
                     )
                 )
             )
-            state = state.copy(
-                createPolicyParams = createPolicyParams,
-                initialPlanSetupStatus = if (createPolicyParams is Resource.Success) InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial else InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatePolicyParamsFailed
-            )
+
+            if (createPolicyParams is Resource.Success) {
+                state = state.copy(
+                    initialPlanData = state.initialPlanData.copy(
+                        createPolicyParams = createPolicyParams.data
+                    ),
+                    createPolicyParams = createPolicyParams,
+                )
+                determineUIStatus()
+            } else {
+                state = state.copy(
+                    createPolicyParams = createPolicyParams,
+                )
+            }
         }
     }
 
-    fun startPolicySetup() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
-                apiCall = Resource.Uninitialized
-            )
-        )
-    }
-
-    fun resetComplete() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.None,
-            approverEncryptionKey = null,
-            complete = false,
-            createPolicyParams = Resource.Uninitialized
-        )
+    private fun startFacetec() {
+        state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
     }
 
     fun reset() {
-        state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial,
-            complete = false
-        )
+        state = InitialPlanSetupScreenState()
     }
-
 
     suspend fun onPolicyCreationFaceScanReady(
         verificationId: BiometryVerificationId,
         facetecData: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
         state = state.copy(
-            initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
-                apiCall = Resource.Loading()
-            )
+            initialPlanSetupStep = InitialPlanSetupStep.PolicyCreation
         )
 
         return viewModelScope.async {
             val createPolicyResponse = ownerRepository.createPolicy(
-                state.createPolicyParams.data!!,
+                state.initialPlanData.createPolicyParams!!,
                 verificationId,
                 facetecData
             )
 
             state = state.copy(
-                initialPlanSetupStatus = InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress(
-                    apiCall = createPolicyResponse
-                ),
+                createPolicyResponse = createPolicyResponse,
                 complete = createPolicyResponse is Resource.Success
             )
+
+
+            if (createPolicyResponse is Resource.Success) {
+                ownerStateFlow.tryEmit(createPolicyResponse.map { it.ownerState })
+            }
 
             createPolicyResponse.map { it.scanResultBlob }
         }.await()

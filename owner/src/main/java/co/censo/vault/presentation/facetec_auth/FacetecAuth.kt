@@ -97,7 +97,10 @@ fun FacetecAuth(
             }
 
             state.apiError -> {
-                Text(text = "Error Occurred")
+                Text(text = when (state.submitResultResponse) {
+                    is Resource.Error -> state.submitResultResponse.exception?.message
+                    else -> null
+                } ?: "Error Occurred")
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = {

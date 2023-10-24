@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.initial_plan_setup
 
+import Base58EncodedPrivateKey
 import LearnMore
 import StandardButton
 import SubTitleText
@@ -29,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,10 +48,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
+import io.github.novacrypto.base58.Base58
+import toEncryptionKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,18 +64,12 @@ fun InitialPlanSetupScreen(
     navController: NavController,
     viewModel: InitialPlanSetupViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val state = viewModel.state
-
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose {}
-    }
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
             navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
-            viewModel.resetComplete()
+            viewModel.reset()
         }
     }
 
@@ -95,77 +93,94 @@ fun InitialPlanSetupScreen(
             )
         },
 
-    ) { paddingValues ->
+        ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (val setupStatus = state.initialPlanSetupStatus) {
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.None,
-                    InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatingPolicyParams -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(28.dp),
-                        color = VaultColors.PrimaryColor,
-                        strokeWidth = 3.dp,
-                    )
-                }
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.ApproverKeyCreationFailed -> {
+            when {
+                state.apiError -> {
+                    val errorText =
+                        if (state.saveKeyToCloudResource is Resource.Error) {
+                            "Error occurred trying to save your approver key"
+                        } else if (state.createPolicyParams is Resource.Error) {
+                            "Error occurred trying to create policy params"
+                        } else if (state.createPolicyResponse is Resource.Error) {
+                            "Error occurred trying to create policy"
+                        } else {
+                            "Failed to complete facetec, try again."
+                        }
+
                     DisplayError(
-                        errorMessage = "Error occurred trying to save your approver key",
+                        errorMessage = errorText,
                         dismissAction = null,
                         retryAction = {
-                            viewModel.createApproverKeyAndPolicyParams()
+                            viewModel.moveToNextAction()
                         }
                     )
                 }
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreatePolicyParamsFailed -> {
-                    DisplayError(
-                        errorMessage = "Error occurred trying to create plan data",
-                        dismissAction = null,
-                        retryAction = {
-                            viewModel.createPolicyParams()
-                        }
-                    )
-                }
+                else -> {
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.Initial ->
-                    InitialPlanSetupStandardUI {
-                        viewModel.startPolicySetup()
-                    }
+                    when (state.initialPlanSetupStep) {
+                        InitialPlanSetupStep.CreateApproverKey,
+                        InitialPlanSetupStep.CreatePolicyParams,
+                        InitialPlanSetupStep.PolicyCreation ->
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(72.dp)
+                                        .align(Alignment.Center),
+                                    color = VaultColors.PrimaryColor,
+                                    strokeWidth = 8.dp,
+                                )
+                            }
+
+                        is InitialPlanSetupStep.Initial ->
+                            InitialPlanSetupStandardUI {
+                                viewModel.moveToNextAction()
+                            }
 
 
-                is InitialPlanSetupScreenState.InitialPlanSetupStatus.CreateInProgress ->
-                    when (val resourceStatus = setupStatus.apiCall) {
-                        is Resource.Uninitialized ->
+                        is InitialPlanSetupStep.Facetec ->
                             FacetecAuth(
                                 onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
                                     navController.navigate(SharedScreen.OwnerWelcomeScreen.route)
-                                    viewModel.resetComplete()
-                                }
-                            )
-
-                        is Resource.Loading ->
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                color = VaultColors.PrimaryColor,
-                                strokeWidth = 3.dp,
-                            )
-
-                        is Resource.Error ->
-                            DisplayError(
-                                errorMessage = resourceStatus.getErrorMessage(context),
-                                dismissAction = null,
-                                retryAction = {
                                     viewModel.reset()
                                 }
                             )
-
-                        else -> {}
                     }
+                }
+            }
+
+            if (state.triggerCloudStorageAction is Resource.Success) {
+                val privateKey =
+                    if (state.triggerCloudStorageAction.data!! == CloudStorageActions.UPLOAD && state.initialPlanData.approverEncryptionKey != null) {
+                        Base58EncodedPrivateKey(
+                            Base58.base58Encode(
+                                state.initialPlanData.approverEncryptionKey.privateKeyRaw()
+                            )
+                        )
+                    } else {
+                        null
+                    }
+
+                CloudStorageHandler(
+                    actionToPerform = state.triggerCloudStorageAction.data!!,
+                    participantId = state.participantId,
+                    privateKey = privateKey,
+                    onActionSuccess = { base58EncodedPrivateKey ->
+                        projectLog(message = "Cloud Storage action success")
+                        viewModel.onKeySaved(base58EncodedPrivateKey.toEncryptionKey())
+                    },
+                    onActionFailed = {
+                        projectLog(message = "Cloud Storage action failed")
+                        viewModel.onKeySaveFailed(exception = it)
+                    },
+                )
             }
         }
     }
@@ -246,13 +261,13 @@ fun InitialPlanSetupStandardUI(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         LearnMore {
-            
+
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
     }
 }

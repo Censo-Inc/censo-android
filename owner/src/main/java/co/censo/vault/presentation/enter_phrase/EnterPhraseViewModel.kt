@@ -6,11 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toSeed
 import co.censo.shared.data.Resource
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
+import co.censo.vault.util.BIP39
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -67,20 +66,10 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun submitFullPhrase() {
-
         projectLog(message = "Phrase submitted: ${state.enteredWords}")
 
-        val phraseValid = try {
-            Mnemonics.MnemonicCode(state.enteredWords.joinToString(" ")).toSeed(validate = true)
-            projectLog(message = "Seed valid")
-            true
-        } catch (e: Exception) {
-            projectLog(message = "Seed invalid: $e")
-            false
-        }
-
         state = state.copy(
-            validPhrase = phraseValid,
+            phraseInvalidReason = BIP39.validateSeedPhrase(state.enteredWords),
             enterWordUIState = EnterPhraseUIState.REVIEW
         )
     }
@@ -178,7 +167,7 @@ class EnterPhraseViewModel @Inject constructor(
     fun entrySelected(entryType: EntryType) {
         state = when (entryType) {
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
-            EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
+            EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
         }
     }
 
@@ -192,6 +181,14 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
+            EnterPhraseUIState.PASTE_ENTRY -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                    editedWord = "",
+                    editedWordIndex = 0,
+                    enteredWords = emptyList(),
+                )
+            }
             EnterPhraseUIState.SELECTED,
             EnterPhraseUIState.EDIT -> {
                 if (state.editedWordIndex == 0 && state.enteredWords.isEmpty()) {
@@ -241,6 +238,25 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun resetPhraseEntryComplete() {
         state = state.copy(phraseEntryComplete = Resource.Uninitialized)
+    }
+
+    fun onPhrasePasted(pastedPhrase: String) {
+        val words =
+            try {
+                pastedPhrase.split(" ")
+            } catch (e: Exception) {
+                listOf("Unable to create phrase...")
+            }
+
+        val editedWordIndex = if (words.size > 1) words.size - 1 else 0
+
+        state = state.copy(
+            enteredWords = words,
+            editedWordIndex = editedWordIndex,
+            editedWord = words[editedWordIndex],
+        )
+
+        submitFullPhrase()
     }
 
 }

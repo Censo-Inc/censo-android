@@ -1,5 +1,6 @@
 package co.censo.shared.presentation.entrance
 
+import ParticipantId
 import StandardButton
 import android.Manifest
 import android.annotation.SuppressLint
@@ -52,6 +53,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.R
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -113,7 +116,7 @@ fun EntranceScreen(
                     viewModel.handleSignInResult(task)
                 }
 
-                RESULT_CANCELED -> viewModel.googleAuthFailure(GoogleAuthError.UserCanceledOneTap)
+                RESULT_CANCELED -> viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
                 else -> viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
             }
         }
@@ -192,7 +195,7 @@ fun EntranceScreen(
                 } else if (state.triggerGoogleSignIn is Resource.Error) {
                     DisplayError(
                         errorMessage = state.triggerGoogleSignIn.getErrorMessage(context),
-                        dismissAction = viewModel::resetSignInUserResource,
+                        dismissAction = viewModel::resetTriggerGoogleSignIn,
                     ) { viewModel.retrySignIn() }
                 }
             }
@@ -201,6 +204,17 @@ fun EntranceScreen(
                 OwnerEntranceStandardUI(
                     authenticate = { viewModel.startGoogleSignInFlow() }
                 )
+
+                if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
+                    CloudStorageHandler(
+                        actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
+                        participantId = ParticipantId(""),
+                        privateKey = null,
+                        onActionSuccess = {},
+                        onActionFailed = {},
+                        onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
+                    )
+                }
             }
         }
     }
@@ -357,7 +371,7 @@ fun OwnerEntranceStandardUIPreview() {
 sealed class GoogleAuthError(val exception: Exception) {
     object InvalidToken : GoogleAuthError(Exception("Invalid Token"))
     object MissingCredentialId : GoogleAuthError(Exception("Missing Google Credential Id"))
-    object UserCanceledOneTap : GoogleAuthError(Exception("User Canceled Google Auth"))
+    object UserCanceledGoogleSignIn : GoogleAuthError(Exception("User Canceled Google Auth"))
     object IntentResultFailed : GoogleAuthError(Exception("Intent Result Failed"))
     data class ErrorParsingIntent(val e: Exception) : GoogleAuthError(e)
     data class FailedToSignUserOut(val e: Exception) : GoogleAuthError(e)

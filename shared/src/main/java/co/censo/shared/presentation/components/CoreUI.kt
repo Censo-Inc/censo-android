@@ -132,9 +132,22 @@ fun MessageText(
     @StringRes message: Int,
     textAlign: TextAlign = TextAlign.Center
 ) {
+    MessageText(
+        modifier = modifier,
+        message = stringResource(id = message),
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun MessageText(
+    modifier: Modifier = Modifier,
+    message: String,
+    textAlign: TextAlign = TextAlign.Center
+) {
     Text(
         modifier = modifier,
-        text = stringResource(id = message),
+        text = message,
         color = Color.Black,
         fontSize = 16.sp,
         textAlign = textAlign

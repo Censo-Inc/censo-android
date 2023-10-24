@@ -152,7 +152,7 @@ fun PlanSetupScreen(
                                 welcomeFlow = welcomeFlow,
                                 onInviteApproverSelected = { viewModel.onInviteApprover() },
                                 onSkipForNowSelected = {
-                                    Toast.makeText(context, "Skip for now", Toast.LENGTH_LONG).show()
+                                    viewModel.onFullyCompleted()
                                 }
                             )
 

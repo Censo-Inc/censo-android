@@ -34,6 +34,7 @@ import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.welcome.WelcomeScreen
 import co.censo.vault.presentation.Screen
+import co.censo.vault.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen

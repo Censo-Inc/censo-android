@@ -160,7 +160,6 @@ dependencies {
 
     //GoogleDrive
     implementation("com.google.android.gms:play-services-drive:17.0.0")
-    implementation("com.google.api-client:google-api-client-android:2.0.0")
     implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
         exclude("org.apache.httpcomponents")
         exclude(module = "guava-jdk5")
@@ -181,9 +180,6 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.44")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
-
-    // BIP39
-    implementation("cash.z.ecc.android:kotlin-bip39:1.0.2")
 
     // Base58
     implementation("org.bouncycastle:bcprov-jdk15to18:1.70")

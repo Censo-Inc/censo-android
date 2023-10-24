@@ -171,9 +171,6 @@ dependencies {
     //Biometrics
     implementation("androidx.biometric:biometric:1.1.0")
 
-    // BIP39
-    implementation("cash.z.ecc.android:kotlin-bip39:1.0.2")
-
     //Raygun crash reporting
     implementation("com.raygun:raygun4android:4.0.1")
 
@@ -183,6 +180,9 @@ dependencies {
 
     //Push Notifications
     implementation("com.google.firebase:firebase-messaging-ktx")
+
+    //GoogleAuth
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

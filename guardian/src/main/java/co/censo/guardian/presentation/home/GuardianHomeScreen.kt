@@ -1,5 +1,7 @@
 package co.censo.guardian.presentation.home
 
+import Base58EncodedPrivateKey
+import ParticipantId
 import StandardButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,9 +41,14 @@ import co.censo.guardian.presentation.components.GuardianTopBar
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.TotpCodeView
 import kotlinx.coroutines.delay
+import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.cloud_storage.CloudStorageViewModel
+import co.censo.shared.util.projectLog
+import io.github.novacrypto.base58.Base58
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +96,7 @@ fun GuardianHomeScreen(
                     DisplayError(
                         errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = null,
-                    ) { viewModel.retrieveApproverState()}
+                    ) { viewModel.retrieveApproverState() }
                 }
 
                 state.acceptGuardianResource is Resource.Error -> {
@@ -131,6 +138,13 @@ fun GuardianHomeScreen(
                         viewModel.resetRejectRecoveryResource()
                         viewModel.retrieveApproverState()
                     }
+                }
+
+                state.saveKeyToCloudResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.saveKeyToCloudResource.getErrorMessage(context),
+                        dismissAction = { viewModel.createAndSaveGuardianKey() }
+                    ) { viewModel.createAndSaveGuardianKey() }
                 }
 
                 else -> {
@@ -279,6 +293,37 @@ fun GuardianHomeScreen(
                     }
                 }
             )
+
+            if (state.triggerCloudStorageAction is Resource.Success) {
+
+                val privateKey =
+                    if (state.triggerCloudStorageAction.data!! == CloudStorageActions.UPLOAD && state.guardianEncryptionKey != null) {
+                        Base58EncodedPrivateKey(
+                            Base58.base58Encode(
+                                state.guardianEncryptionKey.privateKeyRaw()
+                            )
+                        )
+                    } else {
+                        null
+                    }
+
+                CloudStorageHandler(
+                    actionToPerform = state.triggerCloudStorageAction.data!!,
+                    participantId = ParticipantId(state.participantId),
+                    privateKey = privateKey,
+                    onActionSuccess = { base58EncodedPrivateKey ->
+                        projectLog(message = "Cloud Storage action success")
+                        viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.triggerCloudStorageAction.data!!)
+                    },
+                    onActionFailed = { exception ->
+                        projectLog(message = "Cloud Storage action failed")
+                        viewModel.handleCLoudStorageActionFailure(
+                            exception,
+                            state.triggerCloudStorageAction.data!!
+                        )
+                    },
+                )
+            }
         }
     }
 }

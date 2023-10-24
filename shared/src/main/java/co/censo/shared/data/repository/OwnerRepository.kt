@@ -59,6 +59,7 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
+import co.censo.shared.util.projectLog
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
@@ -147,6 +148,8 @@ interface OwnerRepository {
     ): Resource<StoreSecretApiResponse>
 
     suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
+    suspend fun deleteUser(): Resource<Unit>
+
     fun isUserEditingSecurityPlan(): Boolean
     fun setEditingSecurityPlan(editingPlan: Boolean)
     fun retrieveSecurityPlan(): SecurityPlanData?
@@ -417,6 +420,23 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.deleteSecret(guid) }
     }
 
+    override suspend fun deleteUser(): Resource<Unit> {
+        val response = retrieveApiResource { apiService.deleteUser() }
+
+        if (response is Resource.Success) {
+            try {
+                signUserOut() // clears the JWT from storage
+                keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
+                secureStorage.clearDeviceKeyId()
+                authUtil.signOut()
+            } catch (e: Exception) {
+                projectLog(message = "failed on delete clean up ${e.message}")
+            }
+        }
+
+        return response
+    }
+
     override fun isUserEditingSecurityPlan() = secureStorage.isEditingSecurityPlan()
     override fun setEditingSecurityPlan(editingPlan: Boolean) =
         secureStorage.setEditingSecurityPlan(editingPlan)
@@ -502,8 +522,12 @@ class OwnerRepositoryImpl(
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
             val encryptionKey = when (it.isOwnerShard) {
                 true -> {
-                    val ownerApproverKey = keyRepository.retrieveKeyFromCloud(it.participantId)
-                    EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKey.bigInt())
+                    val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(it.participantId)
+                    if (ownerApproverKeyResource is Resource.Error) {
+                        throw ownerApproverKeyResource.exception!!
+                    } else {
+                        EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKeyResource.data!!.bigInt())
+                    }
                 }
                 else -> ownerDeviceKey
             }

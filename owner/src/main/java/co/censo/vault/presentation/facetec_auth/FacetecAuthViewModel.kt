@@ -105,13 +105,17 @@ class FacetecAuthViewModel @Inject constructor(
     ) {
         if (sessionResult?.status != FaceTecSessionStatus.SESSION_COMPLETED_SUCCESSFULLY) {
             scanResultCallback?.cancel()
-            state = if (sessionResult?.status == FaceTecSessionStatus.USER_CANCELLED) {
+            state = if (listOf(
+                    FaceTecSessionStatus.USER_CANCELLED,
+                    FaceTecSessionStatus.USER_CANCELLED_VIA_HARDWARE_BUTTON,
+                    FaceTecSessionStatus.USER_CANCELLED_VIA_CLICKABLE_READY_SCREEN_SUBTEXT
+            ).contains(sessionResult?.status)) {
                 state.copy(
                     submitResultResponse = Resource.Uninitialized,
                     userCancelled = Resource.Success(Unit)
                 )
             } else {
-                state.copy(submitResultResponse = Resource.Error(exception = Exception("Facescan failed to complete. No result.")))
+                state.copy(submitResultResponse = Resource.Error(exception = Exception(sessionResult?.status?.description())))
             }
             return
         }
@@ -188,5 +192,28 @@ class FacetecAuthViewModel @Inject constructor(
         customization.resultScreenCustomization.resultAnimationForegroundColor = Color.White.toArgb()
 
         return customization
+    }
+
+    fun FaceTecSessionStatus?.description(): String {
+        return when (this) {
+            FaceTecSessionStatus.LANDSCAPE_MODE_NOT_ALLOWED -> "Your device must be in portrait mode."
+            FaceTecSessionStatus.CAMERA_INITIALIZATION_ISSUE -> "Your camera could not be started."
+            FaceTecSessionStatus.CAMERA_PERMISSION_DENIED -> "You must enable the camera to continue."
+            FaceTecSessionStatus.CONTEXT_SWITCH -> "Unable to complete, please do not leave the app during the face scan."
+            FaceTecSessionStatus.ENCRYPTION_KEY_INVALID -> "Unable to continue - encryption key invalid."
+            FaceTecSessionStatus.TIMEOUT -> "The face scan took too long, please try again."
+            FaceTecSessionStatus.LOCKED_OUT -> "Too many face scan failures, please wait before trying again."
+            FaceTecSessionStatus.MISSING_GUIDANCE_IMAGES -> "Unable to continue - missing guidance images."
+            FaceTecSessionStatus.NON_PRODUCTION_MODE_KEY_INVALID -> "Unable to continue - non-production mode key invalid."
+            FaceTecSessionStatus.NON_PRODUCTION_MODE_NETWORK_REQUIRED -> "Unable to continue - non-production mode network required."
+            FaceTecSessionStatus.REVERSE_PORTRAIT_NOT_ALLOWED -> "Your device must be in portrait mode."
+            FaceTecSessionStatus.SESSION_UNSUCCESSFUL,
+            FaceTecSessionStatus.UNKNOWN_INTERNAL_ERROR -> "Unable to complete the face scan for an unknown reason, please try again."
+            FaceTecSessionStatus.SESSION_COMPLETED_SUCCESSFULLY -> "The face scan was successful."
+            FaceTecSessionStatus.USER_CANCELLED,
+            FaceTecSessionStatus.USER_CANCELLED_VIA_HARDWARE_BUTTON,
+            FaceTecSessionStatus.USER_CANCELLED_VIA_CLICKABLE_READY_SCREEN_SUBTEXT -> "The face scan was cancelled."
+            null -> "Unexpected error"
+        }
     }
 }

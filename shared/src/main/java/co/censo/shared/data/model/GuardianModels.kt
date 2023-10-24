@@ -1,5 +1,6 @@
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.generatePartitionId
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.cryptography.toPaddedHexString
 import kotlinx.serialization.KSerializer
@@ -21,6 +22,11 @@ typealias GuardianId = String
 @JvmInline
 value class Base58EncodedPrivateKey(val value: String) {
     fun bigInt() = BigInteger(1, Base58.base58Decode(this.value))
+}
+
+fun Base58EncodedPrivateKey.toEncryptionKey() : EncryptionKey {
+    val privateKeyRaw = Base58.base58Decode(this.value)
+    return EncryptionKey.generateFromPrivateKeyRaw(BigInteger(privateKeyRaw))
 }
 
 interface Base58EncodedPublicKey {

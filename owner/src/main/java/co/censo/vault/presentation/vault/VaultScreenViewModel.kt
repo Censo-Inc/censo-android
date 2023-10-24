@@ -12,12 +12,14 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class VaultScreenViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository
+    private val ownerRepository: OwnerRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(VaultScreenState())
@@ -61,6 +63,25 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
+    fun deleteUser() {
+        state = state.copy(
+            deleteUserResource = Resource.Loading()
+        )
+
+        viewModelScope.launch {
+            val response = ownerRepository.deleteUser()
+
+            state = state.copy(
+                deleteUserResource = response
+            )
+
+            if (response is Resource.Success) {
+                onOwnerState(OwnerState.Initial)
+                ownerStateFlow.tryEmit(Resource.Success(OwnerState.Initial))
+            }
+        }
+    }
+
     private fun onOwnerState(ownerState: OwnerState) {
         when (ownerState) {
             is OwnerState.Ready -> {
@@ -89,6 +110,14 @@ class VaultScreenViewModel @Inject constructor(
 
     fun onRecoverPhrases() {
         state = state.copy(navigationResource = Resource.Success(Screen.RecoveryScreen.route))
+    }
+
+    fun onResetUser() {
+        state = state.copy(screen = VaultScreens.ResetUser)
+    }
+
+    fun onCancelResetUser() {
+        state = state.copy(screen = VaultScreens.Unlocked)
     }
 
     fun reset() {

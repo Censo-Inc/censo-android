@@ -41,9 +41,6 @@ interface SecurePreferences {
     fun saveGuardianParticipantId(id: String)
     fun retrieveGuardianParticipantId() : String
     fun clearGuardianParticipantId()
-    fun savePrivateKey(key: String)
-    fun retrievePrivateKey() : String
-    fun clearPrivateKey()
     fun setEditingSecurityPlan(editingSecurityPlan: Boolean)
     fun isEditingSecurityPlan() : Boolean
     fun setSecurityPlan(securityPlanData: SecurityPlanData)
@@ -168,28 +165,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         sharedPrefs.getString(GUARDIAN_PARTICIPANT_ID, "") ?: ""
 
     override fun clearGuardianParticipantId() = saveGuardianParticipantId("")
-    //endregion
-
-    //region Mock Google Drive Private Key
-    override fun savePrivateKey(key: String) {
-        if(BuildConfig.BUILD_TYPE != "debug") {
-            throw Exception("This is a temporary mocking of google drive only to be used on debug builds")
-        }
-
-        val editor = sharedPrefs.edit()
-        editor.putString(GOOGLE_DRIVE_MOCK_KEY, key)
-        editor.apply()
-    }
-
-    override fun retrievePrivateKey() : String {
-        if(BuildConfig.BUILD_TYPE != "debug") {
-            throw Exception("This is a temporary mocking of google drive only to be used on debug builds")
-        }
-
-        return sharedPrefs.getString(GOOGLE_DRIVE_MOCK_KEY, "") ?: ""
-    }
-
-    override fun clearPrivateKey() = savePrivateKey("")
     //endregion
 
     //region push dialog

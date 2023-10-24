@@ -6,29 +6,38 @@ import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.repository.CreatePolicyParams
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 
 data class InitialPlanSetupScreenState(
-    val initialPlanSetupStatus: InitialPlanSetupStatus = InitialPlanSetupStatus.None,
+    val initialPlanSetupStep: InitialPlanSetupStep = InitialPlanSetupStep.Initial,
     val participantId: ParticipantId = ParticipantId(generatePartitionId()),
-    val approverEncryptionKey: EncryptionKey? = null,
     val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
     val createPolicyParams: Resource<CreatePolicyParams> = Resource.Uninitialized,
-    val complete: Boolean = false
+    val createPolicyResponse: Resource<CreatePolicyApiResponse> = Resource.Uninitialized,
+    val initialPlanData: InitialPlanData = InitialPlanData(),
+    val complete: Boolean = false,
+    val triggerCloudStorageAction: Resource<CloudStorageActions> = Resource.Uninitialized,
 ) {
-
-    sealed class InitialPlanSetupStatus {
-        object None : InitialPlanSetupStatus()
-
-        object CreatingPolicyParams : InitialPlanSetupStatus()
-
-        object Initial : InitialPlanSetupStatus()
-
-        object ApproverKeyCreationFailed : InitialPlanSetupStatus()
-
-        object CreatePolicyParamsFailed : InitialPlanSetupStatus()
-
-        data class CreateInProgress(val apiCall: Resource<CreatePolicyApiResponse>) :
-            InitialPlanSetupStatus()
-
-    }
+    val apiError = createPolicyParams is Resource.Error
+        || createPolicyResponse is Resource.Error
+        || saveKeyToCloudResource is Resource.Error
 }
+
+sealed class InitialPlanSetupStep {
+
+    //Entering the screen we will move to following 3 states
+    object Initial : InitialPlanSetupStep()
+    object CreateApproverKey : InitialPlanSetupStep()
+    object CreatePolicyParams : InitialPlanSetupStep()
+
+    //After policy params are made then we will trigger facetec
+    object Facetec : InitialPlanSetupStep()
+
+    //Policy creation always kicked off by facetec completion
+    object PolicyCreation : InitialPlanSetupStep()
+}
+
+data class InitialPlanData(
+    val createPolicyParams: CreatePolicyParams? = null,
+    val approverEncryptionKey: EncryptionKey? = null,
+)

@@ -63,4 +63,9 @@
     <string name="you_have_been_invited_to_become_an_approver">You have been invited to become an approver!</string>
     <string name="accept_invitation">Accept Invitation</string>
     <string name="seed_phrase_owner_has_requested_access_approval">Seed phrase owner has requested access approval</string>
+    <string name="recovery_approval">Recovery Approval</string>
+    <string name="approver_key_upload_error">An error occurred while saving your Approver key. Please try again.</string>
+    <string name="approver_key_upload_prompt">We need you to create and store your Approver key. This will be used to complete recovery if the owner loses their phrase.</string>
+    <string name="retry_key_upload">Retry Key Upload</string>
+    <string name="create_approver_key">Create Approver Key</string>
 </resources>

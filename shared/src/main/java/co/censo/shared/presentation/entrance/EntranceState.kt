@@ -11,7 +11,8 @@ data class EntranceState(
     val ownerStateResource: Resource<OwnerState> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
     val ownerApp: Boolean = false,
-    val authId: String = ""
+    val authId: String = "",
+    val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
 ) {
     val isLoading = signInUserResource is Resource.Loading || ownerStateResource is Resource.Loading
 
@@ -20,3 +21,8 @@ data class EntranceState(
                 triggerGoogleSignIn is Resource.Error ||
                 ownerStateResource is Resource.Error
 }
+
+data class ForceUserToGrantCloudStorageAccess(
+    val requestAccess: Boolean = false,
+    val jwt: String? = ""
+)
