@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.plan_setup
 
 import Base58EncodedGuardianPublicKey
+import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import androidx.compose.runtime.getValue
@@ -24,6 +25,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -217,20 +219,18 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun createOwnerApprover(): Guardian.SetupGuardian.ImplicitlyOwner {
+    private suspend fun createOwnerApprover(): Guardian.SetupGuardian.ImplicitlyOwner {
         val participantId = ParticipantId.generate()
         val approverEncryptionKey = keyRepository.createGuardianKey()
 
-        // TODO saveKeyInCloud overrides previous key
-        // TODO uncomment when key are stored per participantIs
-        /*keyRepository.saveKeyInCloud(
-                    key = Base58EncodedPrivateKey(
-                        Base58.base58Encode(
-                            approverEncryptionKey.privateKeyRaw()
-                        )
-                    ),
-                    participantId = participantId
-                )*/
+        keyRepository.saveKeyInCloud(
+            key = Base58EncodedPrivateKey(
+                Base58.base58Encode(
+                    approverEncryptionKey.privateKeyRaw()
+                )
+            ),
+            participantId = participantId
+        )
 
         return Guardian.SetupGuardian.ImplicitlyOwner(
             label = "Me",
