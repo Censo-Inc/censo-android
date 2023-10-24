@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.components.recovery
 
+import Base58EncodedGuardianPublicKey
 import Base64EncodedData
 import ParticipantId
 import androidx.compose.foundation.background
@@ -190,7 +191,7 @@ fun RecoveryApprovalRowPreview() {
                 label = "Thomas Trusted",
                 participantId = participantId,
                 attributes = GuardianStatus.Onboarded(
-                    onboardedAt = Clock.System.now()
+                    onboardedAt = Clock.System.now(),
                 )
             ),
             approval = Approval(

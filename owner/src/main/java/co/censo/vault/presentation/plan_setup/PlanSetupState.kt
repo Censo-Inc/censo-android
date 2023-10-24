@@ -1,97 +1,90 @@
 package co.censo.vault.presentation.plan_setup
 
-import Base58EncodedIntermediatePublicKey
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
-import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.InitiateRecoveryApiResponse
+import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.ReplacePolicyApiResponse
+import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 
 data class PlanSetupState(
+    val ownerState: OwnerState.Ready? = null,
+
+    // restored approvers state
+    val ownerApprover: Guardian.ProspectGuardian? = null,
+    val primaryApprover: Guardian.ProspectGuardian? = null,
+    val backupApprover: Guardian.ProspectGuardian? = null,
+
     // Screen in Plan Setup Flow
     val planSetupUIState: PlanSetupUIState = PlanSetupUIState.InviteApprovers,
 
-    //Plan Data
-    val primaryApprover: ApproverActivation = ApproverActivation(),
-    val backupApprover: ApproverActivation = ApproverActivation(),
+    // inviting approver
+    val editedNickname: String = "",
+
+    // totp
+    val secondsLeft: Int = 0,
+    val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
+    val approverCodes: Map<ParticipantId, String> = emptyMap(),
+
 
     // API Calls
-    val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
+    val userResponse: Resource<OwnerState> = Resource.Uninitialized,
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
-
-    val createPolicyResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
+    val initiateRecoveryResponse: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
+    val retrieveRecoveryShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,
+    val replacePolicyResponse: Resource<ReplacePolicyApiResponse> = Resource.Uninitialized,
 
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized
 ) {
 
     val backArrowType = when (planSetupUIState) {
+        PlanSetupUIState.ApproverActivation -> BackIconType.Back
+
         PlanSetupUIState.InviteApprovers,
-        PlanSetupUIState.PrimaryApproverActivation,
-        PlanSetupUIState.BackupApproverActivation -> BackIconType.Back
-
-        PlanSetupUIState.PrimaryApproverNickname,
-        PlanSetupUIState.PrimaryApproverGettingLive,
+        PlanSetupUIState.ApproverNickname,
+        PlanSetupUIState.ApproverGettingLive,
         PlanSetupUIState.AddBackupApprover,
-        PlanSetupUIState.BackupApproverNickname,
-        PlanSetupUIState.BackupApproverGettingLive,
-        PlanSetupUIState.Completed -> BackIconType.Exit
+        PlanSetupUIState.RecoveryInProgress -> BackIconType.Exit
+
+        PlanSetupUIState.Completed -> BackIconType.None
     }
 
-    val loading =
-        userResponse is Resource.Loading || createPolicySetupResponse is Resource.Loading
+    val activatingApprover = backupApprover ?: primaryApprover
+    val approverType = if (backupApprover != null) ApproverType.Backup else ApproverType.Primary
 
-    val asyncError =
-        userResponse is Resource.Error || createPolicySetupResponse is Resource.Error
+    val loading = userResponse is Resource.Loading
+                || createPolicySetupResponse is Resource.Loading
+                || initiateRecoveryResponse is Resource.Loading
+                || retrieveRecoveryShardsResponse is Resource.Loading
+                || replacePolicyResponse is Resource.Loading
 
-    data class ApproverActivation(
-        val nickname: String = "",
-        val participantId: ParticipantId = ParticipantId(""),
-        val totpSecret: String = "",
-
-        val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
-        val secondsLeft: Int = 0,
-        val totpCode: String = "",
-
-        val prospectGuardian: Guardian.ProspectGuardian? = null
-    ) {
-        fun totpTick(): ApproverActivation {
-            val newCounter = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
-            val totpCode = if (counter != newCounter) {
-                TotpGenerator.generateCode(this.totpSecret, counter)
-            } else {
-                totpCode
-            }
-
-            val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second
-            val secondsLeft = (newCounter + TotpGenerator.CODE_EXPIRATION - currentSecond).toInt()
-
-            return this.copy(
-                counter = newCounter,
-                totpCode = totpCode,
-                secondsLeft = secondsLeft
-            )
-        }
-    }
+    val asyncError = userResponse is Resource.Error
+            || createPolicySetupResponse is Resource.Error
+            || initiateRecoveryResponse is Resource.Error
+            || retrieveRecoveryShardsResponse is Resource.Error
+            || replacePolicyResponse is Resource.Error
 
     enum class BackIconType {
-        Back, Exit
+        None, Back, Exit
     }
 }
 
 enum class PlanSetupUIState {
     InviteApprovers,
-    PrimaryApproverNickname,
-    PrimaryApproverGettingLive,
-    PrimaryApproverActivation,
+    ApproverNickname,
+    ApproverGettingLive,
+    ApproverActivation,
     AddBackupApprover,
-    BackupApproverNickname,
-    BackupApproverGettingLive,
-    BackupApproverActivation,
+    RecoveryInProgress,
     Completed
+}
+
+enum class ApproverType {
+    Primary, Backup
 }

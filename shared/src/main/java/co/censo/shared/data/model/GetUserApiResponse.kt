@@ -37,7 +37,6 @@ sealed class GuardianStatus {
     @Serializable
     @SerialName("Initial")
     data class Initial(
-        val invitationId: InvitationId,
         val deviceEncryptedTotpSecret: Base64EncodedData,
     ) : GuardianStatus()
 
@@ -116,6 +115,7 @@ sealed class Guardian {
     @Serializable
     @SerialName("Prospect")
     data class ProspectGuardian(
+        val invitationId: InvitationId?,
         override val label: String,
         override val participantId: ParticipantId,
         val status: GuardianStatus,
@@ -130,8 +130,9 @@ sealed class Guardian {
     ) : Guardian()
 }
 
-fun GuardianStatus.Initial.deeplink() =
-    "${SharedScreen.GUARDIAN_ONBOARDING_URI}${invitationId.value}"
+fun Guardian.ProspectGuardian.deeplink(): String {
+    return "${SharedScreen.GUARDIAN_ONBOARDING_URI}${this.invitationId?.value}"
+}
 
 @Serializable
 data class Policy(
@@ -202,7 +203,6 @@ data class Vault(
 data class GuardianSetup(
     val guardians: List<Guardian.ProspectGuardian>,
     val threshold: UInt? = null,
-    val unlockedForSeconds: ULong? = null,
 )
 
 @Serializable

@@ -80,7 +80,9 @@ fun EnterPhraseScreen(
     LaunchedEffect(key1 = state) {
         if (state.phraseEntryComplete is Resource.Success) {
             //TODO: Add add approvers flow if welcome flow is enabled
-            navController.navigate(Screen.PlanSetupRoute.route)
+            navController.navigate(Screen.PlanSetupRoute.buildNavRoute(
+                welcomeFlow = welcomeFlow
+            ))
             viewModel.resetPhraseEntryComplete()
         }
 

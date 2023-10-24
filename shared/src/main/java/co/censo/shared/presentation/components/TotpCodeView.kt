@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.data.cryptography.TotpGenerator.CODE_EXPIRATION
 import co.censo.shared.data.cryptography.TotpGenerator.CODE_LENGTH
 import co.censo.shared.presentation.SharedColors
 
@@ -37,8 +38,10 @@ fun TotpCodeView(
     secondsLeft: Int,
     primaryColor: Color
 ) {
+
+    val countdownSeconds = CODE_EXPIRATION - secondsLeft
     val formattedCode = if (code.length == CODE_LENGTH) {
-        "${code.slice(0 until CODE_LENGTH / 2)}  ${code.slice(CODE_LENGTH / 2 until CODE_LENGTH)}"
+        "${code.slice(0 until CODE_LENGTH / 2)} ${code.slice(CODE_LENGTH / 2 until CODE_LENGTH)}"
     } else {
         code
     }
@@ -55,14 +58,14 @@ fun TotpCodeView(
         )
         Spacer(modifier = Modifier.width(12.dp))
 
-        val color = when (secondsLeft) {
+        val color = when (countdownSeconds) {
             in 1..20 -> SharedColors.ErrorRed
             in 21..40 -> SharedColors.WarningYellow
             else -> SharedColors.SuccessGreen
         }
 
         CircularProgressBar(
-            number = secondsLeft,
+            number = countdownSeconds.toInt(),
             color = color
         )
     }
