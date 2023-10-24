@@ -231,7 +231,7 @@ class EntranceViewModel @Inject constructor(
                 val ownerState = ownerStateResource.data
 
                 val destination =
-                    if (ownerState is OwnerState.Ready && ownerState.vault.secrets.size >= 3) {
+                    if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
                         SharedScreen.OwnerVaultScreen.route
                     } else {
                         SharedScreen.OwnerWelcomeScreen.route
