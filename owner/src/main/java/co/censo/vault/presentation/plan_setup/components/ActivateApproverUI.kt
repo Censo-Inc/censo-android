@@ -240,7 +240,7 @@ fun ApproverInfoBox(
             }
         }
 
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = { /* TODO Requires VAULT-318 */ }) {
             Icon(
                 painterResource(id = co.censo.shared.R.drawable.edit_icon),
                 contentDescription = stringResource(R.string.edit_approver_name),

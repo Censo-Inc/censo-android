@@ -26,6 +26,7 @@ import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -223,14 +224,16 @@ class PlanSetupViewModel @Inject constructor(
         val participantId = ParticipantId.generate()
         val approverEncryptionKey = keyRepository.createGuardianKey()
 
-        keyRepository.saveKeyInCloud(
-            key = Base58EncodedPrivateKey(
-                Base58.base58Encode(
-                    approverEncryptionKey.privateKeyRaw()
-                )
-            ),
-            participantId = participantId
-        )
+        viewModelScope.async(Dispatchers.IO) {
+            keyRepository.saveKeyInCloud(
+                key = Base58EncodedPrivateKey(
+                    Base58.base58Encode(
+                        approverEncryptionKey.privateKeyRaw()
+                    )
+                ),
+                participantId = participantId
+            )
+        }.await()
 
         return Guardian.SetupGuardian.ImplicitlyOwner(
             label = "Me",
@@ -382,7 +385,7 @@ class PlanSetupViewModel @Inject constructor(
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
         state = state.copy(replacePolicyResponse = Resource.Loading())
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val response = ownerRepository.replacePolicy(
                 encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
                 encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
