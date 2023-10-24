@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
@@ -27,6 +28,7 @@ import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
