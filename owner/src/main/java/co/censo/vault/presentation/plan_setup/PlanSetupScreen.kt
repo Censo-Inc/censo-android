@@ -30,7 +30,6 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
@@ -180,8 +179,6 @@ fun PlanSetupScreen(
                         }
 
                         PlanSetupUIState.ApproverActivation -> {
-                            projectLog(message = "Seconds left: ${state.secondsLeft}")
-
                             ActivateApproverUI(
                                 isPrimaryApprover = state.approverType == ApproverType.Primary,
                                 prospectApprover = state.activatingApprover,
