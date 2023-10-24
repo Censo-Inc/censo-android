@@ -228,7 +228,7 @@ fun ActivateApproverActionItem(
         }
 
         is Guardian.ProspectGuardian -> {
-            when (val approverStatus = approver.status) {
+            when (approver.status) {
                 is GuardianStatus.Accepted -> {
                     TotpCodeView(approverCode, percentageLeft.toInt(), VaultColors.PrimaryColor)
                 }
@@ -263,7 +263,7 @@ fun ActivateApproverActionItem(
                             .background(shape = CircleShape, color = VaultColors.PrimaryColor)
                             .padding(all = 8.dp)
                             .clickable {
-                                shareDeeplink(approverStatus.deeplink(), context)
+                                shareDeeplink(approver.deeplink(), context)
                             },
                         imageVector = Icons.Filled.IosShare,
                         contentDescription = stringResource(R.string.share_approver_invite_link),
@@ -350,22 +350,24 @@ fun shareDeeplink(deeplink: String, context: Context) {
 //region Dummy Data
 val dummyListOfApprovers = listOf(
     Guardian.ProspectGuardian(
+        invitationId = InvitationId("12345"),
         "Anton",
         participantId = ParticipantId(generatePartitionId().toHexString()),
         status = GuardianStatus.Initial(
-            invitationId = InvitationId("12345"),
             deviceEncryptedTotpSecret = Base64EncodedData(""),
         )
     ),
     Guardian.ProspectGuardian(
+        invitationId = InvitationId("12345"),
         "Ata",
         participantId = ParticipantId(generatePartitionId().toHexString()),
         status = GuardianStatus.Accepted(
             acceptedAt = Clock.System.now(),
             deviceEncryptedTotpSecret = Base64EncodedData(""),
-            )
+        )
     ),
     Guardian.ProspectGuardian(
+        invitationId = InvitationId("12345"),
         "Ben",
         participantId = ParticipantId(generatePartitionId().toHexString()),
         status = GuardianStatus.VerificationSubmitted(
@@ -374,9 +376,10 @@ val dummyListOfApprovers = listOf(
             guardianPublicKey = Base58EncodedGuardianPublicKey(""),
             submittedAt = Clock.System.now(),
             deviceEncryptedTotpSecret = Base64EncodedData(""),
-            )
+        )
     ),
     Guardian.ProspectGuardian(
+        invitationId = InvitationId("12345"),
         "Brendan",
         participantId = ParticipantId(generatePartitionId().toHexString()),
         status = GuardianStatus.Confirmed(
@@ -387,6 +390,7 @@ val dummyListOfApprovers = listOf(
         )
     ),
     Guardian.ProspectGuardian(
+        invitationId = InvitationId("12345"),
         "Charlie",
         participantId = ParticipantId(generatePartitionId().toHexString()),
         status = GuardianStatus.Declined

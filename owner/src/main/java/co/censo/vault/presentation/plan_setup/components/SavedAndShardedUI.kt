@@ -1,47 +1,33 @@
 package co.censo.vault.presentation.plan_setup.components
 
-import LearnMore
-import MessageText
-import StandardButton
-import SubTitleText
 import TitleText
-import android.app.backup.BackupAgent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import co.censo.shared.util.projectLog
 import co.censo.vault.R
 
 @Composable
 fun SavedAndShardedUI(
-    seedPhraseNickname: String,
+    seedPhraseNickname: String?,
     primaryApproverNickname: String,
-    backupApproverNickname: String,
+    backupApproverNickname: String?,
 ) {
 
     val verticalSpacingHeight = 28.dp
@@ -66,7 +52,7 @@ fun SavedAndShardedUI(
             title = R.string.saved_sharded,
         )
 
-        if (seedPhraseNickname.isNotBlank()) {
+        if (seedPhraseNickname != null) {
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
             TitleText(
@@ -108,7 +94,7 @@ fun SavedAndShardedUI(
             fontWeight = FontWeight.W400
         )
 
-        if (backupApproverNickname.isNotBlank()) {
+        if (backupApproverNickname != null) {
             Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
             TitleText(

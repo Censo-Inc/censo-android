@@ -47,7 +47,7 @@ import kotlinx.coroutines.delay
 fun PlanSetupScreen(
     navController: NavController,
     welcomeFlow: Boolean,
-    seedPhraseNickname: String,
+    seedPhraseNickname: String?,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -150,7 +150,7 @@ fun PlanSetupScreen(
                         PlanSetupUIState.InviteApprovers ->
                             AddTrustedApproversUI(
                                 welcomeFlow = welcomeFlow,
-                                onInviteApproverSelected = { viewModel.onInvitePrimaryApprover() },
+                                onInviteApproverSelected = { viewModel.onInviteApprover() },
                                 onSkipForNowSelected = {
                                     Toast.makeText(context, "Skip for now", Toast.LENGTH_LONG).show()
                                 }
@@ -192,12 +192,12 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.AddBackupApprover -> {
                             AddBackupApproverUI(
-                                onInviteBackupSelected = viewModel::onInviteBackupApprover,
+                                onInviteBackupSelected = viewModel::onInviteApprover,
                                 onSaveAndFinishSelected = viewModel::saveAndFinish
                             )
                         }
 
-                        PlanSetupUIState.ReShardingSecrets -> {
+                        PlanSetupUIState.RecoveryInProgress -> {
                             FacetecAuth(
                                 onFaceScanReady = { verificationId, biometry ->
                                     viewModel.onFaceScanReady(verificationId, biometry)
@@ -206,12 +206,11 @@ fun PlanSetupScreen(
                             )
                         }
 
-                        //Fixme: Can we get this from the setup policy plan at this point...
                         PlanSetupUIState.Completed -> {
                             SavedAndShardedUI(
                                 seedPhraseNickname = seedPhraseNickname,
-                                primaryApproverNickname = "PRIMARY",
-                                backupApproverNickname = "BACKUP"
+                                primaryApproverNickname = state.primaryApprover?.label ?: "Primary approver",
+                                backupApproverNickname = state.backupApprover?.label,
                             )
 
                             LaunchedEffect(Unit) {

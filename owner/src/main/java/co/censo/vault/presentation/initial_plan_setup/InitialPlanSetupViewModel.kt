@@ -2,6 +2,7 @@ package co.censo.vault.presentation.initial_plan_setup
 
 import Base58EncodedGuardianPublicKey
 import Base58EncodedPrivateKey
+import InvitationId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -83,6 +84,7 @@ class InitialPlanSetupViewModel @Inject constructor(
             state = state.copy(createPolicyParams = Resource.Loading())
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
                 Guardian.ProspectGuardian(
+                    invitationId = InvitationId(""),
                     label = "Me",
                     participantId = state.participantId,
                     status = GuardianStatus.ImplicitlyOwner(

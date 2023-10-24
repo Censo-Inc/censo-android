@@ -2,6 +2,7 @@ package co.censo.vault.presentation.plan_setup.components
 
 import Base58EncodedGuardianPublicKey
 import Base64EncodedData
+import InvitationId
 import LearnMore
 import MessageText
 import StandardButton
@@ -50,7 +51,6 @@ import co.censo.shared.presentation.components.TotpCodeView
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 
 @Composable
 fun ActivateApproverUI(
@@ -64,7 +64,7 @@ fun ActivateApproverUI(
 
     val nickName: String = prospectApprover?.label ?: ""
     val guardianStatus = prospectApprover?.status
-    val deeplink = prospectApprover?.status?.deeplink() ?: ""
+    val deeplink = prospectApprover?.deeplink() ?: ""
     val buttonEnabled = prospectApprover?.status is GuardianStatus.Confirmed
 
     val context = LocalContext.current
@@ -113,10 +113,8 @@ fun ActivateApproverUI(
             heading = stringResource(id = R.string.download_the_app_title),
             content = stringResource(id = R.string.dowloand_the_app_message),
             actionButtonUIData = ActionButtonUIData(
-                onClick = {
-                    shareLink(storesLink)
-                },
-                text = stringResource(R.string.share_app_link)
+                onClick = { shareLink(storesLink) },
+                text = stringResource(R.string.share_app_link),
             ),
         )
 
@@ -134,16 +132,20 @@ fun ActivateApproverUI(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ApproverStep(
-            imagePainter = painterResource(id = co.censo.shared.R.drawable.small_face_scan),
-            heading = stringResource(id = R.string.share_the_code_title),
-            content = stringResource(id = R.string.share_the_code_message),
-            verificationCodeUIData =
-            VerificationCodeUIData(
-                code = verificationCode,
-                timeLeft = secondsLeft
-            ),
-        )
+        shareTheCodeStepUIData(
+            isPrimaryApprover,
+            prospectApprover?.status,
+            secondsLeft,
+            verificationCode,
+            context
+        )?.let {
+            ApproverStep(
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.small_face_scan),
+                heading = it.heading,
+                content = it.content,
+                verificationCodeUIData = it.verificationCodeUIData
+            )
+        }
 
         Divider(
             modifier = Modifier
@@ -229,13 +231,13 @@ fun ApproverInfoBox(
                 fontSize = 24.sp
             )
 
-            val activatedUIData : ApproverActivatedUIData = activatedUIData(status, context)
-
-            Text(
-                text = activatedUIData.text,
-                color = activatedUIData.color,
-                fontSize = labelTextSize
-            )
+            activatedUIData(status, context)?.let {
+                Text(
+                    text = it.text,
+                    color = it.color,
+                    fontSize = labelTextSize
+                )
+            }
         }
 
         IconButton(onClick = { /*TODO*/ }) {
@@ -261,17 +263,69 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
             )
         }
 
-        else -> {
+        is GuardianStatus.VerificationSubmitted -> {
+            ApproverActivatedUIData(
+                text = context.getString(R.string.verifying),
+                color = SharedColors.ErrorRed
+            )
+        }
+
+        is GuardianStatus.Confirmed -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.activated),
                 color = SharedColors.SuccessGreen
             )
         }
+
+        else -> null
     }
 
 data class ApproverActivatedUIData(
     val text: String,
     val color: Color
+)
+
+fun shareTheCodeStepUIData(
+    isPrimaryApprover: Boolean,
+    status: GuardianStatus?,
+    secondsLeft: Int,
+    verificationCode: String,
+    context: Context
+) = when (status) {
+        is GuardianStatus.Initial,
+        GuardianStatus.Declined -> {
+            ShareTheCodeUIData(
+                heading = context.getString(R.string.share_the_code_title),
+                content = context.getString(R.string.once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed),
+            )
+        }
+
+        is GuardianStatus.Accepted,
+        is GuardianStatus.VerificationSubmitted -> {
+            ShareTheCodeUIData(
+                heading = context.getString(R.string.share_the_code_title),
+                content = context.getString(R.string.share_the_code_message, if (isPrimaryApprover) context.getString(R.string.primary) else context.getString(R.string.backup)),
+                verificationCodeUIData = VerificationCodeUIData(
+                    code = verificationCode,
+                    timeLeft = secondsLeft
+                ),
+            )
+        }
+
+        is GuardianStatus.Confirmed -> {
+            ShareTheCodeUIData(
+                heading = context.getString(R.string.share_the_code_title),
+                content = context.getString(R.string.the_verification_code_has_been_successfully_confirmed),
+            )
+        }
+
+        else -> null
+    }
+
+data class ShareTheCodeUIData(
+    val heading: String,
+    val content: String,
+    val verificationCodeUIData: VerificationCodeUIData? = null
 )
 
 @Composable
@@ -342,17 +396,122 @@ data class VerificationCodeUIData(
     val timeLeft: Int
 )
 
-
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun ActivatePreview() {
+fun ActivatePrimaryApproverInitialPreview() {
     ActivateApproverUI(
         isPrimaryApprover = true,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
         prospectApprover = Guardian.ProspectGuardian(
+            invitationId = InvitationId(""),
             label = "Neo",
+            participantId = ParticipantId.generate(),
+            status = GuardianStatus.Initial(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+            )
+        ),
+        onContinue = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivatePrimaryApproverAcceptedPreview() {
+    ActivateApproverUI(
+        isPrimaryApprover = true,
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Guardian.ProspectGuardian(
+            invitationId = InvitationId(""),
+            label = "Neo",
+            participantId = ParticipantId.generate(),
+            status = GuardianStatus.Accepted(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+                acceptedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivatePrimaryApproverConfirmedPreview() {
+    ActivateApproverUI(
+        isPrimaryApprover = true,
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Guardian.ProspectGuardian(
+            invitationId = InvitationId(""),
+            label = "Neo",
+            participantId = ParticipantId.generate(),
+            status = GuardianStatus.Confirmed(
+                guardianPublicKey = Base58EncodedGuardianPublicKey(""),
+                guardianKeySignature = Base64EncodedData(""),
+                timeMillis = 0,
+                confirmedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivateBackupApproverInitialPreview() {
+    ActivateApproverUI(
+        isPrimaryApprover = false,
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Guardian.ProspectGuardian(
+            invitationId = InvitationId(""),
+            label = "John Wick",
+            participantId = ParticipantId.generate(),
+            status = GuardianStatus.Initial(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+            )
+        ),
+        onContinue = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivateBackupApproverAcceptedPreview() {
+    ActivateApproverUI(
+        isPrimaryApprover = false,
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Guardian.ProspectGuardian(
+            invitationId = InvitationId(""),
+            label = "John Wick",
+            participantId = ParticipantId.generate(),
+            status = GuardianStatus.Accepted(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+                acceptedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivateBackupApproverConfirmedPreview() {
+    ActivateApproverUI(
+        isPrimaryApprover = false,
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Guardian.ProspectGuardian(
+            invitationId = InvitationId(""),
+            label = "John Wick",
             participantId = ParticipantId.generate(),
             status = GuardianStatus.Confirmed(
                 guardianPublicKey = Base58EncodedGuardianPublicKey(""),

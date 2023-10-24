@@ -5,7 +5,6 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse
@@ -15,15 +14,23 @@ import kotlinx.datetime.Clock
 
 data class PlanSetupState(
     val ownerState: OwnerState.Ready? = null,
+
+    // restored approvers state
+    val ownerApprover: Guardian.ProspectGuardian? = null,
+    val primaryApprover: Guardian.ProspectGuardian? = null,
+    val backupApprover: Guardian.ProspectGuardian? = null,
+
     // Screen in Plan Setup Flow
     val planSetupUIState: PlanSetupUIState = PlanSetupUIState.InviteApprovers,
-    val setupApprovers: List<Guardian.ProspectGuardian> = emptyList(),
 
+    // inviting approver
+    val editedNickname: String = "",
+
+    // totp
     val secondsLeft: Int = 0,
     val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
     val approverCodes: Map<ParticipantId, String> = emptyMap(),
 
-    val editedNickname: String = "",
 
     // API Calls
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
@@ -43,24 +50,13 @@ data class PlanSetupState(
         PlanSetupUIState.ApproverNickname,
         PlanSetupUIState.ApproverGettingLive,
         PlanSetupUIState.AddBackupApprover,
-        PlanSetupUIState.ReShardingSecrets,
+        PlanSetupUIState.RecoveryInProgress,
         PlanSetupUIState.Completed -> BackIconType.Exit
 
     }
 
-    val activatingApprover = setupApprovers.firstOrNull {
-        it.status !is GuardianStatus.ImplicitlyOwner
-                && it.status !is GuardianStatus.Confirmed
-                && it.status !is GuardianStatus.Onboarded
-    }
-
-    //Fixme: this is not nice code!
-    val approverType = if (setupApprovers.size <= 2) {
-        ApproverType.Primary
-    } else {
-        ApproverType.Backup
-    }
-
+    val activatingApprover = backupApprover ?: primaryApprover
+    val approverType = if (backupApprover != null) ApproverType.Backup else ApproverType.Primary
 
     val loading = userResponse is Resource.Loading
                 || createPolicySetupResponse is Resource.Loading
@@ -85,7 +81,7 @@ enum class PlanSetupUIState {
     ApproverGettingLive,
     ApproverActivation,
     AddBackupApprover,
-    ReShardingSecrets,
+    RecoveryInProgress,
     Completed
 }
 

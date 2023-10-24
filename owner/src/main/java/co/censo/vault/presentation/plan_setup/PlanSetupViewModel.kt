@@ -28,7 +28,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,27 +43,10 @@ class PlanSetupViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveOwnerState()
-        // FIXME listen to the owner state updates instead of api call
+        retrieveOwnerState(overwriteUIState = true)
 
         verificationCodeTimer.startCountDownTimer(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
-
-            val now = Clock.System.now()
-            val updatedCounter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
-            val secondsLeft =
-                now.epochSeconds - (updatedCounter.times(TotpGenerator.CODE_EXPIRATION))
-
-            state = if (state.counter != updatedCounter) {
-                state.copy(
-                    secondsLeft = secondsLeft.toInt(),
-                    counter = updatedCounter,
-                    approverCodes = generateTimeCodes(state.setupApprovers)
-                )
-            } else {
-                state.copy(
-                    secondsLeft = secondsLeft.toInt(),
-                )
-            }
+            nextTotpTimerTick()
         }
 
         pollingVerificationTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
@@ -74,75 +56,102 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
+    private fun nextTotpTimerTick() {
+        val now = Clock.System.now()
+        val updatedCounter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
+        val secondsLeft = now.epochSeconds - (updatedCounter.times(TotpGenerator.CODE_EXPIRATION))
+
+        state = if (state.counter != updatedCounter) {
+            state.copy(
+                secondsLeft = secondsLeft.toInt(),
+                counter = updatedCounter,
+                approverCodes = generateTimeCodes(listOfNotNull(state.primaryApprover, state.backupApprover))
+            )
+        } else {
+            state.copy(
+                secondsLeft = secondsLeft.toInt(),
+            )
+        }
+    }
+
     fun onBackActionClick() {
         // FIXME
     }
 
-    private fun retrieveOwnerState(silent: Boolean = false) {
+    private fun retrieveOwnerState(silent: Boolean = false, overwriteUIState: Boolean = false) {
         if (!silent) {
             state = state.copy(userResponse = Resource.Loading())
         }
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            if (ownerStateResource is Resource.Success) {
-                ownerStateFlow.tryEmit(ownerStateResource)
-            }
+            updateOwnerState(ownerStateResource.data!!, overwriteUIState)
 
             state = state.copy(userResponse = ownerStateResource)
-
-            updateOwnerState(ownerStateResource.data!!)
         }
     }
 
-    private fun updateOwnerState(updatedOwnerState: OwnerState) {
-        if (updatedOwnerState !is OwnerState.Ready) {
-            state = state.copy(planSetupUIState = PlanSetupUIState.InviteApprovers)
-            return
+    private fun updateOwnerState(ownerState: OwnerState, overwriteUIState: Boolean = false) {
+        if (ownerState !is OwnerState.Ready) return
+
+        // update global state
+        ownerStateFlow.tryEmit(Resource.Success(ownerState))
+
+        // figure out owner/primary/backup approvers
+        val approverSetup = ownerState.guardianSetup?.guardians ?: emptyList()
+        val externalApprovers = approverSetup.externalApprovers()
+        val ownerApprover: Guardian.ProspectGuardian? = approverSetup.ownerApprover()
+        val primaryApprover: Guardian.ProspectGuardian? = when {
+            externalApprovers.isEmpty() -> null
+            externalApprovers.size == 1 -> externalApprovers.first()
+            else -> externalApprovers.confirmed().minBy { (it.status as GuardianStatus.Confirmed).confirmedAt }
         }
-
-        val guardians = updatedOwnerState.guardianSetup?.guardians ?: emptyList()
-
-        val codes = if (state.approverCodes.isEmpty()) {
-            generateTimeCodes(guardians)
-        } else {
-            null
-        }
-
-        if (guardians.any {
-                it.status !is GuardianStatus.ImplicitlyOwner
-                        && it.status !is GuardianStatus.Confirmed
-                        && it.status !is GuardianStatus.Onboarded
-            }) {
-            state = state.copy(
-                planSetupUIState = PlanSetupUIState.ApproverActivation
-            )
-        } else {
-            when {
-                guardians.filterOwner().size == 2
-                        && state.planSetupUIState != PlanSetupUIState.ReShardingSecrets
-                        && state.planSetupUIState != PlanSetupUIState.Completed -> {
-                    initiateRecovery()
+        val backupApprover: Guardian.ProspectGuardian? = when {
+            externalApprovers.isEmpty() -> null
+            externalApprovers.size == 1 -> null
+            else -> {
+                val notConfirmed = externalApprovers.notConfirmed()
+                when {
+                    notConfirmed.isEmpty() -> externalApprovers.confirmed().maxByOrNull { (it.status as GuardianStatus.Confirmed).confirmedAt }!!
+                    else -> notConfirmed.first()
                 }
 
-                guardians.filterOwner().size == 1
-                        && state.planSetupUIState != PlanSetupUIState.AddBackupApprover
-                        && state.planSetupUIState != PlanSetupUIState.ApproverNickname
-                        && state.planSetupUIState != PlanSetupUIState.ApproverGettingLive -> {
-                    state = state.copy(
-                        planSetupUIState = PlanSetupUIState.AddBackupApprover
-                    )
-                }
             }
         }
 
         state = state.copy(
-            approverCodes = codes ?: state.approverCodes,
-            setupApprovers = guardians,
-            ownerState = updatedOwnerState,
+            // approver names are needed on the last screen. Prevent resetting to 'null' after policy is replaced
+            ownerApprover = ownerApprover ?: state.ownerApprover,
+            primaryApprover = primaryApprover ?: state.primaryApprover,
+            backupApprover = backupApprover ?: state.backupApprover,
         )
 
-        guardians.filter {
+        // generate codes
+        val codes = state.approverCodes.takeIf { totpCodes -> totpCodes.keys.containsAll(
+            approverSetup.notConfirmed().map { it.participantId })
+        } ?: generateTimeCodes(approverSetup)
+
+        state = state.copy(
+            approverCodes = codes,
+            ownerState = ownerState,
+        )
+
+        // restore UI state on view restart (`overwriteUIState` flag)
+        // normally navigation is controlled by pressing "continue" button
+        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.InviteApprovers) {
+            if (externalApprovers.notConfirmed().isNotEmpty()) {
+                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
+            } else if (backupApprover?.status is GuardianStatus.Confirmed) {
+                initiateRecovery()
+            } else if (primaryApprover?.status is GuardianStatus.Confirmed) {
+                state = state.copy(planSetupUIState = PlanSetupUIState.AddBackupApprover)
+            } else {
+                state = state.copy(planSetupUIState = PlanSetupUIState.InviteApprovers)
+            }
+        }
+
+        // verify approvers
+        approverSetup.filter {
             it.status is GuardianStatus.VerificationSubmitted
         }.forEach {
             verifyGuardian(
@@ -152,32 +161,30 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun onInvitePrimaryApprover() {
+    fun onInviteApprover() {
         state = state.copy(
+            editedNickname = "",
             planSetupUIState = PlanSetupUIState.ApproverNickname
         )
     }
 
     fun approverNicknameChanged(nickname: String) {
-        state = state.copy(
-            editedNickname = nickname
-        )
+        state = state.copy(editedNickname = nickname)
     }
 
     fun onSaveApprover() {
-        val ownerState: OwnerState.Ready = state.ownerState ?: return
-
-        state = state.copy(
-            createPolicySetupResponse = Resource.Loading()
-        )
+        state = state.copy(createPolicySetupResponse = Resource.Loading())
 
         viewModelScope.launch {
-            val policySetupGuardians = ownerState.guardianSetup?.guardians ?: emptyList()
-            
+            // policy setup API expects all approvers to be sent with every request
             val updatedPolicySetupGuardians = listOfNotNull(
-                resolveOrCreateOwnerApprover(policySetupGuardians),
-                resolveOrCreatePrimaryApprover(policySetupGuardians),
-                skipOrCreateBackupApprover(policySetupGuardians)
+                state.ownerApprover?.asImplicitlyOwner() ?: createOwnerApprover(),
+                state.primaryApprover?.asExternalApprover() ?: createExternalApprover(state.editedNickname),
+                if (state.primaryApprover?.status is GuardianStatus.Confirmed) {
+                    state.backupApprover?.asExternalApprover() ?: createExternalApprover(state.editedNickname)
+                } else {
+                    null
+                }
             )
             
             val response = ownerRepository.createPolicySetup(
@@ -188,7 +195,7 @@ class PlanSetupViewModel @Inject constructor(
             if (response is Resource.Success) {
                 state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
 
-                ownerStateFlow.tryEmit(response.map { it.ownerState })
+                updateOwnerState(response.data!!.ownerState)
             }
 
             state = state.copy(
@@ -197,16 +204,13 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    private suspend fun resolveOrCreateOwnerApprover(setupGuardians: List<Guardian.ProspectGuardian>): Guardian.SetupGuardian.ImplicitlyOwner {
-        return when (val existingOwner = setupGuardians.find { it.status is GuardianStatus.ImplicitlyOwner }) {
+    private fun createOwnerApprover(): Guardian.SetupGuardian.ImplicitlyOwner {
+        val participantId = ParticipantId.generate()
+        val approverEncryptionKey = keyRepository.createGuardianKey()
 
-            null -> {
-                val participantId = ParticipantId.generate()
-                val approverEncryptionKey = keyRepository.createGuardianKey()
-
-                // TODO saveKeyInCloud overrides previous key
-                // TODO uncomment when key are stored per participantIs
-                /*keyRepository.saveKeyInCloud(
+        // TODO saveKeyInCloud overrides previous key
+        // TODO uncomment when key are stored per participantIs
+        /*keyRepository.saveKeyInCloud(
                     key = Base58EncodedPrivateKey(
                         Base58.base58Encode(
                             approverEncryptionKey.privateKeyRaw()
@@ -215,58 +219,17 @@ class PlanSetupViewModel @Inject constructor(
                     participantId = participantId
                 )*/
 
-                Guardian.SetupGuardian.ImplicitlyOwner(
-                    label = "Me",
-                    participantId = participantId,
-                    guardianPublicKey = Base58EncodedGuardianPublicKey(approverEncryptionKey.publicExternalRepresentation().value),
-                )
-            }
-
-            else -> {
-                Guardian.SetupGuardian.ImplicitlyOwner(
-                    label = existingOwner.label,
-                    participantId = existingOwner.participantId,
-                    guardianPublicKey = (existingOwner.status as GuardianStatus.ImplicitlyOwner).guardianPublicKey
-                )
-            }
-        }
-    }
-
-    private fun resolveOrCreatePrimaryApprover(setupGuardians: List<Guardian.ProspectGuardian>): Guardian.SetupGuardian.ExternalApprover {
-        val externalApprovers = setupGuardians.filterOwner()
-
-        return if (externalApprovers.isEmpty()) {
-            createExternalApprover(state.editedNickname)
-        } else {
-            externalApprovers.filterNotCompleted().first().toExternalApprover()
-        }
-    }
-
-    private fun Guardian.ProspectGuardian.toExternalApprover(): Guardian.SetupGuardian.ExternalApprover {
-        return Guardian.SetupGuardian.ExternalApprover(
-            label = this.label,
-            participantId = this.participantId,
-            deviceEncryptedTotpSecret = this.status.resolveDeviceEncryptedTotpSecret()
-                ?: Base64EncodedData("") // FIXME deviceEncryptedTotpSecret is not always available
+        return Guardian.SetupGuardian.ImplicitlyOwner(
+            label = "Me",
+            participantId = participantId,
+            guardianPublicKey = Base58EncodedGuardianPublicKey(approverEncryptionKey.publicExternalRepresentation().value),
         )
-    }
-
-    private fun skipOrCreateBackupApprover(setupGuardians: List<Guardian.ProspectGuardian>): Guardian.SetupGuardian.ExternalApprover? {
-        val externalApprovers = setupGuardians.filterOwner()
-
-        // primary is already confirmed
-        return if (externalApprovers.size == 1 && externalApprovers.any { it.status is GuardianStatus.Confirmed }) {
-            createExternalApprover(state.editedNickname)
-        } else {
-            null  // to early for backup approver
-        }
     }
 
     private fun createExternalApprover(nickname: String): Guardian.SetupGuardian.ExternalApprover {
         val participantId = ParticipantId.generate()
         val totpSecret = TotpGenerator.generateSecret()
-        val encryptedTotpSecret =
-            keyRepository.encryptWithDeviceKey(totpSecret.toByteArray()).base64Encoded()
+        val encryptedTotpSecret = keyRepository.encryptWithDeviceKey(totpSecret.toByteArray()).base64Encoded()
 
         return Guardian.SetupGuardian.ExternalApprover(
             label = nickname,
@@ -275,34 +238,25 @@ class PlanSetupViewModel @Inject constructor(
         )
     }
 
-    private fun generateTimeCodes(guardians: List<Guardian>): Map<ParticipantId, String> {
+    private fun generateTimeCodes(approvers: List<Guardian>): Map<ParticipantId, String> {
         val timeMillis = Clock.System.now().toEpochMilliseconds()
 
-        return guardians
-            .filter {
-                it is Guardian.ProspectGuardian && (it.status.resolveDeviceEncryptedTotpSecret() != null)
-            }.mapNotNull {
+        return approvers.mapNotNull { approver ->
+            when {
+                approver is Guardian.ProspectGuardian && approver.status.resolveDeviceEncryptedTotpSecret() != null -> {
+                    val encryptedTotpSecret = approver.status.resolveDeviceEncryptedTotpSecret()!!
 
-                when (it) {
-                    is Guardian.ProspectGuardian -> {
-                        val totpSecret = it.status.resolveDeviceEncryptedTotpSecret()?.base64Encoded
+                    val code = TotpGenerator.generateCode(
+                        secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes)),
+                        counter = timeMillis.div(TotpGenerator.CODE_EXPIRATION)
+                    )
 
-                        val code = TotpGenerator.generateCode(
-                            secret = String(
-                                keyRepository.decryptWithDeviceKey(
-                                    Base64.getDecoder().decode(totpSecret)
-                                )
-                            ),
-                            counter = timeMillis.div(TotpGenerator.CODE_EXPIRATION)
-                        )
-
-                        it.participantId to code
-                    }
-
-                    else -> null
+                    approver.participantId to code
                 }
+
+                else -> null
             }
-            .toMap()
+        }.toMap()
     }
 
     private fun verifyGuardian(
@@ -347,52 +301,42 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun onInviteBackupApprover() {
-        state = state.copy(
-            editedNickname = "",
-            planSetupUIState = PlanSetupUIState.ApproverNickname
-        )
-    }
-
     fun saveAndFinish() {
-        state = state.copy(planSetupUIState = PlanSetupUIState.ReShardingSecrets)
+        initiateRecovery()
     }
 
     fun onGoLiveWithApprover() {
-        state = state.copy(
-            planSetupUIState = PlanSetupUIState.ApproverActivation
-        )
+        state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
     }
 
     fun onApproverConfirmed() {
-        val nextStep = if (state.setupApprovers.size == 2) {
-            PlanSetupUIState.AddBackupApprover
+        if (state.backupApprover == null) {
+            state = state.copy(planSetupUIState = PlanSetupUIState.AddBackupApprover)
         } else {
-            PlanSetupUIState.ReShardingSecrets
+            initiateRecovery()
         }
-
-        state = state.copy(planSetupUIState = nextStep)
     }
 
     fun resetNavigationResource() {
         state = state.copy(navigationResource = Resource.Uninitialized)
     }
 
-    fun initiateRecovery() {
+    private fun initiateRecovery() {
         state = state.copy(initiateRecoveryResponse = Resource.Loading())
 
         viewModelScope.launch {
 
             // cancel previous recovery if exists
-            state.ownerState?.recovery?.let { // FIXME populate state earlier
+            state.ownerState?.recovery?.let {
                 ownerRepository.cancelRecovery()
             }
 
-            // request new recovery without secrets
+            // request new recovery without secrets to make shards available immediately
             val initiateRecoveryResponse = ownerRepository.initiateRecovery(listOf())
 
             if (initiateRecoveryResponse is Resource.Success) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ReShardingSecrets)
+                // navigate to the facetec view
+                state = state.copy(planSetupUIState = PlanSetupUIState.RecoveryInProgress)
 
                 updateOwnerState(initiateRecoveryResponse.data!!.ownerState)
             }
@@ -408,38 +352,36 @@ class PlanSetupViewModel @Inject constructor(
         state = state.copy(retrieveRecoveryShardsResponse = Resource.Loading())
 
         return viewModelScope.async {
-            // no secrets to be fetched
             val retrieveShardsResponse = ownerRepository.retrieveRecoveryShards(verificationId, biometry)
 
-            state = state.copy(retrieveRecoveryShardsResponse = retrieveShardsResponse)
-
             if (retrieveShardsResponse is Resource.Success) {
-                reShardAndSubmit(retrieveShardsResponse.data!!.encryptedShards)
+                ownerRepository.cancelRecovery()
+
+                replacePolicy(retrieveShardsResponse.data!!.encryptedShards)
             }
+
+            state = state.copy(retrieveRecoveryShardsResponse = retrieveShardsResponse)
 
             retrieveShardsResponse.map { it.scanResultBlob }
         }.await()
     }
 
-    fun reShardAndSubmit(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
+    private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
         state = state.copy(replacePolicyResponse = Resource.Loading())
 
         viewModelScope.launch {
-
-            ownerRepository.cancelRecovery()
-
             val response = ownerRepository.replacePolicy(
                 encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
                 encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
-                2U,
-                guardians = state.setupApprovers
+                threshold = 2U,
+                guardians = listOfNotNull(state.ownerApprover, state.primaryApprover, state.backupApprover)
             )
 
-            state = state.copy(
-                replacePolicyResponse = response
-            )
+            state = state.copy(replacePolicyResponse = response)
 
             if (response is Resource.Success) {
+                updateOwnerState(response.data!!.ownerState)
+
                 state = state.copy(planSetupUIState = PlanSetupUIState.Completed)
             }
         }
@@ -453,16 +395,41 @@ class PlanSetupViewModel @Inject constructor(
         state = PlanSetupState()
     }
 
-    private fun List<Guardian.ProspectGuardian>.filterOwner(): List<Guardian.ProspectGuardian> {
-        return filter {
-            it.status !is GuardianStatus.ImplicitlyOwner
-        }
+    private fun List<Guardian.ProspectGuardian>.ownerApprover(): Guardian.ProspectGuardian? {
+        return find { it.status is GuardianStatus.ImplicitlyOwner }
     }
 
-    private fun List<Guardian.ProspectGuardian>.filterNotCompleted(): List<Guardian.ProspectGuardian> {
-        return filter {
+    private fun List<Guardian.ProspectGuardian>.externalApprovers(): List<Guardian.ProspectGuardian> {
+        return filter { it.status !is GuardianStatus.ImplicitlyOwner }
+    }
+
+    private fun List<Guardian.ProspectGuardian>.confirmed(): List<Guardian.ProspectGuardian> {
+        return externalApprovers().filter {
             it.status is GuardianStatus.Confirmed || it.status is GuardianStatus.Onboarded
         }
     }
 
+    private fun List<Guardian.ProspectGuardian>.notConfirmed(): List<Guardian.ProspectGuardian> {
+        return externalApprovers().filter {
+            it.status !is GuardianStatus.Confirmed && it.status !is GuardianStatus.Onboarded
+        }
+    }
+
+    private fun Guardian.ProspectGuardian.asExternalApprover(): Guardian.SetupGuardian.ExternalApprover {
+        return Guardian.SetupGuardian.ExternalApprover(
+            label = this.label,
+            participantId = this.participantId,
+            deviceEncryptedTotpSecret = this.status.resolveDeviceEncryptedTotpSecret() ?: Base64EncodedData("")
+        )
+    }
+
+    private fun Guardian.ProspectGuardian.asImplicitlyOwner(): Guardian.SetupGuardian.ImplicitlyOwner {
+        return Guardian.SetupGuardian.ImplicitlyOwner(
+            label = this.label,
+            participantId = this.participantId,
+            guardianPublicKey = (this.status as GuardianStatus.ImplicitlyOwner).guardianPublicKey
+        )
+    }
 }
+
+
