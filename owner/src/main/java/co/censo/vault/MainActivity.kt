@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +23,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.presentation.entrance.EntranceScreen
@@ -34,17 +32,14 @@ import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.welcome.WelcomeScreen
 import co.censo.vault.presentation.Screen
-import co.censo.vault.presentation.enter_phrase.components.PastePhraseUI
+import co.censo.vault.presentation.main.MainVaultScreen
 import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
 import co.censo.vault.presentation.recovery.RecoveryScreen
-import co.censo.vault.presentation.vault.VaultScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -107,7 +102,7 @@ class MainActivity : FragmentActivity() {
                 WelcomeScreen(navController = navController)
             }
             composable(route = SharedScreen.OwnerVaultScreen.route) {
-                VaultScreen(navController = navController)
+                MainVaultScreen(navController = navController)
             }
             composable(route = Screen.RecoveryScreen.route) {
                 RecoveryScreen(navController = navController)

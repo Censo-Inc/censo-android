@@ -13,6 +13,8 @@ data class VaultScreenState(
     // screen
     val screen: VaultScreens = VaultScreens.Unlocked,
 
+    val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
+
     // api requests
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val storeSeedPhraseResource: Resource<StoreSecretApiResponse> = Resource.Uninitialized,
@@ -22,6 +24,9 @@ data class VaultScreenState(
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
+
+    val externalApprovers = (ownerState?.policy?.guardians?.size?.minus(1)) ?: 0
+    val secretsSize = ownerState?.vault?.secrets?.size ?: 0
 
     val loading = userResponse is Resource.Loading ||
             storeSeedPhraseResource is Resource.Loading ||

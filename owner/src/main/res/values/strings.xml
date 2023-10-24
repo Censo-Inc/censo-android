@@ -237,7 +237,7 @@
     <string name="save_finish"><![CDATA[Save & finish]]></string>
     <string name="invite_backup">Invite backup</string>
     <string name="skip_for_now">Skip for now</string>
-    <string name="invite_approver">Invite approver</string>
+    <string name="invite_approver">Invite approver(s)</string>
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
     <string name="the_verification_code_has_been_successfully_confirmed">The verification code has been successfully confirmed.</string>
     <string name="once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed">Once they have accepted the invite, a unique confirmation code will be displayed.</string>
@@ -247,5 +247,18 @@
     <string name="encrypted_your_data_behind">Censo has encrypted your data behind a live, 3D scan of your face with layered security.</string>
     <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
     <string name="face_scan_to_unlock">Face scan to unlock</string>
+    <string name="home_nav_title">Home</string>
+    <string name="phrases_nav_title">Phrases</string>
+    <string name="settings_nav_title">Settings</string>
+    <string name="approvers_nav_title">Approvers</string>
+    <string name="seed_phrase_home_title">seed phrase</string>
+    <string name="add_seed_phrase">Add seed phrase</string>
+    <string name="approvers_home_title">approvers</string>
+    <string name="add_approvers_button_text">Add approvers</string>
+    <string name="add">Add</string>
+    <string name="access">Access</string>
+    <string name="approvers_app_bar_title">Approvers</string>
+    <string name="seed_phrases_app_bar_title">Seed Phrases</string>
+    <string name="settings_app_bar_title">Settings</string>
 
 </resources>

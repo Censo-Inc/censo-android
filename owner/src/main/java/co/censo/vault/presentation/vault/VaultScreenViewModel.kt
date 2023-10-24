@@ -124,7 +124,7 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun onCancelResetUser() {
-        state = state.copy(screen = VaultScreens.Unlocked)
+        state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
     }
 
     fun reset() {

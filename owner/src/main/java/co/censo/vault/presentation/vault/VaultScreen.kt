@@ -36,7 +36,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
-import co.censo.vault.presentation.components.vault.UnlockedVaultScreen
+import co.censo.vault.presentation.main.MainVaultScreen
 import co.censo.vault.presentation.components.vault.VaultSecretListItem
 import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 
@@ -148,14 +148,12 @@ fun VaultScreen(
                         }
                     )
                 }
-                VaultScreens.Unlocked -> {
-                    UnlockedVaultScreen(
-                        onEditSeedPhrases = viewModel::onEditSeedPhrases,
-                        onRecoverSeedPhrases = viewModel::onRecoverPhrases,
-                        onResetUser = viewModel::onResetUser,
-                        showAddApprovers = (state.ownerState?.policy?.guardians?.size ?: 0) == 1
+
+                VaultScreens.Unlocked ->
+                    MainVaultScreen(
+                        navController = navController,
+                        viewModel = viewModel,
                     )
-                }
 
                 VaultScreens.EditSeedPhrases -> {
                     state.ownerState?.let { ownerState ->

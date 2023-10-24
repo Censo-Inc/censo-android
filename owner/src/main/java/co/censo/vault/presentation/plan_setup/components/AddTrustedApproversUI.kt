@@ -79,7 +79,10 @@ fun AddTrustedApproversUI(
             onClick = onInviteApproverSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.approvers),
                     contentDescription = null,
