@@ -252,5 +252,8 @@
     <string name="add_approvers_button_text">Add approvers</string>
     <string name="add">Add</string>
     <string name="access">Access</string>
+    <string name="approvers_app_bar_title">Approvers</string>
+    <string name="seed_phrases_app_bar_title">Seed Phrases</string>
+    <string name="settings_app_bar_title">Settings</string>
 
 </resources>

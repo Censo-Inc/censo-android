@@ -44,6 +44,9 @@ fun MainVaultScreen(
     }
 
     Scaffold(
+        topBar = {
+            VaultTopBar(selectedItem.value)
+        },
         bottomBar = {
             CensoBottomNavBar(selectedItem.value) {
                 selectedItem.value = it
