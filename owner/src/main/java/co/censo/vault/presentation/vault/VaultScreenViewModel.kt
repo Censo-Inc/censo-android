@@ -12,6 +12,7 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -68,8 +69,10 @@ class VaultScreenViewModel @Inject constructor(
             deleteUserResource = Resource.Loading()
         )
 
-        viewModelScope.launch {
-            val response = ownerRepository.deleteUser()
+        val participantId = state.ownerState?.policy?.guardians?.get(0)?.participantId
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.deleteUser(participantId)
 
             state = state.copy(
                 deleteUserResource = response
@@ -83,17 +86,21 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     private fun onOwnerState(ownerState: OwnerState) {
-        when (ownerState) {
+        state = when (ownerState) {
             is OwnerState.Ready -> {
-                state = state.copy(ownerState = ownerState)
+                state.copy(ownerState = ownerState)
             }
 
             else -> {
                 // other owner states are not supported on this view
                 // navigate back to start of the app so it can fix itself
-                state = state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
+                state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
             }
         }
+    }
+
+    fun resetDeleteUserResource() {
+        state = state.copy(deleteUserResource = Resource.Uninitialized)
     }
 
     fun resetStoreSeedPhraseResponse() {
