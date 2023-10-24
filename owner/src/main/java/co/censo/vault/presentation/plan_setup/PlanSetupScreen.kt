@@ -53,9 +53,11 @@ fun PlanSetupScreen(
     val context = LocalContext.current
     val state = viewModel.state
 
-    val iconPair =
-        if (state.backArrowType == PlanSetupState.BackIconType.Back) Icons.Filled.ArrowBack to R.string.back
-        else Icons.Filled.Clear to R.string.exit
+    val iconPair = when (state.backArrowType) {
+        PlanSetupState.BackIconType.Back -> Icons.Filled.ArrowBack to R.string.back
+        PlanSetupState.BackIconType.Exit -> Icons.Filled.Clear to R.string.exit
+        else -> null
+    }
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
@@ -84,13 +86,16 @@ fun PlanSetupScreen(
                 containerColor = VaultColors.NavbarColor
             ),
             navigationIcon = {
-                IconButton(onClick = {
-                    Toast.makeText(context, "Back or Close button clicked", Toast.LENGTH_LONG).show()
-                }) {
-                    Icon(
-                        imageVector = iconPair.first,
-                        contentDescription = stringResource(id = iconPair.second),
-                    )
+                when (iconPair) {
+                    null -> {}
+                    else -> {
+                        IconButton(onClick = viewModel::onBackClicked) {
+                            Icon(
+                                imageVector = iconPair.first,
+                                contentDescription = stringResource(id = iconPair.second),
+                            )
+                        }
+                    }
                 }
             },
             title = {
@@ -171,9 +176,7 @@ fun PlanSetupScreen(
                             GetLiveWithApproverUI(
                                 nickname = state.editedNickname,
                                 onContinueLive = viewModel::onGoLiveWithApprover,
-                                onResumeLater = {
-                                    Toast.makeText(context, "Resume later", Toast.LENGTH_LONG).show()
-                                }
+                                onResumeLater = viewModel::onBackClicked
                             )
                         }
 
@@ -202,7 +205,7 @@ fun PlanSetupScreen(
                                 onFaceScanReady = { verificationId, biometry ->
                                     viewModel.onFaceScanReady(verificationId, biometry)
                                 },
-                                onCancelled = { viewModel.onBackActionClick() }
+                                onCancelled = { viewModel.onBackClicked() }
                             )
                         }
 

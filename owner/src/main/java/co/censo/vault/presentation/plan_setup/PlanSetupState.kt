@@ -44,15 +44,15 @@ data class PlanSetupState(
 ) {
 
     val backArrowType = when (planSetupUIState) {
-        PlanSetupUIState.InviteApprovers,
         PlanSetupUIState.ApproverActivation -> BackIconType.Back
 
+        PlanSetupUIState.InviteApprovers,
         PlanSetupUIState.ApproverNickname,
         PlanSetupUIState.ApproverGettingLive,
         PlanSetupUIState.AddBackupApprover,
-        PlanSetupUIState.RecoveryInProgress,
-        PlanSetupUIState.Completed -> BackIconType.Exit
+        PlanSetupUIState.RecoveryInProgress -> BackIconType.Exit
 
+        PlanSetupUIState.Completed -> BackIconType.None
     }
 
     val activatingApprover = backupApprover ?: primaryApprover
@@ -71,7 +71,7 @@ data class PlanSetupState(
             || replacePolicyResponse is Resource.Error
 
     enum class BackIconType {
-        Back, Exit
+        None, Back, Exit
     }
 }
 

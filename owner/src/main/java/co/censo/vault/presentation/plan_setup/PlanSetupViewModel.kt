@@ -74,8 +74,21 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun onBackActionClick() {
-        // FIXME
+    fun onBackClicked() {
+        state = when (state.planSetupUIState) {
+            PlanSetupUIState.ApproverActivation -> {
+                state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
+            }
+
+            PlanSetupUIState.InviteApprovers,
+            PlanSetupUIState.ApproverNickname,
+            PlanSetupUIState.ApproverGettingLive,
+            PlanSetupUIState.AddBackupApprover,
+            PlanSetupUIState.RecoveryInProgress,
+            PlanSetupUIState.Completed -> {
+                state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+            }
+        }
     }
 
     private fun retrieveOwnerState(silent: Boolean = false, overwriteUIState: Boolean = false) {
