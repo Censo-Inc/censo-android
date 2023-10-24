@@ -46,7 +46,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlanSetupScreen(
     navController: NavController,
-    welcomeFlow: Boolean,
+    welcomeFlow: Boolean = false,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
