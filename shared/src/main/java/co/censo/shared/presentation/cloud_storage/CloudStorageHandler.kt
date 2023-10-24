@@ -46,7 +46,7 @@ fun CloudStorageHandler(
     onActionSuccess: (privateKey: Base58EncodedPrivateKey) -> Unit,
     onActionFailed: (exception: Exception?) -> Unit,
     onCloudStorageAccessGranted: (() -> Unit)? = null,
-    viewModel: CloudStorageViewModel = hiltViewModel()
+    viewModel: CloudStorageHandlerViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current

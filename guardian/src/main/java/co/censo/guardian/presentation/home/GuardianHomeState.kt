@@ -13,6 +13,7 @@ import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.RejectRecoveryApiResponse
 import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -45,10 +46,9 @@ data class GuardianHomeState(
     val showTopBarCancelConfirmationDialog: Boolean = false,
 
     //Cloud Storage
-    val retrievePrivateKeyFailed: Resource<Unit> = Resource.Uninitialized,
-    val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val triggerCloudStorageAction: Resource<CloudStorageActions> = Resource.Uninitialized,
-    val actionToResumeAfterLoadingKey: GuardianHomeActions = GuardianHomeActions.NONE,
+    val loadPrivateKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
+    val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
+    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null
 ) {
 
@@ -65,7 +65,7 @@ data class GuardianHomeState(
             || storeRecoveryTotpSecretResource is Resource.Error
             || approveRecoveryResource is Resource.Error
             || rejectRecoveryResource is Resource.Error
-            || saveKeyToCloudResource is Resource.Error
+            || savePrivateKeyToCloudResource is Resource.Error
 
     data class RecoveryTotpState(
         val code: String,
@@ -94,6 +94,6 @@ enum class GuardianUIState {
     ACCESS_APPROVED,
 }
 
-enum class GuardianHomeActions {
+enum class GuardianHomeCloudStorageReasons {
     NONE, CONFIRM_OR_REJECT_OWNER, SUBMIT_VERIFICATION_CODE
 }

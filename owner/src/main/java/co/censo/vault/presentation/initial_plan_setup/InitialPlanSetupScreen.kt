@@ -1,6 +1,5 @@
 package co.censo.vault.presentation.initial_plan_setup
 
-import Base58EncodedPrivateKey
 import LearnMore
 import StandardButton
 import SubTitleText
@@ -48,14 +47,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import io.github.novacrypto.base58.Base58
 import toEncryptionKey
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -156,20 +153,11 @@ fun InitialPlanSetupScreen(
                 }
             }
 
-            if (state.triggerCloudStorageAction is Resource.Success) {
-                val privateKey =
-                    if (state.triggerCloudStorageAction.data!! == CloudStorageActions.UPLOAD && state.initialPlanData.approverEncryptionKey != null) {
-                        Base58EncodedPrivateKey(
-                            Base58.base58Encode(
-                                state.initialPlanData.approverEncryptionKey.privateKeyRaw()
-                            )
-                        )
-                    } else {
-                        null
-                    }
+            if (state.cloudStorageAction.triggerAction) {
+                val privateKey = viewModel.getPrivateKeyForUpload()
 
                 CloudStorageHandler(
-                    actionToPerform = state.triggerCloudStorageAction.data!!,
+                    actionToPerform = state.cloudStorageAction.action,
                     participantId = state.participantId,
                     privateKey = privateKey,
                     onActionSuccess = { base58EncodedPrivateKey ->

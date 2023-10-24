@@ -20,6 +20,7 @@ import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
@@ -128,7 +129,10 @@ class GuardianHomeViewModel @Inject constructor(
                     is GuardianPhase.RecoveryRequested -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_REQUESTED
                     is GuardianPhase.RecoveryVerification -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER
                     is GuardianPhase.RecoveryConfirmation -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else {
-                        confirmOrRejectOwner(guardianState.participantId, phase)
+                        loadPrivateKeyFromCloud(
+                            reason = GuardianHomeCloudStorageReasons.CONFIRM_OR_REJECT_OWNER,
+                            recoveryPhase = phase
+                        )
                         GuardianUIState.ACCESS_VERIFYING_TOTP_FROM_OWNER
                     }
                 }
@@ -167,8 +171,10 @@ class GuardianHomeViewModel @Inject constructor(
     fun createAndSaveGuardianKey() {
         val guardianEncryptionKey = keyRepository.createGuardianKey()
         state = state.copy(
-            saveKeyToCloudResource = Resource.Loading(),
-            triggerCloudStorageAction = Resource.Success(CloudStorageActions.UPLOAD),
+            savePrivateKeyToCloudResource = Resource.Loading(),
+            cloudStorageAction = CloudStorageActionData(
+                triggerAction = true, action = CloudStorageActions.UPLOAD, reason = null
+            ),
             guardianEncryptionKey = guardianEncryptionKey
         )
     }
@@ -182,7 +188,9 @@ class GuardianHomeViewModel @Inject constructor(
             state = state.copy(verificationCode = value)
 
             if (state.verificationCode.length == TotpGenerator.CODE_LENGTH) {
-                submitVerificationCode()
+                loadPrivateKeyFromCloud(
+                    GuardianHomeCloudStorageReasons.SUBMIT_VERIFICATION_CODE
+                )
             }
         }
     }
@@ -193,16 +201,7 @@ class GuardianHomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
 
             if (state.guardianEncryptionKey == null) {
-                if (state.retrievePrivateKeyFailed is Resource.Error) {
-                    state = state.copy(
-                        submitVerificationResource = Resource.Error(
-                            exception = state.retrievePrivateKeyFailed.exception
-                        ),
-                    )
-                    return@launch
-                }
-
-                loadPrivateKeyFromCloud(actionToResumeAfterKeyLoaded = GuardianHomeActions.SUBMIT_VERIFICATION_CODE)
+                loadPrivateKeyFromCloud(reason = GuardianHomeCloudStorageReasons.SUBMIT_VERIFICATION_CODE)
                 return@launch
             }
 
@@ -241,10 +240,15 @@ class GuardianHomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrivateKeyFromCloud(actionToResumeAfterKeyLoaded: GuardianHomeActions) {
+    private fun loadPrivateKeyFromCloud(
+        reason: GuardianHomeCloudStorageReasons,
+        recoveryPhase: GuardianPhase.RecoveryConfirmation? = null
+    ) {
         state = state.copy(
-            triggerCloudStorageAction = Resource.Success(CloudStorageActions.DOWNLOAD),
-            actionToResumeAfterLoadingKey = actionToResumeAfterKeyLoaded
+            cloudStorageAction = CloudStorageActionData(
+                triggerAction = true, action = CloudStorageActions.DOWNLOAD, reason = reason
+            ),
+            recoveryConfirmationPhase = recoveryPhase
         )
     }
 
@@ -322,7 +326,7 @@ class GuardianHomeViewModel @Inject constructor(
         state = state.copy(recoveryTotp = null)
     }
 
-    private fun confirmOrRejectOwner(
+    private fun confirmOrRejectOwnerRecovery(
         participantId: ParticipantId, recoveryConfirmation: GuardianPhase.RecoveryConfirmation
     ) {
         val recoveryTotp = generateRecoveryTotp(
@@ -340,20 +344,11 @@ class GuardianHomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             if (totpIsCorrect) {
                 if (state.guardianEncryptionKey == null) {
-                    //Check if a previous key download failed, supply the exception, and return early
-                    if (state.retrievePrivateKeyFailed is Resource.Error) {
-                        state = state.copy(
-                            approveRecoveryResource = Resource.Error(
-                                exception = state.retrievePrivateKeyFailed.exception
-                            )
-                        )
-                        return@launch
-                    }
 
                     //Set to state so we can retry this method with the same parameters after the key is loaded
-                    state = state.copy(recoveryConfirmationPhase = recoveryConfirmation)
                     loadPrivateKeyFromCloud(
-                        actionToResumeAfterKeyLoaded = GuardianHomeActions.CONFIRM_OR_REJECT_OWNER
+                        reason = GuardianHomeCloudStorageReasons.CONFIRM_OR_REJECT_OWNER,
+                        recoveryPhase = recoveryConfirmation
                     )
                     return@launch
                 }
@@ -464,91 +459,134 @@ class GuardianHomeViewModel @Inject constructor(
         state = state.copy(rejectRecoveryResource = Resource.Uninitialized)
     }
 
+    //region CloudStorage Action methods
+    fun getPrivateKeyForUpload() : Base58EncodedPrivateKey? {
+        val encryptionKey = state.guardianEncryptionKey ?: return null
+        return Base58EncodedPrivateKey(Base58.base58Encode(encryptionKey.privateKeyRaw()))
+    }
+
+    fun getDownloadReason(): GuardianHomeCloudStorageReasons =
+        try {
+            state.cloudStorageAction.reason as GuardianHomeCloudStorageReasons
+        } catch (e: Exception) {
+            GuardianHomeCloudStorageReasons.NONE
+        }
+
     fun handleCloudStorageActionSuccess(
         privateKey: Base58EncodedPrivateKey,
         cloudStorageAction: CloudStorageActions
     ) {
-        state = state.copy(triggerCloudStorageAction = Resource.Uninitialized)
+        val downloadReason = getDownloadReason()
+        state = state.copy(cloudStorageAction = CloudStorageActionData())
 
         when (cloudStorageAction) {
             CloudStorageActions.UPLOAD -> {
-                //User uploaded key successfully, move forward by retrieving user state
-                state = state.copy(
-                    guardianEncryptionKey = privateKey.toEncryptionKey(),
-                    saveKeyToCloudResource = Resource.Uninitialized
+                keyUploadSuccess(privateKey.toEncryptionKey())
+            }
+            CloudStorageActions.DOWNLOAD -> {
+                keyDownloadSuccess(
+                    privateEncryptionKey = privateKey.toEncryptionKey(),
+                    downloadReason = downloadReason
                 )
-                silentRetrieveApproverState()
-            }
-
-            CloudStorageActions.DOWNLOAD -> {
-                when (state.actionToResumeAfterLoadingKey) {
-                    GuardianHomeActions.CONFIRM_OR_REJECT_OWNER -> {
-                        state = state.copy(
-                            guardianEncryptionKey = privateKey.toEncryptionKey(),
-                            retrievePrivateKeyFailed = Resource.Uninitialized
-                        )
-
-                        //Grab the retry data from state and reset the state
-                        val recoveryConfirmation = state.recoveryConfirmationPhase
-                        state = state.copy(recoveryConfirmationPhase = null)
-                        if (recoveryConfirmation != null) {
-                            confirmOrRejectOwner(ParticipantId(state.participantId), recoveryConfirmation)
-                        } else {
-                            //TODO: Log with raygun
-                            projectLog(message = "Recovery confirmation was null, unable to continue confirm/reject owner flow")
-                        }
-                    }
-                    GuardianHomeActions.SUBMIT_VERIFICATION_CODE -> {
-                        state = state.copy(
-                            guardianEncryptionKey = privateKey.toEncryptionKey(),
-                            retrievePrivateKeyFailed = Resource.Uninitialized,
-                        )
-                        submitVerificationCode()
-                    }
-                    else -> {}
-                }
             }
             else -> {}
         }
     }
 
-    fun handleCLoudStorageActionFailure(exception: Exception?, cloudStorageAction: CloudStorageActions) {
-        state = state.copy(triggerCloudStorageAction = Resource.Uninitialized)
+    //region handle key success
+    private fun keyUploadSuccess(privateEncryptionKey: EncryptionKey) {
+        //User uploaded key successfully, move forward by retrieving user state
+        state = state.copy(
+            guardianEncryptionKey = privateEncryptionKey,
+            savePrivateKeyToCloudResource = Resource.Uninitialized
+        )
+        silentRetrieveApproverState()
+    }
+
+    private fun keyDownloadSuccess(
+        privateEncryptionKey: EncryptionKey,
+        downloadReason: GuardianHomeCloudStorageReasons
+    ) {
+        state = state.copy(
+            guardianEncryptionKey = privateEncryptionKey,
+            loadPrivateKeyFromCloudResource = Resource.Uninitialized,
+        )
+
+        when (downloadReason) {
+            GuardianHomeCloudStorageReasons.CONFIRM_OR_REJECT_OWNER -> {
+                confirmRejectOwner()
+            }
+            GuardianHomeCloudStorageReasons.SUBMIT_VERIFICATION_CODE -> {
+                submitVerificationCode()
+            }
+            else -> {}
+        }
+    }
+
+    private fun confirmRejectOwner() {
+        //Grab the recoveryConfirmation data from state
+        val recoveryConfirmation = state.recoveryConfirmationPhase
+        if (recoveryConfirmation != null) {
+            confirmOrRejectOwnerRecovery(ParticipantId(state.participantId), recoveryConfirmation)
+        } else {
+            //TODO: Log with raygun
+            projectLog(message = "Recovery confirmation was null, unable to continue confirm/reject owner flow")
+            state =
+                state.copy(approveRecoveryResource = Resource.Error(exception = Exception("Unable to confirm owner recovery, missing recovery confirmation data")))
+        }
+    }
+    //endregion
+
+    fun handleCloudStorageActionFailure(
+        exception: Exception?,
+        cloudStorageAction: CloudStorageActions
+    ) {
+
+        val downloadReason = getDownloadReason()
+        state = state.copy(cloudStorageAction = CloudStorageActionData())
 
         when (cloudStorageAction) {
             CloudStorageActions.UPLOAD -> {
-                state = state.copy(saveKeyToCloudResource = Resource.Error(exception = exception))
+                keyUploadFailure(exception)
             }
             CloudStorageActions.DOWNLOAD -> {
-                when (state.actionToResumeAfterLoadingKey) {
-                    GuardianHomeActions.CONFIRM_OR_REJECT_OWNER -> {
-                        //Set state for the method to run
-                        state = state.copy(retrievePrivateKeyFailed = Resource.Error(
-                            exception = exception
-                        ))
-
-                        //Grab the retry data from state and reset the state
-                        val recoveryConfirmation = state.recoveryConfirmationPhase
-                        state = state.copy(recoveryConfirmationPhase = null)
-                        if (recoveryConfirmation != null) {
-                            confirmOrRejectOwner(ParticipantId(state.participantId), recoveryConfirmation)
-                        } else {
-                            //TODO: Log with raygun
-                            projectLog(message = "Recovery confirmation was null, unable to continue confirm/reject owner flow")
-                        }
-                    }
-                    GuardianHomeActions.SUBMIT_VERIFICATION_CODE -> {
-                        //Set the error to state and let the method handle assigning the exception data
-                        state = state.copy(retrievePrivateKeyFailed = Resource.Error(
-                            exception = exception
-                        ))
-
-                        submitVerificationCode()
-                    }
-                    else -> {}
-                }
+                keyDownloadFailure(exception, downloadReason)
             }
             else -> {}
         }
     }
+
+    //region handle key failure
+    private fun keyUploadFailure(exception: Exception?) {
+        state = state.copy(savePrivateKeyToCloudResource = Resource.Error(exception = exception))
+    }
+
+    private fun keyDownloadFailure(exception: Exception?, downloadReason: GuardianHomeCloudStorageReasons) {
+        when (downloadReason) {
+            GuardianHomeCloudStorageReasons.CONFIRM_OR_REJECT_OWNER -> {
+                setErrorToApproveRecoveryResource(exception)
+            }
+            GuardianHomeCloudStorageReasons.SUBMIT_VERIFICATION_CODE -> {
+                setErrorToSubmitVerificationResource(exception)
+            }
+            else -> {}
+        }
+    }
+
+    private fun setErrorToApproveRecoveryResource(exception: Exception?) {
+        //Set error state for the approveRecovery resource
+        state = state.copy(approveRecoveryResource = Resource.Error(
+            exception = exception
+        ))
+    }
+
+    private fun setErrorToSubmitVerificationResource(exception: Exception?) {
+        //Set error state for the submitVerificationCode resource
+        state = state.copy(submitVerificationResource = Resource.Error(
+            exception = exception
+        ))
+    }
+    //endregion
+
+    //endregion
 }

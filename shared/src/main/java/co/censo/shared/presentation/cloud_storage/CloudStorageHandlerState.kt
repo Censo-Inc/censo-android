@@ -4,7 +4,7 @@ import Base58EncodedPrivateKey
 import ParticipantId
 import co.censo.shared.data.Resource
 
-data class CloudStorageState(
+data class CloudStorageHandlerState(
     val cloudActionToPerform: CloudStorageActions = CloudStorageActions.UNINITIALIZED,
     val cloudStorageHandlerArgs: CloudStorageHandlerArgs = CloudStorageHandlerArgs(),
     val shouldEnforceCloudStorageAccess: Boolean = false,
@@ -20,3 +20,9 @@ data class CloudStorageHandlerArgs(
 enum class CloudStorageActions {
     UNINITIALIZED, UPLOAD, DOWNLOAD, ENFORCE_ACCESS
 }
+
+data class CloudStorageActionData(
+    val triggerAction: Boolean = false,
+    val action: CloudStorageActions = CloudStorageActions.UNINITIALIZED,
+    val reason: Any? = null
+)
