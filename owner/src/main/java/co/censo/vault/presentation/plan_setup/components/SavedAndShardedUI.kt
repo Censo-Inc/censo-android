@@ -26,7 +26,7 @@ import co.censo.vault.R
 @Composable
 fun SavedAndShardedUI(
     seedPhraseNickname: String?,
-    primaryApproverNickname: String,
+    primaryApproverNickname: String?,
     backupApproverNickname: String?,
 ) {
 
@@ -52,7 +52,7 @@ fun SavedAndShardedUI(
             title = R.string.saved_sharded,
         )
 
-        if (seedPhraseNickname != null) {
+        if (!seedPhraseNickname.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
             TitleText(
@@ -86,15 +86,17 @@ fun SavedAndShardedUI(
             fontWeight = FontWeight.W400
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
+        if (!primaryApproverNickname.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = primaryApproverNickname,
-            fontWeight = FontWeight.W400
-        )
+            TitleText(
+                modifier = Modifier.fillMaxWidth(),
+                title = primaryApproverNickname,
+                fontWeight = FontWeight.W400
+            )
+        }
 
-        if (backupApproverNickname != null) {
+        if (!backupApproverNickname.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
             TitleText(
@@ -110,9 +112,9 @@ fun SavedAndShardedUI(
 
 @Preview(showBackground = true)
 @Composable
-fun SavedAndShardedUIWithSeedPhrasePreview() {
+fun SavedAndShardedUINoSeedPhrasePreview() {
     SavedAndShardedUI(
-        seedPhraseNickname = "Yankee Hotel Foxtrot",
+        seedPhraseNickname = null,
         primaryApproverNickname = "Neo",
         backupApproverNickname = "John Wick"
     )
@@ -120,9 +122,21 @@ fun SavedAndShardedUIWithSeedPhrasePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SavedAndShardedUIWithoutSeedPhrasePreview() {
+fun SavedAndShardedUSingleSeedPhrasePreview() {
     SavedAndShardedUI(
-        seedPhraseNickname = "",
+        seedPhraseNickname = "Yankee Hotel Foxtrot",
+        primaryApproverNickname = "Neo",
+        backupApproverNickname = "John Wick"
+    )
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun SavedAndShardedUIMultipleSeedPhrasesPreview() {
+    SavedAndShardedUI(
+        seedPhraseNickname = "3 seed phrases",
         primaryApproverNickname = "Neo",
         backupApproverNickname = "John Wick"
     )

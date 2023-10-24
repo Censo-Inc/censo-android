@@ -9,13 +9,9 @@ sealed class Screen(val route: String) {
 
     object PlanSetupRoute : Screen("plan_setup_route") {
         const val WELCOME_FLOW_ARG = "welcome_flow_key"
-        const val SEED_PHRASE_NICKNAME = "seed_phrase_nickname"
 
-        fun buildNavRoute(
-            welcomeFlow: Boolean,
-            seedPhraseNickname: String
-        ): String {
-            return "${PlanSetupRoute.route}/${welcomeFlow}/${seedPhraseNickname}"
+        fun buildNavRoute(welcomeFlow: Boolean): String {
+            return "${PlanSetupRoute.route}/${welcomeFlow}"
         }
     }
 

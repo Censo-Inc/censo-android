@@ -109,7 +109,7 @@ fun WelcomeScreen(
                         } else {
                             WelcomeScreenUI(currentStep = WelcomeStep.PhraseEntered) {
                                 navController.navigate(
-                                    Screen.PlanSetupRoute.buildNavRoute(true, "seed phrase")
+                                    Screen.PlanSetupRoute.buildNavRoute(welcomeFlow = true)
                                 )
                             }
                         }

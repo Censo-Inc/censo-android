@@ -47,7 +47,6 @@ import kotlinx.coroutines.delay
 fun PlanSetupScreen(
     navController: NavController,
     welcomeFlow: Boolean,
-    seedPhraseNickname: String?,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -210,9 +209,17 @@ fun PlanSetupScreen(
                         }
 
                         PlanSetupUIState.Completed -> {
+                            val secrets = state.ownerState?.vault?.secrets
                             SavedAndShardedUI(
-                                seedPhraseNickname = seedPhraseNickname,
-                                primaryApproverNickname = state.primaryApprover?.label ?: "Primary approver",
+                                seedPhraseNickname = when {
+                                    secrets.isNullOrEmpty() -> null
+                                    secrets.size == 1 -> secrets.first().label
+                                    else -> stringResource(
+                                        id = R.string.count_seed_phrases,
+                                        secrets.size
+                                    )
+                                },
+                                primaryApproverNickname = state.primaryApprover?.label,
                                 backupApproverNickname = state.backupApprover?.label,
                             )
 

@@ -138,16 +138,13 @@ class MainActivity : FragmentActivity() {
                 BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
             }
             composable(
-                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.WELCOME_FLOW_ARG}}/{${Screen.PlanSetupRoute.SEED_PHRASE_NICKNAME}}"
+                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.WELCOME_FLOW_ARG}}"
             ) { backStackEntry ->
                 PlanSetupScreen(
                     navController = navController,
                     welcomeFlow = backStackEntry.arguments?.getBoolean(
                         Screen.PlanSetupRoute.WELCOME_FLOW_ARG
-                    ) ?: false,
-                    seedPhraseNickname = backStackEntry.arguments?.getString(
-                        Screen.PlanSetupRoute.SEED_PHRASE_NICKNAME
-                    ) ?: ""
+                    ) ?: false
                 )
             }
             composable(
