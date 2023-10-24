@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.vault.R
+import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.vault.VaultScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,14 +65,36 @@ fun MainVaultScreen(
                     VaultHomeScreen(
                         seedPhrasesSaved = state.secretsSize,
                         approvers = state.externalApprovers,
-                        onAddSeedPhrase = { },
-                        onAddApprovers = { },
-                        showAddApprovers = state.externalApprovers != 0
+                        onAddSeedPhrase = {
+                            state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
+                                val route = Screen.EnterPhraseRoute.buildNavRoute(
+                                    masterPublicKey = masterPublicKey,
+                                    welcomeFlow = false
+                                )
+                                navController.navigate(route)
+                            }
+                        },
+                        onAddApprovers = {
+                            selectedItem.value = BottomNavItem.Approvers
+                        },
+                        showAddApprovers = state.externalApprovers == 0
                     )
 
                 BottomNavItem.Phrases ->
                     PhraseHomeScreen(
-                        vaultSecrets = state.ownerState?.vault?.secrets ?: emptyList()
+                        vaultSecrets = state.ownerState?.vault?.secrets ?: emptyList(),
+                        onAddClick = {
+                            state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
+                                val route = Screen.EnterPhraseRoute.buildNavRoute(
+                                    masterPublicKey = masterPublicKey,
+                                    welcomeFlow = false
+                                )
+                                navController.navigate(route)
+                            }
+                        },
+                        onAccessClick = {
+                            navController.navigate(Screen.RecoveryScreen.route)
+                        }
                     )
 
                 BottomNavItem.Approvers ->
