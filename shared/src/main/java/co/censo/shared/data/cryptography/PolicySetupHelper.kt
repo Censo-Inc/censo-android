@@ -70,7 +70,7 @@ class PolicySetupHelper(
 
                 encryptionKey.sign(
                     data = (intermediateEncryptionKey.publicExternalRepresentation().ecPublicKey as BCECPublicKey).q.getEncoded(
-                        true
+                        false
                     )
                 ).base64Encoded()
             }
