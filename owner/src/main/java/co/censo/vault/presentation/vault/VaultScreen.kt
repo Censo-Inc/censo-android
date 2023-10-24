@@ -106,6 +106,13 @@ fun VaultScreen(
                         dismissAction = viewModel::resetDeleteSeedPhraseResponse,
                     ) {}
                 }
+                
+                state.deleteUserResource is Resource.Error -> {
+                    DisplayError(
+                        errorMessage = state.deleteUserResource.getErrorMessage(context),
+                        dismissAction = viewModel::resetDeleteUserResource
+                    ) { }
+                }
             }
         }
 
