@@ -243,4 +243,9 @@
     <string name="once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed">Once they have accepted the invite, a unique confirmation code will be displayed.</string>
     <string name="paste_your_phrase">Paste your phrase</string>
     <string name="count_seed_phrases">%1$s seed phrases</string>
+    <string name="data_encrypted">Data encrypted</string>
+    <string name="encrypted_your_data_behind">Censo has encrypted your data behind a live, 3D scan of your face with layered security.</string>
+    <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
+    <string name="face_scan_to_unlock">Face scan to unlock</string>
+
 </resources>
