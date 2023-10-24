@@ -238,5 +238,9 @@
     <string name="invite_approver">Invite approver</string>
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
     <string name="paste_your_phrase">Paste your phrase</string>
+    <string name="data_encrypted">Data encrypted</string>
+    <string name="encrypted_your_data_behind">Censo has encrypted your data behind a live, 3D scan of your face with layered security.</string>
+    <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
+    <string name="face_scan_to_unlock">Face scan to unlock</string>
 
 </resources>

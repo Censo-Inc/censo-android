@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.lock_screen
+package co.censo.vault.presentation.lock_screen.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
