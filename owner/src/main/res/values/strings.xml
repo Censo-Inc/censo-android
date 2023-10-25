@@ -260,5 +260,7 @@
     <string name="approvers_app_bar_title">Approvers</string>
     <string name="seed_phrases_app_bar_title">Seed Phrases</string>
     <string name="settings_app_bar_title">Settings</string>
+    <string name="select_seed_phrase">Which seed phrase would you like to access first?</string>
+    <string name="error_occurred">Error Occurred</string>
 
 </resources>

@@ -15,27 +15,40 @@ import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.model.RecoveryStatus
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
+import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AccessSeedPhrasesScreenViewModel @Inject constructor(
+class AccessSeedPhrasesViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
 ) : ViewModel() {
 
-    var state by mutableStateOf(AccessSeedPhrasesScreenState())
+    var state by mutableStateOf(AccessSeedPhrasesState())
         private set
 
     fun onStart() {
-
+        retrieveOwnerState()
     }
 
     fun reset() {
-        state = AccessSeedPhrasesScreenState()
+        state = AccessSeedPhrasesState()
+    }
+
+    fun retrieveOwnerState() {
+        state = state.copy(ownerState = Resource.Loading())
+
+        viewModelScope.launch {
+            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
+
+            state = state.copy(ownerState = ownerStateResource)
+        }
     }
 
     suspend fun onFaceScanReady(
@@ -52,7 +65,7 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     recoverSecrets(response.data!!)
                 }
             }
@@ -74,16 +87,19 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
                         state = state.copy(recoveredPhrases = Resource.Loading())
 
                         runCatching {
-                            val requestedSecrets = ownerState.vault.secrets.filter { recovery.vaultSecretIds.contains(it.guid) }
+                            val requestedSecret = state.selectedPhrase
+
+                            check(requestedSecret != null)
 
                             val recoveredSecrets: List<RecoveredSeedPhrase> = ownerRepository.recoverSecrets(
-                                requestedSecrets,
+                                listOf(requestedSecret),
                                 encryptedShards,
                                 ownerState.policy.encryptedMasterKey
                             )
 
                             state = state.copy(
-                                recoveredPhrases = Resource.Success(recoveredSecrets)
+                                recoveredPhrases = Resource.Success(recoveredSecrets),
+                                accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
                             )
                         }.onFailure {
                             state = state.copy(
@@ -115,6 +131,20 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
     fun resetNavigationResource() {
         state = state.copy(
             navigationResource = Resource.Uninitialized
+        )
+    }
+
+    fun onPhraseSelected(vaultSecret: VaultSecret) {
+        projectLog(message = "Vault Secret Selected: $vaultSecret")
+        state = state.copy(
+            selectedPhrase = vaultSecret,
+            accessPhrasesUIState = AccessPhrasesUIState.ReadyToStart
+        )
+    }
+
+    fun startFacetec() {
+        state = state.copy(
+            accessPhrasesUIState = AccessPhrasesUIState.Facetec
         )
     }
 }
