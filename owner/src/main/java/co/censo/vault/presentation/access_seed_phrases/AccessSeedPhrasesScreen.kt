@@ -24,6 +24,7 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.vault.presentation.access_seed_phrases.components.SelectPhraseUI
+import co.censo.vault.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -74,6 +75,7 @@ fun AccessSeedPhrasesScreen(
                         dismissAction = null,
                     ) { viewModel.retrieveOwnerState() }
                 }
+
                 state.retrieveShardsResponse is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.retrieveShardsResponse.getErrorMessage(context),
@@ -104,11 +106,13 @@ fun AccessSeedPhrasesScreen(
                         retryAction = viewModel::retrieveOwnerState
                     )
                 }
+
                 AccessPhrasesUIState.ReadyToStart -> {
                     ReadyToAccessPhrase {
                         viewModel.startFacetec()
                     }
                 }
+
                 AccessPhrasesUIState.Facetec -> {
                     FacetecAuth(
                         onFaceScanReady = { verificationId, biometry ->
@@ -119,10 +123,16 @@ fun AccessSeedPhrasesScreen(
                         }
                     )
                 }
+
                 AccessPhrasesUIState.ViewPhrase -> {
-                    Text(
-                        text = "Recovered phrases: ${state.recoveredPhrases.data?.toString()}"
-                    )
+                    state.recoveredPhrases.data?.first()?.let {
+                        ViewAccessPhraseUI(
+                            wordIndex = 0,
+                            phraseWord = it.seedPhrase.split(" ")[0],
+                            decrementIndex = { },
+                            incrementIndex = { }
+                        )
+                    }
                 }
             }
 
