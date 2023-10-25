@@ -35,7 +35,8 @@ import co.censo.vault.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddApproverNicknameUI(
+fun ApproverNicknameUI(
+    isRename: Boolean = false,
     nickname: String,
     enabled: Boolean,
     onNicknameChanged: (String) -> Unit,
@@ -54,17 +55,19 @@ fun AddApproverNicknameUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.add_approver_nickname,
+            title = if (isRename) R.string.rename_approver else R.string.add_approver_nickname,
             textAlign = TextAlign.Start
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        if (!isRename) {
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-        MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            message = R.string.add_approver_nickname_message,
-            textAlign = TextAlign.Start
-        )
+            MessageText(
+                modifier = Modifier.fillMaxWidth(),
+                message = R.string.add_approver_nickname_message,
+                textAlign = TextAlign.Start
+            )
+        }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
@@ -128,7 +131,7 @@ fun AddApproverNicknameUI(
 @Preview(showBackground = true)
 @Composable
 fun EnabledAddApproverNicknameUIPreview() {
-    AddApproverNicknameUI(
+    ApproverNicknameUI(
         nickname = "Neo",
         enabled = true,
         onNicknameChanged = {},
@@ -139,9 +142,21 @@ fun EnabledAddApproverNicknameUIPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewDisabledNickname() {
-    AddApproverNicknameUI(
+    ApproverNicknameUI(
         nickname = "",
         enabled = false,
+        onNicknameChanged = {},
+        onSaveNickname = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EnabledRenameApproverUIPreview() {
+    ApproverNicknameUI(
+        isRename = true,
+        nickname = "Neo",
+        enabled = true,
         onNicknameChanged = {},
         onSaveNickname = {},
     )

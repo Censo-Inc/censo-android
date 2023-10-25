@@ -59,7 +59,8 @@ fun ActivateApproverUI(
     secondsLeft: Int,
     verificationCode: String,
     storesLink: String, //This should contain both links since approver could be either
-    onContinue: () -> Unit
+    onContinue: () -> Unit,
+    onEditNickname: () -> Unit,
 ) {
 
     val nickName: String = prospectApprover?.label ?: ""
@@ -158,7 +159,8 @@ fun ActivateApproverUI(
         ApproverInfoBox(
             nickName = nickName,
             primaryApprover = isPrimaryApprover,
-            status = guardianStatus
+            status = guardianStatus,
+            onEdit = onEditNickname
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -192,7 +194,8 @@ fun ActivateApproverUI(
 fun ApproverInfoBox(
     nickName: String,
     primaryApprover: Boolean,
-    status: GuardianStatus?
+    status: GuardianStatus?,
+    onEdit: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -240,7 +243,7 @@ fun ApproverInfoBox(
             }
         }
 
-        IconButton(onClick = { /* TODO Requires VAULT-318 */ }) {
+        IconButton(onClick = onEdit ) {
             Icon(
                 painterResource(id = co.censo.shared.R.drawable.edit_icon),
                 contentDescription = stringResource(R.string.edit_approver_name),
@@ -412,7 +415,8 @@ fun ActivatePrimaryApproverInitialPreview() {
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
             )
         ),
-        onContinue = {}
+        onContinue = {},
+        onEditNickname = {}
     )
 }
 
@@ -433,7 +437,8 @@ fun ActivatePrimaryApproverAcceptedPreview() {
                 acceptedAt = Clock.System.now()
             )
         ),
-        onContinue = {}
+        onContinue = {},
+        onEditNickname = {}
     )
 }
 
@@ -456,7 +461,8 @@ fun ActivatePrimaryApproverConfirmedPreview() {
                 confirmedAt = Clock.System.now()
             )
         ),
-        onContinue = {}
+        onContinue = {},
+        onEditNickname = {}
     )
 }
 
@@ -476,7 +482,8 @@ fun ActivateBackupApproverInitialPreview() {
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
             )
         ),
-        onContinue = {}
+        onContinue = {},
+        onEditNickname = {}
     )
 }
 
@@ -497,7 +504,8 @@ fun ActivateBackupApproverAcceptedPreview() {
                 acceptedAt = Clock.System.now()
             )
         ),
-        onContinue = {}
+        onContinue = {},
+        onEditNickname = {}
     )
 }
 
@@ -520,6 +528,7 @@ fun ActivateBackupApproverConfirmedPreview() {
                 confirmedAt = Clock.System.now()
             )
         ),
-        onContinue = {}
+        onContinue = {},
+        onEditNickname = {}
     )
 }

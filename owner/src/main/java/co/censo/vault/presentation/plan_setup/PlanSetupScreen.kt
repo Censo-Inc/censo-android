@@ -34,7 +34,7 @@ import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.plan_setup.components.ActivateApproverUI
-import co.censo.vault.presentation.plan_setup.components.AddApproverNicknameUI
+import co.censo.vault.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.vault.presentation.plan_setup.components.AddBackupApproverUI
 import co.censo.vault.presentation.plan_setup.components.AddTrustedApproversUI
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
@@ -100,7 +100,8 @@ fun PlanSetupScreen(
                 Text(
                     text =
                     when (state.planSetupUIState) {
-                        PlanSetupUIState.ApproverActivation ->
+                        PlanSetupUIState.ApproverActivation,
+                        PlanSetupUIState.EditApproverNickname ->
                             if (state.approverType == ApproverType.Primary) {
                                 stringResource(id = R.string.primary_approver)
                             } else {
@@ -161,7 +162,7 @@ fun PlanSetupScreen(
 
 
                         PlanSetupUIState.ApproverNickname -> {
-                            AddApproverNicknameUI(
+                            ApproverNicknameUI(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNickname.isNotBlank(),
                                 onNicknameChanged = viewModel::approverNicknameChanged,
@@ -185,7 +186,18 @@ fun PlanSetupScreen(
                                 secondsLeft = state.secondsLeft,
                                 verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
                                 storesLink = "Universal link to the App/Play stores",
-                                onContinue = viewModel::onApproverConfirmed
+                                onContinue = viewModel::onApproverConfirmed,
+                                onEditNickname = viewModel::onEditApproverNickname
+                            )
+                        }
+
+                        PlanSetupUIState.EditApproverNickname -> {
+                            ApproverNicknameUI(
+                                isRename = true,
+                                nickname = state.editedNickname,
+                                enabled = state.editedNickname.isNotBlank(),
+                                onNicknameChanged = viewModel::approverNicknameChanged,
+                                onSaveNickname = viewModel::onSaveApproverNickname
                             )
                         }
 

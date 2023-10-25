@@ -44,7 +44,8 @@ data class PlanSetupState(
 ) {
 
     val backArrowType = when (planSetupUIState) {
-        PlanSetupUIState.ApproverActivation -> BackIconType.Back
+        PlanSetupUIState.ApproverActivation,
+        PlanSetupUIState.EditApproverNickname -> BackIconType.Back
 
         PlanSetupUIState.InviteApprovers,
         PlanSetupUIState.ApproverNickname,
@@ -78,6 +79,7 @@ data class PlanSetupState(
 enum class PlanSetupUIState {
     InviteApprovers,
     ApproverNickname,
+    EditApproverNickname,
     ApproverGettingLive,
     ApproverActivation,
     AddBackupApprover,
