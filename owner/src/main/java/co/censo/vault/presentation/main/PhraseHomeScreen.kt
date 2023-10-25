@@ -41,7 +41,9 @@ import kotlinx.datetime.Clock
 
 @Composable
 fun PhraseHomeScreen(
-    vaultSecrets: List<VaultSecret>
+    vaultSecrets: List<VaultSecret>,
+    onAddClick: () -> Unit,
+    onAccessClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -49,7 +51,7 @@ fun PhraseHomeScreen(
             .background(color = Color.White)
             .verticalScroll(rememberScrollState())
     ) {
-        AddAccessRow(onAddClick = {}, onAccessClick = {})
+        AddAccessRow(onAddClick = onAddClick, onAccessClick = onAccessClick)
         Divider(
             modifier = Modifier.height(1.5.dp).fillMaxWidth(),
             color = SharedColors.DividerGray
@@ -153,6 +155,8 @@ fun SeedPhraseItem(vaultSecret: VaultSecret) {
 @Composable
 fun PreviewPhraseHomeScreen() {
     PhraseHomeScreen(
+        onAccessClick ={},
+        onAddClick = {},
         vaultSecrets = listOf(
             VaultSecret(
                 guid = VaultSecretId("12345"),

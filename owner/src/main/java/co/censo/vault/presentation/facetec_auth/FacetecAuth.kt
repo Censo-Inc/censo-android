@@ -88,14 +88,6 @@ fun FacetecAuth(
     ) {
 
         when {
-            state.loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(72.dp),
-                    strokeWidth = 8.dp,
-                    color = Color.Black
-                )
-            }
-
             state.apiError -> {
                 Text(text = when (state.submitResultResponse) {
                     is Resource.Error -> state.submitResultResponse.exception?.message
@@ -111,9 +103,13 @@ fun FacetecAuth(
                 }
             }
 
-            state.submitResultResponse is Resource.Success -> {
-                Text(text = "Authorized")
-            }
+            else ->
+                CircularProgressIndicator(
+                    modifier = Modifier.size(72.dp),
+                    strokeWidth = 8.dp,
+                    color = Color.Black
+                )
+
         }
     }
 }

@@ -16,8 +16,4 @@ data class FacetecAuthState(
 ) {
     val apiError = initFacetecData is Resource.Error
             || submitResultResponse is Resource.Error
-
-    val loading = initFacetecData is Resource.Loading
-            || submitResultResponse is Resource.Loading
-            || startAuth is Resource.Success
 }

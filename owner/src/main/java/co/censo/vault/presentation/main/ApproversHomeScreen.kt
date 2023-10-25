@@ -45,11 +45,7 @@ import co.censo.vault.presentation.plan_setup.components.ApproverActivatedUIData
 fun ApproversHomeScreen(
     guardians: List<Guardian.TrustedGuardian>
 ) {
-    if (guardians.isEmpty()) {
-        NoApproversUI {
-
-        }
-    } else {
+    if (guardians.any { it.label != "Me" }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,6 +64,10 @@ fun ApproversHomeScreen(
                     editEnabled = false
                 )
             }
+
+        }
+    } else {
+        NoApproversUI {
 
         }
     }
