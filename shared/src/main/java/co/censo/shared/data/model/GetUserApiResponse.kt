@@ -126,6 +126,7 @@ sealed class Guardian {
     data class TrustedGuardian(
         override val label: String,
         override val participantId: ParticipantId,
+        val isOwner: Boolean,
         val attributes: GuardianStatus.Onboarded,
     ) : Guardian()
 }

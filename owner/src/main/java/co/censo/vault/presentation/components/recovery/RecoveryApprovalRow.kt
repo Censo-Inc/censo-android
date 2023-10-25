@@ -190,6 +190,7 @@ fun RecoveryApprovalRowPreview() {
             guardian = Guardian.TrustedGuardian(
                 label = "Thomas Trusted",
                 participantId = participantId,
+                isOwner = false,
                 attributes = GuardianStatus.Onboarded(
                     onboardedAt = Clock.System.now(),
                 )
