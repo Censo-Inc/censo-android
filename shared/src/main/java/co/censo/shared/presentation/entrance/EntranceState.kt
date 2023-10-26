@@ -13,6 +13,7 @@ data class EntranceState(
     val ownerApp: Boolean = false,
     val authId: String = "",
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
+    val acceptedTermsOfUseVersion: String? = null
 ) {
     val isLoading = signInUserResource is Resource.Loading || ownerStateResource is Resource.Loading
 

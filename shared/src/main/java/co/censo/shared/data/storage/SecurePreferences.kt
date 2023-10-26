@@ -6,6 +6,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.model.SecurityPlanData
+import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.ACCEPTED_TERMS_OF_USE_VERSION
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.BIP39
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_CREATED_FLAG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.EDITING_SECURITY_PLAN
@@ -48,6 +49,8 @@ interface SecurePreferences {
     fun retrieveSecurityPlan() : SecurityPlanData?
     fun userHasSeenPermissionDialog(): Boolean
     fun setUserSeenPermissionDialog(seenDialog: Boolean)
+    fun acceptedTermsOfUseVersion(): String
+    fun setAcceptedTermsOfUseVersion(version: String)
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -66,6 +69,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         const val GOOGLE_DRIVE_MOCK_KEY = "google_drive_mock_key"
         const val EDITING_SECURITY_PLAN = "editing_security_plan"
         const val SECURITY_PLAN = "security_plan"
+        const val ACCEPTED_TERMS_OF_USE_VERSION = "accepted_terms_of_use_version"
     }
 
     private val masterKeyAlias: MasterKey =
@@ -178,6 +182,18 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         editor.apply()
     }
     //endregion
+
+    //region terms of use
+    override fun acceptedTermsOfUseVersion(): String {
+        return sharedPrefs.getString(ACCEPTED_TERMS_OF_USE_VERSION, "") ?: ""
+    }
+
+    override fun setAcceptedTermsOfUseVersion(version: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString(ACCEPTED_TERMS_OF_USE_VERSION, version)
+        editor.apply()
+    }
+    // endregion
 
     //region device created
     override fun setDeviceCreatedFlag() {
