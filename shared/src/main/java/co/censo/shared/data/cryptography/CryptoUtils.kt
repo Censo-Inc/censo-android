@@ -113,17 +113,15 @@ fun BigInteger.toByteArrayNoSign(len: Int): ByteArray {
     }
 }
 
-fun String.sha256digest(): ByteArray {
+fun ByteArray.sha256digest(): ByteArray {
     return MessageDigest
         .getInstance("SHA-256")
-        .digest(this.toByteArray())
+        .digest(this)
 }
 
-fun String.sha256(): String {
-    return this.sha256digest()
-        .fold("", { str, it -> str + "%02x".format(it) })
-}
-
+fun String.sha256digest() = this.toByteArray().sha256digest()
+fun String.sha256() = this.sha256digest().toHexString()
+fun ByteArray.sha256() = this.sha256digest().toHexString()
 
 fun BigInteger.toByteArrayNoSign(): ByteArray {
     val byteArray = this.toByteArray()
@@ -137,3 +135,5 @@ fun ByteArray.toHexString(): String =
 
 fun ByteArray.base64Encoded(): Base64EncodedData =
     Base64EncodedData(java.util.Base64.getEncoder().encodeToString(this))
+
+fun ByteArray.toBinaryString(length: Int): String = BigInteger(1, this).toString(2).padStart(length, '0')

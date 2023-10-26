@@ -42,9 +42,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
-import co.censo.vault.util.BIP39InvalidReason
-import co.censo.vault.util.errorMessage
-import co.censo.vault.util.errorTitle
+import co.censo.shared.util.BIP39InvalidReason
+import co.censo.shared.util.errorMessage
+import co.censo.shared.util.errorTitle
 import co.censo.vault.R as VaultR
 import kotlinx.coroutines.launch
 
