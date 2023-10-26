@@ -18,7 +18,7 @@ data class PlanSetupState(
     // restored approvers state
     val ownerApprover: Guardian.ProspectGuardian? = null,
     val primaryApprover: Guardian.ProspectGuardian? = null,
-    val backupApprover: Guardian.ProspectGuardian? = null,
+    val alternateApprover: Guardian.ProspectGuardian? = null,
 
     // Screen in Plan Setup Flow
     val planSetupUIState: PlanSetupUIState = PlanSetupUIState.InviteApprovers,
@@ -50,14 +50,14 @@ data class PlanSetupState(
         PlanSetupUIState.InviteApprovers,
         PlanSetupUIState.ApproverNickname,
         PlanSetupUIState.ApproverGettingLive,
-        PlanSetupUIState.AddBackupApprover,
+        PlanSetupUIState.AddAlternateApprover,
         PlanSetupUIState.RecoveryInProgress -> BackIconType.Exit
 
         PlanSetupUIState.Completed -> BackIconType.None
     }
 
-    val activatingApprover = backupApprover ?: primaryApprover
-    val approverType = if (backupApprover != null) ApproverType.Backup else ApproverType.Primary
+    val activatingApprover = alternateApprover ?: primaryApprover
+    val approverType = if (alternateApprover != null) ApproverType.Alternate else ApproverType.Primary
 
     val loading = userResponse is Resource.Loading
                 || createPolicySetupResponse is Resource.Loading
@@ -82,11 +82,11 @@ enum class PlanSetupUIState {
     EditApproverNickname,
     ApproverGettingLive,
     ApproverActivation,
-    AddBackupApprover,
+    AddAlternateApprover,
     RecoveryInProgress,
     Completed
 }
 
 enum class ApproverType {
-    Primary, Backup
+    Primary, Alternate
 }
