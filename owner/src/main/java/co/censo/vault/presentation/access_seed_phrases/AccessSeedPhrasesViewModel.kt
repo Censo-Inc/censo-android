@@ -18,9 +18,7 @@ import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.Screen
-import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesState.Companion.timeUserCanViewPhrase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -40,7 +38,9 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveOwnerState()
+        if (state.ownerState.data == null) {
+            retrieveOwnerState()
+        }
 
         timer.startCountDownTimer(countdownInterval = 1.seconds.inWholeMilliseconds) {
 
@@ -49,7 +49,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 if (now >= it) {
                     reset()
                 } else {
-                    projectLog(message = "time remaining: ${it - now}")
                     state = state.copy(timeRemaining = it - now)
                 }
             }
@@ -58,6 +57,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun onStop() {
         timer.stopCountDownTimer()
+
+        if (state.viewedPhrase.isNotEmpty()) {
+            reset()
+        }
     }
 
     fun reset() {
@@ -127,7 +130,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                                 recoveredPhrases = Resource.Success(recoveredSecrets),
                                 viewedPhrase = recoveredSecrets.firstOrNull()?.seedPhrase?.split(" ") ?: listOf(""),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
-                                locksAt = Clock.System.now().plus(timeUserCanViewPhrase)
+                                locksAt = Clock.System.now().plus(15.minutes)
                             )
                         }.onFailure {
                             state = state.copy(
@@ -163,7 +166,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun onPhraseSelected(vaultSecret: VaultSecret) {
-        projectLog(message = "Vault Secret Selected: $vaultSecret")
         state = state.copy(
             selectedPhrase = vaultSecret,
             accessPhrasesUIState = AccessPhrasesUIState.ReadyToStart
@@ -185,5 +187,18 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         val index =
             if (state.selectedIndex >= state.viewedPhrase.size - 1) state.selectedIndex else state.selectedIndex + 1
         state = state.copy(selectedIndex = index)
+    }
+
+    fun onBackClicked() {
+        val accessPhrasesUIState = when (state.accessPhrasesUIState) {
+            AccessPhrasesUIState.ViewPhrase,
+            AccessPhrasesUIState.ReadyToStart -> AccessPhrasesUIState.SelectPhrase
+            AccessPhrasesUIState.SelectPhrase,
+            AccessPhrasesUIState.Facetec -> null
+        }
+
+        accessPhrasesUIState?.let {
+            state = state.copy(accessPhrasesUIState = it)
+        }
     }
 }

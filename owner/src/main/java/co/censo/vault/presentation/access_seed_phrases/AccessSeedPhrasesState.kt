@@ -32,10 +32,6 @@ data class AccessSeedPhrasesState(
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
 
-    companion object {
-        val timeUserCanViewPhrase = 15.minutes
-    }
-
     val selectedWord = try {
         viewedPhrase[selectedIndex]
     } catch (e: Exception) {

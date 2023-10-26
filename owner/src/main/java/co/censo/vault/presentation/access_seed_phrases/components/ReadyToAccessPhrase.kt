@@ -76,7 +76,7 @@ fun ReadyToAccessPhrase(
                 .fillMaxWidth()
                 .padding(end = 24.dp)
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             message,
             fontSize = 16.sp,
@@ -85,7 +85,7 @@ fun ReadyToAccessPhrase(
                 .fillMaxWidth()
                 .padding(end = 24.dp)
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
@@ -137,7 +137,7 @@ fun ReadyToAccessPhrase(
 
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

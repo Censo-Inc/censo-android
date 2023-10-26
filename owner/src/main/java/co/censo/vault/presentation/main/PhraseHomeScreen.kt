@@ -61,7 +61,7 @@ fun PhraseHomeScreen(
         Spacer(modifier = Modifier.height(12.dp))
         vaultSecrets.forEach { vaultSecret ->
             Spacer(modifier = Modifier.height(12.dp))
-            SeedPhraseItem(vaultSecret = vaultSecret, onClick = { })
+            SeedPhraseItem(vaultSecret = vaultSecret)
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
@@ -127,11 +127,12 @@ fun AddAccessRow(
 fun SeedPhraseItem(
     horizontalPadding : Dp = 36.dp,
     vaultSecret: VaultSecret,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
+    val modifier = onClick?.let { Modifier.clickable { it() } } ?: Modifier
+
     Box(
-        modifier = Modifier
-            .clickable { onClick() }
+        modifier = modifier
             .padding(horizontal = horizontalPadding)
             .background(
                 color = Color.White,
