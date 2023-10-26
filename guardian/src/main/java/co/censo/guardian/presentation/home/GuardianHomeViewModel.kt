@@ -163,6 +163,9 @@ class GuardianHomeViewModel @Inject constructor(
             )
 
             if (acceptResource is Resource.Success) {
+                acceptResource.data?.guardianState?.participantId?.let {
+                    state = state.copy(participantId = it.value)
+                }
                 createAndSaveGuardianKey()
             }
 

@@ -222,6 +222,7 @@
     <string name="dowloand_the_app_message">They must download Censo Approver app from the Apple App Store or Google Play Store.</string>
     <string name="share_the_link_message">After they have installed Censo Approver app, send them this unique, secret link.</string>
     <string name="share_the_code_message">They must enter this 6-digit code to become your %1$s approver.</string>
+    <string name="rename_approver">Rename approver</string>
     <string name="activate_backup_approver">Activate Backup Approver</string>
     <string name="edit_approver_name">edit approver name</string>
     <string name="primary_approver">Primary approver</string>

@@ -83,6 +83,10 @@ class PlanSetupViewModel @Inject constructor(
                 state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
             }
 
+            PlanSetupUIState.EditApproverNickname -> {
+                state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
+            }
+
             PlanSetupUIState.InviteApprovers,
             PlanSetupUIState.ApproverNickname,
             PlanSetupUIState.ApproverGettingLive,
@@ -156,7 +160,13 @@ class PlanSetupViewModel @Inject constructor(
         // normally navigation is controlled by pressing "continue" button
         if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.InviteApprovers) {
             if (externalApprovers.notConfirmed().isNotEmpty()) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
+                state = state.copy(
+                    editedNickname = when (state.approverType) {
+                        ApproverType.Primary -> state.primaryApprover?.label
+                        ApproverType.Backup -> state.backupApprover?.label
+                    } ?: "",
+                    planSetupUIState = PlanSetupUIState.ApproverActivation
+                )
             } else if (backupApprover?.status is GuardianStatus.Confirmed) {
                 initiateRecovery()
             } else if (primaryApprover?.status is GuardianStatus.Confirmed) {
@@ -195,21 +205,69 @@ class PlanSetupViewModel @Inject constructor(
             // policy setup API expects all approvers to be sent with every request
             val updatedPolicySetupGuardians = listOfNotNull(
                 state.ownerApprover?.asImplicitlyOwner() ?: createOwnerApprover(),
-                state.primaryApprover?.asExternalApprover() ?: createExternalApprover(state.editedNickname),
+                state.primaryApprover?.asExternalApprover()
+                    ?: createExternalApprover(state.editedNickname),
                 if (state.primaryApprover?.status is GuardianStatus.Confirmed) {
-                    state.backupApprover?.asExternalApprover() ?: createExternalApprover(state.editedNickname)
+                    state.backupApprover?.asExternalApprover()
+                        ?: createExternalApprover(state.editedNickname)
                 } else {
                     null
                 }
             )
-            
+
+            submitPolicySetup(updatedPolicySetupGuardians)
+        }
+    }
+
+    fun onEditApproverNickname() {
+        val nicknameToUpdate = when (state.approverType) {
+            ApproverType.Primary -> state.primaryApprover?.label
+            ApproverType.Backup -> state.backupApprover?.label
+        }
+
+        state = state.copy(
+            editedNickname = nicknameToUpdate ?: "",
+            planSetupUIState = PlanSetupUIState.EditApproverNickname
+        )
+    }
+
+    fun onSaveApproverNickname() {
+        state = state.copy(createPolicySetupResponse = Resource.Loading())
+
+        val ownerApprover = state.ownerApprover?.asImplicitlyOwner()
+        val primaryApprover = state.primaryApprover?.asExternalApprover()
+        val backupApprover = state.backupApprover?.asExternalApprover()
+
+        val updatedPolicySetupGuardians = when (state.approverType) {
+            ApproverType.Primary -> {
+                listOfNotNull(
+                    ownerApprover,
+                    primaryApprover?.copy(label = state.editedNickname),
+                    backupApprover
+                )
+            }
+
+            ApproverType.Backup -> {
+                listOfNotNull(
+                    ownerApprover,
+                    primaryApprover,
+                    backupApprover?.copy(label = state.editedNickname),
+                )
+            }
+        }
+
+        submitPolicySetup(updatedPolicySetupGuardians)
+    }
+
+    private fun submitPolicySetup(updatedPolicySetupGuardians: List<Guardian.SetupGuardian>) {
+        viewModelScope.launch {
             val response = ownerRepository.createPolicySetup(
                 threshold = 2U,
                 guardians = updatedPolicySetupGuardians
             )
 
             if (response is Resource.Success) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
+                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
 
                 updateOwnerState(response.data!!.ownerState)
             }

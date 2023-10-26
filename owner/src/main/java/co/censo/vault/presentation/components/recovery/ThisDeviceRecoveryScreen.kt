@@ -171,6 +171,7 @@ fun ThisDeviceRecoveryScreenPreview() {
         Guardian.TrustedGuardian(
             label = "Approver $index",
             participantId = participantId,
+            isOwner = false,
             attributes = GuardianStatus.Onboarded(
                 onboardedAt = Clock.System.now(),
             )
