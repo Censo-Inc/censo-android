@@ -2,7 +2,7 @@ package co.censo.vault.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import co.censo.shared.data.Resource
-import co.censo.vault.util.BIP39InvalidReason
+import co.censo.shared.util.BIP39InvalidReason
 
 data class EnterPhraseState(
     val masterPublicKey: Base58EncodedMasterPublicKey? = null,
