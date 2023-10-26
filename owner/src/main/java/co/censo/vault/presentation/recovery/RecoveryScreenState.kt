@@ -1,7 +1,6 @@
 package co.censo.vault.presentation.recovery
 
 import ParticipantId
-import VaultSecretId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
@@ -21,7 +20,6 @@ data class TotpVerificationScreenState(
 
 data class RecoveryScreenState(
     // owner state
-    val secrets: List<VaultSecretId> = listOf(),
     val guardians: List<Guardian.TrustedGuardian> = listOf(),
     val recovery: Recovery? = null,
     val approvalsCollected: Int = 0,

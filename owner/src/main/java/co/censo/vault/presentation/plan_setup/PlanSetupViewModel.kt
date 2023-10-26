@@ -406,7 +406,7 @@ class PlanSetupViewModel @Inject constructor(
             }
 
             // request new recovery without secrets to make shards available immediately
-            val initiateRecoveryResponse = ownerRepository.initiateRecovery(listOf())
+            val initiateRecoveryResponse = ownerRepository.initiateRecovery()
 
             if (initiateRecoveryResponse is Resource.Success) {
                 // navigate to the facetec view

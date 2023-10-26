@@ -1,12 +1,8 @@
 package co.censo.vault.presentation.components.recovery
 
-import Base58EncodedGuardianPublicKey
-import Base64EncodedData
-import StandardButton
 import ParticipantId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,13 +27,11 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.cryptography.generateBase64
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.model.Approval
@@ -185,8 +179,7 @@ fun ThisDeviceRecoveryScreenPreview() {
             createdAt = Clock.System.now(),
             unlocksAt = Clock.System.now(),
             expiresAt = Clock.System.now() + 1.days,
-            approvals = approvals,
-            vaultSecretIds = listOf()
+            approvals = approvals
         ),
         guardians = guardians,
         approvalsCollected = 1,

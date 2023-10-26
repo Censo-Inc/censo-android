@@ -98,8 +98,7 @@ fun AccessPhrasesScreenPreview() {
             createdAt = Clock.System.now(),
             unlocksAt = Clock.System.now() + 5.minutes,
             expiresAt = Clock.System.now() + 1.days,
-            approvals = listOf(),
-            vaultSecretIds = listOf()
+            approvals = listOf()
         ),
         approvalsCollected = 3,
         approvalsRequired = 3,

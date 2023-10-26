@@ -156,7 +156,7 @@ interface OwnerRepository {
     fun retrieveSecurityPlan(): SecurityPlanData?
     fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
     fun clearSecurityPlanData()
-    suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse>
+    suspend fun initiateRecovery(): Resource<InitiateRecoveryApiResponse>
     suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse>
     suspend fun signUserOut()
     suspend fun submitRecoveryTotpVerification(
@@ -452,8 +452,8 @@ class OwnerRepositoryImpl(
         secureStorage.setSecurityPlan(securityPlanData)
 
     override fun clearSecurityPlanData() = secureStorage.clearSecurityPlanData()
-    override suspend fun initiateRecovery(secretIds: List<VaultSecretId>): Resource<InitiateRecoveryApiResponse> {
-        return retrieveApiResource { apiService.requestRecovery(InitiateRecoveryApiRequest(secretIds)) }
+    override suspend fun initiateRecovery(): Resource<InitiateRecoveryApiResponse> {
+        return retrieveApiResource { apiService.requestRecovery() }
     }
 
     override suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse> {

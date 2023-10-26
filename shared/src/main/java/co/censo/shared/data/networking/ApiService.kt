@@ -208,9 +208,7 @@ interface ApiService {
     ): RetrofitResponse<DeleteSecretApiResponse>
 
     @POST("/v1/recovery")
-    suspend fun requestRecovery(
-        @Body apiRequest: InitiateRecoveryApiRequest
-    ): RetrofitResponse<InitiateRecoveryApiResponse>
+    suspend fun requestRecovery(): RetrofitResponse<InitiateRecoveryApiResponse>
 
     @DELETE("/v1/recovery")
     suspend fun deleteRecovery(): RetrofitResponse<DeleteRecoveryApiResponse>
