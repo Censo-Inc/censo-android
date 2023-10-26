@@ -306,21 +306,24 @@ class GuardianHomeViewModel @Inject constructor(
     }
 
     private fun startRecoveryTotpGeneration(encryptedSecret: Base64EncodedData) {
-        state = state.copy(recoveryTotp = generateRecoveryTotp(encryptedSecret))
-        recoveryTotpTimer.startCountDownTimer(UPDATE_COUNTDOWN) {
-            state.recoveryTotp?.also { totp ->
-                val now = Clock.System.now()
+        viewModelScope.launch {
+            state = state.copy(recoveryTotp = generateRecoveryTotp(encryptedSecret))
+            recoveryTotpTimer.startCountDownTimer(UPDATE_COUNTDOWN) {
+                state.recoveryTotp?.also { totp ->
+                    val now = Clock.System.now()
 
-                state = if (totp.counter != now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)) {
-                    state.copy(
-                        recoveryTotp = generateRecoveryTotp(totp.encryptedSecret)
-                    )
-                } else {
-                    state.copy(
-                        recoveryTotp = totp.copy(
-                            currentSecond = now.toLocalDateTime(TimeZone.UTC).second
-                        )
-                    )
+                    state =
+                        if (totp.counter != now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)) {
+                            state.copy(
+                                recoveryTotp = generateRecoveryTotp(totp.encryptedSecret)
+                            )
+                        } else {
+                            state.copy(
+                                recoveryTotp = totp.copy(
+                                    currentSecond = now.toLocalDateTime(TimeZone.UTC).second
+                                )
+                            )
+                        }
                 }
             }
         }
