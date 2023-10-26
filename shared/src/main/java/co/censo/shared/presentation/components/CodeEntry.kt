@@ -75,10 +75,10 @@ fun CodeInputField(
     }
 
     val boxHeight = 88.dp
-    val boxWidth = 40.dp
-    val spaceBetweenBoxes = 14.dp
+    val boxWidth = 35.dp
+    val spaceBetweenBoxes = 12.dp
 
-    val roundCorner = 20.dp
+    val roundCorner = 15.dp
 
     BasicTextField(
         modifier = modifier.focusRequester(focusRequester),

@@ -141,7 +141,7 @@ fun ActivateApproverUI(
             context
         )?.let {
             ApproverStep(
-                imagePainter = painterResource(id = co.censo.shared.R.drawable.small_face_scan),
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
                 heading = it.heading,
                 content = it.content,
                 verificationCodeUIData = it.verificationCodeUIData

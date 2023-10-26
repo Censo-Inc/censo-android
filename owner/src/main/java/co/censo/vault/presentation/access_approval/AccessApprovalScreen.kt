@@ -35,6 +35,7 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.access_approval.components.ApproveAccessUI
 import co.censo.vault.presentation.access_approval.components.SelectApproverUI
 import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
@@ -192,6 +193,13 @@ fun AccessApprovalScreen(
                                 }
 
                                 AccessApprovalUIState.ApproveAccess -> {
+                                    ApproveAccessUI(
+                                        approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
+                                        verificationCode = state.verificationCode,
+                                        onVerificationCodeChanged = viewModel::onVerificationCodeChanged,
+                                        storesLink = "",
+                                        onContinue = {}
+                                    )
                                 }
 
                                 AccessApprovalUIState.Approved -> {

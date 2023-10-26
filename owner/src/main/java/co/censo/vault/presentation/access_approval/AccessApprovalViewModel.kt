@@ -70,8 +70,8 @@ class AccessApprovalViewModel @Inject constructor(
                     initiateNewRecovery = ownerState.recovery == null,
                     recovery = ownerState.recovery,
                     approvers = ownerState.policy.guardians,
+                    approvals = (ownerState.recovery as Recovery.ThisDevice).approvals,
                     secrets = ownerState.vault.secrets.map { it.guid },
-                    approvalsRequired = ownerState.policy.threshold.toInt()
                 )
 
                 determineCodeVerificationState(ownerState)
@@ -261,6 +261,11 @@ class AccessApprovalViewModel @Inject constructor(
         } else {
             state.copy(selectedApprover = selectedApprover)
         }
+    }
+
+    fun onVerificationCodeChanged(verificationCode: String) {
+        state = state.copy(verificationCode = verificationCode)
+        //FIXME submit automatically
     }
 
     fun continueToApproveAccess() {

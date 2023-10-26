@@ -3,6 +3,7 @@ package co.censo.vault.presentation.access_approval
 import ParticipantId
 import VaultSecretId
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
@@ -25,15 +26,17 @@ data class AccessApprovalState(
     val accessApprovalUIState: AccessApprovalUIState = AccessApprovalUIState.GettingLive,
     val selectedApprover: Guardian.TrustedGuardian? = null,
 
+    val verificationCode: String = "",
+
     // data
     val ownerState: Resource<OwnerState> = Resource.Uninitialized,
     val approvers: List<Guardian.TrustedGuardian> = listOf(),
+    val approvals: List<Approval> = listOf(),
 
 
     // owner state
     val secrets: List<VaultSecretId> = listOf(),
     val recovery: Recovery? = null,
-    val approvalsRequired: Int = 0,
 
     // recovery control
     val initiateNewRecovery: Boolean = false,
