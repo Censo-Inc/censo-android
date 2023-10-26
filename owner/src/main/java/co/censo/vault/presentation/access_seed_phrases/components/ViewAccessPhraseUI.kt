@@ -1,9 +1,11 @@
 package co.censo.vault.presentation.access_seed_phrases.components
 
+import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -22,14 +25,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
 import co.censo.shared.presentation.SharedColors
+import co.censo.vault.presentation.components.recovery.formatDuration
 import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWord
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 @Composable
 fun ViewAccessPhraseUI(
@@ -37,6 +50,8 @@ fun ViewAccessPhraseUI(
     phraseWord: String,
     decrementIndex: () -> Unit,
     incrementIndex: () -> Unit,
+    onDone: () -> Unit,
+    timeLeft: Duration
 ) {
 
     Column(
@@ -44,10 +59,66 @@ fun ViewAccessPhraseUI(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "15 minutes left...", color = Color.Black)
+
+        Column {
+
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = SharedColors.BackgroundGrey)
+                    .padding(vertical = 4.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Icon(
+                        painterResource(id = co.censo.vault.R.drawable.time_left_icon),
+                        contentDescription = "",
+                    )
+                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+
+                    val accessTextStyle = SpanStyle(
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
+
+                    val timeLeftText = buildAnnotatedString {
+                        withStyle(accessTextStyle) {
+                            append("Access ends in ")
+                        }
+                        withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
+                            append(formatPhraseAccessDuration(timeLeft))
+                        }
+                    }
+
+                    Text(
+                        text = timeLeftText,
+                        color = Color.Black
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(0.1f)
+                            .padding(end = 12.dp),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        StandardButton(
+                            contentPadding = PaddingValues(horizontal = 32.dp),
+                            onClick = onDone
+                        ) {
+                            Text(
+                                text = "Done",
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+            Divider()
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -83,11 +154,17 @@ fun ViewAccessPhraseUI(
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 36.dp)
+
+        Column(
+            modifier = Modifier.padding(horizontal = 56.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
+            Divider(
+                color = SharedColors.DividerGray,
+                thickness = 0.75.dp
+            )
+            Spacer(modifier = Modifier.height(28.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -99,7 +176,7 @@ fun ViewAccessPhraseUI(
                             color = SharedColors.DarkGreyBackground,
                             shape = RoundedCornerShape(20.dp)
                         )
-                        .weight(0.25f)
+                        .weight(0.20f)
                         .padding(8.dp)
                 ) {
                     Icon(
@@ -110,7 +187,7 @@ fun ViewAccessPhraseUI(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
                     modifier = Modifier.weight(0.75f),
@@ -130,13 +207,24 @@ fun ViewAccessPhraseUI(
                         modifier = Modifier.fillMaxWidth(),
                         text = "You will need to start this process over if you leave or close the app.",
                         color = Color.Black,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         textAlign = TextAlign.Start
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
+}
+
+fun formatPhraseAccessDuration(duration: Duration): String {
+    val minutes = duration.toInt(DurationUnit.MINUTES)
+    val seconds = duration.minus(minutes.minutes).inWholeSeconds
+
+    val formattedMinutes = "${if (minutes < 10) "0$minutes" else "$minutes"} min"
+    val formattedSeconds = "${if (seconds < 10) "0$seconds" else "$seconds"} sec."
+
+    return "$formattedMinutes $formattedSeconds".trim()
 }
 
 @Preview(showSystemUi = true, showBackground = true)
@@ -148,6 +236,8 @@ fun PreviewViewPhraseWordUI() {
             phraseWord = "lounge",
             decrementIndex = { },
             incrementIndex = { },
+            onDone = {},
+            timeLeft = 1199.seconds
         )
     }
 }

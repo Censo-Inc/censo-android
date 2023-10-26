@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,6 +22,7 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.vault.presentation.access_seed_phrases.components.SelectPhraseUI
@@ -38,7 +40,9 @@ fun AccessSeedPhrasesScreen(
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
-        onDispose { }
+        onDispose {
+            viewModel.onStop()
+        }
     }
 
     LaunchedEffect(key1 = state) {
@@ -108,7 +112,9 @@ fun AccessSeedPhrasesScreen(
                 }
 
                 AccessPhrasesUIState.ReadyToStart -> {
-                    ReadyToAccessPhrase {
+                    ReadyToAccessPhrase(
+                        phraseLabel = state.selectedPhrase?.label ?: stringResource(R.string.phrase)
+                    ) {
                         viewModel.startFacetec()
                     }
                 }
@@ -127,10 +133,12 @@ fun AccessSeedPhrasesScreen(
                 AccessPhrasesUIState.ViewPhrase -> {
                     state.recoveredPhrases.data?.first()?.let {
                         ViewAccessPhraseUI(
-                            wordIndex = 0,
-                            phraseWord = it.seedPhrase.split(" ")[0],
-                            decrementIndex = { },
-                            incrementIndex = { }
+                            wordIndex = state.selectedIndex,
+                            phraseWord = state.selectedWord,
+                            decrementIndex = viewModel::decrementIndex,
+                            incrementIndex = viewModel::incrementIndex,
+                            onDone = viewModel::reset,
+                            timeLeft = state.timeRemaining
                         )
                     }
                 }

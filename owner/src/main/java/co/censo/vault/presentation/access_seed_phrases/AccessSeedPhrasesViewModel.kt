@@ -17,17 +17,22 @@ import co.censo.shared.data.model.RecoveryStatus
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class AccessSeedPhrasesViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val timer: VaultCountDownTimer,
 ) : ViewModel() {
 
     var state by mutableStateOf(AccessSeedPhrasesState())
@@ -35,6 +40,27 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun onStart() {
         retrieveOwnerState()
+
+        timer.startCountDownTimer(countdownInterval = 1.seconds.inWholeMilliseconds) {
+
+            state.locksAt?.let {
+                val now =  Clock.System.now()
+                if (now >= it) {
+                    timerFinished()
+                } else {
+                    projectLog(message = "time remaining: ${it - now}")
+                    state = state.copy(timeRemaining = it - now)
+                }
+            }
+        }
+    }
+
+    fun onStop() {
+        timer.stopCountDownTimer()
+    }
+
+    private fun timerFinished() {
+        state = AccessSeedPhrasesState()
     }
 
     fun reset() {
@@ -91,15 +117,18 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
                             check(requestedSecret != null)
 
-                            val recoveredSecrets: List<RecoveredSeedPhrase> = ownerRepository.recoverSecrets(
-                                listOf(requestedSecret),
-                                encryptedShards,
-                                ownerState.policy.encryptedMasterKey
-                            )
+                            val recoveredSecrets: List<RecoveredSeedPhrase> =
+                                ownerRepository.recoverSecrets(
+                                    listOf(requestedSecret),
+                                    encryptedShards,
+                                    ownerState.policy.encryptedMasterKey
+                                )
 
                             state = state.copy(
                                 recoveredPhrases = Resource.Success(recoveredSecrets),
+                                viewedPhrase = recoveredSecrets.firstOrNull()?.seedPhrase?.split(" ") ?: listOf(""),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
+                                locksAt = Clock.System.now().plus(1.minutes)
                             )
                         }.onFailure {
                             state = state.copy(
@@ -146,5 +175,16 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         state = state.copy(
             accessPhrasesUIState = AccessPhrasesUIState.Facetec
         )
+    }
+
+    fun decrementIndex() {
+        val index = if (state.selectedIndex > 0) state.selectedIndex - 1 else 0
+        state = state.copy(selectedIndex = index)
+    }
+
+    fun incrementIndex() {
+        val index =
+            if (state.selectedIndex >= state.viewedPhrase.size - 1) state.selectedIndex else state.selectedIndex + 1
+        state = state.copy(selectedIndex = index)
     }
 }
