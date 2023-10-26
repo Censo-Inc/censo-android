@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.recovery
+package co.censo.vault.presentation.access_approval
 
 import ParticipantId
 import androidx.compose.runtime.getValue
@@ -12,6 +12,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.repository.OwnerRepository
@@ -23,22 +24,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RecoveryScreenViewModel @Inject constructor(
+class AccessApprovalViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val pollingVerificationTimer: VaultCountDownTimer
 ) : ViewModel() {
 
-    var state by mutableStateOf(RecoveryScreenState())
+    var state by mutableStateOf(AccessApprovalState())
         private set
 
     fun onStart() {
-
         reloadOwnerState()
 
         // setup polling timer to reload approvals state
         pollingVerificationTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
             if (state.userResponse !is Resource.Loading) {
-                silentReloadUserState()
+                reloadOwnerState(silent = true)
             }
         }
     }
@@ -47,17 +47,10 @@ class RecoveryScreenViewModel @Inject constructor(
         pollingVerificationTimer.stopCountDownTimer()
     }
 
-    private fun silentReloadUserState() {
-        viewModelScope.launch {
-            val response = ownerRepository.retrieveUser()
-            if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
-            }
+    fun reloadOwnerState(silent: Boolean = false) {
+        if (!silent) {
+            state = state.copy(userResponse = Resource.Loading())
         }
-    }
-
-    fun reloadOwnerState() {
-        state = state.copy(userResponse = Resource.Loading())
 
         viewModelScope.launch {
             val response = ownerRepository.retrieveUser()
@@ -76,14 +69,8 @@ class RecoveryScreenViewModel @Inject constructor(
                 state = state.copy(
                     initiateNewRecovery = ownerState.recovery == null,
                     recovery = ownerState.recovery,
-                    guardians = ownerState.policy.guardians,
+                    approvers = ownerState.policy.guardians,
                     secrets = ownerState.vault.secrets.map { it.guid },
-                    approvalsCollected = ownerState.recovery?.let {
-                        when (it) {
-                            is Recovery.ThisDevice -> it.approvals.count { it.status == ApprovalStatus.Approved }
-                            else -> 0
-                        }
-                    } ?: 0,
                     approvalsRequired = ownerState.policy.threshold.toInt()
                 )
 
@@ -128,7 +115,7 @@ class RecoveryScreenViewModel @Inject constructor(
     }
 
     fun reset() {
-        state = RecoveryScreenState()
+        state = AccessApprovalState()
     }
 
     fun initiateRecovery() {
@@ -171,7 +158,7 @@ class RecoveryScreenViewModel @Inject constructor(
     }
 
     fun showCodeEntryModal(approval: Approval) {
-        val guardian = state.guardians.find { it.participantId == approval.participantId }!!
+        val guardian = state.approvers.find { it.participantId == approval.participantId }!!
         state = state.copy(
             // reset verification state on re-entry
             totpVerificationState = TotpVerificationScreenState(
@@ -243,4 +230,82 @@ class RecoveryScreenViewModel @Inject constructor(
         )
     }
 
+    fun onResumeLater() {
+        state = state.copy(
+            navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
+        )
+    }
+
+    fun resetNavigationResource() {
+        state = state.copy(
+            navigationResource = Resource.Uninitialized
+        )
+    }
+
+    fun onContinueLive() {
+        state = if (state.approvers.backupApprover().isDefined()) {
+            state.copy(
+                accessApprovalUIState = AccessApprovalUIState.SelectApprover
+            )
+        } else {
+            state.copy(
+                selectedApprover = state.approvers.primaryApprover(),
+                accessApprovalUIState = AccessApprovalUIState.ApproveAccess
+            )
+        }
+    }
+
+    fun onApproverSelected(selectedApprover: Guardian.TrustedGuardian) {
+        state = if (state.selectedApprover == selectedApprover) {
+            state.copy(selectedApprover = null)
+        } else {
+            state.copy(selectedApprover = selectedApprover)
+        }
+    }
+
+    fun continueToApproveAccess() {
+        state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
+    }
+
+    fun onBackClicked() {
+        when (state.accessApprovalUIState) {
+            AccessApprovalUIState.GettingLive -> {
+                state = state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+            }
+
+            AccessApprovalUIState.SelectApprover -> {
+                state = state.copy(accessApprovalUIState = AccessApprovalUIState.GettingLive)
+            }
+
+            AccessApprovalUIState.ApproveAccess -> {
+                state = state.copy(accessApprovalUIState = AccessApprovalUIState.SelectApprover)
+            }
+
+            AccessApprovalUIState.Approved -> {
+                state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
+            }
+        }
+    }
+}
+
+internal fun List<Guardian.TrustedGuardian>.external(): List<Guardian.TrustedGuardian> {
+    return filter { !it.isOwner }
+}
+
+internal fun List<Guardian.TrustedGuardian>.primaryApprover(): Guardian.TrustedGuardian? {
+    return external().minByOrNull { it.attributes.onboardedAt }
+}
+
+internal fun List<Guardian.TrustedGuardian>.backupApprover(): Guardian.TrustedGuardian? {
+    val externalApprovers = external()
+
+    return when {
+        externalApprovers.isEmpty() -> null
+        externalApprovers.size == 1 -> null
+        else -> externalApprovers.maxBy { it.attributes.onboardedAt }
+    }
+}
+
+internal fun Guardian.TrustedGuardian?.isDefined(): Boolean {
+    return this != null
 }

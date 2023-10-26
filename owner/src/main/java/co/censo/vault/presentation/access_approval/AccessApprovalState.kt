@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.recovery
+package co.censo.vault.presentation.access_approval
 
 import ParticipantId
 import VaultSecretId
@@ -7,6 +7,7 @@ import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 
@@ -19,12 +20,19 @@ data class TotpVerificationScreenState(
     val participantId: ParticipantId = ParticipantId("")
 )
 
-data class RecoveryScreenState(
+data class AccessApprovalState(
+    // UI state
+    val accessApprovalUIState: AccessApprovalUIState = AccessApprovalUIState.GettingLive,
+    val selectedApprover: Guardian.TrustedGuardian? = null,
+
+    // data
+    val ownerState: Resource<OwnerState> = Resource.Uninitialized,
+    val approvers: List<Guardian.TrustedGuardian> = listOf(),
+
+
     // owner state
     val secrets: List<VaultSecretId> = listOf(),
-    val guardians: List<Guardian.TrustedGuardian> = listOf(),
     val recovery: Recovery? = null,
-    val approvalsCollected: Int = 0,
     val approvalsRequired: Int = 0,
 
     // recovery control
@@ -54,3 +62,8 @@ data class RecoveryScreenState(
             || cancelRecoveryResource is Resource.Error
             || submitTotpVerificationResource is Resource.Loading
 }
+
+enum class AccessApprovalUIState {
+    GettingLive, SelectApprover, ApproveAccess, Approved
+}
+

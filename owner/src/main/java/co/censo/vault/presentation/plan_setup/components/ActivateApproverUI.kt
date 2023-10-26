@@ -156,7 +156,7 @@ fun ActivateApproverUI(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        ApproverInfoBox(
+        ProspectApproverInfoBox(
             nickName = nickName,
             primaryApprover = isPrimaryApprover,
             status = guardianStatus,
@@ -191,7 +191,7 @@ fun ActivateApproverUI(
 }
 
 @Composable
-fun ApproverInfoBox(
+fun ProspectApproverInfoBox(
     nickName: String,
     primaryApprover: Boolean,
     status: GuardianStatus?,

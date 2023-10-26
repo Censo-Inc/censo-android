@@ -225,12 +225,14 @@
     <string name="rename_approver">Rename approver</string>
     <string name="activate_backup_approver">Activate Backup Approver</string>
     <string name="edit_approver_name">edit approver name</string>
+    <string name="select_approver">select_approver</string>
     <string name="primary_approver">Primary approver</string>
     <string name="backup_approver">Backup approver</string>
     <string name="primary">primary</string>
     <string name="backup">backup</string>
     <string name="activated">Activated</string>
     <string name="not_yet_active">Not yet active</string>
+    <string name="active">Active</string>
     <string name="share_app_link">Share app link</string>
     <string name="share_unique_link">Share unique link</string>
     <string name="add_a_backup_approver">Add a backup approver?</string>
@@ -273,5 +275,7 @@
     <string name="dont_leave_title">Don\'t leave the app</string>
     <string name="dont_leave_message">You will need to start this process over if you leave or close the app.</string>
     <string name="phrase">Phrase</string>
+    <string name="request_access">Request access</string>
+    <string name="request_access_blurb">Which approver would you like to use to request access?</string>
 
 </resources>
