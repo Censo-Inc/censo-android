@@ -19,12 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import co.censo.shared.data.Resource
-import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.lock_screen.components.LockEngagedUI
+import co.censo.vault.presentation.lock_screen.components.ProlongUnlockPrompt
 
 @Composable
 fun LockedScreen(
@@ -36,19 +35,9 @@ fun LockedScreen(
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    OnLifecycleEvent { _, event ->
-        when (event) {
-            Lifecycle.Event.ON_START
-            -> {
-                viewModel.onStart()
-            }
-
-            Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onStop()
-            }
-
-            else -> Unit
-        }
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
+        onDispose {}
     }
 
     Box(modifier = Modifier
@@ -60,6 +49,12 @@ fun LockedScreen(
         when (val lockStatus = state.lockStatus) {
             is LockScreenState.LockStatus.Locked ->
                 LockEngagedUI(initUnlock = viewModel::initUnlock)
+
+            is LockScreenState.LockStatus.Unlocked ->
+                ProlongUnlockPrompt(
+                    lockStatus.locksAt,
+                    onTimeOut = viewModel::onUnlockExpired
+                )
 
             is LockScreenState.LockStatus.UnlockInProgress -> {
                 when (lockStatus.apiCall) {
@@ -92,7 +87,6 @@ fun LockedScreen(
                 }
             }
 
-            is LockScreenState.LockStatus.Unlocked,
             is LockScreenState.LockStatus.None -> {
                 Spacer(modifier = Modifier.height(0.dp))
             }
