@@ -7,6 +7,7 @@ import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.VaultSecret
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -30,6 +31,10 @@ data class AccessSeedPhrasesState(
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
+
+    companion object {
+        val timeUserCanViewPhrase = 15.minutes
+    }
 
     val selectedWord = try {
         viewedPhrase[selectedIndex]

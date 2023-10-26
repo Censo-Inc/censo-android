@@ -93,7 +93,7 @@ fun MainVaultScreen(
                             }
                         },
                         onAccessClick = {
-                            navController.navigate(Screen.AccessSeedPhrases.route)
+                            navController.navigate(Screen.RecoveryScreen.route)
                         }
                     )
 

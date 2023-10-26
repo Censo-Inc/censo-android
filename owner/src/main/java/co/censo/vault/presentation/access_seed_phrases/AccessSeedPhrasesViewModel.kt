@@ -20,6 +20,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.projectLog
 import co.censo.vault.presentation.Screen
+import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesState.Companion.timeUserCanViewPhrase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -46,7 +47,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             state.locksAt?.let {
                 val now =  Clock.System.now()
                 if (now >= it) {
-                    timerFinished()
+                    reset()
                 } else {
                     projectLog(message = "time remaining: ${it - now}")
                     state = state.copy(timeRemaining = it - now)
@@ -59,12 +60,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         timer.stopCountDownTimer()
     }
 
-    private fun timerFinished() {
-        state = AccessSeedPhrasesState()
-    }
-
     fun reset() {
-        state = AccessSeedPhrasesState()
+        state = AccessSeedPhrasesState().copy(
+            ownerState = state.ownerState
+        )
     }
 
     fun retrieveOwnerState() {
@@ -128,7 +127,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                                 recoveredPhrases = Resource.Success(recoveredSecrets),
                                 viewedPhrase = recoveredSecrets.firstOrNull()?.seedPhrase?.split(" ") ?: listOf(""),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
-                                locksAt = Clock.System.now().plus(1.minutes)
+                                locksAt = Clock.System.now().plus(timeUserCanViewPhrase)
                             )
                         }.onFailure {
                             state = state.copy(
