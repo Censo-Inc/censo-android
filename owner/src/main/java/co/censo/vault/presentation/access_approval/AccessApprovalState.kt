@@ -1,6 +1,5 @@
 package co.censo.vault.presentation.access_approval
 
-import ParticipantId
 import VaultSecretId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Approval
@@ -12,40 +11,25 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 
-data class TotpVerificationScreenState(
-    val verificationCode: String = "",
-    val waitingForApproval: Boolean = false,
-    val rejected: Boolean = false,
-    val showModal: Boolean = false,
-    val approverLabel: String = "",
-    val participantId: ParticipantId = ParticipantId("")
-)
-
 data class AccessApprovalState(
     // UI state
     val accessApprovalUIState: AccessApprovalUIState = AccessApprovalUIState.GettingLive,
     val selectedApprover: Guardian.TrustedGuardian? = null,
-
     val verificationCode: String = "",
+    val waitingForApproval: Boolean = false,
 
     // data
-    val ownerState: Resource<OwnerState> = Resource.Uninitialized,
+    val ownerState: OwnerState.Ready? = null,
+    val recovery: Recovery.ThisDevice? = null,
     val approvers: List<Guardian.TrustedGuardian> = listOf(),
     val approvals: List<Approval> = listOf(),
-
-
-    // owner state
     val secrets: List<VaultSecretId> = listOf(),
-    val recovery: Recovery? = null,
 
     // recovery control
     val initiateNewRecovery: Boolean = false,
 
-    // totp code verification
-    val totpVerificationState: TotpVerificationScreenState = TotpVerificationScreenState(),
-
     // api requests
-    val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
+    val userResponse: Resource<OwnerState> = Resource.Uninitialized,
     val approvalsResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val initiateRecoveryResource: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
     val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
@@ -67,6 +51,6 @@ data class AccessApprovalState(
 }
 
 enum class AccessApprovalUIState {
-    GettingLive, SelectApprover, ApproveAccess, Approved
+    AnotherDevice, GettingLive, SelectApprover, ApproveAccess, Approved
 }
 

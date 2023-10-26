@@ -38,7 +38,8 @@ fun CodeEntry(
     isLoading: Boolean,
     primaryColor: Color,
     borderColor: Color,
-    backgroundColor: Color
+    backgroundColor: Color,
+    requestFocus: Boolean = false
 ) {
     Row(
         Modifier
@@ -53,7 +54,8 @@ fun CodeEntry(
             isLoading = isLoading,
             primaryColor = primaryColor,
             borderColor = borderColor,
-            backgroundColor = backgroundColor
+            backgroundColor = backgroundColor,
+            requestFocus = requestFocus
         )
     }
 }
@@ -67,16 +69,17 @@ fun CodeInputField(
     isLoading: Boolean,
     primaryColor: Color,
     borderColor: Color,
-    backgroundColor: Color
+    backgroundColor: Color,
+    requestFocus: Boolean = false
 ) {
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(key1 = Unit) {
-            focusRequester.requestFocus()
+    LaunchedEffect(key1 = requestFocus) {
+        focusRequester.requestFocus()
     }
 
-    val boxHeight = 88.dp
-    val boxWidth = 35.dp
-    val spaceBetweenBoxes = 12.dp
+    val boxHeight = 80.dp
+    val boxWidth = 34.dp
+    val spaceBetweenBoxes = 11.dp
 
     val roundCorner = 15.dp
 

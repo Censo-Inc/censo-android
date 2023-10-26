@@ -153,7 +153,7 @@
     <string name="prolong_unlock_prompt_failed_to_extend_session">Failed to extend session</string>
     <string name="enter_code_you_got_from">Enter code you got from</string>
     <string name="waiting_for_approver_to_verify_the_code">Waiting for approver to verify the code</string>
-    <string name="the_code_you_entered_in_not_correct_please_try_again">The code you entered in not correct. Please try again.</string>
+    <string name="the_code_you_entered_in_not_correct">The code you entered in not correct</string>
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
     <string name="incorrect_code">Incorrect Code</string>
@@ -213,6 +213,7 @@
     <string name="add_approver_nickname">Add approver nickname</string>
     <string name="add_approver_nickname_message">Give your approver a nickname of your choice so you can identify them in the future.\n\nThis will be visible only to you.</string>
     <string name="get_live_with">Get live with</string>
+    <string name="get_live_with_your_approver">Get live with your approver</string>
     <string name="get_live_with_your_approver_message">For maximum security, it\'s best to be face-to-face with the person you\'re adding as an approver in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
     <string name="activate_primary_approver">Activate primary approver</string>
     <string name="approver_do_3_things">Now, your approver must do three things:</string>

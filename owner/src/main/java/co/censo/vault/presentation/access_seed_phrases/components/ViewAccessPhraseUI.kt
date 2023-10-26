@@ -35,11 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
 import co.censo.shared.presentation.SharedColors
-import co.censo.vault.presentation.components.recovery.formatDuration
 import co.censo.vault.presentation.enter_phrase.components.ViewPhraseWord
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit

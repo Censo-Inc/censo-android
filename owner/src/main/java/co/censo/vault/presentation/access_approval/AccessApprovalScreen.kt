@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,15 +31,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.Recovery
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.access_approval.components.ApproveAccessUI
+import co.censo.vault.presentation.access_approval.components.ApprovedUI
 import co.censo.vault.presentation.access_approval.components.SelectApproverUI
-import co.censo.vault.presentation.components.recovery.AnotherDeviceRecoveryScreen
+import co.censo.vault.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -52,7 +54,7 @@ fun AccessApprovalScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_START -> {
+            Lifecycle.Event.ON_RESUME -> {
                 viewModel.onStart()
             }
 
@@ -83,16 +85,35 @@ fun AccessApprovalScreen(
                 containerColor = VaultColors.NavbarColor
             ),
             navigationIcon = {
-                IconButton(onClick = viewModel::onBackClicked) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.back),
-                    )
+                when (state.accessApprovalUIState) {
+                    AccessApprovalUIState.Approved,
+                    AccessApprovalUIState.AnotherDevice -> {}
+                    AccessApprovalUIState.GettingLive -> {
+                        IconButton(onClick = viewModel::onBackClicked) {
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
+                                contentDescription = stringResource(id = R.string.exit),
+                            )
+                        }
+                    }
+                    else -> {
+                        IconButton(onClick = viewModel::onBackClicked) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.back),
+                            )
+                        }
+                    }
                 }
             },
             title = {
                 Text(
-                    text = stringResource(id = R.string.access),
+                    text = when (state.accessApprovalUIState) {
+                        AccessApprovalUIState.Approved -> ""
+                        else -> {
+                            stringResource(id = R.string.access)
+                        }
+                    },
                     textAlign = TextAlign.Center
                 )
             },
@@ -130,138 +151,78 @@ fun AccessApprovalScreen(
                             DisplayError(
                                 errorMessage = state.userResponse.getErrorMessage(context),
                                 dismissAction = null,
-                            ) { viewModel.reloadOwnerState() }
+                                retryAction = { viewModel.retrieveOwnerState() }
+                            )
                         }
 
                         state.initiateRecoveryResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.initiateRecoveryResource.getErrorMessage(
-                                    context
-                                ),
+                                errorMessage = state.initiateRecoveryResource.getErrorMessage(context),
                                 dismissAction = null,
-                            ) { viewModel.initiateRecovery() }
+                                retryAction = { viewModel.initiateRecovery() }
+                            )
                         }
 
                         state.cancelRecoveryResource is Resource.Error -> {
                             DisplayError(
                                 errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
                                 dismissAction = null,
-                            ) { viewModel.cancelRecovery() }
+                                retryAction = { viewModel.cancelRecovery() }
+                            )
                         }
 
                         state.submitTotpVerificationResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.submitTotpVerificationResource.getErrorMessage(
-                                    context
-                                ),
-                                dismissAction = viewModel::dismissVerification,
-                                retryAction = null
+                                errorMessage = state.submitTotpVerificationResource.getErrorMessage(context),
+                                dismissAction = null,
+                                retryAction = { viewModel.updateVerificationCode(state.verificationCode) }
                             )
                         }
                     }
                 }
 
                 else -> {
-
-                    when (val recovery = state.recovery) {
-                        null -> {
-                            // recovery is about to be requested
+                    when (state.accessApprovalUIState) {
+                        AccessApprovalUIState.AnotherDevice -> {
+                            AnotherDeviceAccessScreen(
+                                onCancel = viewModel::cancelRecovery
+                            )
                         }
 
-                        is Recovery.AnotherDevice -> {
-                            AnotherDeviceRecoveryScreen()
+                        AccessApprovalUIState.GettingLive -> {
+                            GetLiveWithApproverUI(
+                                onContinueLive = viewModel::onContinueLive,
+                                onResumeLater = viewModel::onResumeLater,
+                            )
                         }
 
-                        is Recovery.ThisDevice -> {
+                        AccessApprovalUIState.SelectApprover -> {
+                            SelectApproverUI(
+                                approvers = state.approvers.external(),
+                                selectedApprover = state.selectedApprover,
+                                onApproverSelected = viewModel::onApproverSelected,
+                                onContinue = viewModel::continueToApproveAccess
+                            )
+                        }
 
-                            when (state.accessApprovalUIState) {
-                                AccessApprovalUIState.GettingLive -> {
-                                    GetLiveWithApproverUI(
-                                        nickname = "your approver",
-                                        onContinueLive = viewModel::onContinueLive,
-                                        onResumeLater = viewModel::onResumeLater,
-                                    )
-                                }
+                        AccessApprovalUIState.ApproveAccess -> {
+                            ApproveAccessUI(
+                                approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
+                                verificationCode = state.verificationCode,
+                                onVerificationCodeChanged = viewModel::updateVerificationCode,
+                                storesLink = "Universal link to the App/Play stores",
+                                onContinue = viewModel::onApproved
+                            )
+                        }
 
-                                AccessApprovalUIState.SelectApprover -> {
-                                    SelectApproverUI(
-                                        approvers = state.approvers.external(),
-                                        selectedApprover = state.selectedApprover,
-                                        onApproverSelected = viewModel::onApproverSelected,
-                                        onContinue = viewModel::continueToApproveAccess
-                                    )
-                                }
+                        AccessApprovalUIState.Approved -> {
+                            ApprovedUI()
 
-                                AccessApprovalUIState.ApproveAccess -> {
-                                    ApproveAccessUI(
-                                        approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
-                                        verificationCode = state.verificationCode,
-                                        onVerificationCodeChanged = viewModel::onVerificationCodeChanged,
-                                        storesLink = "",
-                                        onContinue = {}
-                                    )
-                                }
-
-                                AccessApprovalUIState.Approved -> {
-                                }
+                            LaunchedEffect(Unit) {
+                                delay(3000)
+                                viewModel.onFullyCompleted()
                             }
                         }
-
-                        /*when (val recovery = state.recovery) {
-                        null -> {
-                            // recovery is about to be requested
-                        }
-
-                        is Recovery.AnotherDevice -> {
-                            AnotherDeviceRecoveryScreen()
-                        }
-
-                        is Recovery.ThisDevice -> {
-
-                            when (recovery.status) {
-                                RecoveryStatus.Requested -> {
-                                    ThisDeviceRecoveryScreen(
-                                        recovery,
-                                        guardians = state.approvers,
-                                        approvalsRequired = state.approvalsRequired,
-                                        approvalsCollected = state.approvalsCollected,
-                                        onCancelRecovery = viewModel::cancelRecovery,
-                                        onEnterCode = { approval ->
-                                            viewModel.showCodeEntryModal(approval)
-                                        }
-                                    )
-
-                                    if (state.totpVerificationState.showModal) {
-                                        RecoveryApprovalCodeVerificationModal(
-                                            approverLabel = state.totpVerificationState.approverLabel,
-                                            validCodeLength = TotpGenerator.CODE_LENGTH,
-                                            value = state.totpVerificationState.verificationCode,
-                                            onValueChanged = { code: String ->
-                                                viewModel.updateVerificationCode(
-                                                    state.totpVerificationState.participantId,
-                                                    code
-                                                )
-                                            },
-                                            onDismiss = viewModel::dismissVerification,
-                                            isLoading = state.submitTotpVerificationResource is Resource.Loading,
-                                            isWaitingForVerification = state.totpVerificationState.waitingForApproval,
-                                            isVerificationRejected = state.totpVerificationState.rejected
-                                        )
-                                    }
-                                }
-
-                                else -> {
-                                    AccessPhrasesScreen(
-                                        recovery,
-                                        approvalsRequired = state.approvalsRequired,
-                                        approvalsCollected = state.approvalsCollected,
-                                        onCancelRecovery = viewModel::cancelRecovery,
-                                        onRecoverPhrases = viewModel::onRecoverPhrases
-                                    )
-                                }
-                            }
-                        }
-                    }*/
                     }
                 }
             }

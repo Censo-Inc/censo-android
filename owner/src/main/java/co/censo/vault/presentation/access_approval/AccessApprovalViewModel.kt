@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
@@ -20,12 +19,14 @@ import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AccessApprovalViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val pollingVerificationTimer: VaultCountDownTimer
 ) : ViewModel() {
 
@@ -33,12 +34,12 @@ class AccessApprovalViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        reloadOwnerState()
+        retrieveOwnerState()
 
         // setup polling timer to reload approvals state
         pollingVerificationTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
             if (state.userResponse !is Resource.Loading) {
-                reloadOwnerState(silent = true)
+                retrieveOwnerState(silent = true)
             }
         }
     }
@@ -47,75 +48,68 @@ class AccessApprovalViewModel @Inject constructor(
         pollingVerificationTimer.stopCountDownTimer()
     }
 
-    fun reloadOwnerState(silent: Boolean = false) {
+    fun retrieveOwnerState(silent: Boolean = false) {
         if (!silent) {
             state = state.copy(userResponse = Resource.Loading())
         }
 
         viewModelScope.launch {
-            val response = ownerRepository.retrieveUser()
+            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            state = state.copy(userResponse = response)
+            updateOwnerState(ownerStateResource.data!!)
 
-            if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
-            }
+            state = state.copy(userResponse = ownerStateResource)
         }
     }
 
-    private fun onOwnerState(ownerState: OwnerState) {
-        when (ownerState) {
-            is OwnerState.Ready -> {
+    private fun updateOwnerState(ownerState: OwnerState) {
+        if (ownerState !is OwnerState.Ready) {
+            // other owner states are not supported on this view
+            // navigate back to start of the app so it can fix itself
+            state = state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
+            return
+        }
+
+        // update global state
+        ownerStateFlow.tryEmit(Resource.Success(ownerState))
+
+        // restore state
+        when (val recovery = ownerState.recovery) {
+            null -> {
                 state = state.copy(
-                    initiateNewRecovery = ownerState.recovery == null,
-                    recovery = ownerState.recovery,
-                    approvers = ownerState.policy.guardians,
-                    approvals = (ownerState.recovery as Recovery.ThisDevice).approvals,
+                    initiateNewRecovery = true,
                     secrets = ownerState.vault.secrets.map { it.guid },
                 )
-
-                determineCodeVerificationState(ownerState)
             }
-
-            else -> {
-                // other owner states are not supported on this view
-                // navigate back to start of the app so it can fix itself
+            is Recovery.AnotherDevice -> {
                 state = state.copy(
-                    navigationResource = Resource.Success(SharedScreen.EntranceRoute.route)
+                    accessApprovalUIState = AccessApprovalUIState.AnotherDevice
                 )
             }
+
+            is Recovery.ThisDevice -> {
+                state = state.copy(
+                    recovery = recovery,
+                    approvals = recovery.approvals,
+                    approvers = ownerState.policy.guardians
+                )
+
+                determineApprovalState()
+            }
         }
     }
 
-    private fun determineCodeVerificationState(ownerState: OwnerState.Ready) {
-        // navigate out of verification code screen once approved
-        val recovery = ownerState.recovery
-        val totpVerificationState = state.totpVerificationState
-
-        if (totpVerificationState.showModal && recovery is Recovery.ThisDevice) {
-            recovery.approvals.find { it.participantId == totpVerificationState.participantId }
-                ?.let { approval ->
-                    if (approval.status == ApprovalStatus.Approved) {
-                        state = state.copy(
-                            totpVerificationState = totpVerificationState.copy(
-                                showModal = false
-                            )
-                        )
-                    } else if (totpVerificationState.waitingForApproval && approval.status == ApprovalStatus.Rejected) {
-                        state = state.copy(
-                            totpVerificationState = totpVerificationState.copy(
-                                verificationCode = "",
-                                waitingForApproval = false,
-                                rejected = true,
-                            )
-                        )
-                    }
+    private fun determineApprovalState() {
+        state.recovery?.approvals
+            ?.find { it.participantId == state.selectedApprover?.participantId }
+            ?.let {
+                if (state.waitingForApproval && it.status == ApprovalStatus.Rejected) {
+                    state = state.copy(
+                        waitingForApproval = false,
+                        verificationCode = ""
+                    )
                 }
-        }
-    }
-
-    fun reset() {
-        state = AccessApprovalState()
+            }
     }
 
     fun initiateRecovery() {
@@ -131,22 +125,16 @@ class AccessApprovalViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
+                updateOwnerState(response.data!!.ownerState)
             }
         }
     }
 
     fun cancelRecovery() {
-        state = state.copy(
-            cancelRecoveryResource = Resource.Loading()
-        )
+        state = state.copy(cancelRecoveryResource = Resource.Loading())
 
         viewModelScope.launch {
             val response = ownerRepository.cancelRecovery()
-
-            state = state.copy(
-                cancelRecoveryResource = response
-            )
 
             if (response is Resource.Success) {
                 state = state.copy(
@@ -154,23 +142,12 @@ class AccessApprovalViewModel @Inject constructor(
                     navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
                 )
             }
+
+            state = state.copy(cancelRecoveryResource = response)
         }
     }
 
-    fun showCodeEntryModal(approval: Approval) {
-        val guardian = state.approvers.find { it.participantId == approval.participantId }!!
-        state = state.copy(
-            // reset verification state on re-entry
-            totpVerificationState = TotpVerificationScreenState(
-                showModal = true,
-
-                approverLabel = guardian.label,
-                participantId = approval.participantId,
-            )
-        )
-    }
-
-    fun updateVerificationCode(participantId: ParticipantId, code: String) {
+    fun updateVerificationCode(code: String) {
         if (state.submitTotpVerificationResource is Resource.Error) {
             state = state.copy(
                 submitTotpVerificationResource = Resource.Uninitialized,
@@ -178,22 +155,19 @@ class AccessApprovalViewModel @Inject constructor(
         }
 
         if (code.isDigitsOnly()) {
-            state = state.copy(
-                totpVerificationState = state.totpVerificationState.copy(
-                    verificationCode = code,
-                    rejected = false,
-                    waitingForApproval = false
-                )
-            )
+            state = state.copy(verificationCode = code)
 
             if (code.length == TotpGenerator.CODE_LENGTH) {
-                submitVerificationCode(participantId, code)
+                submitVerificationCode(state.selectedApprover!!.participantId, code)
             }
         }
     }
 
     private fun submitVerificationCode(participantId: ParticipantId, verificationCode: String) {
-        state = state.copy(submitTotpVerificationResource = Resource.Loading())
+        state = state.copy(
+            submitTotpVerificationResource = Resource.Loading(),
+            waitingForApproval = true
+        )
 
         viewModelScope.launch {
             val submitVerificationResource = ownerRepository.submitRecoveryTotpVerification(
@@ -201,39 +175,20 @@ class AccessApprovalViewModel @Inject constructor(
                 verificationCode = verificationCode
             )
 
-            state = state.copy(
-                submitTotpVerificationResource = submitVerificationResource,
-            )
-
             if (submitVerificationResource is Resource.Success) {
-                state = state.copy(
-                    submitTotpVerificationResource = submitVerificationResource,
-                    totpVerificationState = state.totpVerificationState.copy(
-                        waitingForApproval = true
-                    )
-                )
+                updateOwnerState(submitVerificationResource.map { it.ownerState }.data!!)
             }
+
+            state = state.copy(submitTotpVerificationResource = submitVerificationResource)
         }
     }
 
-    fun dismissVerification() {
-        state = state.copy(
-            totpVerificationState = state.totpVerificationState.copy(
-                showModal = false
-            )
-        )
-    }
-
-    fun onRecoverPhrases() {
-        state = state.copy(
-            navigationResource = Resource.Success(Screen.AccessSeedPhrases.route)
-        )
+    fun onApproved() {
+        state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
     }
 
     fun onResumeLater() {
-        state = state.copy(
-            navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
-        )
+        cancelRecovery()
     }
 
     fun resetNavigationResource() {
@@ -263,11 +218,6 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun onVerificationCodeChanged(verificationCode: String) {
-        state = state.copy(verificationCode = verificationCode)
-        //FIXME submit automatically
-    }
-
     fun continueToApproveAccess() {
         state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
     }
@@ -275,7 +225,7 @@ class AccessApprovalViewModel @Inject constructor(
     fun onBackClicked() {
         when (state.accessApprovalUIState) {
             AccessApprovalUIState.GettingLive -> {
-                state = state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+                cancelRecovery()
             }
 
             AccessApprovalUIState.SelectApprover -> {
@@ -289,7 +239,13 @@ class AccessApprovalViewModel @Inject constructor(
             AccessApprovalUIState.Approved -> {
                 state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
             }
+
+            else -> {}
         }
+    }
+
+    fun onFullyCompleted() {
+        state = state.copy(navigationResource = Resource.Success(Screen.AccessSeedPhrases.route))
     }
 }
 

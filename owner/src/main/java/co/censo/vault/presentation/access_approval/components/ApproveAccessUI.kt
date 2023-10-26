@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,7 +51,7 @@ fun ApproveAccessUI(
 
     val deeplink = approval.deepLink()
     val buttonEnabled = approval.status == ApprovalStatus.Approved
-    val codeEditable = true // FIXME
+    val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
 
     val context = LocalContext.current
 
@@ -127,10 +130,35 @@ fun ApproveAccessUI(
                 onValueChange = onVerificationCodeChanged,
                 primaryColor = Color.Black,
                 borderColor = SharedColors.BorderGrey,
-                backgroundColor = SharedColors.WordBoxBackground
+                backgroundColor = SharedColors.WordBoxBackground,
+                requestFocus = codeEditable
             )
         }
-        // FIXME placeholder for code verification errors
+
+        if (approval.status == ApprovalStatus.WaitingForApproval) {
+            Row {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.waiting_for_approver_to_verify_the_code),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        if (approval.status == ApprovalStatus.Rejected) {
+            Text(
+                text = stringResource(R.string.the_code_you_entered_in_not_correct),
+                textAlign = TextAlign.Center,
+                color = SharedColors.ErrorRed,
+                modifier = Modifier.padding(horizontal = 24.dp)
+
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -167,6 +195,21 @@ fun ApproveAccessInitialPreview() {
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.Initial
+        ),
+        verificationCode = "",
+        onVerificationCodeChanged = {},
+        onContinue = {},
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ApproveAccessWaitingForVerificationPreview() {
+    ApproveAccessUI(
+        storesLink = "link",
+        approval = Approval(
+            participantId = ParticipantId.generate(),
+            status = ApprovalStatus.WaitingForVerification
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
