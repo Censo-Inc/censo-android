@@ -9,15 +9,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,10 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -39,10 +35,10 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.vault.presentation.access_approval.components.ApproveAccessUI
 import co.censo.vault.presentation.access_approval.components.ApprovedUI
 import co.censo.vault.presentation.access_approval.components.SelectApproverUI
-import co.censo.vault.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.vault.presentation.components.access.CancelAccessDialog
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 import kotlinx.coroutines.delay
@@ -85,7 +81,7 @@ fun AccessApprovalScreen(
     }
 
     Scaffold(topBar = {
-        TopAppBar(
+        CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.smallTopAppBarColors(
                 containerColor = VaultColors.NavbarColor
             ),
@@ -223,7 +219,6 @@ fun AccessApprovalScreen(
                                 verificationCode = state.verificationCode,
                                 onVerificationCodeChanged = viewModel::updateVerificationCode,
                                 storesLink = "Universal link to the App/Play stores",
-                                onContinue = viewModel::onApproved
                             )
                         }
 

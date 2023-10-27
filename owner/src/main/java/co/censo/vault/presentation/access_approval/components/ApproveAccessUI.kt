@@ -46,11 +46,9 @@ fun ApproveAccessUI(
     verificationCode: String,
     onVerificationCodeChanged: (String) -> Unit,
     storesLink: String, //This should contain both links since approver could be either
-    onContinue: () -> Unit,
 ) {
 
     val deeplink = approval.deepLink()
-    val buttonEnabled = approval.status == ApprovalStatus.Approved
     val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
 
     val context = LocalContext.current
@@ -144,25 +142,6 @@ fun ApproveAccessUI(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            enabled = buttonEnabled,
-            disabledColor = SharedColors.DisabledGrey,
-            color = Color.Black,
-            contentPadding = PaddingValues(vertical = 12.dp),
-            onClick = onContinue
-        ) {
-            Text(
-                fontSize = 20.sp,
-                text = stringResource(id = R.string.continue_text),
-                color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
         LearnMore {
 
         }
@@ -182,7 +161,6 @@ fun ApproveAccessInitialPreview() {
         ),
         verificationCode = "",
         onVerificationCodeChanged = {},
-        onContinue = {},
     )
 }
 
@@ -197,7 +175,6 @@ fun ApproveAccessWaitingForVerificationPreview() {
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
-        onContinue = {},
     )
 }
 
@@ -212,7 +189,6 @@ fun ApproveAccessWaitingForApprovalPreview() {
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
-        onContinue = {},
     )
 }
 
@@ -227,7 +203,6 @@ fun ApproveAccessRejectedPreview() {
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
-        onContinue = {},
     )
 }
 
@@ -242,6 +217,5 @@ fun ApproveAccessApprovedPreview() {
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
-        onContinue = {},
     )
 }

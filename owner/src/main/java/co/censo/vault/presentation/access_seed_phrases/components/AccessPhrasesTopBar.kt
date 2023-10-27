@@ -36,9 +36,9 @@ fun AccessPhrasesTopBar(
     }
 
     val navIcon = when (accessPhrasesUIState) {
-        AccessPhrasesUIState.ReadyToStart,
         AccessPhrasesUIState.SelectPhrase -> Icons.Rounded.ArrowBack to stringResource(id = R.string.back)
         AccessPhrasesUIState.Facetec -> null
+        AccessPhrasesUIState.ReadyToStart,
         AccessPhrasesUIState.ViewPhrase -> Icons.Rounded.Close to stringResource(id = R.string.exit)
     }
 

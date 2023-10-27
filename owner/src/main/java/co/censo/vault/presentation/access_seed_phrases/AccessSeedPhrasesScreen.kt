@@ -143,26 +143,18 @@ fun AccessSeedPhrasesScreen(
 
                     when (state.accessPhrasesUIState) {
                         AccessPhrasesUIState.SelectPhrase -> {
-                            (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets?.let { vaultSecrets ->
-                                SelectPhraseUI(
-                                    vaultSecrets = vaultSecrets,
-                                    onPhraseSelected = viewModel::onPhraseSelected,
-                                    onFinish = viewModel::showCancelConfirmationDialog
-                                )
-                            } ?: DisplayError(
-                                errorMessage = "Missing phrase data",
-                                dismissAction = viewModel::retrieveOwnerState,
-                                retryAction = viewModel::retrieveOwnerState
+                            SelectPhraseUI(
+                                vaultSecrets = (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets ?: listOf(),
+                                onPhraseSelected = viewModel::onPhraseSelected,
+                                onFinish = viewModel::showCancelConfirmationDialog
                             )
                         }
 
                         AccessPhrasesUIState.ReadyToStart -> {
                             ReadyToAccessPhrase(
-                                phraseLabel = state.selectedPhrase?.label
-                                    ?: stringResource(R.string.phrase)
-                            ) {
-                                viewModel.startFacetec()
-                            }
+                                phraseLabel = state.selectedPhrase?.label ?: stringResource(R.string.phrase),
+                                getStarted = viewModel::startFacetec
+                            )
                         }
 
                         AccessPhrasesUIState.Facetec -> {

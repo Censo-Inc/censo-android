@@ -14,6 +14,7 @@ import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
+import co.censo.shared.data.model.RecoveryStatus
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
@@ -91,14 +92,17 @@ class AccessApprovalViewModel @Inject constructor(
                     approvers = ownerState.policy.guardians
                 )
 
-                determineApprovalState()
+                if (recovery.status == RecoveryStatus.Available) {
+                    state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
+                } else {
+                    determineApprovalState(recovery)
+                }
             }
         }
     }
 
-    private fun determineApprovalState() {
-        state.recovery?.approvals
-            ?.find { it.participantId == state.selectedApprover?.participantId }
+    private fun determineApprovalState(recovery: Recovery.ThisDevice) {
+        recovery.approvals.find { it.participantId == state.selectedApprover?.participantId }
             ?.let {
                 if (state.waitingForApproval && it.status == ApprovalStatus.Rejected) {
                     state = state.copy(
@@ -178,10 +182,6 @@ class AccessApprovalViewModel @Inject constructor(
 
             state = state.copy(submitTotpVerificationResource = submitVerificationResource)
         }
-    }
-
-    fun onApproved() {
-        state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
     }
 
     fun onResumeLater() {
