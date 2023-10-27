@@ -163,7 +163,6 @@ sealed class Recovery {
         val unlocksAt: Instant,
         val expiresAt: Instant,
         val approvals: List<Approval>,
-        val vaultSecretIds: List<VaultSecretId>,
     ) : Recovery()
 }
 

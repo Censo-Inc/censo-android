@@ -77,7 +77,6 @@ class RecoveryScreenViewModel @Inject constructor(
                     initiateNewRecovery = ownerState.recovery == null,
                     recovery = ownerState.recovery,
                     guardians = ownerState.policy.guardians,
-                    secrets = ownerState.vault.secrets.map { it.guid },
                     approvalsCollected = ownerState.recovery?.let {
                         when (it) {
                             is Recovery.ThisDevice -> it.approvals.count { it.status == ApprovalStatus.Approved }
@@ -137,7 +136,7 @@ class RecoveryScreenViewModel @Inject constructor(
             initiateRecoveryResource = Resource.Loading()
         )
         viewModelScope.launch {
-            val response = ownerRepository.initiateRecovery(state.secrets)
+            val response = ownerRepository.initiateRecovery()
 
             state = state.copy(
                 initiateRecoveryResource = response

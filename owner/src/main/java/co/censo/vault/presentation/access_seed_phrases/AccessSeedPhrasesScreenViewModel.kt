@@ -74,7 +74,7 @@ class AccessSeedPhrasesScreenViewModel @Inject constructor(
                         state = state.copy(recoveredPhrases = Resource.Loading())
 
                         runCatching {
-                            val requestedSecrets = ownerState.vault.secrets.filter { recovery.vaultSecretIds.contains(it.guid) }
+                            val requestedSecrets = ownerState.vault.secrets
 
                             val recoveredSecrets: List<RecoveredSeedPhrase> = ownerRepository.recoverSecrets(
                                 requestedSecrets,
