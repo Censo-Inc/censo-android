@@ -141,7 +141,7 @@ fun CodeInputField(
                             textAlign = TextAlign.Center,
                             fontSize = 40.nonScaledSp,
                             fontWeight = if (isFilled) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isFilled || shouldHaveFocusedBorder) primaryColor else borderColor
+                            color = if (!isLoading && (isFilled || shouldHaveFocusedBorder)) primaryColor else borderColor
                         )
                     }
 

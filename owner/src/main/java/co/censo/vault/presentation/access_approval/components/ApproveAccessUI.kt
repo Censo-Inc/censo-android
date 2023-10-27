@@ -122,6 +122,15 @@ fun ApproveAccessUI(
             heading = "3. Enter the code",
             content = "Enter the 6-digit code from your approver.",
         )
+        if (approval.status == ApprovalStatus.Rejected) {
+            Text(
+                text = stringResource(R.string.the_code_you_entered_in_not_correct),
+                textAlign = TextAlign.Center,
+                color = SharedColors.ErrorRed,
+                modifier = Modifier.padding(horizontal = 24.dp)
+
+            )
+        }
         Box(modifier = Modifier.padding(vertical = 12.dp)) {
             CodeEntry(
                 validCodeLength = TotpGenerator.CODE_LENGTH,
@@ -132,31 +141,6 @@ fun ApproveAccessUI(
                 borderColor = SharedColors.BorderGrey,
                 backgroundColor = SharedColors.WordBoxBackground,
                 requestFocus = codeEditable
-            )
-        }
-
-        if (approval.status == ApprovalStatus.WaitingForApproval) {
-            Row {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = stringResource(R.string.waiting_for_approver_to_verify_the_code),
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        if (approval.status == ApprovalStatus.Rejected) {
-            Text(
-                text = stringResource(R.string.the_code_you_entered_in_not_correct),
-                textAlign = TextAlign.Center,
-                color = SharedColors.ErrorRed,
-                modifier = Modifier.padding(horizontal = 24.dp)
-
             )
         }
 

@@ -152,7 +152,6 @@
     <string name="prolong_unlock_prompt_cancel">Cancel</string>
     <string name="prolong_unlock_prompt_failed_to_extend_session">Failed to extend session</string>
     <string name="enter_code_you_got_from">Enter code you got from</string>
-    <string name="waiting_for_approver_to_verify_the_code">Waiting for approver to verify the code</string>
     <string name="the_code_you_entered_in_not_correct">The code you entered in not correct</string>
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
