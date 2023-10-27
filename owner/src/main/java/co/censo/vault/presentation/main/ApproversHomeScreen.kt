@@ -179,7 +179,7 @@ fun ApproverInfoBox(
             Text(
                 text =
                 if (primaryApprover) stringResource(R.string.primary_approver)
-                else stringResource(R.string.backup_approver),
+                else stringResource(R.string.alternate_approver),
                 color = Color.Black,
                 fontSize = labelTextSize
             )

@@ -27,7 +27,7 @@ import co.censo.vault.R
 fun SavedAndShardedUI(
     seedPhraseNickname: String?,
     primaryApproverNickname: String?,
-    backupApproverNickname: String?,
+    alternateApproverNickname: String?,
 ) {
 
     val verticalSpacingHeight = 28.dp
@@ -80,12 +80,6 @@ fun SavedAndShardedUI(
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = "You",
-            fontWeight = FontWeight.W400
-        )
-
         if (!primaryApproverNickname.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
@@ -96,12 +90,12 @@ fun SavedAndShardedUI(
             )
         }
 
-        if (!backupApproverNickname.isNullOrBlank()) {
+        if (!alternateApproverNickname.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(verticalSpacingHeight * 0.5f))
 
             TitleText(
                 modifier = Modifier.fillMaxWidth(),
-                title = backupApproverNickname,
+                title = alternateApproverNickname,
                 fontWeight = FontWeight.W400
             )
         }
@@ -116,7 +110,7 @@ fun SavedAndShardedUINoSeedPhrasePreview() {
     SavedAndShardedUI(
         seedPhraseNickname = null,
         primaryApproverNickname = "Neo",
-        backupApproverNickname = "John Wick"
+        alternateApproverNickname = "John Wick"
     )
 }
 
@@ -126,7 +120,7 @@ fun SavedAndShardedUSingleSeedPhrasePreview() {
     SavedAndShardedUI(
         seedPhraseNickname = "Yankee Hotel Foxtrot",
         primaryApproverNickname = "Neo",
-        backupApproverNickname = "John Wick"
+        alternateApproverNickname = "John Wick"
     )
 }
 
@@ -138,6 +132,6 @@ fun SavedAndShardedUIMultipleSeedPhrasesPreview() {
     SavedAndShardedUI(
         seedPhraseNickname = "3 seed phrases",
         primaryApproverNickname = "Neo",
-        backupApproverNickname = "John Wick"
+        alternateApproverNickname = "John Wick"
     )
 }

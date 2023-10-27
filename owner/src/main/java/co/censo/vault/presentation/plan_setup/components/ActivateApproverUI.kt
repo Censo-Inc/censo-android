@@ -95,7 +95,7 @@ fun ActivateApproverUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = if (isPrimaryApprover) R.string.activate_primary_approver else R.string.activate_backup_approver,
+            title = if (isPrimaryApprover) R.string.activate_primary_approver else R.string.activate_alternate_approver,
             textAlign = TextAlign.Start,
         )
 
@@ -223,7 +223,7 @@ fun ApproverInfoBox(
             Text(
                 text =
                 if (primaryApprover) stringResource(R.string.primary_approver)
-                else stringResource(R.string.backup_approver),
+                else stringResource(R.string.alternate_approver),
                 color = Color.Black,
                 fontSize = labelTextSize
             )
@@ -307,7 +307,7 @@ fun shareTheCodeStepUIData(
         is GuardianStatus.VerificationSubmitted -> {
             ShareTheCodeUIData(
                 heading = context.getString(R.string.share_the_code_title),
-                content = context.getString(R.string.share_the_code_message, if (isPrimaryApprover) context.getString(R.string.primary) else context.getString(R.string.backup)),
+                content = context.getString(R.string.share_the_code_message, if (isPrimaryApprover) context.getString(R.string.primary) else context.getString(R.string.alternate)),
                 verificationCodeUIData = VerificationCodeUIData(
                     code = verificationCode,
                     timeLeft = secondsLeft
@@ -468,7 +468,7 @@ fun ActivatePrimaryApproverConfirmedPreview() {
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun ActivateBackupApproverInitialPreview() {
+fun ActivateAlternateApproverInitialPreview() {
     ActivateApproverUI(
         isPrimaryApprover = false,
         secondsLeft = 43,
@@ -489,7 +489,7 @@ fun ActivateBackupApproverInitialPreview() {
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun ActivateBackupApproverAcceptedPreview() {
+fun ActivateAlternateApproverAcceptedPreview() {
     ActivateApproverUI(
         isPrimaryApprover = false,
         secondsLeft = 43,
@@ -511,7 +511,7 @@ fun ActivateBackupApproverAcceptedPreview() {
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun ActivateBackupApproverConfirmedPreview() {
+fun ActivateAlternateApproverConfirmedPreview() {
     ActivateApproverUI(
         isPrimaryApprover = false,
         secondsLeft = 43,
