@@ -14,6 +14,7 @@ import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.data.model.RecoveryStatus
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
@@ -120,7 +121,7 @@ class AccessApprovalViewModel @Inject constructor(
             initiateRecoveryResource = Resource.Loading()
         )
         viewModelScope.launch {
-            val response = ownerRepository.initiateRecovery()
+            val response = ownerRepository.initiateRecovery(RecoveryIntent.AccessPhrases)
 
             state = state.copy(
                 initiateRecoveryResource = response

@@ -7,6 +7,15 @@ import VaultSecretId
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
+enum class RecoveryIntent {
+    AccessPhrases, ReplacePolicy
+}
+
+@Serializable
+data class InitiateRecoveryApiRequest(
+    val intent: RecoveryIntent,
+)
+
 @Serializable
 data class InitiateRecoveryApiResponse(
     val ownerState: OwnerState,

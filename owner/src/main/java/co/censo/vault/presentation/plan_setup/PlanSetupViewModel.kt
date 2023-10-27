@@ -20,6 +20,7 @@ import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
@@ -411,8 +412,8 @@ class PlanSetupViewModel @Inject constructor(
                 ownerRepository.cancelRecovery()
             }
 
-            // request new recovery without secrets to make shards available immediately
-            val initiateRecoveryResponse = ownerRepository.initiateRecovery()
+            // request new recovery for policy replacement
+            val initiateRecoveryResponse = ownerRepository.initiateRecovery(RecoveryIntent.ReplacePolicy)
 
             if (initiateRecoveryResponse is Resource.Success) {
                 // navigate to the facetec view

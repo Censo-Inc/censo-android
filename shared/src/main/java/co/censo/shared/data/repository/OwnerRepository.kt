@@ -36,11 +36,13 @@ import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.IdentityToken
+import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
@@ -155,7 +157,7 @@ interface OwnerRepository {
     fun retrieveSecurityPlan(): SecurityPlanData?
     fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
     fun clearSecurityPlanData()
-    suspend fun initiateRecovery(): Resource<InitiateRecoveryApiResponse>
+    suspend fun initiateRecovery(intent: RecoveryIntent): Resource<InitiateRecoveryApiResponse>
     suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse>
     suspend fun signUserOut()
     suspend fun submitRecoveryTotpVerification(
@@ -452,8 +454,8 @@ class OwnerRepositoryImpl(
         secureStorage.setSecurityPlan(securityPlanData)
 
     override fun clearSecurityPlanData() = secureStorage.clearSecurityPlanData()
-    override suspend fun initiateRecovery(): Resource<InitiateRecoveryApiResponse> {
-        return retrieveApiResource { apiService.requestRecovery() }
+    override suspend fun initiateRecovery(intent: RecoveryIntent): Resource<InitiateRecoveryApiResponse> {
+        return retrieveApiResource { apiService.requestRecovery(InitiateRecoveryApiRequest(intent)) }
     }
 
     override suspend fun cancelRecovery(): Resource<DeleteRecoveryApiResponse> {
