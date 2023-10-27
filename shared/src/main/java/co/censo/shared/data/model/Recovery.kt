@@ -8,11 +8,6 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InitiateRecoveryApiRequest(
-    val vaultSecretIds: List<VaultSecretId>,
-)
-
-@Serializable
 data class InitiateRecoveryApiResponse(
     val ownerState: OwnerState,
 )

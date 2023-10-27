@@ -35,7 +35,7 @@ import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 import co.censo.vault.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.vault.presentation.plan_setup.components.ApproverNicknameUI
-import co.censo.vault.presentation.plan_setup.components.AddBackupApproverUI
+import co.censo.vault.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.vault.presentation.plan_setup.components.AddTrustedApproversUI
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 import co.censo.vault.presentation.plan_setup.components.SavedAndShardedUI
@@ -105,7 +105,7 @@ fun PlanSetupScreen(
                             if (state.approverType == ApproverType.Primary) {
                                 stringResource(id = R.string.primary_approver)
                             } else {
-                                stringResource(id = R.string.backup_approver)
+                                stringResource(id = R.string.alternate_approver)
                             }
 
                         else -> ""
@@ -201,9 +201,9 @@ fun PlanSetupScreen(
                             )
                         }
 
-                        PlanSetupUIState.AddBackupApprover -> {
-                            AddBackupApproverUI(
-                                onInviteBackupSelected = viewModel::onInviteApprover,
+                        PlanSetupUIState.AddAlternateApprover -> {
+                            AddAlternateApproverUI(
+                                onInviteAlternateSelected = viewModel::onInviteApprover,
                                 onSaveAndFinishSelected = viewModel::saveAndFinish
                             )
                         }
@@ -229,7 +229,7 @@ fun PlanSetupScreen(
                                     )
                                 },
                                 primaryApproverNickname = state.primaryApprover?.label,
-                                backupApproverNickname = state.backupApprover?.label,
+                                alternateApproverNickname = state.alternateApprover?.label,
                             )
 
                             LaunchedEffect(Unit) {

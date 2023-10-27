@@ -74,7 +74,7 @@ class PlanSetupViewModel @Inject constructor(
             state.copy(
                 secondsLeft = secondsLeft.toInt(),
                 counter = updatedCounter,
-                approverCodes = generateTimeCodes(listOfNotNull(state.primaryApprover, state.backupApprover))
+                approverCodes = generateTimeCodes(listOfNotNull(state.primaryApprover, state.alternateApprover))
             )
         } else {
             state.copy(
@@ -96,7 +96,7 @@ class PlanSetupViewModel @Inject constructor(
             PlanSetupUIState.InviteApprovers,
             PlanSetupUIState.ApproverNickname,
             PlanSetupUIState.ApproverGettingLive,
-            PlanSetupUIState.AddBackupApprover,
+            PlanSetupUIState.AddAlternateApprover,
             PlanSetupUIState.RecoveryInProgress,
             PlanSetupUIState.Completed -> {
                 state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
@@ -123,7 +123,7 @@ class PlanSetupViewModel @Inject constructor(
         // update global state
         ownerStateFlow.tryEmit(Resource.Success(ownerState))
 
-        // figure out owner/primary/backup approvers
+        // figure out owner/primary/alternate approvers
         val approverSetup = ownerState.guardianSetup?.guardians ?: emptyList()
         val externalApprovers = approverSetup.externalApprovers()
         val ownerApprover: Guardian.ProspectGuardian? = approverSetup.ownerApprover()
@@ -132,7 +132,7 @@ class PlanSetupViewModel @Inject constructor(
             externalApprovers.size == 1 -> externalApprovers.first()
             else -> externalApprovers.confirmed().minBy { (it.status as GuardianStatus.Confirmed).confirmedAt }
         }
-        val backupApprover: Guardian.ProspectGuardian? = when {
+        val alternateApprover: Guardian.ProspectGuardian? = when {
             externalApprovers.isEmpty() -> null
             externalApprovers.size == 1 -> null
             else -> {
@@ -149,7 +149,7 @@ class PlanSetupViewModel @Inject constructor(
             // approver names are needed on the last screen. Prevent resetting to 'null' after policy is replaced
             ownerApprover = ownerApprover ?: state.ownerApprover,
             primaryApprover = primaryApprover ?: state.primaryApprover,
-            backupApprover = backupApprover ?: state.backupApprover,
+            alternateApprover = alternateApprover ?: state.alternateApprover,
         )
 
         // generate codes
@@ -169,14 +169,14 @@ class PlanSetupViewModel @Inject constructor(
                 state = state.copy(
                     editedNickname = when (state.approverType) {
                         ApproverType.Primary -> state.primaryApprover?.label
-                        ApproverType.Backup -> state.backupApprover?.label
+                        ApproverType.Alternate -> state.alternateApprover?.label
                     } ?: "",
                     planSetupUIState = PlanSetupUIState.ApproverActivation
                 )
-            } else if (backupApprover?.status is GuardianStatus.Confirmed) {
+            } else if (alternateApprover?.status is GuardianStatus.Confirmed) {
                 initiateRecovery()
             } else if (primaryApprover?.status is GuardianStatus.Confirmed) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.AddBackupApprover)
+                state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
             } else {
                 state = state.copy(planSetupUIState = PlanSetupUIState.InviteApprovers)
             }
@@ -214,7 +214,7 @@ class PlanSetupViewModel @Inject constructor(
                 state.primaryApprover?.asExternalApprover()
                     ?: createExternalApprover(state.editedNickname),
                 if (state.primaryApprover?.status is GuardianStatus.Confirmed) {
-                    state.backupApprover?.asExternalApprover()
+                    state.alternateApprover?.asExternalApprover()
                         ?: createExternalApprover(state.editedNickname)
                 } else {
                     null
@@ -228,7 +228,7 @@ class PlanSetupViewModel @Inject constructor(
     fun onEditApproverNickname() {
         val nicknameToUpdate = when (state.approverType) {
             ApproverType.Primary -> state.primaryApprover?.label
-            ApproverType.Backup -> state.backupApprover?.label
+            ApproverType.Alternate -> state.alternateApprover?.label
         }
 
         state = state.copy(
@@ -242,22 +242,22 @@ class PlanSetupViewModel @Inject constructor(
 
         val ownerApprover = state.ownerApprover?.asImplicitlyOwner()
         val primaryApprover = state.primaryApprover?.asExternalApprover()
-        val backupApprover = state.backupApprover?.asExternalApprover()
+        val alternateApprover = state.alternateApprover?.asExternalApprover()
 
         val updatedPolicySetupGuardians = when (state.approverType) {
             ApproverType.Primary -> {
                 listOfNotNull(
                     ownerApprover,
                     primaryApprover?.copy(label = state.editedNickname),
-                    backupApprover
+                    alternateApprover
                 )
             }
 
-            ApproverType.Backup -> {
+            ApproverType.Alternate -> {
                 listOfNotNull(
                     ownerApprover,
                     primaryApprover,
-                    backupApprover?.copy(label = state.editedNickname),
+                    alternateApprover?.copy(label = state.editedNickname),
                 )
             }
         }
@@ -390,8 +390,8 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onApproverConfirmed() {
-        if (state.backupApprover == null) {
-            state = state.copy(planSetupUIState = PlanSetupUIState.AddBackupApprover)
+        if (state.alternateApprover == null) {
+            state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
         } else {
             initiateRecovery()
         }
@@ -412,7 +412,7 @@ class PlanSetupViewModel @Inject constructor(
             }
 
             // request new recovery without secrets to make shards available immediately
-            val initiateRecoveryResponse = ownerRepository.initiateRecovery(listOf())
+            val initiateRecoveryResponse = ownerRepository.initiateRecovery()
 
             if (initiateRecoveryResponse is Resource.Success) {
                 // navigate to the facetec view
@@ -454,7 +454,7 @@ class PlanSetupViewModel @Inject constructor(
                 encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
                 encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
                 threshold = 2U,
-                guardians = listOfNotNull(state.ownerApprover, state.primaryApprover, state.backupApprover)
+                guardians = listOfNotNull(state.ownerApprover, state.primaryApprover, state.alternateApprover)
             )
 
             state = state.copy(replacePolicyResponse = response)

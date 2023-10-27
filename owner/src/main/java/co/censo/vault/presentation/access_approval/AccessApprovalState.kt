@@ -1,6 +1,5 @@
 package co.censo.vault.presentation.access_approval
 
-import VaultSecretId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
@@ -23,7 +22,6 @@ data class AccessApprovalState(
     val recovery: Recovery.ThisDevice? = null,
     val approvers: List<Guardian.TrustedGuardian> = listOf(),
     val approvals: List<Approval> = listOf(),
-    val secrets: List<VaultSecretId> = listOf(),
 
     // recovery control
     val initiateNewRecovery: Boolean = false,
@@ -53,4 +51,3 @@ data class AccessApprovalState(
 enum class AccessApprovalUIState {
     AnotherDevice, GettingLive, SelectApprover, ApproveAccess, Approved
 }
-

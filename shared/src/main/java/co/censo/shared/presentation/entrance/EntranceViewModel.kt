@@ -15,6 +15,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -42,7 +43,8 @@ class EntranceViewModel @Inject constructor(
     private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository,
     private val pushRepository: PushRepository,
-    private val authUtil: AuthUtil
+    private val authUtil: AuthUtil,
+    private val secureStorage: SecurePreferences
 ) : ViewModel() {
 
     var state by mutableStateOf(EntranceState())
@@ -51,12 +53,16 @@ class EntranceViewModel @Inject constructor(
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
     fun onOwnerStart() {
+        initAcceptedTermsOfUseVersion()
+
         state = state.copy(ownerApp = true)
 
         checkUserHasValidToken()
     }
 
     fun onGuardianStart(invitationId: String?, recoveryParticipantId: String?) {
+        initAcceptedTermsOfUseVersion()
+
         if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
         }
@@ -69,6 +75,14 @@ class EntranceViewModel @Inject constructor(
         checkUserHasValidToken()
     }
 
+    private fun initAcceptedTermsOfUseVersion() {
+        state = state.copy(acceptedTermsOfUseVersion = secureStorage.acceptedTermsOfUseVersion())
+    }
+
+    fun setAcceptedTermsOfUseVersion(version: String) {
+        secureStorage.setAcceptedTermsOfUseVersion(version)
+        state = state.copy(acceptedTermsOfUseVersion = version)
+    }
 
     private fun checkUserHasValidToken() {
         viewModelScope.launch {

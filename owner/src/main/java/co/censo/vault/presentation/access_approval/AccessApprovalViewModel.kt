@@ -76,10 +76,7 @@ class AccessApprovalViewModel @Inject constructor(
         // restore state
         when (val recovery = ownerState.recovery) {
             null -> {
-                state = state.copy(
-                    initiateNewRecovery = true,
-                    secrets = ownerState.vault.secrets.map { it.guid },
-                )
+                state = state.copy(initiateNewRecovery = true)
             }
             is Recovery.AnotherDevice -> {
                 state = state.copy(
@@ -118,7 +115,7 @@ class AccessApprovalViewModel @Inject constructor(
             initiateRecoveryResource = Resource.Loading()
         )
         viewModelScope.launch {
-            val response = ownerRepository.initiateRecovery(state.secrets)
+            val response = ownerRepository.initiateRecovery()
 
             state = state.copy(
                 initiateRecoveryResource = response

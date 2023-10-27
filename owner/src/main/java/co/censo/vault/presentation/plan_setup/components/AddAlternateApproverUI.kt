@@ -3,9 +3,7 @@ package co.censo.vault.presentation.plan_setup.components
 import LearnMore
 import MessageText
 import StandardButton
-import SubTitleText
 import TitleText
-import android.app.backup.BackupAgent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,8 +29,8 @@ import androidx.compose.ui.unit.sp
 import co.censo.vault.R
 
 @Composable
-fun AddBackupApproverUI(
-    onInviteBackupSelected: () -> Unit,
+fun AddAlternateApproverUI(
+    onInviteAlternateSelected: () -> Unit,
     onSaveAndFinishSelected: () -> Unit
 ) {
 
@@ -48,7 +46,7 @@ fun AddBackupApproverUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.add_a_backup_approver,
+            title = R.string.add_an_alternate_approver,
             textAlign = TextAlign.Start
         )
 
@@ -57,7 +55,7 @@ fun AddBackupApproverUI(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.add_a_backup_approver_message,
+            message = R.string.add_an_alternate_approver_message,
             textAlign = TextAlign.Start
         )
 
@@ -66,7 +64,7 @@ fun AddBackupApproverUI(
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
-            onClick = onInviteBackupSelected,
+            onClick = onInviteAlternateSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Row {
@@ -77,7 +75,7 @@ fun AddBackupApproverUI(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.invite_backup),
+                    text = stringResource(R.string.invite_alternate),
                     color = Color.White,
                     fontSize = 24.sp
                 )
@@ -111,9 +109,9 @@ fun AddBackupApproverUI(
 
 @Preview(showBackground = true)
 @Composable
-fun AddBackupApproverUIPreview() {
-    AddBackupApproverUI(
-        onInviteBackupSelected = {},
+fun AddAlternateApproverUIPreview() {
+    AddAlternateApproverUI(
+        onInviteAlternateSelected = {},
         onSaveAndFinishSelected = {},
     )
 }

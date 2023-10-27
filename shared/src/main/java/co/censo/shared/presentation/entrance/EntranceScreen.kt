@@ -7,8 +7,11 @@ import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,12 +21,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,18 +47,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.R
+import co.censo.shared.data.model.termsOfUseVersions
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
@@ -164,6 +174,12 @@ fun EntranceScreen(
     ) {
 
         when {
+            state.acceptedTermsOfUseVersion == "" -> {
+                TermsOfUse {
+                    viewModel.setAcceptedTermsOfUseVersion("v0.1")
+                }
+            }
+
             state.isLoading -> {
                 Box(
                     modifier = Modifier
@@ -356,6 +372,66 @@ fun OwnerEntranceStandardUI(
                 modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/privacy/") },
                 fontWeight = FontWeight.SemiBold
             )
+        }
+    }
+}
+
+@Composable
+fun TermsOfUse(
+    onAccept: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(stringResource(R.string.terms_of_use), fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
+        HtmlText(
+            termsOfUseVersions["v0.1"]!!,
+            Modifier
+                .padding(20.dp)
+                .fillMaxHeight(0.8f)
+                .verticalScroll(rememberScrollState())
+        )
+        StandardButton(
+            onClick = onAccept,
+            color = Color.Black,
+            modifier = Modifier
+               .padding(start = 20.dp, top = 10.dp, end = 20.dp)
+        ) {
+            Text(stringResource(R.string.accept), textAlign = TextAlign.Center, color = Color.White, modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+            )
+        }
+        Text(stringResource(R.string.tou_agreement),
+            fontStyle = FontStyle.Italic,
+            fontSize = 12.sp,
+            modifier = Modifier
+            .padding(10.dp)
+        )
+    }
+}
+
+@Composable
+fun HtmlText(html: String, modifier: Modifier = Modifier, @ColorInt color: Int = android.graphics.Color.parseColor("#000000")) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context -> TextView(context).apply {
+            setTextColor(color)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        } },
+        update = {
+            it.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        }
+    )
+}
+
+@Preview
+@Composable
+fun TermsOfUsePreview() {
+    Surface {
+        TermsOfUse {
+            print("Accepted!")
         }
     }
 }
