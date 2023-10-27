@@ -1,56 +1,60 @@
 package co.censo.vault.presentation.access_seed_phrases
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.OwnerState
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
-import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.access_seed_phrases.components.AccessPhrasesTopBar
+import co.censo.vault.presentation.access_seed_phrases.components.ReadyToAccessPhrase
+import co.censo.vault.presentation.access_seed_phrases.components.SelectPhraseUI
+import co.censo.vault.presentation.access_seed_phrases.components.ViewAccessPhraseUI
+import co.censo.vault.presentation.components.access.CancelAccessDialog
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
-import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AccessSeedPhrasesScreen(
     navController: NavController,
-    viewModel: AccessSeedPhrasesScreenViewModel = hiltViewModel()
+    viewModel: AccessSeedPhrasesViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { }
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME
+            -> {
+                viewModel.onStart()
+            }
+
+            Lifecycle.Event.ON_PAUSE -> {
+                viewModel.onStop()
+            }
+
+            else -> Unit
+        }
     }
 
     LaunchedEffect(key1 = state) {
@@ -62,111 +66,122 @@ fun AccessSeedPhrasesScreen(
         }
     }
 
-    when {
-        state.loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = VaultColors.PrimaryColor)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center),
-                    strokeWidth = 8.dp,
-                    color = Color.White
-                )
-            }
-        }
 
-        state.asyncError -> {
+    Scaffold(
+        topBar = {
+            AccessPhrasesTopBar(
+                accessPhrasesUIState = state.accessPhrasesUIState,
+                phraseLabel = state.selectedPhrase?.label,
+                onNavClicked = {
+                    if (state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase) {
+                        viewModel.showCancelConfirmationDialog()
+                    } else {
+                        viewModel.onBackClicked()
+                    }
+                }
+            )
+        }
+    ) { contentPadding ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center
+        ) {
+
             when {
-                state.retrieveShardsResponse is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.retrieveShardsResponse.getErrorMessage(context),
-                        dismissAction = null,
-                    ) { viewModel.reset() }
-                }
-
-                state.recoveredPhrases is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.recoveredPhrases.getErrorMessage(context),
-                        dismissAction = null,
-                    ) { viewModel.reset() }
-                }
-            }
-        }
-
-        else -> {
-
-            when (state.retrieveShardsResponse) {
-                Resource.Uninitialized -> {
-                    FacetecAuth(
-                        onFaceScanReady = { verificationId, biometry ->
-                            viewModel.onFaceScanReady(
-                                verificationId,
-                                biometry
-                            )
-                        }
+                state.loading ->
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .align(Alignment.Center),
+                        strokeWidth = 8.dp,
+                        color = Color.White
                     )
-                }
 
-                is Resource.Success -> {
-                    if (state.recoveredPhrases is Resource.Success) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                state.asyncError -> {
+                    when {
+                        state.ownerState is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.ownerState.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.retrieveOwnerState() }
+                        }
 
-                            Text(
-                                text = stringResource(R.string.your_seed_phrases),
-                                textAlign = TextAlign.Center,
-                                color = Color.Black,
-                                fontSize = 36.sp
-                            )
+                        state.retrieveShardsResponse is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.retrieveShardsResponse.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.reset() }
+                        }
 
-                            Spacer(Modifier.height(12.dp))
+                        state.recoveredPhrases is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.recoveredPhrases.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.reset() }
+                        }
 
-                            LazyColumn(
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                val phrases = state.recoveredPhrases.data!!
-
-                                items(phrases.size) { index ->
-                                    Column {
-                                        Text(
-                                            text = "${stringResource(R.string.added_on)}: ${
-                                                phrases[index].createdAt.toLocalDateTime(
-                                                    TimeZone.currentSystemDefault()
-                                                ).toJavaLocalDateTime()
-                                                    .format(DateTimeFormatter.ISO_LOCAL_DATE)
-                                            }", color = Color.Gray, fontSize = 14.sp
-                                        )
-                                        Text(
-                                            text = "${stringResource(R.string.label)}: ${phrases[index].label}",
-                                            color = Color.Gray,
-                                            fontSize = 18.sp
-                                        )
-                                        Text(
-                                            text = phrases[index].seedPhrase,
-                                            color = Color.Gray,
-                                            fontSize = 12.sp,
-                                            overflow = TextOverflow.Visible,
-                                            modifier = Modifier.wrapContentWidth(),
-                                        )
-
-                                        Spacer(Modifier.height(12.dp))
-                                    }
-                                }
-                            }
+                        state.cancelRecoveryResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.cancelAccess() }
                         }
                     }
                 }
 
-                else -> {}
+                else -> {
+
+                    if (state.showCancelConfirmationDialog) {
+                        CancelAccessDialog(
+                            onDismiss = viewModel::hideCloseConfirmationDialog,
+                            onConfirm = viewModel::cancelAccess
+                        )
+                    }
+
+                    when (state.accessPhrasesUIState) {
+                        AccessPhrasesUIState.SelectPhrase -> {
+                            SelectPhraseUI(
+                                vaultSecrets = (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets ?: listOf(),
+                                onPhraseSelected = viewModel::onPhraseSelected,
+                                onFinish = viewModel::showCancelConfirmationDialog
+                            )
+                        }
+
+                        AccessPhrasesUIState.ReadyToStart -> {
+                            ReadyToAccessPhrase(
+                                phraseLabel = state.selectedPhrase?.label ?: stringResource(R.string.phrase),
+                                getStarted = viewModel::startFacetec
+                            )
+                        }
+
+                        AccessPhrasesUIState.Facetec -> {
+                            FacetecAuth(
+                                onFaceScanReady = { verificationId, biometry ->
+                                    viewModel.onFaceScanReady(
+                                        verificationId,
+                                        biometry
+                                    )
+                                }
+                            )
+                        }
+
+                        AccessPhrasesUIState.ViewPhrase -> {
+                            state.recoveredPhrases.data?.first()?.let {
+                                ViewAccessPhraseUI(
+                                    wordIndex = state.selectedIndex,
+                                    phraseWord = state.selectedWord,
+                                    decrementIndex = viewModel::decrementIndex,
+                                    incrementIndex = viewModel::incrementIndex,
+                                    onDone = viewModel::reset,
+                                    timeLeft = state.timeRemaining
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

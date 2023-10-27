@@ -36,7 +36,7 @@ import co.censo.vault.presentation.main.MainVaultScreen
 import co.censo.vault.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.vault.presentation.lock_screen.LockedScreen
 import co.censo.vault.presentation.plan_setup.PlanSetupScreen
-import co.censo.vault.presentation.recovery.RecoveryScreen
+import co.censo.vault.presentation.access_approval.AccessApprovalScreen
 import co.censo.vault.ui.theme.VaultTheme
 import co.censo.vault.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
@@ -104,8 +104,8 @@ class MainActivity : FragmentActivity() {
             composable(route = SharedScreen.OwnerVaultScreen.route) {
                 MainVaultScreen(navController = navController)
             }
-            composable(route = Screen.RecoveryScreen.route) {
-                RecoveryScreen(navController = navController)
+            composable(route = Screen.AccessApproval.route) {
+                AccessApprovalScreen(navController = navController)
             }
             composable(
                 route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}/{${Screen.EnterPhraseRoute.WELCOME_FLOW_ARG}}"

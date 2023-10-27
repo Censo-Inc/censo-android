@@ -59,6 +59,12 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
+    fun onStop() {
+        verificationCodeTimer.stopCountDownTimer()
+        pollingVerificationTimer.stopCountDownTimer()
+    }
+
+
     private fun nextTotpTimerTick() {
         val now = Clock.System.now()
         val updatedCounter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)

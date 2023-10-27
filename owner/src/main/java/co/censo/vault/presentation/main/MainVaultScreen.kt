@@ -93,13 +93,16 @@ fun MainVaultScreen(
                             }
                         },
                         onAccessClick = {
-                            navController.navigate(Screen.RecoveryScreen.route)
+                            navController.navigate(Screen.AccessApproval.route)
                         }
                     )
 
                 BottomNavItem.Approvers ->
                     ApproversHomeScreen(
-                        guardians = state.ownerState?.policy?.guardians ?: emptyList()
+                        guardians = state.ownerState?.policy?.guardians ?: emptyList(),
+                        onInviteApproversSelected = {
+                            navController.navigate(Screen.PlanSetupRoute.buildNavRoute())
+                        }
                     )
 
                 BottomNavItem.Settings ->

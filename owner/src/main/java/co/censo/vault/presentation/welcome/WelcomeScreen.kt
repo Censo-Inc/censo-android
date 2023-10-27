@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -125,6 +126,8 @@ fun SetupStep(
     imagePainter: Painter,
     heading: String,
     content: String,
+    imageBackgroundColor : Color = SharedColors.BackgroundGrey,
+    iconColor: Color = Color.Black,
     completionText: String? = null
 ) {
     Row(
@@ -133,13 +136,14 @@ fun SetupStep(
     ) {
         Box(
             contentAlignment = Alignment.Center, modifier = Modifier
-                .background(color = Color.LightGray, shape = RoundedCornerShape(20.dp))
+                .background(color = imageBackgroundColor, shape = RoundedCornerShape(20.dp))
                 .padding(16.dp)
         ) {
-            Image(
+            Icon(
                 painter = imagePainter,
                 contentDescription = null,
-                modifier = Modifier.width(32.dp)
+                modifier = Modifier.width(32.dp),
+                tint = iconColor
             )
         }
         Column(modifier = Modifier.padding(16.dp)) {

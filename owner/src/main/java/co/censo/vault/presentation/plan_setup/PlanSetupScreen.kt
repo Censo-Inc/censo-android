@@ -68,11 +68,11 @@ fun PlanSetupScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_START
-            -> {
+            Lifecycle.Event.ON_RESUME -> {
                 viewModel.onStart()
             }
             Lifecycle.Event.ON_PAUSE -> {
+                viewModel.onStop()
             }
             else -> Unit
         }

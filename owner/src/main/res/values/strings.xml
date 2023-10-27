@@ -152,8 +152,7 @@
     <string name="prolong_unlock_prompt_cancel">Cancel</string>
     <string name="prolong_unlock_prompt_failed_to_extend_session">Failed to extend session</string>
     <string name="enter_code_you_got_from">Enter code you got from</string>
-    <string name="waiting_for_approver_to_verify_the_code">Waiting for approver to verify the code</string>
-    <string name="the_code_you_entered_in_not_correct_please_try_again">The code you entered in not correct. Please try again.</string>
+    <string name="the_code_you_entered_in_not_correct">The code you entered in not correct</string>
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
     <string name="incorrect_code">Incorrect Code</string>
@@ -213,6 +212,7 @@
     <string name="add_approver_nickname">Add approver nickname</string>
     <string name="add_approver_nickname_message">Give your approver a nickname of your choice so you can identify them in the future.\n\nThis will be visible only to you.</string>
     <string name="get_live_with">Get live with</string>
+    <string name="get_live_with_your_approver">Get live with your approver</string>
     <string name="get_live_with_your_approver_message">For maximum security, it\'s best to be face-to-face with the person you\'re adding as an approver in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
     <string name="activate_primary_approver">Activate primary approver</string>
     <string name="approver_do_3_things">Now, your approver must do three things:</string>
@@ -225,12 +225,14 @@
     <string name="rename_approver">Rename approver</string>
     <string name="activate_alternate_approver">Activate Alternate Approver</string>
     <string name="edit_approver_name">edit approver name</string>
+    <string name="select_approver">select_approver</string>
     <string name="primary_approver">Primary approver</string>
     <string name="alternate_approver">Alternate approver</string>
     <string name="primary">primary</string>
     <string name="alternate">alternate</string>
     <string name="activated">Activated</string>
     <string name="not_yet_active">Not yet active</string>
+    <string name="active">Active</string>
     <string name="share_app_link">Share app link</string>
     <string name="share_unique_link">Share unique link</string>
     <string name="add_an_alternate_approver">Add an alternate approver?</string>
@@ -261,5 +263,25 @@
     <string name="approvers_app_bar_title">Approvers</string>
     <string name="seed_phrases_app_bar_title">Seed Phrases</string>
     <string name="settings_app_bar_title">Settings</string>
+    <string name="select_seed_phrase">Which seed phrase would you like to access first?</string>
+    <string name="error_occurred">Error Occurred</string>
+    <string name="ready_to_start">Ready to start your 15 minutes of access?</string>
+    <string name="get_ready_message">Get ready to type your seed phrase into a secure location on another device. You will have 15 minutes to access</string>
+    <string name="access_time_scan_face_message">When you\'re ready, start your 15-min access via 3D face scan.</string>
+    <string name="private_place_title">Go to a private place</string>
+    <string name="private_place_message">Make sure you are alone in your home or a highly secure area.</string>
+    <string name="access_for_fifteen_title">Access for 15 minutes</string>
+    <string name="access_for_fifteen_message">You have 15 min to access your seed phrase and cannot extend this time.</string>
+    <string name="dont_leave_title">Don\'t leave the app</string>
+    <string name="dont_leave_message">You will need to start this process over if you leave or close the app.</string>
+    <string name="phrase">Phrase</string>
+    <string name="request_access">Request access</string>
+    <string name="request_access_blurb">Which approver would you like to use to request access?</string>
+    <string name="cancel_access_dialog">Your access will be cancelled. Continue?</string>
+    <string name="access_was_requested_using_another_phone">Access was requested using another phone</string>
+    <string name="access_was_requested_using_another_phone_blurb">For security reasons we allow access only from same device</string>
+    <string name="cancel_access">Cancel access</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
 
 </resources>

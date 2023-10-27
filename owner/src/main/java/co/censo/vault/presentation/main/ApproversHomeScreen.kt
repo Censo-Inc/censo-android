@@ -43,7 +43,8 @@ import co.censo.vault.presentation.plan_setup.components.ApproverActivatedUIData
 
 @Composable
 fun ApproversHomeScreen(
-    guardians: List<Guardian.TrustedGuardian>
+    guardians: List<Guardian.TrustedGuardian>,
+    onInviteApproversSelected: () -> Unit
 ) {
     if (guardians.any { it.label != "Me" }) {
         Column(
@@ -67,9 +68,9 @@ fun ApproversHomeScreen(
 
         }
     } else {
-        NoApproversUI {
-
-        }
+        NoApproversUI(
+            onInviteApproversSelected = onInviteApproversSelected
+        )
     }
 }
 
@@ -236,7 +237,8 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
 @Composable
 fun PreviewApproversHome() {
     ApproversHomeScreen(
-        emptyList()
+        guardians = emptyList(),
+        onInviteApproversSelected = {}
 //        listOf(
 //            Guardian.TrustedGuardian(
 //                label = "Neo",

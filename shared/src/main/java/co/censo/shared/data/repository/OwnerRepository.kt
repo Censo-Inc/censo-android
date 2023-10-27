@@ -214,6 +214,7 @@ class OwnerRepositoryImpl(
     ): Resource<CreatePolicyParams> {
         return try {
             PolicySetupHelper.create(
+                masterEncryptionKey = EncryptionKey.generateRandomKey(),
                 threshold = 1U,
                 guardians = listOf(ownerApprover)
             ). let {
@@ -535,10 +536,10 @@ class OwnerRepositoryImpl(
                         EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKeyResource.data!!.bigInt())
                     }
                 }
-                else -> ownerDeviceKey
+                false -> ownerDeviceKey
             }
             Point(
-                BigInteger(it.participantId.getBytes()),
+                it.participantId.bigInt(),
                 BigInteger(encryptionKey.decrypt(it.encryptedShard.bytes))
             )
         }

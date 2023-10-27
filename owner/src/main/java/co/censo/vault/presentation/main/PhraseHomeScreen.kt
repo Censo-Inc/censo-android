@@ -5,6 +5,7 @@ import StandardButton
 import VaultSecretId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.data.model.HashedValue
@@ -122,10 +124,16 @@ fun AddAccessRow(
 }
 
 @Composable
-fun SeedPhraseItem(vaultSecret: VaultSecret) {
+fun SeedPhraseItem(
+    horizontalPadding : Dp = 36.dp,
+    vaultSecret: VaultSecret,
+    onClick: (() -> Unit)? = null
+) {
+    val modifier = onClick?.let { Modifier.clickable { it() } } ?: Modifier
+
     Box(
-        modifier = Modifier
-            .padding(horizontal = 36.dp)
+        modifier = modifier
+            .padding(horizontal = horizontalPadding)
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(12.dp)

@@ -116,7 +116,7 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun onRecoverPhrases() {
-        state = state.copy(navigationResource = Resource.Success(Screen.RecoveryScreen.route))
+        state = state.copy(navigationResource = Resource.Success(Screen.AccessApproval.route))
     }
 
     fun onResetUser() {

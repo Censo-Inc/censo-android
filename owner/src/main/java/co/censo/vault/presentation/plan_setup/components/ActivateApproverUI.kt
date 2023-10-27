@@ -141,7 +141,7 @@ fun ActivateApproverUI(
             context
         )?.let {
             ApproverStep(
-                imagePainter = painterResource(id = co.censo.shared.R.drawable.small_face_scan),
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
                 heading = it.heading,
                 content = it.content,
                 verificationCodeUIData = it.verificationCodeUIData
@@ -156,7 +156,7 @@ fun ActivateApproverUI(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        ApproverInfoBox(
+        ProspectApproverInfoBox(
             nickName = nickName,
             primaryApprover = isPrimaryApprover,
             status = guardianStatus,
@@ -191,7 +191,7 @@ fun ActivateApproverUI(
 }
 
 @Composable
-fun ApproverInfoBox(
+fun ProspectApproverInfoBox(
     nickName: String,
     primaryApprover: Boolean,
     status: GuardianStatus?,

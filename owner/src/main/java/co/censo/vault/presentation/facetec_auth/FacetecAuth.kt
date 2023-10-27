@@ -1,9 +1,11 @@
 package co.censo.vault.presentation.facetec_auth
 
+import StandardButton
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -18,13 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
+import co.censo.vault.R
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
@@ -89,17 +95,26 @@ fun FacetecAuth(
 
         when {
             state.apiError -> {
-                Text(text = when (state.submitResultResponse) {
-                    is Resource.Error -> state.submitResultResponse.exception?.message
-                    else -> null
-                } ?: "Error Occurred")
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
+                Text(
+                    text = when (state.submitResultResponse) {
+                        is Resource.Error -> state.submitResultResponse.exception?.message
+                        else -> null
+                    } ?: stringResource(R.string.error_occurred),
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StandardButton(
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
                     onClick = {
                         viewModel.retry()
                     }
                 ) {
-                    Text(text = "Retry")
+                    Text(
+                        text = "Retry",
+                        color = Color.White,
+                        fontSize = 20.sp
+                    )
                 }
             }
 
