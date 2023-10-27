@@ -127,7 +127,7 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun cancelRecovery() {
+    fun cancelAccess() {
         state = state.copy(cancelRecoveryResource = Resource.Loading())
 
         viewModelScope.launch {
@@ -185,7 +185,7 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun onResumeLater() {
-        cancelRecovery()
+        cancelAccess()
     }
 
     fun resetNavigationResource() {
@@ -222,7 +222,7 @@ class AccessApprovalViewModel @Inject constructor(
     fun onBackClicked() {
         when (state.accessApprovalUIState) {
             AccessApprovalUIState.GettingLive -> {
-                cancelRecovery()
+                cancelAccess()
             }
 
             AccessApprovalUIState.SelectApprover -> {

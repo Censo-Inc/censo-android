@@ -1,7 +1,6 @@
 package co.censo.vault.presentation.access_seed_phrases
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,9 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +25,6 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.vault.R
-import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.access_seed_phrases.components.AccessPhrasesTopBar
 import co.censo.vault.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.vault.presentation.access_seed_phrases.components.SelectPhraseUI
@@ -77,8 +73,7 @@ fun AccessSeedPhrasesScreen(
                 phraseLabel = state.selectedPhrase?.label,
                 onNavClicked = {
                     if (state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase) {
-                        //Exit entire flow
-                        navController.popBackStack()
+                        viewModel.cancelAccess()
                     } else {
                         viewModel.onBackClicked()
                     }
@@ -126,6 +121,13 @@ fun AccessSeedPhrasesScreen(
                                 dismissAction = null,
                             ) { viewModel.reset() }
                         }
+
+                        state.cancelRecoveryResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.cancelAccess() }
+                        }
                     }
                 }
 
@@ -136,7 +138,8 @@ fun AccessSeedPhrasesScreen(
                             (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets?.let { vaultSecrets ->
                                 SelectPhraseUI(
                                     vaultSecrets = vaultSecrets,
-                                    onPhraseSelected = viewModel::onPhraseSelected
+                                    onPhraseSelected = viewModel::onPhraseSelected,
+                                    onFinish = viewModel::cancelAccess
                                 )
                             } ?: DisplayError(
                                 errorMessage = "Missing phrase data",

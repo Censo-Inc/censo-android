@@ -23,7 +23,7 @@ sealed class Screen(val route: String) {
 
     object VaultScreen : Screen("vault_screen")
 
-    object RecoveryScreen : Screen("recovery_screen")
+    object AccessApproval : Screen("access_approval")
 
     object EnterPhraseRoute : Screen("enter_phrase_screen") {
         const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"

@@ -167,7 +167,7 @@ fun AccessApprovalScreen(
                             DisplayError(
                                 errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.cancelRecovery() }
+                                retryAction = { viewModel.cancelAccess() }
                             )
                         }
 
@@ -185,7 +185,7 @@ fun AccessApprovalScreen(
                     when (state.accessApprovalUIState) {
                         AccessApprovalUIState.AnotherDevice -> {
                             AnotherDeviceAccessScreen(
-                                onCancel = viewModel::cancelRecovery
+                                onCancel = viewModel::cancelAccess
                             )
                         }
 

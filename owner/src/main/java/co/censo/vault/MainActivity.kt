@@ -104,7 +104,7 @@ class MainActivity : FragmentActivity() {
             composable(route = SharedScreen.OwnerVaultScreen.route) {
                 MainVaultScreen(navController = navController)
             }
-            composable(route = Screen.RecoveryScreen.route) {
+            composable(route = Screen.AccessApproval.route) {
                 AccessApprovalScreen(navController = navController)
             }
             composable(

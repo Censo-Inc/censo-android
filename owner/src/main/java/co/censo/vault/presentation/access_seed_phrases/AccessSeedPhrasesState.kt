@@ -1,6 +1,7 @@
 package co.censo.vault.presentation.access_seed_phrases
 
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
@@ -27,6 +28,7 @@ data class AccessSeedPhrasesState(
 
     // api requests
     val retrieveShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,
+    val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
 
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
@@ -40,10 +42,13 @@ data class AccessSeedPhrasesState(
 
     val loading = retrieveShardsResponse is Resource.Loading
                 || ownerState is Resource.Loading
+                || cancelRecoveryResource is Resource.Loading
                 || recoveredPhrases is Resource.Loading
 
     val asyncError = retrieveShardsResponse is Resource.Error
-            || recoveredPhrases is Resource.Error || ownerState is Resource.Error
+            || recoveredPhrases is Resource.Error
+            || ownerState is Resource.Error
+            || cancelRecoveryResource is Resource.Error
 }
 
 enum class AccessPhrasesUIState {

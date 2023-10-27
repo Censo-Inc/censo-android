@@ -22,6 +22,7 @@ import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -31,6 +32,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class AccessSeedPhrasesViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val timer: VaultCountDownTimer,
 ) : ViewModel() {
 
@@ -38,8 +40,12 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        if (state.ownerState.data == null) {
-            retrieveOwnerState()
+        viewModelScope.launch {
+            ownerStateFlow.collect { resource: Resource<OwnerState> ->
+                if (resource is Resource.Success) {
+                    state = state.copy(ownerState = resource)
+                }
+            }
         }
 
         timer.startCountDownTimer(countdownInterval = 1.seconds.inWholeMilliseconds) {
@@ -143,7 +149,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                         // there should be 'available' recovery requested by this device
                         // navigate back to recovery screen
                         state = state.copy(
-                            navigationResource = Resource.Success(Screen.RecoveryScreen.route)
+                            navigationResource = Resource.Success(Screen.AccessApproval.route)
                         )
                     }
                 }
@@ -199,6 +205,22 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
         accessPhrasesUIState?.let {
             state = state.copy(accessPhrasesUIState = it)
+        }
+    }
+
+    fun cancelAccess() {
+        state = state.copy(cancelRecoveryResource = Resource.Loading())
+
+        viewModelScope.launch {
+            val response = ownerRepository.cancelRecovery()
+
+            if (response is Resource.Success) {
+                state = state.copy(
+                    navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
+                )
+            }
+
+            state = state.copy(cancelRecoveryResource = response)
         }
     }
 }
