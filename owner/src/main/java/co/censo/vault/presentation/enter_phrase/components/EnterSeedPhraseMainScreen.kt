@@ -56,9 +56,11 @@ fun SelectSeedPhraseEntryType(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
+        val title = if (welcomeFlow) R.string.add_first_seed_phrase else R.string.add_seed_phrase
+
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.add_first_seed_phrase,
+            title = title,
             textAlign = TextAlign.Start
         )
 
