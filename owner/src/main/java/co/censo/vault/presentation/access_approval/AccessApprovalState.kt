@@ -16,6 +16,7 @@ data class AccessApprovalState(
     val selectedApprover: Guardian.TrustedGuardian? = null,
     val verificationCode: String = "",
     val waitingForApproval: Boolean = false,
+    val showCancelConfirmationDialog: Boolean = false,
 
     // data
     val ownerState: OwnerState.Ready? = null,

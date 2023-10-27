@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,8 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -39,6 +43,7 @@ import co.censo.vault.presentation.access_approval.components.ApproveAccessUI
 import co.censo.vault.presentation.access_approval.components.ApprovedUI
 import co.censo.vault.presentation.access_approval.components.SelectApproverUI
 import co.censo.vault.presentation.access_approval.components.AnotherDeviceAccessScreen
+import co.censo.vault.presentation.components.access.CancelAccessDialog
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 import kotlinx.coroutines.delay
 
@@ -128,6 +133,13 @@ fun AccessApprovalScreen(
                 }
             })
     }) { paddingValues ->
+
+        if (state.showCancelConfirmationDialog) {
+            CancelAccessDialog(
+                onDismiss = viewModel::hideCloseConfirmationDialog,
+                onConfirm = viewModel::cancelAccess
+            )
+        }
 
         Box(
             modifier = Modifier

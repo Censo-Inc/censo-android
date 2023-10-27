@@ -20,6 +20,7 @@ data class AccessSeedPhrasesState(
     val locksAt: Instant? = null,
     val selectedIndex: Int = 0,
     val viewedPhrase: List<String> = emptyList(),
+    val showCancelConfirmationDialog: Boolean = false,
 
     // data
     val recoveredPhrases: Resource<List<RecoveredSeedPhrase>> = Resource.Uninitialized,

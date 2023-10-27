@@ -29,6 +29,7 @@ import co.censo.vault.presentation.access_seed_phrases.components.AccessPhrasesT
 import co.censo.vault.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.vault.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.vault.presentation.access_seed_phrases.components.ViewAccessPhraseUI
+import co.censo.vault.presentation.components.access.CancelAccessDialog
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +74,7 @@ fun AccessSeedPhrasesScreen(
                 phraseLabel = state.selectedPhrase?.label,
                 onNavClicked = {
                     if (state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase) {
-                        viewModel.cancelAccess()
+                        viewModel.showCancelConfirmationDialog()
                     } else {
                         viewModel.onBackClicked()
                     }
@@ -133,13 +134,20 @@ fun AccessSeedPhrasesScreen(
 
                 else -> {
 
+                    if (state.showCancelConfirmationDialog) {
+                        CancelAccessDialog(
+                            onDismiss = viewModel::hideCloseConfirmationDialog,
+                            onConfirm = viewModel::cancelAccess
+                        )
+                    }
+
                     when (state.accessPhrasesUIState) {
                         AccessPhrasesUIState.SelectPhrase -> {
                             (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets?.let { vaultSecrets ->
                                 SelectPhraseUI(
                                     vaultSecrets = vaultSecrets,
                                     onPhraseSelected = viewModel::onPhraseSelected,
-                                    onFinish = viewModel::cancelAccess
+                                    onFinish = viewModel::showCancelConfirmationDialog
                                 )
                             } ?: DisplayError(
                                 errorMessage = "Missing phrase data",

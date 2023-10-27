@@ -277,5 +277,11 @@
     <string name="phrase">Phrase</string>
     <string name="request_access">Request access</string>
     <string name="request_access_blurb">Which approver would you like to use to request access?</string>
+    <string name="cancel_access_dialog">Your access will be cancelled. Continue?</string>
+    <string name="access_was_requested_using_another_phone">Access was requested using another phone</string>
+    <string name="access_was_requested_using_another_phone_blurb">For security reasons we allow access only from same device</string>
+    <string name="cancel_access">Cancel access</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
 
 </resources>

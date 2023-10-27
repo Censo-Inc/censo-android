@@ -17,11 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
+import co.censo.vault.R
 
 @Composable
 fun AnotherDeviceAccessScreen(
@@ -39,7 +41,7 @@ fun AnotherDeviceAccessScreen(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = "Access was requested using another phone",
+            title = stringResource(R.string.access_was_requested_using_another_phone),
             textAlign = TextAlign.Start,
         )
 
@@ -47,7 +49,7 @@ fun AnotherDeviceAccessScreen(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = "For security reasons we allow access only from same device",
+            message = stringResource(R.string.access_was_requested_using_another_phone_blurb),
             textAlign = TextAlign.Start,
         )
 
@@ -63,7 +65,7 @@ fun AnotherDeviceAccessScreen(
         ) {
             Text(
                 fontSize = 20.sp,
-                text = "Cancel access",
+                text = stringResource(R.string.cancel_access),
                 color = Color.White
             )
         }

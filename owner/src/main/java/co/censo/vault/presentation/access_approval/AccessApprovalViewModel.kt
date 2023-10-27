@@ -222,7 +222,7 @@ class AccessApprovalViewModel @Inject constructor(
     fun onBackClicked() {
         when (state.accessApprovalUIState) {
             AccessApprovalUIState.GettingLive -> {
-                cancelAccess()
+                state = state.copy(showCancelConfirmationDialog = true)
             }
 
             AccessApprovalUIState.SelectApprover -> {
@@ -243,6 +243,10 @@ class AccessApprovalViewModel @Inject constructor(
 
     fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.AccessSeedPhrases.route))
+    }
+
+    fun hideCloseConfirmationDialog() {
+        state = state.copy(showCancelConfirmationDialog = false)
     }
 }
 

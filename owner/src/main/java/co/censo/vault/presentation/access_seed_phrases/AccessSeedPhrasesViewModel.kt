@@ -223,4 +223,12 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             state = state.copy(cancelRecoveryResource = response)
         }
     }
+
+    fun hideCloseConfirmationDialog() {
+        state = state.copy(showCancelConfirmationDialog = false)
+    }
+
+    fun showCancelConfirmationDialog() {
+        state = state.copy(showCancelConfirmationDialog = true)
+    }
 }
