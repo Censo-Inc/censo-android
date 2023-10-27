@@ -89,7 +89,8 @@ class AccessApprovalViewModel @Inject constructor(
                 state = state.copy(
                     recovery = recovery,
                     approvals = recovery.approvals,
-                    approvers = ownerState.policy.guardians
+                    approvers = ownerState.policy.guardians,
+                    accessApprovalUIState = if (state.accessApprovalUIState == AccessApprovalUIState.Initial) AccessApprovalUIState.GettingLive else state.accessApprovalUIState
                 )
 
                 if (recovery.status == RecoveryStatus.Available) {

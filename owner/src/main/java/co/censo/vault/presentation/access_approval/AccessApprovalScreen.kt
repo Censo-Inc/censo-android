@@ -191,6 +191,16 @@ fun AccessApprovalScreen(
 
                 else -> {
                     when (state.accessApprovalUIState) {
+
+                        AccessApprovalUIState.Initial -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(72.dp),
+                                strokeWidth = 5.dp
+                            )
+                        }
+
                         AccessApprovalUIState.AnotherDevice -> {
                             AnotherDeviceAccessScreen(
                                 onCancel = viewModel::cancelAccess

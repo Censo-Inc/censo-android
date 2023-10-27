@@ -12,7 +12,7 @@ import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 
 data class AccessApprovalState(
     // UI state
-    val accessApprovalUIState: AccessApprovalUIState = AccessApprovalUIState.GettingLive,
+    val accessApprovalUIState: AccessApprovalUIState = AccessApprovalUIState.Initial,
     val selectedApprover: Guardian.TrustedGuardian? = null,
     val verificationCode: String = "",
     val waitingForApproval: Boolean = false,
@@ -50,5 +50,5 @@ data class AccessApprovalState(
 }
 
 enum class AccessApprovalUIState {
-    AnotherDevice, GettingLive, SelectApprover, ApproveAccess, Approved
+    Initial, AnotherDevice, GettingLive, SelectApprover, ApproveAccess, Approved
 }
