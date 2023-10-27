@@ -29,15 +29,13 @@ class PolicySetupHelper(
         fun create(
             threshold: UInt,
             guardians: List<Guardian.ProspectGuardian>,
-            masterEncryptionKey: EncryptionKey = EncryptionKey.generateRandomKey(),
+            masterEncryptionKey: EncryptionKey,
             previousIntermediateKey: PrivateKey? = null,
         ): PolicySetupHelper {
             val intermediateEncryptionKey = EncryptionKey.generateRandomKey()
 
-            val encryptedMasterKey = Base64.getEncoder().encodeToString(
-                intermediateEncryptionKey.encrypt(
-                    masterEncryptionKey.privateKeyRaw()
-                )
+            val encryptedMasterKey = intermediateEncryptionKey.encrypt(
+                masterEncryptionKey.privateKeyRaw()
             )
 
             val sharer = SecretSharer(
@@ -59,7 +57,7 @@ class PolicySetupHelper(
 
                 GuardianShard(
                     participantId = guardian.participantId,
-                    encryptedShard = Base64EncodedData(Base64.getEncoder().encodeToString(encryptedShard))
+                    encryptedShard = encryptedShard.base64Encoded()
                 )
             }
 
@@ -78,7 +76,7 @@ class PolicySetupHelper(
             return PolicySetupHelper(
                 masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value),
                 intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation().value),
-                encryptedMasterKey = Base64EncodedData(encryptedMasterKey),
+                encryptedMasterKey = encryptedMasterKey.base64Encoded(),
                 threshold = threshold,
                 guardianShards = guardianShards,
                 signatureByPreviousIntermediateKey = signatureByPreviousIntermediateKey,
