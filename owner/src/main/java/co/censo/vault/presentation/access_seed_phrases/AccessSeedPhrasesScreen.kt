@@ -145,6 +145,7 @@ fun AccessSeedPhrasesScreen(
                         AccessPhrasesUIState.SelectPhrase -> {
                             SelectPhraseUI(
                                 vaultSecrets = (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets ?: listOf(),
+                                viewedIds = state.viewedPhraseIds,
                                 onPhraseSelected = viewModel::onPhraseSelected,
                                 onFinish = viewModel::showCancelConfirmationDialog
                             )

@@ -71,7 +71,8 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun reset() {
         state = AccessSeedPhrasesState().copy(
-            ownerState = state.ownerState
+            ownerState = state.ownerState,
+            viewedPhraseIds = state.viewedPhraseIds
         )
     }
 
@@ -136,6 +137,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                                 recoveredPhrases = Resource.Success(recoveredSecrets),
                                 viewedPhrase = recoveredSecrets.firstOrNull()?.seedPhrase?.split(" ") ?: listOf(""),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
+                                viewedPhraseIds = recoveredSecrets.firstOrNull()?.let { state.viewedPhraseIds + it.guid } ?: state.viewedPhraseIds,
                                 locksAt = Clock.System.now().plus(15.minutes)
                             )
                         }.onFailure {

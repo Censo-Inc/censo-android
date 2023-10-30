@@ -189,6 +189,7 @@
     <string name="move_one_word_back">move one word back</string>
     <string name="enter_next_word">Enter next word</string>
     <string name="finish">Finish</string>
+    <string name="finished">Finished</string>
     <string name="submit_word">Submit word</string>
     <string name="add_a_nickname">Add a nickname</string>
     <string name="nickname_message">Now, give your seed phrase a nickname of your choice so you can identify it in the future.\n\nThis will be secured within your face scan encryption and not shared with anyone.</string>

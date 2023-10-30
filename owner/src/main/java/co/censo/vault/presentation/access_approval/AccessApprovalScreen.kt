@@ -207,19 +207,19 @@ fun AccessApprovalScreen(
                             )
                         }
 
-                        AccessApprovalUIState.GettingLive -> {
-                            GetLiveWithApproverUI(
-                                onContinueLive = viewModel::onContinueLive,
-                                onResumeLater = viewModel::onResumeLater,
-                            )
-                        }
-
                         AccessApprovalUIState.SelectApprover -> {
                             SelectApproverUI(
                                 approvers = state.approvers.external(),
                                 selectedApprover = state.selectedApprover,
                                 onApproverSelected = viewModel::onApproverSelected,
-                                onContinue = viewModel::continueToApproveAccess
+                                onContinue = viewModel::onApproverSelected
+                            )
+                        }
+
+                        AccessApprovalUIState.GettingLive -> {
+                            GetLiveWithApproverUI(
+                                onContinueLive = viewModel::onContinueLive,
+                                onResumeLater = viewModel::onResumeLater,
                             )
                         }
 
@@ -237,7 +237,7 @@ fun AccessApprovalScreen(
 
                             LaunchedEffect(Unit) {
                                 delay(3000)
-                                viewModel.onFullyCompleted()
+                                viewModel.navigateToViewSeedPhrases()
                             }
                         }
                     }

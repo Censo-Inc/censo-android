@@ -79,6 +79,7 @@ class AccessApprovalViewModel @Inject constructor(
             null -> {
                 state = state.copy(initiateNewRecovery = true)
             }
+
             is Recovery.AnotherDevice -> {
                 state = state.copy(
                     accessApprovalUIState = AccessApprovalUIState.AnotherDevice
@@ -89,20 +90,34 @@ class AccessApprovalViewModel @Inject constructor(
                 state = state.copy(
                     recovery = recovery,
                     approvals = recovery.approvals,
-                    approvers = ownerState.policy.guardians,
-                    accessApprovalUIState = if (state.accessApprovalUIState == AccessApprovalUIState.Initial) AccessApprovalUIState.GettingLive else state.accessApprovalUIState
+                    approvers = ownerState.policy.guardians
                 )
 
                 if (recovery.status == RecoveryStatus.Available) {
-                    state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
+                    if (ownerState.policy.guardians.all { it.isOwner }) {
+                        // owner is single approver, skip to view seed phrases
+                        navigateToViewSeedPhrases()
+                    } else {
+                        state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
+                    }
+                } else if (state.accessApprovalUIState == AccessApprovalUIState.Initial) {
+                    // determine initial UI state
+                    state = if (state.approvers.backupApprover().isDefined()) {
+                        state.copy(accessApprovalUIState = AccessApprovalUIState.SelectApprover)
+                    } else {
+                        state.copy(
+                            selectedApprover = state.approvers.primaryApprover(),
+                            accessApprovalUIState = AccessApprovalUIState.GettingLive
+                        )
+                    }
                 } else {
-                    determineApprovalState(recovery)
+                    checkForRejections(recovery)
                 }
             }
         }
     }
 
-    private fun determineApprovalState(recovery: Recovery.ThisDevice) {
+    private fun checkForRejections(recovery: Recovery.ThisDevice) {
         recovery.approvals.find { it.participantId == state.selectedApprover?.participantId }
             ?.let {
                 if (state.waitingForApproval && it.status == ApprovalStatus.Rejected) {
@@ -196,16 +211,7 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun onContinueLive() {
-        state = if (state.approvers.backupApprover().isDefined()) {
-            state.copy(
-                accessApprovalUIState = AccessApprovalUIState.SelectApprover
-            )
-        } else {
-            state.copy(
-                selectedApprover = state.approvers.primaryApprover(),
-                accessApprovalUIState = AccessApprovalUIState.ApproveAccess
-            )
-        }
+        state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
     }
 
     fun onApproverSelected(selectedApprover: Guardian.TrustedGuardian) {
@@ -216,8 +222,8 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun continueToApproveAccess() {
-        state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
+    fun onApproverSelected() {
+        state = state.copy(accessApprovalUIState = AccessApprovalUIState.GettingLive)
     }
 
     fun onBackClicked() {
@@ -242,7 +248,7 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun onFullyCompleted() {
+    fun navigateToViewSeedPhrases() {
         state = state.copy(navigationResource = Resource.Success(Screen.AccessSeedPhrases.route))
     }
 
