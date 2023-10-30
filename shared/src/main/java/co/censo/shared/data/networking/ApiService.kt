@@ -20,6 +20,7 @@ import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
@@ -207,7 +208,7 @@ interface ApiService {
     ): RetrofitResponse<DeleteSecretApiResponse>
 
     @POST("/v1/recovery")
-    suspend fun requestRecovery(): RetrofitResponse<InitiateRecoveryApiResponse>
+    suspend fun requestRecovery(@Body apiRequest: InitiateRecoveryApiRequest): RetrofitResponse<InitiateRecoveryApiResponse>
 
     @DELETE("/v1/recovery")
     suspend fun deleteRecovery(): RetrofitResponse<DeleteRecoveryApiResponse>

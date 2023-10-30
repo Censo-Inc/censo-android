@@ -163,6 +163,7 @@ sealed class Recovery {
         val unlocksAt: Instant,
         val expiresAt: Instant,
         val approvals: List<Approval>,
+        val intent: RecoveryIntent,
     ) : Recovery()
 }
 
