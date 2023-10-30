@@ -39,7 +39,7 @@ class InitialPlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(InitialPlanSetupScreenState())
         private set
 
-    fun moveToNextAction() {
+    private fun moveToNextAction() {
         when {
             state.initialPlanData.approverEncryptionKey == null -> createApproverKey()
             state.initialPlanData.createPolicyParams == null -> createPolicyParams()
@@ -48,7 +48,7 @@ class InitialPlanSetupViewModel @Inject constructor(
     }
 
 
-    private fun determineUIStatus() {
+    fun determineUIStatus() {
         val uiStatus = when {
             state.initialPlanData.approverEncryptionKey == null -> InitialPlanSetupStep.CreateApproverKey
             state.initialPlanData.createPolicyParams == null -> InitialPlanSetupStep.CreatePolicyParams

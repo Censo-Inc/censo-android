@@ -114,7 +114,7 @@ fun InitialPlanSetupScreen(
                         errorMessage = errorText,
                         dismissAction = null,
                         retryAction = {
-                            viewModel.moveToNextAction()
+                            viewModel.determineUIStatus()
                         }
                     )
                 }
@@ -137,7 +137,7 @@ fun InitialPlanSetupScreen(
 
                         is InitialPlanSetupStep.Initial ->
                             InitialPlanSetupStandardUI {
-                                viewModel.moveToNextAction()
+                                viewModel.determineUIStatus()
                             }
 
 
