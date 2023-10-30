@@ -14,9 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.guardian.presentation.Screen
+import co.censo.guardian.presentation.home.GuardianUIState
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.projectLog
 
 @Composable
 fun ApproverRoutingScreen(
@@ -28,8 +30,7 @@ fun ApproverRoutingScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navToGuardianHome is Resource.Success) {
-            //TODO: Pass this data along to the screens
-            val uiState = state.navToGuardianHome.data
+            projectLog(tag = "Navigation", message = "Navving to GHVM")
 
             navController.navigate(SharedScreen.HomeRoute.route) {
                 popUpTo(Screen.ApproverRoutingScreen.route) {
@@ -37,7 +38,16 @@ fun ApproverRoutingScreen(
                 }
             }
 
-            viewModel.resetNavigationTrigger()
+            viewModel.resetGuardianHomeNavigationTrigger()
+        }
+
+        if (state.navToApproverOnboarding is Resource.Success) {
+            navController.navigate(Screen.ApproverOnboardingScreen.route) {
+                popUpTo(Screen.ApproverRoutingScreen.route) {
+                    inclusive = true
+                }
+            }
+            viewModel.resetApproverOnboardingNavigationTrigger()
         }
     }
 
@@ -52,8 +62,8 @@ fun ApproverRoutingScreen(
         if (state.userResponse is Resource.Error) {
             DisplayError(
                 errorMessage = state.userResponse.getErrorMessage(context),
-                dismissAction = { viewModel.retrieveApproverState() }) {
-                viewModel.retrieveApproverState()
+                dismissAction = { viewModel.retrieveApproverState(false) }) {
+                viewModel.retrieveApproverState(false)
             }
         } else {
             CircularProgressIndicator(modifier = Modifier.size(44.dp))

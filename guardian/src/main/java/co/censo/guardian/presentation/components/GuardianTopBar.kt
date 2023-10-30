@@ -12,8 +12,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import co.censo.guardian.R
+import co.censo.guardian.data.ApproverOnboardingUIState
+import co.censo.guardian.data.ApproverUIState
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.home.GuardianUIState
+import co.censo.shared.data.model.Guardian
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +54,47 @@ fun isClosable(uiState: GuardianUIState): Boolean {
         GuardianUIState.MISSING_INVITE_CODE,
         GuardianUIState.COMPLETE,
         GuardianUIState.ACCESS_APPROVED -> false
+
+        else -> true
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ApproverTopBar(
+    uiState: ApproverUIState,
+    onClose: () -> Unit
+) {
+
+    TopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = GuardianColors.NavBar,
+            navigationIconContentColor = Color.Black,
+            titleContentColor = Color.Black,
+        ),
+        navigationIcon = {
+            if (approverTopAppBarIsClosable(uiState)) {
+                IconButton(
+                    onClick = onClose
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        stringResource(R.string.close),
+                    )
+                }
+            }
+        },
+        title = {
+            // Titles are part of the screen content
+        },
+    )
+}
+
+fun approverTopAppBarIsClosable(uiState: ApproverUIState): Boolean {
+    return when (uiState) {
+        ApproverOnboardingUIState.Complete,
+        ApproverOnboardingUIState.MissingInviteCode -> false
+        //TODO: Setup access Approved here once we finish ApproverAccessVM
 
         else -> true
     }

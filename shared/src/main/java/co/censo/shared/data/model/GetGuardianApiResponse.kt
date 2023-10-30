@@ -22,6 +22,13 @@ data class GuardianState(
 
 @Serializable
 sealed class GuardianPhase {
+
+    fun isAccessPhase() =
+        this is  RecoveryRequested || this is RecoveryVerification || this is RecoveryConfirmation
+
+    fun isOnboardingPhase() =
+        this is WaitingForCode || this is WaitingForVerification || this is VerificationRejected
+
     @Serializable
     @SerialName("WaitingForCode")
     data class WaitingForCode(

@@ -97,7 +97,7 @@ class EntranceViewModel @Inject constructor(
                         retrieveOwnerState()
                     } else {
                         state = state.copy(
-                            userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                            userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route),
                         )
                     }
                 } else {
@@ -124,7 +124,7 @@ class EntranceViewModel @Inject constructor(
                     retrieveOwnerState()
                 } else {
                     state = state.copy(
-                        userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route)
+                        userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route)
                     )
                 }
             } else {
@@ -299,7 +299,7 @@ class EntranceViewModel @Inject constructor(
             retrieveOwnerState()
         } else {
             state = state.copy(
-                userFinishedSetup = Resource.Success(SharedScreen.HomeRoute.route),
+                userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route),
                 showPushNotificationsDialog = Resource.Uninitialized
             )
         }

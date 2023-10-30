@@ -85,6 +85,7 @@ class GuardianHomeViewModel @Inject constructor(
                 val guardianStates = userResponse.data!!.guardianStates
 
                 if (participantId.isEmpty()) {
+                    projectLog(tag = guardianHomeLogTag, message = "participantId was empty, determining guardianUIState with: ${guardianStates.firstOrNull()}")
                     determineGuardianUIState(guardianStates.firstOrNull())
                 } else {
                     when (val guardianState = guardianStates.forParticipant(participantId)) {

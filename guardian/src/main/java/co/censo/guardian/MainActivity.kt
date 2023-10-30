@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import co.censo.guardian.presentation.Screen
 import co.censo.guardian.presentation.home.GuardianHomeScreen
+import co.censo.guardian.presentation.onboarding.ApproverOnboardingScreen
 import co.censo.guardian.presentation.routing.ApproverRoutingScreen
 import co.censo.guardian.ui.theme.GuardianTheme
 import co.censo.shared.SharedScreen
@@ -25,6 +26,7 @@ import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_RECOVERY
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_ONBOARDING_URI
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_RECOVERY_URI
 import co.censo.shared.presentation.entrance.EntranceScreen
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
 
 public val routingLogTag = "ROUTING"
@@ -68,6 +70,11 @@ class MainActivity : FragmentActivity() {
                 Screen.ApproverRoutingScreen.route
             ) {
                 ApproverRoutingScreen(navController = navController)
+            }
+            composable(
+                route = Screen.ApproverOnboardingScreen.route
+            ) {
+                ApproverOnboardingScreen(navController = navController)
             }
             composable(
                 "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",

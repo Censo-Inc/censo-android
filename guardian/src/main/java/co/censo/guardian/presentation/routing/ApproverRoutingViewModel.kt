@@ -6,22 +6,36 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.guardian.presentation.home.GuardianUIState
-import co.censo.guardian.routingLogTag
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-//Overall flow
-//1. get user data
-//2. determine guardian state
-//3. action step / UI state
+/**
+ *
+ * 1. Retrieve user data from API
+ * 2. Determine approver: determineApprover()
+ *
+ *      Backend will know who we are based on our Google ID token
+ *
+ *      EXCEPT: For initial onboarding when we need to create the approver --> Invitation Id
+ *
+ *      Access Edge Case: Cannot be null for access b/c we should have participant ID
+ *                        and the backend will know our account by Google Id token
+ *
+ *
+ * 3. Determine to send user to Onboarding or Access Flows
+ *      Null: Initial Onboarding User
+ *      Complete: Home Screen (Unknown right now with designs)
+ *      Onboarding Sub Type: Onboarding
+ *      Access Sub Type: Access
+ *
+ */
 
 @HiltViewModel
 class ApproverRoutingViewModel @Inject constructor(
@@ -32,23 +46,20 @@ class ApproverRoutingViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveApproverState()
+        retrieveApproverState(false)
     }
 
     fun onStop() {
         state = ApproverRoutingState()
     }
 
-    fun retrieveApproverState() {
-        state = state.copy(userResponse = Resource.Loading())
+    fun retrieveApproverState(silently: Boolean) {
+        if (!silently) {
+            state = state.copy(userResponse = Resource.Loading())
+        }
 
-        silentRetrieveApproverState()
-    }
-
-    private fun silentRetrieveApproverState() {
         viewModelScope.launch {
             val userResponse = ownerRepository.retrieveUser()
-            projectLog(tag = routingLogTag, message = "User Response: ${userResponse.data}")
 
             state = state.copy(userResponse = userResponse)
 
@@ -62,92 +73,66 @@ class ApproverRoutingViewModel @Inject constructor(
         val participantId = guardianRepository.retrieveParticipantId()
 
         if (participantId.isEmpty()) {
-            projectLog(tag = routingLogTag, message = "determining guardian UI state with firstOrNull guardianState")
             determineApproverUIState(guardianStates.firstOrNull())
             return
         }
 
         val guardianState = guardianStates.forParticipant(participantId)
         if (guardianState == null) {
-            projectLog(tag = routingLogTag, message = "handling missing guardian")
             handleMissingApprover()
             return
         }
 
-        projectLog(tag = routingLogTag, message = "determining guardian UI state with existing approver guardianState")
         determineApproverUIState(guardianState)
     }
 
     private fun handleMissingApprover() {
         guardianRepository.clearParticipantId()
         state = state.copy(guardianUIState = GuardianUIState.INVALID_PARTICIPANT_ID)
-        triggerNavigation(GuardianUIState.INVALID_PARTICIPANT_ID)
+        triggerNavigation(RoutingDestination.ACCESS)
     }
 
 
     private fun determineApproverUIState(guardianState: GuardianState?) {
-        val inviteCode = guardianRepository.retrieveInvitationId()
-        val participantId = guardianRepository.retrieveParticipantId()
-
         if (guardianState == null) {
-            projectLog(
-                tag = routingLogTag,
-                message = "Determining UI state for new approver onboarding"
-            )
-            val approverOnboardingUIState = if (inviteCode.isEmpty()) {
-                GuardianUIState.MISSING_INVITE_CODE
-            } else {
-                GuardianUIState.INVITE_READY
-            }
-            triggerNavigation(approverOnboardingUIState)
+            triggerNavigation(RoutingDestination.ONBOARDING)
             return
         }
 
-        projectLog(
-            tag = routingLogTag,
-            message = "Determining UI state with following guardianState: $guardianState"
-        )
+        val approverDestination = when (guardianState.phase) {
+            //No Action needed
+            GuardianPhase.Complete -> RoutingDestination.ACCESS
 
-        val existingApproverUIState = when (guardianState.phase) {// existing approver
-            // Onboarding, invitationId is mandatory
-            is GuardianPhase.WaitingForCode -> if (inviteCode.isEmpty()) GuardianUIState.MISSING_INVITE_CODE else GuardianUIState.WAITING_FOR_CODE
-            is GuardianPhase.WaitingForVerification -> if (inviteCode.isEmpty()) GuardianUIState.MISSING_INVITE_CODE else GuardianUIState.WAITING_FOR_CONFIRMATION
-            is GuardianPhase.VerificationRejected -> if (inviteCode.isEmpty()) GuardianUIState.MISSING_INVITE_CODE else GuardianUIState.CODE_REJECTED
+            //Approver Access Requested
+            is GuardianPhase.RecoveryRequested,
+            is GuardianPhase.RecoveryVerification,
+            is GuardianPhase.RecoveryConfirmation -> RoutingDestination.ACCESS
 
-            // No action needed
-            is GuardianPhase.Complete -> GuardianUIState.COMPLETE
-
-            // recovery, participantId is mandatory
-            is GuardianPhase.RecoveryRequested -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_REQUESTED
-            is GuardianPhase.RecoveryVerification -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER
-            is GuardianPhase.RecoveryConfirmation -> if (participantId.isEmpty()) GuardianUIState.COMPLETE else GuardianUIState.ACCESS_VERIFYING_TOTP_FROM_OWNER
+            //Approver Onboarding
+            is GuardianPhase.WaitingForCode,
+            is GuardianPhase.WaitingForVerification,
+            is GuardianPhase.VerificationRejected -> RoutingDestination.ONBOARDING
         }
 
-
-        //Logging data for testing
-        val stateParticipantId = guardianState.participantId.value
-        projectLog(tag = routingLogTag, message = "Approver invite code: $inviteCode")
-        projectLog(
-            tag = routingLogTag,
-            message = "Approver local participantID: ${participantId.ifEmpty { "no local value" }} (Retrieved from local storage)"
-        )
-        projectLog(
-            tag = routingLogTag,
-            message = "Approver remote participantID: ${stateParticipantId.ifEmpty { "no remote value" }} (From guardianState/remote)"
-        )
-        projectLog(tag = routingLogTag, message = "determined UI State: $existingApproverUIState")
-
         //Trigger navigation to move the approver forward
-        triggerNavigation(existingApproverUIState)
+        triggerNavigation(routingDestination = approverDestination)
     }
 
-    private fun triggerNavigation(guardianUIState: GuardianUIState) {
-        projectLog(tag = routingLogTag, message = "Triggering navigation to GuardianHomeVM")
-        state = state.copy(navToGuardianHome = Resource.Success(guardianUIState))
+    private fun triggerNavigation(routingDestination: RoutingDestination) {
+        state = when (routingDestination) {
+            RoutingDestination.ACCESS ->
+                state.copy(navToGuardianHome = Resource.Success(Unit))
+
+            RoutingDestination.ONBOARDING ->
+                state.copy(navToApproverOnboarding = Resource.Success(Unit))
+        }
     }
 
-    fun resetNavigationTrigger() {
-        projectLog(tag = routingLogTag, message = "Resetting navigation to GuardianHomeVM")
+    fun resetGuardianHomeNavigationTrigger() {
         state = state.copy(navToGuardianHome = Resource.Uninitialized)
+    }
+
+    fun resetApproverOnboardingNavigationTrigger() {
+        state = state.copy(navToApproverOnboarding = Resource.Uninitialized)
     }
 }

@@ -1,10 +1,13 @@
 package co.censo.guardian.presentation.routing
 
-import InvitationId
+import co.censo.guardian.data.ApproverAccessUIState
+import co.censo.guardian.data.ApproverOnboardingUIState
 import co.censo.guardian.presentation.home.GuardianUIState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.GuardianState
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 data class ApproverRoutingState(
 
@@ -16,5 +19,10 @@ data class ApproverRoutingState(
 
     // async resources
     val userResponse: Resource<GetUserApiResponse> = Resource.Loading(),
-    val navToGuardianHome: Resource<GuardianUIState> = Resource.Uninitialized
+    val navToGuardianHome: Resource<Unit> = Resource.Uninitialized,
+    val navToApproverOnboarding: Resource<Unit> = Resource.Uninitialized
 )
+
+enum class RoutingDestination {
+    ONBOARDING, ACCESS
+}
