@@ -5,7 +5,6 @@ import LearnMore
 import StandardButton
 import TitleText
 import VaultSecretId
-import android.content.IntentSender.OnFinished
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import kotlinx.datetime.Clock
 @Composable
 fun SelectPhraseUI(
     vaultSecrets: List<VaultSecret>,
+    viewedIds: List<VaultSecretId>,
     onPhraseSelected: (VaultSecret) -> Unit,
     onFinish: () -> Unit
 ) {
@@ -41,7 +41,7 @@ fun SelectPhraseUI(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White)
-            .padding(horizontal = 36.dp),
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -52,13 +52,14 @@ fun SelectPhraseUI(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        vaultSecrets.forEach {
+        vaultSecrets.forEach { seedPhrase ->
             Spacer(modifier = Modifier.height(12.dp))
             SeedPhraseItem(
                 horizontalPadding = 0.dp,
-                vaultSecret = it
+                vaultSecret = seedPhrase,
+                isSelected = viewedIds.any { it == seedPhrase.guid}
             ) {
-                onPhraseSelected(it)
+                onPhraseSelected(seedPhrase)
             }
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -74,7 +75,7 @@ fun SelectPhraseUI(
             color = Color.Black
         ) {
             Text(
-                text = stringResource(id = R.string.finish),
+                text = stringResource(id = R.string.finished),
                 color = Color.White,
                 fontWeight = FontWeight.Medium,
                 fontSize = 22.sp,
@@ -96,21 +97,21 @@ fun PreviewSelectPhraseUI() {
     SelectPhraseUI(
         vaultSecrets = listOf(
             VaultSecret(
-                guid = VaultSecretId(""),
+                guid = VaultSecretId("1"),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 seedPhraseHash = HashedValue(""),
                 label = "Yankee Hotel Foxtrot",
                 createdAt = Clock.System.now(),
             ),
             VaultSecret(
-                guid = VaultSecretId(""),
+                guid = VaultSecretId("2"),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 seedPhraseHash = HashedValue(""),
                 label = "BashOLantern",
                 createdAt = Clock.System.now(),
             ),
             VaultSecret(
-                guid = VaultSecretId(""),
+                guid = VaultSecretId("3"),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 seedPhraseHash = HashedValue(""),
                 label = "Robin Hood",
@@ -118,6 +119,9 @@ fun PreviewSelectPhraseUI() {
             ),
 
             ),
+        viewedIds = listOf(
+            VaultSecretId("2"),
+        ),
         onPhraseSelected = {},
         onFinish = {}
     )

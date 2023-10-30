@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.access_seed_phrases
 
+import VaultSecretId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
@@ -8,7 +9,6 @@ import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.VaultSecret
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -21,6 +21,7 @@ data class AccessSeedPhrasesState(
     val selectedIndex: Int = 0,
     val viewedPhrase: List<String> = emptyList(),
     val showCancelConfirmationDialog: Boolean = false,
+    val viewedPhraseIds: List<VaultSecretId> = emptyList(),
 
     // data
     val recoveredPhrases: Resource<List<RecoveredSeedPhrase>> = Resource.Uninitialized,

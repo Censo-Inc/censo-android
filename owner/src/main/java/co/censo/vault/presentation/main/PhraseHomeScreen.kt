@@ -39,6 +39,7 @@ import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.presentation.SharedColors
 import co.censo.vault.R
+import co.censo.vault.presentation.VaultColors
 import kotlinx.datetime.Clock
 
 @Composable
@@ -127,6 +128,7 @@ fun AddAccessRow(
 fun SeedPhraseItem(
     horizontalPadding : Dp = 36.dp,
     vaultSecret: VaultSecret,
+    isSelected: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
     val modifier = onClick?.let { Modifier.clickable { it() } } ?: Modifier
@@ -140,22 +142,40 @@ fun SeedPhraseItem(
             )
             .border(
                 width = 1.dp,
-                color = SharedColors.BorderGrey,
+                color = if (isSelected) VaultColors.PrimaryColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
-        Text(
-            modifier = Modifier.padding(
-                vertical = 32.dp,
-                horizontal = 24.dp
-            ),
-            text = vaultSecret.label,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.W600,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 16.dp),
+                ) {
+                    Icon(
+                        painterResource(id = co.censo.shared.R.drawable.check_icon),
+                        contentDescription = stringResource(R.string.select_approver),
+                        tint = Color.Black
+                    )
+                }
+            }
+
+            Text(
+                modifier = Modifier.padding(
+                    vertical = 32.dp,
+                    horizontal = 24.dp
+                ),
+                text = vaultSecret.label,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.W600,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
