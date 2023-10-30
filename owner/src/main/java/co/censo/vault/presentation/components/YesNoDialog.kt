@@ -15,7 +15,7 @@ import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 
 @Composable
-fun ConfirmationDialog(
+fun YesNoDialog(
     title: String,
     message: String,
     onDismiss: () -> Unit,

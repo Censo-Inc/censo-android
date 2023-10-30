@@ -29,7 +29,7 @@ import co.censo.vault.presentation.access_seed_phrases.components.AccessPhrasesT
 import co.censo.vault.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.vault.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.vault.presentation.access_seed_phrases.components.ViewAccessPhraseUI
-import co.censo.vault.presentation.components.ConfirmationDialog
+import co.censo.vault.presentation.components.YesNoDialog
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,7 +135,7 @@ fun AccessSeedPhrasesScreen(
                 else -> {
 
                     if (state.showCancelConfirmationDialog) {
-                        ConfirmationDialog(
+                        YesNoDialog(
                             title = stringResource(R.string.cancel_access),
                             message = stringResource(R.string.cancel_access_dialog),
                             onDismiss = viewModel::hideCloseConfirmationDialog,
