@@ -4,7 +4,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.StoreSecretApiResponse
+import co.censo.shared.data.model.VaultSecret
 
 data class VaultScreenState(
     // owner state
@@ -14,10 +14,10 @@ data class VaultScreenState(
     val screen: VaultScreens = VaultScreens.Unlocked,
 
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
+    val triggerEditPhraseDialog: Resource<VaultSecret> = Resource.Uninitialized,
 
     // api requests
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
-    val storeSeedPhraseResource: Resource<StoreSecretApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSecretApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 
@@ -29,13 +29,11 @@ data class VaultScreenState(
     val secretsSize = ownerState?.vault?.secrets?.size ?: 0
 
     val loading = userResponse is Resource.Loading ||
-            storeSeedPhraseResource is Resource.Loading ||
             deleteSeedPhraseResource is Resource.Loading ||
             deleteUserResource is Resource.Loading
 
     val asyncError =
         userResponse is Resource.Error ||
-                storeSeedPhraseResource is Resource.Error ||
                 deleteSeedPhraseResource is Resource.Error ||
                 deleteUserResource is Resource.Error
 

@@ -93,13 +93,6 @@ fun VaultScreen(
                     ) { viewModel.retrieveOwnerState() }
                 }
 
-                state.storeSeedPhraseResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.storeSeedPhraseResource.getErrorMessage(context),
-                        dismissAction = viewModel::resetStoreSeedPhraseResponse,
-                    ) {}
-                }
-
                 state.deleteSeedPhraseResource is Resource.Error -> {
                     DisplayError(
                         errorMessage = state.deleteSeedPhraseResource.getErrorMessage(context),
@@ -203,7 +196,7 @@ fun VaultScreen(
                                         VaultSecretListItem(
                                             secret = secrets[index],
                                             onDelete = {
-                                                viewModel.deleteSecret(it)
+                                                //viewModel.deleteSecret(it)
                                             }
                                         )
                                     }

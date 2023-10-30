@@ -94,6 +94,9 @@ fun MainVaultScreen(
                         },
                         onAccessClick = {
                             navController.navigate(Screen.AccessApproval.route)
+                        },
+                        onEditPhraseClick = { vaultSecret ->
+                            viewModel.showEditPhraseDialog(vaultSecret)
                         }
                     )
 
@@ -106,26 +109,40 @@ fun MainVaultScreen(
                     )
 
                 BottomNavItem.Settings ->
-                    Text(text = selectedItem.value.route, color = Color.Black)
+                    SettingsHomeScreen(
+                        onDeleteUser = viewModel::showDeleteUserDialog,
+                        onSignOut = {},
+                    )
             }
         }
 
         if (state.triggerDeleteUserDialog is Resource.Success) {
-            DeleteUserDialog(
-                onCancel = viewModel::onCancelResetUser, onDeleteUser = viewModel::deleteUser
+            HomeDialog(
+                title = stringResource(R.string.you_are_about_to_delete_user),
+                onCancel = viewModel::onCancelResetUser,
+                onDelete = viewModel::deleteUser,
+            )
+        }
+
+        if (state.triggerEditPhraseDialog is Resource.Success) {
+            HomeDialog(
+                title = stringResource(R.string.you_are_about_to_delete_phrase),
+                onCancel = viewModel::onCancelDeletePhrase,
+                onDelete = viewModel::deleteSecret,
             )
         }
     }
 }
 
 @Composable
-fun DeleteUserDialog(
-    onCancel: () -> Unit, onDeleteUser: () -> Unit
+fun HomeDialog(
+    title: String,
+    onCancel: () -> Unit, onDelete: () -> Unit
 ) {
     AlertDialog(onDismissRequest = onCancel, text = {
         Text(
             modifier = Modifier.padding(8.dp),
-            text = stringResource(R.string.you_are_about_to_delete_user),
+            text = title,
             color = Color.Black,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
@@ -133,7 +150,7 @@ fun DeleteUserDialog(
         )
     }, confirmButton = {
         Button(
-            onClick = onDeleteUser
+            onClick = onDelete
         ) {
             Text(stringResource(R.string.confirm))
         }

@@ -287,5 +287,8 @@
     <string name="cancel_access">Cancel access</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
+    <string name="delete_user">Delete User</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="you_are_about_to_delete_phrase">You are about to delete this phrase</string>
 
 </resources>
