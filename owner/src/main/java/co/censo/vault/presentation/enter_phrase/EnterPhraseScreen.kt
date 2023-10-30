@@ -36,6 +36,7 @@ import co.censo.shared.R as SharedR
 import co.censo.vault.R
 import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.VaultColors
+import co.censo.vault.presentation.components.ConfirmationDialog
 import co.censo.vault.presentation.enter_phrase.components.AddPhraseNicknameUI
 import co.censo.vault.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.vault.presentation.enter_phrase.components.indexToWordText
@@ -157,6 +158,15 @@ fun EnterPhraseScreen(
                 }
 
                 else -> {
+                    if (state.exitConfirmationDialog) {
+                        ConfirmationDialog(
+                            title = stringResource(R.string.exit_seed_phrase_entry),
+                            message = stringResource(R.string.exit_seed_phrase_entry_message),
+                            onDismiss = viewModel::hideExitConfirmationDialog,
+                            onConfirm = viewModel::exitFlow
+                        )
+                    }
+
                     when (state.enterWordUIState) {
                         EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
                             SelectSeedPhraseEntryType(

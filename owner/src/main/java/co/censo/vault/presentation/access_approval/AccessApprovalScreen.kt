@@ -39,7 +39,7 @@ import co.censo.vault.presentation.access_approval.components.AnotherDeviceAcces
 import co.censo.vault.presentation.access_approval.components.ApproveAccessUI
 import co.censo.vault.presentation.access_approval.components.ApprovedUI
 import co.censo.vault.presentation.access_approval.components.SelectApproverUI
-import co.censo.vault.presentation.components.access.CancelAccessDialog
+import co.censo.vault.presentation.components.ConfirmationDialog
 import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 import kotlinx.coroutines.delay
 
@@ -131,7 +131,9 @@ fun AccessApprovalScreen(
     }) { paddingValues ->
 
         if (state.showCancelConfirmationDialog) {
-            CancelAccessDialog(
+            ConfirmationDialog(
+                title = stringResource(R.string.cancel_access),
+                message = stringResource(R.string.cancel_access_dialog),
                 onDismiss = viewModel::hideCloseConfirmationDialog,
                 onConfirm = viewModel::cancelAccess
             )

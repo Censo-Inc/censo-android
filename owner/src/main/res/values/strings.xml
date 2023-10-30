@@ -112,6 +112,8 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="exit_edit_plan">Exit edit plan</string>
     <string name="exit">Exit</string>
+    <string name="exit_seed_phrase_entry">Exit seed phrase entry</string>
+    <string name="exit_seed_phrase_entry_message">Entered phrase will be lost. Continue?</string>
     <string name="status">Status</string>
     <string name="activate_approvers">Activate Approvers</string>
     <string name="edit_plan">Edit plan</string>

@@ -77,6 +77,11 @@ data class CreatePolicyParams(
     val participantId: ParticipantId
 )
 
+data class EncryptedSeedPhrase(
+    val hash: String,
+    val encrypted: Base64EncodedData
+)
+
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetUserApiResponse>
@@ -141,10 +146,14 @@ interface OwnerRepository {
 
     suspend fun lock(): Resource<LockApiResponse>
 
-    suspend fun storeSecret(
+    suspend fun encryptSecret(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        label: String,
         seedPhrase: String
+    ): EncryptedSeedPhrase
+
+    suspend fun storeSecret(
+        label: String,
+        seedPhrase: EncryptedSeedPhrase
     ): Resource<StoreSecretApiResponse>
 
     suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
@@ -392,27 +401,34 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.lock() }
     }
 
-    override suspend fun storeSecret(
+    override suspend fun encryptSecret(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        label: String,
         seedPhrase: String
-    ): Resource<StoreSecretApiResponse> {
-
+    ): EncryptedSeedPhrase {
         val encodedData = BIP39.phraseToBinaryData(seedPhrase)
-        val seedPhraseHash = encodedData.sha256()
+
         val encryptedSeedPhrase = ECIESManager.encryptMessage(
             dataToEncrypt = encodedData,
             publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
         )
 
+        return EncryptedSeedPhrase(
+            hash = encodedData.sha256(),
+            encrypted = encryptedSeedPhrase.base64Encoded()
+        )
+    }
+
+    override suspend fun storeSecret(
+        label: String,
+        seedPhrase: EncryptedSeedPhrase
+    ): Resource<StoreSecretApiResponse> {
+
         return retrieveApiResource {
             apiService.storeSecret(
                 StoreSecretApiRequest(
                     label = label,
-                    encryptedSeedPhrase = Base64EncodedData(
-                        Base64.getEncoder().encodeToString(encryptedSeedPhrase)
-                    ),
-                    seedPhraseHash = seedPhraseHash
+                    encryptedSeedPhrase = seedPhrase.encrypted,
+                    seedPhraseHash = seedPhrase.hash,
                 )
             )
         }
