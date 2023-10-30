@@ -46,7 +46,6 @@ data class GuardianHomeState(
     val showTopBarCancelConfirmationDialog: Boolean = false,
 
     //Cloud Storage
-    val loadPrivateKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null

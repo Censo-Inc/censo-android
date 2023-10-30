@@ -3,6 +3,7 @@ package co.censo.guardian.presentation.home
 import Base58EncodedPrivateKey
 import ParticipantId
 import StandardButton
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -298,6 +299,23 @@ fun GuardianHomeScreen(
                     if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
                         viewModel.getPrivateKeyForUpload()
                     } else null
+
+
+                if (state.savePrivateKeyToCloudResource is Resource.Loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .align(Alignment.Center),
+                            strokeWidth = 8.dp,
+                            color = Color.Black
+                        )
+                    }
+                }
 
                 CloudStorageHandler(
                     actionToPerform = state.cloudStorageAction.action,
