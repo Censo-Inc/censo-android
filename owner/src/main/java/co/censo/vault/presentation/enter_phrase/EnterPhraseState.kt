@@ -2,6 +2,7 @@ package co.censo.vault.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import co.censo.shared.data.Resource
+import co.censo.shared.data.repository.EncryptedSeedPhrase
 import co.censo.shared.util.BIP39InvalidReason
 
 data class EnterPhraseState(
@@ -11,24 +12,26 @@ data class EnterPhraseState(
     val editedWordIndex: Int = 0,
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
     val phraseInvalidReason: BIP39InvalidReason? = null,
-    val nickName: String = "",
+    val label: String = "",
+    val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
     val welcomeFlow: Boolean = false,
+    val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false
 ) {
 
-    val validName = nickName.isNotEmpty()
+    val labelValid = label.isNotEmpty()
 
     val backArrowType = when (enterWordUIState) {
-        EnterPhraseUIState.NICKNAME,
         EnterPhraseUIState.EDIT,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.SELECTED -> BackIconType.BACK
+        EnterPhraseUIState.SELECTED,
+        EnterPhraseUIState.REVIEW -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.REVIEW -> BackIconType.CLOSE
+        EnterPhraseUIState.LABEL -> BackIconType.CLOSE
     }
 
     val error = submitResource is Resource.Error
@@ -36,7 +39,7 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, NICKNAME
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, LABEL
 }
 
 enum class BackIconType {

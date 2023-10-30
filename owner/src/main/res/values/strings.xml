@@ -112,6 +112,8 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="exit_edit_plan">Exit edit plan</string>
     <string name="exit">Exit</string>
+    <string name="exit_seed_phrase_entry">Exit seed phrase entry</string>
+    <string name="exit_seed_phrase_entry_message">Entered phrase will be lost. Continue?</string>
     <string name="status">Status</string>
     <string name="activate_approvers">Activate Approvers</string>
     <string name="edit_plan">Edit plan</string>
@@ -191,9 +193,10 @@
     <string name="finish">Finish</string>
     <string name="finished">Finished</string>
     <string name="submit_word">Submit word</string>
-    <string name="add_a_nickname">Add a nickname</string>
-    <string name="nickname_message">Now, give your seed phrase a nickname of your choice so you can identify it in the future.\n\nThis will be secured within your face scan encryption and not shared with anyone.</string>
+    <string name="add_a_label">Add a label</string>
+    <string name="seed_phrase_label_message">Now, give your seed phrase a label of your choice so you can identify it in the future.\n\nThis will be secured within your face scan encryption and not shared with anyone.</string>
     <string name="enter_a_nickname">Enter a nickname…</string>
+    <string name="enter_a_label">Enter a label…</string>
     <string name="add_seed_phrases">Add seed phrases</string>
     <string name="add_first_seed_phrase">Add your first seed phrase</string>
     <string name="add_seed_phrase_message">Add a seed phrase to store it safely with Censo. Your seed phrase is sharded and encrypted for ultimate security.\n\nOnly you can retrieve your seed phrase. Neither Censo nor trusted approvers can access it.</string>

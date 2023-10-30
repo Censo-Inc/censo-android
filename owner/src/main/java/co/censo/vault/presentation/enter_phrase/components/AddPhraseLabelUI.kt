@@ -35,10 +35,10 @@ import co.censo.vault.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPhraseNicknameUI(
-    nickname: String,
+fun AddPhraseLabelUI(
+    label: String,
     enabled: Boolean,
-    onNicknameChanged: (String) -> Unit,
+    onLabelChanged: (String) -> Unit,
     onSavePhrase: () -> Unit
 ) {
 
@@ -54,7 +54,7 @@ fun AddPhraseNicknameUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.add_a_nickname,
+            title = R.string.add_a_label,
             textAlign = TextAlign.Start
         )
 
@@ -62,7 +62,7 @@ fun AddPhraseNicknameUI(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.nickname_message,
+            message = R.string.seed_phrase_label_message,
             textAlign = TextAlign.Start
         )
 
@@ -77,13 +77,13 @@ fun AddPhraseNicknameUI(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = nickname,
-            onValueChange = onNicknameChanged,
+            value = label,
+            onValueChange = onLabelChanged,
             shape = CircleShape,
             placeholder = {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.enter_a_nickname),
+                    text = stringResource(R.string.enter_a_label),
                     fontSize = 24.sp,
                     fontWeight = textFieldStyle.fontWeight,
                     textAlign = TextAlign.Center,
@@ -127,22 +127,22 @@ fun AddPhraseNicknameUI(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewEnabledNickname() {
-    AddPhraseNicknameUI(
-        nickname = "Yankee Hotel Foxtrot",
+fun PreviewEnabledLabel() {
+    AddPhraseLabelUI(
+        label = "Yankee Hotel Foxtrot",
         enabled = true,
-        onNicknameChanged = {},
+        onLabelChanged = {},
         onSavePhrase = {},
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewDisabledNickname() {
-    AddPhraseNicknameUI(
-        nickname = "",
+fun PreviewDisabledLabel() {
+    AddPhraseLabelUI(
+        label = "",
         enabled = false,
-        onNicknameChanged = {},
+        onLabelChanged = {},
         onSavePhrase = {},
     )
 }

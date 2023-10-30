@@ -120,13 +120,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
     }
 
-    fun moveToNickname() {
-        state = state.copy(
-            enterWordUIState = EnterPhraseUIState.NICKNAME
-        )
-    }
-
-    fun saveSeedPhrase() {
+    fun moveToLabel() {
         viewModelScope.launch {
             if (state.masterPublicKey == null) {
                 state = state.copy(
@@ -135,11 +129,34 @@ class EnterPhraseViewModel @Inject constructor(
                 return@launch
             }
 
+            runCatching {
+                // encrypt seed phrase and drop single words
+                val encryptedSeedPhrase = ownerRepository.encryptSecret(
+                    state.masterPublicKey!!,
+                    state.enteredWords.joinToString(" ").trim()
+                )
 
+                state = state.copy(
+                    enterWordUIState = EnterPhraseUIState.LABEL,
+                    encryptedSeedPhrase = encryptedSeedPhrase,
+                    enteredWords = listOf()
+                )
+
+            }.onFailure { throwable ->
+                state = state.copy(
+                    submitResource = Resource.Error(exception = Exception(throwable))
+                )
+            }
+        }
+    }
+
+    fun saveSeedPhrase() {
+        state = state.copy(submitResource = Resource.Loading())
+
+        viewModelScope.launch {
             val response = ownerRepository.storeSecret(
-                state.masterPublicKey!!,
-                state.nickName.trim(),
-                state.enteredWords.joinToString(" ").trim()
+                state.label.trim(),
+                state.encryptedSeedPhrase!!
             )
 
             state = state.copy(
@@ -159,8 +176,8 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
 
-    fun updateNickname(updatedNickName: String) {
-        state = state.copy(nickName = updatedNickName)
+    fun updateLabel(updatedLabel: String) {
+        state = state.copy(label = updatedLabel)
 
     }
 
@@ -223,13 +240,13 @@ class EnterPhraseViewModel @Inject constructor(
                     enterWordUIState = EnterPhraseUIState.VIEW,
                     editedWordIndex = 0
                 )
-            EnterPhraseUIState.NICKNAME ->
-                 state.copy(
-                    editedWord = "",
-                    enterWordUIState = EnterPhraseUIState.REVIEW,
-                    editedWordIndex = 0
-                )
+            EnterPhraseUIState.LABEL ->
+                state.copy(exitConfirmationDialog = true)
         }
+    }
+
+    fun exitFlow() {
+        state = state.copy(exitFlow = true)
     }
 
     fun resetExitFlow() {
@@ -257,6 +274,10 @@ class EnterPhraseViewModel @Inject constructor(
         )
 
         submitFullPhrase()
+    }
+
+    fun hideExitConfirmationDialog() {
+        state = state.copy(exitConfirmationDialog = false)
     }
 
 }

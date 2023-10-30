@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.components.access
+package co.censo.vault.presentation.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -15,7 +15,9 @@ import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 
 @Composable
-fun CancelAccessDialog(
+fun YesNoDialog(
+    title: String,
+    message: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -24,7 +26,7 @@ fun CancelAccessDialog(
         title = {
             Text(
                 modifier = Modifier.padding(8.dp),
-                text = stringResource(R.string.cancel_access),
+                text = title,
                 color = VaultColors.PrimaryColor,
                 textAlign = TextAlign.Left,
                 fontSize = 18.sp,
@@ -34,7 +36,7 @@ fun CancelAccessDialog(
         text = {
             Text(
                 modifier = Modifier.padding(8.dp),
-                text = stringResource(R.string.cancel_access_dialog),
+                text = message,
                 color = VaultColors.PrimaryColor,
                 textAlign = TextAlign.Left,
                 fontSize = 18.sp,
