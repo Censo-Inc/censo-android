@@ -69,7 +69,7 @@ fun PlanSetupScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart()
+                viewModel.onStart(welcomeFlow)
             }
             Lifecycle.Event.ON_PAUSE -> {
                 viewModel.onStop()
@@ -151,6 +151,14 @@ fun PlanSetupScreen(
 
                 else -> {
                     when (state.planSetupUIState) {
+                        PlanSetupUIState.Initial ->
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(72.dp),
+                                strokeWidth = 5.dp
+                            )
+
                         PlanSetupUIState.InviteApprovers ->
                             AddTrustedApproversUI(
                                 welcomeFlow = welcomeFlow,
@@ -160,7 +168,6 @@ fun PlanSetupScreen(
                                 }
                             )
 
-
                         PlanSetupUIState.ApproverNickname -> {
                             ApproverNicknameUI(
                                 nickname = state.editedNickname,
@@ -169,7 +176,6 @@ fun PlanSetupScreen(
                                 onSaveNickname = viewModel::onSaveApprover
                             )
                         }
-                        
                         
                         PlanSetupUIState.ApproverGettingLive -> {
                             GetLiveWithApproverUI(
