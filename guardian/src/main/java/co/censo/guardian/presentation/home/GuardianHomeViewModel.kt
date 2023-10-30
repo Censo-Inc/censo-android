@@ -508,17 +508,14 @@ class GuardianHomeViewModel @Inject constructor(
             guardianEncryptionKey = privateEncryptionKey,
             savePrivateKeyToCloudResource = Resource.Uninitialized
         )
-        silentRetrieveApproverState()
+        retrieveApproverState()
     }
 
     private fun keyDownloadSuccess(
         privateEncryptionKey: EncryptionKey,
         downloadReason: GuardianHomeCloudStorageReasons
     ) {
-        state = state.copy(
-            guardianEncryptionKey = privateEncryptionKey,
-            loadPrivateKeyFromCloudResource = Resource.Uninitialized,
-        )
+        state = state.copy(guardianEncryptionKey = privateEncryptionKey)
 
         when (downloadReason) {
             GuardianHomeCloudStorageReasons.CONFIRM_OR_REJECT_OWNER -> {
