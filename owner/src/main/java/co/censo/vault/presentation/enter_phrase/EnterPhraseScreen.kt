@@ -37,7 +37,7 @@ import co.censo.vault.R
 import co.censo.vault.presentation.Screen
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.components.YesNoDialog
-import co.censo.vault.presentation.enter_phrase.components.AddPhraseNicknameUI
+import co.censo.vault.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.vault.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.vault.presentation.enter_phrase.components.indexToWordText
 import co.censo.vault.presentation.enter_phrase.components.EditPhraseWordUI
@@ -60,7 +60,7 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.NICKNAME,
+        EnterPhraseUIState.LABEL,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.REVIEW -> ""
@@ -209,17 +209,17 @@ fun EnterPhraseScreen(
                             ReviewSeedPhraseUI(
                                 invalidReason = state.phraseInvalidReason,
                                 phraseWords = state.enteredWords,
-                                saveSeedPhrase = viewModel::moveToNickname,
+                                saveSeedPhrase = viewModel::moveToLabel,
                                 editSeedPhrase = viewModel::editEntirePhrase
 
                             )
                         }
 
-                        EnterPhraseUIState.NICKNAME -> {
-                            AddPhraseNicknameUI(
-                                nickname = state.nickName,
-                                enabled = state.validName,
-                                onNicknameChanged = viewModel::updateNickname,
+                        EnterPhraseUIState.LABEL -> {
+                            AddPhraseLabelUI(
+                                label = state.label,
+                                enabled = state.labelValid,
+                                onLabelChanged = viewModel::updateLabel,
                                 onSavePhrase = viewModel::saveSeedPhrase
                             )
                         }

@@ -120,7 +120,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
     }
 
-    fun moveToNickname() {
+    fun moveToLabel() {
         viewModelScope.launch {
             if (state.masterPublicKey == null) {
                 state = state.copy(
@@ -137,7 +137,7 @@ class EnterPhraseViewModel @Inject constructor(
                 )
 
                 state = state.copy(
-                    enterWordUIState = EnterPhraseUIState.NICKNAME,
+                    enterWordUIState = EnterPhraseUIState.LABEL,
                     encryptedSeedPhrase = encryptedSeedPhrase,
                     enteredWords = listOf()
                 )
@@ -155,7 +155,7 @@ class EnterPhraseViewModel @Inject constructor(
 
         viewModelScope.launch {
             val response = ownerRepository.storeSecret(
-                state.nickName.trim(),
+                state.label.trim(),
                 state.encryptedSeedPhrase!!
             )
 
@@ -176,8 +176,8 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
 
-    fun updateNickname(updatedNickName: String) {
-        state = state.copy(nickName = updatedNickName)
+    fun updateLabel(updatedLabel: String) {
+        state = state.copy(label = updatedLabel)
 
     }
 
@@ -240,7 +240,7 @@ class EnterPhraseViewModel @Inject constructor(
                     enterWordUIState = EnterPhraseUIState.VIEW,
                     editedWordIndex = 0
                 )
-            EnterPhraseUIState.NICKNAME ->
+            EnterPhraseUIState.LABEL ->
                 state.copy(exitConfirmationDialog = true)
         }
     }

@@ -12,7 +12,7 @@ data class EnterPhraseState(
     val editedWordIndex: Int = 0,
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
     val phraseInvalidReason: BIP39InvalidReason? = null,
-    val nickName: String = "",
+    val label: String = "",
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
@@ -21,7 +21,7 @@ data class EnterPhraseState(
     val exitFlow: Boolean = false
 ) {
 
-    val validName = nickName.isNotEmpty()
+    val labelValid = label.isNotEmpty()
 
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.EDIT,
@@ -31,7 +31,7 @@ data class EnterPhraseState(
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.NICKNAME -> BackIconType.CLOSE
+        EnterPhraseUIState.LABEL -> BackIconType.CLOSE
     }
 
     val error = submitResource is Resource.Error
@@ -39,7 +39,7 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, NICKNAME
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, LABEL
 }
 
 enum class BackIconType {
