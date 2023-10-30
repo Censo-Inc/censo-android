@@ -18,17 +18,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.presentation.entrance.EntranceScreen
 import co.censo.vault.presentation.access_seed_phrases.AccessSeedPhrasesScreen
-import co.censo.vault.presentation.activate_approvers.ActivateApproversScreen
-import co.censo.vault.presentation.bip_39_detail.BIP39DetailScreen
 import co.censo.vault.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.vault.presentation.welcome.WelcomeScreen
 import co.censo.vault.presentation.Screen
@@ -123,16 +119,6 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.BIP39DetailRoute.route}/{${Screen.BIP39DetailRoute.BIP_39_NAME_ARG}}",
-                arguments = listOf(navArgument(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) {
-                    type = NavType.StringType
-                })
-            ) { backStackEntry ->
-                val nameArgument =
-                    backStackEntry.arguments?.getString(Screen.BIP39DetailRoute.BIP_39_NAME_ARG) as String
-                BIP39DetailScreen(navController = navController, bip39Name = nameArgument)
-            }
-            composable(
                 route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.WELCOME_FLOW_ARG}}"
             ) { backStackEntry ->
                 PlanSetupScreen(
@@ -148,9 +134,6 @@ class MainActivity : FragmentActivity() {
                 InitialPlanSetupScreen(
                     navController = navController
                 )
-            }
-            composable(route = Screen.ActivateApprovers.route) {
-                ActivateApproversScreen(navController = navController)
             }
             composable(route = Screen.AccessSeedPhrases.route) {
                 AccessSeedPhrasesScreen(navController = navController)
