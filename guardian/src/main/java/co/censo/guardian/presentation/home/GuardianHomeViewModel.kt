@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.guardian.routingLogTag
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
@@ -50,7 +51,11 @@ class GuardianHomeViewModel @Inject constructor(
     var state by mutableStateOf(GuardianHomeState())
         private set
 
+    val guardianHomeLogTag = "$routingLogTag + GuardianHome"
+
     fun onStart() {
+        projectLog(tag = guardianHomeLogTag, message = "GuardianHomeVM onStart running")
+
         retrieveApproverState()
 
         userStatePollingTimer.startCountDownTimer(POLLING_VERIFICATION_COUNTDOWN) {
@@ -139,6 +144,13 @@ class GuardianHomeViewModel @Inject constructor(
                     }
                 }
             }
+
+            val stateParticipantId = guardianState?.participantId?.value ?: state.participantId
+
+            projectLog(tag = guardianHomeLogTag, message = "Approver invite code: $inviteCode")
+            projectLog(tag = guardianHomeLogTag, message = "Approver local participantID: ${participantId.ifEmpty { "no local value" }} (Retrieved from local storage)")
+            projectLog(tag = guardianHomeLogTag, message = "Approver remote participantID: ${stateParticipantId.ifEmpty { "no remote value" }} (From guardianState/remote)")
+            projectLog(tag = guardianHomeLogTag, message = "determined UI State: $guardianUIStateNewNew")
 
             state = state.copy(
                 guardianUIState = guardianUIStateNewNew,

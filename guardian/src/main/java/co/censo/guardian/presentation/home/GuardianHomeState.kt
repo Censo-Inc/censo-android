@@ -74,6 +74,9 @@ data class GuardianHomeState(
     )
 }
 
+//Split GuardianUIState into sealed interface
+// Invite (onboarding)
+// Access
 enum class GuardianUIState {
     // Default
     MISSING_INVITE_CODE,        // There is no guardian state in the user response, and app did not persist invite code.
