@@ -153,7 +153,7 @@ class InternalDeviceKey(private val keyId: String) : VaultKey {
     }
 
     override fun publicExternalRepresentation(): Base58EncodedPublicKey {
-        return Base58EncodedDevicePublicKey(keystoreHelper.getDevicePublicKeyInBase58(keyId))
+        return Base58EncodedDevicePublicKey(Base58.base58Encode(publicKeyUncompressed()))
     }
 
     override fun privateKeyRaw(): ByteArray {
