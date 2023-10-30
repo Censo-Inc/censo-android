@@ -117,9 +117,9 @@ class MainActivity : FragmentActivity() {
                             Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
                         )!!
                     ),
-                    welcomeFlow = backStackEntry.arguments?.getBoolean(
+                    welcomeFlow = (backStackEntry.arguments?.getString(
                         Screen.EnterPhraseRoute.WELCOME_FLOW_ARG
-                    ) ?: false
+                    ) ?: false.toString()).toBoolean()
                 )
             }
             composable(
@@ -137,9 +137,9 @@ class MainActivity : FragmentActivity() {
             ) { backStackEntry ->
                 PlanSetupScreen(
                     navController = navController,
-                    welcomeFlow = backStackEntry.arguments?.getBoolean(
+                    welcomeFlow = (backStackEntry.arguments?.getString(
                         Screen.PlanSetupRoute.WELCOME_FLOW_ARG
-                    ) ?: false
+                    ) ?: false.toString()).toBoolean()
                 )
             }
             composable(

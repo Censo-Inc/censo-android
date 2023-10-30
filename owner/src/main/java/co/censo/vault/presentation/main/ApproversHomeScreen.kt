@@ -43,10 +43,13 @@ import co.censo.vault.presentation.plan_setup.components.ApproverActivatedUIData
 
 @Composable
 fun ApproversHomeScreen(
-    guardians: List<Guardian.TrustedGuardian>,
+    approvers: List<Guardian.TrustedGuardian>,
     onInviteApproversSelected: () -> Unit
 ) {
-    if (guardians.any { it.label != "Me" }) {
+    
+    val nonOwnerApprovers = approvers.filter { !it.isOwner }
+    
+    if (nonOwnerApprovers.isNotEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -57,13 +60,14 @@ fun ApproversHomeScreen(
         ) {
             Spacer(modifier = Modifier.height(36.dp))
 
-            for (guardian in guardians) {
+            for ((index, approver) in nonOwnerApprovers.withIndex()) {
                 ApproverInfoBox(
-                    nickName = guardian.label,
-                    primaryApprover = true,
-                    status = guardian.attributes,
+                    nickName = approver.label,
+                    primaryApprover = index == 0,
+                    status = approver.attributes,
                     editEnabled = false
                 )
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
         }
@@ -237,7 +241,7 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
 @Composable
 fun PreviewApproversHome() {
     ApproversHomeScreen(
-        guardians = emptyList(),
+        approvers = emptyList(),
         onInviteApproversSelected = {}
 //        listOf(
 //            Guardian.TrustedGuardian(
