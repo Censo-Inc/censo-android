@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,7 +80,10 @@ fun ReviewSeedPhraseUI(
 
     val horizontalPadding = 32.dp
 
-    val pagerState = rememberPagerState(0)
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { phraseWords.size }
+    )
 
     val context = LocalContext.current
 
@@ -137,14 +141,17 @@ fun ReviewSeedPhraseUI(
                 modifier = Modifier
                     .weight(0.8f)
                     .padding(horizontal = 24.dp),
-                pageCount = phraseWords.size,
-                state = pagerState
-            ) { page ->
-                ViewPhraseWord(
-                    index = page,
-                    phraseWord = phraseWords[page]
-                )
-            }
+                state = pagerState,
+                contentPadding = PaddingValues(0.dp),
+                beyondBoundsPageCount = 0,
+                key = null,
+                pageContent = {
+                    ViewPhraseWord(
+                        index = it,
+                        phraseWord = phraseWords[it]
+                    )
+                }
+            )
             IconButton(
                 modifier = Modifier
                     .weight(0.1f)
