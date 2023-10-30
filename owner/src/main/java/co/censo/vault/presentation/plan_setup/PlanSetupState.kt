@@ -21,7 +21,7 @@ data class PlanSetupState(
     val alternateApprover: Guardian.ProspectGuardian? = null,
 
     // Screen in Plan Setup Flow
-    val planSetupUIState: PlanSetupUIState = PlanSetupUIState.InviteApprovers,
+    val planSetupUIState: PlanSetupUIState = PlanSetupUIState.Initial,
 
     // inviting approver
     val editedNickname: String = "",
@@ -53,7 +53,7 @@ data class PlanSetupState(
         PlanSetupUIState.AddAlternateApprover,
         PlanSetupUIState.RecoveryInProgress -> BackIconType.Exit
 
-        PlanSetupUIState.Completed -> BackIconType.None
+        PlanSetupUIState.Initial, PlanSetupUIState.Completed -> BackIconType.None
     }
 
     val activatingApprover = alternateApprover ?: primaryApprover
@@ -77,6 +77,7 @@ data class PlanSetupState(
 }
 
 enum class PlanSetupUIState {
+    Initial,
     InviteApprovers,
     ApproverNickname,
     EditApproverNickname,

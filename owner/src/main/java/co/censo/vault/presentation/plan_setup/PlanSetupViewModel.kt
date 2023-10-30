@@ -46,7 +46,15 @@ class PlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(PlanSetupState())
         private set
 
-    fun onStart() {
+    fun onStart(welcomeFlow: Boolean) {
+
+        if (state.planSetupUIState == PlanSetupUIState.Initial) {
+            val planSetupUIState =
+                if (welcomeFlow) PlanSetupUIState.InviteApprovers else PlanSetupUIState.ApproverNickname
+
+            state = state.copy(planSetupUIState = planSetupUIState)
+        }
+
         retrieveOwnerState(overwriteUIState = true)
 
         verificationCodeTimer.startCountDownTimer(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
@@ -94,6 +102,7 @@ class PlanSetupViewModel @Inject constructor(
                 state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
             }
 
+            PlanSetupUIState.Initial,
             PlanSetupUIState.InviteApprovers,
             PlanSetupUIState.ApproverNickname,
             PlanSetupUIState.ApproverGettingLive,
