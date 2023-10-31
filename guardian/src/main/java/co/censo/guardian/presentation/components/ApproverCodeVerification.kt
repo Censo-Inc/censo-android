@@ -95,7 +95,11 @@ fun ApproverCodeVerification(
         }
 }
 
-@Preview
+enum class CodeVerificationStatus {
+    Waiting, Rejected, Initial
+}
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ApproverCodeVerificationPreview() {
     Box(
@@ -107,9 +111,44 @@ fun ApproverCodeVerificationPreview() {
             isVerificationRejected = false,
             validCodeLength = 6,
             value = "12345",
-            label = "Enter your code",
+            label = "Enter the code",
             onValueChanged = {}
         )
     }
+}
 
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ApproverCodeVerificationWaitingPreview() {
+    Box(
+        modifier = Modifier.background(Color.White)
+    ) {
+        ApproverCodeVerification(
+            isLoading = false,
+            isWaitingForVerification = false,
+            isVerificationRejected = false,
+            validCodeLength = 6,
+            value = "12345",
+            label = "Enter the code",
+            onValueChanged = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ApproverCodeVerificationRejectedPreview() {
+    Box(
+        modifier = Modifier.background(Color.White)
+    ) {
+        ApproverCodeVerification(
+            isLoading = false,
+            isWaitingForVerification = false,
+            isVerificationRejected = false,
+            validCodeLength = 6,
+            value = "12345",
+            label = "Enter the code",
+            onValueChanged = {}
+        )
+    }
 }
