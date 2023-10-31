@@ -71,7 +71,7 @@ android {
 
     buildTypes {
         release {
-            resValue("string", "app_name", "Debug Vault")
+            resValue("string", "app_name", "Vault")
             isMinifyEnabled = false
             isDebuggable = false
             resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")

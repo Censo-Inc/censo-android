@@ -71,9 +71,10 @@ android {
             )
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             manifestPlaceholders["URL_SCHEME"] = "censo"
+            resValue("string", "app_name", "Approver")
         }
         create("staging") {
-            resValue("string", "app_name", "Staging Guardian")
+            resValue("string", "app_name", "Staging Approver")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
@@ -82,7 +83,7 @@ android {
             manifestPlaceholders["URL_SCHEME"] = "censo-staging"
         }
         create("aintegration") {
-            resValue("string", "app_name", "A Integration Guardian")
+            resValue("string", "app_name", "A Integration Approver")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
@@ -92,22 +93,22 @@ android {
         }
         create("bintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "B Integration Guardian")
+            resValue("string", "app_name", "B Integration Approver")
             applicationIdSuffix = ".bintegration"
         }
         create("cintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "C Integration Guardian")
+            resValue("string", "app_name", "C Integration Approver")
             applicationIdSuffix = ".cintegration"
         }
         create("dintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "D Integration Guardian")
+            resValue("string", "app_name", "D Integration Approver")
             applicationIdSuffix = ".dintegration"
         }
         debug {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "Debug Guardian")
+            resValue("string", "app_name", "Debug Approver")
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
             applicationIdSuffix = ".debug"
