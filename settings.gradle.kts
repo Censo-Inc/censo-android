@@ -10,9 +10,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        flatDir { dirs(".") }
     }
 }
 
 rootProject.name = "Vault"
-include(":app")
- 
+include(":owner")
+include(":guardian")
+include(":shared")

@@ -1,0 +1,71 @@
+<resources>
+    <string name="app_name">Guardian</string>
+
+    <string name="retry">Retry</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="create_device_call_failed">Something went wrong when attempting to register device, please try again</string>
+    <string name="owner_setup">Owner Setup</string>
+
+    <string name="continue_onboarding">Continue onboarding</string>
+    <string name="add_content_desc">Add</string>
+    <string name="remove_content_desc">Remove</string>
+    <string name="threshold">Threshold</string>
+    <string name="add_guardian">Add Guardian</string>
+    <string name="guardians_empty_message">Please start adding guardians to invite to your policy</string>
+    <string name="share_guardian_deeplinks">Share these links with your guardians to continue setting up your policy</string>
+    <string name="missing_guardian_arg_data">The invitation link used for guardianship is missing policy data.\n\nPlease request a new link from the policy owner and try again.</string>
+    <string name="awaiting_confirmation_of_verification_code">Awaiting confirmation of verification code</string>
+    <string name="enter_verification_code">Enter verification code</string>
+    <string name="submit">Submit</string>
+    <string name="guardian_entrance">Guardian Home</string>
+    <string name="register_guardian_error">Register Guardian Error</string>
+    <string name="accept_guardianship_error">Accept Guardianship Error</string>
+    <string name="successful_biometry_authentication_is_required_to_use_this_app">Successful biometry authentication is required to use this app</string>
+    <string name="register">Register</string>
+    <string name="you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship">You have been invited to Vault as a guardian,\nto accept guardianship please enter the verification code</string>
+    <string name="decline">Decline</string>
+    <string name="declined_guardianship">You have declined guardianship, to restart this process have the owner of the policy send you a new invite</string>
+    <string name="guardian_setup_complete">Guardian setup complete, no further action required at this time</string>
+    <string name="received_shard_from_owner">Received shard from owner, encrypting shard and updating policy data...</string>
+    <string name="accept_guardianship">Accept Guardianship</string>
+    <string name="decline_guardianship_error">Decline Guardianship Error</string>
+    <string name="to_decline_guardianship_tap_the_button_below">To decline Guardianship, tap the button below</string>
+    <string name="registering_guardian">Registering Guardian</string>
+    <string name="display_qr_code">Display this QR code for the owner of social policy to scan</string>
+    <string name="login">Login</string>
+    <string name="authenticate_with_onetap">Authenticate with OneTap</string>
+    <string name="become_an_approver">Become an approver</string>
+    <string name="approver_verification_code_text">Please enter the code provided by the Vault owner</string>
+    <string name="waiting_for_owner_verify_code">Waiting for owner to verify the code.</string>
+    <string name="submit_code_error_occurred">The code you entered is not correct. Please try again.</string>
+    <string name="code_not_approved">Code not approved. Please send new verification code.</string>
+    <string name="code_sent_to_owner_waiting_for_them_to_approve">Code sent to owner, waiting for them to approve.</string>
+
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="default_notification_channel_name" translatable="true">Notifications</string>
+
+    <string name="access_approval">Access Approval</string>
+    <string name="the_code_you_entered_in_not_correct_please_try_again">The code you entered in not correct. Please try again.</string>
+    <string name="close">Close</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="do_you_really_want_to_cancel">Do you really want to cancel?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="enter_the_digit_code_from_the_seed_phrase_owner">Enter the %1$s-digit code from the seed phrase owner</string>
+    <string name="verifying_code">Verifying Code...</string>
+    <string name="loading">Loading...</string>
+    <string name="tell_seed_phrase_owner_this_digit_code_to_approve_their_access">Tell seed phrase owner this %1$s-digit code to approve their access</string>
+    <string name="link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner">Link you have opened does not appear to be correct. Please contact seed phrase owner</string>
+    <string name="access_approved">Access approved!</string>
+    <string name="you_are_fully_set">You are fully set!</string>
+    <string name="when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access">When needed, the seed phrase owner will get in touch with you to approve their access</string>
+    <string name="this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner">This application can only be used by invitation. Please click the invite link you received from the seed phrase owner.</string>
+    <string name="you_have_been_invited_to_become_an_approver">You have been invited to become an approver!</string>
+    <string name="accept_invitation">Accept Invitation</string>
+    <string name="seed_phrase_owner_has_requested_access_approval">Seed phrase owner has requested access approval</string>
+    <string name="recovery_approval">Recovery Approval</string>
+    <string name="approver_key_upload_error">An error occurred while saving your Approver key. Please try again.</string>
+    <string name="approver_key_upload_prompt">We need you to create and store your Approver key. This will be used to complete recovery if the owner loses their phrase.</string>
+    <string name="retry_key_upload">Retry Key Upload</string>
+    <string name="create_approver_key">Create Approver Key</string>
+</resources>
