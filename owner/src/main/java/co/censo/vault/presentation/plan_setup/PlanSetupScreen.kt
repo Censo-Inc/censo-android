@@ -191,7 +191,7 @@ fun PlanSetupScreen(
                                 prospectApprover = state.activatingApprover,
                                 secondsLeft = state.secondsLeft,
                                 verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
-                                storesLink = "Universal link to the App/Play stores",
+                                storesLink = "https://censo.co/approvers",
                                 onContinue = viewModel::onApproverConfirmed,
                                 onEditNickname = viewModel::onEditApproverNickname
                             )
