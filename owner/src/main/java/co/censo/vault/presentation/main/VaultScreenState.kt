@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.vault
+package co.censo.vault.presentation.main
 
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteSecretApiResponse
@@ -10,9 +10,6 @@ data class VaultScreenState(
     // owner state
     val ownerState: OwnerState.Ready? = null,
 
-    // screen
-    val screen: VaultScreens = VaultScreens.Unlocked,
-
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val triggerEditPhraseDialog: Resource<VaultSecret> = Resource.Uninitialized,
 
@@ -22,7 +19,7 @@ data class VaultScreenState(
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 
     // navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val kickUserOut: Resource<Unit> = Resource.Uninitialized,
 ) {
 
     val externalApprovers = (ownerState?.policy?.guardians?.size?.minus(1)) ?: 0
