@@ -32,15 +32,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.components.ActionCompleteUI
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.vault.presentation.access_approval.components.ApproveAccessUI
-import co.censo.vault.presentation.access_approval.components.ApprovedUI
 import co.censo.vault.presentation.access_approval.components.SelectApproverUI
 import co.censo.vault.presentation.components.YesNoDialog
-import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -219,7 +219,9 @@ fun AccessApprovalScreen(
                         }
 
                         AccessApprovalUIState.GettingLive -> {
-                            GetLiveWithApproverUI(
+                            GetLiveWithUserUI(
+                                title = stringResource(R.string.get_live_with_your_approver),
+                                message = stringResource(R.string.get_live_with_your_approver_message),
                                 onContinueLive = viewModel::onContinueLive,
                                 onResumeLater = viewModel::onResumeLater,
                             )
@@ -235,7 +237,9 @@ fun AccessApprovalScreen(
                         }
 
                         AccessApprovalUIState.Approved -> {
-                            ApprovedUI()
+                            ActionCompleteUI(
+                                title = stringResource(id = R.string.approved)
+                            )
 
                             LaunchedEffect(Unit) {
                                 delay(3000)

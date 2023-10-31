@@ -47,6 +47,7 @@ import co.censo.shared.util.BIP39InvalidReason
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
 import co.censo.vault.R as VaultR
+import co.censo.shared.R as SharedR
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -59,7 +60,7 @@ fun ReviewSeedPhraseUI(
 ) {
     val valid = invalidReason == null
 
-    val drawableResource = if (valid) VaultR.drawable.check_circle else VaultR.drawable.warning
+    val drawableResource = if (valid) SharedR.drawable.check_circle else VaultR.drawable.warning
 
     val title = if (valid) {
         stringResource(id = VaultR.string.seed_phrase_verified)

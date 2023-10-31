@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
@@ -37,7 +38,6 @@ import co.censo.vault.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.vault.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.vault.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.vault.presentation.plan_setup.components.AddTrustedApproversUI
-import co.censo.vault.presentation.plan_setup.components.GetLiveWithApproverUI
 import co.censo.vault.presentation.plan_setup.components.SavedAndShardedUI
 import kotlinx.coroutines.delay
 
@@ -178,8 +178,10 @@ fun PlanSetupScreen(
                         }
                         
                         PlanSetupUIState.ApproverGettingLive -> {
-                            GetLiveWithApproverUI(
-                                nickname = state.editedNickname,
+
+                            GetLiveWithUserUI(
+                                title = "${stringResource(R.string.get_live_with)} ${state.editedNickname}",
+                                message = stringResource(R.string.get_live_with_your_approver_message),
                                 onContinueLive = viewModel::onGoLiveWithApprover,
                                 onResumeLater = viewModel::onBackClicked
                             )

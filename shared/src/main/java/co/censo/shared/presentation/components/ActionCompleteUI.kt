@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.access_approval.components
+package co.censo.shared.presentation.components
 
 import TitleText
 import androidx.compose.foundation.Image
@@ -15,10 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import co.censo.vault.R
 
 @Composable
-fun ApprovedUI() {
+fun ActionCompleteUI(title: String) {
 
     val verticalSpacingHeight = 28.dp
 
@@ -30,15 +29,15 @@ fun ApprovedUI() {
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painterResource(id = R.drawable.check_circle),
-            contentDescription = "check"
+            painterResource(id = co.censo.shared.R.drawable.check_circle),
+            contentDescription = null
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.approved,
+            title = title,
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight + 100.dp))
@@ -47,6 +46,6 @@ fun ApprovedUI() {
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun ApprovedUIPreview() {
-    ApprovedUI()
+fun ActionCompleteUIPreview() {
+    ActionCompleteUI("Hello")
 }

@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.lock_screen.components
+package co.censo.guardian.presentation
 
 import MessageText
 import StandardButton
@@ -29,52 +29,55 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.vault.R
+import co.censo.guardian.R as ApproverR
 
 @Composable
-fun LockEngagedUI(
-    initUnlock: () -> Unit
+fun PasteLinkHomeScreen(
+    onPasteLinkClick: () -> Unit
 ) {
+
+
     Column(
         Modifier
             .fillMaxSize()
             .background(color = Color.White)
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        val horizontalSpacingBetweenItems = 24.dp
+        val verticalSpacingBetweenItems = 24.dp
 
         Image(
-            painter = painterResource(id = co.censo.shared.R.drawable.main_lock),
-            contentDescription = stringResource(R.string.app_content_is_locked_behind_facescan)
+            painter = painterResource(id = ApproverR.drawable.main_export_link),
+            contentDescription = null
         )
 
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems + (horizontalSpacingBetweenItems / 2)))
+        Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
+
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = co.censo.shared.R.string.data_encrypted,
+            title = ApproverR.string.get_the_unique_link,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
+        Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
 
         MessageText(
-            message = R.string.encrypted_your_data_behind,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+            message = ApproverR.string.get_unique_link,
+            modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
+        Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
+
 
         StandardButton(
+            modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
-            onClick = initUnlock,
+            contentPadding = PaddingValues(vertical = 12.dp),
+            onClick = onPasteLinkClick,
         ) {
             Row(
                 horizontalArrangement = Arrangement.Center,
@@ -83,14 +86,14 @@ fun LockEngagedUI(
                 Icon(
                     modifier = Modifier.size(24.dp),
                     painter = painterResource(
-                        id = co.censo.shared.R.drawable.small_face_scan
+                        id = co.censo.shared.R.drawable.paste_phrase_icon
                     ),
                     contentDescription = null,
                     tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.face_scan_to_unlock),
+                    text = stringResource(ApproverR.string.paste_link),
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
                     fontSize = 24.sp,
@@ -98,12 +101,14 @@ fun LockEngagedUI(
             }
         }
     }
+
 }
+
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun PreviewLockScreen() {
-    LockEngagedUI {
+fun PreviewPasteLinkHomeScreen() {
+    PasteLinkHomeScreen {
 
     }
 }
