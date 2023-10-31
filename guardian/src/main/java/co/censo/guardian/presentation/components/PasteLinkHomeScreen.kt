@@ -1,4 +1,4 @@
-package co.censo.guardian.presentation
+package co.censo.guardian.presentation.components
 
 import MessageText
 import StandardButton

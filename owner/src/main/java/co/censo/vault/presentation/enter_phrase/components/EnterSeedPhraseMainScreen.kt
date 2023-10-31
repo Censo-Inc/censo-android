@@ -105,7 +105,7 @@ fun SelectSeedPhraseEntryType(
         ) {
             Row {
                 Icon(
-                    painter = painterResource(id = R.drawable.paste_phrase_icon),
+                    painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
                     contentDescription = null,
                     tint = Color.White
                 )

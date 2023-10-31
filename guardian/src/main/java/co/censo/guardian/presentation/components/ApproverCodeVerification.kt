@@ -1,7 +1,10 @@
 package co.censo.guardian.presentation.components
 
+import MessageText
+import TitleText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,73 +29,43 @@ import co.censo.shared.presentation.components.CodeEntry
 @Composable
 fun ApproverCodeVerification(
     isLoading: Boolean,
-    isWaitingForVerification: Boolean,
-    isVerificationRejected: Boolean,
+    codeVerificationStatus: CodeVerificationStatus,
     validCodeLength: Int,
     value: String,
-    label: String,
     onValueChanged: (String) -> Unit
 ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = stringResource(R.string.become_an_approver),
-            color = GuardianColors.PrimaryColor,
-            textAlign = TextAlign.Center,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+
+    Column {
+
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        TitleText(title = stringResource(R.string.enter_the_code))
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        val messageText = when (codeVerificationStatus) {
+            CodeVerificationStatus.Waiting -> "Waiting on owner to approve code..."
+            CodeVerificationStatus.Rejected -> "Incorrect code entered. Please try again."
+            CodeVerificationStatus.Initial -> "Enter the 6-digit code from the seed phrase owner."
+        }
+
+        MessageText(message = messageText)
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        //Code entry box
+        CodeEntry(
+            length = validCodeLength,
+            enabled = !isLoading || codeVerificationStatus != CodeVerificationStatus.Waiting,
+            value = value,
+            onValueChange = onValueChanged,
+            primaryColor = GuardianColors.PrimaryColor,
+            borderColor = SharedColors.BorderGrey,
+            backgroundColor = SharedColors.WordBoxBackground
         )
-
-        if (!isWaitingForVerification) {
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Text(
-                modifier = Modifier.padding(horizontal = 40.dp),
-                text = label,
-                color = GuardianColors.PrimaryColor,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal
-            )
-            Spacer(modifier = Modifier.height(30.dp))
-
-            //Code entry boxes
-            CodeEntry(
-                validCodeLength = validCodeLength,
-                isLoading = isLoading,
-                value = value,
-                onValueChange = onValueChanged,
-                primaryColor = GuardianColors.PrimaryColor,
-                borderColor = SharedColors.BorderGrey,
-                backgroundColor = SharedColors.WordBoxBackground
-            )
-        } else {
-            Spacer(modifier = Modifier.height(36.dp))
-
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = stringResource(R.string.waiting_for_owner_verify_code),
-                color = GuardianColors.PrimaryColor,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            CircularProgressIndicator(modifier = Modifier.size(32.dp))
-        }
-
-        if (isVerificationRejected) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(R.string.the_code_you_entered_in_not_correct_please_try_again),
-                textAlign = TextAlign.Center,
-                color = ErrorRed,
-                modifier = Modifier.padding(horizontal = 24.dp)
-
-            )
-        }
+        Spacer(modifier = Modifier.height(36.dp))
+    }
 }
 
 enum class CodeVerificationStatus {
@@ -107,11 +80,9 @@ fun ApproverCodeVerificationPreview() {
     ) {
         ApproverCodeVerification(
             isLoading = false,
-            isWaitingForVerification = false,
-            isVerificationRejected = false,
+            codeVerificationStatus = CodeVerificationStatus.Initial,
             validCodeLength = 6,
             value = "12345",
-            label = "Enter the code",
             onValueChanged = {}
         )
     }
@@ -125,11 +96,9 @@ fun ApproverCodeVerificationWaitingPreview() {
     ) {
         ApproverCodeVerification(
             isLoading = false,
-            isWaitingForVerification = false,
-            isVerificationRejected = false,
+            codeVerificationStatus = CodeVerificationStatus.Waiting,
             validCodeLength = 6,
             value = "12345",
-            label = "Enter the code",
             onValueChanged = {}
         )
     }
@@ -143,11 +112,9 @@ fun ApproverCodeVerificationRejectedPreview() {
     ) {
         ApproverCodeVerification(
             isLoading = false,
-            isWaitingForVerification = false,
-            isVerificationRejected = false,
+            codeVerificationStatus = CodeVerificationStatus.Rejected,
             validCodeLength = 6,
             value = "12345",
-            label = "Enter the code",
             onValueChanged = {}
         )
     }

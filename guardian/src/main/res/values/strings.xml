@@ -72,4 +72,7 @@
     <string name="paste_link">Paste link</string>
     <string name="get_the_unique_link">Get the unique link</string>
     <string name="get_unique_link">Please get the unique link from the seed phrase owner and tap on it, or paste it here.</string>
+    <string name="enter_the_code">Enter the code</string>
+    <string name="the_owner_must_enter_this_6_digit_code">The owner must enter this 6-digit code</string>
+    <string name="share_the_code">Share the code</string>
 </resources>

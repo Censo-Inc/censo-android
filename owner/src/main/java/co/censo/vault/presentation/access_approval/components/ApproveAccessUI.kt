@@ -2,23 +2,18 @@ package co.censo.vault.presentation.access_approval.components
 
 import LearnMore
 import MessageText
-import StandardButton
 import TitleText
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
@@ -131,8 +125,8 @@ fun ApproveAccessUI(
         }
         Box(modifier = Modifier.padding(vertical = 12.dp)) {
             CodeEntry(
-                validCodeLength = TotpGenerator.CODE_LENGTH,
-                isLoading = !codeEditable,
+                length = TotpGenerator.CODE_LENGTH,
+                enabled = !codeEditable,
                 value = verificationCode,
                 onValueChange = onVerificationCodeChanged,
                 primaryColor = Color.Black,
