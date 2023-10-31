@@ -46,7 +46,8 @@ import kotlinx.datetime.Clock
 fun PhraseHomeScreen(
     vaultSecrets: List<VaultSecret>,
     onAddClick: () -> Unit,
-    onAccessClick: () -> Unit
+    onAccessClick: () -> Unit,
+    onEditPhraseClick: (VaultSecret) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -62,7 +63,12 @@ fun PhraseHomeScreen(
         Spacer(modifier = Modifier.height(12.dp))
         vaultSecrets.forEach { vaultSecret ->
             Spacer(modifier = Modifier.height(12.dp))
-            SeedPhraseItem(vaultSecret = vaultSecret)
+            SeedPhraseItem(
+                vaultSecret = vaultSecret,
+                onClick = {
+                    onEditPhraseClick(vaultSecret)
+                }
+            )
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
@@ -207,6 +213,9 @@ fun PreviewPhraseHomeScreen() {
                 encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
-        )
+        ),
+        onEditPhraseClick = {
+
+        }
     )
 }

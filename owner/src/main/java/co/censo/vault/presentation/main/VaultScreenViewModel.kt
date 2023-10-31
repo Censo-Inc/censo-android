@@ -1,16 +1,14 @@
-package co.censo.vault.presentation.vault
+package co.censo.vault.presentation.main
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,13 +44,23 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
-    fun deleteSecret(secret: VaultSecret) {
+    fun deleteSecret() {
+        if (state.triggerEditPhraseDialog !is Resource.Success && state.triggerEditPhraseDialog.data == null) {
+            state = state.copy(
+                deleteSeedPhraseResource = Resource.Error()
+            )
+            return
+        }
+
+        val vaultSecret = state.triggerEditPhraseDialog.data
+
         state = state.copy(
+            triggerEditPhraseDialog = Resource.Uninitialized,
             deleteSeedPhraseResource = Resource.Loading()
         )
 
         viewModelScope.launch {
-            val response = ownerRepository.deleteSecret(secret.guid)
+            val response = ownerRepository.deleteSecret(vaultSecret!!.guid)
 
             state = state.copy(
                 deleteSeedPhraseResource = response
@@ -69,7 +77,9 @@ class VaultScreenViewModel @Inject constructor(
             deleteUserResource = Resource.Loading()
         )
 
-        val participantId = state.ownerState?.policy?.guardians?.get(0)?.participantId
+        //val participantId = state.ownerState?.policy?.guardians?.get(0)?.participantId
+        val participantId =
+            state.ownerState?.policy?.guardians?.first { it.isOwner }?.participantId
 
         viewModelScope.launch(Dispatchers.IO) {
             val response = ownerRepository.deleteUser(participantId)
@@ -94,7 +104,7 @@ class VaultScreenViewModel @Inject constructor(
             else -> {
                 // other owner states are not supported on this view
                 // navigate back to start of the app so it can fix itself
-                state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
+                state.copy(kickUserOut = Resource.Success(Unit))
             }
         }
     }
@@ -103,24 +113,20 @@ class VaultScreenViewModel @Inject constructor(
         state = state.copy(deleteUserResource = Resource.Uninitialized)
     }
 
-    fun resetStoreSeedPhraseResponse() {
-        state = state.copy(storeSeedPhraseResource = Resource.Uninitialized)
-    }
-
     fun resetDeleteSeedPhraseResponse() {
         state = state.copy(deleteSeedPhraseResource = Resource.Uninitialized)
     }
 
-    fun onEditSeedPhrases() {
-        state = state.copy(screen = VaultScreens.EditSeedPhrases)
+    fun showDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
     }
 
-    fun onRecoverPhrases() {
-        state = state.copy(navigationResource = Resource.Success(Screen.AccessApproval.route))
+    fun showEditPhraseDialog(vaultSecret: VaultSecret) {
+        state = state.copy(triggerEditPhraseDialog = Resource.Success(vaultSecret))
     }
 
-    fun onResetUser() {
-        state = state.copy(screen = VaultScreens.ResetUser)
+    fun onCancelDeletePhrase() {
+        state = state.copy(triggerEditPhraseDialog = Resource.Uninitialized)
     }
 
     fun onCancelResetUser() {
