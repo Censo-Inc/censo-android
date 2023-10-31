@@ -17,4 +17,36 @@ Need to pass two arguments:
 
 ## Testing Deep Link
 
-adb shell am start -W -a android.intent.action.VIEW -d "vault://guardian/[TOKEN_HERE]" co.censo.vault.[VARIANT_SUFFIX]
+Onboarding case: 
+
+`adb shell am start -W -a android.intent.action.VIEW -d "censo-guardian://invite/[INVITATION_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
+
+Recovery case:
+
+`adb shell am start -W -a android.intent.action.VIEW -d "censo-guardian://recovery/[PARTICIPANT_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
+
+## UI Tests
+
+Start adb server before running UI Tests in a separate terminal
+
+`java -jar app/adbserver-desktop.jar`
+
+Start an emulator
+
+Then run the tests
+
+`./gradlew connectedCheck`
+
+## How to wipe all app data on the device
+
+Run 
+
+`adb shell pm clear co.censo.vault.debug`
+
+or
+
+`adb shell pm clear co.censo.vault.staging`
+
+depending on the build variant you are running. 
+
+Adb is a tool that is located in `~/Library/Android/sdk/platform-tools`
