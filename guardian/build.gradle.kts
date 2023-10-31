@@ -35,7 +35,7 @@ android {
 
                 keyAlias = configProperties["GUARDIAN_RELEASE_KEY_ALIAS"] as String
                 keyPassword = configProperties["GUARDIAN_RELEASE_STORE_PASSWORD"] as String
-                storeFile = file("keystore.jks")
+                storeFile = file("approver_keystore.jks")
                 storePassword = configProperties["GUARDIAN_RELEASE_STORE_PASSWORD"] as String
             }
         }
