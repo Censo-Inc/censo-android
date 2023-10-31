@@ -21,16 +21,25 @@ if [[ -z variant ]]; then
   exit 1
 fi
 
+if [[ -z type ]]; then
+  printf "Missing app type. Make sure to pass app type as: --type argument. The two options are main or recovery.\n"
+  exit 1
+fi
+
 environment=$variant
 
+appType=$type
+
+
+
 ./gradlew --stop
-echo Running lint"${environment}"
-./gradlew lint"${environment}"
-echo Running test"${environment}"UnitTest
-./gradlew test"${environment}"UnitTest
+echo Running "${appType}:"lint"${environment}"
+./gradlew "${appType}:"lint"${environment}"
+echo Running "${appType}:"test"${environment}"UnitTest
+./gradlew "${appType}:"test"${environment}"UnitTest
 
 export FIREBASE_TOKEN="$token"
 echo "$FIREBASE_TOKEN"
 
-echo Running assemble"${environment}" appDistributionUpload"${environment}"
-./gradlew assemble"${environment}" appDistributionUpload"${environment}"
+echo Running "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
+./gradlew "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
