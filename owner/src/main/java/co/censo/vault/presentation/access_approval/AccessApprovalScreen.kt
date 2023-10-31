@@ -230,7 +230,7 @@ fun AccessApprovalScreen(
                                 approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
                                 verificationCode = state.verificationCode,
                                 onVerificationCodeChanged = viewModel::updateVerificationCode,
-                                storesLink = "Universal link to the App/Play stores",
+                                storesLink = "https://censo.co/approvers",
                             )
                         }
 
