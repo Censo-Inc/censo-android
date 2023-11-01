@@ -67,6 +67,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "URL_SCHEME", "\"censo\"")
         }
         create("staging") {
             resValue("string", "app_name", "Staging Vault")
@@ -74,6 +75,7 @@ android {
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("String", "URL_SCHEME", "\"censo-staging\"")
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Vault")
@@ -81,6 +83,7 @@ android {
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("String", "URL_SCHEME", "\"censo-integration\"")
         }
         create("bintegration") {
             initWith(getByName("aintegration"))

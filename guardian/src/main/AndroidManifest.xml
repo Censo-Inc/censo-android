@@ -36,8 +36,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="censo-guardian" android:host="invite" />
-                <data android:scheme="censo-guardian" android:host="recovery" />
+                <data android:scheme="${URL_SCHEME}" android:host="invite" />
+                <data android:scheme="${URL_SCHEME}" android:host="access" />
             </intent-filter>
         </activity>
 

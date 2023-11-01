@@ -70,6 +70,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
+            manifestPlaceholders["URL_SCHEME"] = "censo"
         }
         create("staging") {
             resValue("string", "app_name", "Staging Guardian")
@@ -78,6 +79,7 @@ android {
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
+            manifestPlaceholders["URL_SCHEME"] = "censo-staging"
         }
         create("aintegration") {
             resValue("string", "app_name", "A Integration Guardian")
@@ -86,6 +88,7 @@ android {
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".aintegration"
             isDebuggable = false
+            manifestPlaceholders["URL_SCHEME"] = "censo-integration"
         }
         create("bintegration") {
             initWith(getByName("aintegration"))
