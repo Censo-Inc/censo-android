@@ -81,7 +81,7 @@ class EntranceViewModel @Inject constructor(
 
     fun setAcceptedTermsOfUseVersion(version: String) {
         secureStorage.setAcceptedTermsOfUseVersion(version)
-        state = state.copy(acceptedTermsOfUseVersion = version)
+        state = state.copy(acceptedTermsOfUseVersion = version, showAcceptTermsOfUse = false)
     }
 
     private fun checkUserHasValidToken() {
@@ -254,7 +254,8 @@ class EntranceViewModel @Inject constructor(
 
                 state = state.copy(
                     userFinishedSetup = Resource.Success(destination),
-                    ownerStateResource = ownerStateResource
+                    ownerStateResource = ownerStateResource,
+                    showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
                 )
             } else {
                 state = state.copy(ownerStateResource = ownerStateResource)

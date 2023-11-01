@@ -32,11 +32,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +67,7 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.R
 import co.censo.shared.data.model.termsOfUseVersions
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
@@ -143,11 +148,13 @@ fun EntranceScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.userFinishedSetup is Resource.Success) {
-            state.userFinishedSetup.data?.let {
-                navController.navigate(it)
+            if (!state.showAcceptTermsOfUse) {
+                state.userFinishedSetup.data?.let {
+                    navController.navigate(it)
+                }
+                viewModel.resetUserFinishedSetup()
+                viewModel.resetOwnerState()
             }
-            viewModel.resetUserFinishedSetup()
-            viewModel.resetOwnerState()
         }
 
         if (state.triggerGoogleSignIn is Resource.Success) {
@@ -174,7 +181,7 @@ fun EntranceScreen(
     ) {
 
         when {
-            state.acceptedTermsOfUseVersion == "" -> {
+            state.showAcceptTermsOfUse -> {
                 TermsOfUse {
                     viewModel.setAcceptedTermsOfUseVersion("v0.1")
                 }
@@ -376,39 +383,68 @@ fun OwnerEntranceStandardUI(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun TermsOfUse(
     onAccept: () -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(stringResource(R.string.terms_of_use), fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
-        HtmlText(
-            termsOfUseVersions["v0.1"]!!,
-            Modifier
-                .padding(20.dp)
-                .fillMaxHeight(0.8f)
-                .verticalScroll(rememberScrollState())
+    Scaffold(topBar = {
+        CenterAlignedTopAppBar(
+            colors = TopAppBarDefaults.smallTopAppBarColors(
+                containerColor = SharedColors.BackgroundGrey
+            ),
+            title = {
+                Text(
+                    stringResource(R.string.terms_of_use),
+                )
+            }
         )
-        StandardButton(
-            onClick = onAccept,
-            color = Color.Black,
-            modifier = Modifier
-               .padding(start = 20.dp, top = 10.dp, end = 20.dp)
+    }) { paddingValues ->
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(R.string.accept), textAlign = TextAlign.Center, color = Color.White, modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
+            Text(
+                stringResource(R.string.tou_blurb),
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(20.dp)
+            )
+            Divider()
+            HtmlText(
+                termsOfUseVersions["v0.1"]!!,
+                Modifier
+                    .padding(20.dp)
+                    .fillMaxHeight(0.8f)
+                    .verticalScroll(rememberScrollState())
+            )
+            Divider()
+            StandardButton(
+                onClick = onAccept,
+                color = Color.Black,
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
+                modifier = Modifier
+                    .padding(start = 20.dp, top = 10.dp, end = 20.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.tou_accept),
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
+            }
+            Text(
+                stringResource(R.string.tou_agreement),
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .padding(10.dp)
             )
         }
-        Text(stringResource(R.string.tou_agreement),
-            fontStyle = FontStyle.Italic,
-            fontSize = 12.sp,
-            modifier = Modifier
-            .padding(10.dp)
-        )
     }
 }
 
