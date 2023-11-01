@@ -329,7 +329,6 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     private fun generateTimeCodes(approvers: List<Guardian>): Map<ParticipantId, String> {
-        val timeMillis = Clock.System.now().toEpochMilliseconds()
 
         return approvers.mapNotNull { approver ->
             when {
@@ -338,7 +337,7 @@ class PlanSetupViewModel @Inject constructor(
 
                     val code = TotpGenerator.generateCode(
                         secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes)),
-                        counter = timeMillis.div(TotpGenerator.CODE_EXPIRATION)
+                        counter = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION )
                     )
 
                     approver.participantId to code
@@ -355,7 +354,7 @@ class PlanSetupViewModel @Inject constructor(
     ) {
 
         val codeVerified = ownerRepository.checkCodeMatches(
-            verificationCode = state.approverCodes[participantId] ?: "",
+            encryptedTotpSecret = guardianStatus.deviceEncryptedTotpSecret,
             transportKey = guardianStatus.guardianPublicKey,
             signature = guardianStatus.signature,
             timeMillis = guardianStatus.timeMillis

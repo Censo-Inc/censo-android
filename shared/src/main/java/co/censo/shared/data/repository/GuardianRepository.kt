@@ -6,6 +6,7 @@ import Base64EncodedData
 import InvitationId
 import ParticipantId
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
@@ -55,7 +56,7 @@ interface GuardianRepository {
     ): Resource<StoreRecoveryTotpSecretApiResponse>
 
     fun checkTotpMatches(
-        totp: String,
+        encryptedTotpSecret: Base64EncodedData,
         ownerPublicKey: Base58EncodedPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
@@ -73,7 +74,8 @@ interface GuardianRepository {
 
 class GuardianRepositoryImpl(
     private val apiService: ApiService,
-    private val secureStorage: SecurePreferences
+    private val secureStorage: SecurePreferences,
+    private val keyRepository: KeyRepository
 ) : GuardianRepository, BaseRepository() {
 
     override fun signVerificationCode(
@@ -156,18 +158,35 @@ class GuardianRepositoryImpl(
     }
 
     override fun checkTotpMatches(
-        totp: String,
+        encryptedTotpSecret: Base64EncodedData,
         ownerPublicKey: Base58EncodedPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
     ): Boolean =
         try {
-            val dataToSign = totp.generateVerificationCodeSignData(timeMillis)
-            ExternalEncryptionKey.generateFromPublicKeyBase58(ownerPublicKey).verify(
-                signedData = dataToSign,
-                signature = Base64.getDecoder().decode(signature.base64Encoded),
-            )
+            val externalDeviceKey =
+                ExternalEncryptionKey.generateFromPublicKeyBase58(ownerPublicKey)
+
+            val timeSeconds = timeMillis / 1000
+            val secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes))
+            listOf(
+                timeSeconds,
+                timeSeconds - TotpGenerator.CODE_EXPIRATION,
+                timeSeconds + TotpGenerator.CODE_EXPIRATION
+            ).any { ts ->
+                val code = TotpGenerator.generateCode(
+                    secret = secret,
+                    counter = ts.div(TotpGenerator.CODE_EXPIRATION)
+                )
+
+                val dataToSign = code.generateVerificationCodeSignData(timeMillis)
+                externalDeviceKey.verify(
+                    signedData = dataToSign,
+                    signature = Base64.getDecoder().decode(signature.base64Encoded),
+                )
+            }
         } catch (e: Exception) {
+            // TODO raygun alert
             false
         }
 
