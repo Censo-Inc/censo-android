@@ -71,7 +71,7 @@ android {
 
     buildTypes {
         release {
-            resValue("string", "app_name", "Debug Vault")
+            resValue("string", "app_name", "Censo")
             isMinifyEnabled = false
             isDebuggable = false
             resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
@@ -83,7 +83,7 @@ android {
             )
         }
         create("staging") {
-            resValue("string", "app_name", "Staging Vault")
+            resValue("string", "app_name", "Staging Censo")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
@@ -91,7 +91,7 @@ android {
             isDebuggable = false
         }
         create("aintegration") {
-            resValue("string", "app_name", "A Integration Vault")
+            resValue("string", "app_name", "A Integration Censo")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
@@ -100,22 +100,22 @@ android {
         }
         create("bintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "B Integration Vault")
+            resValue("string", "app_name", "B Integration Censo")
             applicationIdSuffix = ".bintegration"
         }
         create("cintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "C Integration Vault")
+            resValue("string", "app_name", "C Integration Censo")
             applicationIdSuffix = ".cintegration"
         }
         create("dintegration") {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "D Integration Vault")
+            resValue("string", "app_name", "D Integration Censo")
             applicationIdSuffix = ".dintegration"
         }
         debug {
             initWith(getByName("aintegration"))
-            resValue("string", "app_name", "Debug Vault")
+            resValue("string", "app_name", "Debug Censo")
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
             applicationIdSuffix = ".debug"
