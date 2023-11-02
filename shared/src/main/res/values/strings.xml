@@ -27,6 +27,4 @@
     <string name="tou_blurb">We built Censo to be a secure, open-source way to safeguard seed phrases with fair, simple terms. Please read &amp; accept the terms of use.</string>
     <string name="tou_agreement">By clicking Accept you agree to our terms of use.</string>
     <string name="data_encrypted">Data encrypted</string>
-<!--    <string name="encrypted_layered_security">Censo has encrypted the data with layered security.</string>-->
-<!--    <string name="paste_link">Paste link</string>-->
 </resources>
