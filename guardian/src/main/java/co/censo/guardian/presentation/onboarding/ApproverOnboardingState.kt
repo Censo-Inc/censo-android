@@ -32,6 +32,7 @@ data class ApproverOnboardingState(
 
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
+    val retrievePrivateKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
 
     //Success/Error Message
@@ -40,6 +41,9 @@ data class ApproverOnboardingState(
     val loading = userResponse is Resource.Loading
             || acceptGuardianResource is Resource.Loading
             || submitVerificationResource is Resource.Loading
+
+    val loadingCloudAction = savePrivateKeyToCloudResource is Resource.Loading
+            || retrievePrivateKeyFromCloudResource is Resource.Loading
 
     val asyncError = userResponse is Resource.Error
             || acceptGuardianResource is Resource.Error

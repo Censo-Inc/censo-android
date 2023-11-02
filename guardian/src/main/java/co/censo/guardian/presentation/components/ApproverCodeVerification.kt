@@ -46,31 +46,37 @@ fun ApproverCodeVerification(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        TitleText(title = stringResource(R.string.enter_the_code))
+        val title =
+            if (codeVerificationStatus == CodeVerificationStatus.Waiting) stringResource(R.string.code_entered)
+            else stringResource(R.string.enter_the_code)
+
+        TitleText(title = title)
 
         Spacer(modifier = Modifier.height(30.dp))
 
         val messageText = when (codeVerificationStatus) {
-            CodeVerificationStatus.Waiting -> "Waiting on owner to approve code..."
-            CodeVerificationStatus.Rejected -> "Incorrect code entered. Please try again."
-            CodeVerificationStatus.Initial -> "Enter the 6-digit code from the seed phrase owner."
+            CodeVerificationStatus.Waiting -> stringResource(R.string.waiting_on_owner_to_approve_code)
+            CodeVerificationStatus.Rejected -> stringResource(R.string.incorrect_code_entered_please_try_again)
+            CodeVerificationStatus.Initial -> stringResource(R.string.enter_the_6_digit_code_from_the_seed_phrase_owner)
         }
 
         MessageText(message = messageText)
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        //Code entry box
-        CodeEntry(
-            length = validCodeLength,
-            enabled = !isLoading || codeVerificationStatus != CodeVerificationStatus.Waiting,
-            value = value,
-            onValueChange = onValueChanged,
-            primaryColor = GuardianColors.PrimaryColor,
-            borderColor = SharedColors.BorderGrey,
-            backgroundColor = SharedColors.WordBoxBackground
-        )
-        Spacer(modifier = Modifier.height(36.dp))
+        if (codeVerificationStatus != CodeVerificationStatus.Waiting) {
+            //Code entry box
+            CodeEntry(
+                length = validCodeLength,
+                enabled = !isLoading || codeVerificationStatus != CodeVerificationStatus.Waiting,
+                value = value,
+                onValueChange = onValueChanged,
+                primaryColor = GuardianColors.PrimaryColor,
+                borderColor = SharedColors.BorderGrey,
+                backgroundColor = SharedColors.WordBoxBackground
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+        }
     }
 }
 

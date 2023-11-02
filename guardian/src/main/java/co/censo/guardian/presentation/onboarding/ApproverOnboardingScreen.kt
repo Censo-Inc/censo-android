@@ -47,7 +47,6 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.ClipboardHelper
-import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +72,7 @@ fun ApproverOnboardingScreen(
         }
     }
 
-    DisposableEffect(key1 =  viewModel) {
+    DisposableEffect(key1 = viewModel) {
         onDispose { viewModel.onDispose() }
     }
 
@@ -89,7 +88,7 @@ fun ApproverOnboardingScreen(
         }
 
         if (state.onboardingMessage is Resource.Success) {
-            val message = when(state.onboardingMessage.data) {
+            val message = when (state.onboardingMessage.data) {
                 OnboardingMessage.FailedPasteLink -> "Failed to get invite from clipboard. Please try again."
                 OnboardingMessage.LinkPastedSuccessfully -> "Found invite from clipboard!"
                 OnboardingMessage.LinkAccepted -> "Accepted as an approver. Let's get you verified."
@@ -104,101 +103,78 @@ fun ApproverOnboardingScreen(
         }
     }
 
-    when {
+    Scaffold(
+        topBar = {
+            ApproverTopBar(
+                uiState = state.approverUIState,
+                onClose = viewModel::showCloseConfirmationDialog
+            )
+        },
+        content = { contentPadding ->
 
-        state.loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center),
-                    strokeWidth = 8.dp,
-                    color = Color.Black
-                )
-            }
-        }
-
-        state.asyncError -> {
             when {
-                state.userResponse is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.userResponse.getErrorMessage(context),
-                        dismissAction = null,
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-
-                state.acceptGuardianResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.acceptGuardianResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetAcceptGuardianResource() },
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-
-                state.submitVerificationResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.submitVerificationResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetSubmitVerificationResource() },
-                    ) { viewModel.submitVerificationCode() }
-                }
-
-                state.savePrivateKeyToCloudResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.savePrivateKeyToCloudResource.getErrorMessage(context),
-                        dismissAction = { viewModel.createKeyAndTriggerCloudSave() }
-                    ) { viewModel.createKeyAndTriggerCloudSave() }
-                }
-
-                else -> {
-                    DisplayError(
-                        errorMessage = stringResource(R.string.something_went_wrong),
-                        dismissAction = null,
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-            }
-        }
-
-        else -> {
-
-            if (state.showTopBarCancelConfirmationDialog) {
-                AlertDialog(
-                    onDismissRequest = viewModel::hideCloseConfirmationDialog,
-                    text = {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.do_you_really_want_to_cancel),
-                            color = GuardianColors.PrimaryColor,
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal
+                state.loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .align(Alignment.Center),
+                            strokeWidth = 8.dp,
+                            color = Color.Black
                         )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = viewModel::onTopBarCloseConfirmed
-                        ) {
-                            Text(stringResource(R.string.yes))
+                    }
+                }
+
+                state.asyncError -> {
+                    when {
+                        state.userResponse is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.userResponse.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.retrieveApproverState(false) }
                         }
-                    },
-                    dismissButton = {
-                        Button(
-                            onClick = viewModel::hideCloseConfirmationDialog
-                        ) {
-                            Text(stringResource(R.string.no))
+
+                        state.acceptGuardianResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.acceptGuardianResource.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = { viewModel.resetAcceptGuardianResource() },
+                            ) { viewModel.retrieveApproverState(false) }
+                        }
+
+                        state.submitVerificationResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.submitVerificationResource.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = { viewModel.resetSubmitVerificationResource() },
+                            ) { viewModel.submitVerificationCode() }
+                        }
+
+                        state.savePrivateKeyToCloudResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.savePrivateKeyToCloudResource.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = { viewModel.createKeyAndTriggerCloudSave() }
+                            ) { viewModel.createKeyAndTriggerCloudSave() }
+                        }
+
+                        else -> {
+                            DisplayError(
+                                errorMessage = stringResource(R.string.something_went_wrong),
+                                dismissAction = null,
+                            ) { viewModel.retrieveApproverState(false) }
                         }
                     }
-                )
-            }
+                }
 
-            Scaffold(
-                topBar = {
-                    ApproverTopBar(
-                        uiState = state.approverUIState,
-                        onClose = viewModel::showCloseConfirmationDialog
-                    )
-                },
-                content = { contentPadding ->
+
+                else -> {
+
 
                     Column(
                         modifier = Modifier
@@ -241,47 +217,78 @@ fun ApproverOnboardingScreen(
                         Spacer(modifier = Modifier.weight(0.7f))
                     }
                 }
-            )
+            }
+        }
+    )
 
-            if (state.cloudStorageAction.triggerAction) {
-                val privateKey =
-                    if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-                        viewModel.getPrivateKeyForUpload()
-                    } else null
-
-                if (state.savePrivateKeyToCloudResource is Resource.Loading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .align(Alignment.Center),
-                            strokeWidth = 8.dp,
-                            color = Color.Black
-                        )
-                    }
+    if (state.showTopBarCancelConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = viewModel::hideCloseConfirmationDialog,
+            text = {
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = stringResource(R.string.do_you_really_want_to_cancel),
+                    color = GuardianColors.PrimaryColor,
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = viewModel::onTopBarCloseConfirmed
+                ) {
+                    Text(stringResource(R.string.yes))
                 }
+            },
+            dismissButton = {
+                Button(
+                    onClick = viewModel::hideCloseConfirmationDialog
+                ) {
+                    Text(stringResource(R.string.no))
+                }
+            }
+        )
+    }
 
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = ParticipantId(state.participantId),
-                    privateKey = privateKey,
-                    onActionSuccess = { base58EncodedPrivateKey ->
-                        projectLog(message = "Cloud Storage action success")
-                        viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.cloudStorageAction.action)
-                    },
-                    onActionFailed = { exception ->
-                        projectLog(message = "Cloud Storage action failed")
-                        viewModel.handleCloudStorageActionFailure(
-                            exception,
-                            state.cloudStorageAction.action
-                        )
-                    },
+    if (state.cloudStorageAction.triggerAction) {
+        val privateKey =
+            if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
+                viewModel.getPrivateKeyForUpload()
+            } else null
+
+        if (state.loadingCloudAction) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .align(Alignment.Center),
+                    strokeWidth = 8.dp,
+                    color = Color.Black
                 )
             }
         }
+
+        CloudStorageHandler(
+            actionToPerform = state.cloudStorageAction.action,
+            participantId = ParticipantId(state.participantId),
+            privateKey = privateKey,
+            onActionSuccess = { base58EncodedPrivateKey ->
+                viewModel.handleCloudStorageActionSuccess(
+                    base58EncodedPrivateKey,
+                    state.cloudStorageAction.action
+                )
+            },
+            onActionFailed = { exception ->
+                viewModel.handleCloudStorageActionFailure(
+                    exception,
+                    state.cloudStorageAction.action
+                )
+            },
+        )
     }
 }

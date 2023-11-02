@@ -231,6 +231,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
     private fun loadPrivateKeyFromCloud() {
         state = state.copy(
+            retrievePrivateKeyFromCloudResource = Resource.Loading(),
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true,
                 action = CloudStorageActions.DOWNLOAD,
@@ -344,7 +345,10 @@ class ApproverOnboardingViewModel @Inject constructor(
     private fun keyDownloadSuccess(
         privateEncryptionKey: EncryptionKey,
     ) {
-        state = state.copy(guardianEncryptionKey = privateEncryptionKey)
+        state = state.copy(
+            retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
+            guardianEncryptionKey = privateEncryptionKey
+        )
         submitVerificationCode()
     }
     //endregion
@@ -375,9 +379,12 @@ class ApproverOnboardingViewModel @Inject constructor(
 
     private fun keyDownloadFailure(exception: Exception?) {
         //Set error state for the submitVerificationCode resource
-        state = state.copy(submitVerificationResource = Resource.Error(
-            exception = exception
-        ))
+        state = state.copy(
+            retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
+            submitVerificationResource = Resource.Error(
+                exception = exception
+            )
+        )
     }
 
     fun userPastedInviteCode(clipboardContent: String?) {
@@ -385,6 +392,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         if (inviteCode != null) {
             guardianRepository.saveInvitationId(inviteCode)
+            loadInvitationId()
             acceptGuardianship()
         } else {
             state = state.copy()
