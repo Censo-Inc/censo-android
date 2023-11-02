@@ -14,11 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.guardian.presentation.Screen
-import co.censo.guardian.presentation.home.GuardianUIState
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.projectLog
 
 @Composable
 fun ApproverRoutingScreen(
@@ -29,16 +26,14 @@ fun ApproverRoutingScreen(
     val context = LocalContext.current
 
     LaunchedEffect(key1 = state) {
-        if (state.navToGuardianHome is Resource.Success) {
-            projectLog(tag = "Navigation", message = "Navving to GHVM")
-
-            navController.navigate(SharedScreen.HomeRoute.route) {
+        if (state.navToApproverAccess is Resource.Success) {
+            navController.navigate(Screen.ApproverAccessScreen.route) {
                 popUpTo(Screen.ApproverRoutingScreen.route) {
                     inclusive = true
                 }
             }
 
-            viewModel.resetGuardianHomeNavigationTrigger()
+            viewModel.resetApproverAccessNavigationTrigger()
         }
 
         if (state.navToApproverOnboarding is Resource.Success) {

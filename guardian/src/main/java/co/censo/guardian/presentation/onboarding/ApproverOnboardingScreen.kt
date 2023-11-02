@@ -38,7 +38,6 @@ import co.censo.guardian.presentation.Screen
 import co.censo.guardian.presentation.components.ApproverCodeVerification
 import co.censo.guardian.presentation.components.ApproverTopBar
 import co.censo.guardian.presentation.components.CodeVerificationStatus
-import co.censo.guardian.presentation.home.GuardianUIState
 import co.censo.guardian.presentation.home.InviteReady
 import co.censo.guardian.presentation.home.InvitesOnly
 import co.censo.shared.SharedScreen
@@ -79,14 +78,14 @@ fun ApproverOnboardingScreen(
     }
 
     LaunchedEffect(key1 = state) {
-        if (state.navToGuardianHome) {
-            navController.navigate(SharedScreen.HomeRoute.route) {
+        if (state.navToApproverAccess) {
+            navController.navigate(Screen.ApproverAccessScreen.route) {
                 popUpTo(Screen.ApproverOnboardingScreen.route) {
                     inclusive = true
                 }
             }
 
-            viewModel.resetGuardianHomeNavigationTrigger()
+            viewModel.resetApproverAccessNavigationTrigger()
         }
     }
 

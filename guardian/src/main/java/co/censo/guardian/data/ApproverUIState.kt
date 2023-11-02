@@ -37,10 +37,10 @@ sealed class ApproverAccessUIState : ApproverUIState {
     object AccessRequested : ApproverAccessUIState()
 
     @Serializable
-    object AccessWaitingForToTPFromOwner : ApproverAccessUIState()
+    object WaitingForToTPFromOwner : ApproverAccessUIState()
 
     @Serializable
-    object AccessVerifyingToTPFromOwner : ApproverAccessUIState()
+    object VerifyingToTPFromOwner : ApproverAccessUIState()
 
     @Serializable
     object AccessApproved : ApproverAccessUIState()

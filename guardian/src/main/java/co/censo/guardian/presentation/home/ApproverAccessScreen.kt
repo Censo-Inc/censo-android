@@ -35,26 +35,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.guardian.R
+import co.censo.guardian.data.ApproverAccessUIState
 import co.censo.guardian.presentation.GuardianColors
-import co.censo.guardian.presentation.components.ApproverCodeVerification
-import co.censo.guardian.presentation.components.CodeVerificationStatus
-import co.censo.guardian.presentation.components.GuardianTopBar
+import co.censo.guardian.presentation.components.ApproverTopBar
 import co.censo.guardian.presentation.components.OwnerCodeVerification
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.presentation.components.TotpCodeView
 import kotlinx.coroutines.delay
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GuardianHomeScreen(
+fun ApproverAccessScreen(
     navController: NavController,
-    viewModel: GuardianHomeViewModel = hiltViewModel()
+    viewModel: ApproverAccessViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
@@ -96,21 +92,7 @@ fun GuardianHomeScreen(
                     DisplayError(
                         errorMessage = state.userResponse.getErrorMessage(context),
                         dismissAction = null,
-                    ) { viewModel.retrieveApproverState() }
-                }
-
-                state.acceptGuardianResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.acceptGuardianResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetAcceptGuardianResource() },
-                    ) { viewModel.acceptGuardianship() }
-                }
-
-                state.submitVerificationResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.submitVerificationResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetSubmitVerificationResource() },
-                    ) { viewModel.submitVerificationCode() }
+                    ) { viewModel.retrieveApproverState(false) }
                 }
 
                 state.storeRecoveryTotpSecretResource is Resource.Error -> {
@@ -126,7 +108,7 @@ fun GuardianHomeScreen(
                         dismissAction = { viewModel.resetApproveRecoveryResource() },
                     ) {
                         viewModel.resetApproveRecoveryResource()
-                        viewModel.retrieveApproverState()
+                        viewModel.retrieveApproverState(false)
                     }
                 }
 
@@ -136,22 +118,15 @@ fun GuardianHomeScreen(
                         dismissAction = { viewModel.resetRejectRecoveryResource() },
                     ) {
                         viewModel.resetRejectRecoveryResource()
-                        viewModel.retrieveApproverState()
+                        viewModel.retrieveApproverState(false)
                     }
-                }
-
-                state.savePrivateKeyToCloudResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.savePrivateKeyToCloudResource.getErrorMessage(context),
-                        dismissAction = { viewModel.createAndSaveGuardianKey() }
-                    ) { viewModel.createAndSaveGuardianKey() }
                 }
 
                 else -> {
                     DisplayError(
                         errorMessage = stringResource(R.string.something_went_wrong),
                         dismissAction = null,
-                    ) { viewModel.retrieveApproverState() }
+                    ) { viewModel.retrieveApproverState(false) }
                 }
             }
         }
@@ -190,8 +165,8 @@ fun GuardianHomeScreen(
 
             Scaffold(
                 topBar = {
-                    GuardianTopBar(
-                        uiState = state.guardianUIState,
+                    ApproverTopBar(
+                        uiState = state.approverAccessUIState,
                         onClose = viewModel::showCloseConfirmationDialog
                     )
                 },
@@ -206,49 +181,19 @@ fun GuardianHomeScreen(
                     ) {
                         Spacer(modifier = Modifier.weight(0.3f))
 
-                        when (state.guardianUIState) {
-
-                            GuardianUIState.MISSING_INVITE_CODE -> {
-                                InvitesOnly()
-                            }
-
-                            GuardianUIState.INVITE_READY -> {
-                                InviteReady(
-                                    onAccept = viewModel::acceptGuardianship,
-                                    onCancel = viewModel::cancelOnboarding,
-                                    enabled = state.acceptGuardianResource !is Resource.Loading
-                                )
-                            }
-
-                            GuardianUIState.WAITING_FOR_CONFIRMATION,
-                            GuardianUIState.CODE_REJECTED,
-                            GuardianUIState.WAITING_FOR_CODE -> {
-                                ApproverCodeVerification(
-                                    value = state.verificationCode,
-                                    onValueChanged = viewModel::updateVerificationCode,
-                                    validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    isLoading = state.submitVerificationResource is Resource.Loading,
-                                    codeVerificationStatus = when (state.guardianUIState) {
-                                        GuardianUIState.WAITING_FOR_CONFIRMATION -> CodeVerificationStatus.Waiting
-                                        GuardianUIState.CODE_REJECTED -> CodeVerificationStatus.Rejected
-                                        else -> CodeVerificationStatus.Initial
-                                    }
-                                )
-                            }
-
-                            GuardianUIState.COMPLETE -> {
+                        when (state.approverAccessUIState) {
+                            ApproverAccessUIState.Complete -> {
                                 Onboarded()
                             }
-
-                            GuardianUIState.INVALID_PARTICIPANT_ID -> {
+                            ApproverAccessUIState.InvalidParticipantId -> {
                                 InvalidParticipantId()
                             }
 
-                            GuardianUIState.ACCESS_REQUESTED -> {
+                            ApproverAccessUIState.AccessRequested -> {
                                 RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret )
                             }
 
-                            GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER -> {
+                            ApproverAccessUIState.WaitingForToTPFromOwner -> {
                                 //Fixme we should have an error state for owner
                                 OwnerCodeVerification(
                                     totpCode = state.recoveryTotp?.code,
@@ -257,11 +202,12 @@ fun GuardianHomeScreen(
                                 )
                             }
 
-                            GuardianUIState.ACCESS_VERIFYING_TOTP_FROM_OWNER -> {
+                            ApproverAccessUIState.VerifyingToTPFromOwner -> {
                                 VerifyingOwnerCode()
+
                             }
 
-                            GuardianUIState.ACCESS_APPROVED -> {
+                            ApproverAccessUIState.AccessApproved -> {
                                 AccessApproved(
                                     onClose = viewModel::resetApproveRecoveryResource
                                 )
@@ -274,31 +220,10 @@ fun GuardianHomeScreen(
             )
 
             if (state.cloudStorageAction.triggerAction) {
-                val privateKey =
-                    if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-                        viewModel.getPrivateKeyForUpload()
-                    } else null
-
-                if (state.savePrivateKeyToCloudResource is Resource.Loading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .align(Alignment.Center),
-                            strokeWidth = 8.dp,
-                            color = Color.Black
-                        )
-                    }
-                }
-
                 CloudStorageHandler(
                     actionToPerform = state.cloudStorageAction.action,
                     participantId = ParticipantId(state.participantId),
-                    privateKey = privateKey,
+                    privateKey = null,
                     onActionSuccess = { base58EncodedPrivateKey ->
                         projectLog(message = "Cloud Storage action success")
                         viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.cloudStorageAction.action)

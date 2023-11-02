@@ -108,7 +108,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             guardianPhase?.isAccessPhase() == true || guardianPhase is GuardianPhase.Complete
 
         if (guardianNotInOnboarding) {
-            state = state.copy(navToGuardianHome = true)
+            state = state.copy(navToApproverAccess = true)
             return
         }
 
@@ -296,8 +296,8 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
 
-    fun resetGuardianHomeNavigationTrigger() {
-        state = state.copy(navToGuardianHome = false)
+    fun resetApproverAccessNavigationTrigger() {
+        state = state.copy(navToApproverAccess = false)
     }
 
     //region CloudStorage Action methods

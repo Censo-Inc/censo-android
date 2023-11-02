@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import co.censo.guardian.presentation.Screen
-import co.censo.guardian.presentation.home.GuardianHomeScreen
+import co.censo.guardian.presentation.home.ApproverAccessScreen
 import co.censo.guardian.presentation.onboarding.ApproverOnboardingScreen
 import co.censo.guardian.presentation.routing.ApproverRoutingScreen
 import co.censo.guardian.ui.theme.GuardianTheme
@@ -26,10 +26,7 @@ import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_RECOVERY
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_ONBOARDING_URI
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_RECOVERY_URI
 import co.censo.shared.presentation.entrance.EntranceScreen
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
-
-public val routingLogTag = "ROUTING"
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -62,9 +59,9 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                SharedScreen.HomeRoute.route
+                Screen.ApproverAccessScreen.route
             ) {
-                GuardianHomeScreen(navController = navController)
+                ApproverAccessScreen(navController = navController)
             }
             composable(
                 Screen.ApproverRoutingScreen.route

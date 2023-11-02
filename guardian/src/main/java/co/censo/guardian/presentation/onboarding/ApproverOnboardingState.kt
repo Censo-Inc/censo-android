@@ -2,7 +2,6 @@ package co.censo.guardian.presentation.onboarding
 
 import InvitationId
 import co.censo.guardian.data.ApproverOnboardingUIState
-import co.censo.guardian.presentation.home.GuardianUIState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
@@ -29,7 +28,7 @@ data class ApproverOnboardingState(
     // UI state
     val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.MissingInviteCode,
     val showTopBarCancelConfirmationDialog: Boolean = false,
-    val navToGuardianHome: Boolean = false,
+    val navToApproverAccess: Boolean = false,
 
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,

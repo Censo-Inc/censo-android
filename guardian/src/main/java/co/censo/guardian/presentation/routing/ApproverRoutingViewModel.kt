@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.guardian.presentation.home.GuardianUIState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
@@ -88,7 +87,6 @@ class ApproverRoutingViewModel @Inject constructor(
 
     private fun handleMissingApprover() {
         guardianRepository.clearParticipantId()
-        state = state.copy(guardianUIState = GuardianUIState.INVALID_PARTICIPANT_ID)
         triggerNavigation(RoutingDestination.ACCESS)
     }
 
@@ -121,15 +119,15 @@ class ApproverRoutingViewModel @Inject constructor(
     private fun triggerNavigation(routingDestination: RoutingDestination) {
         state = when (routingDestination) {
             RoutingDestination.ACCESS ->
-                state.copy(navToGuardianHome = Resource.Success(Unit))
+                state.copy(navToApproverAccess = Resource.Success(Unit))
 
             RoutingDestination.ONBOARDING ->
                 state.copy(navToApproverOnboarding = Resource.Success(Unit))
         }
     }
 
-    fun resetGuardianHomeNavigationTrigger() {
-        state = state.copy(navToGuardianHome = Resource.Uninitialized)
+    fun resetApproverAccessNavigationTrigger() {
+        state = state.copy(navToApproverAccess = Resource.Uninitialized)
     }
 
     fun resetApproverOnboardingNavigationTrigger() {
