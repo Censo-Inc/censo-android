@@ -2,7 +2,6 @@ package co.censo.guardian.presentation.home
 
 import ParticipantId
 import StandardButton
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -38,9 +36,6 @@ import co.censo.guardian.R
 import co.censo.guardian.data.ApproverAccessUIState
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverTopBar
-import co.censo.guardian.presentation.components.ApproverCodeVerification
-import co.censo.guardian.presentation.components.CodeVerificationStatus
-import co.censo.guardian.presentation.components.LockedApproverScreen
 import co.censo.guardian.presentation.components.OwnerCodeVerification
 import co.censo.guardian.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
@@ -157,31 +152,8 @@ fun ApproverAccessScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverAccessUIState) {
-                            GuardianUIState.MISSING_INVITE_CODE,
-                            GuardianUIState.INVITE_READY -> {
-                                PasteLinkHomeScreen {
-
-                                }
-                            }
-
-                            GuardianUIState.WAITING_FOR_CONFIRMATION,
-                            GuardianUIState.CODE_REJECTED,
-                            GuardianUIState.WAITING_FOR_CODE -> {
-                                ApproverCodeVerification(
-                                    value = state.verificationCode,
-                                    onValueChanged = viewModel::updateVerificationCode,
-                                    validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    isLoading = state.submitVerificationResource is Resource.Loading,
-                                    codeVerificationStatus = when (state.guardianUIState) {
-                                        GuardianUIState.WAITING_FOR_CONFIRMATION -> CodeVerificationStatus.Waiting
-                                        GuardianUIState.CODE_REJECTED -> CodeVerificationStatus.Rejected
-                                        else -> CodeVerificationStatus.Initial
-                                    }
-                                )
-                            }
-
-                            GuardianUIState.COMPLETE -> {
-                                LockedApproverScreen()
+                            ApproverAccessUIState.Complete -> {
+                                PasteLinkHomeScreen(null)
                             }
 
                             ApproverAccessUIState.InvalidParticipantId -> {
