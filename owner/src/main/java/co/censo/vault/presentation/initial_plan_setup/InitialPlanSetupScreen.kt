@@ -55,7 +55,6 @@ import co.censo.shared.util.projectLog
 import co.censo.vault.R
 import co.censo.vault.presentation.VaultColors
 import co.censo.vault.presentation.facetec_auth.FacetecAuth
-import toEncryptionKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
