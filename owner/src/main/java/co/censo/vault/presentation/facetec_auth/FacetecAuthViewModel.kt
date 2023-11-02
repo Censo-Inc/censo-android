@@ -1,5 +1,6 @@
 package co.censo.vault.presentation.facetec_auth
 
+import android.graphics.Rect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -155,13 +156,19 @@ class FacetecAuthViewModel @Inject constructor(
 
         }
     }
-
+    
     fun facetecCustomizations(): FaceTecCustomization {
         val customization = FaceTecCustomization()
 
-        customization.frameCustomization.borderColor = Color.Black.toArgb()
-        customization.frameCustomization.cornerRadius = 20
+        // Cancel Button
+        customization.cancelButtonCustomization.customImage = R.drawable.close
+        customization.cancelButtonCustomization.location = FaceTecCancelButtonCustomization.ButtonLocation.CUSTOM
+        customization.cancelButtonCustomization.customLocation = Rect(20, 20, 25, 25)
 
+        // no frame
+        customization.frameCustomization.borderColor = Color.Transparent.toArgb()
+
+        // no brand image
         customization.overlayCustomization.showBrandingImage = false
 
         customization.feedbackCustomization.textColor = Color.White.toArgb()
@@ -176,7 +183,6 @@ class FacetecAuthViewModel @Inject constructor(
         customization.guidanceCustomization.buttonTextHighlightColor = Color.White.toArgb()
         customization.guidanceCustomization.buttonBackgroundHighlightColor = Color.Black.copy(alpha = 0.9f).toArgb()
         customization.guidanceCustomization.cameraPermissionsScreenImage = R.drawable.camera
-
         customization.guidanceCustomization.foregroundColor = Color.Black.toArgb()
         customization.guidanceCustomization.retryScreenImageBorderColor = Color.Black.toArgb()
 
