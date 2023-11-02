@@ -349,13 +349,8 @@ class GuardianHomeViewModel @Inject constructor(
     private fun confirmOrRejectOwnerRecovery(
         participantId: ParticipantId, recoveryConfirmation: GuardianPhase.RecoveryConfirmation
     ) {
-        val recoveryTotp = generateRecoveryTotp(
-            recoveryConfirmation.encryptedTotpSecret,
-            Instant.fromEpochMilliseconds(recoveryConfirmation.ownerKeySignatureTimeMillis)
-        )
-
         val totpIsCorrect = guardianRepository.checkTotpMatches(
-            recoveryTotp.code,
+            recoveryConfirmation.encryptedTotpSecret,
             recoveryConfirmation.ownerPublicKey,
             signature = recoveryConfirmation.ownerKeySignature,
             timeMillis = recoveryConfirmation.ownerKeySignatureTimeMillis

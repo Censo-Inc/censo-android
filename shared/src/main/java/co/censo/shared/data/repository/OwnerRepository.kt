@@ -15,6 +15,7 @@ import co.censo.shared.data.cryptography.ORDER
 import co.censo.shared.data.cryptography.Point
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.SecretSharerUtils
+import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
@@ -128,7 +129,7 @@ interface OwnerRepository {
     ): Resource<RejectGuardianVerificationApiResponse>
 
     fun checkCodeMatches(
-        verificationCode: String,
+        encryptedTotpSecret: Base64EncodedData,
         transportKey: Base58EncodedGuardianPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
@@ -307,22 +308,35 @@ class OwnerRepositoryImpl(
     }
 
     override fun checkCodeMatches(
-        verificationCode: String,
+        encryptedTotpSecret: Base64EncodedData,
         transportKey: Base58EncodedGuardianPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
-    ) =
+    ): Boolean =
         try {
-            val dataToSign = verificationCode.generateVerificationCodeSignData(timeMillis)
-
             val externalDeviceKey =
                 ExternalEncryptionKey.generateFromPublicKeyBase58(transportKey)
 
-            externalDeviceKey.verify(
-                signedData = dataToSign,
-                signature = Base64.getDecoder().decode(signature.base64Encoded),
-            )
+            val timeSeconds = timeMillis / 1000
+            val secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes))
+            listOf(
+                timeSeconds,
+                timeSeconds - TotpGenerator.CODE_EXPIRATION,
+                timeSeconds + TotpGenerator.CODE_EXPIRATION
+            ).any { ts ->
+                val code = TotpGenerator.generateCode(
+                    secret = secret,
+                    counter = ts.div(TotpGenerator.CODE_EXPIRATION)
+                )
+
+                val dataToSign = code.generateVerificationCodeSignData(timeMillis)
+                externalDeviceKey.verify(
+                    signedData = dataToSign,
+                    signature = Base64.getDecoder().decode(signature.base64Encoded),
+                )
+            }
         } catch (e: Exception) {
+            // TODO raygun alert
             false
         }
 

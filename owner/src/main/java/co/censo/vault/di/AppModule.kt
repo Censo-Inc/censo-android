@@ -102,10 +102,12 @@ object AppModule {
     fun provideGuardianRepository(
         apiService: ApiService,
         storage: SecurePreferences,
+        keyRepository: KeyRepository
     ): GuardianRepository {
         return GuardianRepositoryImpl(
             secureStorage = storage,
             apiService = apiService,
+            keyRepository = keyRepository
         )
     }
 
