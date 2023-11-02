@@ -1,4 +1,4 @@
-package co.censo.vault.presentation.plan_setup.components
+package co.censo.shared.presentation.components
 
 import LearnMore
 import MessageText
@@ -17,18 +17,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.vault.R
 
 @Composable
-fun GetLiveWithApproverUI(
-    nickname: String? = null,
+fun GetLiveWithUserUI(
+    title: String,
+    message: String,
+    showSecondButton: Boolean = true,
     onContinueLive: () -> Unit,
-    onResumeLater: () -> Unit
+    onResumeLater: () -> Unit,
 ) {
 
     val verticalSpacingHeight = 28.dp
@@ -43,7 +43,7 @@ fun GetLiveWithApproverUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = nickname?.let { "${stringResource(R.string.get_live_with)} $nickname" } ?: stringResource(R.string.get_live_with_your_approver),
+            title = title,
             textAlign = TextAlign.Start
         )
 
@@ -51,7 +51,7 @@ fun GetLiveWithApproverUI(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.get_live_with_your_approver_message,
+            message = message,
             textAlign = TextAlign.Start
         )
 
@@ -72,20 +72,22 @@ fun GetLiveWithApproverUI(
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
-            onClick = onResumeLater,
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
-        ) {
-            Text(
-                text = "Resume later",
-                color = Color.White,
-                fontSize = 24.sp
-            )
-        }
+        if (showSecondButton) {
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.Black,
+                onClick = onResumeLater,
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
+            ) {
+                Text(
+                    text = "Resume later",
+                    color = Color.White,
+                    fontSize = 24.sp
+                )
+            }
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        }
 
         LearnMore {
 
@@ -97,9 +99,10 @@ fun GetLiveWithApproverUI(
 
 @Preview(showBackground = true)
 @Composable
-fun GetLiveWithApproverUIPreview() {
-    GetLiveWithApproverUI(
-        nickname = "Neo",
+fun GetLiveWithUserUIPreview() {
+    GetLiveWithUserUI(
+        title = "Get live with Neo",
+        message = "For maximum security yada yada and then go do this thing over there and think about all sorts of things.",
         onContinueLive = {},
         onResumeLater = {},
     )

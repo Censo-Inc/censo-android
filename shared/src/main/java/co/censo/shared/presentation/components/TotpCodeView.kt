@@ -2,8 +2,10 @@ package co.censo.shared.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
@@ -31,6 +33,45 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.data.cryptography.TotpGenerator.CODE_EXPIRATION
 import co.censo.shared.data.cryptography.TotpGenerator.CODE_LENGTH
 import co.censo.shared.presentation.SharedColors
+
+@Composable
+fun LargeTotpCodeView(
+    code: String,
+    secondsLeft: Int,
+    primaryColor: Color
+) {
+    val countdownSeconds = CODE_EXPIRATION - secondsLeft
+    val formattedCode = if (code.length == CODE_LENGTH) {
+        "${code.slice(0 until CODE_LENGTH / 2)} ${code.slice(CODE_LENGTH / 2 until CODE_LENGTH)}"
+    } else {
+        code
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = formattedCode,
+            color = primaryColor,
+            fontWeight = FontWeight.W700,
+            fontSize = 44.sp
+        )
+
+        Spacer(modifier = Modifier.height(44.dp))
+
+        val color = when (countdownSeconds) {
+            in 1..20 -> SharedColors.ErrorRed
+            in 21..40 -> SharedColors.WarningYellow
+            else -> SharedColors.SuccessGreen
+        }
+
+        CircularProgressBar(
+            number = countdownSeconds.toInt(),
+            color = color
+        )
+    }
+}
 
 @Composable
 fun TotpCodeView(
@@ -135,25 +176,14 @@ fun ProgressBarPreview() {
     }
 }
 
-class TimeLeftShape(
-    percentRemaining: Float,
-) : Shape {
-
-    private val angle = percentRemaining * 360f
-    override fun createOutline(
-        size: Size,
-        layoutDirection: LayoutDirection,
-        density: Density
-    ): Outline {
-        val path = Path().apply {
-            var angle = 360f - angle
-            if (angle <= 0f) {
-                angle = 0.1f
-            }
-            moveTo(size.width / 2f, size.height / 2f)
-            arcTo(Rect(0f, 0f, size.width, size.height), 270f, angle, forceMoveTo = false)
-            close()
-        }
-        return Outline.Generic(path)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LargeTotp() {
+    Box(modifier = Modifier.padding(24.dp)) {
+        LargeTotpCodeView(
+            code = "123456",
+            secondsLeft = 44,
+            primaryColor = Color.White
+        )
     }
 }

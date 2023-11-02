@@ -1,6 +1,5 @@
 package co.censo.guardian.presentation.home
 
-import Base58EncodedPrivateKey
 import ParticipantId
 import StandardButton
 import androidx.compose.foundation.background
@@ -38,7 +37,9 @@ import androidx.navigation.NavController
 import co.censo.guardian.R
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverCodeVerification
+import co.censo.guardian.presentation.components.CodeVerificationStatus
 import co.censo.guardian.presentation.components.GuardianTopBar
+import co.censo.guardian.presentation.components.OwnerCodeVerification
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
@@ -48,7 +49,6 @@ import co.censo.shared.presentation.components.TotpCodeView
 import kotlinx.coroutines.delay
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.util.projectLog
-import io.github.novacrypto.base58.Base58
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -220,42 +220,19 @@ fun GuardianHomeScreen(
                                 )
                             }
 
+                            GuardianUIState.WAITING_FOR_CONFIRMATION,
+                            GuardianUIState.CODE_REJECTED,
                             GuardianUIState.WAITING_FOR_CODE -> {
                                 ApproverCodeVerification(
                                     value = state.verificationCode,
                                     onValueChanged = viewModel::updateVerificationCode,
                                     validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = stringResource(
-                                        R.string.enter_the_digit_code_from_the_seed_phrase_owner,
-                                        TotpGenerator.CODE_LENGTH
-                                    ),
                                     isLoading = state.submitVerificationResource is Resource.Loading,
-                                    isVerificationRejected = false,
-                                    isWaitingForVerification = false,
-                                )
-                            }
-
-                            GuardianUIState.WAITING_FOR_CONFIRMATION -> {
-                                ApproverCodeVerification(
-                                    value = state.verificationCode,
-                                    onValueChanged = viewModel::updateVerificationCode,
-                                    validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = stringResource(R.string.code_sent_to_owner_waiting_for_them_to_approve),
-                                    isLoading = state.submitVerificationResource is Resource.Loading,
-                                    isVerificationRejected = false,
-                                    isWaitingForVerification = true,
-                                )
-                            }
-
-                            GuardianUIState.CODE_REJECTED -> {
-                                ApproverCodeVerification(
-                                    value = state.verificationCode,
-                                    onValueChanged = viewModel::updateVerificationCode,
-                                    validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = stringResource(R.string.code_not_approved),
-                                    isLoading = state.submitVerificationResource is Resource.Loading,
-                                    isVerificationRejected = true,
-                                    isWaitingForVerification = false,
+                                    codeVerificationStatus = when (state.guardianUIState) {
+                                        GuardianUIState.WAITING_FOR_CONFIRMATION -> CodeVerificationStatus.Waiting
+                                        GuardianUIState.CODE_REJECTED -> CodeVerificationStatus.Rejected
+                                        else -> CodeVerificationStatus.Initial
+                                    }
                                 )
                             }
 
@@ -272,9 +249,11 @@ fun GuardianHomeScreen(
                             }
 
                             GuardianUIState.ACCESS_WAITING_FOR_TOTP_FROM_OWNER -> {
+                                //Fixme we should have an error state for owner
                                 OwnerCodeVerification(
                                     totpCode = state.recoveryTotp?.code,
-                                    secondsLeft = state.recoveryTotp?.currentSecond
+                                    secondsLeft = state.recoveryTotp?.currentSecond,
+                                    errorEnabled = false
                                 )
                             }
 
@@ -345,38 +324,6 @@ private fun VerifyingOwnerCode() {
         textAlign = TextAlign.Center,
         fontSize = 18.sp
     )
-}
-
-@Composable
-private fun OwnerCodeVerification(
-    totpCode: String?,
-    secondsLeft: Int?
-) {
-    if (totpCode == null || secondsLeft == null) {
-        Text(
-            text = stringResource(R.string.loading),
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
-        )
-    } else {
-        Text(
-            modifier = Modifier.padding(horizontal = 30.dp),
-            text = stringResource(
-                R.string.tell_seed_phrase_owner_this_digit_code_to_approve_their_access,
-                TotpGenerator.CODE_LENGTH
-            ),
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
-        )
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        TotpCodeView(
-            totpCode,
-            secondsLeft,
-            GuardianColors.PrimaryColor
-        )
-    }
 }
 
 @Composable

@@ -41,7 +41,7 @@ fun SavedAndShardedUI(
     ) {
 
         Image(
-            painterResource(id = R.drawable.check_circle),
+            painterResource(id = co.censo.shared.R.drawable.check_circle),
             contentDescription = ""
         )
 

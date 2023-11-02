@@ -37,6 +37,8 @@ import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.Screen
 import co.censo.guardian.presentation.components.ApproverCodeVerification
 import co.censo.guardian.presentation.components.ApproverTopBar
+import co.censo.guardian.presentation.components.CodeVerificationStatus
+import co.censo.guardian.presentation.home.GuardianUIState
 import co.censo.guardian.presentation.home.InviteReady
 import co.censo.guardian.presentation.home.InvitesOnly
 import co.censo.shared.SharedScreen
@@ -194,17 +196,23 @@ fun ApproverOnboardingScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverUIState) {
-                            ApproverOnboardingUIState.CodeRejected -> {
+
+                            ApproverOnboardingUIState.NeedsToEnterCode,
+                            ApproverOnboardingUIState.CodeRejected,
+                            ApproverOnboardingUIState.WaitingForConfirmation -> {
                                 ApproverCodeVerification(
                                     value = state.verificationCode,
                                     onValueChanged = viewModel::updateVerificationCode,
                                     validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = stringResource(R.string.code_not_approved),
                                     isLoading = state.submitVerificationResource is Resource.Loading,
-                                    isVerificationRejected = true,
-                                    isWaitingForVerification = false,
+                                    codeVerificationStatus = when (state.approverUIState) {
+                                        ApproverOnboardingUIState.WaitingForConfirmation -> CodeVerificationStatus.Waiting
+                                        ApproverOnboardingUIState.CodeRejected -> CodeVerificationStatus.Rejected
+                                        else -> CodeVerificationStatus.Initial
+                                    }
                                 )
                             }
+
                             ApproverOnboardingUIState.InviteReady -> {
                                 InviteReady(
                                     onAccept = viewModel::acceptGuardianship,
@@ -214,31 +222,6 @@ fun ApproverOnboardingScreen(
                             }
                             ApproverOnboardingUIState.MissingInviteCode -> {
                                 InvitesOnly()
-                            }
-                            ApproverOnboardingUIState.NeedsToEnterCode -> {
-                                ApproverCodeVerification(
-                                    value = state.verificationCode,
-                                    onValueChanged = viewModel::updateVerificationCode,
-                                    validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = stringResource(
-                                        R.string.enter_the_digit_code_from_the_seed_phrase_owner,
-                                        TotpGenerator.CODE_LENGTH
-                                    ),
-                                    isLoading = state.submitVerificationResource is Resource.Loading,
-                                    isVerificationRejected = false,
-                                    isWaitingForVerification = false,
-                                )
-                            }
-                            ApproverOnboardingUIState.WaitingForConfirmation -> {
-                                ApproverCodeVerification(
-                                    value = state.verificationCode,
-                                    onValueChanged = viewModel::updateVerificationCode,
-                                    validCodeLength = TotpGenerator.CODE_LENGTH,
-                                    label = stringResource(R.string.code_sent_to_owner_waiting_for_them_to_approve),
-                                    isLoading = state.submitVerificationResource is Resource.Loading,
-                                    isVerificationRejected = false,
-                                    isWaitingForVerification = true,
-                                )
                             }
 
                             else -> {}

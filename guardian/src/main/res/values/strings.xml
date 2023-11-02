@@ -52,8 +52,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="enter_the_digit_code_from_the_seed_phrase_owner">Enter the %1$s-digit code from the seed phrase owner</string>
-    <string name="verifying_code">Verifying Code...</string>
-    <string name="loading">Loading...</string>
+    <string name="verifying_code">Verifying Code…</string>
+    <string name="loading">Loading…</string>
     <string name="tell_seed_phrase_owner_this_digit_code_to_approve_their_access">Tell seed phrase owner this %1$s-digit code to approve their access</string>
     <string name="link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner">Link you have opened does not appear to be correct. Please contact seed phrase owner</string>
     <string name="access_approved">Access approved!</string>
@@ -68,4 +68,11 @@
     <string name="approver_key_upload_prompt">We need you to create and store your Approver key. This will be used to complete recovery if the owner loses their phrase.</string>
     <string name="retry_key_upload">Retry Key Upload</string>
     <string name="create_approver_key">Create Approver Key</string>
+    <string name="encrypted_layered_security">Censo has encrypted the data with layered security.</string>
+    <string name="paste_link">Paste link</string>
+    <string name="get_the_unique_link">Get the unique link</string>
+    <string name="get_unique_link">Please get the unique link from the seed phrase owner and tap on it, or paste it here.</string>
+    <string name="enter_the_code">Enter the code</string>
+    <string name="the_owner_must_enter_this_6_digit_code">The owner must enter this 6-digit code</string>
+    <string name="share_the_code">Share the code</string>
 </resources>
