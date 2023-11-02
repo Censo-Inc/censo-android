@@ -22,11 +22,9 @@ typealias GuardianId = String
 @JvmInline
 value class Base58EncodedPrivateKey(val value: String) {
     fun bigInt() = BigInteger(1, Base58.base58Decode(this.value))
-}
 
-fun Base58EncodedPrivateKey.toEncryptionKey() : EncryptionKey {
-    val privateKeyRaw = Base58.base58Decode(this.value)
-    return EncryptionKey.generateFromPrivateKeyRaw(BigInteger(privateKeyRaw))
+    fun toEncryptionKey() =
+        EncryptionKey.generateFromPrivateKeyRaw(this.bigInt())
 }
 
 interface Base58EncodedPublicKey {

@@ -25,7 +25,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import toEncryptionKey
 import javax.inject.Inject
 
 @HiltViewModel
