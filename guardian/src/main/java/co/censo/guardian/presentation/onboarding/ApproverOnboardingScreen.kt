@@ -1,6 +1,7 @@
 package co.censo.guardian.presentation.onboarding
 
 import ParticipantId
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,15 +39,14 @@ import co.censo.guardian.presentation.Screen
 import co.censo.guardian.presentation.components.ApproverCodeVerification
 import co.censo.guardian.presentation.components.ApproverTopBar
 import co.censo.guardian.presentation.components.CodeVerificationStatus
-import co.censo.guardian.presentation.home.InviteReady
-import co.censo.guardian.presentation.home.InvitesOnly
-import co.censo.shared.SharedScreen
+import co.censo.guardian.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +87,21 @@ fun ApproverOnboardingScreen(
 
             viewModel.resetApproverAccessNavigationTrigger()
         }
+
+        if (state.onboardingMessage is Resource.Success) {
+            val message = when(state.onboardingMessage.data) {
+                OnboardingMessage.FailedPasteLink -> "Failed to get invite from clipboard. Please try again."
+                OnboardingMessage.LinkPastedSuccessfully -> "Found invite from clipboard!"
+                OnboardingMessage.LinkAccepted -> "Accepted as an approver. Let's get you verified."
+                OnboardingMessage.CodeAccepted -> "Owner has accepted your code!"
+                null -> null
+            }
+
+            message?.let {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            }
+            viewModel.resetMessage()
+        }
     }
 
     when {
@@ -118,7 +133,7 @@ fun ApproverOnboardingScreen(
                     DisplayError(
                         errorMessage = state.acceptGuardianResource.getErrorMessage(context),
                         dismissAction = { viewModel.resetAcceptGuardianResource() },
-                    ) { viewModel.acceptGuardianship() }
+                    ) { viewModel.retrieveApproverState(false) }
                 }
 
                 state.submitVerificationResource is Resource.Error -> {
@@ -212,15 +227,12 @@ fun ApproverOnboardingScreen(
                                 )
                             }
 
-                            ApproverOnboardingUIState.InviteReady -> {
-                                InviteReady(
-                                    onAccept = viewModel::acceptGuardianship,
-                                    onCancel = viewModel::cancelOnboarding,
-                                    enabled = state.acceptGuardianResource !is Resource.Loading
-                                )
-                            }
-                            ApproverOnboardingUIState.MissingInviteCode -> {
-                                InvitesOnly()
+                            ApproverOnboardingUIState.UserNeedsPasteLink -> {
+                                PasteLinkHomeScreen {
+                                    viewModel.userPastedInviteCode(
+                                        ClipboardHelper.getClipboardContent(context)
+                                    )
+                                }
                             }
 
                             else -> {}

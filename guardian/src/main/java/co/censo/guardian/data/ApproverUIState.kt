@@ -7,12 +7,8 @@ sealed interface ApproverUIState
 
 @Serializable
 sealed class ApproverOnboardingUIState : ApproverUIState {
-
     @Serializable
-    object MissingInviteCode : ApproverOnboardingUIState()
-
-    @Serializable
-    object InviteReady : ApproverOnboardingUIState()
+    object UserNeedsPasteLink : ApproverOnboardingUIState()
 
     @Serializable
     object NeedsToEnterCode : ApproverOnboardingUIState()

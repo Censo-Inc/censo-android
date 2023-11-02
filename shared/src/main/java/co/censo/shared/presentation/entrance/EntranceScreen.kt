@@ -125,6 +125,7 @@ fun EntranceScreen(
     val googleAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { activityResult ->
+            projectLog(message = "Result code from google auth: ${activityResult.resultCode}")
             when (activityResult.resultCode) {
                 RESULT_OK -> {
                     val task = GoogleSignIn.getSignedInAccountFromIntent(activityResult.data)

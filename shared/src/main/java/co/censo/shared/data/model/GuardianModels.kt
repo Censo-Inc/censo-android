@@ -16,8 +16,6 @@ import java.util.Base64
 import io.github.novacrypto.base58.Base58
 import java.security.interfaces.ECPublicKey
 
-typealias GuardianId = String
-
 @Serializable
 @JvmInline
 value class Base58EncodedPrivateKey(val value: String) {

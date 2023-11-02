@@ -17,6 +17,7 @@ import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.getInviteCodeFromDeeplink
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl
@@ -81,7 +82,9 @@ class ApproverOnboardingViewModel @Inject constructor(
         val inviteCodeNeeded = guardianState == null
 
         if (state.invitationId.value.isEmpty() && inviteCodeNeeded) {
-            state = state.copy(approverUIState = ApproverOnboardingUIState.MissingInviteCode)
+            state = state.copy(
+                approverUIState = ApproverOnboardingUIState.UserNeedsPasteLink
+            )
             return
         }
 
@@ -112,7 +115,13 @@ class ApproverOnboardingViewModel @Inject constructor(
             return
         }
 
-        state = when (guardianState?.phase) {
+        //Is null always when a user needs to accept
+        if (guardianState?.phase == null) {
+            acceptGuardianship()
+            return
+        }
+
+        state = when (guardianState.phase) {
             is GuardianPhase.VerificationRejected ->
                 state.copy(approverUIState = ApproverOnboardingUIState.CodeRejected)
 
@@ -122,13 +131,11 @@ class ApproverOnboardingViewModel @Inject constructor(
             is GuardianPhase.WaitingForVerification ->
                 state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
 
-            null -> state.copy(approverUIState = ApproverOnboardingUIState.InviteReady)
-
             else -> state
         }
     }
 
-    fun acceptGuardianship() {
+    private fun acceptGuardianship() {
         state = state.copy(acceptGuardianResource = Resource.Loading())
 
         viewModelScope.launch {
@@ -195,7 +202,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             val signedVerificationData  = try {
                 guardianRepository.signVerificationCode(
                     verificationCode = state.verificationCode,
-                    state.guardianEncryptionKey!!
+                    encryptionKey = state.guardianEncryptionKey!!
                 )
             } catch (e: Exception) {
                 state = state.copy(
@@ -222,11 +229,11 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrivateKeyFromCloud(
-    ) {
+    private fun loadPrivateKeyFromCloud() {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(
-                triggerAction = true, action = CloudStorageActions.DOWNLOAD,
+                triggerAction = true,
+                action = CloudStorageActions.DOWNLOAD,
             ),
         )
     }
@@ -260,7 +267,6 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         when (state.approverUIState) {
             // onboarding
-            ApproverOnboardingUIState.InviteReady,
             ApproverOnboardingUIState.NeedsToEnterCode,
             ApproverOnboardingUIState.WaitingForConfirmation,
             ApproverOnboardingUIState.CodeRejected -> {
@@ -269,7 +275,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
             //No UI for these states
             ApproverOnboardingUIState.Complete,
-            ApproverOnboardingUIState.MissingInviteCode -> {
+            ApproverOnboardingUIState.UserNeedsPasteLink -> {
             }
         }
     }
@@ -279,7 +285,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         state = state.copy(
             invitationId = InvitationId(""),
-            approverUIState = ApproverOnboardingUIState.MissingInviteCode
+            approverUIState = ApproverOnboardingUIState.UserNeedsPasteLink
         )
     }
 
@@ -372,6 +378,21 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = state.copy(submitVerificationResource = Resource.Error(
             exception = exception
         ))
+    }
+
+    fun userPastedInviteCode(clipboardContent: String?) {
+        val inviteCode = clipboardContent?.getInviteCodeFromDeeplink()
+
+        if (inviteCode != null) {
+            guardianRepository.saveInvitationId(inviteCode)
+            acceptGuardianship()
+        } else {
+            state = state.copy()
+        }
+    }
+
+    fun resetMessage() {
+        state = state.copy(onboardingMessage = Resource.Uninitialized)
     }
     //endregion
 

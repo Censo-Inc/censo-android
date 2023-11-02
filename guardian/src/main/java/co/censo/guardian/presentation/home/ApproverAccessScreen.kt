@@ -38,7 +38,11 @@ import co.censo.guardian.R
 import co.censo.guardian.data.ApproverAccessUIState
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverTopBar
+import co.censo.guardian.presentation.components.ApproverCodeVerification
+import co.censo.guardian.presentation.components.CodeVerificationStatus
+import co.censo.guardian.presentation.components.LockedApproverScreen
 import co.censo.guardian.presentation.components.OwnerCodeVerification
+import co.censo.guardian.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
@@ -153,8 +157,31 @@ fun ApproverAccessScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverAccessUIState) {
-                            ApproverAccessUIState.Complete -> {
-                                Onboarded()
+                            GuardianUIState.MISSING_INVITE_CODE,
+                            GuardianUIState.INVITE_READY -> {
+                                PasteLinkHomeScreen {
+
+                                }
+                            }
+
+                            GuardianUIState.WAITING_FOR_CONFIRMATION,
+                            GuardianUIState.CODE_REJECTED,
+                            GuardianUIState.WAITING_FOR_CODE -> {
+                                ApproverCodeVerification(
+                                    value = state.verificationCode,
+                                    onValueChanged = viewModel::updateVerificationCode,
+                                    validCodeLength = TotpGenerator.CODE_LENGTH,
+                                    isLoading = state.submitVerificationResource is Resource.Loading,
+                                    codeVerificationStatus = when (state.guardianUIState) {
+                                        GuardianUIState.WAITING_FOR_CONFIRMATION -> CodeVerificationStatus.Waiting
+                                        GuardianUIState.CODE_REJECTED -> CodeVerificationStatus.Rejected
+                                        else -> CodeVerificationStatus.Initial
+                                    }
+                                )
+                            }
+
+                            GuardianUIState.COMPLETE -> {
+                                LockedApproverScreen()
                             }
 
                             ApproverAccessUIState.InvalidParticipantId -> {
@@ -298,83 +325,6 @@ private fun AccessApproved(
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold
     )
-}
-
-@Composable
-private fun Onboarded() {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = stringResource(R.string.you_are_fully_set),
-        color = GuardianColors.PrimaryColor,
-        textAlign = TextAlign.Center,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(modifier = Modifier.height(30.dp))
-
-    Text(
-        modifier = Modifier.padding(horizontal = 40.dp),
-        text = stringResource(R.string.when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access),
-        color = GuardianColors.PrimaryColor,
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Normal
-    )
-}
-
-@Composable
-fun InvitesOnly() {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp
-    )
-}
-
-@Composable
-fun InviteReady(
-    onAccept: () -> Unit,
-    onCancel: () -> Unit,
-    enabled: Boolean
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.you_have_been_invited_to_become_an_approver),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Medium
-    )
-
-    Spacer(modifier = Modifier.height(48.dp))
-
-    StandardButton(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        color = GuardianColors.PrimaryColor,
-        borderColor = Color.White,
-        border = false,
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
-        onClick = onAccept,
-        enabled = enabled
-    )
-    {
-        Text(
-            text = stringResource(R.string.accept_invitation),
-            color = Color.White,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-
-    Spacer(modifier = Modifier.height(24.dp))
-
-    TextButton(onClick = onCancel) {
-        Text(
-            text = stringResource(R.string.close),
-            color = Color.Black
-        )
-    }
 }
 
 @Composable
