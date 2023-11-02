@@ -89,10 +89,10 @@ fun ApproverOnboardingScreen(
 
         if (state.onboardingMessage is Resource.Success) {
             val message = when (state.onboardingMessage.data) {
-                OnboardingMessage.FailedPasteLink -> "Failed to get invite from clipboard. Please try again."
-                OnboardingMessage.LinkPastedSuccessfully -> "Found invite from clipboard!"
-                OnboardingMessage.LinkAccepted -> "Accepted as an approver. Let's get you verified."
-                OnboardingMessage.CodeAccepted -> "Owner has accepted your code!"
+                OnboardingMessage.FailedPasteLink -> context.getString(R.string.failed_to_get_invite_clipboard)
+                OnboardingMessage.LinkPastedSuccessfully -> context.getString(R.string.found_invite_clipboard)
+                OnboardingMessage.LinkAccepted -> context.getString(R.string.accepted_as_an_approver)
+                OnboardingMessage.CodeAccepted -> context.getString(R.string.owner_accepted_code)
                 null -> null
             }
 

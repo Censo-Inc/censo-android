@@ -46,7 +46,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             if (state.userResponse !is Resource.Loading
                 && state.savePrivateKeyToCloudResource !is Resource.Loading
                 && state.guardianState?.phase is GuardianPhase.WaitingForVerification) {
-                retrieveApproverState(silently = true)
+                retrieveApproverState(silently = true, checkingVerification = true)
             }
         }
     }
@@ -59,7 +59,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = ApproverOnboardingState()
     }
 
-    fun retrieveApproverState(silently: Boolean) {
+    fun retrieveApproverState(silently: Boolean, checkingVerification: Boolean = false) {
         if (!silently) {
             state = state.copy(userResponse = Resource.Loading())
         }
@@ -72,6 +72,8 @@ class ApproverOnboardingViewModel @Inject constructor(
             if (userResponse is Resource.Success) {
                 val guardianState = userResponse.data!!.guardianStates.firstOrNull()
                 checkApproverHasInvitationCode(guardianState)
+
+                showMessageWhenUserMovesToComplete(guardianState, checkingVerification)
             }
         }
     }
@@ -146,6 +148,9 @@ class ApproverOnboardingViewModel @Inject constructor(
             state = state.copy(acceptGuardianResource = acceptResource)
 
             if (acceptResource is Resource.Success) {
+                state = state.copy(
+                    onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
+                )
                 assignParticipantId(acceptResource.data?.guardianState)
                 createKeyAndTriggerCloudSave()
             }
@@ -281,7 +286,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
-    fun cancelOnboarding() {
+    private fun cancelOnboarding() {
         guardianRepository.clearInvitationId()
 
         state = state.copy(
@@ -387,15 +392,30 @@ class ApproverOnboardingViewModel @Inject constructor(
         )
     }
 
+    private fun showMessageWhenUserMovesToComplete(
+        guardianState: GuardianState?, checkingVerification: Boolean
+    ) {
+        if (guardianState?.phase is GuardianPhase.Complete && checkingVerification) {
+            state = state.copy(
+                onboardingMessage = Resource.Success(OnboardingMessage.CodeAccepted)
+            )
+        }
+    }
+
     fun userPastedInviteCode(clipboardContent: String?) {
         val inviteCode = clipboardContent?.getInviteCodeFromDeeplink()
 
-        if (inviteCode != null) {
+        if (!inviteCode.isNullOrEmpty()) {
             guardianRepository.saveInvitationId(inviteCode)
             loadInvitationId()
+            state = state.copy(
+                onboardingMessage = Resource.Success(OnboardingMessage.LinkPastedSuccessfully)
+            )
             acceptGuardianship()
         } else {
-            state = state.copy()
+            state = state.copy(
+                onboardingMessage = Resource.Success(OnboardingMessage.FailedPasteLink)
+            )
         }
     }
 

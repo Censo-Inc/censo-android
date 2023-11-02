@@ -51,7 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,7 +70,6 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.projectLog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -117,7 +115,6 @@ fun EntranceScreen(
             }
 
         } catch (e: Exception) {
-            projectLog(message = "checkPermissionDialog exception caught: ${e.message}")
             //TODO: raygun
         }
     }
@@ -125,7 +122,6 @@ fun EntranceScreen(
     val googleAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { activityResult ->
-            projectLog(message = "Result code from google auth: ${activityResult.resultCode}")
             when (activityResult.resultCode) {
                 RESULT_OK -> {
                     val task = GoogleSignIn.getSignedInAccountFromIntent(activityResult.data)
