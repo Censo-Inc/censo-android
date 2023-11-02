@@ -126,7 +126,7 @@ fun ApproveAccessUI(
         Box(modifier = Modifier.padding(vertical = 12.dp)) {
             CodeEntry(
                 length = TotpGenerator.CODE_LENGTH,
-                enabled = !codeEditable,
+                enabled = codeEditable,
                 value = verificationCode,
                 onValueChange = onVerificationCodeChanged,
                 primaryColor = Color.Black,
