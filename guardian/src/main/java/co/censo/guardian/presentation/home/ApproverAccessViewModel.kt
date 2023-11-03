@@ -50,7 +50,7 @@ class ApproverAccessViewModel @Inject constructor(
     fun onStart() {
         retrieveApproverState(false)
 
-        userStatePollingTimer.startCountDownTimer(POLLING_VERIFICATION_COUNTDOWN) {
+        userStatePollingTimer.start(POLLING_VERIFICATION_COUNTDOWN) {
             if (state.shouldCheckRecoveryCode) {
                 retrieveApproverState(true)
             }
@@ -58,7 +58,7 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     fun onStop() {
-        userStatePollingTimer.stopCountDownTimer()
+        userStatePollingTimer.stop()
         stopRecoveryTotpGeneration()
     }
 
@@ -240,7 +240,7 @@ class ApproverAccessViewModel @Inject constructor(
     private fun startRecoveryTotpGeneration(encryptedSecret: Base64EncodedData) {
         viewModelScope.launch {
             state = state.copy(recoveryTotp = generateRecoveryTotp(encryptedSecret))
-            recoveryTotpTimer.startCountDownTimer(UPDATE_COUNTDOWN) {
+            recoveryTotpTimer.start(UPDATE_COUNTDOWN) {
                 state.recoveryTotp?.also { totp ->
                     val now = Clock.System.now()
 
@@ -262,7 +262,7 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     private fun stopRecoveryTotpGeneration() {
-        recoveryTotpTimer.stopCountDownTimer()
+        recoveryTotpTimer.stop()
         state = state.copy(recoveryTotp = null)
     }
 

@@ -42,22 +42,30 @@ data class PlanSetupState(
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized
 ) {
-
-    val backArrowType = when (planSetupUIState) {
-        PlanSetupUIState.ApproverActivation,
-        PlanSetupUIState.EditApproverNickname -> BackIconType.Back
-
-        PlanSetupUIState.InviteApprovers,
-        PlanSetupUIState.ApproverNickname,
-        PlanSetupUIState.ApproverGettingLive,
-        PlanSetupUIState.AddAlternateApprover,
-        PlanSetupUIState.RecoveryInProgress -> BackIconType.Exit
-
-        PlanSetupUIState.Initial, PlanSetupUIState.Completed -> BackIconType.None
-    }
-
     val activatingApprover = alternateApprover ?: primaryApprover
     val approverType = if (alternateApprover != null) ApproverType.Alternate else ApproverType.Primary
+
+    val backArrowType = when {
+        planSetupUIState in listOf(
+            PlanSetupUIState.ApproverActivation,
+            PlanSetupUIState.EditApproverNickname
+        ) -> BackIconType.Back
+
+        planSetupUIState in listOf(
+            PlanSetupUIState.ApproverGettingLive,
+            PlanSetupUIState.EditApproverNickname
+        ) && approverType == ApproverType.Alternate -> BackIconType.Back
+
+        planSetupUIState in listOf(
+            PlanSetupUIState.InviteApprovers,
+            PlanSetupUIState.ApproverNickname,
+            PlanSetupUIState.ApproverGettingLive,
+            PlanSetupUIState.AddAlternateApprover,
+            PlanSetupUIState.RecoveryInProgress
+        ) -> BackIconType.Exit
+
+        else -> BackIconType.None
+    }
 
     val loading = userResponse is Resource.Loading
                 || createPolicySetupResponse is Resource.Loading

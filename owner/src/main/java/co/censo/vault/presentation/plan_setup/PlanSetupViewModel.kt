@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
@@ -25,6 +24,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
@@ -40,8 +40,8 @@ class PlanSetupViewModel @Inject constructor(
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
-    private val pollingVerificationTimer: VaultCountDownTimer
-) : ViewModel() {
+    private val pollingVerificationTimer: VaultCountDownTimer,
+    ) : ViewModel() {
 
     var state by mutableStateOf(PlanSetupState())
         private set
@@ -55,22 +55,30 @@ class PlanSetupViewModel @Inject constructor(
             state = state.copy(planSetupUIState = planSetupUIState)
         }
 
-        retrieveOwnerState(overwriteUIState = true)
+        viewModelScope.launch {
+            val ownerState = ownerStateFlow.value
+            if (ownerState is Resource.Success) {
+                updateOwnerState(ownerState.data!!, overwriteUIState = true)
+            }
 
-        verificationCodeTimer.startCountDownTimer(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
-            nextTotpTimerTick()
+            pollingVerificationTimer.startWithDelay(
+                initialDelay = CountDownTimerImpl.Companion.INITIAL_DELAY,
+                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
+            ) {
+                if (state.userResponse !is Resource.Loading) {
+                    retrieveOwnerState(silent = true)
+                }
+            }
         }
 
-        pollingVerificationTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
-            if (state.userResponse !is Resource.Loading) {
-                retrieveOwnerState(silent = true)
-            }
+        verificationCodeTimer.start(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
+            nextTotpTimerTick()
         }
     }
 
     fun onStop() {
-        verificationCodeTimer.stopCountDownTimer()
-        pollingVerificationTimer.stopCountDownTimer()
+        verificationCodeTimer.stop()
+        pollingVerificationTimer.stop()
     }
 
 
@@ -93,28 +101,28 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onBackClicked() {
-        state = when (state.planSetupUIState) {
-            PlanSetupUIState.ApproverActivation -> {
-                state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
+        val backIconNavigation = listOf(
+            PlanSetupUIState.EditApproverNickname to PlanSetupUIState.ApproverActivation,
+            PlanSetupUIState.ApproverActivation to PlanSetupUIState.ApproverGettingLive,
+            PlanSetupUIState.ApproverGettingLive to PlanSetupUIState.AddAlternateApprover,
+        ).toMap()
+
+        when (state.backArrowType) {
+            PlanSetupState.BackIconType.None -> {}
+
+            PlanSetupState.BackIconType.Back -> {
+                state = state.copy(
+                    planSetupUIState = backIconNavigation[state.planSetupUIState] ?: state.planSetupUIState
+                )
             }
 
-            PlanSetupUIState.EditApproverNickname -> {
-                state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
-            }
-
-            PlanSetupUIState.Initial,
-            PlanSetupUIState.InviteApprovers,
-            PlanSetupUIState.ApproverNickname,
-            PlanSetupUIState.ApproverGettingLive,
-            PlanSetupUIState.AddAlternateApprover,
-            PlanSetupUIState.RecoveryInProgress,
-            PlanSetupUIState.Completed -> {
-                state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+            PlanSetupState.BackIconType.Exit -> {
+                state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
             }
         }
     }
 
-    private fun retrieveOwnerState(silent: Boolean = false, overwriteUIState: Boolean = false) {
+    fun retrieveOwnerState(silent: Boolean = false, overwriteUIState: Boolean = false) {
         if (!silent) {
             state = state.copy(userResponse = Resource.Loading())
         }
@@ -174,7 +182,7 @@ class PlanSetupViewModel @Inject constructor(
 
         // restore UI state on view restart (`overwriteUIState` flag)
         // normally navigation is controlled by pressing "continue" button
-        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.InviteApprovers) {
+        if (overwriteUIState && state.planSetupUIState in listOf(PlanSetupUIState.InviteApprovers, PlanSetupUIState.ApproverNickname)) {
             if (externalApprovers.notConfirmed().isNotEmpty()) {
                 state = state.copy(
                     editedNickname = when (state.approverType) {
@@ -187,8 +195,6 @@ class PlanSetupViewModel @Inject constructor(
                 initiateRecovery()
             } else if (primaryApprover?.status is GuardianStatus.Confirmed) {
                 state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
-            } else {
-                state = state.copy(planSetupUIState = PlanSetupUIState.InviteApprovers)
             }
         }
 
@@ -204,10 +210,17 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onInviteApprover() {
-        state = state.copy(
-            editedNickname = "",
-            planSetupUIState = PlanSetupUIState.ApproverNickname
-        )
+        if (state.alternateApprover != null) {
+            // skip name entry of alternate approver if it is already set
+            state = state.copy(
+                planSetupUIState = PlanSetupUIState.ApproverGettingLive
+            )
+        } else {
+            state = state.copy(
+                editedNickname = "",
+                planSetupUIState = PlanSetupUIState.ApproverNickname
+            )
+        }
     }
 
     fun approverNicknameChanged(nickname: String) {
@@ -391,7 +404,35 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun saveAndFinish() {
-        initiateRecovery()
+        if (state.alternateApprover != null) {
+            // finishing flow after primary approver
+            dropAlternateApproverAndInitiateRecovery()
+        } else {
+            initiateRecovery()
+        }
+    }
+
+    private fun dropAlternateApproverAndInitiateRecovery() {
+        state = state.copy(createPolicySetupResponse = Resource.Loading())
+
+        viewModelScope.launch {
+            val response = ownerRepository.createPolicySetup(
+                threshold = 2U,
+                guardians = listOfNotNull(
+                    state.ownerApprover?.asImplicitlyOwner(),
+                    state.primaryApprover?.asExternalApprover()
+                )
+            )
+
+            if (response is Resource.Success) {
+                state = state.copy(alternateApprover = null)
+                initiateRecovery()
+            }
+
+            state = state.copy(
+                createPolicySetupResponse = response
+            )
+        }
     }
 
     fun onGoLiveWithApprover() {
@@ -477,11 +518,12 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onFullyCompleted() {
-        state = state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
 
     fun reset() {
         state = PlanSetupState()
+        retrieveOwnerState(silent = false, overwriteUIState = true)
     }
 
     private fun List<Guardian.ProspectGuardian>.ownerApprover(): Guardian.ProspectGuardian? {

@@ -48,7 +48,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             }
         }
 
-        timer.startCountDownTimer(countdownInterval = 1.seconds.inWholeMilliseconds) {
+        timer.start(interval = 1.seconds.inWholeMilliseconds) {
 
             state.locksAt?.let {
                 val now =  Clock.System.now()
@@ -62,7 +62,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun onStop() {
-        timer.stopCountDownTimer()
+        timer.stop()
 
         if (state.viewedPhrase.isNotEmpty()) {
             reset()
@@ -103,6 +103,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     recoverSecrets(response.data!!)
                 }
+                ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
 
             response.map { it.scanResultBlob }
@@ -211,15 +212,19 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun cancelAccess() {
-        state = state.copy(cancelRecoveryResource = Resource.Loading())
+        state = state.copy(
+            showCancelConfirmationDialog = false,
+            cancelRecoveryResource = Resource.Loading()
+        )
 
         viewModelScope.launch {
             val response = ownerRepository.cancelRecovery()
 
             if (response is Resource.Success) {
                 state = state.copy(
-                    navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
+                    navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
                 )
+                ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
 
             state = state.copy(cancelRecoveryResource = response)

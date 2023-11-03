@@ -36,18 +36,26 @@ class AccessApprovalViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveOwnerState()
+        viewModelScope.launch {
+            val ownerState = ownerStateFlow.value
+            if (ownerState is Resource.Success) {
+                updateOwnerState(ownerState.data!!)
+            }
 
-        // setup polling timer to reload approvals state
-        pollingVerificationTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
-            if (state.userResponse !is Resource.Loading) {
-                retrieveOwnerState(silent = true)
+            // setup polling timer to reload approvals state
+            pollingVerificationTimer.startWithDelay(
+                initialDelay = CountDownTimerImpl.Companion.INITIAL_DELAY,
+                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
+            ) {
+                if (state.userResponse !is Resource.Loading) {
+                    retrieveOwnerState(silent = true)
+                }
             }
         }
     }
 
     fun onStop() {
-        pollingVerificationTimer.stopCountDownTimer()
+        pollingVerificationTimer.stop()
     }
 
     fun retrieveOwnerState(silent: Boolean = false) {
@@ -131,25 +139,29 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun initiateRecovery() {
-        state = state.copy(
-            initiateNewRecovery = false,
-            initiateRecoveryResource = Resource.Loading()
-        )
-        viewModelScope.launch {
-            val response = ownerRepository.initiateRecovery(RecoveryIntent.AccessPhrases)
+        if (state.initiateRecoveryResource !is Resource.Loading) {
+            state = state.copy(initiateRecoveryResource = Resource.Loading())
 
-            state = state.copy(
-                initiateRecoveryResource = response
-            )
+            viewModelScope.launch {
+                val response = ownerRepository.initiateRecovery(RecoveryIntent.AccessPhrases)
 
-            if (response is Resource.Success) {
-                updateOwnerState(response.data!!.ownerState)
+                if (response is Resource.Success) {
+                    updateOwnerState(response.data!!.ownerState)
+                }
+
+                state = state.copy(
+                    initiateRecoveryResource = response,
+                    initiateNewRecovery = false
+                )
             }
         }
     }
 
     fun cancelAccess() {
-        state = state.copy(cancelRecoveryResource = Resource.Loading())
+        state = state.copy(
+            showCancelConfirmationDialog = false,
+            cancelRecoveryResource = Resource.Loading()
+        )
 
         viewModelScope.launch {
             val response = ownerRepository.cancelRecovery()
@@ -157,7 +169,7 @@ class AccessApprovalViewModel @Inject constructor(
             if (response is Resource.Success) {
                 state = state.copy(
                     recovery = null,
-                    navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route)
+                    navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
                 )
             }
 

@@ -42,7 +42,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     fun onStart() {
         retrieveApproverState(silently = false)
 
-        userStatePollingTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
+        userStatePollingTimer.start(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
             if (state.userResponse !is Resource.Loading
                 && state.savePrivateKeyToCloudResource !is Resource.Loading
                 && state.guardianState?.phase is GuardianPhase.WaitingForVerification) {
@@ -52,7 +52,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
     fun onStop() {
-        userStatePollingTimer.stopCountDownTimer()
+        userStatePollingTimer.stop()
     }
 
     fun onDispose() {

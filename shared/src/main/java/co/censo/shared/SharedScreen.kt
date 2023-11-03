@@ -10,10 +10,8 @@ fun String.getInviteCodeFromDeeplink() =
     }
 
 sealed class SharedScreen(val route: String) {
-    object HomeRoute : SharedScreen("home_screen")
     object EntranceRoute : SharedScreen("entrance_screen")
-    object OwnerVaultScreen : SharedScreen("owner_vault_screen")
-    object OwnerWelcomeScreen : SharedScreen("owner_welcome_screen")
+    object OwnerRoutingScreen : SharedScreen("owner_routing_screen")
     object ApproverRoutingScreen : SharedScreen("approver_routing_screen")
     companion object {
         const val GUARDIAN_ONBOARDING_URI = "${BuildConfig.URL_SCHEME}://invite/"
