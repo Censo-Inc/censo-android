@@ -39,6 +39,7 @@ import co.censo.guardian.presentation.Screen
 import co.censo.guardian.presentation.components.ApproverCodeVerification
 import co.censo.guardian.presentation.components.ApproverTopBar
 import co.censo.guardian.presentation.components.CodeVerificationStatus
+import co.censo.guardian.presentation.components.LockedApproverScreen
 import co.censo.guardian.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
@@ -47,6 +48,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.ClipboardHelper
+import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -211,7 +213,9 @@ fun ApproverOnboardingScreen(
                                 }
                             }
 
-                            else -> {}
+                            ApproverOnboardingUIState.Complete -> {
+                                LockedApproverScreen()
+                            }
                         }
 
                         Spacer(modifier = Modifier.weight(0.7f))

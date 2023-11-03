@@ -81,4 +81,6 @@
     <string name="found_invite_clipboard">Found invite from clipboard!</string>
     <string name="accepted_as_an_approver">Accepted as an approver. Let\'s get you verified.</string>
     <string name="owner_accepted_code">Owner has accepted your code!</string>
+    <string name="access_requested_message">For maximum security, it\'s best to be face-to-face with the phrase owner in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
+    <string name="access_requested_title">Get live with the owner</string>
 </resources>

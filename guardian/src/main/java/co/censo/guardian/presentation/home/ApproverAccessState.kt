@@ -1,20 +1,16 @@
 package co.censo.guardian.presentation.home
 
 import Base64EncodedData
-import InvitationId
 import co.censo.guardian.data.ApproverAccessUIState
-import co.censo.guardian.presentation.onboarding.OnboardingMessage
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
 import co.censo.shared.data.model.GetUserApiResponse
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.RejectRecoveryApiResponse
 import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
-import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -49,7 +45,7 @@ data class ApproverAccessState(
     val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null,
 
     //Success/Error Message
-    val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,
+    val onboardingMessage: Resource<RecoveryMessage> = Resource.Uninitialized,
 ) {
 
     val loading = userResponse is Resource.Loading
@@ -62,7 +58,7 @@ data class ApproverAccessState(
             || approveRecoveryResource is Resource.Error
             || rejectRecoveryResource is Resource.Error
 
-    val getApproverState =
+    val shouldCheckRecoveryCode =
         userResponse !is Resource.Loading && guardianState?.phase is GuardianPhase.RecoveryVerification
 
     data class RecoveryTotpState(
@@ -71,4 +67,8 @@ data class ApproverAccessState(
         val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
         val encryptedSecret: Base64EncodedData
     )
+}
+
+enum class RecoveryMessage {
+    FailedPasteLink, LinkPastedSuccessfully, LinkAccepted, ApprovalCompleted
 }

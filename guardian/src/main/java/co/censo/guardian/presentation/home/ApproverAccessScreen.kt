@@ -37,6 +37,7 @@ import co.censo.guardian.R
 import co.censo.guardian.data.ApproverAccessUIState
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverTopBar
+import co.censo.guardian.presentation.components.LockedApproverScreen
 import co.censo.guardian.presentation.components.OwnerCodeVerification
 import co.censo.guardian.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
@@ -44,6 +45,8 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import kotlinx.coroutines.delay
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.GetLiveWithUserUI
+import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,13 +157,23 @@ fun ApproverAccessScreen(
 
                         when (state.approverAccessUIState) {
                             ApproverAccessUIState.UserNeedsPasteRecoveryLink,
-                            ApproverAccessUIState.Complete,
-                            ApproverAccessUIState.AccessApproved -> {
-                                PasteLinkHomeScreen(null)
+                            ApproverAccessUIState.AccessApproved,
+                            ApproverAccessUIState.Complete -> {
+                                LockedApproverScreen {
+                                    viewModel.userPastedRecovery(
+                                        ClipboardHelper.getClipboardContent(context)
+                                    )
+                                }
                             }
 
                             ApproverAccessUIState.AccessRequested -> {
-                                RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret)
+                                GetLiveWithUserUI(
+                                    title = stringResource(R.string.access_requested_title),
+                                    message = stringResource(R.string.access_requested_message),
+                                    onContinueLive = viewModel::storeRecoveryTotpSecret,
+                                    onResumeLater = {},
+                                    showSecondButton = false
+                                )
                             }
 
                             ApproverAccessUIState.VerifyingToTPFromOwner,
@@ -244,77 +257,6 @@ fun ApproverAccessScreen(
                     state.cloudStorageAction.action
                 )
             },
-        )
-    }
-}
-
-@Composable
-private fun VerifyingOwnerCode() {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.verifying_code),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp
-    )
-}
-
-@Composable
-fun InvalidParticipantId() {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp
-    )
-}
-
-@Composable
-private fun AccessApproved(
-    onClose: () -> Unit
-) {
-    LaunchedEffect(Unit) {
-        delay(5000)
-        onClose()
-    }
-
-    Text(
-        modifier = Modifier.padding(16.dp),
-        text = stringResource(R.string.access_approved),
-        color = GuardianColors.PrimaryColor,
-        textAlign = TextAlign.Center,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold
-    )
-}
-
-@Composable
-private fun RecoveryRequested(
-    onContinue: () -> Unit
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.seed_phrase_owner_has_requested_access_approval),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Medium
-    )
-
-    Spacer(modifier = Modifier.height(48.dp))
-
-    StandardButton(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        color = GuardianColors.PrimaryColor,
-        borderColor = Color.White,
-        border = false,
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
-        onClick = onContinue,
-    )
-    {
-        Text(
-            text = "Continue",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
         )
     }
 }
