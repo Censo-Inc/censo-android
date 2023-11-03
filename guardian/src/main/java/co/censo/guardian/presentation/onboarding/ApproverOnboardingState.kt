@@ -26,20 +26,31 @@ data class ApproverOnboardingState(
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
 
     // UI state
-    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.MissingInviteCode,
+    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink,
     val showTopBarCancelConfirmationDialog: Boolean = false,
     val navToApproverAccess: Boolean = false,
 
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
+    val retrievePrivateKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
+
+    //Success/Error Message
+    val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,
 ) {
     val loading = userResponse is Resource.Loading
             || acceptGuardianResource is Resource.Loading
             || submitVerificationResource is Resource.Loading
 
+    val loadingCloudAction = savePrivateKeyToCloudResource is Resource.Loading
+            || retrievePrivateKeyFromCloudResource is Resource.Loading
+
     val asyncError = userResponse is Resource.Error
             || acceptGuardianResource is Resource.Error
             || submitVerificationResource is Resource.Error
             || savePrivateKeyToCloudResource is Resource.Error
+}
+
+enum class OnboardingMessage {
+    FailedPasteLink, LinkPastedSuccessfully, LinkAccepted, CodeAccepted
 }

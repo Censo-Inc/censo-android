@@ -1,6 +1,14 @@
 package co.censo.shared
 
 fun SharedScreen.buildScreenDeepLinkUri() = "${SharedScreen.GUARDIAN_ONBOARDING_URI}${this.route}"
+
+fun String.getInviteCodeFromDeeplink() =
+    try {
+        split("/").last()
+    } catch (e: Exception) {
+        ""
+    }
+
 sealed class SharedScreen(val route: String) {
     object HomeRoute : SharedScreen("home_screen")
     object EntranceRoute : SharedScreen("entrance_screen")

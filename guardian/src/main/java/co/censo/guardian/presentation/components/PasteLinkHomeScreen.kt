@@ -33,7 +33,7 @@ import co.censo.guardian.R as ApproverR
 
 @Composable
 fun PasteLinkHomeScreen(
-    onPasteLinkClick: () -> Unit
+    onPasteLinkClick: (() -> Unit)?
 ) {
 
 
@@ -73,31 +73,33 @@ fun PasteLinkHomeScreen(
         Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
 
 
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
-            contentPadding = PaddingValues(vertical = 12.dp),
-            onClick = onPasteLinkClick,
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+        onPasteLinkClick?.let {
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.Black,
+                contentPadding = PaddingValues(vertical = 12.dp),
+                onClick = it,
             ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(
-                        id = co.censo.shared.R.drawable.paste_phrase_icon
-                    ),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(ApproverR.string.paste_link),
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 24.sp,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(
+                            id = co.censo.shared.R.drawable.paste_phrase_icon
+                        ),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(ApproverR.string.paste_link),
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 24.sp,
+                    )
+                }
             }
         }
     }

@@ -46,7 +46,7 @@ android {
         applicationId = "co.censo.guardian"
         minSdk = 33
         targetSdk = 33
-        versionCode = 2
+        versionCode = 5
         versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
 
         signingConfig = if (signBuild) {

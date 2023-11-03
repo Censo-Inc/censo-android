@@ -20,12 +20,12 @@ import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.getInviteCodeFromDeeplink
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +51,7 @@ class ApproverAccessViewModel @Inject constructor(
         retrieveApproverState(false)
 
         userStatePollingTimer.startCountDownTimer(POLLING_VERIFICATION_COUNTDOWN) {
-            if (state.getApproverState) {
+            if (state.shouldCheckRecoveryCode) {
                 retrieveApproverState(true)
             }
         }
@@ -84,14 +84,14 @@ class ApproverAccessViewModel @Inject constructor(
 
         //If participantId is empty then the approver is in the complete state
         if (participantId.isEmpty()) {
-            state = state.copy(approverAccessUIState = ApproverAccessUIState.Complete)
+            state = state.copy(approverAccessUIState = ApproverAccessUIState.UserNeedsPasteRecoveryLink)
             return
         }
 
         when (val guardianState = guardianStates.forParticipant(participantId = participantId)) {
             null -> {
                 guardianRepository.clearParticipantId()
-                state = state.copy(approverAccessUIState = ApproverAccessUIState.InvalidParticipantId)
+                state = state.copy(approverAccessUIState = ApproverAccessUIState.UserNeedsPasteRecoveryLink)
             }
             else -> {
                 assignGuardianStateAndParticipantId(
@@ -107,6 +107,10 @@ class ApproverAccessViewModel @Inject constructor(
         state = state.copy(participantId = participantId, guardianState = guardianState)
     }
 
+    private fun assignParticipantId(participantId: String) {
+        state = state.copy(participantId = participantId)
+    }
+
     private fun determineApproverAccessUIState(guardianState: GuardianState) {
         state = when (val phase = guardianState.phase) {
             is GuardianPhase.Complete -> {
@@ -116,7 +120,8 @@ class ApproverAccessViewModel @Inject constructor(
                 }
             }
 
-            is GuardianPhase.RecoveryRequested -> state.copy(approverAccessUIState = ApproverAccessUIState.AccessRequested)
+            is GuardianPhase.RecoveryRequested ->
+                state.copy(approverAccessUIState = ApproverAccessUIState.AccessRequested)
             is GuardianPhase.RecoveryVerification -> {
                 startRecoveryTotpGeneration(phase.encryptedTotpSecret)
                 state.copy(approverAccessUIState = ApproverAccessUIState.WaitingForToTPFromOwner)
@@ -130,12 +135,13 @@ class ApproverAccessViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrivateKeyFromCloud(recoveryPhase: GuardianPhase.RecoveryConfirmation? = null) {
+    private fun loadPrivateKeyFromCloud(recoveryPhase: GuardianPhase.RecoveryConfirmation) {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true, action = CloudStorageActions.DOWNLOAD
             ),
-            recoveryConfirmationPhase = recoveryPhase
+            recoveryConfirmationPhase = recoveryPhase,
+            loadKeyFromCloudResource = Resource.Loading()
         )
     }
 
@@ -156,8 +162,10 @@ class ApproverAccessViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             if (totpIsCorrect) {
+                state = state.copy(approveRecoveryResource = Resource.Loading())
+
                 if (state.guardianEncryptionKey == null) {
-                    //Set to state so we can retry this method with the same parameters after the key is loaded
+                    state = state.copy(approveRecoveryResource = Resource.Uninitialized)
                     loadPrivateKeyFromCloud(recoveryPhase = recoveryConfirmation)
                     return@launch
                 }
@@ -170,7 +178,7 @@ class ApproverAccessViewModel @Inject constructor(
                     ).base64Encoded()
                 )
 
-                state = state.copy(approveRecoveryResource = response)
+                state = state.copy(approveRecoveryResource = response, ownerEnteredWrongCode = false)
 
                 if (response is Resource.Success) {
                     guardianRepository.clearParticipantId()
@@ -179,11 +187,12 @@ class ApproverAccessViewModel @Inject constructor(
 
                 stopRecoveryTotpGeneration()
             } else {
+                state = state.copy(rejectRecoveryResource = Resource.Loading())
                 val response = guardianRepository.rejectRecovery(participantId)
+                state = state.copy(rejectRecoveryResource = response, ownerEnteredWrongCode = true)
                 if (response is Resource.Success) {
                     determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
                 }
-                state = state.copy(rejectRecoveryResource = response)
             }
         }
     }
@@ -274,7 +283,7 @@ class ApproverAccessViewModel @Inject constructor(
 
         when (state.approverAccessUIState) {
             ApproverAccessUIState.AccessRequested,
-            ApproverAccessUIState.InvalidParticipantId,
+            ApproverAccessUIState.UserNeedsPasteRecoveryLink,
             ApproverAccessUIState.VerifyingToTPFromOwner,
             ApproverAccessUIState.WaitingForToTPFromOwner -> cancelRecovery()
 
@@ -311,7 +320,10 @@ class ApproverAccessViewModel @Inject constructor(
         privateKey: Base58EncodedPrivateKey,
         cloudStorageAction: CloudStorageActions
     ) {
-        state = state.copy(cloudStorageAction = CloudStorageActionData())
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            loadKeyFromCloudResource = Resource.Uninitialized
+        )
 
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {
@@ -343,7 +355,10 @@ class ApproverAccessViewModel @Inject constructor(
         exception: Exception?,
         cloudStorageAction: CloudStorageActions
     ) {
-        state = state.copy(cloudStorageAction = CloudStorageActionData())
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            loadKeyFromCloudResource = Resource.Uninitialized
+        )
 
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {
@@ -357,6 +372,23 @@ class ApproverAccessViewModel @Inject constructor(
         state = state.copy(approveRecoveryResource = Resource.Error(
             exception = exception
         ))
+    }
+
+    fun userPastedRecovery(clipboardContent: String?) {
+        val participantId = clipboardContent?.getInviteCodeFromDeeplink()
+
+        if (!participantId.isNullOrEmpty()) {
+            guardianRepository.saveParticipantId(participantId)
+            assignParticipantId(participantId)
+            state = state.copy(
+                onboardingMessage = Resource.Success(RecoveryMessage.LinkPastedSuccessfully)
+            )
+            retrieveApproverState(false)
+        } else {
+            state = state.copy(
+                onboardingMessage = Resource.Success(RecoveryMessage.FailedPasteLink)
+            )
+        }
     }
 
     //endregion

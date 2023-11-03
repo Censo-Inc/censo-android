@@ -18,7 +18,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -38,12 +37,16 @@ import co.censo.guardian.R
 import co.censo.guardian.data.ApproverAccessUIState
 import co.censo.guardian.presentation.GuardianColors
 import co.censo.guardian.presentation.components.ApproverTopBar
+import co.censo.guardian.presentation.components.LockedApproverScreen
 import co.censo.guardian.presentation.components.OwnerCodeVerification
+import co.censo.guardian.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import kotlinx.coroutines.delay
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.GetLiveWithUserUI
+import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,11 +73,163 @@ fun ApproverAccessScreen(
         }
     }
 
-    when {
+    Scaffold(
+        topBar = {
+            if (!state.loading && !state.asyncError) {
+                ApproverTopBar(
+                    uiState = state.approverAccessUIState,
+                    onClose = viewModel::showCloseConfirmationDialog
+                )
+            }
+        },
+        content = { contentPadding ->
+            when {
+                state.loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .align(Alignment.Center),
+                            strokeWidth = 8.dp,
+                            color = Color.Black
+                        )
+                    }
+                }
 
-        state.loading -> {
+                state.asyncError -> {
+                    when {
+                        state.userResponse is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.userResponse.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.retrieveApproverState(false) }
+                        }
+
+                        state.storeRecoveryTotpSecretResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
+                            ) { viewModel.storeRecoveryTotpSecret() }
+                        }
+
+                        state.approveRecoveryResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.approveRecoveryResource.getErrorMessage(context),
+                                dismissAction = { viewModel.resetApproveRecoveryResource() },
+                            ) {
+                                viewModel.resetApproveRecoveryResource()
+                                viewModel.retrieveApproverState(false)
+                            }
+                        }
+
+                        state.rejectRecoveryResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
+                                dismissAction = { viewModel.resetRejectRecoveryResource() },
+                            ) {
+                                viewModel.resetRejectRecoveryResource()
+                                viewModel.retrieveApproverState(false)
+                            }
+                        }
+
+                        else -> {
+                            DisplayError(
+                                errorMessage = stringResource(R.string.something_went_wrong),
+                                dismissAction = null,
+                            ) { viewModel.retrieveApproverState(false) }
+                        }
+                    }
+                }
+
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.weight(0.3f))
+
+                        when (state.approverAccessUIState) {
+                            ApproverAccessUIState.UserNeedsPasteRecoveryLink,
+                            ApproverAccessUIState.AccessApproved,
+                            ApproverAccessUIState.Complete -> {
+                                LockedApproverScreen {
+                                    viewModel.userPastedRecovery(
+                                        ClipboardHelper.getClipboardContent(context)
+                                    )
+                                }
+                            }
+
+                            ApproverAccessUIState.AccessRequested -> {
+                                GetLiveWithUserUI(
+                                    title = stringResource(R.string.access_requested_title),
+                                    message = stringResource(R.string.access_requested_message),
+                                    onContinueLive = viewModel::storeRecoveryTotpSecret,
+                                    onResumeLater = {},
+                                    showSecondButton = false
+                                )
+                            }
+
+                            ApproverAccessUIState.VerifyingToTPFromOwner,
+                            ApproverAccessUIState.WaitingForToTPFromOwner -> {
+                                OwnerCodeVerification(
+                                    totpCode = state.recoveryTotp?.code,
+                                    secondsLeft = state.recoveryTotp?.currentSecond,
+                                    errorEnabled = state.ownerEnteredWrongCode
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(0.7f))
+                    }
+                }
+            }
+        }
+    )
+
+    if (state.showTopBarCancelConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = viewModel::hideCloseConfirmationDialog,
+            text = {
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = stringResource(R.string.do_you_really_want_to_cancel),
+                    color = GuardianColors.PrimaryColor,
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = viewModel::onTopBarCloseConfirmed
+                ) {
+                    Text(stringResource(R.string.yes))
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = viewModel::hideCloseConfirmationDialog
+                ) {
+                    Text(stringResource(R.string.no))
+                }
+            }
+        )
+    }
+
+    if (state.cloudStorageAction.triggerAction) {
+
+        if (state.loadKeyFromCloudResource is Resource.Loading) {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -86,305 +241,22 @@ fun ApproverAccessScreen(
             }
         }
 
-        state.asyncError -> {
-            when {
-                state.userResponse is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.userResponse.getErrorMessage(context),
-                        dismissAction = null,
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-
-                state.storeRecoveryTotpSecretResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
-                    ) { viewModel.storeRecoveryTotpSecret() }
-                }
-
-                state.approveRecoveryResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.approveRecoveryResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetApproveRecoveryResource() },
-                    ) {
-                        viewModel.resetApproveRecoveryResource()
-                        viewModel.retrieveApproverState(false)
-                    }
-                }
-
-                state.rejectRecoveryResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetRejectRecoveryResource() },
-                    ) {
-                        viewModel.resetRejectRecoveryResource()
-                        viewModel.retrieveApproverState(false)
-                    }
-                }
-
-                else -> {
-                    DisplayError(
-                        errorMessage = stringResource(R.string.something_went_wrong),
-                        dismissAction = null,
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-            }
-        }
-
-        else -> {
-
-            if (state.showTopBarCancelConfirmationDialog) {
-                AlertDialog(
-                    onDismissRequest = viewModel::hideCloseConfirmationDialog,
-                    text = {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.do_you_really_want_to_cancel),
-                            color = GuardianColors.PrimaryColor,
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = viewModel::onTopBarCloseConfirmed
-                        ) {
-                            Text(stringResource(R.string.yes))
-                        }
-                    },
-                    dismissButton = {
-                        Button(
-                            onClick = viewModel::hideCloseConfirmationDialog
-                        ) {
-                            Text(stringResource(R.string.no))
-                        }
-                    }
+        CloudStorageHandler(
+            actionToPerform = state.cloudStorageAction.action,
+            participantId = ParticipantId(state.participantId),
+            privateKey = null,
+            onActionSuccess = { base58EncodedPrivateKey ->
+                viewModel.handleCloudStorageActionSuccess(
+                    base58EncodedPrivateKey,
+                    state.cloudStorageAction.action
                 )
-            }
-
-            Scaffold(
-                topBar = {
-                    ApproverTopBar(
-                        uiState = state.approverAccessUIState,
-                        onClose = viewModel::showCloseConfirmationDialog
-                    )
-                },
-                content = { contentPadding ->
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Spacer(modifier = Modifier.weight(0.3f))
-
-                        when (state.approverAccessUIState) {
-                            ApproverAccessUIState.Complete -> {
-                                Onboarded()
-                            }
-                            ApproverAccessUIState.InvalidParticipantId -> {
-                                InvalidParticipantId()
-                            }
-
-                            ApproverAccessUIState.AccessRequested -> {
-                                RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret )
-                            }
-
-                            ApproverAccessUIState.WaitingForToTPFromOwner -> {
-                                //Fixme we should have an error state for owner
-                                OwnerCodeVerification(
-                                    totpCode = state.recoveryTotp?.code,
-                                    secondsLeft = state.recoveryTotp?.currentSecond,
-                                    errorEnabled = false
-                                )
-                            }
-
-                            ApproverAccessUIState.VerifyingToTPFromOwner -> {
-                                VerifyingOwnerCode()
-
-                            }
-
-                            ApproverAccessUIState.AccessApproved -> {
-                                AccessApproved(
-                                    onClose = viewModel::resetApproveRecoveryResource
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.weight(0.7f))
-                    }
-                }
-            )
-
-            if (state.cloudStorageAction.triggerAction) {
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = ParticipantId(state.participantId),
-                    privateKey = null,
-                    onActionSuccess = { base58EncodedPrivateKey ->
-                        projectLog(message = "Cloud Storage action success")
-                        viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.cloudStorageAction.action)
-                    },
-                    onActionFailed = { exception ->
-                        projectLog(message = "Cloud Storage action failed")
-                        viewModel.handleCloudStorageActionFailure(
-                            exception,
-                            state.cloudStorageAction.action
-                        )
-                    },
+            },
+            onActionFailed = { exception ->
+                viewModel.handleCloudStorageActionFailure(
+                    exception,
+                    state.cloudStorageAction.action
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun VerifyingOwnerCode() {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.verifying_code),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp
-    )
-}
-
-@Composable
-fun InvalidParticipantId() {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp
-    )
-}
-
-@Composable
-private fun AccessApproved(
-    onClose: () -> Unit
-) {
-    LaunchedEffect(Unit) {
-        delay(5000)
-        onClose()
-    }
-
-    Text(
-        modifier = Modifier.padding(16.dp),
-        text = stringResource(R.string.access_approved),
-        color = GuardianColors.PrimaryColor,
-        textAlign = TextAlign.Center,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold
-    )
-}
-
-@Composable
-private fun Onboarded() {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = stringResource(R.string.you_are_fully_set),
-        color = GuardianColors.PrimaryColor,
-        textAlign = TextAlign.Center,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(modifier = Modifier.height(30.dp))
-
-    Text(
-        modifier = Modifier.padding(horizontal = 40.dp),
-        text = stringResource(R.string.when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access),
-        color = GuardianColors.PrimaryColor,
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Normal
-    )
-}
-
-@Composable
-fun InvitesOnly() {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp
-    )
-}
-
-@Composable
-fun InviteReady(
-    onAccept: () -> Unit,
-    onCancel: () -> Unit,
-    enabled: Boolean
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.you_have_been_invited_to_become_an_approver),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Medium
-    )
-
-    Spacer(modifier = Modifier.height(48.dp))
-
-    StandardButton(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        color = GuardianColors.PrimaryColor,
-        borderColor = Color.White,
-        border = false,
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
-        onClick = onAccept,
-        enabled = enabled
-    )
-    {
-        Text(
-            text = stringResource(R.string.accept_invitation),
-            color = Color.White,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-
-    Spacer(modifier = Modifier.height(24.dp))
-
-    TextButton(onClick = onCancel) {
-        Text(
-            text = stringResource(R.string.close),
-            color = Color.Black
-        )
-    }
-}
-
-@Composable
-private fun RecoveryRequested(
-    onContinue: () -> Unit
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(R.string.seed_phrase_owner_has_requested_access_approval),
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Medium
-    )
-
-    Spacer(modifier = Modifier.height(48.dp))
-
-    StandardButton(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        color = GuardianColors.PrimaryColor,
-        borderColor = Color.White,
-        border = false,
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
-        onClick = onContinue,
-    )
-    {
-        Text(
-            text = "Continue",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
+            },
         )
     }
 }

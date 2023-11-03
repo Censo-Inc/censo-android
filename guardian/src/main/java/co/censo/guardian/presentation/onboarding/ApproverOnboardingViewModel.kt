@@ -17,6 +17,7 @@ import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.getInviteCodeFromDeeplink
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl
@@ -45,7 +46,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             if (state.userResponse !is Resource.Loading
                 && state.savePrivateKeyToCloudResource !is Resource.Loading
                 && state.guardianState?.phase is GuardianPhase.WaitingForVerification) {
-                retrieveApproverState(silently = true)
+                retrieveApproverState(silently = true, checkingVerification = true)
             }
         }
     }
@@ -58,7 +59,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = ApproverOnboardingState()
     }
 
-    fun retrieveApproverState(silently: Boolean) {
+    fun retrieveApproverState(silently: Boolean, checkingVerification: Boolean = false) {
         if (!silently) {
             state = state.copy(userResponse = Resource.Loading())
         }
@@ -71,6 +72,8 @@ class ApproverOnboardingViewModel @Inject constructor(
             if (userResponse is Resource.Success) {
                 val guardianState = userResponse.data!!.guardianStates.firstOrNull()
                 checkApproverHasInvitationCode(guardianState)
+
+                showMessageWhenUserMovesToComplete(guardianState, checkingVerification)
             }
         }
     }
@@ -81,7 +84,9 @@ class ApproverOnboardingViewModel @Inject constructor(
         val inviteCodeNeeded = guardianState == null
 
         if (state.invitationId.value.isEmpty() && inviteCodeNeeded) {
-            state = state.copy(approverUIState = ApproverOnboardingUIState.MissingInviteCode)
+            state = state.copy(
+                approverUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink
+            )
             return
         }
 
@@ -112,7 +117,13 @@ class ApproverOnboardingViewModel @Inject constructor(
             return
         }
 
-        state = when (guardianState?.phase) {
+        //Is null always when a user needs to accept
+        if (guardianState?.phase == null) {
+            acceptGuardianship()
+            return
+        }
+
+        state = when (guardianState.phase) {
             is GuardianPhase.VerificationRejected ->
                 state.copy(approverUIState = ApproverOnboardingUIState.CodeRejected)
 
@@ -122,13 +133,11 @@ class ApproverOnboardingViewModel @Inject constructor(
             is GuardianPhase.WaitingForVerification ->
                 state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
 
-            null -> state.copy(approverUIState = ApproverOnboardingUIState.InviteReady)
-
             else -> state
         }
     }
 
-    fun acceptGuardianship() {
+    private fun acceptGuardianship() {
         state = state.copy(acceptGuardianResource = Resource.Loading())
 
         viewModelScope.launch {
@@ -139,6 +148,9 @@ class ApproverOnboardingViewModel @Inject constructor(
             state = state.copy(acceptGuardianResource = acceptResource)
 
             if (acceptResource is Resource.Success) {
+                state = state.copy(
+                    onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
+                )
                 assignParticipantId(acceptResource.data?.guardianState)
                 createKeyAndTriggerCloudSave()
             }
@@ -195,7 +207,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             val signedVerificationData  = try {
                 guardianRepository.signVerificationCode(
                     verificationCode = state.verificationCode,
-                    state.guardianEncryptionKey!!
+                    encryptionKey = state.guardianEncryptionKey!!
                 )
             } catch (e: Exception) {
                 state = state.copy(
@@ -222,11 +234,12 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrivateKeyFromCloud(
-    ) {
+    private fun loadPrivateKeyFromCloud() {
         state = state.copy(
+            retrievePrivateKeyFromCloudResource = Resource.Loading(),
             cloudStorageAction = CloudStorageActionData(
-                triggerAction = true, action = CloudStorageActions.DOWNLOAD,
+                triggerAction = true,
+                action = CloudStorageActions.DOWNLOAD,
             ),
         )
     }
@@ -260,7 +273,6 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         when (state.approverUIState) {
             // onboarding
-            ApproverOnboardingUIState.InviteReady,
             ApproverOnboardingUIState.NeedsToEnterCode,
             ApproverOnboardingUIState.WaitingForConfirmation,
             ApproverOnboardingUIState.CodeRejected -> {
@@ -269,17 +281,17 @@ class ApproverOnboardingViewModel @Inject constructor(
 
             //No UI for these states
             ApproverOnboardingUIState.Complete,
-            ApproverOnboardingUIState.MissingInviteCode -> {
+            ApproverOnboardingUIState.UserNeedsPasteInvitationLink -> {
             }
         }
     }
 
-    fun cancelOnboarding() {
+    private fun cancelOnboarding() {
         guardianRepository.clearInvitationId()
 
         state = state.copy(
             invitationId = InvitationId(""),
-            approverUIState = ApproverOnboardingUIState.MissingInviteCode
+            approverUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink
         )
     }
 
@@ -338,7 +350,10 @@ class ApproverOnboardingViewModel @Inject constructor(
     private fun keyDownloadSuccess(
         privateEncryptionKey: EncryptionKey,
     ) {
-        state = state.copy(guardianEncryptionKey = privateEncryptionKey)
+        state = state.copy(
+            retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
+            guardianEncryptionKey = privateEncryptionKey
+        )
         submitVerificationCode()
     }
     //endregion
@@ -369,9 +384,43 @@ class ApproverOnboardingViewModel @Inject constructor(
 
     private fun keyDownloadFailure(exception: Exception?) {
         //Set error state for the submitVerificationCode resource
-        state = state.copy(submitVerificationResource = Resource.Error(
-            exception = exception
-        ))
+        state = state.copy(
+            retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
+            submitVerificationResource = Resource.Error(
+                exception = exception
+            )
+        )
+    }
+
+    private fun showMessageWhenUserMovesToComplete(
+        guardianState: GuardianState?, checkingVerification: Boolean
+    ) {
+        if (guardianState?.phase is GuardianPhase.Complete && checkingVerification) {
+            state = state.copy(
+                onboardingMessage = Resource.Success(OnboardingMessage.CodeAccepted)
+            )
+        }
+    }
+
+    fun userPastedInviteCode(clipboardContent: String?) {
+        val inviteCode = clipboardContent?.getInviteCodeFromDeeplink()
+
+        if (!inviteCode.isNullOrEmpty()) {
+            guardianRepository.saveInvitationId(inviteCode)
+            loadInvitationId()
+            state = state.copy(
+                onboardingMessage = Resource.Success(OnboardingMessage.LinkPastedSuccessfully)
+            )
+            acceptGuardianship()
+        } else {
+            state = state.copy(
+                onboardingMessage = Resource.Success(OnboardingMessage.FailedPasteLink)
+            )
+        }
+    }
+
+    fun resetMessage() {
+        state = state.copy(onboardingMessage = Resource.Uninitialized)
     }
     //endregion
 

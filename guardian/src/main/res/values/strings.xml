@@ -57,8 +57,6 @@
     <string name="tell_seed_phrase_owner_this_digit_code_to_approve_their_access">Tell seed phrase owner this %1$s-digit code to approve their access</string>
     <string name="link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner">Link you have opened does not appear to be correct. Please contact seed phrase owner</string>
     <string name="access_approved">Access approved!</string>
-    <string name="you_are_fully_set">You are fully set!</string>
-    <string name="when_needed_the_seed_phrase_owner_will_get_in_touch_with_you_to_approve_their_access">When needed, the seed phrase owner will get in touch with you to approve their access</string>
     <string name="this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner">This application can only be used by invitation. Please click the invite link you received from the seed phrase owner.</string>
     <string name="you_have_been_invited_to_become_an_approver">You have been invited to become an approver!</string>
     <string name="accept_invitation">Accept Invitation</string>
@@ -75,4 +73,14 @@
     <string name="enter_the_code">Enter the code</string>
     <string name="the_owner_must_enter_this_6_digit_code">The owner must enter this 6-digit code</string>
     <string name="share_the_code">Share the code</string>
+    <string name="code_entered">Code Entered</string>
+    <string name="waiting_on_owner_to_approve_code">Waiting on owner to approve code...</string>
+    <string name="incorrect_code_entered_please_try_again">Incorrect code entered. Please try again.</string>
+    <string name="enter_the_6_digit_code_from_the_seed_phrase_owner">Enter the 6-digit code from the seed phrase owner.</string>
+    <string name="failed_to_get_invite_clipboard">Failed to get invite from clipboard. Please try again.</string>
+    <string name="found_invite_clipboard">Found invite from clipboard!</string>
+    <string name="accepted_as_an_approver">Accepted as an approver. Let\'s get you verified.</string>
+    <string name="owner_accepted_code">Owner has accepted your code!</string>
+    <string name="access_requested_message">For maximum security, it\'s best to be face-to-face with the phrase owner in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
+    <string name="access_requested_title">Get live with the owner</string>
 </resources>
