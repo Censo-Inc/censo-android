@@ -70,32 +70,21 @@ android {
             buildConfigField("String", "URL_SCHEME", "\"censo\"")
         }
         create("staging") {
-            resValue("string", "app_name", "Staging Vault")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "URL_SCHEME", "\"censo-staging\"")
         }
-        create("aintegration") {
-            resValue("string", "app_name", "A Integration Vault")
+        create("integration") {
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "URL_SCHEME", "\"censo-integration\"")
         }
-        create("bintegration") {
-            initWith(getByName("aintegration"))
-        }
-        create("cintegration") {
-            initWith(getByName("aintegration"))
-        }
-        create("dintegration") {
-            initWith(getByName("aintegration"))
-        }
         debug {
-            initWith(getByName("aintegration"))
+            initWith(getByName("integration"))
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
         }
