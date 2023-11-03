@@ -8,7 +8,7 @@ sealed interface ApproverUIState
 @Serializable
 sealed class ApproverOnboardingUIState : ApproverUIState {
     @Serializable
-    object UserNeedsPasteLink : ApproverOnboardingUIState()
+    object UserNeedsPasteInvitationLink : ApproverOnboardingUIState()
 
     @Serializable
     object NeedsToEnterCode : ApproverOnboardingUIState()
@@ -27,7 +27,7 @@ sealed class ApproverOnboardingUIState : ApproverUIState {
 sealed class ApproverAccessUIState : ApproverUIState {
 
     @Serializable
-    object InvalidParticipantId : ApproverAccessUIState()
+    object UserNeedsPasteRecoveryLink : ApproverAccessUIState()
 
     @Serializable
     object AccessRequested : ApproverAccessUIState()

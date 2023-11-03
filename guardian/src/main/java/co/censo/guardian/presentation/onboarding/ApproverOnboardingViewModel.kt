@@ -85,7 +85,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         if (state.invitationId.value.isEmpty() && inviteCodeNeeded) {
             state = state.copy(
-                approverUIState = ApproverOnboardingUIState.UserNeedsPasteLink
+                approverUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink
             )
             return
         }
@@ -281,7 +281,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
             //No UI for these states
             ApproverOnboardingUIState.Complete,
-            ApproverOnboardingUIState.UserNeedsPasteLink -> {
+            ApproverOnboardingUIState.UserNeedsPasteInvitationLink -> {
             }
         }
     }
@@ -291,7 +291,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         state = state.copy(
             invitationId = InvitationId(""),
-            approverUIState = ApproverOnboardingUIState.UserNeedsPasteLink
+            approverUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink
         )
     }
 

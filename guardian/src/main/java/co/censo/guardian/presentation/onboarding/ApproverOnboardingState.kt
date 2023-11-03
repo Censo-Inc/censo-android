@@ -26,7 +26,7 @@ data class ApproverOnboardingState(
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
 
     // UI state
-    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.UserNeedsPasteLink,
+    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink,
     val showTopBarCancelConfirmationDialog: Boolean = false,
     val navToApproverAccess: Boolean = false,
 

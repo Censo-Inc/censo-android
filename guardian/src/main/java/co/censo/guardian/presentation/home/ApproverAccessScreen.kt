@@ -2,6 +2,7 @@ package co.censo.guardian.presentation.home
 
 import ParticipantId
 import StandardButton
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -152,35 +153,22 @@ fun ApproverAccessScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverAccessUIState) {
-                            ApproverAccessUIState.Complete -> {
+                            ApproverAccessUIState.UserNeedsPasteRecoveryLink,
+                            ApproverAccessUIState.Complete,
+                            ApproverAccessUIState.AccessApproved -> {
                                 PasteLinkHomeScreen(null)
-                            }
-
-                            ApproverAccessUIState.InvalidParticipantId -> {
-                                InvalidParticipantId()
                             }
 
                             ApproverAccessUIState.AccessRequested -> {
                                 RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret)
                             }
 
+                            ApproverAccessUIState.VerifyingToTPFromOwner,
                             ApproverAccessUIState.WaitingForToTPFromOwner -> {
-                                //Fixme we should have an error state for owner
                                 OwnerCodeVerification(
                                     totpCode = state.recoveryTotp?.code,
                                     secondsLeft = state.recoveryTotp?.currentSecond,
                                     errorEnabled = false
-                                )
-                            }
-
-                            ApproverAccessUIState.VerifyingToTPFromOwner -> {
-                                VerifyingOwnerCode()
-
-                            }
-
-                            ApproverAccessUIState.AccessApproved -> {
-                                AccessApproved(
-                                    onClose = viewModel::resetApproveRecoveryResource
                                 )
                             }
                         }

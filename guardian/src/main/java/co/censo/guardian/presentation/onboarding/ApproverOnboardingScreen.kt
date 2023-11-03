@@ -203,7 +203,7 @@ fun ApproverOnboardingScreen(
                                 )
                             }
 
-                            ApproverOnboardingUIState.UserNeedsPasteLink -> {
+                            ApproverOnboardingUIState.UserNeedsPasteInvitationLink -> {
                                 PasteLinkHomeScreen {
                                     viewModel.userPastedInviteCode(
                                         ClipboardHelper.getClipboardContent(context)

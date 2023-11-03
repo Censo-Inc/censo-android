@@ -3,6 +3,7 @@ package co.censo.guardian.presentation.home
 import Base64EncodedData
 import InvitationId
 import co.censo.guardian.data.ApproverAccessUIState
+import co.censo.guardian.presentation.onboarding.OnboardingMessage
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.key.EncryptionKey
@@ -36,13 +37,16 @@ data class ApproverAccessState(
     val rejectRecoveryResource: Resource<RejectRecoveryApiResponse> = Resource.Uninitialized,
 
     // UI state
-    val approverAccessUIState: ApproverAccessUIState = ApproverAccessUIState.InvalidParticipantId,
+    val approverAccessUIState: ApproverAccessUIState = ApproverAccessUIState.UserNeedsPasteRecoveryLink,
     val showTopBarCancelConfirmationDialog: Boolean = false,
 
     //Cloud Storage
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null
+    val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null,
+
+    //Success/Error Message
+    val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,
 ) {
 
     val loading = userResponse is Resource.Loading

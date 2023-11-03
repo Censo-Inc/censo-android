@@ -91,7 +91,7 @@ class ApproverAccessViewModel @Inject constructor(
         when (val guardianState = guardianStates.forParticipant(participantId = participantId)) {
             null -> {
                 guardianRepository.clearParticipantId()
-                state = state.copy(approverAccessUIState = ApproverAccessUIState.InvalidParticipantId)
+                state = state.copy(approverAccessUIState = ApproverAccessUIState.UserNeedsPasteRecoveryLink)
             }
             else -> {
                 assignGuardianStateAndParticipantId(
@@ -275,7 +275,7 @@ class ApproverAccessViewModel @Inject constructor(
 
         when (state.approverAccessUIState) {
             ApproverAccessUIState.AccessRequested,
-            ApproverAccessUIState.InvalidParticipantId,
+            ApproverAccessUIState.UserNeedsPasteRecoveryLink,
             ApproverAccessUIState.VerifyingToTPFromOwner,
             ApproverAccessUIState.WaitingForToTPFromOwner -> cancelRecovery()
 
