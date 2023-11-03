@@ -46,7 +46,7 @@ class LockScreenViewModel @Inject constructor(
             }
         }
 
-        timer.startCountDownTimer(countdownInterval = 1.seconds.inWholeMilliseconds) {
+        timer.start(interval = 1.seconds.inWholeMilliseconds) {
             val lockStatus = state.lockStatus
             if (lockStatus is LockScreenState.LockStatus.Unlocked) {
                 val now = Clock.System.now()
@@ -62,7 +62,7 @@ class LockScreenViewModel @Inject constructor(
     }
 
     fun onStop() {
-        timer.stopCountDownTimer()
+        timer.stop()
     }
 
     private fun retrieveOwnerState() {

@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
@@ -25,6 +24,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.vault.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
@@ -40,8 +40,8 @@ class PlanSetupViewModel @Inject constructor(
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
-    private val pollingVerificationTimer: VaultCountDownTimer
-) : ViewModel() {
+    private val pollingVerificationTimer: VaultCountDownTimer,
+    ) : ViewModel() {
 
     var state by mutableStateOf(PlanSetupState())
         private set
@@ -55,22 +55,30 @@ class PlanSetupViewModel @Inject constructor(
             state = state.copy(planSetupUIState = planSetupUIState)
         }
 
-        retrieveOwnerState(overwriteUIState = true)
+        viewModelScope.launch {
+            val ownerState = ownerStateFlow.value
+            if (ownerState is Resource.Success) {
+                updateOwnerState(ownerState.data!!, overwriteUIState = true)
+            }
 
-        verificationCodeTimer.startCountDownTimer(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
-            nextTotpTimerTick()
+            pollingVerificationTimer.startWithDelay(
+                initialDelay = CountDownTimerImpl.Companion.INITIAL_DELAY,
+                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
+            ) {
+                if (state.userResponse !is Resource.Loading) {
+                    retrieveOwnerState(silent = true)
+                }
+            }
         }
 
-        pollingVerificationTimer.startCountDownTimer(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
-            if (state.userResponse !is Resource.Loading) {
-                retrieveOwnerState(silent = true)
-            }
+        verificationCodeTimer.start(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
+            nextTotpTimerTick()
         }
     }
 
     fun onStop() {
-        verificationCodeTimer.stopCountDownTimer()
-        pollingVerificationTimer.stopCountDownTimer()
+        verificationCodeTimer.stop()
+        pollingVerificationTimer.stop()
     }
 
 
@@ -109,7 +117,7 @@ class PlanSetupViewModel @Inject constructor(
             PlanSetupUIState.AddAlternateApprover,
             PlanSetupUIState.RecoveryInProgress,
             PlanSetupUIState.Completed -> {
-                state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+                state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
             }
         }
     }
@@ -174,7 +182,7 @@ class PlanSetupViewModel @Inject constructor(
 
         // restore UI state on view restart (`overwriteUIState` flag)
         // normally navigation is controlled by pressing "continue" button
-        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.InviteApprovers) {
+        if (overwriteUIState && state.planSetupUIState in listOf(PlanSetupUIState.InviteApprovers, PlanSetupUIState.ApproverNickname)) {
             if (externalApprovers.notConfirmed().isNotEmpty()) {
                 state = state.copy(
                     editedNickname = when (state.approverType) {
@@ -187,8 +195,6 @@ class PlanSetupViewModel @Inject constructor(
                 initiateRecovery()
             } else if (primaryApprover?.status is GuardianStatus.Confirmed) {
                 state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
-            } else {
-                state = state.copy(planSetupUIState = PlanSetupUIState.InviteApprovers)
             }
         }
 
@@ -477,7 +483,7 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onFullyCompleted() {
-        state = state.copy(navigationResource = Resource.Success(SharedScreen.OwnerVaultScreen.route))
+        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
 
     fun reset() {

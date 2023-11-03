@@ -5,10 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.BuildConfig
 import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
@@ -237,39 +235,14 @@ class EntranceViewModel @Inject constructor(
     }
 
     fun retrieveOwnerState() {
-        state = state.copy(ownerStateResource = Resource.Loading())
-        viewModelScope.launch {
-            val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
-
-            if (ownerStateResource is Resource.Success) {
-                val ownerState = ownerStateResource.data
-
-                val destination =
-                    if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
-                        SharedScreen.OwnerVaultScreen.route
-                    } else {
-                        SharedScreen.OwnerWelcomeScreen.route
-                    }
-
-
-                state = state.copy(
-                    userFinishedSetup = Resource.Success(destination),
-                    ownerStateResource = ownerStateResource,
-                    showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
-                )
-            } else {
-                state = state.copy(ownerStateResource = ownerStateResource)
-            }
-        }
-    }
-
-    fun resetOwnerState() {
-        state = state.copy(ownerStateResource = Resource.Uninitialized)
+        state = state.copy(
+            userFinishedSetup = Resource.Success(SharedScreen.OwnerRoutingScreen.route),
+            showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
+        )
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
-        state =
-            state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
+        state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
     fun retrySignIn() {

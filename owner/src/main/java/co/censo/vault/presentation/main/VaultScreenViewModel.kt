@@ -90,7 +90,6 @@ class VaultScreenViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 onOwnerState(OwnerState.Initial)
-                ownerStateFlow.tryEmit(Resource.Success(OwnerState.Initial))
             }
         }
     }
@@ -107,6 +106,8 @@ class VaultScreenViewModel @Inject constructor(
                 state.copy(kickUserOut = Resource.Success(Unit))
             }
         }
+
+        ownerStateFlow.tryEmit(Resource.Success(ownerState))
     }
 
     fun resetDeleteUserResource() {

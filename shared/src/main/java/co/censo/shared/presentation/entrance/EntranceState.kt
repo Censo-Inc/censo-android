@@ -8,7 +8,6 @@ data class EntranceState(
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<ResponseBody> = Resource.Loading(),
     val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
-    val ownerStateResource: Resource<OwnerState> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
     val ownerApp: Boolean = false,
     val authId: String = "",
@@ -16,12 +15,8 @@ data class EntranceState(
     val acceptedTermsOfUseVersion: String? = null,
     val showAcceptTermsOfUse: Boolean = false
 ) {
-    val isLoading = signInUserResource is Resource.Loading || ownerStateResource is Resource.Loading
-
-    val apiCallErrorOccurred =
-        signInUserResource is Resource.Error ||
-                triggerGoogleSignIn is Resource.Error ||
-                ownerStateResource is Resource.Error
+    val isLoading = signInUserResource is Resource.Loading
+    val apiCallErrorOccurred =  signInUserResource is Resource.Error || triggerGoogleSignIn is Resource.Error
 }
 
 data class ForceUserToGrantCloudStorageAccess(

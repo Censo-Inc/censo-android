@@ -150,7 +150,6 @@ fun EntranceScreen(
                     navController.navigate(it)
                 }
                 viewModel.resetUserFinishedSetup()
-                viewModel.resetOwnerState()
             }
         }
 
@@ -201,13 +200,7 @@ fun EntranceScreen(
             }
 
             state.apiCallErrorOccurred -> {
-                if (state.ownerStateResource is Resource.Error) {
-                    DisplayError(
-                        errorMessage = state.ownerStateResource.getErrorMessage(context),
-                        dismissAction = viewModel::retrieveOwnerState,
-                        retryAction = viewModel::retrieveOwnerState
-                    )
-                } else if (state.signInUserResource is Resource.Error) {
+                if (state.signInUserResource is Resource.Error) {
                     DisplayError(
                         errorMessage = state.signInUserResource.getErrorMessage(context),
                         dismissAction = viewModel::resetSignInUserResource,

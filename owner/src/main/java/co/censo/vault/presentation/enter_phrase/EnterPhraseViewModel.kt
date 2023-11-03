@@ -7,16 +7,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import co.censo.shared.util.BIP39
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EnterPhraseViewModel @Inject constructor(
-    private val ownerRepository: OwnerRepository
+    private val ownerRepository: OwnerRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(EnterPhraseState())
@@ -163,6 +166,10 @@ class EnterPhraseViewModel @Inject constructor(
                 submitResource = response.map { },
                 phraseEntryComplete = Resource.Success(Unit)
             )
+
+            if (response is Resource.Success) {
+                ownerStateFlow.tryEmit(response.map { it.ownerState })
+            }
         }
         projectLog(message = "Save this seed phrase and send user back to start...")
     }
