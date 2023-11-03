@@ -168,7 +168,7 @@ fun ApproverAccessScreen(
                                 OwnerCodeVerification(
                                     totpCode = state.recoveryTotp?.code,
                                     secondsLeft = state.recoveryTotp?.currentSecond,
-                                    errorEnabled = false
+                                    errorEnabled = state.ownerEnteredWrongCode
                                 )
                             }
                         }

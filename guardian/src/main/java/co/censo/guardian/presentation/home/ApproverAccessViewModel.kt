@@ -157,8 +157,10 @@ class ApproverAccessViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             if (totpIsCorrect) {
+                state = state.copy(approveRecoveryResource = Resource.Loading())
+
                 if (state.guardianEncryptionKey == null) {
-                    //Set to state so we can retry this method with the same parameters after the key is loaded
+                    state = state.copy(approveRecoveryResource = Resource.Uninitialized)
                     loadPrivateKeyFromCloud(recoveryPhase = recoveryConfirmation)
                     return@launch
                 }
@@ -171,7 +173,7 @@ class ApproverAccessViewModel @Inject constructor(
                     ).base64Encoded()
                 )
 
-                state = state.copy(approveRecoveryResource = response)
+                state = state.copy(approveRecoveryResource = response, ownerEnteredWrongCode = false)
 
                 if (response is Resource.Success) {
                     guardianRepository.clearParticipantId()
@@ -180,11 +182,12 @@ class ApproverAccessViewModel @Inject constructor(
 
                 stopRecoveryTotpGeneration()
             } else {
+                state = state.copy(rejectRecoveryResource = Resource.Loading())
                 val response = guardianRepository.rejectRecovery(participantId)
                 if (response is Resource.Success) {
                     determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
                 }
-                state = state.copy(rejectRecoveryResource = response)
+                state = state.copy(rejectRecoveryResource = response, ownerEnteredWrongCode = true)
             }
         }
     }

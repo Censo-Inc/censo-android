@@ -28,13 +28,16 @@ data class ApproverAccessState(
     // deep links data
     val participantId: String = "",
 
-    // recovery
+    // Approver data
     val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
     val guardianEncryptionKey: EncryptionKey? = null,
+
+    // recovery
     val recoveryTotp: RecoveryTotpState? = null,
     val storeRecoveryTotpSecretResource: Resource<StoreRecoveryTotpSecretApiResponse> = Resource.Uninitialized,
     val approveRecoveryResource: Resource<ApproveRecoveryApiResponse> = Resource.Uninitialized,
     val rejectRecoveryResource: Resource<RejectRecoveryApiResponse> = Resource.Uninitialized,
+    val ownerEnteredWrongCode: Boolean = false,
 
     // UI state
     val approverAccessUIState: ApproverAccessUIState = ApproverAccessUIState.UserNeedsPasteRecoveryLink,
