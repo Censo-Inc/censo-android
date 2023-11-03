@@ -70,108 +70,79 @@ fun ApproverAccessScreen(
         }
     }
 
-    when {
-
-        state.loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center),
-                    strokeWidth = 8.dp,
-                    color = Color.Black
+    Scaffold(
+        topBar = {
+            if (!state.loading && !state.asyncError) {
+                ApproverTopBar(
+                    uiState = state.approverAccessUIState,
+                    onClose = viewModel::showCloseConfirmationDialog
                 )
             }
-        }
-
-        state.asyncError -> {
+        },
+        content = { contentPadding ->
             when {
-                state.userResponse is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.userResponse.getErrorMessage(context),
-                        dismissAction = null,
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-
-                state.storeRecoveryTotpSecretResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
-                    ) { viewModel.storeRecoveryTotpSecret() }
-                }
-
-                state.approveRecoveryResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.approveRecoveryResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetApproveRecoveryResource() },
+                state.loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        viewModel.resetApproveRecoveryResource()
-                        viewModel.retrieveApproverState(false)
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .align(Alignment.Center),
+                            strokeWidth = 8.dp,
+                            color = Color.Black
+                        )
                     }
                 }
 
-                state.rejectRecoveryResource is Resource.Error -> {
-                    DisplayError(
-                        errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
-                        dismissAction = { viewModel.resetRejectRecoveryResource() },
-                    ) {
-                        viewModel.resetRejectRecoveryResource()
-                        viewModel.retrieveApproverState(false)
+                state.asyncError -> {
+                    when {
+                        state.userResponse is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.userResponse.getErrorMessage(context),
+                                dismissAction = null,
+                            ) { viewModel.retrieveApproverState(false) }
+                        }
+
+                        state.storeRecoveryTotpSecretResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
+                            ) { viewModel.storeRecoveryTotpSecret() }
+                        }
+
+                        state.approveRecoveryResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.approveRecoveryResource.getErrorMessage(context),
+                                dismissAction = { viewModel.resetApproveRecoveryResource() },
+                            ) {
+                                viewModel.resetApproveRecoveryResource()
+                                viewModel.retrieveApproverState(false)
+                            }
+                        }
+
+                        state.rejectRecoveryResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
+                                dismissAction = { viewModel.resetRejectRecoveryResource() },
+                            ) {
+                                viewModel.resetRejectRecoveryResource()
+                                viewModel.retrieveApproverState(false)
+                            }
+                        }
+
+                        else -> {
+                            DisplayError(
+                                errorMessage = stringResource(R.string.something_went_wrong),
+                                dismissAction = null,
+                            ) { viewModel.retrieveApproverState(false) }
+                        }
                     }
                 }
 
                 else -> {
-                    DisplayError(
-                        errorMessage = stringResource(R.string.something_went_wrong),
-                        dismissAction = null,
-                    ) { viewModel.retrieveApproverState(false) }
-                }
-            }
-        }
-
-        else -> {
-
-            if (state.showTopBarCancelConfirmationDialog) {
-                AlertDialog(
-                    onDismissRequest = viewModel::hideCloseConfirmationDialog,
-                    text = {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.do_you_really_want_to_cancel),
-                            color = GuardianColors.PrimaryColor,
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = viewModel::onTopBarCloseConfirmed
-                        ) {
-                            Text(stringResource(R.string.yes))
-                        }
-                    },
-                    dismissButton = {
-                        Button(
-                            onClick = viewModel::hideCloseConfirmationDialog
-                        ) {
-                            Text(stringResource(R.string.no))
-                        }
-                    }
-                )
-            }
-
-            Scaffold(
-                topBar = {
-                    ApproverTopBar(
-                        uiState = state.approverAccessUIState,
-                        onClose = viewModel::showCloseConfirmationDialog
-                    )
-                },
-                content = { contentPadding ->
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -185,12 +156,13 @@ fun ApproverAccessScreen(
                             ApproverAccessUIState.Complete -> {
                                 Onboarded()
                             }
+
                             ApproverAccessUIState.InvalidParticipantId -> {
                                 InvalidParticipantId()
                             }
 
                             ApproverAccessUIState.AccessRequested -> {
-                                RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret )
+                                RecoveryRequested(onContinue = viewModel::storeRecoveryTotpSecret)
                             }
 
                             ApproverAccessUIState.WaitingForToTPFromOwner -> {
@@ -217,27 +189,75 @@ fun ApproverAccessScreen(
                         Spacer(modifier = Modifier.weight(0.7f))
                     }
                 }
-            )
+            }
+        }
+    )
 
-            if (state.cloudStorageAction.triggerAction) {
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = ParticipantId(state.participantId),
-                    privateKey = null,
-                    onActionSuccess = { base58EncodedPrivateKey ->
-                        projectLog(message = "Cloud Storage action success")
-                        viewModel.handleCloudStorageActionSuccess(base58EncodedPrivateKey, state.cloudStorageAction.action)
-                    },
-                    onActionFailed = { exception ->
-                        projectLog(message = "Cloud Storage action failed")
-                        viewModel.handleCloudStorageActionFailure(
-                            exception,
-                            state.cloudStorageAction.action
-                        )
-                    },
+    if (state.showTopBarCancelConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = viewModel::hideCloseConfirmationDialog,
+            text = {
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = stringResource(R.string.do_you_really_want_to_cancel),
+                    color = GuardianColors.PrimaryColor,
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = viewModel::onTopBarCloseConfirmed
+                ) {
+                    Text(stringResource(R.string.yes))
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = viewModel::hideCloseConfirmationDialog
+                ) {
+                    Text(stringResource(R.string.no))
+                }
+            }
+        )
+    }
+
+    if (state.cloudStorageAction.triggerAction) {
+
+        if (state.loadKeyFromCloudResource is Resource.Loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .align(Alignment.Center),
+                    strokeWidth = 8.dp,
+                    color = Color.Black
                 )
             }
         }
+
+        CloudStorageHandler(
+            actionToPerform = state.cloudStorageAction.action,
+            participantId = ParticipantId(state.participantId),
+            privateKey = null,
+            onActionSuccess = { base58EncodedPrivateKey ->
+                viewModel.handleCloudStorageActionSuccess(
+                    base58EncodedPrivateKey,
+                    state.cloudStorageAction.action
+                )
+            },
+            onActionFailed = { exception ->
+                viewModel.handleCloudStorageActionFailure(
+                    exception,
+                    state.cloudStorageAction.action
+                )
+            },
+        )
     }
 }
 

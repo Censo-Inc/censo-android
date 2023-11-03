@@ -41,6 +41,7 @@ data class ApproverAccessState(
 
     //Cloud Storage
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
+    val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null
 ) {
 

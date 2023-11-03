@@ -130,12 +130,13 @@ class ApproverAccessViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrivateKeyFromCloud(recoveryPhase: GuardianPhase.RecoveryConfirmation? = null) {
+    private fun loadPrivateKeyFromCloud(recoveryPhase: GuardianPhase.RecoveryConfirmation) {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true, action = CloudStorageActions.DOWNLOAD
             ),
-            recoveryConfirmationPhase = recoveryPhase
+            recoveryConfirmationPhase = recoveryPhase,
+            loadKeyFromCloudResource = Resource.Loading()
         )
     }
 
@@ -311,7 +312,10 @@ class ApproverAccessViewModel @Inject constructor(
         privateKey: Base58EncodedPrivateKey,
         cloudStorageAction: CloudStorageActions
     ) {
-        state = state.copy(cloudStorageAction = CloudStorageActionData())
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            loadKeyFromCloudResource = Resource.Uninitialized
+        )
 
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {
@@ -343,7 +347,10 @@ class ApproverAccessViewModel @Inject constructor(
         exception: Exception?,
         cloudStorageAction: CloudStorageActions
     ) {
-        state = state.copy(cloudStorageAction = CloudStorageActionData())
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            loadKeyFromCloudResource = Resource.Uninitialized
+        )
 
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {
