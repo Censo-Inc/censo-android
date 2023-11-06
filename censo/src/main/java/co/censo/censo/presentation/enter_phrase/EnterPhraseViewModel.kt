@@ -11,6 +11,8 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import co.censo.shared.util.BIP39
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -48,15 +50,11 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun wordSubmitted() {
-        projectLog(message = "Inserting ${state.editedWord} in ${state.editedWordIndex}")
-
         val phrase = state.enteredWords.toMutableList()
 
         if (state.editedWordIndex >= state.enteredWords.size) {
-            projectLog(message = "Adding word to the end of the list...")
             phrase.add(state.editedWord)
         } else {
-            projectLog(message = "Editing the word in the list...")
             phrase[state.editedWordIndex] = state.editedWord
         }
 
@@ -69,8 +67,6 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun submitFullPhrase() {
-        projectLog(message = "Phrase submitted: ${state.enteredWords}")
-
         state = state.copy(
             phraseInvalidReason = BIP39.validateSeedPhrase(state.enteredWords),
             enterWordUIState = EnterPhraseUIState.REVIEW
@@ -78,8 +74,6 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun enterNextWord() {
-        projectLog(message = "Moving index to ${state.editedWordIndex + 1}")
-
         state = state.copy(
             editedWordIndex = state.editedWordIndex + 1,
             editedWord = "",
@@ -91,7 +85,6 @@ class EnterPhraseViewModel @Inject constructor(
         val currentIndex = state.editedWordIndex
 
         return if (currentIndex != state.enteredWords.size - 1) {
-            projectLog(message = "Incrementing index to ${state.editedWordIndex + 1}")
             state =
                 state.copy(
                     editedWordIndex = state.editedWordIndex + 1,
@@ -107,7 +100,6 @@ class EnterPhraseViewModel @Inject constructor(
         val currentIndex = state.editedWordIndex
 
         return if (currentIndex != 0) {
-            projectLog(message = "Decrementing index to ${state.editedWordIndex - 1}")
             state =
                 state.copy(
                     editedWordIndex = state.editedWordIndex - 1,
@@ -171,11 +163,9 @@ class EnterPhraseViewModel @Inject constructor(
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
         }
-        projectLog(message = "Save this seed phrase and send user back to start...")
     }
 
     fun editEntirePhrase() {
-        projectLog(message = "Editing seed phrase, send user back to start...")
         state = state.copy(
             editedWord = state.enteredWords[0],
             editedWordIndex = 0,
@@ -269,6 +259,7 @@ class EnterPhraseViewModel @Inject constructor(
             try {
                 BIP39.splitToWords(pastedPhrase)
             } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.PastePhrase)
                 listOf("Unable to create phrase...")
             }
 

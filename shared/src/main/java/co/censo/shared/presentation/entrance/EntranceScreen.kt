@@ -70,6 +70,8 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -115,7 +117,7 @@ fun EntranceScreen(
             }
 
         } catch (e: Exception) {
-            //TODO: raygun
+            e.sendError(CrashReportingUtil.PermissionDialog)
         }
     }
 
@@ -128,8 +130,14 @@ fun EntranceScreen(
                     viewModel.handleSignInResult(task)
                 }
 
-                RESULT_CANCELED -> viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
-                else -> viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
+                RESULT_CANCELED -> {
+                    Exception("User canceled google auth").sendError(CrashReportingUtil.SignIn)
+                    viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
+                }
+                else -> {
+                    Exception("Google auth intent result failed").sendError(CrashReportingUtil.SignIn)
+                    viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
+                }
             }
         }
     )
@@ -160,6 +168,7 @@ fun EntranceScreen(
                 val intent = googleSignInClient.signInIntent
                 googleAuthLauncher.launch(intent)
             } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.SignIn)
                 viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
             }
             viewModel.resetTriggerGoogleSignIn()

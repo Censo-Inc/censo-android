@@ -6,6 +6,8 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -48,7 +50,7 @@ class PushRepositoryImpl @Inject constructor(
         try {
             api.removePushNotificationToken(DEVICE_TYPE)
         } catch (e: Exception) {
-            //TODO: Log the exception
+            e.sendError(CrashReportingUtil.RemovePushNotification)
         }
     }
 

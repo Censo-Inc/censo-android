@@ -25,7 +25,9 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -345,7 +347,7 @@ class ApproverAccessViewModel @Inject constructor(
         if (recoveryConfirmation != null) {
             confirmOrRejectOwnerAccessRequest(ParticipantId(state.participantId), recoveryConfirmation)
         } else {
-            //TODO: Log with raygun
+            Exception().sendError(CrashReportingUtil.RecoveryConfirmation)
             state =
                 state.copy(approveRecoveryResource = Resource.Error(exception = Exception("Unable to confirm owner recovery, missing recovery confirmation data")))
         }

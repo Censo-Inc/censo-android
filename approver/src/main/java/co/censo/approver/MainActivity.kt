@@ -26,6 +26,7 @@ import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_RECOVERY
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_ONBOARDING_URI
 import co.censo.shared.SharedScreen.Companion.GUARDIAN_RECOVERY_URI
 import co.censo.shared.presentation.entrance.EntranceScreen
+import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -33,6 +34,8 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setupRayGunCrashReporting()
 
         setContent {
             val navController = rememberNavController()
@@ -105,5 +108,10 @@ class MainActivity : FragmentActivity() {
                 )
             }
         }
+    }
+
+    private fun setupRayGunCrashReporting() {
+        RaygunClient.init(application);
+        RaygunClient.enableCrashReporting();
     }
 }

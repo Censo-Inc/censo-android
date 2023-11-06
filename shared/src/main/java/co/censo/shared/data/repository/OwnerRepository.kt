@@ -62,7 +62,9 @@ import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
@@ -243,6 +245,7 @@ class OwnerRepositoryImpl(
             }
 
         } catch (e: Exception) {
+            e.sendError("CreatePolicyParams")
             Resource.Error(exception = e)
         }
     }
@@ -285,6 +288,7 @@ class OwnerRepositoryImpl(
                 previousIntermediateKey = intermediateEncryptionKey
             )
         } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ReplacePolicy)
             return Resource.Error(exception = e)
         }
 
@@ -336,7 +340,7 @@ class OwnerRepositoryImpl(
                 )
             }
         } catch (e: Exception) {
-            // TODO raygun alert
+            e.sendError(CrashReportingUtil.TotpVerification)
             false
         }
 
@@ -372,6 +376,7 @@ class OwnerRepositoryImpl(
             val jwtDecoded = JWT(jwtToken)
             authUtil.isJWTValid(jwtDecoded)
         } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.JWTToken)
             false
         }
     }
@@ -394,6 +399,7 @@ class OwnerRepositoryImpl(
                 )
             )
         } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.EncryptShard)
             null
         }
     }
@@ -467,7 +473,7 @@ class OwnerRepositoryImpl(
                 secureStorage.clearDeviceKeyId()
                 authUtil.signOut()
             } catch (e: Exception) {
-                projectLog(message = "failed on delete clean up ${e.message}")
+                e.sendError(CrashReportingUtil.DeleteUser)
             }
         }
 

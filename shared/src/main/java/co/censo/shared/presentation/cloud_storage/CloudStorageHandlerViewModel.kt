@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,11 +81,11 @@ class CloudStorageHandlerViewModel @Inject constructor(
         }
 
         if (participantId.value.isEmpty()) {
+            val e = Exception("Attempted to save private key with empty participantID value")
+            e.sendError(CrashReportingUtil.CloudUpload)
             state = state.copy(
                 cloudStorageActionResource = Resource.Error(
-                    exception = Exception(
-                        "Attempted to save private key with empty participantID value"
-                    )
+                    exception = e
                 )
             )
             return
@@ -100,9 +102,11 @@ class CloudStorageHandlerViewModel @Inject constructor(
                 if (uploadResource is Resource.Success) {
                     state.copy(cloudStorageActionResource = Resource.Success(privateKey))
                 } else {
+                    uploadResource.exception?.sendError(CrashReportingUtil.CloudUpload)
                     state.copy(cloudStorageActionResource = Resource.Error(exception = uploadResource.exception))
                 }
             } catch (e: CloudStoragePermissionNotGrantedException) {
+                e.sendError(CrashReportingUtil.CloudUpload)
                 state.copy(shouldEnforceCloudStorageAccess = true)
             }
         }
@@ -113,11 +117,11 @@ class CloudStorageHandlerViewModel @Inject constructor(
     ) {
         val participantId = state.cloudStorageHandlerArgs.participantId
         if (participantId.value.isEmpty()) {
+            val e = Exception("Attempted to load private key with empty participantID value")
+            e.sendError(CrashReportingUtil.CloudDownload)
             state = state.copy(
                 cloudStorageActionResource = Resource.Error(
-                    exception = Exception(
-                        "Attempted to load private key with empty participantID value"
-                    )
+                    exception = e
                 )
             )
             return
@@ -133,11 +137,11 @@ class CloudStorageHandlerViewModel @Inject constructor(
                 if (downloadResource is Resource.Success) {
                     val key = downloadResource.data
                     if (key == null || key.value.isEmpty()) {
+                        val e = Exception("Retrieved private key was null or empty")
+                        e.sendError(CrashReportingUtil.CloudDownload)
                         state = state.copy(
                             cloudStorageActionResource = Resource.Error(
-                                exception = Exception(
-                                    "Retrieved private key was null or empty"
-                                )
+                                exception = e
                             )
                         )
                         return@launch
@@ -145,9 +149,11 @@ class CloudStorageHandlerViewModel @Inject constructor(
 
                     state.copy(cloudStorageActionResource = Resource.Success(key))
                 } else {
+                    downloadResource.exception?.sendError(CrashReportingUtil.CloudDownload)
                     state.copy(cloudStorageActionResource = Resource.Error(exception = downloadResource.exception))
                 }
             } catch (e: CloudStoragePermissionNotGrantedException) {
+                e.sendError(CrashReportingUtil.CloudDownload)
                 state.copy(shouldEnforceCloudStorageAccess = true)
             }
         }

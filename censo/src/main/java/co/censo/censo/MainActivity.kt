@@ -36,6 +36,8 @@ import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.routing.OwnerRoutingScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
+import co.censo.shared.util.sendError
+import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,6 +50,7 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setupRayGunCrashReporting()
         setupPushChannel()
 
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -157,5 +160,10 @@ class MainActivity : FragmentActivity() {
                 channelName, NotificationManager.IMPORTANCE_HIGH
             )
         )
+    }
+
+    private fun setupRayGunCrashReporting() {
+        RaygunClient.init(application);
+        RaygunClient.enableCrashReporting();
     }
 }

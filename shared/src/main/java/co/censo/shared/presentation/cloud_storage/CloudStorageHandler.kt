@@ -33,8 +33,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.R
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.GoogleAuth
-import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 
@@ -82,20 +83,16 @@ fun CloudStorageHandler(
                             pendingIntent?.let { safeIntent ->
                                 val intentSenderRequest = IntentSenderRequest.Builder(safeIntent.intentSender).build()
                                 googleDriveAccessResultLauncher.launch(intentSenderRequest)
-                                projectLog(message = "Intent launched")
-                            }
+                            } ?: Exception("Pending Intent null").sendError(CrashReportingUtil.CloudStorageIntent)
                         } catch (e: IntentSender.SendIntentException) {
-                            //TODO: Log with raygun
-                            projectLog(message = "Failed to send intent")
+                            e.sendError(CrashReportingUtil.CloudStorageIntent)
                         }
                     } else {
-                        projectLog(message = "User already gave permission")
                         viewModel.performAction(bypassScopeCheckForCloudStorage = true)
                     }
                 }
                 .addOnFailureListener {
-                    //TODO: Log with raygun
-                    projectLog(message = "Failed to send intent with exception: $it")
+                    it.sendError(CrashReportingUtil.CloudStorageIntent)
                 }
 
             triggerAuthRequest = !triggerAuthRequest
