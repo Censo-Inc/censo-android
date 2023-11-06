@@ -95,7 +95,7 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
-            applicationIdSuffix = ".aintegration"
+            applicationIdSuffix = ".integration"
             isDebuggable = false
         }
         debug {
