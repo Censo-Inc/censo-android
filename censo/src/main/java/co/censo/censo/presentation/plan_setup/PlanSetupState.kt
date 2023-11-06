@@ -27,6 +27,7 @@ data class PlanSetupState(
 
     // inviting approver
     val editedNickname: String = "",
+    val editedNicknameError: String? = null,
 
     // totp
     val secondsLeft: Int = 0,
@@ -53,6 +54,8 @@ data class PlanSetupState(
 ) {
     val activatingApprover = alternateApprover ?: primaryApprover
     val approverType = if (alternateApprover != null) ApproverType.Alternate else ApproverType.Primary
+
+    val editedNicknameValid = editedNickname.isNotEmpty() && editedNicknameError == null
 
     val backArrowType = when {
         planSetupUIState in listOf(

@@ -39,6 +39,7 @@ fun ApproverNicknameUI(
     isRename: Boolean = false,
     nickname: String,
     enabled: Boolean,
+    error: String? = null,
     onNicknameChanged: (String) -> Unit,
     onSaveNickname: () -> Unit
 ) {
@@ -102,7 +103,14 @@ fun ApproverNicknameUI(
             )
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = error ?: " ",
+            textAlign = TextAlign.Center,
+            color = SharedColors.ErrorRed
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight / 2))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
@@ -145,6 +153,18 @@ fun PreviewDisabledNickname() {
     ApproverNicknameUI(
         nickname = "",
         enabled = false,
+        onNicknameChanged = {},
+        onSaveNickname = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewError() {
+    ApproverNicknameUI(
+        nickname = "",
+        enabled = false,
+        error = "Can't be longer than 20 characters",
         onNicknameChanged = {},
         onSaveNickname = {},
     )

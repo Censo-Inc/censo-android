@@ -218,6 +218,7 @@ fun EnterPhraseScreen(
                             AddPhraseLabelUI(
                                 label = state.label,
                                 enabled = state.labelValid,
+                                error = state.labelError,
                                 onLabelChanged = viewModel::updateLabel,
                                 onSavePhrase = viewModel::saveSeedPhrase
                             )

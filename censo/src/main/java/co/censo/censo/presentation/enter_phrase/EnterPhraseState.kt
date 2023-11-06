@@ -13,6 +13,7 @@ data class EnterPhraseState(
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
     val phraseInvalidReason: BIP39InvalidReason? = null,
     val label: String = "",
+    val labelError: String? = null,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
@@ -21,7 +22,7 @@ data class EnterPhraseState(
     val exitFlow: Boolean = false
 ) {
 
-    val labelValid = label.isNotEmpty()
+    val labelValid = label.isNotEmpty() && labelError == null
 
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.EDIT,

@@ -173,7 +173,8 @@ fun PlanSetupScreen(
                         PlanSetupUIState.ApproverNickname -> {
                             ApproverNicknameUI(
                                 nickname = state.editedNickname,
-                                enabled = state.editedNickname.isNotBlank(),
+                                enabled = state.editedNicknameValid,
+                                error = state.editedNicknameError,
                                 onNicknameChanged = viewModel::approverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApprover
                             )
@@ -205,7 +206,8 @@ fun PlanSetupScreen(
                             ApproverNicknameUI(
                                 isRename = true,
                                 nickname = state.editedNickname,
-                                enabled = state.editedNickname.isNotBlank(),
+                                enabled = state.editedNicknameValid,
+                                error = state.editedNicknameError,
                                 onNicknameChanged = viewModel::approverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApproverNickname
                             )

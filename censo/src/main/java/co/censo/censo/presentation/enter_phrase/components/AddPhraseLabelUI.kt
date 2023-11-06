@@ -40,6 +40,7 @@ import co.censo.censo.R
 fun AddPhraseLabelUI(
     label: String,
     enabled: Boolean,
+    error: String? = null,
     onLabelChanged: (String) -> Unit,
     onSavePhrase: () -> Unit
 ) {
@@ -102,7 +103,14 @@ fun AddPhraseLabelUI(
             )
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = error ?: " ",
+            textAlign = TextAlign.Center,
+            color = SharedColors.ErrorRed
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight / 2))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
@@ -145,6 +153,18 @@ fun PreviewDisabledLabel() {
     AddPhraseLabelUI(
         label = "",
         enabled = false,
+        onLabelChanged = {},
+        onSavePhrase = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewError() {
+    AddPhraseLabelUI(
+        label = "",
+        enabled = false,
+        error = "Can't be longer than 50 characters",
         onLabelChanged = {},
         onSavePhrase = {},
     )

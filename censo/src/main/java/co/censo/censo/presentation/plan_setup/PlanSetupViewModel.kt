@@ -48,7 +48,10 @@ class PlanSetupViewModel @Inject constructor(
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
     private val pollingVerificationTimer: VaultCountDownTimer,
-    ) : ViewModel() {
+) : ViewModel() {
+    companion object {
+        const val APPROVER_NAME_MAX_LENGTH = 20
+    }
 
     var state by mutableStateOf(PlanSetupState())
         private set
@@ -225,13 +228,17 @@ class PlanSetupViewModel @Inject constructor(
         } else {
             state = state.copy(
                 editedNickname = "",
+                editedNicknameError = null,
                 planSetupUIState = PlanSetupUIState.ApproverNickname
             )
         }
     }
 
     fun approverNicknameChanged(nickname: String) {
-        state = state.copy(editedNickname = nickname)
+        state = state.copy(
+            editedNickname = nickname,
+            editedNicknameError = if (nickname.length > APPROVER_NAME_MAX_LENGTH) "Can't be longer than $APPROVER_NAME_MAX_LENGTH characters" else null
+        )
     }
 
     fun onSaveApprover() {
@@ -302,6 +309,7 @@ class PlanSetupViewModel @Inject constructor(
 
         state = state.copy(
             editedNickname = nicknameToUpdate ?: "",
+            editedNicknameError = null,
             planSetupUIState = PlanSetupUIState.EditApproverNickname
         )
     }
