@@ -3,6 +3,8 @@ package co.censo.shared.util
 import android.content.Context
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.util.CrashReportingUtil.RetrieveAccount
+import co.censo.shared.util.CrashReportingUtil.SilentRefreshToken
 import com.auth0.android.jwt.JWT
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -55,10 +57,10 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
             val account = task.getResult(ApiException::class.java)
             onSuccess(account)
         } catch (e: ApiException) {
-            e.sendError("RetrieveAccount")
+            e.sendError(RetrieveAccount)
             onException(e)
         } catch (e: Exception) {
-            e.sendError("RetrieveAccount")
+            e.sendError(RetrieveAccount)
             onException(e)
         }
     }
@@ -75,8 +77,7 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
                     if (updatedJwt?.isNotEmpty() == true) {
                         val verifiedIdToken = verifyToken(updatedJwt)
                         if (verifiedIdToken == null || verifiedIdToken != deviceKeyId) {
-                            Exception().sendError("SilentSignIn")
-                            projectLog(message = "Silent Sign In failed")
+                            Exception().sendError(SilentRefreshToken)
                         } else {
                             secureStorage.saveJWT(updatedJwt)
                         }
@@ -84,8 +85,7 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
                     }
                 },
                 onException = {
-                    it.sendError("SilentRefreshToken")
-                    projectLog(message = "ApiException: $it")
+                    it.sendError(SilentRefreshToken)
                 }
             )
         }
@@ -94,9 +94,8 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
     override suspend fun signOut() {
         getGoogleSignInClient().signOut().addOnCompleteListener {
             if (it.isSuccessful) {
-                projectLog(message = " signOut completed successfully")
             } else {
-                projectLog(message = "signOut failed, ${it.exception?.message}")
+                it.exception?.sendError(CrashReportingUtil.SignOut)
             }
         }.await()
     }

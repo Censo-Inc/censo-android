@@ -62,6 +62,7 @@ import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
@@ -287,7 +288,7 @@ class OwnerRepositoryImpl(
                 previousIntermediateKey = intermediateEncryptionKey
             )
         } catch (e: Exception) {
-            e.sendError("ReplacePolicy")
+            e.sendError(CrashReportingUtil.ReplacePolicy)
             return Resource.Error(exception = e)
         }
 
@@ -339,7 +340,7 @@ class OwnerRepositoryImpl(
                 )
             }
         } catch (e: Exception) {
-            e.sendError("TotpVerification")
+            e.sendError(CrashReportingUtil.TotpVerification)
             false
         }
 
@@ -375,7 +376,7 @@ class OwnerRepositoryImpl(
             val jwtDecoded = JWT(jwtToken)
             authUtil.isJWTValid(jwtDecoded)
         } catch (e: Exception) {
-            e.sendError("JWToken")
+            e.sendError(CrashReportingUtil.JWTToken)
             false
         }
     }
@@ -398,7 +399,7 @@ class OwnerRepositoryImpl(
                 )
             )
         } catch (e: Exception) {
-            e.sendError("EncryptShard")
+            e.sendError(CrashReportingUtil.EncryptShard)
             null
         }
     }
@@ -472,8 +473,7 @@ class OwnerRepositoryImpl(
                 secureStorage.clearDeviceKeyId()
                 authUtil.signOut()
             } catch (e: Exception) {
-                e.sendError("DeleteUser")
-                projectLog(message = "failed on delete clean up ${e.message}")
+                e.sendError(CrashReportingUtil.DeleteUser)
             }
         }
 

@@ -48,6 +48,7 @@ import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -317,8 +318,7 @@ class AuthInterceptor(
         try {
             authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId)
         } catch (e: Exception) {
-            e.sendError("AuthHeaders")
-            projectLog(message = "Exception thrown: $e")
+            e.sendError(CrashReportingUtil.AuthHeaders)
             return emptyList()
         }
 

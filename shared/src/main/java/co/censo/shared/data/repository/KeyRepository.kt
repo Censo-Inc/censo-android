@@ -102,7 +102,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
                 participantId = participantId,
             )
         } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.CLOUD_UPLOAD)
+            e.sendError(CrashReportingUtil.CloudUpload)
             Resource.Error(exception = e)
         }
     }
@@ -132,7 +132,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
                 return Resource.Error(exception = resource.exception)
             }
         } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.CLOUD_UPLOAD)
+            e.sendError(CrashReportingUtil.CloudDownload)
             Resource.Error(exception = e)
         }
     }

@@ -1,11 +1,13 @@
 package co.censo.shared.data.storage
 
-import Base58EncodedPrivateKey
 import ParticipantId
 import android.content.Context
 import co.censo.shared.data.Resource
+import co.censo.shared.util.CrashReportingUtil.CloudUpload
+import co.censo.shared.util.CrashReportingUtil.DeleteFile
+import co.censo.shared.util.CrashReportingUtil.RetrieveDriveService
+import co.censo.shared.util.CrashReportingUtil.RetrieveFileContent
 import co.censo.shared.util.GoogleAuth
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -42,12 +44,11 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
     }
 
     override suspend fun uploadFile(fileContent: String, participantId: ParticipantId) : Resource<Unit> {
-        projectLog(message = "Starting file upload")
         val account = GoogleSignIn.getLastSignedInAccount(context)
         return if (account != null) {
             val driveService = getDriveService(account, context)
             if (driveService == null) {
-                projectLog(message = "Drive service was null")
+                Exception("Drive Service Null").sendError(CloudUpload)
                 return Resource.Error()
             }
 
@@ -60,9 +61,8 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     val outputStream = FileOutputStream(localFile)
                     outputStream.write(fileContent.toByteArray())
                     outputStream.close()
-                    projectLog(message = "Saved local file")
                 } catch (e: IOException) {
-                    e.sendError("UploadFile")
+                    e.sendError(CloudUpload)
                     return Resource.Error(exception = e)
                 }
 
@@ -79,25 +79,21 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
 
                     //Delete the temp local file
                     localFile.delete()
-                    projectLog(message = "File upload process finished")
                     return if (uploadedFile != null && uploadedFile.id != null ) {
-                        projectLog(message = "File uploaded with id: ${uploadedFile.id}")
                         Resource.Success(Unit)
                     } else {
-                        projectLog(message = "File upload failed")
+                        Exception("Upload File Null or ID null").sendError(CloudUpload)
                         Resource.Error()
                     }
                 } catch (e: GoogleJsonResponseException) {
-                    e.sendError("UploadFile")
-                    projectLog(message = "File upload failed, with google json response exception: $e")
+                    e.sendError(CloudUpload)
                     return Resource.Error(exception = e)
                 } catch (e: Exception) {
-                    e.sendError("UploadFile")
-                    projectLog(message = "File upload failed, with exception: $e")
+                    e.sendError(CloudUpload)
                     return Resource.Error(exception = e)
                 }
         } else {
-            projectLog(message = "Account was null")
+            Exception("Account was null").sendError(CloudUpload)
             Resource.Error()
         }
     }
@@ -123,10 +119,10 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     it.name == fileName
                 }
             } catch (e: NoSuchElementException) {
-                e.sendError("RetrieveFileContent")
+                e.sendError(RetrieveFileContent)
                 return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
             } catch (e: Exception) {
-                e.sendError("RetrieveFileContent")
+                e.sendError(RetrieveFileContent)
                 return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
             }
 
@@ -143,20 +139,20 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 }
 
                 return if (fileContents.isNotEmpty()) {
-                    projectLog(message = "Successfully exported file content to outputStream, file content: $fileContents")
                     Resource.Success(fileContents)
                 } else {
+                    Exception("Empty file").sendError(RetrieveFileContent)
                     Resource.Error(exception = Exception("File existed and contents were downloaded, however the contents were empty"))
                 }
             } catch (e: GoogleJsonResponseException) {
-                e.sendError("RetrieveFileContent")
+                e.sendError(RetrieveFileContent)
                 return Resource.Error(exception = e)
             } catch (e: Exception) {
-                e.sendError("RetrieveFileContent")
+                e.sendError(RetrieveFileContent)
                 return Resource.Error(exception = e)
             }
         } else {
-            Exception().sendError("RetrieveFileContent")
+            Exception().sendError(RetrieveFileContent)
             return Resource.Error(exception = Exception("Users account was null"))
         }
     }
@@ -171,7 +167,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
         return if (account != null) {
             val driveService = getDriveService(account, context)
             if (driveService == null) {
-                projectLog(message = "Drive service was null")
+                Exception("Drive Service null").sendError(RetrieveDriveService)
                 return Resource.Error()
             }
 
@@ -190,10 +186,10 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     it.name == fileName
                 }
             } catch (e: NoSuchElementException) {
-                e.sendError("DeleteFile")
+                e.sendError(DeleteFile)
                 return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
             } catch (e: Exception) {
-                e.sendError("DeleteFile")
+                e.sendError(DeleteFile)
                 return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
             }
 
@@ -202,11 +198,12 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 driveService.files().delete(file.id).execute()
                 return Resource.Success(Unit)
             } catch (e: Exception) {
-                e.sendError("DeleteFile")
+                e.sendError(DeleteFile)
                 return Resource.Error(exception = e)
             }
         }
         else {
+            Exception("Null User Account").sendError(DeleteFile)
             Resource.Error(exception = Exception("Users account was null"))
         }
     }
@@ -222,7 +219,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 Collections.singleton(DriveScopes.DRIVE_FILE)
             ).setSelectedAccount(account.account)
         } catch (e: IOException) {
-            e.sendError("RetrieveDriveService")
+            e.sendError(RetrieveDriveService)
             return null
         }
 

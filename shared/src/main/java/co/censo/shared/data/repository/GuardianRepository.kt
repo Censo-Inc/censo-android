@@ -20,6 +20,7 @@ import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
@@ -187,7 +188,7 @@ class GuardianRepositoryImpl(
                 )
             }
         } catch (e: Exception) {
-            e.sendError("TotpVerification")
+            e.sendError(CrashReportingUtil.TotpVerification)
             false
         }
 

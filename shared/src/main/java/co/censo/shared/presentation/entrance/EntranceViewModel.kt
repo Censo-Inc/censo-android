@@ -15,7 +15,7 @@ import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
-import co.censo.shared.util.projectLog
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -100,7 +100,7 @@ class EntranceViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    //TODO: Sign out the user here
+                    Exception("JWTToken Invalid when entering entrance").sendError(CrashReportingUtil.SignIn)
                 }
             } else {
                 state = state.copy(
@@ -146,8 +146,7 @@ class EntranceViewModel @Inject constructor(
                     pushRepository.addPushNotification(pushBody = pushBody)
                 }
             } catch (e: Exception) {
-                e.sendError("SubmitNotificationToken")
-                projectLog(message = "Exception caught while trying to submit notif token")
+                e.sendError(CrashReportingUtil.SubmitNotificationToken)
             }
         }
     }
@@ -186,7 +185,7 @@ class EntranceViewModel @Inject constructor(
     }
 
 
-    fun signInUser(jwt: String?) {
+    private fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             if (jwt.isNullOrEmpty()) {
                 googleAuthFailure(GoogleAuthError.MissingCredentialId)
@@ -198,13 +197,13 @@ class EntranceViewModel @Inject constructor(
             val idToken = try {
                 ownerRepository.verifyToken(jwt)
             } catch (e: Exception) {
-                e.sendError("SignInVerifyToken")
+                e.sendError(CrashReportingUtil.SignIn)
                 googleAuthFailure(GoogleAuthError.FailedToVerifyId(e))
                 return@launch
             }
 
             if (idToken == null) {
-                Exception().sendError("SignIn")
+                Exception().sendError(CrashReportingUtil.SignIn)
                 googleAuthFailure(GoogleAuthError.InvalidToken)
                 return@launch
             }
@@ -214,7 +213,7 @@ class EntranceViewModel @Inject constructor(
                 try {
                     keyRepository.createAndSaveKeyWithId(idToken)
                 } catch (e: Exception) {
-                    e.sendError("SignIn")
+                    e.sendError(CrashReportingUtil.SignIn)
                     googleAuthFailure(GoogleAuthError.FailedToCreateKeyWithId(e))
                 }
             } else {
