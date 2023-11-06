@@ -40,7 +40,6 @@ import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.AddTrustedApproversUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
-import co.censo.shared.util.projectLog
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -256,14 +255,14 @@ fun PlanSetupScreen(
     }
 
     if (state.cloudStorageAction.triggerAction) {
-        val encryptedKey = viewModel.getPrivateKeyForUpload()
+        val encryptedKey = viewModel.getEncryptedKeyForUpload()
         val participantId = state.tempOwnerApprover?.participantId
 
         if (encryptedKey != null && participantId != null) {
             CloudStorageHandler(
                 actionToPerform = state.cloudStorageAction.action,
                 participantId = participantId,
-                privateKey = encryptedKey,
+                encryptedPrivateKey = encryptedKey,
                 onActionSuccess = { viewModel.onKeyUploadSuccess() },
                 onActionFailed = viewModel::onKeyUploadFailed
             )

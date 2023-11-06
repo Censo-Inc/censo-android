@@ -10,10 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.data.ApproverAccessUIState
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
+import co.censo.shared.data.cryptography.decryptFromByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
+import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.forParticipant
@@ -28,6 +31,7 @@ import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -335,13 +339,18 @@ class ApproverAccessViewModel @Inject constructor(
 
     //region CloudStorage Action methods
     fun handleCloudStorageActionSuccess(
-        privateKey: Base58EncodedPrivateKey,
+        encryptedKey: ByteArray,
         cloudStorageAction: CloudStorageActions
     ) {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(),
             loadKeyFromCloudResource = Resource.Uninitialized
         )
+
+        //Decrypt the byteArray
+
+        val privateKey =
+            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
 
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {

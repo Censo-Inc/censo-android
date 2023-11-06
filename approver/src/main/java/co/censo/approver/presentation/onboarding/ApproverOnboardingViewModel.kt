@@ -10,8 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
+import co.censo.shared.data.cryptography.decryptFromByteArray
+import co.censo.shared.data.cryptography.encryptToByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.cryptography.sha256digest
+import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.repository.GuardianRepository
@@ -301,16 +306,20 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
     //region CloudStorage Action methods
-    fun getPrivateKeyForUpload() : Base58EncodedPrivateKey? {
+    fun getEncryptedKeyForUpload() : ByteArray? {
         val encryptionKey = state.guardianEncryptionKey ?: return null
-        return Base58EncodedPrivateKey(Base58.base58Encode(encryptionKey.privateKeyRaw()))
+        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
     }
 
     fun handleCloudStorageActionSuccess(
-        privateKey: Base58EncodedPrivateKey,
+        encryptedKey: ByteArray,
         cloudStorageAction: CloudStorageActions
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
+
+        //Decrypt the byteArray
+        val privateKey =
+            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
 
         when (cloudStorageAction) {
             CloudStorageActions.UPLOAD -> {
