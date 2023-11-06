@@ -55,8 +55,10 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
             val account = task.getResult(ApiException::class.java)
             onSuccess(account)
         } catch (e: ApiException) {
+            e.sendError("RetrieveAccount")
             onException(e)
         } catch (e: Exception) {
+            e.sendError("RetrieveAccount")
             onException(e)
         }
     }
@@ -73,7 +75,7 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
                     if (updatedJwt?.isNotEmpty() == true) {
                         val verifiedIdToken = verifyToken(updatedJwt)
                         if (verifiedIdToken == null || verifiedIdToken != deviceKeyId) {
-                            //TODO: Log with raygun
+                            Exception().sendError("SilentSignIn")
                             projectLog(message = "Silent Sign In failed")
                         } else {
                             secureStorage.saveJWT(updatedJwt)
@@ -82,7 +84,7 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
                     }
                 },
                 onException = {
-                    //TODO: Log with raygun
+                    it.sendError("SilentRefreshToken")
                     projectLog(message = "ApiException: $it")
                 }
             )

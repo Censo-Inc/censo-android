@@ -16,6 +16,7 @@ import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
@@ -145,6 +146,7 @@ class EntranceViewModel @Inject constructor(
                     pushRepository.addPushNotification(pushBody = pushBody)
                 }
             } catch (e: Exception) {
+                e.sendError("SubmitNotificationToken")
                 projectLog(message = "Exception caught while trying to submit notif token")
             }
         }
@@ -196,11 +198,13 @@ class EntranceViewModel @Inject constructor(
             val idToken = try {
                 ownerRepository.verifyToken(jwt)
             } catch (e: Exception) {
+                e.sendError("SignInVerifyToken")
                 googleAuthFailure(GoogleAuthError.FailedToVerifyId(e))
                 return@launch
             }
 
             if (idToken == null) {
+                Exception().sendError("SignIn")
                 googleAuthFailure(GoogleAuthError.InvalidToken)
                 return@launch
             }
@@ -210,6 +214,7 @@ class EntranceViewModel @Inject constructor(
                 try {
                     keyRepository.createAndSaveKeyWithId(idToken)
                 } catch (e: Exception) {
+                    e.sendError("SignIn")
                     googleAuthFailure(GoogleAuthError.FailedToCreateKeyWithId(e))
                 }
             } else {

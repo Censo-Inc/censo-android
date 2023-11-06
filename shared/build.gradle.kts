@@ -150,6 +150,10 @@ dependencies {
     implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
     implementation("com.google.api-client:google-api-client-android:2.0.0")
 
+    //Push Notifications
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
     //GoogleDrive
     implementation("com.google.android.gms:play-services-drive:17.0.0")
     implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
@@ -157,15 +161,14 @@ dependencies {
         exclude(module = "guava-jdk5")
     }
 
-    //Push Notifications
-    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
-    implementation("com.google.firebase:firebase-messaging-ktx")
-    
     //auth0 JWT
     implementation("com.auth0.android:jwtdecode:2.0.1")
 
     //Encrypted Preferences
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
+
+    //Raygun crash reporting
+    implementation("com.raygun:raygun4android:4.0.1")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")

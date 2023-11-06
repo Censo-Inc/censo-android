@@ -70,6 +70,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -115,7 +116,7 @@ fun EntranceScreen(
             }
 
         } catch (e: Exception) {
-            //TODO: raygun
+            e.sendError("CheckPermissionDialog")
         }
     }
 
@@ -160,6 +161,7 @@ fun EntranceScreen(
                 val intent = googleSignInClient.signInIntent
                 googleAuthLauncher.launch(intent)
             } catch (e: Exception) {
+                e.sendError("GoogleSignIn")
                 viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
             }
             viewModel.resetTriggerGoogleSignIn()

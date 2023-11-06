@@ -45,7 +45,7 @@ android {
         applicationId = "co.censo.censo"
         minSdk = 33
         targetSdk = 33
-        versionCode = 5
+        versionCode = 6
         versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
 
         signingConfig = if (signBuild) {
@@ -185,6 +185,7 @@ dependencies {
 
     //GoogleAuth
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

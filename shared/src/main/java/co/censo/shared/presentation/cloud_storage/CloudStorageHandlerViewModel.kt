@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -103,6 +104,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
                     state.copy(cloudStorageActionResource = Resource.Error(exception = uploadResource.exception))
                 }
             } catch (e: CloudStoragePermissionNotGrantedException) {
+                e.sendError("UploadCloud")
                 state.copy(shouldEnforceCloudStorageAccess = true)
             }
         }
@@ -148,6 +150,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
                     state.copy(cloudStorageActionResource = Resource.Error(exception = downloadResource.exception))
                 }
             } catch (e: CloudStoragePermissionNotGrantedException) {
+                e.sendError("UploadCloud")
                 state.copy(shouldEnforceCloudStorageAccess = true)
             }
         }

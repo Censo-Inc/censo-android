@@ -6,6 +6,7 @@ import android.content.Context
 import co.censo.shared.data.Resource
 import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
@@ -61,7 +62,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     outputStream.close()
                     projectLog(message = "Saved local file")
                 } catch (e: IOException) {
-                    projectLog(message = "Failed to save local file")
+                    e.sendError("UploadFile")
                     return Resource.Error(exception = e)
                 }
 
@@ -87,9 +88,11 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                         Resource.Error()
                     }
                 } catch (e: GoogleJsonResponseException) {
+                    e.sendError("UploadFile")
                     projectLog(message = "File upload failed, with google json response exception: $e")
                     return Resource.Error(exception = e)
                 } catch (e: Exception) {
+                    e.sendError("UploadFile")
                     projectLog(message = "File upload failed, with exception: $e")
                     return Resource.Error(exception = e)
                 }
@@ -120,8 +123,10 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     it.name == fileName
                 }
             } catch (e: NoSuchElementException) {
+                e.sendError("RetrieveFileContent")
                 return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
             } catch (e: Exception) {
+                e.sendError("RetrieveFileContent")
                 return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
             }
 
@@ -144,11 +149,14 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     Resource.Error(exception = Exception("File existed and contents were downloaded, however the contents were empty"))
                 }
             } catch (e: GoogleJsonResponseException) {
+                e.sendError("RetrieveFileContent")
                 return Resource.Error(exception = e)
             } catch (e: Exception) {
+                e.sendError("RetrieveFileContent")
                 return Resource.Error(exception = e)
             }
         } else {
+            Exception().sendError("RetrieveFileContent")
             return Resource.Error(exception = Exception("Users account was null"))
         }
     }
@@ -182,8 +190,10 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     it.name == fileName
                 }
             } catch (e: NoSuchElementException) {
+                e.sendError("DeleteFile")
                 return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
             } catch (e: Exception) {
+                e.sendError("DeleteFile")
                 return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
             }
 
@@ -192,6 +202,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 driveService.files().delete(file.id).execute()
                 return Resource.Success(Unit)
             } catch (e: Exception) {
+                e.sendError("DeleteFile")
                 return Resource.Error(exception = e)
             }
         }
@@ -211,6 +222,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 Collections.singleton(DriveScopes.DRIVE_FILE)
             ).setSelectedAccount(account.account)
         } catch (e: IOException) {
+            e.sendError("RetrieveDriveService")
             return null
         }
 

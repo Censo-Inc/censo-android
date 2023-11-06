@@ -16,6 +16,8 @@ import io.github.novacrypto.base58.Base58
 import org.bouncycastle.util.encoders.Hex
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
@@ -100,7 +102,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
                 participantId = participantId,
             )
         } catch (e: Exception) {
-            //TODO: Log with raygun
+            e.sendError(CrashReportingUtil.CLOUD_UPLOAD)
             Resource.Error(exception = e)
         }
     }
@@ -130,7 +132,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
                 return Resource.Error(exception = resource.exception)
             }
         } catch (e: Exception) {
-            //TODO: Log with raygun
+            e.sendError(CrashReportingUtil.CLOUD_UPLOAD)
             Resource.Error(exception = e)
         }
     }

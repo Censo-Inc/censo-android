@@ -7,6 +7,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.util.sendError
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds

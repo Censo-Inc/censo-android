@@ -35,6 +35,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 
@@ -85,7 +86,7 @@ fun CloudStorageHandler(
                                 projectLog(message = "Intent launched")
                             }
                         } catch (e: IntentSender.SendIntentException) {
-                            //TODO: Log with raygun
+                            e.sendError("CloudStorageIntent")
                             projectLog(message = "Failed to send intent")
                         }
                     } else {
@@ -94,7 +95,7 @@ fun CloudStorageHandler(
                     }
                 }
                 .addOnFailureListener {
-                    //TODO: Log with raygun
+                    it.sendError("CloudStorageIntent")
                     projectLog(message = "Failed to send intent with exception: $it")
                 }
 

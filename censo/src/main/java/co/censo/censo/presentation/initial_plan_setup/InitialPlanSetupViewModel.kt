@@ -20,6 +20,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +71,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                 val approverEncryptionKey = keyRepository.createGuardianKey()
                 savePrivateKeyToCloud(approverEncryptionKey)
             } catch (e: Exception) {
+                e.sendError("CreateApproverKey")
                 state = state.copy(
                     saveKeyToCloudResource = Resource.Error(exception = e)
                 )

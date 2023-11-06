@@ -1,11 +1,14 @@
 package co.censo.shared
 
+import co.censo.shared.util.sendError
+
 fun SharedScreen.buildScreenDeepLinkUri() = "${SharedScreen.GUARDIAN_ONBOARDING_URI}${this.route}"
 
 fun String.getInviteCodeFromDeeplink() =
     try {
         split("/").last()
     } catch (e: Exception) {
+        e.sendError("InviteDeeplink")
         ""
     }
 

@@ -11,6 +11,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.projectLog
 import co.censo.shared.util.BIP39
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -269,6 +270,7 @@ class EnterPhraseViewModel @Inject constructor(
             try {
                 BIP39.splitToWords(pastedPhrase)
             } catch (e: Exception) {
+                e.sendError("PastePhrease")
                 listOf("Unable to create phrase...")
             }
 

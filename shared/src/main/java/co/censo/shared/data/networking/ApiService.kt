@@ -49,6 +49,7 @@ import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -316,7 +317,7 @@ class AuthInterceptor(
         try {
             authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId)
         } catch (e: Exception) {
-            //TODO: Log with raygun
+            e.sendError("AuthHeaders")
             projectLog(message = "Exception thrown: $e")
             return emptyList()
         }
