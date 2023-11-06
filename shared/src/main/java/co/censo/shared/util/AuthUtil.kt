@@ -22,7 +22,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.datetime.Clock
 
 interface AuthUtil {
-    suspend fun silentlyRefreshTokenIfInvalid(jwt: String, deviceKeyId: String)
+    suspend fun silentlyRefreshTokenIfInvalid(jwt: String, deviceKeyId: String, onDone: (() -> Unit)? = null)
     fun getGoogleSignInClient() : GoogleSignInClient
     fun isJWTValid(jwt: JWT): Boolean
     fun getAccountFromSignInTask(
@@ -65,7 +65,7 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
         }
     }
 
-    override suspend fun silentlyRefreshTokenIfInvalid(jwt: String, deviceKeyId: String) {
+    override suspend fun silentlyRefreshTokenIfInvalid(jwt: String, deviceKeyId: String, onDone: (() -> Unit)?) {
         val decodedJwt = JWT(jwt)
         if (!isJWTValid(decodedJwt)) {
             val googleSignInClient = getGoogleSignInClient()
@@ -78,14 +78,16 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
                         val verifiedIdToken = verifyToken(updatedJwt)
                         if (verifiedIdToken == null || verifiedIdToken != deviceKeyId) {
                             Exception().sendError(SilentRefreshToken)
+                            onDone?.invoke()
                         } else {
                             secureStorage.saveJWT(updatedJwt)
+                            onDone?.invoke()
                         }
-
                     }
                 },
                 onException = {
                     it.sendError(SilentRefreshToken)
+                    onDone?.invoke()
                 }
             )
         }

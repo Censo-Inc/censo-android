@@ -91,22 +91,39 @@ class EntranceViewModel @Inject constructor(
 
                 if (tokenValid) {
                     checkUserHasRespondedToNotificationOptIn()
-
-                    if (state.ownerApp) {
-                        retrieveOwnerState()
-                    } else {
-                        state = state.copy(
-                            userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route),
-                        )
-                    }
                 } else {
-                    Exception("JWTToken Invalid when entering entrance").sendError(CrashReportingUtil.SignIn)
+                    attemptRefresh(jwtToken)
                 }
             } else {
                 state = state.copy(
                     signInUserResource = Resource.Uninitialized
                 )
             }
+        }
+    }
+
+    private fun attemptRefresh(jwt: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val deviceKeyId = secureStorage.retrieveDeviceKeyId()
+            authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId, onDone = {
+                checkUserTokenAfterRefreshAttempt()
+            })
+        }
+    }
+
+    private fun checkUserTokenAfterRefreshAttempt() {
+        val jwtToken = ownerRepository.retrieveJWT()
+        if (jwtToken.isNotEmpty() && ownerRepository.checkJWTValid(jwtToken)) {
+            checkUserHasRespondedToNotificationOptIn()
+        } else {
+            signUserOutAfterAttemptedTokenRefresh()
+        }
+    }
+
+    private fun signUserOutAfterAttemptedTokenRefresh() {
+        viewModelScope.launch {
+            ownerRepository.signUserOut()
+            resetSignInUserResource()
         }
     }
 
@@ -119,13 +136,8 @@ class EntranceViewModel @Inject constructor(
         viewModelScope.launch {
             if (pushRepository.userHasSeenPushDialog()) {
                 submitNotificationTokenForRegistration()
-                if (state.ownerApp) {
-                    retrieveOwnerState()
-                } else {
-                    state = state.copy(
-                        userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route)
-                    )
-                }
+
+                if (state.ownerApp) triggerOwnerNavigation() else triggerApproverNavigation()
             } else {
                 state = state.copy(
                     showPushNotificationsDialog = Resource.Success(Unit)
@@ -238,10 +250,16 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    fun retrieveOwnerState() {
+    private fun triggerOwnerNavigation() {
         state = state.copy(
             userFinishedSetup = Resource.Success(SharedScreen.OwnerRoutingScreen.route),
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
+        )
+    }
+
+    private fun triggerApproverNavigation() {
+        state = state.copy(
+            userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route)
         )
     }
 
@@ -271,14 +289,8 @@ class EntranceViewModel @Inject constructor(
 
     fun finishPushNotificationDialog() {
         submitNotificationTokenForRegistration()
+        state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
 
-        if (state.ownerApp) {
-            retrieveOwnerState()
-        } else {
-            state = state.copy(
-                userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route),
-                showPushNotificationsDialog = Resource.Uninitialized
-            )
-        }
+        if (state.ownerApp) triggerOwnerNavigation() else triggerApproverNavigation()
     }
 }

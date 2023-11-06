@@ -170,7 +170,7 @@ fun MainVaultScreen(
                         BottomNavItem.Settings ->
                             SettingsHomeScreen(
                                 onDeleteUser = viewModel::showDeleteUserDialog,
-                                onSignOut = {},
+                                onSignOut = viewModel::signOut,
                             )
                     }
 

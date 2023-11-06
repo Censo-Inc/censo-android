@@ -94,6 +94,13 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
+    fun signOut() {
+        viewModelScope.launch {
+            ownerRepository.signUserOut()
+            state = state.copy(kickUserOut = Resource.Success(Unit))
+        }
+    }
+
     private fun onOwnerState(ownerState: OwnerState) {
         state = when (ownerState) {
             is OwnerState.Ready -> {

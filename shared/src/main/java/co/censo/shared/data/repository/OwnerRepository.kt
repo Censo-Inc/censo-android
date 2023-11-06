@@ -117,8 +117,8 @@ interface OwnerRepository {
 
     suspend fun verifyToken(token: String): String?
     suspend fun saveJWT(jwtToken: String)
-    suspend fun retrieveJWT(): String
-    suspend fun checkJWTValid(jwtToken: String): Boolean
+    fun retrieveJWT(): String
+    fun checkJWTValid(jwtToken: String): Boolean
 
     suspend fun confirmGuardianShip(
         participantId: ParticipantId,
@@ -370,8 +370,8 @@ class OwnerRepositoryImpl(
         }
     }
 
-    override suspend fun retrieveJWT() = secureStorage.retrieveJWT()
-    override suspend fun checkJWTValid(jwtToken: String): Boolean {
+    override fun retrieveJWT() = secureStorage.retrieveJWT()
+    override fun checkJWTValid(jwtToken: String): Boolean {
         return try {
             val jwtDecoded = JWT(jwtToken)
             authUtil.isJWTValid(jwtDecoded)
@@ -465,7 +465,7 @@ class OwnerRepositoryImpl(
 
         if (response is Resource.Success) {
             try {
-                signUserOut() // clears the JWT from storage
+                signUserOut()
                 keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
                 if (participantId != null) {
                     keyRepository.deleteSavedKeyFromCloud(participantId)
@@ -499,6 +499,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun signUserOut() {
+        authUtil.signOut()
         secureStorage.clearJWT()
     }
 
