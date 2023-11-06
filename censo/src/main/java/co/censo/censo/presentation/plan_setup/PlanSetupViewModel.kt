@@ -25,6 +25,13 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.shared.data.cryptography.SymmetricEncryption
+import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
@@ -228,23 +235,62 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onSaveApprover() {
+        if (state.ownerApprover?.asImplicitlyOwner() == null) {
+            //Need to create owner approver key and upload it before submitting policy setup
+            createOwnerApproverAndTriggerKeyUpload()
+        } else {
+            //Can move directly to setting up and submitting policy
+            state = state.copy(createPolicySetupResponse = Resource.Loading())
+            submitPolicySetup(
+                updatedPolicySetupGuardians = getUpdatedPolicySetupGuardianList(
+                    state.primaryApprover?.asImplicitlyOwner()!!
+                )
+            )
+        }
+    }
+
+    private fun createOwnerApproverAndTriggerKeyUpload() {
+        state = state.copy(saveKeyToCloud = Resource.Loading())
+        val participantId = ParticipantId.generate()
+        val approverEncryptionKey = keyRepository.createGuardianKey()
+
+        //TODO: Do SymmetricEncryption here in the next PR
+
+        state = state.copy(
+            tempEncryptedKey = approverEncryptionKey,
+            tempOwnerApprover = Guardian.SetupGuardian.ImplicitlyOwner(
+                label = "Me",
+                participantId = participantId,
+                guardianPublicKey = Base58EncodedGuardianPublicKey(
+                    approverEncryptionKey.publicExternalRepresentation().value
+                )
+            ),
+            cloudStorageAction = CloudStorageActionData(
+                triggerAction = true, action = CloudStorageActions.UPLOAD
+            )
+        )
+    }
+
+    private fun getUpdatedPolicySetupGuardianList(ownerApprover: Guardian.SetupGuardian.ImplicitlyOwner): List<Guardian.SetupGuardian> =
+        listOfNotNull(
+            ownerApprover,
+            state.primaryApprover?.asExternalApprover()
+                ?: createExternalApprover(state.editedNickname),
+            if (state.primaryApprover?.status is GuardianStatus.Confirmed) {
+                state.alternateApprover?.asExternalApprover()
+                    ?: createExternalApprover(state.editedNickname)
+            } else {
+                null
+            }
+        )
+
+    private fun createPolicySetupWithOwnerApprover(ownerApprover: Guardian.SetupGuardian.ImplicitlyOwner) {
         state = state.copy(createPolicySetupResponse = Resource.Loading())
 
         viewModelScope.launch {
-            // policy setup API expects all approvers to be sent with every request
-            val updatedPolicySetupGuardians = listOfNotNull(
-                state.ownerApprover?.asImplicitlyOwner() ?: createOwnerApprover(),
-                state.primaryApprover?.asExternalApprover()
-                    ?: createExternalApprover(state.editedNickname),
-                if (state.primaryApprover?.status is GuardianStatus.Confirmed) {
-                    state.alternateApprover?.asExternalApprover()
-                        ?: createExternalApprover(state.editedNickname)
-                } else {
-                    null
-                }
+            submitPolicySetup(
+                updatedPolicySetupGuardians = getUpdatedPolicySetupGuardianList(ownerApprover)
             )
-
-            submitPolicySetup(updatedPolicySetupGuardians)
         }
     }
 
@@ -305,28 +351,6 @@ class PlanSetupViewModel @Inject constructor(
                 createPolicySetupResponse = response
             )
         }
-    }
-
-    private suspend fun createOwnerApprover(): Guardian.SetupGuardian.ImplicitlyOwner {
-        val participantId = ParticipantId.generate()
-        val approverEncryptionKey = keyRepository.createGuardianKey()
-
-        viewModelScope.async(Dispatchers.IO) {
-            keyRepository.saveKeyInCloud(
-                key = Base58EncodedPrivateKey(
-                    Base58.base58Encode(
-                        approverEncryptionKey.privateKeyRaw()
-                    )
-                ),
-                participantId = participantId
-            )
-        }.await()
-
-        return Guardian.SetupGuardian.ImplicitlyOwner(
-            label = "Me",
-            participantId = participantId,
-            guardianPublicKey = Base58EncodedGuardianPublicKey(approverEncryptionKey.publicExternalRepresentation().value),
-        )
     }
 
     private fun createExternalApprover(nickname: String): Guardian.SetupGuardian.ExternalApprover {
@@ -561,6 +585,44 @@ class PlanSetupViewModel @Inject constructor(
             guardianPublicKey = (this.status as GuardianStatus.ImplicitlyOwner).guardianPublicKey
         )
     }
+
+    //Cloud Storage
+    fun getPrivateKeyForUpload() : Base58EncodedPrivateKey? {
+        val encryptionKey = state.tempEncryptedKey ?: return null
+        return Base58EncodedPrivateKey(Base58.base58Encode(encryptionKey.privateKeyRaw()))
+    }
+
+    fun onKeyUploadSuccess() {
+        val ownerApprover = state.tempOwnerApprover
+        resetCloudStorageActionState()
+
+        kotlin.runCatching {
+            require(ownerApprover != null)
+            createPolicySetupWithOwnerApprover(ownerApprover)
+        }.onFailure {
+            val exception = Exception(it)
+            state = state.copy(
+                createPolicySetupResponse =
+                Resource.Error(exception = exception)
+            )
+            exception.sendError(CrashReportingUtil.CloudUpload)
+        }
+    }
+
+    fun onKeyUploadFailed(exception: Exception?) {
+        state = state.copy(
+            createPolicySetupResponse = Resource.Error(exception = exception),
+            saveKeyToCloud = Resource.Uninitialized
+        )
+        exception?.sendError(CrashReportingUtil.CloudUpload)
+    }
+
+    private fun resetCloudStorageActionState() {
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            tempOwnerApprover = null,
+            tempEncryptedKey = null,
+            saveKeyToCloud = Resource.Uninitialized
+        )
+    }
 }
-
-

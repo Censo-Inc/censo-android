@@ -3,12 +3,14 @@ package co.censo.censo.presentation.plan_setup
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import kotlinx.datetime.Clock
 
 
@@ -38,6 +40,13 @@ data class PlanSetupState(
     val initiateRecoveryResponse: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
     val retrieveRecoveryShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,
     val replacePolicyResponse: Resource<ReplacePolicyApiResponse> = Resource.Uninitialized,
+
+    // Cloud Storage
+    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
+    val tempOwnerApprover: Guardian.SetupGuardian.ImplicitlyOwner? = null,
+    //TODO: Perform SymmetricEncryption on the key in the next PR
+    val tempEncryptedKey: EncryptionKey? = null,
+    val saveKeyToCloud: Resource<Unit> = Resource.Uninitialized,
 
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized
@@ -72,6 +81,7 @@ data class PlanSetupState(
                 || initiateRecoveryResponse is Resource.Loading
                 || retrieveRecoveryShardsResponse is Resource.Loading
                 || replacePolicyResponse is Resource.Loading
+                || saveKeyToCloud is Resource.Loading
 
     val asyncError = userResponse is Resource.Error
             || createPolicySetupResponse is Resource.Error

@@ -36,11 +36,10 @@ object CrashReportingUtil {
     const val RetrieveAccount = "RetrieveAccount"
 }
 
-fun Exception.sendError(reason: String, origin: String? = null) {
+fun Exception.sendError(reason: String) {
     val errorMessageData = mapOf(ERROR_MESSAGE_KEY to reason)
 
     val tagList = mutableListOf(MANUALLY_REPORTED_TAG)
-    if (origin != null) { tagList.add(origin) }
 
     RaygunClient.send(this, tagList, errorMessageData)
 }
