@@ -174,8 +174,9 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun updateLabel(updatedLabel: String) {
-        state = state.copy(label = updatedLabel)
-
+        state = state.copy(
+            label = updatedLabel
+        )
     }
 
     fun entrySelected(entryType: EntryType) {

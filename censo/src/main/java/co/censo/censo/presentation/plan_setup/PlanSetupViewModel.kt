@@ -48,8 +48,7 @@ class PlanSetupViewModel @Inject constructor(
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
     private val pollingVerificationTimer: VaultCountDownTimer,
-    ) : ViewModel() {
-
+) : ViewModel() {
     var state by mutableStateOf(PlanSetupState())
         private set
 
@@ -231,7 +230,9 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun approverNicknameChanged(nickname: String) {
-        state = state.copy(editedNickname = nickname)
+        state = state.copy(
+            editedNickname = nickname
+        )
     }
 
     fun onSaveApprover() {

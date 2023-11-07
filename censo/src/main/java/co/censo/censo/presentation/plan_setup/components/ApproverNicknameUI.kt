@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.censo.presentation.plan_setup.PlanSetupState.Companion.APPROVER_NAME_MAX_LENGTH
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +40,7 @@ fun ApproverNicknameUI(
     isRename: Boolean = false,
     nickname: String,
     enabled: Boolean,
+    nicknameIsTooLong: Boolean = false,
     onNicknameChanged: (String) -> Unit,
     onSaveNickname: () -> Unit
 ) {
@@ -102,7 +104,14 @@ fun ApproverNicknameUI(
             )
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = if (nicknameIsTooLong) stringResource(R.string.input_string_is_too_long, APPROVER_NAME_MAX_LENGTH) else " ",
+            textAlign = TextAlign.Center,
+            color = SharedColors.ErrorRed
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight / 2))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
@@ -145,6 +154,18 @@ fun PreviewDisabledNickname() {
     ApproverNicknameUI(
         nickname = "",
         enabled = false,
+        onNicknameChanged = {},
+        onSaveNickname = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewNicknameIsTooLong() {
+    ApproverNicknameUI(
+        nickname = "",
+        enabled = false,
+        nicknameIsTooLong = true,
         onNicknameChanged = {},
         onSaveNickname = {},
     )

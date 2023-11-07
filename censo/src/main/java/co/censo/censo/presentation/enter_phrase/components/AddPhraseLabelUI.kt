@@ -34,12 +34,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.censo.presentation.enter_phrase.EnterPhraseState.Companion.PHRASE_LABEL_MAX_LENGTH
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPhraseLabelUI(
     label: String,
     enabled: Boolean,
+    labelIsTooLong: Boolean = false,
     onLabelChanged: (String) -> Unit,
     onSavePhrase: () -> Unit
 ) {
@@ -102,7 +104,14 @@ fun AddPhraseLabelUI(
             )
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = if (labelIsTooLong) stringResource(R.string.input_string_is_too_long, PHRASE_LABEL_MAX_LENGTH) else " ",
+            textAlign = TextAlign.Center,
+            color = SharedColors.ErrorRed
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight / 2))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
@@ -145,6 +154,18 @@ fun PreviewDisabledLabel() {
     AddPhraseLabelUI(
         label = "",
         enabled = false,
+        onLabelChanged = {},
+        onSavePhrase = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewLabelTooLong() {
+    AddPhraseLabelUI(
+        label = "",
+        enabled = false,
+        labelIsTooLong = true,
         onLabelChanged = {},
         onSavePhrase = {},
     )

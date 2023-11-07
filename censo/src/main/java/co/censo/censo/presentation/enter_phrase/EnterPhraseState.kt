@@ -13,6 +13,7 @@ data class EnterPhraseState(
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
     val phraseInvalidReason: BIP39InvalidReason? = null,
     val label: String = "",
+    val labelTooLong: String? = null,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
@@ -21,7 +22,12 @@ data class EnterPhraseState(
     val exitFlow: Boolean = false
 ) {
 
-    val labelValid = label.isNotEmpty()
+    companion object {
+        const val PHRASE_LABEL_MAX_LENGTH = 50
+    }
+
+    val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH
+    val labelValid = label.isNotEmpty() && !labelIsTooLong
 
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.EDIT,
