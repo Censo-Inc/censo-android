@@ -143,8 +143,9 @@ dependencies {
     //Google API Java Client
     implementation("com.google.api-client:google-api-client:2.2.0")
 
-    //One Tap
+    //Google Auth
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
 
     //GoogleAuth (utilizes the One Tap dependency above)
     implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")

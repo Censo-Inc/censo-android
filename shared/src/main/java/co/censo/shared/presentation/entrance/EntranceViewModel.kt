@@ -24,6 +24,7 @@ import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 /**
@@ -173,9 +174,10 @@ class EntranceViewModel @Inject constructor(
     }
 
     fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        authUtil.getAccountFromSignInTask(
-            completedTask,
-            onSuccess = { account ->
+        viewModelScope.launch {
+            try {
+                val account = completedTask.await()
+
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
                     state = state.copy(
                         forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(
@@ -186,14 +188,11 @@ class EntranceViewModel @Inject constructor(
                 } else {
                     signInUser(account.idToken)
                 }
-            },
-            onException = { exception ->
-                googleAuthFailure(
-                    GoogleAuthError.ErrorParsingIntent(
-                        exception
-                    )
-                )
-            })
+
+            } catch (e: Exception) {
+                googleAuthFailure(GoogleAuthError.ErrorParsingIntent(e))
+            }
+        }
     }
 
 
