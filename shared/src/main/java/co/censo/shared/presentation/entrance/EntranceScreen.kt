@@ -374,13 +374,13 @@ fun OwnerEntranceStandardUI(
         ) {
             Text(
                 text = stringResource(R.string.terms),
-                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/terms/") },
+                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/legal/terms") },
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.width(24.dp))
             Text(
                 text = stringResource(R.string.privacy),
-                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/privacy/") },
+                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/legal/privacy") },
                 fontWeight = FontWeight.SemiBold
             )
         }
