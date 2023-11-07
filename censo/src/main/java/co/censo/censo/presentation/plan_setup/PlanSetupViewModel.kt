@@ -135,7 +135,9 @@ class PlanSetupViewModel @Inject constructor(
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            updateOwnerState(ownerStateResource.data!!, overwriteUIState)
+            ownerStateResource.data?.let {
+                updateOwnerState(it, overwriteUIState)
+            }
 
             state = state.copy(userResponse = ownerStateResource)
         }
