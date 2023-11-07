@@ -18,7 +18,7 @@ data class GetGuardianStateApiResponse(
 data class GuardianState(
     val participantId: ParticipantId,
     val phase: GuardianPhase,
-    val invitationId: InvitationId?
+    val invitationId: InvitationId? = null
 )
 
 @Serializable
