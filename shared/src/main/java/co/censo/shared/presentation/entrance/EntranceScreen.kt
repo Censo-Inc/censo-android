@@ -138,11 +138,9 @@ fun EntranceScreen(
                 }
 
                 RESULT_CANCELED -> {
-                    Exception("User canceled google auth").sendError(CrashReportingUtil.SignIn)
                     viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
                 }
                 else -> {
-                    Exception("Google auth intent result failed").sendError(CrashReportingUtil.SignIn)
                     viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
                 }
             }

@@ -21,5 +21,6 @@ buildscript {
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.44")
         classpath("com.adarshr:gradle-test-logger-plugin:3.2.0")
         classpath("com.google.firebase:firebase-appdistribution-gradle:4.0.1")
+        classpath("io.sentry:sentry-android-gradle-plugin:3.14.0")
     }
 }

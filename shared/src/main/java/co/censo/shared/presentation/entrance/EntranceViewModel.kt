@@ -263,6 +263,7 @@ class EntranceViewModel @Inject constructor(
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
+        googleAuthError.exception.sendError(CrashReportingUtil.SignIn)
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 

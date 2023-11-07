@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".VaultApplication"
+        android:name=".CensoApplication"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:windowSoftInputMode="adjustResize"
@@ -67,6 +67,16 @@
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
+
+        <!-- Required: set your sentry.io project identifier (DSN) -->
+        <meta-data android:name="io.sentry.dsn" android:value="https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192" />
+
+        <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
+        <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="false" />
+        <!-- enable screenshot for crashes -->
+        <meta-data android:name="io.sentry.attach-screenshot" android:value="false" />
+        <!-- enable view hierarchy for crashes -->
+        <meta-data android:name="io.sentry.attach-view-hierarchy" android:value="false" />
     </application>
 
 </manifest>
