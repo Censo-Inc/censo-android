@@ -30,6 +30,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,43 +69,47 @@ fun ViewAccessPhraseUI(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Icon(
-                        painterResource(id = co.censo.censo.R.drawable.time_left_icon),
-                        contentDescription = "",
-                    )
-                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
 
-                    val accessTextStyle = SpanStyle(
-                        fontSize = 16.sp,
-                        color = Color.Black
-                    )
+                    Row(
+                        modifier = Modifier.weight(0.70f),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painterResource(id = co.censo.censo.R.drawable.time_left_icon),
+                            contentDescription = "",
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
 
-                    val timeLeftText = buildAnnotatedString {
-                        withStyle(accessTextStyle) {
-                            append("Access ends in ")
+                        val accessTextStyle = SpanStyle(
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+
+                        val timeLeftText = buildAnnotatedString {
+                            withStyle(accessTextStyle) {
+                                append("Access ends in ")
+                            }
+                            withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
+                                append(formatPhraseAccessDuration(timeLeft))
+                            }
                         }
-                        withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
-                            append(formatPhraseAccessDuration(timeLeft))
-                        }
+
+                        Text(
+                            text = timeLeftText,
+                            color = Color.Black
+                        )
                     }
 
-                    Text(
-                        text = timeLeftText,
-                        color = Color.Black
-                    )
-
                     Box(
-                        modifier = Modifier
-                            .weight(0.1f)
-                            .padding(end = 12.dp),
-                        contentAlignment = Alignment.CenterEnd,
+                        modifier = Modifier.weight(0.30f),
+                        contentAlignment = Alignment.Center,
                     ) {
                         StandardButton(
-                            contentPadding = PaddingValues(horizontal = 32.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp),
                             onClick = onDone
                         ) {
                             Text(
@@ -224,7 +229,7 @@ fun formatPhraseAccessDuration(duration: Duration): String {
     return "$formattedMinutes $formattedSeconds".trim()
 }
 
-@Preview(showSystemUi = true, showBackground = true)
+@Preview(name = "PIXEL", device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
