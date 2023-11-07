@@ -50,7 +50,6 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setupRayGunCrashReporting()
         setupPushChannel()
 
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -160,10 +159,5 @@ class MainActivity : FragmentActivity() {
                 channelName, NotificationManager.IMPORTANCE_HIGH
             )
         )
-    }
-
-    private fun setupRayGunCrashReporting() {
-        RaygunClient.init(application);
-        RaygunClient.enableCrashReporting();
     }
 }

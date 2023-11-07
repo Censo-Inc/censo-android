@@ -171,6 +171,9 @@ dependencies {
     //Raygun crash reporting
     implementation("com.raygun:raygun4android:4.0.1")
 
+    //Sentry
+    implementation("io.sentry:sentry-android:6.33.0")
+
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
