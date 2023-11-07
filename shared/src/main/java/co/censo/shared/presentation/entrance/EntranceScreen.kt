@@ -44,15 +44,22 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -388,6 +395,9 @@ fun OwnerEntranceStandardUI(
 fun TermsOfUse(
     onAccept: () -> Unit
 ) {
+
+    var isReview by remember { mutableStateOf(false) }
+
     Scaffold(topBar = {
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -401,48 +411,87 @@ fun TermsOfUse(
         )
     }) { paddingValues ->
         Column(
-            verticalArrangement = Arrangement.Top,
+            modifier = Modifier
+                .padding(horizontal = 28.dp)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                stringResource(R.string.tou_blurb),
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(20.dp)
-            )
-            Divider()
-            HtmlText(
-                termsOfUseVersions["v0.1"]!!,
-                Modifier
-                    .padding(20.dp)
-                    .fillMaxHeight(0.8f)
-                    .verticalScroll(rememberScrollState())
-            )
-            Divider()
+
+            if (isReview) {
+                HtmlText(
+                    termsOfUseVersions["v0.1"]!!,
+                    Modifier
+                        .padding(paddingValues)
+                        .fillMaxHeight(0.8f)
+                        .verticalScroll(rememberScrollState())
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Divider()
+                Spacer(modifier = Modifier.height(10.dp))
+            } else {
+                Image(
+                    painterResource(id = R.drawable.files),
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.terms_of_use),
+                    fontWeight = FontWeight.W600,
+                    fontSize = 24.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.tou_blurb),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        shadow = androidx.compose.ui.graphics.Shadow(
+                            color = Color.LightGray,
+                            offset = Offset(0f, 10f),
+                            blurRadius = 10f
+                        )
+                    )
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StandardButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    onClick = { isReview = true },
+                    color = Color.Black
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.tou_review),
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 22.sp,
+                        modifier = Modifier.padding(all = 8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
             StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 8.dp),
                 onClick = onAccept,
-                color = Color.Black,
-                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
-                modifier = Modifier
-                    .padding(start = 20.dp, top = 10.dp, end = 20.dp)
+                color = Color.Black
             ) {
                 Text(
                     text = stringResource(R.string.tou_accept),
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.Center,
                     color = Color.White,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(all = 8.dp)
                 )
             }
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
-                stringResource(R.string.tou_agreement),
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .padding(10.dp)
+                text = stringResource(R.string.tou_agreement),
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
             )
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
@@ -464,10 +513,8 @@ fun HtmlText(html: String, modifier: Modifier = Modifier, @ColorInt color: Int =
 @Preview
 @Composable
 fun TermsOfUsePreview() {
-    Surface {
-        TermsOfUse {
-            print("Accepted!")
-        }
+    TermsOfUse {
+        print("Accepted!")
     }
 }
 
