@@ -6,11 +6,13 @@ import co.censo.shared.data.model.GuardianState
 
 data class ApproverRoutingState(
 
-    // guardian state
-    val guardianState: GuardianState? = null,
+    val showPasteLink: Boolean = false,
+
+    val linkError: Boolean = false,
+
+    val hasApprovers: Boolean = false,
 
     // async resources
-    val userResponse: Resource<GetUserApiResponse> = Resource.Loading(),
     val navToApproverAccess: Resource<Unit> = Resource.Uninitialized,
     val navToApproverOnboarding: Resource<Unit> = Resource.Uninitialized
 )

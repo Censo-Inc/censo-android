@@ -49,10 +49,7 @@ fun ApproverTopBar(
 
 fun approverTopAppBarIsClosable(uiState: ApproverUIState): Boolean {
     return when (uiState) {
-        ApproverAccessUIState.Complete,
-        ApproverAccessUIState.AccessApproved,
-        ApproverOnboardingUIState.Complete,
-        ApproverOnboardingUIState.UserNeedsPasteInvitationLink -> false
+        ApproverOnboardingUIState.Complete -> false
 
         else -> true
     }

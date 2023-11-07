@@ -40,14 +40,12 @@ import co.censo.approver.presentation.components.ApproverCodeVerification
 import co.censo.approver.presentation.components.ApproverTopBar
 import co.censo.approver.presentation.components.CodeVerificationStatus
 import co.censo.approver.presentation.components.LockedApproverScreen
-import co.censo.approver.presentation.components.PasteLinkHomeScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.ClipboardHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,14 +76,14 @@ fun ApproverOnboardingScreen(
     }
 
     LaunchedEffect(key1 = state) {
-        if (state.navToApproverAccess) {
-            navController.navigate(Screen.ApproverAccessScreen.route) {
+        if (state.navToApproverRouting) {
+            navController.navigate(Screen.ApproverRoutingScreen.route) {
                 popUpTo(Screen.ApproverOnboardingScreen.route) {
                     inclusive = true
                 }
             }
 
-            viewModel.resetApproverAccessNavigationTrigger()
+            viewModel.resetApproverRoutingNavigationTrigger()
         }
 
         if (state.onboardingMessage is Resource.Success) {
@@ -143,7 +141,7 @@ fun ApproverOnboardingScreen(
                                     context
                                 ),
                                 dismissAction = { viewModel.resetAcceptGuardianResource() },
-                            ) { viewModel.retrieveApproverState(false) }
+                            ) { viewModel.resetAcceptGuardianResource() }
                         }
 
                         state.submitVerificationResource is Resource.Error -> {
@@ -202,14 +200,6 @@ fun ApproverOnboardingScreen(
                                         else -> CodeVerificationStatus.Initial
                                     }
                                 )
-                            }
-
-                            ApproverOnboardingUIState.UserNeedsPasteInvitationLink -> {
-                                PasteLinkHomeScreen {
-                                    viewModel.userPastedInviteCode(
-                                        ClipboardHelper.getClipboardContent(context)
-                                    )
-                                }
                             }
 
                             ApproverOnboardingUIState.Complete -> {

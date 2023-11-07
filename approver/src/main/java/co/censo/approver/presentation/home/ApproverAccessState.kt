@@ -34,9 +34,10 @@ data class ApproverAccessState(
     val approveRecoveryResource: Resource<ApproveRecoveryApiResponse> = Resource.Uninitialized,
     val rejectRecoveryResource: Resource<RejectRecoveryApiResponse> = Resource.Uninitialized,
     val ownerEnteredWrongCode: Boolean = false,
+    val accessNotInProgress: Resource<Unit> = Resource.Uninitialized,
 
     // UI state
-    val approverAccessUIState: ApproverAccessUIState = ApproverAccessUIState.UserNeedsPasteRecoveryLink,
+    val approverAccessUIState: ApproverAccessUIState = ApproverAccessUIState.AccessRequested,
     val showTopBarCancelConfirmationDialog: Boolean = false,
 
     //Cloud Storage
@@ -46,6 +47,8 @@ data class ApproverAccessState(
 
     //Success/Error Message
     val onboardingMessage: Resource<RecoveryMessage> = Resource.Uninitialized,
+
+    val navToApproverRouting: Boolean = false,
 ) {
 
     val loading = userResponse is Resource.Loading
@@ -57,6 +60,7 @@ data class ApproverAccessState(
             || storeRecoveryTotpSecretResource is Resource.Error
             || approveRecoveryResource is Resource.Error
             || rejectRecoveryResource is Resource.Error
+            || accessNotInProgress is Resource.Error
 
     val shouldCheckRecoveryCode =
         userResponse !is Resource.Loading && guardianState?.phase is GuardianPhase.RecoveryVerification

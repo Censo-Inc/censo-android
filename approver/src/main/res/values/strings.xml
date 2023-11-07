@@ -48,6 +48,7 @@
     <string name="the_code_you_entered_in_not_correct_please_try_again">The code you entered in not correct. Please try again.</string>
     <string name="close">Close</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="link_not_valid">Link is not valid</string>
     <string name="do_you_really_want_to_cancel">Do you really want to cancel?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -57,6 +58,7 @@
     <string name="tell_seed_phrase_owner_this_digit_code_to_approve_their_access">Tell seed phrase owner this %1$s-digit code to approve their access</string>
     <string name="link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner">Link you have opened does not appear to be correct. Please contact seed phrase owner</string>
     <string name="access_approved">Access approved!</string>
+    <string name="access_not_in_progress">Access not in progress!</string>
     <string name="this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner">This application can only be used by invitation. Please click the invite link you received from the seed phrase owner.</string>
     <string name="you_have_been_invited_to_become_an_approver">You have been invited to become an approver!</string>
     <string name="accept_invitation">Accept Invitation</string>

@@ -26,9 +26,9 @@ data class ApproverOnboardingState(
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
 
     // UI state
-    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.UserNeedsPasteInvitationLink,
+    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.NeedsToEnterCode,
     val showTopBarCancelConfirmationDialog: Boolean = false,
-    val navToApproverAccess: Boolean = false,
+    val navToApproverRouting: Boolean = false,
 
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,

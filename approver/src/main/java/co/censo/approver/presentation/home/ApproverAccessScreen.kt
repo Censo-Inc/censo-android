@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,15 +33,14 @@ import androidx.navigation.NavController
 import co.censo.approver.R
 import co.censo.approver.data.ApproverAccessUIState
 import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproverTopBar
-import co.censo.approver.presentation.components.LockedApproverScreen
 import co.censo.approver.presentation.components.OwnerCodeVerification
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.GetLiveWithUserUI
-import co.censo.shared.util.ClipboardHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +63,18 @@ fun ApproverAccessScreen(
             }
 
             else -> Unit
+        }
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.navToApproverRouting) {
+            navController.navigate(Screen.ApproverRoutingScreen.route) {
+                popUpTo(Screen.ApproverAccessScreen.route) {
+                    inclusive = true
+                }
+            }
+
+            viewModel.resetApproverRoutingNavigationTrigger()
         }
     }
 
@@ -129,12 +141,21 @@ fun ApproverAccessScreen(
                             }
                         }
 
+                        state.accessNotInProgress is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = context.getString(R.string.access_not_in_progress),
+                                dismissAction = { viewModel.resetAccessNotInProgressResource() },
+                                retryAction = null
+                            )
+                        }
+
                         else -> {
                             DisplayError(
                                 errorMessage = stringResource(R.string.something_went_wrong),
                                 dismissAction = null,
                             ) { viewModel.retrieveApproverState(false) }
                         }
+
                     }
                 }
 
@@ -149,15 +170,6 @@ fun ApproverAccessScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverAccessUIState) {
-                            ApproverAccessUIState.UserNeedsPasteRecoveryLink,
-                            ApproverAccessUIState.AccessApproved,
-                            ApproverAccessUIState.Complete -> {
-                                LockedApproverScreen {
-                                    viewModel.userPastedRecovery(
-                                        ClipboardHelper.getClipboardContent(context)
-                                    )
-                                }
-                            }
 
                             ApproverAccessUIState.AccessRequested -> {
                                 GetLiveWithUserUI(

@@ -6,33 +6,17 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.GuardianPhase
-import co.censo.shared.data.model.GuardianState
-import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  *
- * 1. Retrieve user data from API
- * 2. Determine approver: determineApprover()
- *
- *      Backend will know who we are based on our Google ID token
- *
- *      EXCEPT: For initial onboarding when we need to create the approver --> Invitation Id
- *
- *      Access Edge Case: Cannot be null for access b/c we should have participant ID
- *                        and the backend will know our account by Google Id token
- *
- *
- * 3. Determine to send user to Onboarding or Access Flows
- *      Null: Initial Onboarding User
- *      Complete: Home Screen (Unknown right now with designs)
- *      Onboarding Sub Type: Onboarding
- *      Access Sub Type: Access
+ * If we came from a link then navigate to the appropriate place
+ * If not then have them paste a link and use that to navigate
  *
  */
 
@@ -45,75 +29,83 @@ class ApproverRoutingViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveApproverState(false)
+        determineRoute()
     }
 
     fun onStop() {
         state = ApproverRoutingState()
     }
 
-    fun retrieveApproverState(silently: Boolean) {
-        if (!silently) {
-            state = state.copy(userResponse = Resource.Loading())
-        }
-
+    private fun determineRoute() {
         viewModelScope.launch {
-            val userResponse = ownerRepository.retrieveUser()
+            val participantId = guardianRepository.retrieveParticipantId()
+            val invitationId = guardianRepository.retrieveInvitationId()
 
-            state = state.copy(userResponse = userResponse)
+            when {
+                participantId.isEmpty() && invitationId.isEmpty() -> {
+                    val userResponse = ownerRepository.retrieveUser()
+                    if (userResponse is Resource.Success) {
+                        state = state.copy(hasApprovers = userResponse.data!!.guardianStates.count { it.invitationId != null } > 0)
+                    }
+                    state = state.copy(showPasteLink = true)
+                }
+                participantId.isNotEmpty() ->
+                    triggerNavigation(RoutingDestination.ACCESS)
+                invitationId.isNotEmpty() ->
+                    triggerNavigation(RoutingDestination.ONBOARDING)
 
-            if (userResponse is Resource.Success) {
-                determineApprover(userResponse.data!!.guardianStates)
             }
         }
     }
 
-    private fun determineApprover(guardianStates: List<GuardianState>) {
-        val participantId = guardianRepository.retrieveParticipantId()
+    fun userPastedLink(clipboardContent: String?) {
 
-        if (participantId.isEmpty()) {
-            determineApproverUIState(guardianStates.firstOrNull())
+        if (clipboardContent == null) {
+            state = state.copy(linkError = true)
             return
         }
+        viewModelScope.launch {
+            try {
+                val censoLink = parseLink(clipboardContent)
+                when(censoLink.host) {
+                    "invite" -> {
+                        guardianRepository.clearParticipantId()
+                        guardianRepository.saveInvitationId(censoLink.identifier)
+                        triggerNavigation(RoutingDestination.ONBOARDING)
+                    }
 
-        val guardianState = guardianStates.forParticipant(participantId)
-        if (guardianState == null) {
-            handleMissingApprover()
-            return
+                    "access" -> {
+                        guardianRepository.clearInvitationId()
+                        guardianRepository.saveParticipantId(censoLink.identifier)
+                        triggerNavigation(RoutingDestination.ACCESS)
+                    }
+
+                    else -> state = state.copy(linkError = true)
+                }
+            } catch (e: Exception) {
+                state = state.copy(linkError = true)
+            }
         }
-
-        determineApproverUIState(guardianState)
     }
 
-    private fun handleMissingApprover() {
-        guardianRepository.clearParticipantId()
-        triggerNavigation(RoutingDestination.ACCESS)
+    data class CensoLink(
+        val host: String,
+        val identifier: String
+    )
+    private fun parseLink(link: String): CensoLink {
+        val parts = link.split("//")
+        if (parts.size != 2 || !parts[0].startsWith("censo")) {
+            throw Exception("invalid link")
+        }
+        val routeAndIdentifier = parts[1].split("/")
+        if (routeAndIdentifier.size != 2 && !setOf("access", "invite").contains(routeAndIdentifier[0])) {
+            throw Exception("invalid link")
+        }
+        return CensoLink(routeAndIdentifier[0], routeAndIdentifier[1])
     }
 
-
-    private fun determineApproverUIState(guardianState: GuardianState?) {
-        if (guardianState == null) {
-            triggerNavigation(RoutingDestination.ONBOARDING)
-            return
-        }
-
-        val approverDestination = when (guardianState.phase) {
-            //No Action needed
-            GuardianPhase.Complete -> RoutingDestination.ACCESS
-
-            //Approver Access Requested
-            is GuardianPhase.RecoveryRequested,
-            is GuardianPhase.RecoveryVerification,
-            is GuardianPhase.RecoveryConfirmation -> RoutingDestination.ACCESS
-
-            //Approver Onboarding
-            is GuardianPhase.WaitingForCode,
-            is GuardianPhase.WaitingForVerification,
-            is GuardianPhase.VerificationRejected -> RoutingDestination.ONBOARDING
-        }
-
-        //Trigger navigation to move the approver forward
-        triggerNavigation(routingDestination = approverDestination)
+    fun clearError() {
+        state = state.copy(linkError = false)
     }
 
     private fun triggerNavigation(routingDestination: RoutingDestination) {

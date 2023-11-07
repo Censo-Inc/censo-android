@@ -18,6 +18,7 @@ data class GetGuardianStateApiResponse(
 data class GuardianState(
     val participantId: ParticipantId,
     val phase: GuardianPhase,
+    val invitationId: InvitationId?
 )
 
 @Serializable
@@ -31,21 +32,15 @@ sealed class GuardianPhase {
 
     @Serializable
     @SerialName("WaitingForCode")
-    data class WaitingForCode(
-        val invitationId: InvitationId,
-    ) : GuardianPhase()
+    object WaitingForCode : GuardianPhase()
 
     @Serializable
     @SerialName("WaitingForVerification")
-    data class WaitingForVerification(
-        val invitationId: InvitationId,
-    ) : GuardianPhase()
+    object WaitingForVerification : GuardianPhase()
 
     @Serializable
     @SerialName("VerificationRejected")
-    data class VerificationRejected(
-        val invitationId: InvitationId,
-    ) : GuardianPhase()
+    object VerificationRejected : GuardianPhase()
 
     @Serializable
     @SerialName("Complete")
