@@ -218,7 +218,7 @@ fun EnterPhraseScreen(
                             AddPhraseLabelUI(
                                 label = state.label,
                                 enabled = state.labelValid,
-                                error = state.labelError,
+                                labelIsTooLong = state.labelIsTooLong,
                                 onLabelChanged = viewModel::updateLabel,
                                 onSavePhrase = viewModel::saveSeedPhrase
                             )

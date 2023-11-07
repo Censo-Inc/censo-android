@@ -24,10 +24,6 @@ class EnterPhraseViewModel @Inject constructor(
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
-    companion object {
-        const val PHRASE_LABEL_MAX_LENGTH = 50
-    }
-
     var state by mutableStateOf(EnterPhraseState())
         private set
 
@@ -179,8 +175,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun updateLabel(updatedLabel: String) {
         state = state.copy(
-            label = updatedLabel,
-            labelError = if (updatedLabel.length > PHRASE_LABEL_MAX_LENGTH) "Can't be longer than $PHRASE_LABEL_MAX_LENGTH characters" else null
+            label = updatedLabel
         )
     }
 

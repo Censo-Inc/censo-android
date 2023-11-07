@@ -27,7 +27,6 @@ data class PlanSetupState(
 
     // inviting approver
     val editedNickname: String = "",
-    val editedNicknameError: String? = null,
 
     // totp
     val secondsLeft: Int = 0,
@@ -52,10 +51,15 @@ data class PlanSetupState(
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized
 ) {
+    companion object {
+        const val APPROVER_NAME_MAX_LENGTH = 20
+    }
+
     val activatingApprover = alternateApprover ?: primaryApprover
     val approverType = if (alternateApprover != null) ApproverType.Alternate else ApproverType.Primary
 
-    val editedNicknameValid = editedNickname.isNotEmpty() && editedNicknameError == null
+    val editedNicknameIsTooLong = editedNickname.length > APPROVER_NAME_MAX_LENGTH
+    val editedNicknameValid = editedNickname.isNotEmpty() && !editedNicknameIsTooLong
 
     val backArrowType = when {
         planSetupUIState in listOf(

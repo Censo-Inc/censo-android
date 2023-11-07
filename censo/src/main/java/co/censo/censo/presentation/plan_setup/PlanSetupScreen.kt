@@ -174,7 +174,7 @@ fun PlanSetupScreen(
                             ApproverNicknameUI(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
-                                error = state.editedNicknameError,
+                                nicknameIsTooLong = state.editedNicknameIsTooLong,
                                 onNicknameChanged = viewModel::approverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApprover
                             )
@@ -207,7 +207,7 @@ fun PlanSetupScreen(
                                 isRename = true,
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
-                                error = state.editedNicknameError,
+                                nicknameIsTooLong = state.editedNicknameIsTooLong,
                                 onNicknameChanged = viewModel::approverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApproverNickname
                             )
