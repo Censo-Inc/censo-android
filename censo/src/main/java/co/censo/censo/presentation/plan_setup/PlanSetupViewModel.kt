@@ -238,18 +238,11 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onSaveApprover() {
-        if (state.ownerApprover?.asImplicitlyOwner() == null) {
-            //Need to create owner approver key and upload it before submitting policy setup
-            createOwnerApproverAndTriggerKeyUpload()
-        } else {
+        state.ownerApprover?.asImplicitlyOwner()?.let {
             //Can move directly to setting up and submitting policy
             state = state.copy(createPolicySetupResponse = Resource.Loading())
-            submitPolicySetup(
-                updatedPolicySetupGuardians = getUpdatedPolicySetupGuardianList(
-                    state.primaryApprover?.asImplicitlyOwner()!!
-                )
-            )
-        }
+            submitPolicySetup(updatedPolicySetupGuardians = getUpdatedPolicySetupGuardianList(it))
+        } ?: createOwnerApproverAndTriggerKeyUpload() //Need to create owner approver key and upload it before submitting policy setup
     }
 
     private fun createOwnerApproverAndTriggerKeyUpload() {
