@@ -25,13 +25,7 @@ interface AuthUtil {
     suspend fun silentlyRefreshTokenIfInvalid(jwt: String, deviceKeyId: String, onDone: (() -> Unit)? = null)
     fun getGoogleSignInClient() : GoogleSignInClient
     fun isJWTValid(jwt: JWT): Boolean
-    fun getAccountFromSignInTask(
-        task: Task<GoogleSignInAccount>,
-        onSuccess: (GoogleSignInAccount) -> Unit,
-        onException: (Exception) -> Unit
-    )
     fun verifyToken(jwt: String) : String?
-
     suspend fun signOut()
 }
 
@@ -48,48 +42,33 @@ class GoogleAuth(private val context: Context, private val secureStorage: Secure
             .build()
 
 
-    override fun getAccountFromSignInTask(
-        task: Task<GoogleSignInAccount>,
-        onSuccess: (GoogleSignInAccount) -> Unit,
-        onException: (Exception) -> Unit
-    ) {
-        try {
-            val account = task.getResult(ApiException::class.java)
-            onSuccess(account)
-        } catch (e: ApiException) {
-            e.sendError(RetrieveAccount)
-            onException(e)
-        } catch (e: Exception) {
-            e.sendError(RetrieveAccount)
-            onException(e)
-        }
-    }
-
     override suspend fun silentlyRefreshTokenIfInvalid(jwt: String, deviceKeyId: String, onDone: (() -> Unit)?) {
         val decodedJwt = JWT(jwt)
-        if (!isJWTValid(decodedJwt)) {
+
+        if (isJWTValid(decodedJwt)) {
+            return
+        }
+
+        try {
             val googleSignInClient = getGoogleSignInClient()
 
-            getAccountFromSignInTask(
-                task = googleSignInClient.silentSignIn(),
-                onSuccess = { account ->
-                    val updatedJwt = account.idToken
-                    if (updatedJwt?.isNotEmpty() == true) {
-                        val verifiedIdToken = verifyToken(updatedJwt)
-                        if (verifiedIdToken == null || verifiedIdToken != deviceKeyId) {
-                            Exception().sendError(SilentRefreshToken)
-                            onDone?.invoke()
-                        } else {
-                            secureStorage.saveJWT(updatedJwt)
-                            onDone?.invoke()
-                        }
-                    }
-                },
-                onException = {
-                    it.sendError(SilentRefreshToken)
+            val account = googleSignInClient.silentSignIn().await()
+
+            val updatedJwt = account.idToken
+            if (updatedJwt?.isNotEmpty() == true) {
+                val verifiedIdToken = verifyToken(updatedJwt)
+                if (verifiedIdToken == null || verifiedIdToken != deviceKeyId) {
+                    Exception().sendError(SilentRefreshToken)
+                    onDone?.invoke()
+                } else {
+                    secureStorage.saveJWT(updatedJwt)
                     onDone?.invoke()
                 }
-            )
+            }
+
+        } catch (e: Exception) {
+            e.sendError(SilentRefreshToken)
+            onDone?.invoke()
         }
     }
 
