@@ -56,19 +56,17 @@ class ApproverEntranceViewModel @Inject constructor(
     }
 
     private fun determineLoginState() {
-        viewModelScope.launch {
-            val jwtToken = ownerRepository.retrieveJWT()
-            if (jwtToken.isNotEmpty()) {
-                val tokenValid = ownerRepository.checkJWTValid(jwtToken)
+        val jwtToken = ownerRepository.retrieveJWT()
+        if (jwtToken.isNotEmpty()) {
+            val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
-                if (tokenValid) {
-                    checkUserHasRespondedToNotificationOptIn()
-                } else {
-                    attemptRefresh(jwtToken)
-                }
+            if (tokenValid) {
+                checkUserHasRespondedToNotificationOptIn()
             } else {
-                loggedOutRouting()
+                attemptRefresh(jwtToken)
             }
+        } else {
+            loggedOutRouting()
         }
     }
 
@@ -244,6 +242,7 @@ class ApproverEntranceViewModel @Inject constructor(
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
+        googleAuthError.exception.sendError(CrashReportingUtil.SignIn)
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 

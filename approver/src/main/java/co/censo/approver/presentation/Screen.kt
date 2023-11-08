@@ -1,5 +1,7 @@
 package co.censo.approver.presentation
 
+import co.censo.shared.DeepLinkURI
+
 sealed class Screen(val route: String) {
     object ApproverEntranceRoute : Screen("approver_entrance_screen")
     object ApproverOnboardingScreen : Screen("approver_onboarding_screen")

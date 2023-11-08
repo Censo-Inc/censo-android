@@ -40,6 +40,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.popUpToTop
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -99,11 +100,9 @@ fun ApproverEntranceScreen(
                 }
 
                 RESULT_CANCELED -> {
-                    Exception("User canceled google auth").sendError(CrashReportingUtil.SignIn)
                     viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
                 }
                 else -> {
-                    Exception("Google auth intent result failed").sendError(CrashReportingUtil.SignIn)
                     viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
                 }
             }
@@ -119,9 +118,7 @@ fun ApproverEntranceScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let { destination ->
                 navController.navigate(destination) {
-                    popUpTo(Screen.ApproverEntranceRoute.route) {
-                        inclusive = true
-                    }
+                    popUpToTop()
                 }
 
             }
@@ -211,18 +208,18 @@ fun ApproverEntranceScreen(
                         )
                     }
                 }
-
-                if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
-                    CloudStorageHandler(
-                        actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
-                        participantId = ParticipantId(""),
-                        encryptedPrivateKey = null,
-                        onActionSuccess = {},
-                        onActionFailed = {},
-                        onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
-                    )
-                }
             }
+        }
+
+        if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
+            CloudStorageHandler(
+                actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
+                participantId = ParticipantId(""),
+                encryptedPrivateKey = null,
+                onActionSuccess = {},
+                onActionFailed = {},
+                onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
+            )
         }
     }
 }

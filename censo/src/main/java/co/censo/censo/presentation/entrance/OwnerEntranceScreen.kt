@@ -235,18 +235,18 @@ fun OwnerEntranceScreen(
                 OwnerEntranceStandardUI(
                     authenticate = { viewModel.startGoogleSignInFlow() }
                 )
-
-                if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
-                    CloudStorageHandler(
-                        actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
-                        participantId = ParticipantId(""),
-                        encryptedPrivateKey = null,
-                        onActionSuccess = {},
-                        onActionFailed = {},
-                        onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
-                    )
-                }
             }
+        }
+
+        if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
+            CloudStorageHandler(
+                actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
+                participantId = ParticipantId(""),
+                encryptedPrivateKey = null,
+                onActionSuccess = {},
+                onActionFailed = {},
+                onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
+            )
         }
     }
 }

@@ -22,8 +22,8 @@ import co.censo.approver.presentation.entrance.ApproverEntranceScreen
 import co.censo.approver.presentation.home.ApproverAccessScreen
 import co.censo.approver.presentation.onboarding.ApproverOnboardingScreen
 import co.censo.approver.ui.theme.GuardianTheme
-import co.censo.shared.SharedScreen.Companion.APPROVER_INVITE_URI
-import co.censo.shared.SharedScreen.Companion.APPROVER_ACCESS_URI
+import co.censo.shared.DeepLinkURI.APPROVER_INVITE_URI
+import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_URI
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

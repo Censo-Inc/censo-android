@@ -34,8 +34,4 @@ sealed class Screen(val route: String) {
             return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}"
         }
     }
-
-    companion object {
-        const val START_DESTINATION_ID = 0
-    }
 }
