@@ -9,7 +9,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.SymmetricEncryption
+import co.censo.shared.data.cryptography.decryptFromByteArray
+import co.censo.shared.data.cryptography.encryptToByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.cryptography.sha256digest
+import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
@@ -91,15 +96,20 @@ class InitialPlanSetupViewModel @Inject constructor(
         )
     }
 
-    fun getPrivateKeyForUpload() : Base58EncodedPrivateKey? {
+    fun getEncryptedKeyForUpload() : ByteArray? {
         val encryptionKey = state.initialPlanData.approverEncryptionKey ?: return null
-        return Base58EncodedPrivateKey(Base58.base58Encode(encryptionKey.privateKeyRaw()))
+        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
     }
 
-    fun onKeySaved(approverEncryptionKey: EncryptionKey) {
+    fun onKeySaved(approverEncryptedKey: ByteArray) {
+
+        //Decrypt the byteArray
+        val privateKey =
+            approverEncryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+
         state = state.copy(
             initialPlanData = state.initialPlanData.copy(
-                approverEncryptionKey = approverEncryptionKey
+                approverEncryptionKey = privateKey.toEncryptionKey()
             ),
             saveKeyToCloudResource = Resource.Uninitialized,
             cloudStorageAction = CloudStorageActionData()

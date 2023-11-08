@@ -28,12 +28,12 @@ class CloudStorageHandlerViewModel @Inject constructor(
     fun onStart(
         actionToPerform: CloudStorageActions,
         participantId: ParticipantId,
-        privateKey: Base58EncodedPrivateKey?
+        privateKey: ByteArray?
     ) {
         state = state.copy(
             cloudActionToPerform = actionToPerform,
             cloudStorageHandlerArgs = CloudStorageHandlerArgs(
-                participantId = participantId, privateKey = privateKey
+                participantId = participantId, encryptedPrivateKey = privateKey
             )
         )
 
@@ -66,10 +66,10 @@ class CloudStorageHandlerViewModel @Inject constructor(
     private fun savePrivateKeyToCloud(
         bypassScopeCheckForCloudStorage: Boolean = false,
     ) {
-        val privateKey = state.cloudStorageHandlerArgs.privateKey
+        val privateKey = state.cloudStorageHandlerArgs.encryptedPrivateKey
         val participantId = state.cloudStorageHandlerArgs.participantId
 
-        if (privateKey == null || privateKey.value.isEmpty()) {
+        if (privateKey == null || privateKey.isEmpty()) {
             state = state.copy(
                 cloudStorageActionResource = Resource.Error(
                     exception = Exception(
@@ -136,7 +136,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
 
                 if (downloadResource is Resource.Success) {
                     val key = downloadResource.data
-                    if (key == null || key.value.isEmpty()) {
+                    if (key == null || key.isEmpty()) {
                         val e = Exception("Retrieved private key was null or empty")
                         e.sendError(CrashReportingUtil.CloudDownload)
                         state = state.copy(

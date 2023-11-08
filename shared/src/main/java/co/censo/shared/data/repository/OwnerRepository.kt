@@ -4,6 +4,7 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedGuardianPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
+import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import VaultSecretId
@@ -15,13 +16,16 @@ import co.censo.shared.data.cryptography.ORDER
 import co.censo.shared.data.cryptography.Point
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.SecretSharerUtils
+import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
+import co.censo.shared.data.cryptography.decryptFromByteArray
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256
+import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
@@ -572,7 +576,11 @@ class OwnerRepositoryImpl(
                     if (ownerApproverKeyResource is Resource.Error) {
                         throw ownerApproverKeyResource.exception!!
                     } else {
-                        EncryptionKey.generateFromPrivateKeyRaw(ownerApproverKeyResource.data!!.bigInt())
+                        val encryptedKey = ownerApproverKeyResource.data!!
+                        val base58EncodedPrivateKey =
+                            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+
+                        EncryptionKey.generateFromPrivateKeyRaw(base58EncodedPrivateKey.bigInt())
                     }
                 }
                 false -> ownerDeviceKey
