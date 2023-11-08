@@ -247,7 +247,7 @@ fun ApproverOnboardingScreen(
     if (state.cloudStorageAction.triggerAction) {
         val privateKey =
             if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-                viewModel.getPrivateKeyForUpload()
+                viewModel.getEncryptedKeyForUpload()
             } else null
 
         if (state.loadingCloudAction) {
@@ -269,10 +269,10 @@ fun ApproverOnboardingScreen(
         CloudStorageHandler(
             actionToPerform = state.cloudStorageAction.action,
             participantId = ParticipantId(state.participantId),
-            privateKey = privateKey,
-            onActionSuccess = { base58EncodedPrivateKey ->
+            encryptedPrivateKey = privateKey,
+            onActionSuccess = { byteArray ->
                 viewModel.handleCloudStorageActionSuccess(
-                    base58EncodedPrivateKey,
+                    byteArray,
                     state.cloudStorageAction.action
                 )
             },

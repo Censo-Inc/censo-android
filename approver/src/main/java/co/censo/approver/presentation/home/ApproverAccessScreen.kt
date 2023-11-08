@@ -249,10 +249,10 @@ fun ApproverAccessScreen(
         CloudStorageHandler(
             actionToPerform = state.cloudStorageAction.action,
             participantId = ParticipantId(state.participantId),
-            privateKey = null,
-            onActionSuccess = { base58EncodedPrivateKey ->
+            encryptedPrivateKey = null,
+            onActionSuccess = { byteArray ->
                 viewModel.handleCloudStorageActionSuccess(
-                    base58EncodedPrivateKey,
+                    byteArray,
                     state.cloudStorageAction.action
                 )
             },

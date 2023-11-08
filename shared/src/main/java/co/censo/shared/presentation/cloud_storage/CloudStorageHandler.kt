@@ -43,8 +43,8 @@ import com.google.android.gms.auth.api.identity.Identity
 fun CloudStorageHandler(
     actionToPerform: CloudStorageActions,
     participantId: ParticipantId,
-    privateKey: Base58EncodedPrivateKey?,
-    onActionSuccess: (privateKey: Base58EncodedPrivateKey) -> Unit,
+    encryptedPrivateKey: ByteArray?,
+    onActionSuccess: (privateKey: ByteArray) -> Unit,
     onActionFailed: (exception: Exception?) -> Unit,
     onCloudStorageAccessGranted: (() -> Unit)? = null,
     viewModel: CloudStorageHandlerViewModel = hiltViewModel()
@@ -117,7 +117,7 @@ fun CloudStorageHandler(
         viewModel.onStart(
             actionToPerform = actionToPerform,
             participantId = participantId,
-            privateKey = privateKey
+            privateKey = encryptedPrivateKey
         )
         onDispose { viewModel.onDispose() }
     }

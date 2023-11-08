@@ -8,13 +8,13 @@ data class CloudStorageHandlerState(
     val cloudActionToPerform: CloudStorageActions = CloudStorageActions.UNINITIALIZED,
     val cloudStorageHandlerArgs: CloudStorageHandlerArgs = CloudStorageHandlerArgs(),
     val shouldEnforceCloudStorageAccess: Boolean = false,
-    val cloudStorageActionResource: Resource<Base58EncodedPrivateKey> = Resource.Uninitialized,
+    val cloudStorageActionResource: Resource<ByteArray> = Resource.Uninitialized,
     val cloudStorageAccessGranted: Boolean = false,
 )
 
 data class CloudStorageHandlerArgs(
     val participantId: ParticipantId = ParticipantId(""),
-    val privateKey: Base58EncodedPrivateKey? = null,
+    val encryptedPrivateKey: ByteArray? = null,
 )
 
 enum class CloudStorageActions {

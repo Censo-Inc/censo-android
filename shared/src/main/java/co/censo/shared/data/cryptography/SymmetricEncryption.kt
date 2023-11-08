@@ -1,5 +1,8 @@
 package co.censo.shared.data.cryptography
 
+import Base58EncodedPrivateKey
+import co.censo.shared.data.cryptography.key.EncryptionKey
+import io.github.novacrypto.base58.Base58
 import org.bouncycastle.crypto.engines.AESEngine
 import org.bouncycastle.crypto.modes.GCMBlockCipher
 import org.bouncycastle.crypto.params.AEADParameters
@@ -28,4 +31,17 @@ class SymmetricEncryption {
 
         return cipher.doFinal(Arrays.copyOfRange(encryptedData, 12, encryptedData.size))
     }
+}
+
+fun ByteArray.decryptFromByteArray(deviceKeyId: String) : Base58EncodedPrivateKey {
+    val decryptedKey = SymmetricEncryption().decrypt(deviceKeyId.sha256digest(), this)
+    return Base58EncodedPrivateKey(Base58.base58Encode(decryptedKey))
+}
+
+fun EncryptionKey.encryptToByteArray(deviceKeyId: String) : ByteArray {
+    return SymmetricEncryption().encrypt(
+        deviceKeyId.sha256digest(),
+        Base58EncodedPrivateKey(Base58.base58Encode(this.privateKeyRaw())).bigInt()
+            .toByteArrayNoSign()
+    )
 }

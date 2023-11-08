@@ -29,14 +29,14 @@ interface KeyRepository {
     fun encryptWithDeviceKey(data: ByteArray) : ByteArray
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
     suspend fun saveKeyInCloud(
-        key: Base58EncodedPrivateKey,
+        key: ByteArray,
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false
-    ): Resource<Base58EncodedPrivateKey?>
+    ): Resource<ByteArray?>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
     suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
     suspend fun deleteDeviceKeyIfPresent(keyId: String)
@@ -81,7 +81,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      * the caller should wrap this method in a try catch
      */
     override suspend fun saveKeyInCloud(
-        key: Base58EncodedPrivateKey,
+        key: ByteArray,
         participantId: ParticipantId,
         bypassScopeCheck: Boolean
     ) : Resource<Unit> {
@@ -91,14 +91,9 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             }
         }
 
-        val encryptedKey = SymmetricEncryption().encrypt(
-            retrieveSavedDeviceId().sha256digest(),
-            key.bigInt().toByteArrayNoSign()
-        )
-
         return try {
             cloudStorage.uploadFile(
-                fileContent = encryptedKey.toHexString(),
+                fileContent = key.toHexString(),
                 participantId = participantId,
             )
         } catch (e: Exception) {
@@ -114,7 +109,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean
-    ): Resource<Base58EncodedPrivateKey?> {
+    ): Resource<ByteArray?> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
                 throw CloudStoragePermissionNotGrantedException()
@@ -125,9 +120,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             val resource = cloudStorage.retrieveFileContents(participantId)
 
             if (resource is Resource.Success) {
-                val encryptedKey = Hex.decode(resource.data)
-                val decryptedKey = SymmetricEncryption().decrypt(retrieveSavedDeviceId().sha256digest(), encryptedKey)
-                return Resource.Success(Base58EncodedPrivateKey(Base58.base58Encode(decryptedKey)))
+                return Resource.Success(Hex.decode(resource.data))
             } else {
                 return Resource.Error(exception = resource.exception)
             }
@@ -144,7 +137,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
         val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
         return if (downloadResource is Resource.Success) {
-            downloadResource.data?.value?.isNotEmpty() ?: false
+            downloadResource.data?.isNotEmpty() ?: false
         } else {
             false
         }

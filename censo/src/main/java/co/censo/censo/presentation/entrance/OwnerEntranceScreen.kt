@@ -240,7 +240,7 @@ fun OwnerEntranceScreen(
                     CloudStorageHandler(
                         actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
                         participantId = ParticipantId(""),
-                        privateKey = null,
+                        encryptedPrivateKey = null,
                         onActionSuccess = {},
                         onActionFailed = {},
                         onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }

@@ -155,15 +155,15 @@ fun InitialPlanSetupScreen(
             }
 
             if (state.cloudStorageAction.triggerAction) {
-                val privateKey = viewModel.getPrivateKeyForUpload()
+                val privateKey = viewModel.getEncryptedKeyForUpload()
 
                 CloudStorageHandler(
                     actionToPerform = state.cloudStorageAction.action,
                     participantId = state.participantId,
-                    privateKey = privateKey,
-                    onActionSuccess = { base58EncodedPrivateKey ->
+                    encryptedPrivateKey = privateKey,
+                    onActionSuccess = { byteArray ->
                         projectLog(message = "Cloud Storage action success")
-                        viewModel.onKeySaved(base58EncodedPrivateKey.toEncryptionKey())
+                        viewModel.onKeySaved(byteArray)
                     },
                     onActionFailed = {
                         projectLog(message = "Cloud Storage action failed")

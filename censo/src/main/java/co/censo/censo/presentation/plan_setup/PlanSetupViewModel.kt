@@ -1,7 +1,6 @@
 package co.censo.censo.presentation.plan_setup
 
 import Base58EncodedGuardianPublicKey
-import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import androidx.compose.runtime.getValue
@@ -25,15 +24,12 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
-import co.censo.shared.data.cryptography.SymmetricEncryption
-import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.cryptography.encryptToByteArray
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -238,18 +234,11 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onSaveApprover() {
-        if (state.ownerApprover?.asImplicitlyOwner() == null) {
-            //Need to create owner approver key and upload it before submitting policy setup
-            createOwnerApproverAndTriggerKeyUpload()
-        } else {
+        state.ownerApprover?.asImplicitlyOwner()?.let {
             //Can move directly to setting up and submitting policy
             state = state.copy(createPolicySetupResponse = Resource.Loading())
-            submitPolicySetup(
-                updatedPolicySetupGuardians = getUpdatedPolicySetupGuardianList(
-                    state.primaryApprover?.asImplicitlyOwner()!!
-                )
-            )
-        }
+            submitPolicySetup(updatedPolicySetupGuardians = getUpdatedPolicySetupGuardianList(it))
+        } ?: createOwnerApproverAndTriggerKeyUpload() //Need to create owner approver key and upload it before submitting policy setup
     }
 
     private fun createOwnerApproverAndTriggerKeyUpload() {
@@ -590,9 +579,9 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     //Cloud Storage
-    fun getPrivateKeyForUpload() : Base58EncodedPrivateKey? {
+    fun getEncryptedKeyForUpload() : ByteArray? {
         val encryptionKey = state.tempEncryptedKey ?: return null
-        return Base58EncodedPrivateKey(Base58.base58Encode(encryptionKey.privateKeyRaw()))
+        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
     }
 
     fun onKeyUploadSuccess() {
