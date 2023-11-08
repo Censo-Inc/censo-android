@@ -1,14 +1,15 @@
-package co.censo.shared.presentation.entrance
+package co.censo.censo.presentation.entrance
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
+import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GoogleAuthError
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.networking.PushBody
-import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
@@ -23,6 +24,7 @@ import com.google.android.gms.tasks.Task
 import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -38,39 +40,22 @@ import javax.inject.Inject
  */
 
 @HiltViewModel
-class EntranceViewModel @Inject constructor(
+class OwnerEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository,
     private val pushRepository: PushRepository,
     private val authUtil: AuthUtil,
-    private val secureStorage: SecurePreferences
+    private val secureStorage: SecurePreferences,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
 ) : ViewModel() {
 
-    var state by mutableStateOf(EntranceState())
+    var state by mutableStateOf(OwnerEntranceState())
         private set
 
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
-    fun onOwnerStart() {
+    fun onStart() {
         initAcceptedTermsOfUseVersion()
-
-        state = state.copy(ownerApp = true)
-
-        checkUserHasValidToken()
-    }
-
-    fun onGuardianStart(invitationId: String?, recoveryParticipantId: String?) {
-        initAcceptedTermsOfUseVersion()
-
-        if (invitationId != null) {
-            guardianRepository.saveInvitationId(invitationId)
-        }
-        if (recoveryParticipantId != null) {
-            guardianRepository.saveParticipantId(recoveryParticipantId)
-        }
-
-        state = state.copy(ownerApp = false)
 
         checkUserHasValidToken()
     }
@@ -137,8 +122,7 @@ class EntranceViewModel @Inject constructor(
         viewModelScope.launch {
             if (pushRepository.userHasSeenPushDialog()) {
                 submitNotificationTokenForRegistration()
-
-                if (state.ownerApp) triggerOwnerNavigation() else triggerApproverNavigation()
+                triggerNavigation()
             } else {
                 state = state.copy(
                     showPushNotificationsDialog = Resource.Success(Unit)
@@ -249,16 +233,10 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private fun triggerOwnerNavigation() {
+    private fun triggerNavigation() {
         state = state.copy(
-            userFinishedSetup = Resource.Success(SharedScreen.OwnerRoutingScreen.route),
+            userFinishedSetup = true,
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
-        )
-    }
-
-    private fun triggerApproverNavigation() {
-        state = state.copy(
-            userFinishedSetup = Resource.Success(SharedScreen.ApproverRoutingScreen.route)
         )
     }
 
@@ -276,7 +254,7 @@ class EntranceViewModel @Inject constructor(
     }
 
     fun resetUserFinishedSetup() {
-        state = state.copy(userFinishedSetup = Resource.Uninitialized)
+        state = state.copy(userFinishedSetup = false)
     }
 
     fun resetSignInUserResource() {
@@ -291,6 +269,40 @@ class EntranceViewModel @Inject constructor(
         submitNotificationTokenForRegistration()
         state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
 
-        if (state.ownerApp) triggerOwnerNavigation() else triggerApproverNavigation()
+        triggerNavigation()
+    }
+
+    fun retrieveOwnerStateAndNavigate() {
+        state = state.copy(userResponse = Resource.Loading())
+
+        viewModelScope.launch {
+            val userResponse = ownerRepository.retrieveUser()
+
+            state = state.copy(userResponse = userResponse)
+
+            if (userResponse is Resource.Success) {
+                // update global state
+                ownerStateFlow.tryEmit(userResponse.map { it.ownerState })
+
+                loggedInRouting(userResponse.data!!.ownerState)
+            }
+        }
+    }
+
+    private fun loggedInRouting(ownerState: OwnerState) {
+        if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
+            val destination = when {
+                ownerState.guardianSetup != null -> Screen.PlanSetupRoute.buildNavRoute(welcomeFlow = false)
+                ownerState.recovery != null -> Screen.AccessApproval.route
+                else -> Screen.OwnerVaultScreen.route
+            }
+            state = state.copy(navigationResource = Resource.Success(destination))
+        } else {
+            state = state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
+        }
+    }
+
+    fun resetNavigationResource() {
+        state = state.copy(navigationResource = Resource.Uninitialized)
     }
 }

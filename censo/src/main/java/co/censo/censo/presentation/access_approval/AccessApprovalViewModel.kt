@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.ApprovalStatus
@@ -76,7 +75,7 @@ class AccessApprovalViewModel @Inject constructor(
         if (ownerState !is OwnerState.Ready) {
             // other owner states are not supported on this view
             // navigate back to start of the app so it can fix itself
-            state = state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
+            state = state.copy(navigationResource = Resource.Success(Screen.EntranceRoute.route))
             return
         }
 

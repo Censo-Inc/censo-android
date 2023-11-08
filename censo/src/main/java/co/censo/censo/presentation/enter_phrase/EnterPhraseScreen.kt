@@ -29,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.R as SharedR
@@ -93,7 +92,7 @@ fun EnterPhraseScreen(
         }
 
         if (state.exitFlow) {
-            navController.navigate(SharedScreen.EntranceRoute.route)
+            navController.navigate(Screen.EntranceRoute.route)
             viewModel.resetExitFlow()
         }
     }

@@ -21,9 +21,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.storage.SecurePreferences
-import co.censo.shared.presentation.entrance.EntranceScreen
+import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.welcome.WelcomeScreen
@@ -33,11 +32,8 @@ import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
-import co.censo.censo.presentation.routing.OwnerRoutingScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
-import co.censo.shared.util.sendError
-import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -89,18 +85,10 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(
             navController = navController,
-            startDestination = SharedScreen.EntranceRoute.route
+            startDestination = Screen.EntranceRoute.route
         ) {
-            composable(route = SharedScreen.EntranceRoute.route) {
-                EntranceScreen(
-                    navController = navController,
-                    guardianEntrance = false
-                )
-            }
-            composable(
-                SharedScreen.OwnerRoutingScreen.route
-            ) {
-                OwnerRoutingScreen(navController = navController)
+            composable(route = Screen.EntranceRoute.route) {
+                OwnerEntranceScreen(navController = navController)
             }
             composable(route = Screen.OwnerWelcomeScreen.route) {
                 WelcomeScreen(navController = navController)

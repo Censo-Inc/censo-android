@@ -26,12 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
-import co.censo.censo.util.popUpToTop
+import co.censo.shared.util.popUpToTop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +52,7 @@ fun MainVaultScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.kickUserOut is Resource.Success) {
-            navController.navigate(SharedScreen.EntranceRoute.route) {
+            navController.navigate(Screen.EntranceRoute.route) {
                 launchSingleTop = true
                 popUpToTop()
             }

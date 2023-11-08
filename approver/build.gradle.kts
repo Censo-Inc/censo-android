@@ -125,7 +125,7 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":shared")))
+    implementation(project(":shared"))
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
@@ -170,8 +170,6 @@ dependencies {
     //Push Notifications
     implementation("com.google.firebase:firebase-messaging-ktx")
 
-    //GoogleAuth
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

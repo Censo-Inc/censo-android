@@ -125,7 +125,7 @@ fun LockedApproverScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Active approver",
+                text = stringResource(id = ApproverR.string.active_approver),
                 fontSize = 14.sp,
                 color = Color.Black,
                 fontWeight = FontWeight.W500

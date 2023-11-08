@@ -1,10 +1,10 @@
-package co.censo.censo.util
+package co.censo.shared.util
 
 import androidx.navigation.NavOptionsBuilder
-import co.censo.censo.presentation.Screen
 
+const val START_DESTINATION = 0
 fun NavOptionsBuilder.popUpToTop(shouldPopTopDestination: Boolean = true) {
-    popUpTo(Screen.START_DESTINATION_ID) {
+    popUpTo(START_DESTINATION) {
         inclusive = shouldPopTopDestination
     }
 }

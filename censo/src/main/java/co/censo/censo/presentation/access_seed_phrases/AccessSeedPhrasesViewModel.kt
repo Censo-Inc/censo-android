@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -162,7 +161,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 // other owner states are not supported on this view
                 // navigate back to start of the app so it can fix itself
                 state = state.copy(
-                    navigationResource = Resource.Success(SharedScreen.EntranceRoute.route)
+                    navigationResource = Resource.Success(Screen.EntranceRoute.route)
                 )
             }
         }

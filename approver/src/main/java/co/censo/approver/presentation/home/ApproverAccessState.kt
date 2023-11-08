@@ -45,9 +45,6 @@ data class ApproverAccessState(
     val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null,
 
-    //Success/Error Message
-    val onboardingMessage: Resource<RecoveryMessage> = Resource.Uninitialized,
-
     val navToApproverRouting: Boolean = false,
 ) {
 
@@ -71,8 +68,4 @@ data class ApproverAccessState(
         val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
         val encryptedSecret: Base64EncodedData
     )
-}
-
-enum class RecoveryMessage {
-    FailedPasteLink, LinkPastedSuccessfully, LinkAccepted, ApprovalCompleted
 }

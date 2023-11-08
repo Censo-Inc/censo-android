@@ -14,20 +14,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import co.censo.approver.presentation.Screen
+import co.censo.approver.presentation.Screen.Companion.DL_INVITATION_ID_KEY
+import co.censo.approver.presentation.Screen.Companion.DL_PARTICIPANT_ID_KEY
+import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_INVITATION
+import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_ACCESS
+import co.censo.approver.presentation.entrance.ApproverEntranceScreen
 import co.censo.approver.presentation.home.ApproverAccessScreen
 import co.censo.approver.presentation.onboarding.ApproverOnboardingScreen
-import co.censo.approver.presentation.routing.ApproverRoutingScreen
 import co.censo.approver.ui.theme.GuardianTheme
-import co.censo.shared.SharedScreen
-import co.censo.shared.SharedScreen.Companion.DL_INVITATION_ID_KEY
-import co.censo.shared.SharedScreen.Companion.DL_PARTICIPANT_ID_KEY
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_DEEPLINK_RECOVERY
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_ONBOARDING_URI
-import co.censo.shared.SharedScreen.Companion.GUARDIAN_RECOVERY_URI
-import co.censo.shared.presentation.entrance.EntranceScreen
-import co.censo.shared.util.sendError
-import com.raygun.raygun4android.RaygunClient
+import co.censo.shared.DeepLinkURI.APPROVER_INVITE_URI
+import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_URI
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -53,11 +49,10 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
-        NavHost(navController = navController, startDestination = SharedScreen.EntranceRoute.route) {
-            composable(route = SharedScreen.EntranceRoute.route) {
-                EntranceScreen(
-                    navController = navController,
-                    guardianEntrance = true
+        NavHost(navController = navController, startDestination = Screen.ApproverEntranceRoute.route) {
+            composable(route = Screen.ApproverEntranceRoute.route) {
+                ApproverEntranceScreen(
+                    navController = navController
                 )
             }
             composable(
@@ -66,44 +61,37 @@ class MainActivity : FragmentActivity() {
                 ApproverAccessScreen(navController = navController)
             }
             composable(
-                Screen.ApproverRoutingScreen.route
-            ) {
-                ApproverRoutingScreen(navController = navController)
-            }
-            composable(
                 route = Screen.ApproverOnboardingScreen.route
             ) {
                 ApproverOnboardingScreen(navController = navController)
             }
             composable(
-                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",
+                "$APPROVER_DEEPLINK_INVITATION?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",
                 deepLinks = listOf(
                     navDeepLink {
-                        uriPattern = "$GUARDIAN_ONBOARDING_URI{$DL_INVITATION_ID_KEY}"
+                        uriPattern = "$APPROVER_INVITE_URI{$DL_INVITATION_ID_KEY}"
                     }
 
                 )
             ) { backStackEntry ->
                 val invitationId = backStackEntry.arguments?.getString(DL_INVITATION_ID_KEY) ?: ""
-                EntranceScreen(
+                ApproverEntranceScreen(
                     navController = navController,
-                    invitationId = invitationId,
-                    guardianEntrance = true
+                    invitationId = invitationId
                 )
             }
             composable(
-                "$GUARDIAN_DEEPLINK_RECOVERY?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
+                "$APPROVER_DEEPLINK_ACCESS?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
                 deepLinks = listOf(
                     navDeepLink {
-                        uriPattern = "$GUARDIAN_RECOVERY_URI{$DL_PARTICIPANT_ID_KEY}"
+                        uriPattern = "$APPROVER_ACCESS_URI{$DL_PARTICIPANT_ID_KEY}"
                     }
                 )
             ) { backStackEntry ->
                 val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
-                EntranceScreen(
+                ApproverEntranceScreen(
                     navController = navController,
-                    recoveryParticipantId = participantId,
-                    guardianEntrance = true
+                    recoveryParticipantId = participantId
                 )
             }
         }

@@ -183,9 +183,6 @@ dependencies {
     //Push Notifications
     implementation("com.google.firebase:firebase-messaging-ktx")
 
-    //GoogleAuth
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

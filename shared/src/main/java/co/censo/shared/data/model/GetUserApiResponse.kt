@@ -7,7 +7,7 @@ import Base64EncodedData
 import InvitationId
 import ParticipantId
 import VaultSecretId
-import co.censo.shared.SharedScreen
+import co.censo.shared.DeepLinkURI
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
@@ -132,7 +132,7 @@ sealed class Guardian {
 }
 
 fun Guardian.ProspectGuardian.deeplink(): String {
-    return "${SharedScreen.GUARDIAN_ONBOARDING_URI}${this.invitationId?.value}"
+    return "${DeepLinkURI.APPROVER_INVITE_URI}${this.invitationId?.value}"
 }
 
 @Serializable
@@ -177,7 +177,7 @@ data class Approval(
     val participantId: ParticipantId,
     val status: ApprovalStatus,
 ) {
-    fun deepLink(): String ="${SharedScreen.GUARDIAN_RECOVERY_URI}${participantId.value}"
+    fun deepLink(): String ="${DeepLinkURI.APPROVER_ACCESS_URI}${participantId.value}"
 }
 
 @Serializable
