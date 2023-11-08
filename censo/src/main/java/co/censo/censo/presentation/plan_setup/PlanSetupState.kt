@@ -41,6 +41,8 @@ data class PlanSetupState(
     val retrieveRecoveryShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,
     val replacePolicyResponse: Resource<ReplacePolicyApiResponse> = Resource.Uninitialized,
 
+    val verifyKeyConfirmationSignature: Resource<Unit> = Resource.Uninitialized,
+
     // Cloud Storage
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val tempOwnerApprover: Guardian.SetupGuardian.ImplicitlyOwner? = null,
@@ -95,6 +97,7 @@ data class PlanSetupState(
             || initiateRecoveryResponse is Resource.Error
             || retrieveRecoveryShardsResponse is Resource.Error
             || replacePolicyResponse is Resource.Error
+            || verifyKeyConfirmationSignature is Resource.Error
 
     enum class BackIconType {
         None, Back, Exit

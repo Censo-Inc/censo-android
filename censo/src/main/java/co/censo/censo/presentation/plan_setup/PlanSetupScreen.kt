@@ -142,12 +142,20 @@ fun PlanSetupScreen(
                 }
 
                 state.asyncError -> {
-                    // FIXME add error cases with appropriate actions
-                    DisplayError(
-                        errorMessage = "Failed to invite approvers",
-                        dismissAction = { viewModel.reset() },
-                        retryAction = { viewModel.reset() },
-                    )
+                    if (state.verifyKeyConfirmationSignature is Resource.Error) {
+                        DisplayError(
+                            errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
+                            dismissAction = { viewModel.resetVerifyKeyConfirmationSignature() },
+                            retryAction = { viewModel.resetVerifyKeyConfirmationSignature() },
+                        )
+                    } else {
+                        // FIXME add error cases with appropriate actions
+                        DisplayError(
+                            errorMessage = "Failed to invite approvers",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    }
                 }
 
                 else -> {
