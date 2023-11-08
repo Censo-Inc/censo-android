@@ -1,9 +1,9 @@
 package co.censo.approver.data
 
-
 sealed interface ApproverUIState
 
 sealed class ApproverOnboardingUIState : ApproverUIState {
+    object NeedsToSaveKey : ApproverOnboardingUIState()
 
     object NeedsToEnterCode : ApproverOnboardingUIState()
 
