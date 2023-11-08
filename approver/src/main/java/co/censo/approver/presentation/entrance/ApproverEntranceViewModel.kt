@@ -52,10 +52,10 @@ class ApproverEntranceViewModel @Inject constructor(
             guardianRepository.saveParticipantId(recoveryParticipantId)
         }
 
-        checkUserHasValidToken()
+        determineLoginState()
     }
 
-    private fun checkUserHasValidToken() {
+    private fun determineLoginState() {
         viewModelScope.launch {
             val jwtToken = ownerRepository.retrieveJWT()
             if (jwtToken.isNotEmpty()) {
@@ -76,21 +76,17 @@ class ApproverEntranceViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val deviceKeyId = secureStorage.retrieveDeviceKeyId()
             authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId, onDone = {
-                checkUserTokenAfterRefreshAttempt()
+                val jwtToken = ownerRepository.retrieveJWT()
+                if (jwtToken.isNotEmpty() && ownerRepository.checkJWTValid(jwtToken)) {
+                    checkUserHasRespondedToNotificationOptIn()
+                } else {
+                    signOut()
+                }
             })
         }
     }
 
-    private fun checkUserTokenAfterRefreshAttempt() {
-        val jwtToken = ownerRepository.retrieveJWT()
-        if (jwtToken.isNotEmpty() && ownerRepository.checkJWTValid(jwtToken)) {
-            checkUserHasRespondedToNotificationOptIn()
-        } else {
-            signUserOutAfterAttemptedTokenRefresh()
-        }
-    }
-
-    private fun signUserOutAfterAttemptedTokenRefresh() {
+    private fun signOut() {
         viewModelScope.launch {
             ownerRepository.signUserOut()
             determineLoggedOutRoute()

@@ -1,9 +1,7 @@
 package co.censo.approver.presentation.entrance
 
 import co.censo.approver.data.ApproverEntranceUIState
-import co.censo.approver.data.ApproverUIState
 import co.censo.shared.data.Resource
-import kotlinx.serialization.Serializable
 import okhttp3.ResponseBody
 
 data class ApproverEntranceState(
