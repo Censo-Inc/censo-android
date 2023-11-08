@@ -7,14 +7,10 @@ import android.content.Intent
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
-import androidx.core.net.toUri
 import co.censo.approver.MainActivity
 import co.censo.approver.R
-import co.censo.approver.presentation.Screen
-import co.censo.approver.presentation.buildScreenDeepLinkUri
 import co.censo.shared.service.BaseMessagingService
 import co.censo.shared.service.PushData
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 import kotlin.math.abs
@@ -32,8 +28,6 @@ class MessagingService : BaseMessagingService() {
             this,
             MainActivity::class.java
         )
-
-        projectLog(message="sendNotification - ${Screen.ApproverEntranceRoute.buildScreenDeepLinkUri().toUri()}")
 
         homeScreenIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
