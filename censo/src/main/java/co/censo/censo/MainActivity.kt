@@ -22,7 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import co.censo.shared.data.storage.SecurePreferences
-import co.censo.censo.presentation.entrance.EntranceScreen
+import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.welcome.WelcomeScreen
@@ -32,7 +32,6 @@ import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
-import co.censo.censo.presentation.routing.OwnerRoutingScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
 import dagger.hilt.android.AndroidEntryPoint
@@ -89,12 +88,7 @@ class MainActivity : FragmentActivity() {
             startDestination = Screen.EntranceRoute.route
         ) {
             composable(route = Screen.EntranceRoute.route) {
-                EntranceScreen(navController = navController)
-            }
-            composable(
-                Screen.OwnerRoutingScreen.route
-            ) {
-                OwnerRoutingScreen(navController = navController)
+                OwnerEntranceScreen(navController = navController)
             }
             composable(route = Screen.OwnerWelcomeScreen.route) {
                 WelcomeScreen(navController = navController)

@@ -67,7 +67,7 @@ class ApproverEntranceViewModel @Inject constructor(
                     attemptRefresh(jwtToken)
                 }
             } else {
-                determineLoggedOutRoute()
+                loggedOutRouting()
             }
         }
     }
@@ -89,7 +89,7 @@ class ApproverEntranceViewModel @Inject constructor(
     private fun signOut() {
         viewModelScope.launch {
             ownerRepository.signUserOut()
-            determineLoggedOutRoute()
+            loggedOutRouting()
         }
     }
 
@@ -102,7 +102,7 @@ class ApproverEntranceViewModel @Inject constructor(
         viewModelScope.launch {
             if (pushRepository.userHasSeenPushDialog()) {
                 submitNotificationTokenForRegistration()
-                determineLoggedInRoute()
+                loggedInRouting()
             } else {
                 state = state.copy(showPushNotificationsDialog = true)
             }
@@ -210,7 +210,7 @@ class ApproverEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun determineLoggedInRoute() {
+    private fun loggedInRouting() {
         viewModelScope.launch {
             val participantId = guardianRepository.retrieveParticipantId()
             val invitationId = guardianRepository.retrieveInvitationId()
@@ -231,7 +231,7 @@ class ApproverEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun determineLoggedOutRoute() {
+    private fun loggedOutRouting() {
         viewModelScope.launch {
             val participantId = guardianRepository.retrieveParticipantId()
             val invitationId = guardianRepository.retrieveInvitationId()
@@ -271,18 +271,18 @@ class ApproverEntranceViewModel @Inject constructor(
         submitNotificationTokenForRegistration()
         state = state.copy(showPushNotificationsDialog = false)
 
-        determineLoggedInRoute()
+        loggedInRouting()
     }
 
     fun handleLoggedOutLink(clipboardContent: String?) {
         handleLink(clipboardContent) {
-            determineLoggedOutRoute()
+            loggedOutRouting()
         }
     }
 
     fun handleLoggedInLink(clipboardContent: String?) {
         handleLink(clipboardContent) {
-            determineLoggedInRoute()
+            loggedInRouting()
         }
     }
 

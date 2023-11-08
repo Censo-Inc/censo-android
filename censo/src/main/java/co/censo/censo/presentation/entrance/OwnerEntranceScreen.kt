@@ -82,9 +82,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun EntranceScreen(
+fun OwnerEntranceScreen(
     navController: NavController,
-    viewModel: EntranceViewModel = hiltViewModel()
+    viewModel: OwnerEntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
 
@@ -149,13 +149,9 @@ fun EntranceScreen(
     }
 
     LaunchedEffect(key1 = state) {
-        if (state.userFinishedSetup is Resource.Success) {
-            if (!state.showAcceptTermsOfUse) {
-                state.userFinishedSetup.data?.let {
-                    navController.navigate(it)
-                }
-                viewModel.resetUserFinishedSetup()
-            }
+        if (state.userFinishedSetup && !state.showAcceptTermsOfUse) {
+            viewModel.retrieveOwnerStateAndNavigate()
+            viewModel.resetUserFinishedSetup()
         }
 
         if (state.triggerGoogleSignIn is Resource.Success) {
@@ -173,6 +169,17 @@ fun EntranceScreen(
 
         if (state.showPushNotificationsDialog is Resource.Success) {
             checkNotificationsPermissionDialog()
+        }
+
+        if (state.navigationResource is Resource.Success) {
+            state.navigationResource.data?.let { destination ->
+                navController.navigate(destination) {
+                    popUpTo(destination) {
+                        inclusive = true
+                    }
+                }
+            }
+            viewModel.resetNavigationResource()
         }
     }
 
@@ -216,6 +223,11 @@ fun EntranceScreen(
                         errorMessage = state.triggerGoogleSignIn.getErrorMessage(context),
                         dismissAction = viewModel::resetTriggerGoogleSignIn,
                     ) { viewModel.retrySignIn() }
+                } else if (state.userResponse is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.userResponse.getErrorMessage(context),
+                        dismissAction = viewModel::retrieveOwnerStateAndNavigate,
+                    ) { viewModel.retrieveOwnerStateAndNavigate() }
                 }
             }
 

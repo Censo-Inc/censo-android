@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -23,6 +24,7 @@ import com.google.android.gms.tasks.Task
 import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -38,15 +40,16 @@ import javax.inject.Inject
  */
 
 @HiltViewModel
-class EntranceViewModel @Inject constructor(
+class OwnerEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val pushRepository: PushRepository,
     private val authUtil: AuthUtil,
-    private val secureStorage: SecurePreferences
+    private val secureStorage: SecurePreferences,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
 ) : ViewModel() {
 
-    var state by mutableStateOf(EntranceState())
+    var state by mutableStateOf(OwnerEntranceState())
         private set
 
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
@@ -232,7 +235,7 @@ class EntranceViewModel @Inject constructor(
 
     private fun triggerNavigation() {
         state = state.copy(
-            userFinishedSetup = Resource.Success(Screen.OwnerRoutingScreen.route),
+            userFinishedSetup = true,
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
         )
     }
@@ -251,7 +254,7 @@ class EntranceViewModel @Inject constructor(
     }
 
     fun resetUserFinishedSetup() {
-        state = state.copy(userFinishedSetup = Resource.Uninitialized)
+        state = state.copy(userFinishedSetup = false)
     }
 
     fun resetSignInUserResource() {
@@ -267,5 +270,39 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
 
         triggerNavigation()
+    }
+
+    fun retrieveOwnerStateAndNavigate() {
+        state = state.copy(userResponse = Resource.Loading())
+
+        viewModelScope.launch {
+            val userResponse = ownerRepository.retrieveUser()
+
+            state = state.copy(userResponse = userResponse)
+
+            if (userResponse is Resource.Success) {
+                // update global state
+                ownerStateFlow.tryEmit(userResponse.map { it.ownerState })
+
+                loggedInRouting(userResponse.data!!.ownerState)
+            }
+        }
+    }
+
+    private fun loggedInRouting(ownerState: OwnerState) {
+        if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
+            val destination = when {
+                ownerState.guardianSetup != null -> Screen.PlanSetupRoute.buildNavRoute(welcomeFlow = false)
+                ownerState.recovery != null -> Screen.AccessApproval.route
+                else -> Screen.OwnerVaultScreen.route
+            }
+            state = state.copy(navigationResource = Resource.Success(destination))
+        } else {
+            state = state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
+        }
+    }
+
+    fun resetNavigationResource() {
+        state = state.copy(navigationResource = Resource.Uninitialized)
     }
 }
