@@ -10,8 +10,8 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import co.censo.approver.MainActivity
 import co.censo.approver.R
-import co.censo.shared.SharedScreen
-import co.censo.shared.buildScreenDeepLinkUri
+import co.censo.approver.presentation.Screen
+import co.censo.approver.presentation.buildScreenDeepLinkUri
 import co.censo.shared.service.BaseMessagingService
 import co.censo.shared.service.PushData
 import co.censo.shared.util.projectLog
@@ -33,7 +33,7 @@ class MessagingService : BaseMessagingService() {
             MainActivity::class.java
         )
 
-        projectLog(message="sendNotification - ${SharedScreen.EntranceRoute.buildScreenDeepLinkUri().toUri()}")
+        projectLog(message="sendNotification - ${Screen.ApproverEntranceRoute.buildScreenDeepLinkUri().toUri()}")
 
         homeScreenIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {

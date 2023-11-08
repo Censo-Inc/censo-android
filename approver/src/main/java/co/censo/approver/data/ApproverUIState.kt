@@ -33,3 +33,19 @@ sealed class ApproverAccessUIState : ApproverUIState {
     @Serializable
     object VerifyingToTPFromOwner : ApproverAccessUIState()
 }
+
+@Serializable
+sealed class ApproverEntranceUIState : ApproverUIState {
+
+    @Serializable
+    object Initial : ApproverEntranceUIState()
+
+    @Serializable
+    object LoggedOutPasteLink : ApproverEntranceUIState()
+
+    @Serializable
+    object SignIn : ApproverEntranceUIState()
+
+    @Serializable
+    class LoggedInPasteLink(val isActiveApprover: Boolean) : ApproverEntranceUIState()
+}

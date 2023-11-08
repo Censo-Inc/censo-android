@@ -86,7 +86,6 @@ class ApproverOnboardingViewModel @Inject constructor(
         determineApproverUIState(guardianState)
     }
 
-
     private fun assignGuardianState(guardianState: GuardianState?) {
         state = state.copy(guardianState = guardianState)
     }

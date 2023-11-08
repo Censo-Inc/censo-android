@@ -32,10 +32,9 @@ import androidx.compose.ui.unit.sp
 import co.censo.approver.R as ApproverR
 
 @Composable
-fun PasteLinkHomeScreen(
-    onPasteLinkClick: (() -> Unit)?
+fun PasteLink(
+    onPasteLinkClick: () -> Unit
 ) {
-
 
     Column(
         Modifier
@@ -72,45 +71,40 @@ fun PasteLinkHomeScreen(
 
         Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
 
-
-        onPasteLinkClick?.let {
-            StandardButton(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.Black,
-                contentPadding = PaddingValues(vertical = 12.dp),
-                onClick = it,
+        StandardButton(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.Black,
+            contentPadding = PaddingValues(vertical = 12.dp),
+            onClick = onPasteLinkClick,
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(
-                            id = co.censo.shared.R.drawable.paste_phrase_icon
-                        ),
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = stringResource(ApproverR.string.paste_link),
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 24.sp,
-                    )
-                }
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(
+                        id = co.censo.shared.R.drawable.paste_phrase_icon
+                    ),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(ApproverR.string.paste_link),
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 24.sp,
+                )
             }
         }
     }
-
 }
-
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun PreviewPasteLinkHomeScreen() {
-    PasteLinkHomeScreen {
-
-    }
+fun PasteLinkPreview() {
+    PasteLink(
+        onPasteLinkClick = {}
+    )
 }

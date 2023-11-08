@@ -1,14 +1,16 @@
-package co.censo.shared.presentation.entrance
+package co.censo.approver.presentation.entrance
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
+import co.censo.approver.data.ApproverEntranceUIState
+import co.censo.approver.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.networking.PushBody
+import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
@@ -27,43 +29,30 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-/**
- *
- * General Android Owner Flow
- * Step 1: Login user with Primary Auth (Google Sign In)
- *       - If login error occurs notify user
- * Step 2: Handle Device Key Work: TODO
- * Step 3: Send user to Home screen
- *
- */
-
 @HiltViewModel
-class EntranceViewModel @Inject constructor(
+class ApproverEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository,
     private val pushRepository: PushRepository,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences
 ) : ViewModel() {
 
-    var state by mutableStateOf(EntranceState())
+    var state by mutableStateOf(ApproverEntranceState())
         private set
 
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
-    fun onStart() {
-        initAcceptedTermsOfUseVersion()
+    fun onStart(invitationId: String?, recoveryParticipantId: String?) {
+        if (invitationId != null) {
+            guardianRepository.saveInvitationId(invitationId)
+        }
+        if (recoveryParticipantId != null) {
+            guardianRepository.saveParticipantId(recoveryParticipantId)
+        }
 
         checkUserHasValidToken()
-    }
-
-    private fun initAcceptedTermsOfUseVersion() {
-        state = state.copy(acceptedTermsOfUseVersion = secureStorage.acceptedTermsOfUseVersion())
-    }
-
-    fun setAcceptedTermsOfUseVersion(version: String) {
-        secureStorage.setAcceptedTermsOfUseVersion(version)
-        state = state.copy(acceptedTermsOfUseVersion = version, showAcceptTermsOfUse = false)
     }
 
     private fun checkUserHasValidToken() {
@@ -78,9 +67,7 @@ class EntranceViewModel @Inject constructor(
                     attemptRefresh(jwtToken)
                 }
             } else {
-                state = state.copy(
-                    signInUserResource = Resource.Uninitialized
-                )
+                determineLoggedOutRoute()
             }
         }
     }
@@ -106,7 +93,7 @@ class EntranceViewModel @Inject constructor(
     private fun signUserOutAfterAttemptedTokenRefresh() {
         viewModelScope.launch {
             ownerRepository.signUserOut()
-            resetSignInUserResource()
+            determineLoggedOutRoute()
         }
     }
 
@@ -119,11 +106,9 @@ class EntranceViewModel @Inject constructor(
         viewModelScope.launch {
             if (pushRepository.userHasSeenPushDialog()) {
                 submitNotificationTokenForRegistration()
-                triggerNavigation()
+                determineLoggedInRoute()
             } else {
-                state = state.copy(
-                    showPushNotificationsDialog = Resource.Success(Unit)
-                )
+                state = state.copy(showPushNotificationsDialog = true)
             }
         }
     }
@@ -175,7 +160,6 @@ class EntranceViewModel @Inject constructor(
             }
         }
     }
-
 
     private fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -230,15 +214,40 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private fun triggerNavigation() {
-        state = state.copy(
-            userFinishedSetup = Resource.Success(SharedScreen.OwnerRoutingScreen.route),
-            showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
-        )
+    private fun determineLoggedInRoute() {
+        viewModelScope.launch {
+            val participantId = guardianRepository.retrieveParticipantId()
+            val invitationId = guardianRepository.retrieveInvitationId()
+
+            when {
+                participantId.isEmpty() && invitationId.isEmpty() -> {
+                    val isActiveApprover = ownerRepository.retrieveUser().data
+                        ?.let { it.guardianStates.any { it.invitationId != null } }
+                        ?: false
+
+                    state = state.copy(
+                        uiState = ApproverEntranceUIState.LoggedInPasteLink(isActiveApprover)
+                    )
+                }
+                participantId.isNotEmpty() -> triggerNavigation(RoutingDestination.ACCESS)
+                invitationId.isNotEmpty() -> triggerNavigation(RoutingDestination.ONBOARDING)
+            }
+        }
+    }
+
+    private fun determineLoggedOutRoute() {
+        viewModelScope.launch {
+            val participantId = guardianRepository.retrieveParticipantId()
+            val invitationId = guardianRepository.retrieveInvitationId()
+
+            when {
+                participantId.isNotEmpty() || invitationId.isNotEmpty() -> signInUI()
+                else -> loggedOutPasteLinkUI()
+            }
+        }
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
-        googleAuthError.exception.sendError(CrashReportingUtil.SignIn)
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
@@ -250,8 +259,8 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(triggerGoogleSignIn = Resource.Uninitialized)
     }
 
-    fun resetUserFinishedSetup() {
-        state = state.copy(userFinishedSetup = Resource.Uninitialized)
+    fun resetNavigationResource() {
+        state = state.copy(navigationResource = Resource.Uninitialized)
     }
 
     fun resetSignInUserResource() {
@@ -264,8 +273,88 @@ class EntranceViewModel @Inject constructor(
 
     fun finishPushNotificationDialog() {
         submitNotificationTokenForRegistration()
-        state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
+        state = state.copy(showPushNotificationsDialog = false)
 
-        triggerNavigation()
+        determineLoggedInRoute()
+    }
+
+    fun handleLoggedOutLink(clipboardContent: String?) {
+        handleLink(clipboardContent) {
+            determineLoggedOutRoute()
+        }
+    }
+
+    fun handleLoggedInLink(clipboardContent: String?) {
+        handleLink(clipboardContent) {
+            determineLoggedInRoute()
+        }
+    }
+
+    private fun handleLink(clipboardContent: String?, routing: () -> Unit) {
+        if (clipboardContent == null) {
+            state = state.copy(linkError = true)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val censoLink = parseLink(clipboardContent)
+                when (censoLink.host) {
+                    "invite" -> {
+                        guardianRepository.clearParticipantId()
+                        guardianRepository.saveInvitationId(censoLink.identifier)
+                        routing()
+                    }
+
+                    "access" -> {
+                        guardianRepository.clearInvitationId()
+                        guardianRepository.saveParticipantId(censoLink.identifier)
+                        routing()
+                    }
+
+                    else -> state = state.copy(linkError = true)
+                }
+            } catch (e: Exception) {
+                state = state.copy(linkError = true)
+            }
+        }
+    }
+
+    private fun loggedOutPasteLinkUI() {
+        state = state.copy(uiState = ApproverEntranceUIState.LoggedOutPasteLink)
+    }
+
+    private fun signInUI() {
+        state = state.copy(uiState = ApproverEntranceUIState.SignIn)
+    }
+
+    private fun triggerNavigation(routingDestination: RoutingDestination) {
+        state = when (routingDestination) {
+            RoutingDestination.ACCESS ->
+                state.copy(navigationResource = Resource.Success(Screen.ApproverAccessScreen.route))
+
+            RoutingDestination.ONBOARDING ->
+                state.copy(navigationResource = Resource.Success(Screen.ApproverOnboardingScreen.route))
+        }
+    }
+
+    data class CensoLink(
+        val host: String,
+        val identifier: String
+    )
+    private fun parseLink(link: String): CensoLink {
+        val parts = link.split("//")
+        if (parts.size != 2 || !parts[0].startsWith("censo")) {
+            throw Exception("invalid link")
+        }
+        val routeAndIdentifier = parts[1].split("/")
+        if (routeAndIdentifier.size != 2 && !setOf("access", "invite").contains(routeAndIdentifier[0])) {
+            throw Exception("invalid link")
+        }
+        return CensoLink(routeAndIdentifier[0], routeAndIdentifier[1])
+    }
+
+    fun clearError() {
+        state = state.copy(linkError = false)
     }
 }

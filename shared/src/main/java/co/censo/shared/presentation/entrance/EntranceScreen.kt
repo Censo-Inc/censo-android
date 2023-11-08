@@ -59,7 +59,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +71,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.R
+import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.termsOfUseVersions
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -85,9 +85,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 @Composable
 fun EntranceScreen(
     navController: NavController,
-    guardianEntrance: Boolean,
-    invitationId: String? = null,
-    recoveryParticipantId: String? = null,
     viewModel: EntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -148,11 +145,7 @@ fun EntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        if (guardianEntrance) {
-            viewModel.onGuardianStart(invitationId, recoveryParticipantId)
-        } else {
-            viewModel.onOwnerStart()
-        }
+        viewModel.onStart()
         onDispose { }
     }
 
@@ -522,16 +515,4 @@ fun OwnerEntranceStandardUIPreview() {
     Surface {
         OwnerEntranceStandardUI({})
     }
-}
-
-sealed class GoogleAuthError(val exception: Exception) {
-    object InvalidToken : GoogleAuthError(Exception("Invalid Token"))
-    object MissingCredentialId : GoogleAuthError(Exception("Missing Google Credential Id"))
-    object UserCanceledGoogleSignIn : GoogleAuthError(Exception("User Canceled Google Auth"))
-    object IntentResultFailed : GoogleAuthError(Exception("Intent Result Failed"))
-    data class ErrorParsingIntent(val e: Exception) : GoogleAuthError(e)
-    data class FailedToSignUserOut(val e: Exception) : GoogleAuthError(e)
-    data class FailedToLaunchGoogleAuthUI(val e: Exception) : GoogleAuthError(e)
-    data class FailedToVerifyId(val e: Exception) : GoogleAuthError(e)
-    data class FailedToCreateKeyWithId(val e: Exception) : GoogleAuthError(e)
 }

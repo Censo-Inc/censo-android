@@ -9,7 +9,6 @@ data class EntranceState(
     val signInUserResource: Resource<ResponseBody> = Resource.Loading(),
     val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val userFinishedSetup: Resource<String> = Resource.Uninitialized,
-    val ownerApp: Boolean = false,
     val authId: String = "",
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
     val acceptedTermsOfUseVersion: String? = null,

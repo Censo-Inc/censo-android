@@ -36,8 +36,6 @@ import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.routing.OwnerRoutingScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
-import co.censo.shared.util.sendError
-import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -92,10 +90,7 @@ class MainActivity : FragmentActivity() {
             startDestination = SharedScreen.EntranceRoute.route
         ) {
             composable(route = SharedScreen.EntranceRoute.route) {
-                EntranceScreen(
-                    navController = navController,
-                    guardianEntrance = false
-                )
+                EntranceScreen(navController = navController)
             }
             composable(
                 SharedScreen.OwnerRoutingScreen.route

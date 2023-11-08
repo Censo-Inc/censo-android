@@ -132,7 +132,7 @@ sealed class Guardian {
 }
 
 fun Guardian.ProspectGuardian.deeplink(): String {
-    return "${SharedScreen.GUARDIAN_ONBOARDING_URI}${this.invitationId?.value}"
+    return "${SharedScreen.APPROVER_INVITE_URI}${this.invitationId?.value}"
 }
 
 @Serializable
@@ -177,7 +177,7 @@ data class Approval(
     val participantId: ParticipantId,
     val status: ApprovalStatus,
 ) {
-    fun deepLink(): String ="${SharedScreen.GUARDIAN_RECOVERY_URI}${participantId.value}"
+    fun deepLink(): String ="${SharedScreen.APPROVER_ACCESS_URI}${participantId.value}"
 }
 
 @Serializable

@@ -77,7 +77,7 @@ fun ApproverOnboardingScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navToApproverRouting) {
-            navController.navigate(Screen.ApproverRoutingScreen.route) {
+            navController.navigate(Screen.ApproverEntranceRoute.route) {
                 popUpTo(Screen.ApproverOnboardingScreen.route) {
                     inclusive = true
                 }
