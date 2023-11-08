@@ -10,10 +10,10 @@ sealed class Screen(val route: String) {
     object ApproverAccessScreen : Screen("approver_access_screen")
 
     companion object {
-        const val GUARDIAN_DEEPLINK_ACCEPTANCE = "guardianDeepLinkAcceptance"
+        const val APPROVER_DEEPLINK_INVITATION = "approverDeepLinkInvitation"
         const val DL_INVITATION_ID_KEY = "invitation_id_key"
 
-        const val GUARDIAN_DEEPLINK_RECOVERY = "guardianDeepLinkRecovery"
+        const val APPROVER_DEEPLINK_ACCESS = "approverDeepLinkAccess"
         const val DL_PARTICIPANT_ID_KEY = "participant_id_key"
 
     }

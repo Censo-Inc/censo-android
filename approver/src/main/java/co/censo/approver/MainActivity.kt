@@ -16,8 +16,8 @@ import androidx.navigation.navDeepLink
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.Screen.Companion.DL_INVITATION_ID_KEY
 import co.censo.approver.presentation.Screen.Companion.DL_PARTICIPANT_ID_KEY
-import co.censo.approver.presentation.Screen.Companion.GUARDIAN_DEEPLINK_ACCEPTANCE
-import co.censo.approver.presentation.Screen.Companion.GUARDIAN_DEEPLINK_RECOVERY
+import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_INVITATION
+import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_ACCESS
 import co.censo.approver.presentation.entrance.ApproverEntranceScreen
 import co.censo.approver.presentation.home.ApproverAccessScreen
 import co.censo.approver.presentation.onboarding.ApproverOnboardingScreen
@@ -66,7 +66,7 @@ class MainActivity : FragmentActivity() {
                 ApproverOnboardingScreen(navController = navController)
             }
             composable(
-                "$GUARDIAN_DEEPLINK_ACCEPTANCE?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",
+                "$APPROVER_DEEPLINK_INVITATION?$DL_INVITATION_ID_KEY={$DL_INVITATION_ID_KEY}",
                 deepLinks = listOf(
                     navDeepLink {
                         uriPattern = "$APPROVER_INVITE_URI{$DL_INVITATION_ID_KEY}"
@@ -81,7 +81,7 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                "$GUARDIAN_DEEPLINK_RECOVERY?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
+                "$APPROVER_DEEPLINK_ACCESS?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}",
                 deepLinks = listOf(
                     navDeepLink {
                         uriPattern = "$APPROVER_ACCESS_URI{$DL_PARTICIPANT_ID_KEY}"
