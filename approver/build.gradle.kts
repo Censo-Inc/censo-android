@@ -170,15 +170,6 @@ dependencies {
     //Push Notifications
     implementation("com.google.firebase:firebase-messaging-ktx")
 
-    //GoogleAuth
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-
-    //GoogleDrive
-    implementation("com.google.android.gms:play-services-drive:17.0.0")
-    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
-        exclude("org.apache.httpcomponents")
-        exclude(module = "guava-jdk5")
-    }
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

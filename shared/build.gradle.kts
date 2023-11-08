@@ -144,8 +144,8 @@ dependencies {
     implementation("com.google.api-client:google-api-client:2.2.0")
 
     //Google Auth
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
+    api("com.google.android.gms:play-services-auth:20.7.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
 
     //GoogleAuth (utilizes the One Tap dependency above)
     implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
@@ -156,8 +156,8 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
 
     //GoogleDrive
-    implementation("com.google.android.gms:play-services-drive:17.0.0")
-    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
+    api("com.google.android.gms:play-services-drive:17.0.0")
+    api("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
         exclude("org.apache.httpcomponents")
         exclude(module = "guava-jdk5")
     }
