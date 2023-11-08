@@ -3,6 +3,10 @@ package co.censo.censo.presentation
 import Base58EncodedMasterPublicKey
 
 sealed class Screen(val route: String) {
+    object EntranceRoute : Screen("entrance_screen")
+
+    object OwnerRoutingScreen : Screen("owner_routing_screen")
+
     object PlanSetupRoute : Screen("plan_setup_route") {
         const val WELCOME_FLOW_ARG = "welcome_flow_key"
 

@@ -1,4 +1,4 @@
-package co.censo.shared.presentation.entrance
+package co.censo.censo.presentation.entrance
 
 import ParticipantId
 import StandardButton

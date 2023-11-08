@@ -76,7 +76,7 @@ class AccessApprovalViewModel @Inject constructor(
         if (ownerState !is OwnerState.Ready) {
             // other owner states are not supported on this view
             // navigate back to start of the app so it can fix itself
-            state = state.copy(navigationResource = Resource.Success(SharedScreen.EntranceRoute.route))
+            state = state.copy(navigationResource = Resource.Success(Screen.EntranceRoute.route))
             return
         }
 

@@ -1,11 +1,11 @@
-package co.censo.shared.presentation.entrance
+package co.censo.censo.presentation.entrance
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.shared.SharedScreen
+import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.networking.PushBody
@@ -232,7 +232,7 @@ class EntranceViewModel @Inject constructor(
 
     private fun triggerNavigation() {
         state = state.copy(
-            userFinishedSetup = Resource.Success(SharedScreen.OwnerRoutingScreen.route),
+            userFinishedSetup = Resource.Success(Screen.OwnerRoutingScreen.route),
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
         )
     }

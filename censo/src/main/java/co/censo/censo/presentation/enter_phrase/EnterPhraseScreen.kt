@@ -93,7 +93,7 @@ fun EnterPhraseScreen(
         }
 
         if (state.exitFlow) {
-            navController.navigate(SharedScreen.EntranceRoute.route)
+            navController.navigate(Screen.EntranceRoute.route)
             viewModel.resetExitFlow()
         }
     }

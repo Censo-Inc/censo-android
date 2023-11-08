@@ -21,9 +21,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import co.censo.shared.SharedScreen
 import co.censo.shared.data.storage.SecurePreferences
-import co.censo.shared.presentation.entrance.EntranceScreen
+import co.censo.censo.presentation.entrance.EntranceScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.welcome.WelcomeScreen
@@ -87,13 +86,13 @@ class MainActivity : FragmentActivity() {
     private fun CensoNavHost(navController: NavHostController) {
         NavHost(
             navController = navController,
-            startDestination = SharedScreen.EntranceRoute.route
+            startDestination = Screen.EntranceRoute.route
         ) {
-            composable(route = SharedScreen.EntranceRoute.route) {
+            composable(route = Screen.EntranceRoute.route) {
                 EntranceScreen(navController = navController)
             }
             composable(
-                SharedScreen.OwnerRoutingScreen.route
+                Screen.OwnerRoutingScreen.route
             ) {
                 OwnerRoutingScreen(navController = navController)
             }

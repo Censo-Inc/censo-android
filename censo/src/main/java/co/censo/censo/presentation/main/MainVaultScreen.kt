@@ -53,7 +53,7 @@ fun MainVaultScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.kickUserOut is Resource.Success) {
-            navController.navigate(SharedScreen.EntranceRoute.route) {
+            navController.navigate(Screen.EntranceRoute.route) {
                 launchSingleTop = true
                 popUpToTop()
             }

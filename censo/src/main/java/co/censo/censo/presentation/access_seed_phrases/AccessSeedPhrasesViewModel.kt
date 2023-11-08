@@ -162,7 +162,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 // other owner states are not supported on this view
                 // navigate back to start of the app so it can fix itself
                 state = state.copy(
-                    navigationResource = Resource.Success(SharedScreen.EntranceRoute.route)
+                    navigationResource = Resource.Success(Screen.EntranceRoute.route)
                 )
             }
         }

@@ -1,7 +1,6 @@
-package co.censo.shared.presentation.entrance
+package co.censo.censo.presentation.entrance
 
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.OwnerState
 import okhttp3.ResponseBody
 
 data class EntranceState(
