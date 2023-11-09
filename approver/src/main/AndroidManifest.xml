@@ -41,18 +41,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".service.MessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="default_channel_id"/>
-
         <!-- Required: set your sentry.io project identifier (DSN) -->
         <meta-data android:name="io.sentry.dsn" android:value="https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192" />
 

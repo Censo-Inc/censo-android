@@ -9,8 +9,6 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
-import co.censo.shared.data.repository.PushRepository
-import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.CloudStorage
 import co.censo.shared.data.storage.GoogleDriveStorage
 import co.censo.shared.data.storage.SecurePreferences
@@ -103,20 +101,6 @@ object AppModule {
             apiService = apiService,
             secureStorage = secureStorage,
             keyRepository = keyRepository
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun providesPushRepository(
-        api: ApiService,
-        @ApplicationContext applicationContext: Context,
-        secureStorage: SecurePreferences
-    ): PushRepository {
-        return PushRepositoryImpl(
-            api = api,
-            applicationContext = applicationContext,
-            secureStorage = secureStorage
         )
     }
 
