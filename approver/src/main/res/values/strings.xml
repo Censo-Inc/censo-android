@@ -88,4 +88,5 @@
     <string name="active_approver">Active approver</string>
     <string name="key_failed_to_save_please_save_again">In order to use the Approver app, we need to store access data in your Google Drive. Please continue</string>
     <string name="save_key_to_cloud">Save Key</string>
+    <string name="sensible_crypto_security">sensible crypto security</string>
 </resources>

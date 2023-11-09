@@ -173,14 +173,14 @@
     <string name="sorry">"Sorry, "</string>
     <string name="is_not_a_valid_seed_phrase_word">" is not a valid seed phrase word."</string>
     <string name="welcome_to_censo">Welcome to Censo</string>
-    <string name="welcome_blurb">We built Censo to be a secure way to safeguard your seed phrases with multiple levels of security:</string>
+    <string name="welcome_blurb">Censo is a breakthrough in seed phrase security. Here\'s how you get started:</string>
     <string name="get_started">Get started</string>
-    <string name="authenticate_privately">Authenticate privately</string>
-    <string name="authenticate_privately_blurb">Censo does not store your info.</string>
+    <string name="authenticate_privately">Authenticate anonymously</string>
+    <string name="authenticate_privately_blurb">No personal info collected, ever, from Google or any other source.</string>
     <string name="authenticated">Authenticated</string>
-    <string name="scan_your_face_blurb">Fortify your Censo account with an encrypted, 3rd-party-verified scan.</string>
+    <string name="scan_your_face_blurb">Anonymous biometrics ensure that only you can access your seed phrase.</string>
     <string name="enter_your_phrase">Enter your phrase</string>
-    <string name="enter_your_phrase_blurb">Add your seed phrase; Censo will encrypt it for your eyes only</string>
+    <string name="enter_your_phrase_blurb">Now your seed phrase is encrypted and entirely in your control.</string>
     <string name="invite_approvers">Invite approvers</string>
     <string name="info">Learn more</string>
     <string name="word">%1$d%2$s word</string>
@@ -204,7 +204,7 @@
 
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Scan your face</string>
-    <string name="scan_phrase">Access to your seed phrase is always sealed behind a live scan of your face.\n\nCapture &#038; encrypt a 3D map of your face to confirm your live, physical presence with third-party-verified technology.</string>
+    <string name="scan_phrase_message">Your face scan ensures that only you have access to your seed phrase.\n\nYou will capture and store an anonymous 3D map of your face to confirm your live physical presence.</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
@@ -290,5 +290,6 @@
     <string name="you_are_about_to_delete_phrase">You are about to delete this phrase</string>
     <string name="delete_phrase">Delete Phrase</string>
     <string name="input_string_is_too_long">Can\'t be longer than %1$s characters</string>
+    <string name="enter_your_seed_phrase">Enter your seed phrase</string>
 
 </resources>

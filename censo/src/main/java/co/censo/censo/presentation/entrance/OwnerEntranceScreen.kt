@@ -252,7 +252,8 @@ fun OwnerEntranceStandardUI(
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -267,12 +268,12 @@ fun OwnerEntranceStandardUI(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = stringResource(R.string.sensible_crypto_security),
+            text = stringResource(R.string.tag_line),
             fontWeight = FontWeight.W600,
             fontSize = 24.sp,
             color = Color.Black
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(44.dp))
         StandardButton(
             onClick = authenticate,
             contentPadding = PaddingValues(
@@ -301,24 +302,8 @@ fun OwnerEntranceStandardUI(
                 )
             }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(all = 10.dp)
-        ) {
-            Icon(
-                Icons.Outlined.Info, contentDescription = null,
-                Modifier
-                    .height(height = 34.dp)
-                    .padding(all = 8.dp)
-            )
-            Text(
-                text = stringResource(R.string.why_google),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W500
-            )
-        }
 
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(112.dp))
 
         Row(
             verticalAlignment = Alignment.Top,
@@ -362,23 +347,27 @@ fun OwnerEntranceStandardUI(
         }
         Divider(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp))
         Row(
-            modifier = Modifier.padding(
-                start = 32.dp,
-                end = 32.dp,
-                top = 20.dp,
-                bottom = 32.dp
-            )
+            modifier = Modifier
+                .padding(
+                    start = 32.dp,
+                    end = 32.dp,
+                    top = 20.dp,
+                    bottom = 32.dp
+                )
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
             Text(
                 text = stringResource(R.string.terms),
                 modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/legal/terms") },
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
             )
-            Spacer(modifier = Modifier.width(24.dp))
             Text(
                 text = stringResource(R.string.privacy),
                 modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/legal/privacy") },
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
             )
         }
     }

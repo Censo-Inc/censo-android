@@ -1,8 +1,6 @@
 package co.censo.censo.presentation.initial_plan_setup
 
-import LearnMore
 import StandardButton
-import SubTitleText
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -181,80 +178,64 @@ fun InitialPlanSetupStandardUI(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = Color.White),
-        verticalArrangement = Arrangement.Bottom,
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Column(modifier = Modifier.padding(32.dp)) {
+            Image(
+                painter = painterResource(id = co.censo.shared.R.drawable.large_face_scan),
+                contentScale = ContentScale.FillWidth,
+                contentDescription = null,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+            )
+        }
 
-        val horizontalPadding = 32.dp
-        Image(
-            painter = painterResource(id = co.censo.shared.R.drawable.large_face_scan),
-            contentScale = ContentScale.FillWidth,
-            contentDescription = null,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
-        )
-        Spacer(modifier = Modifier.padding(PaddingValues(vertical = 30.dp)))
-        SubTitleText(
-            subtitle = R.string.step_1,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .padding(PaddingValues(horizontal = horizontalPadding))
-                .fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.padding(PaddingValues(vertical = 2.dp)))
-        TitleText(
-            title = R.string.scan_your_face,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .padding(PaddingValues(horizontal = horizontalPadding))
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.padding(PaddingValues(horizontal = 0.dp, vertical = 12.dp)))
-        Text(
-            text = stringResource(R.string.scan_phrase),
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .padding(PaddingValues(horizontal = horizontalPadding))
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(24.dp))
+        Column(modifier = Modifier.padding(horizontal = 44.dp)) {
+            TitleText(
+                title = R.string.scan_your_face,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(R.string.scan_phrase_message),
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(24.dp))
 
-        StandardButton(
-            onClick = startPlanSetup,
-            color = Color.Black,
-            contentPadding = PaddingValues(vertical = 12.dp),
-            modifier = Modifier
-                .padding(horizontal = horizontalPadding)
-                .fillMaxWidth(),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            StandardButton(
+                onClick = startPlanSetup,
+                color = Color.Black,
+                contentPadding = PaddingValues(vertical = 12.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
             ) {
-                Image(
-                    painter = painterResource(id = co.censo.shared.R.drawable.small_face_scan_white),
-                    contentDescription = null,
-                    modifier = Modifier.width(32.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.begin_face_scan),
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 24.sp,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(
+                        painter = painterResource(id = co.censo.shared.R.drawable.small_face_scan_white),
+                        contentDescription = null,
+                        modifier = Modifier.width(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.begin_face_scan),
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 24.sp,
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(44.dp))
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        LearnMore {
-
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

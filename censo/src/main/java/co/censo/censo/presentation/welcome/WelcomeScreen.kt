@@ -201,7 +201,7 @@ fun WelcomeScreenUI(
             )
             SetupStep(
                 imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
-                heading = stringResource(id = R.string.enter_your_phrase),
+                heading = stringResource(id = R.string.enter_your_seed_phrase),
                 content = stringResource(id = R.string.enter_your_phrase_blurb),
             )
             Divider()
@@ -227,10 +227,6 @@ fun WelcomeScreenUI(
                 fontSize = 22.sp,
                 modifier = Modifier.padding(all = 8.dp)
             )
-        }
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(12.dp))

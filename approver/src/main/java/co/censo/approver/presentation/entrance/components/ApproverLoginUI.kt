@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.approver.R
 
 @Composable
 fun ApproverLoginUI(
@@ -55,7 +56,7 @@ fun ApproverLoginUI(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = stringResource(co.censo.shared.R.string.sensible_crypto_security),
+            text = stringResource(R.string.sensible_crypto_security),
             fontWeight = FontWeight.W600,
             fontSize = 24.sp,
             color = Color.Black
