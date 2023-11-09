@@ -162,7 +162,7 @@ fun MainVaultScreen(
                             ApproversHomeScreen(
                                 approvers = state.ownerState?.policy?.guardians ?: emptyList(),
                                 onInviteApproversSelected = {
-                                    navController.navigate(Screen.PlanSetupRoute.buildNavRoute(false))
+                                    navController.navigate(Screen.PlanSetupRoute.route)
                                 }
                             )
 

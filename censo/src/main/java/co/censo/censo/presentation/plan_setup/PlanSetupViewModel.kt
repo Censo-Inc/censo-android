@@ -48,13 +48,9 @@ class PlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(PlanSetupState())
         private set
 
-    fun onStart(welcomeFlow: Boolean) {
-
+    fun onStart() {
         if (state.planSetupUIState == PlanSetupUIState.Initial) {
-            val planSetupUIState =
-                if (welcomeFlow) PlanSetupUIState.InviteApprovers else PlanSetupUIState.ApproverNickname
-
-            state = state.copy(planSetupUIState = planSetupUIState)
+            state = state.copy(planSetupUIState = PlanSetupUIState.ApproverNickname)
         }
 
         viewModelScope.launch {
@@ -186,7 +182,7 @@ class PlanSetupViewModel @Inject constructor(
 
         // restore UI state on view restart (`overwriteUIState` flag)
         // normally navigation is controlled by pressing "continue" button
-        if (overwriteUIState && state.planSetupUIState in listOf(PlanSetupUIState.InviteApprovers, PlanSetupUIState.ApproverNickname)) {
+        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.ApproverNickname) {
             if (externalApprovers.notConfirmed().isNotEmpty()) {
                 state = state.copy(
                     editedNickname = when (state.approverType) {

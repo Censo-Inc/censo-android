@@ -37,7 +37,6 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
-import co.censo.censo.presentation.plan_setup.components.AddTrustedApproversUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import kotlinx.coroutines.delay
@@ -46,7 +45,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlanSetupScreen(
     navController: NavController,
-    welcomeFlow: Boolean = false,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -70,7 +68,7 @@ fun PlanSetupScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart(welcomeFlow)
+                viewModel.onStart()
             }
             Lifecycle.Event.ON_PAUSE -> {
                 viewModel.onStop()
@@ -158,15 +156,6 @@ fun PlanSetupScreen(
                                     .align(Alignment.Center)
                                     .size(72.dp),
                                 strokeWidth = 5.dp
-                            )
-
-                        PlanSetupUIState.InviteApprovers ->
-                            AddTrustedApproversUI(
-                                welcomeFlow = welcomeFlow,
-                                onInviteApproverSelected = { viewModel.onInviteApprover() },
-                                onSkipForNowSelected = {
-                                    viewModel.onFullyCompleted()
-                                }
                             )
 
                         PlanSetupUIState.ApproverNickname -> {

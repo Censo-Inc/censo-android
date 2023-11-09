@@ -12,5 +12,5 @@ data class WelcomeState(
 }
 
 enum class WelcomeStep(val order: Int) {
-    Authenticated(1), FaceScanned(2), PhraseEntered(3)
+    Authenticated(1), FaceScanned(2)
 }
