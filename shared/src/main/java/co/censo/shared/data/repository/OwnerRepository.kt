@@ -469,13 +469,12 @@ class OwnerRepositoryImpl(
 
         if (response is Resource.Success) {
             try {
-                signUserOut()
                 keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
                 if (participantId != null) {
                     keyRepository.deleteSavedKeyFromCloud(participantId)
                 }
                 secureStorage.clearDeviceKeyId()
-                authUtil.signOut()
+                signUserOut()
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.DeleteUser)
             }
