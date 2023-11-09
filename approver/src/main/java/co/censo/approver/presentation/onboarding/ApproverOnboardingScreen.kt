@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
@@ -174,7 +175,6 @@ fun ApproverOnboardingScreen(
 
                 else -> {
 
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -185,7 +185,9 @@ fun ApproverOnboardingScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverUIState) {
-
+                            ApproverOnboardingUIState.NeedsToSaveKey -> {
+                                NeedsToSaveKey(viewModel::createKeyAndTriggerCloudSave)
+                            }
                             ApproverOnboardingUIState.NeedsToEnterCode,
                             ApproverOnboardingUIState.CodeRejected,
                             ApproverOnboardingUIState.WaitingForConfirmation -> {
@@ -283,5 +285,20 @@ fun ApproverOnboardingScreen(
                 )
             },
         )
+    }
+}
+
+@Composable
+fun NeedsToSaveKey(
+    onSaveKey: () -> Unit
+) {
+    Text(
+        modifier = Modifier.padding(horizontal = 12.dp),
+        text = stringResource(R.string.key_failed_to_save_please_save_again),
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(24.dp))
+    Button(onClick = onSaveKey) {
+        Text(text = stringResource(R.string.save_key_to_cloud))
     }
 }

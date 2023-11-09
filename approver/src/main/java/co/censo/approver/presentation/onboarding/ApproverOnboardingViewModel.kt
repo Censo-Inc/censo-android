@@ -2,6 +2,7 @@ package co.censo.approver.presentation.onboarding
 
 import Base58EncodedPrivateKey
 import InvitationId
+import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -27,6 +28,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
@@ -121,17 +123,24 @@ class ApproverOnboardingViewModel @Inject constructor(
             return
         }
 
-        state = when (guardianState.phase) {
-            is GuardianPhase.VerificationRejected ->
-                state.copy(approverUIState = ApproverOnboardingUIState.CodeRejected)
+        viewModelScope.launch(Dispatchers.IO) {
+            if (!keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))) {
+                state = state.copy(approverUIState = ApproverOnboardingUIState.NeedsToSaveKey)
+                return@launch
+            }
 
-            is GuardianPhase.WaitingForCode ->
-                state.copy(approverUIState = ApproverOnboardingUIState.NeedsToEnterCode)
+            state = when (guardianState.phase) {
+                is GuardianPhase.VerificationRejected ->
+                    state.copy(approverUIState = ApproverOnboardingUIState.CodeRejected)
 
-            is GuardianPhase.WaitingForVerification ->
-                state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
+                is GuardianPhase.WaitingForCode ->
+                    state.copy(approverUIState = ApproverOnboardingUIState.NeedsToEnterCode)
 
-            else -> state
+                is GuardianPhase.WaitingForVerification ->
+                    state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
+
+                else -> state
+            }
         }
     }
 
@@ -266,6 +275,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         when (state.approverUIState) {
             // onboarding
+            ApproverOnboardingUIState.NeedsToSaveKey,
             ApproverOnboardingUIState.NeedsToEnterCode,
             ApproverOnboardingUIState.WaitingForConfirmation,
             ApproverOnboardingUIState.CodeRejected -> {
@@ -375,7 +385,10 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
     private fun keyUploadFailure(exception: Exception?) {
-        state = state.copy(savePrivateKeyToCloudResource = Resource.Error(exception = exception))
+        state = state.copy(
+            savePrivateKeyToCloudResource = Resource.Error(exception = exception),
+            approverUIState = ApproverOnboardingUIState.NeedsToSaveKey
+        )
     }
 
     private fun keyDownloadFailure(exception: Exception?) {

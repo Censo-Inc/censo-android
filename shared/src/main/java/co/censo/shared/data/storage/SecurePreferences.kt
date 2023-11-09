@@ -10,7 +10,6 @@ import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.ACCEPTED_TER
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.BIP39
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_CREATED_FLAG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.EDITING_SECURITY_PLAN
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.GOOGLE_DRIVE_MOCK_KEY
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.GUARDIAN_INVITATION_ID
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.GUARDIAN_PARTICIPANT_ID
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.JWT_KEY
@@ -18,7 +17,6 @@ import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SHARED_PREF_
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SECURITY_PLAN
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.USER_SEEN_PERMISSION_DIALOG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_KEY
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -66,7 +64,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         const val DEVICE_KEY = "device_key"
         const val GUARDIAN_INVITATION_ID = "guardian_invitation_id"
         const val GUARDIAN_PARTICIPANT_ID = "guardian_participant_id"
-        const val GOOGLE_DRIVE_MOCK_KEY = "google_drive_mock_key"
         const val EDITING_SECURITY_PLAN = "editing_security_plan"
         const val SECURITY_PLAN = "security_plan"
         const val ACCEPTED_TERMS_OF_USE_VERSION = "accepted_terms_of_use_version"

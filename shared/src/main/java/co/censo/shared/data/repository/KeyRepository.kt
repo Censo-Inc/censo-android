@@ -17,6 +17,7 @@ import org.bouncycastle.util.encoders.Hex
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 
 interface KeyRepository {
