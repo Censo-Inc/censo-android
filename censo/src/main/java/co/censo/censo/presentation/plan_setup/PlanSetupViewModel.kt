@@ -513,6 +513,12 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
+        state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
+        if (state.ownerState!!.guardianSetup!!.guardians.any {  !ownerRepository.verifyKeyConfirmationSignature(it) }) {
+            state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
+            return
+        }
+
         state = state.copy(replacePolicyResponse = Resource.Loading())
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -616,5 +622,9 @@ class PlanSetupViewModel @Inject constructor(
             tempEncryptedKey = null,
             saveKeyToCloud = Resource.Uninitialized
         )
+    }
+
+    fun resetVerifyKeyConfirmationSignature() {
+        state = state.copy(verifyKeyConfirmationSignature = Resource.Uninitialized)
     }
 }

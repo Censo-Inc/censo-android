@@ -4,7 +4,6 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedGuardianPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
-import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import VaultSecretId
@@ -16,7 +15,6 @@ import co.censo.shared.data.cryptography.ORDER
 import co.censo.shared.data.cryptography.Point
 import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.SecretSharerUtils
-import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.decryptFromByteArray
@@ -67,7 +65,6 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
@@ -123,6 +120,8 @@ interface OwnerRepository {
     suspend fun saveJWT(jwtToken: String)
     fun retrieveJWT(): String
     fun checkJWTValid(jwtToken: String): Boolean
+
+    fun verifyKeyConfirmationSignature(guardian: Guardian.ProspectGuardian): Boolean
 
     suspend fun confirmGuardianShip(
         participantId: ParticipantId,
@@ -381,6 +380,25 @@ class OwnerRepositoryImpl(
             authUtil.isJWTValid(jwtDecoded)
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.JWTToken)
+            false
+        }
+    }
+
+    override fun verifyKeyConfirmationSignature(guardian: Guardian.ProspectGuardian): Boolean {
+        return try {
+            when (val status = guardian.status) {
+                is GuardianStatus.Confirmed -> {
+                    val deviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
+                    deviceKey.verify(
+                        status.guardianPublicKey.getBytes() + guardian.participantId.getBytes() + status.timeMillis.toString().toByteArray(),
+                        status.guardianKeySignature.bytes
+                    )
+                }
+                is GuardianStatus.ImplicitlyOwner -> true
+                else -> false
+            }
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.EncryptShard)
             false
         }
     }
