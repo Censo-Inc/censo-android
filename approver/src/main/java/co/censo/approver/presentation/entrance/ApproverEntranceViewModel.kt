@@ -300,7 +300,7 @@ class ApproverEntranceViewModel @Inject constructor(
         val identifier: String
     )
     private fun parseLink(link: String): CensoLink {
-        val parts = link.split("//")
+        val parts = link.replace(Regex("[\\r\\n]+"), "").trim().split("//")
         if (parts.size != 2 || !parts[0].startsWith("censo")) {
             throw Exception("invalid link")
         }
