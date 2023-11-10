@@ -278,13 +278,16 @@ class OwnerEntranceViewModel @Inject constructor(
         viewModelScope.launch {
             val userResponse = ownerRepository.retrieveUser()
 
-            state = state.copy(userResponse = userResponse)
-
             if (userResponse is Resource.Success) {
                 // update global state
                 ownerStateFlow.tryEmit(userResponse.map { it.ownerState })
 
                 loggedInRouting(userResponse.data!!.ownerState)
+
+                state = state.copy(userResponse = userResponse)
+            } else {
+                state = state.copy(userResponse = Resource.Uninitialized)
+                retrySignIn()
             }
         }
     }

@@ -215,13 +215,19 @@ class ApproverEntranceViewModel @Inject constructor(
 
             when {
                 participantId.isEmpty() && invitationId.isEmpty() -> {
-                    val isActiveApprover = guardianRepository.retrieveUser().data
-                        ?.let { it.guardianStates.any { it.invitationId != null } }
-                        ?: false
+                    val retrieveUser = guardianRepository.retrieveUser()
 
-                    state = state.copy(
-                        uiState = ApproverEntranceUIState.LoggedInPasteLink(isActiveApprover)
-                    )
+                    if (retrieveUser is Resource.Success) {
+                        val isActiveApprover = retrieveUser.data
+                            ?.let { it.guardianStates.any { it.invitationId != null } }
+                            ?: false
+
+                        state = state.copy(
+                            uiState = ApproverEntranceUIState.LoggedInPasteLink(isActiveApprover)
+                        )
+                    } else {
+                        retrySignIn()
+                    }
                 }
                 participantId.isNotEmpty() -> triggerNavigation(RoutingDestination.ACCESS)
                 invitationId.isNotEmpty() -> triggerNavigation(RoutingDestination.ONBOARDING)
