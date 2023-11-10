@@ -388,7 +388,7 @@ class PlanSetupViewModel @Inject constructor(
         viewModelScope.launch {
             if (codeVerified) {
 
-                val keyConfirmationTimeMillis = Clock.System.now().epochSeconds
+                val keyConfirmationTimeMillis = Clock.System.now().toEpochMilliseconds()
 
                 val keyConfirmationMessage =
                     guardianStatus.guardianPublicKey.getBytes() + participantId.getBytes() + keyConfirmationTimeMillis.toString()
