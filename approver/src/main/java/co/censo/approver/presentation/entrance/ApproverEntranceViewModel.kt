@@ -215,7 +215,7 @@ class ApproverEntranceViewModel @Inject constructor(
 
             when {
                 participantId.isEmpty() && invitationId.isEmpty() -> {
-                    val isActiveApprover = ownerRepository.retrieveUser().data
+                    val isActiveApprover = guardianRepository.retrieveUser().data
                         ?.let { it.guardianStates.any { it.invitationId != null } }
                         ?: false
 

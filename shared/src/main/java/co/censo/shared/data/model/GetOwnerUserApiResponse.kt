@@ -17,10 +17,15 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @Serializable
-data class GetUserApiResponse(
+data class GetOwnerUserApiResponse(
+    val identityToken: IdentityToken,
+    val ownerState: OwnerState,
+)
+
+@Serializable
+data class GetApproverUserApiResponse(
     val identityToken: IdentityToken,
     val guardianStates: List<GuardianState>,
-    val ownerState: OwnerState,
 )
 
 @Serializable

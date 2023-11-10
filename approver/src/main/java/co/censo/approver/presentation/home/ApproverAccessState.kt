@@ -6,7 +6,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
-import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.RejectRecoveryApiResponse
@@ -25,7 +25,7 @@ data class ApproverAccessState(
     val participantId: String = "",
 
     // Approver data
-    val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
+    val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
     val guardianEncryptionKey: EncryptionKey? = null,
 
     // recovery

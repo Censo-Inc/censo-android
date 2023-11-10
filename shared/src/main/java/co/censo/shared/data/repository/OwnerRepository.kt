@@ -23,7 +23,6 @@ import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256
-import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
@@ -35,7 +34,7 @@ import co.censo.shared.data.model.DeleteRecoveryApiResponse
 import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.EncryptedShard
 import co.censo.shared.data.model.FacetecBiometry
-import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.IdentityToken
@@ -90,7 +89,7 @@ data class EncryptedSeedPhrase(
 
 interface OwnerRepository {
 
-    suspend fun retrieveUser(): Resource<GetUserApiResponse>
+    suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
     suspend fun signInUser(jwtToken: String, idToken: String): Resource<ResponseBody>
 
     suspend fun getCreatePolicyParams(
@@ -198,8 +197,8 @@ class OwnerRepositoryImpl(
     private val authUtil: AuthUtil,
     private val keyRepository: KeyRepository
 ) : OwnerRepository, BaseRepository() {
-    override suspend fun retrieveUser(): Resource<GetUserApiResponse> {
-        return retrieveApiResource { apiService.user() }
+    override suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse> {
+        return retrieveApiResource { apiService.ownerUser() }
     }
 
     override suspend fun signInUser(authId: String, idToken: String) =

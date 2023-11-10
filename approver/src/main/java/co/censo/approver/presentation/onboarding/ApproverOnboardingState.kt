@@ -5,7 +5,8 @@ import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
-import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GetApproverUserApiResponse
+import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
@@ -21,7 +22,7 @@ data class ApproverOnboardingState(
     // onboarding
     val verificationCode: String = "",
     val guardianEncryptionKey: EncryptionKey? = null,
-    val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
+    val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
     val acceptGuardianResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
 

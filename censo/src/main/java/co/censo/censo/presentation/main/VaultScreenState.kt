@@ -2,7 +2,7 @@ package co.censo.censo.presentation.main
 
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteSecretApiResponse
-import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.VaultSecret
 
@@ -14,7 +14,7 @@ data class VaultScreenState(
     val triggerEditPhraseDialog: Resource<VaultSecret> = Resource.Uninitialized,
 
     // api requests
-    val userResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
+    val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSecretApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 

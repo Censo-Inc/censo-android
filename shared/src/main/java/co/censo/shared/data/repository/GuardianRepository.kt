@@ -13,6 +13,7 @@ import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiRequest
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.RejectRecoveryApiResponse
 import co.censo.shared.data.model.StoreRecoveryTotpSecretApiRequest
 import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
@@ -27,6 +28,7 @@ import okhttp3.ResponseBody
 import java.util.Base64
 
 interface GuardianRepository {
+    suspend fun retrieveUser(): Resource<GetApproverUserApiResponse>
     suspend fun acceptGuardianship(
         invitationId: InvitationId,
     ): Resource<AcceptGuardianshipApiResponse>
@@ -79,6 +81,10 @@ class GuardianRepositoryImpl(
     private val secureStorage: SecurePreferences,
     private val keyRepository: KeyRepository
 ) : GuardianRepository, BaseRepository() {
+
+    override suspend fun retrieveUser(): Resource<GetApproverUserApiResponse> {
+        return retrieveApiResource { apiService.approverUser() }
+    }
 
     override fun signVerificationCode(
         verificationCode: String,

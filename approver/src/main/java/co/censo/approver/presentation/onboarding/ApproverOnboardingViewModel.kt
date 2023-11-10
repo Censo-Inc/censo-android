@@ -73,7 +73,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val userResponse = ownerRepository.retrieveUser()
+            val userResponse = guardianRepository.retrieveUser()
 
             state = state.copy(userResponse = userResponse)
 

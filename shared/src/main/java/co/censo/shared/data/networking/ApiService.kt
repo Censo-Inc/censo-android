@@ -19,7 +19,8 @@ import co.censo.shared.data.model.DeleteSecretApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
-import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GetApproverUserApiResponse
+import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.LockApiResponse
@@ -49,7 +50,6 @@ import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.runBlocking
@@ -130,7 +130,10 @@ interface ApiService {
     suspend fun signIn(@Body signInApiRequest: SignInApiRequest): RetrofitResponse<ResponseBody>
 
     @GET("/v1/user")
-    suspend fun user(): RetrofitResponse<GetUserApiResponse>
+    suspend fun ownerUser(): RetrofitResponse<GetOwnerUserApiResponse>
+
+    @GET("/v1/user")
+    suspend fun approverUser(): RetrofitResponse<GetApproverUserApiResponse>
 
     @DELETE("/v1/user")
     suspend fun deleteUser(): RetrofitResponse<Unit>

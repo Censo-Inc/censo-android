@@ -3,7 +3,7 @@ package co.censo.censo.presentation.access_approval
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.DeleteRecoveryApiResponse
-import co.censo.shared.data.model.GetUserApiResponse
+import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
@@ -29,7 +29,7 @@ data class AccessApprovalState(
 
     // api requests
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
-    val approvalsResponse: Resource<GetUserApiResponse> = Resource.Uninitialized,
+    val approvalsResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val initiateRecoveryResource: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
     val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
     val submitTotpVerificationResource: Resource<SubmitRecoveryTotpVerificationApiResponse> = Resource.Uninitialized,
