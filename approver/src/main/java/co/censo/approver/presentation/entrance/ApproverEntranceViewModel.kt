@@ -9,12 +9,9 @@ import co.censo.approver.data.ApproverEntranceUIState
 import co.censo.approver.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
-import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.data.repository.PushRepository
-import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
@@ -34,7 +31,6 @@ class ApproverEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val guardianRepository: GuardianRepository,
     private val keyRepository: KeyRepository,
-    private val pushRepository: PushRepository,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences
 ) : ViewModel() {
@@ -61,7 +57,7 @@ class ApproverEntranceViewModel @Inject constructor(
             val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
             if (tokenValid) {
-                checkUserHasRespondedToNotificationOptIn()
+                loggedInRouting()
             } else {
                 attemptRefresh(jwtToken)
             }
@@ -76,7 +72,7 @@ class ApproverEntranceViewModel @Inject constructor(
             authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId, onDone = {
                 val jwtToken = ownerRepository.retrieveJWT()
                 if (jwtToken.isNotEmpty() && ownerRepository.checkJWTValid(jwtToken)) {
-                    checkUserHasRespondedToNotificationOptIn()
+                    loggedInRouting()
                 } else {
                     signOut()
                 }
@@ -88,39 +84,6 @@ class ApproverEntranceViewModel @Inject constructor(
         viewModelScope.launch {
             ownerRepository.signUserOut()
             loggedOutRouting()
-        }
-    }
-
-    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
-
-    fun setUserSeenPushDialog(seenDialog: Boolean) =
-        pushRepository.setUserSeenPushDialog(seenDialog)
-
-    private fun checkUserHasRespondedToNotificationOptIn() {
-        viewModelScope.launch {
-            if (pushRepository.userHasSeenPushDialog()) {
-                submitNotificationTokenForRegistration()
-                loggedInRouting()
-            } else {
-                state = state.copy(showPushNotificationsDialog = true)
-            }
-        }
-    }
-
-    private fun submitNotificationTokenForRegistration() {
-        viewModelScope.launch {
-            try {
-                val token = pushRepository.retrievePushToken()
-                if (token.isNotEmpty()) {
-                    val pushBody = PushBody(
-                        deviceType = PushRepositoryImpl.DEVICE_TYPE,
-                        token = token
-                    )
-                    pushRepository.addPushNotification(pushBody = pushBody)
-                }
-            } catch (e: Exception) {
-                e.sendError(CrashReportingUtil.SubmitNotificationToken)
-            }
         }
     }
 
@@ -198,7 +161,7 @@ class ApproverEntranceViewModel @Inject constructor(
             )
 
             state = if (signInUserResponse is Resource.Success) {
-                checkUserHasRespondedToNotificationOptIn()
+                loggedInRouting()
                 state.copy(
                     signInUserResource = signInUserResponse
                 )
@@ -270,13 +233,6 @@ class ApproverEntranceViewModel @Inject constructor(
 
     private fun resetForceUserToGrantCloudStorageAccess() {
         state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
-    }
-
-    fun finishPushNotificationDialog() {
-        submitNotificationTokenForRegistration()
-        state = state.copy(showPushNotificationsDialog = false)
-
-        loggedInRouting()
     }
 
     fun handleLoggedOutLink(clipboardContent: String?) {

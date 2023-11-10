@@ -43,6 +43,6 @@ class CountDownTimerImpl : VaultCountDownTimer {
     object Companion {
         const val INITIAL_DELAY = 2_000L
         const val UPDATE_COUNTDOWN = 1_000L
-        const val POLLING_VERIFICATION_COUNTDOWN = 5_000L
+        const val POLLING_VERIFICATION_COUNTDOWN = 3_000L
     }
 }

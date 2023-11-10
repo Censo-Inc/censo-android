@@ -10,7 +10,6 @@ data class ApproverEntranceState(
 
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<ResponseBody> = Resource.Uninitialized,
-    val showPushNotificationsDialog: Boolean = false,
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
 
     val navigationResource: Resource<String> = Resource.Uninitialized,

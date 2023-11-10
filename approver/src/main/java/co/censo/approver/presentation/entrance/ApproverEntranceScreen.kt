@@ -56,40 +56,6 @@ fun ApproverEntranceScreen(
 
     val state = viewModel.state
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = {
-            viewModel.finishPushNotificationDialog()
-        }
-    )
-
-    fun checkNotificationsPermissionDialog() {
-        try {
-            val notificationGranted =
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-
-            if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
-                val shownPermissionBefore =
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    )
-                val seenDialogBefore = viewModel.userHasSeenPushDialog()
-
-                if (!shownPermissionBefore && !seenDialogBefore) {
-                    viewModel.setUserSeenPushDialog(true)
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-
-        } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.PermissionDialog)
-        }
-    }
-
     val googleAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { activityResult ->
@@ -136,10 +102,6 @@ fun ApproverEntranceScreen(
                 viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
             }
             viewModel.resetTriggerGoogleSignIn()
-        }
-
-        if (state.showPushNotificationsDialog) {
-            checkNotificationsPermissionDialog()
         }
     }
 
