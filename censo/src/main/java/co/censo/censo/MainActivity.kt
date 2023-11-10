@@ -115,13 +115,10 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.WELCOME_FLOW_ARG}}"
-            ) { backStackEntry ->
+                route = Screen.PlanSetupRoute.route
+            ) {
                 PlanSetupScreen(
-                    navController = navController,
-                    welcomeFlow = (backStackEntry.arguments?.getString(
-                        Screen.PlanSetupRoute.WELCOME_FLOW_ARG
-                    ) ?: false.toString()).toBoolean()
+                    navController = navController
                 )
             }
             composable(

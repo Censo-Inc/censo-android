@@ -75,7 +75,6 @@ data class PlanSetupState(
         ) && approverType == ApproverType.Alternate -> BackIconType.Back
 
         planSetupUIState in listOf(
-            PlanSetupUIState.InviteApprovers,
             PlanSetupUIState.ApproverNickname,
             PlanSetupUIState.ApproverGettingLive,
             PlanSetupUIState.AddAlternateApprover,
@@ -106,7 +105,6 @@ data class PlanSetupState(
 
 enum class PlanSetupUIState {
     Initial,
-    InviteApprovers,
     ApproverNickname,
     EditApproverNickname,
     ApproverGettingLive,

@@ -108,11 +108,9 @@ fun WelcomeScreen(
                                 )
                             }
                         } else {
-                            WelcomeScreenUI(currentStep = WelcomeStep.PhraseEntered) {
-                                navController.navigate(
-                                    Screen.PlanSetupRoute.buildNavRoute(welcomeFlow = true)
-                                )
-                            }
+                            navController.navigate(
+                                Screen.OwnerVaultScreen.route
+                            )
                         }
                     }
                 }
@@ -211,13 +209,6 @@ fun WelcomeScreenUI(
                 imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
                 heading = stringResource(id = R.string.enter_your_phrase),
                 content = stringResource(id = R.string.enter_your_phrase_blurb),
-                completionText = if (currentStep.order >= WelcomeStep.PhraseEntered.order) stringResource(R.string.authenticated) else null
-            )
-            Divider()
-            SetupStep(
-                imagePainter = painterResource(id = co.censo.shared.R.drawable.two_people),
-                heading = stringResource(id = R.string.add_approvers),
-                content = stringResource(id = R.string.add_approvers_blurb),
             )
             Divider()
         }
@@ -225,7 +216,6 @@ fun WelcomeScreenUI(
         val buttonText = when (currentStep) {
             WelcomeStep.Authenticated -> stringResource(id = R.string.get_started)
             WelcomeStep.FaceScanned -> stringResource(id = R.string.enter_your_phrase)
-            WelcomeStep.PhraseEntered -> stringResource(id = R.string.add_approvers)
         }
 
         StandardButton(

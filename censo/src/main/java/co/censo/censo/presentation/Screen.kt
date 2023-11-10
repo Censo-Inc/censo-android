@@ -5,13 +5,7 @@ import Base58EncodedMasterPublicKey
 sealed class Screen(val route: String) {
     object EntranceRoute : Screen("entrance_screen")
 
-    object PlanSetupRoute : Screen("plan_setup_route") {
-        const val WELCOME_FLOW_ARG = "welcome_flow_key"
-
-        fun buildNavRoute(welcomeFlow: Boolean = false): String {
-            return "${PlanSetupRoute.route}/${welcomeFlow}"
-        }
-    }
+    object PlanSetupRoute : Screen("plan_setup_route")
 
     object OwnerVaultScreen : Screen("owner_vault_screen")
 

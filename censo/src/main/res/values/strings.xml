@@ -182,8 +182,6 @@
     <string name="enter_your_phrase">Enter your phrase</string>
     <string name="enter_your_phrase_blurb">Add your seed phrase; Censo will encrypt it for your eyes only</string>
     <string name="invite_approvers">Invite approvers</string>
-    <string name="add_approvers">Optional: Add approvers</string>
-    <string name="add_approvers_blurb">To improve security, choose people to approve access.</string>
     <string name="info">Learn more</string>
     <string name="word">%1$d%2$s word</string>
     <string name="valid_seed_phrase_word">\u2713 Valid seed phrase word</string>

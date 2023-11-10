@@ -295,7 +295,6 @@ class OwnerEntranceViewModel @Inject constructor(
     private fun loggedInRouting(ownerState: OwnerState) {
         if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
             val destination = when {
-                ownerState.guardianSetup != null -> Screen.PlanSetupRoute.buildNavRoute(welcomeFlow = false)
                 ownerState.recovery != null -> Screen.AccessApproval.route
                 else -> Screen.OwnerVaultScreen.route
             }

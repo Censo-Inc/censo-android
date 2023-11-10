@@ -81,9 +81,7 @@ fun EnterPhraseScreen(
         if (state.phraseEntryComplete is Resource.Success) {
             if (welcomeFlow) {
                 navController.navigate(
-                    Screen.PlanSetupRoute.buildNavRoute(
-                        welcomeFlow = true
-                    )
+                    Screen.OwnerVaultScreen.route
                 )
             } else {
                 navController.popBackStack()
