@@ -168,7 +168,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     //Facetec
-    implementation("com.facetec:facetec-sdk:9.6.47@aar")
+    implementation("com.facetec:facetec-sdk:9.6.58@aar")
 
     //Biometrics
     implementation("androidx.biometric:biometric:1.1.0")
