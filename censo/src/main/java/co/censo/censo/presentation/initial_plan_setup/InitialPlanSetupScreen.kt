@@ -22,7 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +54,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,16 +125,12 @@ fun InitialPlanSetupScreen(
                     when (state.initialPlanSetupStep) {
                         InitialPlanSetupStep.CreateApproverKey,
                         InitialPlanSetupStep.CreatePolicyParams,
-                        InitialPlanSetupStep.PolicyCreation ->
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(72.dp)
-                                        .align(Alignment.Center),
-                                    color = VaultColors.PrimaryColor,
-                                    strokeWidth = 8.dp,
-                                )
-                            }
+                        InitialPlanSetupStep.PolicyCreation -> Loading(
+                            strokeWidth = 8.dp,
+                            color = VaultColors.PrimaryColor,
+                            size = 72.dp,
+                            fullscreen = true
+                        )
 
                         is InitialPlanSetupStep.Initial ->
                             InitialPlanSetupStandardUI {

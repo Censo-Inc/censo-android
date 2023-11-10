@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -45,6 +44,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.shared.presentation.components.Loading
 
 @Composable
 fun WelcomeScreen(
@@ -63,19 +63,13 @@ fun WelcomeScreen(
 
     when {
         state.loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = Color.White)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center),
-                    strokeWidth = 8.dp,
-                    color = Color.Black
-                )
-            }
+            Loading(
+                strokeWidth = 8.dp,
+                color = Color.Black,
+                size = 72.dp,
+                fullscreen = true,
+                fullscreenBackgroundColor = Color.White
+            )
         }
 
         state.asyncError -> {

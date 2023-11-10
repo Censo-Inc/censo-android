@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -91,14 +91,12 @@ fun AccessSeedPhrasesScreen(
         ) {
 
             when {
-                state.loading ->
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .align(Alignment.Center),
-                        strokeWidth = 8.dp,
-                        color = Color.White
-                    )
+                state.loading -> Loading(
+                    strokeWidth = 8.dp,
+                    color = Color.White,
+                    size = 72.dp,
+                    fullscreen = true
+                )
 
                 state.asyncError -> {
                     when {

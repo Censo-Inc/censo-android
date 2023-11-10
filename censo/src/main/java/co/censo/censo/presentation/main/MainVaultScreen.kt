@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +29,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.popUpToTop
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,15 +78,12 @@ fun MainVaultScreen(
         ) {
 
             when {
-                state.loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .align(Alignment.Center),
-                        strokeWidth = 8.dp,
-                        color = Color.Black
-                    )
-                }
+                state.loading -> Loading(
+                    strokeWidth = 8.dp,
+                    color = Color.Black,
+                    size = 72.dp,
+                    fullscreen = true
+                )
 
                 state.asyncError -> {
                     when {

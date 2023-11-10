@@ -47,6 +47,7 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,17 +115,12 @@ fun ApproverOnboardingScreen(
 
             when {
                 state.loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .align(Alignment.Center),
-                            strokeWidth = 8.dp,
-                            color = Color.Black
-                        )
-                    }
+                    Loading(
+                        strokeWidth = 8.dp,
+                        color = Color.Black,
+                        size = 72.dp,
+                        fullscreen = true
+                    )
                 }
 
                 state.asyncError -> {
@@ -253,19 +249,13 @@ fun ApproverOnboardingScreen(
             } else null
 
         if (state.loadingCloudAction) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center),
-                    strokeWidth = 8.dp,
-                    color = Color.Black
-                )
-            }
+            Loading(
+                strokeWidth = 8.dp,
+                color = Color.Black,
+                size = 72.dp,
+                fullscreen = true,
+                fullscreenBackgroundColor = Color.White
+            )
         }
 
         CloudStorageHandler(

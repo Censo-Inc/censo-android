@@ -24,6 +24,7 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.lock_screen.components.LockEngagedUI
+import co.censo.shared.presentation.components.Loading
 
 @Composable
 fun LockedScreen(
@@ -85,9 +86,13 @@ fun LockedScreen(
                         )
                     }
 
-                    else -> {
-                        LoadingIndicator()
-                    }
+                    else -> Loading(
+                        strokeWidth = 8.dp,
+                        color = Color.Black,
+                        size = 72.dp,
+                        fullscreen = true,
+                        fullscreenBackgroundColor = Color.White
+                    )
                 }
             }
 
@@ -96,22 +101,5 @@ fun LockedScreen(
                 Spacer(modifier = Modifier.height(0.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.White),
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .size(72.dp)
-                .align(Alignment.Center),
-            strokeWidth = 8.dp,
-            color = Color.Black
-        )
     }
 }
