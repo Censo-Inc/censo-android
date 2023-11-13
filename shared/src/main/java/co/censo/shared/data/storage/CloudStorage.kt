@@ -54,13 +54,10 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
 
                 //Save local file
                 val fileName = "${FILE_NAME}_${participantId.value}$FILE_EXTENSION"
-                val fileDir = context.getExternalFilesDir(null)
-                val localFile = File(fileDir, fileName)
+                val localFile = File(context.filesDir, fileName)
 
                 try {
-                    val outputStream = FileOutputStream(localFile)
-                    outputStream.write(fileContent.toByteArray())
-                    outputStream.close()
+                    localFile.writeText(fileContent)
                 } catch (e: IOException) {
                     e.sendError(CloudUpload)
                     return Resource.Error(exception = e)
