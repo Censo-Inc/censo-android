@@ -291,5 +291,12 @@
     <string name="delete_phrase">Delete Phrase</string>
     <string name="input_string_is_too_long">Can\'t be longer than %1$s characters</string>
     <string name="enter_your_seed_phrase">Enter your seed phrase</string>
+    <string name="you_can_increase_security_by_adding_approvers">You can increase security by adding approvers.</string>
+    <string name="you_have_span">"You have "</string>
+    <string name="seed_phrases_span">" seed phrases."</string>
+    <string name="seed_phrase_span">" seed phrase."</string>
+    <string name="it_is_stored_securely_and_accessible_span">"It is stored securely and accessible "</string>
+    <string name="to_you_span">" to you."</string>
+    <string name="only_span">only</string>
 
 </resources>

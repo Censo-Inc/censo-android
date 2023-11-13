@@ -1,8 +1,8 @@
 package co.censo.censo.presentation.main
 
 import StandardButton
+import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,184 +11,147 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.PaintingStyle
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 
 @Composable
 fun VaultHomeScreen(
     seedPhrasesSaved: Int,
-    approvers: Int,
     onAddSeedPhrase: () -> Unit,
     onAddApprovers: () -> Unit,
     showAddApprovers: Boolean
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White)
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier
-                .weight(0.5f)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            VaultHomeContainer(
-                value = seedPhrasesSaved,
-                title = stringResource(R.string.seed_phrase_home_title),
-                buttonText = stringResource(R.string.add_seed_phrase),
-                onButtonClick = onAddSeedPhrase,
-            )
-        }
-
-        Divider(
-            modifier = Modifier.height(1.dp),
-            color = SharedColors.DividerGray
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = buildSeedPhraseCount(seedPhrasesSaved, context),
+            fontSize = 28.sp,
+            fontWeight = FontWeight.W700,
+            textAlign = TextAlign.Center
         )
 
-        Column(
-            modifier = Modifier
-                .weight(0.5f)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Spacer(modifier = Modifier.height(36.dp))
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = buildAddSeedPhraseDisclaimer(context),
+            fontSize = 24.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(36.dp))
+
+        StandardButton(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.Black,
+            contentPadding = PaddingValues(vertical = 8.dp),
+            onClick = onAddSeedPhrase
         ) {
-            VaultHomeContainer(
-                value = approvers,
-                title = stringResource(R.string.approvers_home_title),
-                buttonText = stringResource(R.string.add_approvers_button_text),
-                dashedBorder = true,
-                showButton = showAddApprovers,
-                onButtonClick = onAddApprovers,
+            Text(
+                text = stringResource(id = R.string.add_seed_phrase),
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.W400
             )
         }
 
-        Spacer(modifier = Modifier.height(44.dp))
-    }
-}
+        if (showAddApprovers) {
+            Spacer(modifier = Modifier.height(36.dp))
 
-@Composable
-fun VaultHomeContainer(
-    value: Int,
-    title: String,
-    buttonText: String,
-    dashedBorder: Boolean = false,
-    showButton: Boolean = true,
-    onButtonClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-
-        Spacer(modifier = Modifier.weight(0.1f))
-
-        val modifier = if (dashedBorder) {
-            Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                .weight(0.8f)
-                .dashedBorder(
-                    width = 1.dp,
-                    color = SharedColors.BorderGrey,
-                    radius = 16.dp
-                )
-        } else {
-            Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                .weight(0.8f)
-                .border(
-                    width = 1.dp,
-                    color = SharedColors.BorderGrey,
-                    shape = RoundedCornerShape(16.dp)
-                )
-        }
-
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier,
-        ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = value.toString(),
-                fontSize = 72.sp,
+                text = stringResource(R.string.you_can_increase_security_by_adding_approvers),
+                fontSize = 26.sp,
                 fontWeight = FontWeight.W700,
+                lineHeight = 30.sp,
                 textAlign = TextAlign.Center
             )
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = title,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.W600,
-                textAlign = TextAlign.Center
-            )
-        }
 
-        Spacer(modifier = Modifier.weight(0.05f))
+            Spacer(modifier = Modifier.height(36.dp))
 
-        if (showButton) {
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
-                color = SharedColors.ButtonGrey,
+                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 8.dp),
-                onClick = onButtonClick
+                onClick = onAddApprovers
             ) {
                 Text(
-                    text = buttonText,
-                    color = Color.Black,
+                    text = stringResource(id = R.string.add_approvers_button_text),
+                    color = Color.White,
                     fontSize = 16.sp,
+                    fontWeight = FontWeight.W400
                 )
             }
-
-            Spacer(modifier = Modifier.weight(0.1f))
-        } else {
-            Spacer(modifier = Modifier.weight(0.20f))
         }
     }
 }
 
-fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
-    drawBehind {
-        drawIntoCanvas {
-            val paint = Paint()
-                .apply {
-                    strokeWidth = width.toPx()
-                    this.color = color
-                    style = PaintingStyle.Stroke
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                }
-            it.drawRoundRect(
-                width.toPx(),
-                width.toPx(),
-                size.width - width.toPx(),
-                size.height - width.toPx(),
-                radius.toPx(),
-                radius.toPx(),
-                paint
-            )
+private fun buildSeedPhraseCount(count: Int, context: Context) : AnnotatedString {
+    val countSpanStyle = SpanStyle(
+        fontSize = 38.sp,
+        fontWeight = FontWeight.W700
+    )
+
+    val textSpanStyle = SpanStyle(
+        fontSize = 26.sp,
+    )
+
+    return buildAnnotatedString {
+        withStyle(textSpanStyle) {
+            append(context.getString(R.string.you_have_span))
+        }
+        withStyle(countSpanStyle) {
+            append(count.toString())
+        }
+        withStyle(textSpanStyle) {
+            if (count > 1) {
+                append(context.getString(R.string.seed_phrases_span))
+            } else {
+                append(context.getString(R.string.seed_phrase_span))
+            }
         }
     }
+}
+
+private fun buildAddSeedPhraseDisclaimer(context: Context) : AnnotatedString {
+    val emphasisSpanStyle = SpanStyle(
+        fontWeight = FontWeight.W600
+    )
+
+    return buildAnnotatedString {
+            append(context.getString(R.string.it_is_stored_securely_and_accessible_span))
+
+            withStyle(emphasisSpanStyle) {
+                append(context.getString(R.string.only_span))
+            }
+
+            append(context.getString(R.string.to_you_span))
+        }
+}
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -198,6 +161,5 @@ fun VaultHomePreview() {
         onAddSeedPhrase = {},
         showAddApprovers = true,
         seedPhrasesSaved = 2,
-        approvers = 1
     )
 }

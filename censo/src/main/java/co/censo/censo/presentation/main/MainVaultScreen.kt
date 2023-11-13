@@ -119,7 +119,6 @@ fun MainVaultScreen(
                         BottomNavItem.Home ->
                             VaultHomeScreen(
                                 seedPhrasesSaved = state.secretsSize,
-                                approvers = state.externalApprovers,
                                 onAddSeedPhrase = {
                                     state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
                                         val route = Screen.EnterPhraseRoute.buildNavRoute(
