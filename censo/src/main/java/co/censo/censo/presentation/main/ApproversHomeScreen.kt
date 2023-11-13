@@ -1,11 +1,10 @@
 package co.censo.censo.presentation.main
 
-import LearnMore
 import MessageText
 import StandardButton
-import SubTitleText
 import TitleText
 import android.content.Context
+import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +30,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,40 +86,67 @@ fun ApproversHomeScreen(
 fun NoApproversUI(
     onInviteApproversSelected: () -> Unit
 ) {
-    val verticalSpacingHeight = 12.dp
+    val verticalSpacingHeight = 24.dp
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 36.dp),
+            .padding(horizontal = 36.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
-        SubTitleText(
-            modifier = Modifier.fillMaxWidth(),
-            subtitle = R.string.optional_increase_security,
-            textAlign = TextAlign.Start
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.invite_trusted_approvers,
+            title = stringResource(R.string.you_can_increase_your_security),
+            textAlign = TextAlign.Start
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight + 12.dp))
+
+        MessageText(
+            message = buildSpannedParagraph(
+                preceding = stringResource(R.string.adding_approvers_span),
+                bolded = stringResource(R.string.require),
+                remaining = stringResource(R.string.their_approval_in_addition_to_yours_span),
+            ),
             textAlign = TextAlign.Start
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-
         MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            message = R.string.invite_trusted_approvers_message,
+            message = buildSpannedParagraph(
+                preceding = stringResource(R.string.adding_a_span),
+                bolded = stringResource(R.string.first_approver),
+                remaining = stringResource(R.string.ensures_access_first_approver_span),
+            ),
             textAlign = TextAlign.Start
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight + 24.dp))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+        MessageText(
+            message = buildSpannedParagraph(
+                preceding =  stringResource(R.string.adding_a_span),
+                bolded = stringResource(R.string.second_approver),
+                remaining = stringResource(R.string.ensures_access_second_approver_span),
+            ),
+            textAlign = TextAlign.Start
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight - 12.dp))
+        Text(
+            text = stringResource(R.string.add_approvers_beta_warning),
+            color = Color.Red,
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.W500
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
@@ -134,20 +165,33 @@ fun NoApproversUI(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.invite_approver),
+                    text = stringResource(R.string.add_approvers_button_text),
                     color = Color.White,
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.W400
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight + 24.dp))
+    }
+}
 
-        LearnMore {
+private fun buildSpannedParagraph(
+    preceding: String,
+    bolded: String,
+    remaining: String
+): AnnotatedString {
+    val boldSpanStyle = SpanStyle(
+        fontWeight = FontWeight.W700
+    )
 
+    return buildAnnotatedString {
+        append("$preceding ")
+        withStyle(boldSpanStyle) {
+            append(bolded)
         }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        append(" $remaining")
     }
 }
 
@@ -243,14 +287,5 @@ fun PreviewApproversHome() {
     ApproversHomeScreen(
         approvers = emptyList(),
         onInviteApproversSelected = {}
-//        listOf(
-//            Guardian.TrustedGuardian(
-//                label = "Neo",
-//                participantId = ParticipantId.generate(),
-//                attributes = GuardianStatus.Onboarded(
-//                    onboardedAt = Clock.System.now()
-//                )
-//            )
-//        )
     )
 }

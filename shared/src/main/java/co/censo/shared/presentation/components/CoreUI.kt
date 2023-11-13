@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -135,6 +136,21 @@ fun MessageText(
     MessageText(
         modifier = modifier,
         message = stringResource(id = message),
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun MessageText(
+    modifier: Modifier = Modifier,
+    message: AnnotatedString,
+    textAlign: TextAlign = TextAlign.Center
+) {
+    Text(
+        modifier = modifier,
+        text = message,
+        color = Color.Black,
+        fontSize = 16.sp,
         textAlign = textAlign
     )
 }

@@ -209,9 +209,6 @@
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
     <string name="failed_save_seed">Failed to save seed, please ensure you have entered it correctly.</string>
-    <string name="optional_increase_security">Optional: Increase security</string>
-    <string name="invite_trusted_approvers">Invite trusted approvers</string>
-    <string name="invite_trusted_approvers_message">Invite up to two trusted approvers for an additional layer of security.\n\nYou can use either your primary or your alternate approver along with your face scan to access your seed phrase. They help you keep the key but can never unlock the door.</string>
     <string name="add_approver_nickname">Add approver nickname</string>
     <string name="add_approver_nickname_message">Give your approver a nickname of your choice so you can identify them in the future.\n\nThis will be visible only to you.</string>
     <string name="get_live_with">Get live with</string>
@@ -243,7 +240,6 @@
     <string name="save_finish"><![CDATA[Save & finish]]></string>
     <string name="invite_alternate">Invite alternate</string>
     <string name="skip_for_now">Skip for now</string>
-    <string name="invite_approver">Invite approver(s)</string>
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
     <string name="the_verification_code_has_been_successfully_confirmed">The verification code has been successfully confirmed.</string>
     <string name="once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed">Once they have accepted the invite, a unique confirmation code will be displayed.</string>
@@ -298,5 +294,15 @@
     <string name="it_is_stored_securely_and_accessible_span">"It is stored securely and accessible "</string>
     <string name="to_you_span">" to you."</string>
     <string name="only_span">only</string>
+    <string name="adding_a_span">Adding a</string>
+    <string name="first_approver">first approver</string>
+    <string name="second_approver">second approver</string>
+    <string name="ensures_access_second_approver_span">ensures access to your seed phrase even if your first approver is unavailable. It also ensures that you can access your seed phrase in the event you cannot login with your Google account or your face scan fails.</string>
+    <string name="ensures_access_first_approver_span">ensures that your seed phrase is split into two fragments and encrypted for more security.</string>
+    <string name="their_approval_in_addition_to_yours_span">their approval, in addition to yours.</string>
+    <string name="require">require</string>
+    <string name="adding_approvers_span">Adding approvers makes you more secure. An approver is someone you choose and trust, and will help you when you need to access your seed phrase. Access to your seed phrase will</string>
+    <string name="you_can_increase_your_security">You can increase your security!</string>
+    <string name="add_approvers_beta_warning">Note: during the beta, approvers can only be added once, and cannot be changed.</string>
 
 </resources>
