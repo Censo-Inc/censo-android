@@ -34,6 +34,7 @@ import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
+import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -76,6 +77,8 @@ class MainActivity : FragmentActivity() {
                             LockedScreen()
                         }
                     }
+
+                    StrongboxUI()
                 }
             }
         }
