@@ -24,6 +24,7 @@ import co.censo.approver.presentation.onboarding.ApproverOnboardingScreen
 import co.censo.approver.ui.theme.GuardianTheme
 import co.censo.shared.DeepLinkURI.APPROVER_INVITE_URI
 import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_URI
+import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -43,6 +44,7 @@ class MainActivity : FragmentActivity() {
                 ) {
                     CensoNavHost(navController = navController)
                 }
+                StrongboxUI()
             }
         }
     }
