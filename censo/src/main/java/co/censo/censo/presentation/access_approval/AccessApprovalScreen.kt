@@ -5,12 +5,10 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -41,6 +38,7 @@ import co.censo.censo.presentation.access_approval.components.AnotherDeviceAcces
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApproverUI
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.shared.presentation.components.Loading
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -147,12 +145,7 @@ fun AccessApprovalScreen(
 
             when {
                 state.loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(72.dp),
-                        strokeWidth = 5.dp
-                    )
+                    Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
                 }
 
                 state.asyncError -> {
@@ -195,12 +188,7 @@ fun AccessApprovalScreen(
                     when (state.accessApprovalUIState) {
 
                         AccessApprovalUIState.Initial -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(72.dp),
-                                strokeWidth = 5.dp
-                            )
+                            Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
                         }
 
                         AccessApprovalUIState.AnotherDevice -> {

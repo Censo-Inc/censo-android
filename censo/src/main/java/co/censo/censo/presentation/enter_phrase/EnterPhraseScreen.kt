@@ -43,6 +43,7 @@ import co.censo.censo.presentation.enter_phrase.components.EditPhraseWordUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
+import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,15 +136,7 @@ fun EnterPhraseScreen(
         ) {
 
             when {
-
-                state.loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(72.dp),
-                        strokeWidth = 5.dp
-                    )
-                }
+                state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
 
                 state.error -> {
                     DisplayError(

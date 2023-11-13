@@ -38,6 +38,7 @@ import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.popUpToTop
@@ -112,7 +113,13 @@ fun ApproverEntranceScreen(
     ) {
         when {
             state.isLoading -> {
-                Loading()
+                Loading(
+                    strokeWidth = 8.dp,
+                    color = Color.Black,
+                    size = 72.dp,
+                    fullscreen = true,
+                    fullscreenBackgroundColor = Color.White
+                )
             }
 
             state.apiCallErrorOccurred -> {
@@ -140,7 +147,13 @@ fun ApproverEntranceScreen(
             else -> {
                 when (val uiState = state.uiState) {
                     ApproverEntranceUIState.Initial -> {
-                        Loading()
+                        Loading(
+                            strokeWidth = 8.dp,
+                            color = Color.Black,
+                            size = 72.dp,
+                            fullscreen = true,
+                            fullscreenBackgroundColor = Color.White
+                        )
                     }
 
                     ApproverEntranceUIState.LoggedOutPasteLink -> {
@@ -183,22 +196,5 @@ fun ApproverEntranceScreen(
                 onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
             )
         }
-    }
-}
-
-@Composable
-private fun Loading() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .size(72.dp)
-                .align(Alignment.Center),
-            strokeWidth = 8.dp,
-            color = Color.Black
-        )
     }
 }

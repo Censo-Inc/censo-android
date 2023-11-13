@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +38,7 @@ import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.Loading
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,14 +130,8 @@ fun PlanSetupScreen(
         ) {
 
             when {
-                state.loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(72.dp),
-                        strokeWidth = 5.dp
-                    )
-                }
+                state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
+
 
                 state.asyncError -> {
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
@@ -158,13 +152,11 @@ fun PlanSetupScreen(
 
                 else -> {
                     when (state.planSetupUIState) {
-                        PlanSetupUIState.Initial ->
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(72.dp),
-                                strokeWidth = 5.dp
-                            )
+                        PlanSetupUIState.Initial -> Loading(
+                            strokeWidth = 5.dp,
+                            size = 72.dp,
+                            fullscreen = true
+                        )
 
                         PlanSetupUIState.ApproverNickname -> {
                             ApproverNicknameUI(

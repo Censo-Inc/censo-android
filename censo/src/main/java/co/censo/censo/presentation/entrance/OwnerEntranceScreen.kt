@@ -34,7 +34,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -76,6 +75,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -196,21 +196,14 @@ fun OwnerEntranceScreen(
                 }
             }
 
-            state.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color.White)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .align(Alignment.Center),
-                        strokeWidth = 8.dp,
-                        color = Color.Black
-                    )
-                }
-            }
+            state.isLoading -> Loading(
+                strokeWidth = 8.dp,
+                color = Color.Black,
+                size = 72.dp,
+                fullscreen = true,
+                fullscreenBackgroundColor = Color.White
+            )
+
 
             state.apiCallErrorOccurred -> {
                 if (state.signInUserResource is Resource.Error) {
