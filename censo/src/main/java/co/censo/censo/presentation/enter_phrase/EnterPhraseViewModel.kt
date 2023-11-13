@@ -156,7 +156,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             state = state.copy(
                 submitResource = response.map { },
-                phraseEntryComplete = Resource.Success(Unit)
+                enterWordUIState = EnterPhraseUIState.DONE
             )
 
             if (response is Resource.Success) {
@@ -195,6 +195,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
+            EnterPhraseUIState.DONE,
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
             EnterPhraseUIState.PASTE_ENTRY -> {
                 state.copy(
@@ -241,6 +242,10 @@ class EnterPhraseViewModel @Inject constructor(
             EnterPhraseUIState.LABEL ->
                 state.copy(exitConfirmationDialog = true)
         }
+    }
+
+    fun finishPhraseEntry() {
+        state = state.copy(phraseEntryComplete = Resource.Success(Unit))
     }
 
     fun exitFlow() {

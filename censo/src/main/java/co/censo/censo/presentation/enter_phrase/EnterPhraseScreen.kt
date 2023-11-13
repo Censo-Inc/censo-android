@@ -6,11 +6,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,7 +19,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +33,7 @@ import co.censo.shared.R as SharedR
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
+import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
@@ -66,6 +64,8 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.REVIEW -> ""
+
+        EnterPhraseUIState.DONE -> stringResource(R.string.add_seed_phrase_title)
     }
 
     val iconPair =
@@ -125,16 +125,8 @@ fun EnterPhraseScreen(
                             color = Color.Black
                         )
                     }
-                }, actions = {
-                    IconButton(onClick = {
-                        Toast.makeText(context, "Show FAQ Web View", Toast.LENGTH_LONG).show()
-                    }) {
-                        Icon(
-                            painterResource(id = SharedR.drawable.question),
-                            contentDescription = "learn more"
-                        )
-                    }
-                })
+                },
+            )
         }
     }) { paddingValues ->
         Box(
@@ -220,6 +212,10 @@ fun EnterPhraseScreen(
                                 onLabelChanged = viewModel::updateLabel,
                                 onSavePhrase = viewModel::saveSeedPhrase
                             )
+                        }
+
+                        EnterPhraseUIState.DONE -> {
+                            SeedPhraseAdded(viewModel::finishPhraseEntry)
                         }
                     }
                 }

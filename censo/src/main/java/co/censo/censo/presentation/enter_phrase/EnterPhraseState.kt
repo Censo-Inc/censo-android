@@ -37,7 +37,8 @@ data class EnterPhraseState(
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.LABEL -> BackIconType.CLOSE
+        EnterPhraseUIState.LABEL,
+        EnterPhraseUIState.DONE-> BackIconType.CLOSE
     }
 
     val error = submitResource is Resource.Error
@@ -45,7 +46,7 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, LABEL
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, LABEL, DONE
 }
 
 enum class BackIconType {

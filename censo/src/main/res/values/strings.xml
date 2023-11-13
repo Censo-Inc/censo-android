@@ -307,5 +307,9 @@
     <string name="add_approvers_beta_warning">Note: during the beta, approvers can only be added once, and cannot be changed.</string>
     <string name="paste_seed_phrase">Paste seed phrase</string>
     <string name="input_seed_phrase">Input seed phrase</string>
+    <string name="phrase_added_done_message">You\'ll never have to worry about losing access to your valuable crypto again.</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="ok">OK</string>
+    <string name="add_seed_phrase_title">Add Seed Phrase</string>
 
 </resources>
