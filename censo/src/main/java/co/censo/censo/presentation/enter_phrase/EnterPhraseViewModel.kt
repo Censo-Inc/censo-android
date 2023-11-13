@@ -186,8 +186,9 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun setViewPhrase() {
+    fun resetErrorState() {
         state = state.copy(
+            submitResource = Resource.Uninitialized,
             editedWordIndex = 0,
             enterWordUIState = EnterPhraseUIState.VIEW
         )
@@ -263,6 +264,9 @@ class EnterPhraseViewModel @Inject constructor(
     fun onPhrasePasted(pastedPhrase: String) {
         val words =
             try {
+                if (pastedPhrase.isEmpty()) {
+                    throw Exception("No Phrase Pasted")
+                }
                 BIP39.splitToWords(pastedPhrase)
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.PastePhrase)

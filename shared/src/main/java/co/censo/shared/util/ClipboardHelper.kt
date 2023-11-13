@@ -14,4 +14,12 @@ object ClipboardHelper {
 
         return clipboard.primaryClip?.getItemAt(0)?.coerceToText(context).toString()
     }
+
+    fun clearClipboardContent(context: Context) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        if (clipboard.hasPrimaryClip()) {
+            clipboard.clearPrimaryClip()
+        }
+    }
 }

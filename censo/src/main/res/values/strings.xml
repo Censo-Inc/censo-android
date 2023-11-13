@@ -314,5 +314,10 @@
     <string name="access_ends_in">"Access ends in "</string>
     <string name="less_than_1_minute">Less than 1 minute</string>
     <string name="min">min</string>
+    <string name="copy_your_seed_phrase">1. Copy your seed phrase</string>
+    <string name="click_the_button_below">2. Click the button below</string>
+    <string name="copy_seed_phrase_message">Open the app where your seed phrase is, copy it to the clipboard, and then come back here</string>
+    <string name="click_past_button_message">When you tap the Paste From Clipboard button, your seed phrase will be pasted from the clipboard, and the clipboard will then be cleared.\n\nYou will then have the opportunity to review the seed phrase before saving it.</string>
+    <string name="paste_from_clipboard">Paste From Clipboard</string>
 
 </resources>

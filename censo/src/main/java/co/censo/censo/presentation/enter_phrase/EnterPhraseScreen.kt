@@ -43,7 +43,7 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.shared.presentation.components.Loading
-import co.censo.shared.util.projectLog
+import co.censo.shared.util.ClipboardHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,8 +141,8 @@ fun EnterPhraseScreen(
                 state.error -> {
                     DisplayError(
                         errorMessage = stringResource(R.string.failed_save_seed),
-                        dismissAction = viewModel::setViewPhrase,
-                        retryAction = viewModel::setViewPhrase
+                        dismissAction = viewModel::resetErrorState,
+                        retryAction = viewModel::resetErrorState
                     )
                 }
 
@@ -166,10 +166,12 @@ fun EnterPhraseScreen(
                         }
 
                         EnterPhraseUIState.PASTE_ENTRY -> {
-                            PastePhraseUI(
-                                pastedPhrase = state.editedWord,
-                                onPhraseEntered = viewModel::onPhrasePasted,
-                            )
+                            PastePhraseUI {
+                                viewModel.onPhrasePasted(
+                                    ClipboardHelper.getClipboardContent(context) ?: ""
+                                )
+                                ClipboardHelper.clearClipboardContent(context)
+                            }
                         }
 
                         EnterPhraseUIState.EDIT, EnterPhraseUIState.SELECTED -> {
