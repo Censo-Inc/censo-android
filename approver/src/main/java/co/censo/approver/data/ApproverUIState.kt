@@ -21,6 +21,8 @@ sealed class ApproverAccessUIState : ApproverUIState {
     object WaitingForToTPFromOwner : ApproverAccessUIState()
 
     object VerifyingToTPFromOwner : ApproverAccessUIState()
+
+    object Complete : ApproverAccessUIState()
 }
 
 sealed class ApproverEntranceUIState : ApproverUIState {

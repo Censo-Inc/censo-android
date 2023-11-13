@@ -119,7 +119,7 @@ class ApproverAccessViewModel @Inject constructor(
                 when (state.approveRecoveryResource) {
                     is Resource.Success -> {
                         guardianRepository.clearParticipantId()
-                        state.copy(navToApproverRouting = true)
+                        state.copy(approverAccessUIState = ApproverAccessUIState.Complete)
                     }
                     else -> {
                         state.copy(accessNotInProgress = Resource.Error())
@@ -306,8 +306,14 @@ class ApproverAccessViewModel @Inject constructor(
             ApproverAccessUIState.VerifyingToTPFromOwner,
             ApproverAccessUIState.WaitingForToTPFromOwner -> cancelRecovery()
 
+            ApproverAccessUIState.Complete -> {}
         }
     }
+
+    fun triggerApproverRoutingNavigation() {
+        state = state.copy(navToApproverRouting = true)
+    }
+
 
     private fun cancelRecovery() {
         guardianRepository.clearParticipantId()

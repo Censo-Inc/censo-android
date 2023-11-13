@@ -1,6 +1,5 @@
 package co.censo.approver.presentation.onboarding
 
-import Base58EncodedPrivateKey
 import InvitationId
 import ParticipantId
 import androidx.compose.runtime.getValue
@@ -11,27 +10,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.decryptFromByteArray
 import co.censo.shared.data.cryptography.encryptToByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.cryptography.sha256digest
-import co.censo.shared.data.cryptography.toByteArrayNoSign
+import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,7 +33,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ApproverOnboardingViewModel @Inject constructor(
     private val guardianRepository: GuardianRepository,
-    private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val userStatePollingTimer: VaultCountDownTimer
 ) : ViewModel() {
@@ -54,7 +47,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             if (state.userResponse !is Resource.Loading
                 && state.savePrivateKeyToCloudResource !is Resource.Loading
                 && state.guardianState?.phase is GuardianPhase.WaitingForVerification) {
-                retrieveApproverState(silently = true, checkingVerification = true)
+                retrieveApproverState(silently = true)
             }
         }
     }
@@ -67,7 +60,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = ApproverOnboardingState()
     }
 
-    fun retrieveApproverState(silently: Boolean, checkingVerification: Boolean = false) {
+    fun retrieveApproverState(silently: Boolean) {
         if (!silently) {
             state = state.copy(userResponse = Resource.Loading())
         }
@@ -78,10 +71,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             state = state.copy(userResponse = userResponse)
 
             if (userResponse is Resource.Success) {
-                val guardianState = userResponse.data!!.guardianStates.firstOrNull()
                 checkApproverHasInvitationCode(userResponse.data!!.guardianStates)
-
-                showMessageWhenUserMovesToComplete(guardianState, checkingVerification)
             }
         }
     }
@@ -109,7 +99,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         val guardianPhase = guardianState?.phase
 
         val guardianNotInOnboarding =
-            guardianPhase?.isAccessPhase() == true || guardianPhase is GuardianPhase.Complete
+            guardianPhase?.isAccessPhase() == true
 
         if (guardianNotInOnboarding) {
             guardianRepository.clearInvitationId()
@@ -138,6 +128,11 @@ class ApproverOnboardingViewModel @Inject constructor(
 
                 is GuardianPhase.WaitingForVerification ->
                     state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
+
+                is GuardianPhase.Complete -> {
+                    guardianRepository.clearInvitationId()
+                    state.copy(approverUIState = ApproverOnboardingUIState.Complete)
+                }
 
                 else -> state
             }
@@ -256,6 +251,10 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = state.copy(
             invitationId = InvitationId(guardianRepository.retrieveInvitationId())
         )
+    }
+
+    fun triggerApproverRoutingNavigation() {
+        state = state.copy(navToApproverRouting = true)
     }
 
     fun showCloseConfirmationDialog() {
@@ -399,17 +398,6 @@ class ApproverOnboardingViewModel @Inject constructor(
                 exception = exception
             )
         )
-    }
-
-    private fun showMessageWhenUserMovesToComplete(
-        guardianState: GuardianState?, checkingVerification: Boolean
-    ) {
-        if (guardianState?.phase is GuardianPhase.Complete && checkingVerification) {
-            guardianRepository.clearInvitationId()
-            state = state.copy(
-                onboardingMessage = Resource.Success(OnboardingMessage.CodeAccepted)
-            )
-        }
     }
 
     fun resetMessage() {

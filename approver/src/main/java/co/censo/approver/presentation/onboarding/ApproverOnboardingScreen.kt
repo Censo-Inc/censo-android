@@ -41,6 +41,7 @@ import co.censo.approver.presentation.components.ApproverCodeVerification
 import co.censo.approver.presentation.components.ApproverTopBar
 import co.censo.approver.presentation.components.CodeVerificationStatus
 import co.censo.approver.presentation.components.LockedApproverScreen
+import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
@@ -60,13 +61,14 @@ fun ApproverOnboardingScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_START
-            -> {
-                viewModel.onStart()
-            }
+            Lifecycle.Event.ON_START -> viewModel.onStart()
 
             Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onStop()
+                if (state.approverUIState is ApproverOnboardingUIState.Complete) {
+                    viewModel.triggerApproverRoutingNavigation()
+                } else {
+                    viewModel.onStop()
+                }
             }
 
             else -> Unit
@@ -106,10 +108,10 @@ fun ApproverOnboardingScreen(
 
     Scaffold(
         topBar = {
-            ApproverTopBar(
-                uiState = state.approverUIState,
-                onClose = viewModel::showCloseConfirmationDialog
-            )
+            ApproverTopBar {
+                if (state.approverUIState is ApproverOnboardingUIState.Complete) viewModel.triggerApproverRoutingNavigation()
+                else viewModel.showCloseConfirmationDialog()
+            }
         },
         content = { contentPadding ->
 
@@ -201,7 +203,7 @@ fun ApproverOnboardingScreen(
                             }
 
                             ApproverOnboardingUIState.Complete -> {
-                                LockedApproverScreen()
+                                PostApproverAction()
                             }
                         }
 

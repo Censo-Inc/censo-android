@@ -32,10 +32,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.approver.R
 import co.censo.approver.data.ApproverAccessUIState
+import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.approver.presentation.GuardianColors
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproverTopBar
 import co.censo.approver.presentation.components.OwnerCodeVerification
+import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
@@ -83,8 +85,10 @@ fun ApproverAccessScreen(
         topBar = {
             if (!state.loading && !state.asyncError) {
                 ApproverTopBar(
-                    uiState = state.approverAccessUIState,
-                    onClose = viewModel::showCloseConfirmationDialog
+                    onClose = {
+                        if (state.approverAccessUIState is ApproverAccessUIState.Complete) viewModel.triggerApproverRoutingNavigation()
+                        else viewModel.showCloseConfirmationDialog()
+                    }
                 )
             }
         },
@@ -184,6 +188,10 @@ fun ApproverAccessScreen(
                                     secondsLeft = state.recoveryTotp?.currentSecond,
                                     errorEnabled = state.ownerEnteredWrongCode
                                 )
+                            }
+
+                            ApproverAccessUIState.Complete -> {
+                                PostApproverAction()
                             }
                         }
 

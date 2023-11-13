@@ -19,7 +19,6 @@ import co.censo.approver.presentation.GuardianColors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApproverTopBar(
-    uiState: ApproverUIState,
     onClose: () -> Unit
 ) {
 
@@ -30,27 +29,17 @@ fun ApproverTopBar(
             titleContentColor = Color.Black,
         ),
         navigationIcon = {
-            if (approverTopAppBarIsClosable(uiState)) {
-                IconButton(
-                    onClick = onClose
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        stringResource(R.string.close),
-                    )
-                }
+            IconButton(
+                onClick = onClose
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    stringResource(R.string.close),
+                )
             }
         },
         title = {
             // Titles are part of the screen content
         },
     )
-}
-
-fun approverTopAppBarIsClosable(uiState: ApproverUIState): Boolean {
-    return when (uiState) {
-        ApproverOnboardingUIState.Complete -> false
-
-        else -> true
-    }
 }
