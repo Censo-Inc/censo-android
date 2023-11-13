@@ -4,7 +4,9 @@ import LearnMore
 import MessageText
 import StandardButton
 import TitleText
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -17,16 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.R
 
 @Composable
 fun GetLiveWithUserUI(
     title: String,
     message: String,
     showSecondButton: Boolean = true,
+    activatingApprover: Boolean = false,
     onContinueLive: () -> Unit,
     onResumeLater: () -> Unit,
 ) {
@@ -47,7 +52,7 @@ fun GetLiveWithUserUI(
             textAlign = TextAlign.Start
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight - 8.dp))
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
@@ -55,8 +60,11 @@ fun GetLiveWithUserUI(
             textAlign = TextAlign.Start
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight + 24.dp))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
+        val buttonText = if (activatingApprover) stringResource(R.string.activate_now) else stringResource(
+            R.string.continue_live
+        )
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
@@ -64,13 +72,13 @@ fun GetLiveWithUserUI(
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Text(
-                text = "Continue live",
+                text = buttonText,
                 color = Color.White,
                 fontSize = 24.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight - 12.dp))
 
         if (showSecondButton) {
             StandardButton(
@@ -80,7 +88,7 @@ fun GetLiveWithUserUI(
                 contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
             ) {
                 Text(
-                    text = "Resume later",
+                    text = stringResource(R.string.resume_later),
                     color = Color.White,
                     fontSize = 24.sp
                 )
@@ -88,22 +96,21 @@ fun GetLiveWithUserUI(
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
         }
-
-        LearnMore {
-
-        }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GetLiveWithUserUIPreview() {
-    GetLiveWithUserUI(
-        title = "Get live with Neo",
-        message = "For maximum security yada yada and then go do this thing over there and think about all sorts of things.",
-        onContinueLive = {},
-        onResumeLater = {},
-    )
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.White)) {
+        GetLiveWithUserUI(
+            title = "Get live with Neo",
+            message = "For maximum security yada yada and then go do this thing over there and think about all sorts of things.",
+            activatingApprover = true,
+            onContinueLive = {},
+            onResumeLater = {},
+        )
+    }
 }

@@ -210,13 +210,13 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun onInviteApprover() {
-        if (state.alternateApprover != null) {
+        state = if (state.alternateApprover != null) {
             // skip name entry of alternate approver if it is already set
-            state = state.copy(
+            state.copy(
                 planSetupUIState = PlanSetupUIState.ApproverGettingLive
             )
         } else {
-            state = state.copy(
+            state.copy(
                 editedNickname = "",
                 planSetupUIState = PlanSetupUIState.ApproverNickname
             )
@@ -330,7 +330,7 @@ class PlanSetupViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
+                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
 
                 updateOwnerState(response.data!!.ownerState)
             }

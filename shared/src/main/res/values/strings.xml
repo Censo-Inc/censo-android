@@ -28,4 +28,7 @@
     <string name="tou_agreement">By tapping Accept &amp; Continue, you agree to our terms of use.</string>
     <string name="data_encrypted">Data encrypted</string>
     <string name="storngbox_incompatible_message">Device Incompatible: Censo app requires a device with Strongbox support for enhanced security features. Please use a compatible device to proceed.</string>
+    <string name="activate_now">Activate now</string>
+    <string name="continue_live">Continue live</string>
+    <string name="resume_later">Resume later</string>
 </resources>

@@ -1,10 +1,8 @@
 package co.censo.censo.presentation.plan_setup
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -17,10 +15,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -110,17 +106,8 @@ fun PlanSetupScreen(
                         else -> ""
                     }
                 )
-            },
-            actions = {
-                IconButton(onClick = {
-                    Toast.makeText(context, "Show FAQ Web View", Toast.LENGTH_LONG).show()
-                }) {
-                    Icon(
-                        painterResource(id = co.censo.shared.R.drawable.question),
-                        contentDescription = "learn more"
-                    )
-                }
-            })
+            }
+        )
     }) { paddingValues ->
 
         Box(
@@ -169,10 +156,10 @@ fun PlanSetupScreen(
                         }
                         
                         PlanSetupUIState.ApproverGettingLive -> {
-
                             GetLiveWithUserUI(
-                                title = "${stringResource(R.string.get_live_with)} ${state.editedNickname}",
-                                message = stringResource(R.string.get_live_with_your_approver_message),
+                                title = "${stringResource(R.string.activate_approver)} ${state.editedNickname}",
+                                message = stringResource(R.string.activate_your_approver_message, state.editedNickname),
+                                activatingApprover = true,
                                 onContinueLive = viewModel::onGoLiveWithApprover,
                                 onResumeLater = viewModel::onBackClicked
                             )
