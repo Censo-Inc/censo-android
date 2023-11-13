@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,11 +29,17 @@ fun OwnerCodeVerification(
     errorEnabled: Boolean
 ) {
 
-    TitleText(title = stringResource(R.string.share_the_code))
+    TitleText(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        title = stringResource(R.string.read_code)
+    )
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    MessageText(message = stringResource(R.string.the_owner_must_enter_this_6_digit_code))
+    MessageText(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        message = stringResource(R.string.read_code_message)
+    )
 
     if (totpCode == null || secondsLeft == null) {
         Text(
@@ -53,7 +60,7 @@ fun OwnerCodeVerification(
     if (errorEnabled) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Owner entered wrong code",
+            text = stringResource(R.string.owner_entered_wrong_code),
             color = SharedColors.ErrorRed,
             fontSize = 16.sp
         )

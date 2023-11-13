@@ -73,8 +73,8 @@
     <string name="get_the_unique_link">Get the unique link</string>
     <string name="get_unique_link">Please get the unique link from the seed phrase owner and tap on it, or paste it here.</string>
     <string name="enter_the_code">Enter the code</string>
-    <string name="the_owner_must_enter_this_6_digit_code">The owner must enter this 6-digit code</string>
-    <string name="share_the_code">Share the code</string>
+    <string name="read_code_message">Read aloud this 6-digit code only to the person you are assisting. Once they have successfully entered it, their identity will have been verified and the request approved.</string>
+    <string name="read_code">Read code</string>
     <string name="code_entered">Code Entered</string>
     <string name="waiting_on_owner_to_approve_code">Waiting on owner to approve code...</string>
     <string name="incorrect_code_entered_please_try_again">Incorrect code entered. Please try again.</string>
@@ -99,4 +99,5 @@
     <string name="congratulations_you_re_all_done">Congratulations. You\'re all done!</string>
     <string name="thanks_for_helping_approver">Thanks for helping someone keep their crypto safe.</string>
     <string name="you_may_now_close_the_app">You may now close the app.</string>
+    <string name="owner_entered_wrong_code">Owner entered wrong code</string>
 </resources>
