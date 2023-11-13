@@ -311,5 +311,8 @@
     <string name="congratulations">Congratulations!</string>
     <string name="ok">OK</string>
     <string name="add_seed_phrase_title">Add Seed Phrase</string>
+    <string name="access_ends_in">"Access ends in "</string>
+    <string name="less_than_1_minute">Less than 1 minute</string>
+    <string name="min">min</string>
 
 </resources>
