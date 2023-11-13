@@ -198,7 +198,7 @@
     <string name="enter_a_label">Enter a label…</string>
     <string name="add_seed_phrases">Add seed phrases</string>
     <string name="add_first_seed_phrase">Add your first seed phrase</string>
-    <string name="add_seed_phrase_message">Add a seed phrase to store it safely with Censo. Your seed phrase is sharded and encrypted for ultimate security.\n\nOnly you can retrieve your seed phrase. Neither Censo nor trusted approvers can access it.</string>
+    <string name="add_seed_phrase_message">Your seed phrase will be encrypted so only you can access it.</string>
     <string name="step_2">Step 2</string>
     <string name="you_are_about_to_delete_user">You are about to delete your user and associated data. This action cannot be reversed. \n\nAre you sure?</string>
 
@@ -305,5 +305,7 @@
     <string name="adding_approvers_span">Adding approvers makes you more secure. An approver is someone you choose and trust, and will help you when you need to access your seed phrase. Access to your seed phrase will</string>
     <string name="you_can_increase_your_security">You can increase your security!</string>
     <string name="add_approvers_beta_warning">Note: during the beta, approvers can only be added once, and cannot be changed.</string>
+    <string name="paste_seed_phrase">Paste seed phrase</string>
+    <string name="input_seed_phrase">Input seed phrase</string>
 
 </resources>

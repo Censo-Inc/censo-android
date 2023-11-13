@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -44,6 +45,7 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.shared.presentation.components.Loading
+import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,38 +98,44 @@ fun EnterPhraseScreen(
         }
     }
 
+    BackHandler(enabled = state.enterWordUIState == EnterPhraseUIState.SELECT_ENTRY_TYPE) {
+        viewModel.onBackClicked()
+    }
+
     Scaffold(topBar = {
-        TopAppBar(
-            colors = TopAppBarDefaults.smallTopAppBarColors(
-                containerColor = VaultColors.NavbarColor
-            ),
-            navigationIcon = {
-                IconButton(onClick = {
-                    viewModel.onBackClicked()
-                }) {
-                    Icon(
-                        imageVector = iconPair.first,
-                        contentDescription = stringResource(id = iconPair.second),
-                    )
-                }
-            },
-            title = {
-                if (title.isNotEmpty()) {
-                    Text(
-                        text = title,
-                        color = Color.Black
-                    )
-                }
-            }, actions = {
-                IconButton(onClick = {
-                    Toast.makeText(context, "Show FAQ Web View", Toast.LENGTH_LONG).show()
-                }) {
-                    Icon(
-                        painterResource(id = SharedR.drawable.question),
-                        contentDescription = "learn more"
-                    )
-                }
-            })
+        if (state.enterWordUIState != EnterPhraseUIState.SELECT_ENTRY_TYPE) {
+            TopAppBar(
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = VaultColors.NavbarColor
+                ),
+                navigationIcon = {
+                    IconButton(onClick = {
+                        viewModel.onBackClicked()
+                    }) {
+                        Icon(
+                            imageVector = iconPair.first,
+                            contentDescription = stringResource(id = iconPair.second),
+                        )
+                    }
+                },
+                title = {
+                    if (title.isNotEmpty()) {
+                        Text(
+                            text = title,
+                            color = Color.Black
+                        )
+                    }
+                }, actions = {
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Show FAQ Web View", Toast.LENGTH_LONG).show()
+                    }) {
+                        Icon(
+                            painterResource(id = SharedR.drawable.question),
+                            contentDescription = "learn more"
+                        )
+                    }
+                })
+        }
     }) { paddingValues ->
         Box(
             modifier = Modifier

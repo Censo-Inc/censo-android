@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,17 +45,6 @@ fun SelectSeedPhraseEntryType(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
-
-        if (welcomeFlow) {
-            SubTitleText(
-                modifier = Modifier.fillMaxWidth(),
-                subtitle = R.string.step_2,
-                textAlign = TextAlign.Start
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
         val title = if (welcomeFlow) R.string.add_first_seed_phrase else R.string.add_seed_phrase
 
         TitleText(
@@ -87,7 +77,7 @@ fun SelectSeedPhraseEntryType(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Enter seed phrase",
+                    text = stringResource(R.string.input_seed_phrase),
                     color = Color.White,
                     fontSize = 24.sp
                 )
@@ -110,17 +100,11 @@ fun SelectSeedPhraseEntryType(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Paste seed phrase",
+                    text = stringResource(R.string.paste_seed_phrase),
                     color = Color.White,
                     fontSize = 24.sp
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
