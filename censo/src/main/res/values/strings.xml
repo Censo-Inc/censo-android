@@ -322,5 +322,7 @@
     <string name="copy_seed_phrase_message">Open the app where your seed phrase is, copy it to the clipboard, and then come back here</string>
     <string name="click_past_button_message">When you tap the Paste From Clipboard button, your seed phrase will be pasted from the clipboard, and the clipboard will then be cleared.\n\nYou will then have the opportunity to review the seed phrase before saving it.</string>
     <string name="paste_from_clipboard">Paste From Clipboard</string>
+    <string name="subsequent_seed_phrase_saved">Your seed phrase is securely stored.\n\nIt can be accessed only by you.</string>
+    <string name="error_occurred_trying_to_get_user_data_please_try_again">Error occurred trying to get user data. Please try again.</string>
 
 </resources>

@@ -30,6 +30,7 @@ import co.censo.shared.R
 
 @Composable
 fun SeedPhraseAdded(
+    isSavingFirstSeedPhrase: Boolean,
     onClick: () -> Unit,
 ) {
     Column(
@@ -58,9 +59,14 @@ fun SeedPhraseAdded(
 
         Spacer(modifier = Modifier.weight(0.15f))
 
+
+        val messageText =
+            if (isSavingFirstSeedPhrase) stringResource(co.censo.censo.R.string.phrase_added_done_message)
+            else stringResource(co.censo.censo.R.string.subsequent_seed_phrase_saved)
+
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
-            text = stringResource(co.censo.censo.R.string.phrase_added_done_message),
+            text = messageText,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 36.sp,
@@ -95,6 +101,6 @@ fun SeedPhraseAddedPreview() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        SeedPhraseAdded {}
+        SeedPhraseAdded(true) {}
     }
 }

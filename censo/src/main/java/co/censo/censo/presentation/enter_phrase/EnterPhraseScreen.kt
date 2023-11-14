@@ -1,7 +1,6 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,14 +21,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.R as SharedR
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
@@ -44,6 +41,7 @@ import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntry
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
+import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +70,7 @@ fun EnterPhraseScreen(
         if (state.backArrowType == BackIconType.BACK) Icons.Filled.ArrowBack to R.string.back
         else Icons.Filled.Clear to R.string.exit
 
-    DisposableEffect(key1 = state) {
+    DisposableEffect(key1 = viewModel) {
         viewModel.onStart(
             welcomeFlow = welcomeFlow,
             masterPublicKey = masterPublicKey
@@ -139,11 +137,20 @@ fun EnterPhraseScreen(
                 state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
 
                 state.error -> {
-                    DisplayError(
-                        errorMessage = stringResource(R.string.failed_save_seed),
-                        dismissAction = viewModel::resetErrorState,
-                        retryAction = viewModel::resetErrorState
-                    )
+                    if (state.submitResource is Resource.Error) {
+                        DisplayError(
+                            errorMessage = stringResource(R.string.failed_save_seed),
+                            dismissAction = viewModel::resetSubmitResourceErrorState,
+                            retryAction = viewModel::resetSubmitResourceErrorState
+                        )
+                    } else if (state.userResource is Resource.Error) {
+                        DisplayError(
+                            errorMessage = stringResource(R.string.error_occurred_trying_to_get_user_data_please_try_again),
+                            dismissAction = viewModel::resetUserResourceAndRetryGetUserApiCall,
+                            retryAction = viewModel::resetUserResourceAndRetryGetUserApiCall
+                        )
+                    }
+
                 }
 
                 else -> {
@@ -217,7 +224,10 @@ fun EnterPhraseScreen(
                         }
 
                         EnterPhraseUIState.DONE -> {
-                            SeedPhraseAdded(viewModel::finishPhraseEntry)
+                            SeedPhraseAdded(
+                                isSavingFirstSeedPhrase = state.isSavingFirstSeedPhrase,
+                                onClick = viewModel::finishPhraseEntry
+                            )
                         }
                     }
                 }

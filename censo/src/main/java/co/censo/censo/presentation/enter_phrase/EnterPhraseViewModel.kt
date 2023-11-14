@@ -36,6 +36,25 @@ class EnterPhraseViewModel @Inject constructor(
                 welcomeFlow = welcomeFlow,
                 masterPublicKey = masterPublicKey
             )
+
+        retrieveOwnerState()
+    }
+
+    //Only retrieving owner state to determine if this is the first seed phrase they are saving
+    fun retrieveOwnerState() {
+        state = state.copy(userResource = Resource.Loading())
+        viewModelScope.launch {
+            val response = ownerRepository.retrieveUser()
+
+            state = state.copy(userResource = response)
+
+            if (response is Resource.Success) {
+                val ownerState = response.data!!.ownerState
+                if (ownerState is OwnerState.Ready) {
+                    state = state.copy(isSavingFirstSeedPhrase = ownerState.vault.secrets.isEmpty())
+                }
+            }
+        }
     }
 
     fun updateEditedWord(updatedWord: String) {
@@ -186,12 +205,17 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun resetErrorState() {
+    fun resetSubmitResourceErrorState() {
         state = state.copy(
             submitResource = Resource.Uninitialized,
             editedWordIndex = 0,
             enterWordUIState = EnterPhraseUIState.VIEW
         )
+    }
+
+    fun resetUserResourceAndRetryGetUserApiCall() {
+        state = state.copy(userResource = Resource.Uninitialized)
+        retrieveOwnerState()
     }
 
     fun onBackClicked() {

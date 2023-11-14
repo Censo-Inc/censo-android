@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.repository.EncryptedSeedPhrase
 import co.censo.shared.util.BIP39InvalidReason
 
@@ -15,11 +16,17 @@ data class EnterPhraseState(
     val label: String = "",
     val labelTooLong: String? = null,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
+
+    //Async
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
+    val userResource: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
+
+    //Flags
     val welcomeFlow: Boolean = false,
     val exitConfirmationDialog: Boolean = false,
-    val exitFlow: Boolean = false
+    val exitFlow: Boolean = false,
+    val isSavingFirstSeedPhrase: Boolean = false,
 ) {
 
     companion object {
@@ -41,8 +48,8 @@ data class EnterPhraseState(
         EnterPhraseUIState.DONE-> BackIconType.CLOSE
     }
 
-    val error = submitResource is Resource.Error
-    val loading = submitResource is Resource.Loading
+    val error = submitResource is Resource.Error || userResource is Resource.Error
+    val loading = submitResource is Resource.Loading || userResource is Resource.Loading
 }
 
 enum class EnterPhraseUIState {
