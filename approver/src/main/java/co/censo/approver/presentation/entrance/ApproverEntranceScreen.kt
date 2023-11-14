@@ -1,35 +1,38 @@
 package co.censo.approver.presentation.entrance
 
 import ParticipantId
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
-import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.approver.R
 import co.censo.approver.data.ApproverEntranceUIState
-import co.censo.approver.presentation.Screen
+import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.entrance.components.ApproverLanding
 import co.censo.approver.presentation.entrance.components.ApproverLoginUI
 import co.censo.approver.presentation.entrance.components.LoggedInPasteLinkUI
 import co.censo.approver.presentation.entrance.components.LoggedOutPasteLinkUI
@@ -37,11 +40,13 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.popUpToTop
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -69,6 +74,7 @@ fun ApproverEntranceScreen(
                 RESULT_CANCELED -> {
                     viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
                 }
+
                 else -> {
                     viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
                 }
@@ -133,12 +139,21 @@ fun ApproverEntranceScreen(
                         errorMessage = state.triggerGoogleSignIn.getErrorMessage(context),
                         dismissAction = viewModel::resetTriggerGoogleSignIn,
                     ) { viewModel.retrySignIn() }
+                } else if (state.deleteUserResource is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.deleteUserResource.getErrorMessage(context),
+                        dismissAction = viewModel::resetDeleteUserResource,
+                    ) { }
                 }
             }
 
             state.linkError -> {
                 DisplayError(
-                    errorMessage = "${stringResource(R.string.link_not_valid)} - (${ClipboardHelper.getClipboardContent(context)})",
+                    errorMessage = "${stringResource(R.string.link_not_valid)} - (${
+                        ClipboardHelper.getClipboardContent(
+                            context
+                        )
+                    })",
                     dismissAction = { viewModel.clearError() },
                     retryAction = null
                 )
@@ -181,6 +196,32 @@ fun ApproverEntranceScreen(
                         ApproverLoginUI(
                             authenticate = { viewModel.startGoogleSignInFlow() }
                         )
+                    }
+
+                    ApproverEntranceUIState.Landing -> {
+                        ApproverLanding(
+                            isLoggedIn = state.loggedIn,
+                            onActiveApproverLongPress = viewModel::setShowDeleteUserWarning,
+                            onContinue = viewModel::onLandingContinue
+                        )
+
+                        if (state.showDeleteUserWarningDialog) {
+                            ConfirmationDialog(
+                                title = "",
+                                message = stringResource(R.string.delete_data),
+                                onCancel = viewModel::resetShowDeleteUserWarning,
+                                onDelete = viewModel::setShowDeleteUserConfirmDialog
+                            )
+                        }
+
+                        if (state.showDeleteUserConfirmDialog) {
+                            ConfirmationDialog(
+                                title = stringResource(R.string.deactivate_delete),
+                                message = stringResource(R.string.deactivate_delete_message),
+                                onCancel = { viewModel.resetShowDeleteUserConfirmDialog() },
+                                onDelete = viewModel::deleteUser,
+                            )
+                        }
                     }
                 }
             }

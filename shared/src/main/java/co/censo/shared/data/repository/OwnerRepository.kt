@@ -164,7 +164,7 @@ interface OwnerRepository {
     ): Resource<StoreSecretApiResponse>
 
     suspend fun deleteSecret(guid: VaultSecretId): Resource<DeleteSecretApiResponse>
-    suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit>
+    suspend fun deleteUser(participantId: ParticipantId?, deletingApproverUser: Boolean = false): Resource<Unit>
 
     fun isUserEditingSecurityPlan(): Boolean
     fun setEditingSecurityPlan(editingPlan: Boolean)
@@ -481,13 +481,13 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.deleteSecret(guid) }
     }
 
-    override suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit> {
+    override suspend fun deleteUser(participantId: ParticipantId?, deletingApproverUser: Boolean): Resource<Unit> {
         val response = retrieveApiResource { apiService.deleteUser() }
 
         if (response is Resource.Success) {
             try {
                 keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
-                if (participantId != null) {
+                if (participantId != null && !deletingApproverUser) {
                     keyRepository.deleteSavedKeyFromCloud(participantId)
                 }
                 secureStorage.clearDeviceKeyId()

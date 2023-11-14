@@ -92,7 +92,6 @@
     <string name="hello_approver">Hello Approver!</string>
     <string name="approver_you_have_been_chosen">You\'ve been chosen by someone to help keep their crypto safe. Please tap the continue button when you\'re ready to begin helping them.</string>
     <string name="continue_text">Continue</string>
-    <string name="please_follow_this_link_to_censo"><![CDATA[If instead you\'re interested in using Censo to securely manage your own seed phrases, please follow <this link> to download the Censo app.]]></string>
     <string name="logged_in_approver_landing_message">You\'re helping someone who trusts you keep their crypto safe.\n\nPlease tap the continue button when they contact you.</string>
     <string name="tapping_sign_in">By tapping Sign in, you agree to our terms of use.</string>
     <string name="sign_in_google_explainer">Sign in with Google for enhanced privacy.\n\nWe\'ll only use your Google Drive to save necessary files, keeping your data private and secure.</string>
@@ -100,4 +99,11 @@
     <string name="thanks_for_helping_approver">Thanks for helping someone keep their crypto safe.</string>
     <string name="you_may_now_close_the_app">You may now close the app.</string>
     <string name="owner_entered_wrong_code">Owner entered wrong code</string>
+    <string name="this_link">this link</string>
+    <string name="to_download_the_censo_app_span">to download the Censo app.</string>
+    <string name="interested_in_using_censo_span">If instead you\'re interested in using Censo to securely manage your own seed phrases, please follow</string>
+    <string name="https_censo_co_link">https://censo.co/</string>
+    <string name="deactivate_delete"><![CDATA[Deactivate & Delete]]></string>
+    <string name="deactivate_delete_message">You are about to permanently delete your data and stop being an approver.\n\nTHIS CANNOT BE UNDONE!\n\nThe seed phrases you are helping to protect may become inaccessible if you confirm this action.\n\nAre you sure?</string>
+    <string name="delete_data">Delete Data</string>
 </resources>

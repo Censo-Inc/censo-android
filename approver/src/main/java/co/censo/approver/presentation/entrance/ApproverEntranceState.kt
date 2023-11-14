@@ -7,11 +7,15 @@ import okhttp3.ResponseBody
 data class ApproverEntranceState(
     val uiState: ApproverEntranceUIState = ApproverEntranceUIState.Initial,
     val linkError: Boolean = false,
+    val loggedIn: Boolean = false,
+    val showDeleteUserWarningDialog: Boolean = false,
+    val showDeleteUserConfirmDialog: Boolean = false,
 
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<ResponseBody> = Resource.Uninitialized,
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
 
+    val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
     val isLoading = signInUserResource is Resource.Loading

@@ -29,6 +29,8 @@ sealed class ApproverEntranceUIState : ApproverUIState {
 
     object Initial : ApproverEntranceUIState()
 
+    object Landing : ApproverEntranceUIState()
+
     object LoggedOutPasteLink : ApproverEntranceUIState()
 
     object SignIn : ApproverEntranceUIState()

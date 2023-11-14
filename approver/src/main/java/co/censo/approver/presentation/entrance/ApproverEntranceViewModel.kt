@@ -15,6 +15,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -51,18 +52,30 @@ class ApproverEntranceViewModel @Inject constructor(
         determineLoginState()
     }
 
+    fun onLandingContinue() {
+        if (state.loggedIn) {
+            loggedInRouting()
+        } else {
+            loggedOutRouting()
+        }
+    }
+
+    private fun setLandingState(loggedIn: Boolean) {
+        state = state.copy(uiState = ApproverEntranceUIState.Landing, loggedIn = loggedIn)
+    }
+
     private fun determineLoginState() {
         val jwtToken = ownerRepository.retrieveJWT()
         if (jwtToken.isNotEmpty()) {
             val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
             if (tokenValid) {
-                loggedInRouting()
+                setLandingState(loggedIn = true)
             } else {
                 attemptRefresh(jwtToken)
             }
         } else {
-            loggedOutRouting()
+            setLandingState(loggedIn = false)
         }
     }
 
@@ -72,7 +85,7 @@ class ApproverEntranceViewModel @Inject constructor(
             authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId, onDone = {
                 val jwtToken = ownerRepository.retrieveJWT()
                 if (jwtToken.isNotEmpty() && ownerRepository.checkJWTValid(jwtToken)) {
-                    loggedInRouting()
+                    setLandingState(loggedIn = true)
                 } else {
                     signOut()
                 }
@@ -83,7 +96,7 @@ class ApproverEntranceViewModel @Inject constructor(
     private fun signOut() {
         viewModelScope.launch {
             ownerRepository.signUserOut()
-            loggedOutRouting()
+            setLandingState(loggedIn = false)
         }
     }
 
@@ -313,5 +326,45 @@ class ApproverEntranceViewModel @Inject constructor(
 
     fun clearError() {
         state = state.copy(linkError = false)
+    }
+
+    fun setShowDeleteUserWarning() {
+        state = state.copy(showDeleteUserWarningDialog = true)
+    }
+
+    fun resetShowDeleteUserWarning() {
+        state = state.copy(showDeleteUserWarningDialog = false)
+    }
+
+    fun setShowDeleteUserConfirmDialog() {
+        resetShowDeleteUserWarning()
+        state = state.copy(showDeleteUserConfirmDialog = true)
+    }
+
+    fun resetShowDeleteUserConfirmDialog() {
+        state = state.copy(showDeleteUserConfirmDialog = false)
+    }
+
+    fun deleteUser() {
+        state = state.copy(deleteUserResource = Resource.Loading())
+        resetShowDeleteUserConfirmDialog()
+
+        viewModelScope.launch {
+            //When deleting the approver user, we don't need to pass in the participantId
+            val deleteUserResource = ownerRepository.deleteUser(null, true)
+
+            state = state.copy(
+                deleteUserResource = deleteUserResource
+            )
+
+            if (deleteUserResource is Resource.Success) {
+                state =
+                    state.copy(navigationResource = Resource.Success(Screen.ApproverEntranceRoute.route))
+            }
+        }
+    }
+
+    fun resetDeleteUserResource() {
+        state = state.copy(deleteUserResource = Resource.Uninitialized)
     }
 }

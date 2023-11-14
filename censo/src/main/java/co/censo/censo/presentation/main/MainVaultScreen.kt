@@ -32,6 +32,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.popUpToTop
 
@@ -197,7 +198,7 @@ fun MainVaultScreen(
                             append(stringResource(id = R.string.about_to_delete_user_second_half))
                         }
 
-                        HomeDialog(
+                        ConfirmationDialog(
                             title = stringResource(id = R.string.delete_user),
                             message = annotatedString,
                             onCancel = viewModel::onCancelResetUser,
@@ -211,7 +212,7 @@ fun MainVaultScreen(
                             append(stringResource(R.string.you_are_about_to_delete_phrase))
                         }
 
-                        HomeDialog(
+                        ConfirmationDialog(
                             title = stringResource(id = R.string.delete_phrase),
                             message = message,
                             onCancel = viewModel::onCancelDeletePhrase,
@@ -222,55 +223,4 @@ fun MainVaultScreen(
             }
         }
     }
-}
-
-@Composable
-fun HomeDialog(
-    title: String,
-    message: AnnotatedString,
-    onCancel: () -> Unit, onDelete: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        title = {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = title,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.W500,
-            )
-        },
-        text = {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = message,
-                color = Color.Black,
-                textAlign = TextAlign.Start,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Normal
-            )
-        }, confirmButton = {
-            TextButton(
-                onClick = onDelete
-            ) {
-                Text(
-                    stringResource(R.string.confirm),
-                    color = Color.Black,
-                    fontSize = 20.sp
-                )
-            }
-        }, dismissButton = {
-            TextButton(
-                onClick = onCancel
-            ) {
-                Text(
-                    stringResource(R.string.cancel),
-                    color = Color.Black,
-                    fontSize = 20.sp
-                )
-            }
-        }
-    )
 }
