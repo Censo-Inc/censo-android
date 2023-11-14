@@ -3,7 +3,6 @@ package co.censo.censo.presentation.main
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -19,8 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -164,25 +167,46 @@ fun MainVaultScreen(
 
                         BottomNavItem.Settings ->
                             SettingsHomeScreen(
+                                onLock = viewModel::lock,
                                 onDeleteUser = viewModel::showDeleteUserDialog,
                                 onSignOut = viewModel::signOut,
+                                loading = state.loading
                             )
                     }
 
 
                     if (state.triggerDeleteUserDialog is Resource.Success) {
+
+                        val annotatedString = buildAnnotatedString {
+                            append(stringResource(id = R.string.about_to_delete_user_first_half))
+                            append(" ")
+
+                            withStyle(SpanStyle(fontWeight = FontWeight.W500)) {
+                                append(stringResource(id = R.string.all))
+                            }
+
+                            append(" ")
+
+                            append(stringResource(id = R.string.about_to_delete_user_second_half))
+                        }
+
                         HomeDialog(
                             title = stringResource(id = R.string.delete_user),
-                            message = stringResource(R.string.you_are_about_to_delete_user),
+                            message = annotatedString,
                             onCancel = viewModel::onCancelResetUser,
                             onDelete = viewModel::deleteUser,
                         )
                     }
 
                     if (state.triggerEditPhraseDialog is Resource.Success) {
+
+                        val message = buildAnnotatedString {
+                            append(stringResource(R.string.you_are_about_to_delete_phrase))
+                        }
+
                         HomeDialog(
                             title = stringResource(id = R.string.delete_phrase),
-                            message = stringResource(R.string.you_are_about_to_delete_phrase),
+                            message = message,
                             onCancel = viewModel::onCancelDeletePhrase,
                             onDelete = viewModel::deleteSecret,
                         )
@@ -196,7 +220,7 @@ fun MainVaultScreen(
 @Composable
 fun HomeDialog(
     title: String,
-    message: String,
+    message: AnnotatedString,
     onCancel: () -> Unit, onDelete: () -> Unit
 ) {
     AlertDialog(

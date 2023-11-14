@@ -200,7 +200,9 @@
     <string name="add_first_seed_phrase">Add your first seed phrase</string>
     <string name="add_seed_phrase_message">Add a seed phrase to store it safely with Censo. Your seed phrase is sharded and encrypted for ultimate security.\n\nOnly you can retrieve your seed phrase. Neither Censo nor trusted approvers can access it.</string>
     <string name="step_2">Step 2</string>
-    <string name="you_are_about_to_delete_user">You are about to delete your user and associated data. This action cannot be reversed. \n\nAre you sure?</string>
+    <string name="about_to_delete_user_first_half">You are about to delete</string>
+    <string name="all">ALL</string>
+    <string name="about_to_delete_user_second_half">of your data.\n\nSeed phrases you have added will no longer be accessible. This action cannot be reversed.\n\nAre you sure?</string>
 
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Scan your face</string>
@@ -281,7 +283,7 @@
     <string name="cancel_access">Cancel access</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="delete_user">Delete User</string>
+    <string name="delete_user">Delete User Data</string>
     <string name="sign_out">Sign Out</string>
     <string name="you_are_about_to_delete_phrase">You are about to delete this phrase</string>
     <string name="delete_phrase">Delete Phrase</string>
