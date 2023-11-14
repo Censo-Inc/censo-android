@@ -2,19 +2,16 @@ package co.censo.censo.presentation.initial_plan_setup
 
 import Base58EncodedGuardianPublicKey
 import InvitationId
-import Base58EncodedPrivateKey
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.SymmetricEncryption
-import co.censo.shared.data.cryptography.decryptFromByteArray
-import co.censo.shared.data.cryptography.encryptToByteArray
+import co.censo.shared.data.cryptography.decryptWithEntropy
+import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.cryptography.sha256digest
-import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
@@ -28,7 +25,6 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,15 +93,25 @@ class InitialPlanSetupViewModel @Inject constructor(
     }
 
     fun getEncryptedKeyForUpload() : ByteArray? {
+        val entropy = retrieveEntropy() ?: return null
+
         val encryptionKey = state.initialPlanData.approverEncryptionKey ?: return null
-        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
+
+        return encryptionKey.encryptWithEntropy(
+            deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+            entropy = entropy
+        )
     }
 
     fun onKeySaved(approverEncryptedKey: ByteArray) {
+        val entropy = retrieveEntropy() ?: return
 
         //Decrypt the byteArray
         val privateKey =
-            approverEncryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+            approverEncryptedKey.decryptWithEntropy(
+                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                entropy = entropy
+            )
 
         state = state.copy(
             initialPlanData = state.initialPlanData.copy(
@@ -158,6 +164,9 @@ class InitialPlanSetupViewModel @Inject constructor(
             }
         }
     }
+
+    private fun retrieveEntropy(): Base64EncodedData? =
+        (ownerStateFlow.value.data as? OwnerState.Initial)?.entropy
 
     private fun startFacetec() {
         state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
