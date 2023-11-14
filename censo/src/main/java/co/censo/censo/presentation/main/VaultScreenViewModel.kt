@@ -77,7 +77,6 @@ class VaultScreenViewModel @Inject constructor(
             deleteUserResource = Resource.Loading()
         )
 
-        //val participantId = state.ownerState?.policy?.guardians?.get(0)?.participantId
         val participantId =
             state.ownerState?.policy?.guardians?.first { it.isOwner }?.participantId
 
@@ -143,6 +142,21 @@ class VaultScreenViewModel @Inject constructor(
 
     fun reset() {
         state = VaultScreenState()
+    }
+
+    fun lock() {
+        state = state.copy(lockResponse = Resource.Loading())
+        viewModelScope.launch {
+            val lockResponse = ownerRepository.lock()
+
+            if (lockResponse is Resource.Success) {
+                onOwnerState(OwnerState.Initial)
+            }
+        }
+    }
+
+    fun resetLockResource() {
+        state = state.copy(lockResponse = Resource.Uninitialized)
     }
 
 }

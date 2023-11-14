@@ -52,14 +52,16 @@ fun Loading(
         ), label = "anim_alpha"
     )
 
+    val modifier = fullscreenBackgroundColor?.let {
+        Modifier
+            .fillMaxSize()
+            .background(color = it)
+    } ?: Modifier.fillMaxSize()
+
 
     if (fullscreen) {
         Box(
-            modifier = Modifier.fillMaxSize().apply {
-                if (fullscreenBackgroundColor != null) {
-                    this.background(fullscreenBackgroundColor)
-                }
-            }
+            modifier = modifier
         ) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -107,5 +109,6 @@ fun LoadingPreview() {
         color = Color.White,
         size = 72.dp,
         fullscreen = false,
+        fullscreenBackgroundColor = Color.Red
     )
 }
