@@ -112,6 +112,14 @@ fun MainVaultScreen(
                                 dismissAction = viewModel::resetDeleteUserResource
                             ) { }
                         }
+
+                        state.lockResponse is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.lockResponse.getErrorMessage(context),
+                                dismissAction = viewModel::resetLockResource,
+                                retryAction = viewModel::lock
+                            )
+                        }
                     }
                 }
 
@@ -170,7 +178,6 @@ fun MainVaultScreen(
                                 onLock = viewModel::lock,
                                 onDeleteUser = viewModel::showDeleteUserDialog,
                                 onSignOut = viewModel::signOut,
-                                loading = state.loading
                             )
                     }
 

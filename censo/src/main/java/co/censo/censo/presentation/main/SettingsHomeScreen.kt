@@ -38,7 +38,6 @@ import co.censo.shared.presentation.components.Loading
 
 @Composable
 fun SettingsHomeScreen(
-    loading: Boolean,
     onLock: () -> Unit,
     onDeleteUser: () -> Unit,
     onSignOut: () -> Unit,
@@ -127,15 +126,6 @@ fun SettingsHomeScreen(
         }
         Divider()
     }
-
-    if (loading) {
-        Loading(
-            strokeWidth = 6.dp,
-            size = 72.dp,
-            fullscreen = true,
-            fullscreenBackgroundColor = Color.White.copy(alpha = 0.85f)
-        )
-    }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -145,17 +135,6 @@ fun PreviewSettingsScreen() {
         onLock = {},
         onDeleteUser = {},
         onSignOut = {},
-        loading = false
     )
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewLoadingSettingsScreen() {
-    SettingsHomeScreen(
-        onLock = {},
-        onDeleteUser = {},
-        onSignOut = {},
-        loading = true
-    )
-}

@@ -34,6 +34,7 @@ data class VaultScreenState(
     val asyncError =
         userResponse is Resource.Error ||
                 deleteSeedPhraseResource is Resource.Error ||
-                deleteUserResource is Resource.Error
+                deleteUserResource is Resource.Error ||
+                lockResponse is Resource.Error
 
 }

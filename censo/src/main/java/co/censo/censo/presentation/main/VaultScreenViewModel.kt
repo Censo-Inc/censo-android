@@ -155,4 +155,8 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
+    fun resetLockResource() {
+        state = state.copy(lockResponse = Resource.Uninitialized)
+    }
+
 }
