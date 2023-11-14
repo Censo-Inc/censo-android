@@ -46,7 +46,7 @@ android {
         applicationId = "co.censo.approver"
         minSdk = 33
         targetSdk = 33
-        versionCode = 15
+        versionCode = 16
         versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
 
         signingConfig = if (signBuild) {
@@ -54,6 +54,8 @@ android {
         } else {
             signingConfigs.getByName("debug")
         }
+
+        manifestPlaceholders["STRONGBOX_ENABLED"] = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -70,6 +72,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
+            buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             manifestPlaceholders["URL_SCHEME"] = "censo"
             resValue("string", "app_name", "Approver")
         }
