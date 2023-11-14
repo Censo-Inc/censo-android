@@ -32,41 +32,45 @@ fun PostApproverAction() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
+        val sharedFontSize = 22.sp
 
         Image(
             painterResource(id = SharedR.drawable.check_circle),
             contentDescription = null
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
             text = stringResource(R.string.congratulations_you_re_all_done),
-            fontSize = 28.sp,
+            fontSize = sharedFontSize,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            lineHeight =  30.sp
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Text(
             text = stringResource(R.string.thanks_for_helping_approver),
-            fontSize = 28.sp,
+            fontSize = sharedFontSize,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            lineHeight = 30.sp
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Text(
             text = stringResource(R.string.you_may_now_close_the_app),
-            fontSize = 28.sp,
+            fontSize = sharedFontSize,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            lineHeight =  30.sp
         )
     }
 }
