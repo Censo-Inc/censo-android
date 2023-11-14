@@ -249,7 +249,7 @@
     <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
     <string name="face_scan_to_unlock">Face scan to unlock</string>
     <string name="home_nav_title">Home</string>
-    <string name="phrases_nav_title">Phrases</string>
+    <string name="phrases_nav_title">My Phrases</string>
     <string name="settings_nav_title">Settings</string>
     <string name="approvers_nav_title">Approvers</string>
     <string name="seed_phrase_home_title">seed phrase</string>
