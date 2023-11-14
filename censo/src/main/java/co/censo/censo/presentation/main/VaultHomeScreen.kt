@@ -58,7 +58,10 @@ fun VaultHomeScreen(
 
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = buildAddSeedPhraseDisclaimer(context),
+            text = buildAddSeedPhraseDisclaimer(
+                context = context,
+                multiplePhrases = seedPhrasesSaved > 1
+            ),
             fontSize = 24.sp,
             textAlign = TextAlign.Center
         )
@@ -137,20 +140,26 @@ private fun buildSeedPhraseCount(count: Int, context: Context) : AnnotatedString
     }
 }
 
-private fun buildAddSeedPhraseDisclaimer(context: Context) : AnnotatedString {
+private fun buildAddSeedPhraseDisclaimer(context: Context, multiplePhrases: Boolean) : AnnotatedString {
     val emphasisSpanStyle = SpanStyle(
         fontWeight = FontWeight.W600
     )
 
     return buildAnnotatedString {
+        if (multiplePhrases) {
+            append(context.getString(R.string.they_are_stored_securely))
+        } else {
             append(context.getString(R.string.it_is_stored_securely_and_accessible_span))
-
-            withStyle(emphasisSpanStyle) {
-                append(context.getString(R.string.only_span))
-            }
-
-            append(context.getString(R.string.to_you_span))
         }
+
+        append(" ")
+
+        withStyle(emphasisSpanStyle) {
+            append(context.getString(R.string.only_span))
+        }
+
+        append(context.getString(R.string.to_you_span))
+    }
 }
 
 @Preview(showSystemUi = true, showBackground = true)
