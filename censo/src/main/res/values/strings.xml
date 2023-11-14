@@ -294,7 +294,8 @@
     <string name="you_have_span">"You have "</string>
     <string name="seed_phrases_span">" seed phrases."</string>
     <string name="seed_phrase_span">" seed phrase."</string>
-    <string name="it_is_stored_securely_and_accessible_span">"It is stored securely and accessible "</string>
+    <string name="it_is_stored_securely_and_accessible_span">It is stored securely and accessible</string>
+    <string name="they_are_stored_securely">They are stored securely and accessible</string>
     <string name="to_you_span">" to you."</string>
     <string name="only_span">only</string>
     <string name="adding_a_span">Adding a</string>
