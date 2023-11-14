@@ -78,55 +78,50 @@ fun AccessApprovalScreen(
         }
     }
 
-    Scaffold(topBar = {
-        CenterAlignedTopAppBar(
-            colors = TopAppBarDefaults.smallTopAppBarColors(
-                containerColor = VaultColors.NavbarColor
-            ),
-            navigationIcon = {
-                when (state.accessApprovalUIState) {
-                    AccessApprovalUIState.Approved,
-                    AccessApprovalUIState.AnotherDevice -> {}
-                    AccessApprovalUIState.GettingLive -> {
-                        IconButton(onClick = viewModel::onBackClicked) {
-                            Icon(
-                                imageVector = Icons.Filled.Clear,
-                                contentDescription = stringResource(id = R.string.exit),
-                            )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = VaultColors.NavbarColor
+                ),
+                navigationIcon = {
+                    when (state.accessApprovalUIState) {
+                        AccessApprovalUIState.Approved,
+                        AccessApprovalUIState.AnotherDevice -> {
                         }
-                    }
-                    else -> {
-                        IconButton(onClick = viewModel::onBackClicked) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back),
-                            )
+
+                        AccessApprovalUIState.GettingLive -> {
+                            IconButton(onClick = viewModel::onBackClicked) {
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = stringResource(id = R.string.exit),
+                                )
+                            }
                         }
-                    }
-                }
-            },
-            title = {
-                Text(
-                    text = when (state.accessApprovalUIState) {
-                        AccessApprovalUIState.Approved -> ""
+
                         else -> {
-                            stringResource(id = R.string.access)
+                            IconButton(onClick = viewModel::onBackClicked) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = stringResource(id = R.string.back),
+                                )
+                            }
                         }
-                    },
-                    textAlign = TextAlign.Center
-                )
-            },
-            actions = {
-                IconButton(onClick = {
-                    Toast.makeText(context, "Show FAQ Web View", Toast.LENGTH_LONG).show()
-                }) {
-                    Icon(
-                        painterResource(id = co.censo.shared.R.drawable.question),
-                        contentDescription = "learn more"
+                    }
+                },
+                title = {
+                    Text(
+                        text = when (state.accessApprovalUIState) {
+                            AccessApprovalUIState.Approved -> ""
+                            else -> {
+                                stringResource(id = R.string.access)
+                            }
+                        },
+                        textAlign = TextAlign.Center
                     )
-                }
-            })
-    }) { paddingValues ->
+                },
+            )
+        }) { paddingValues ->
 
         if (state.showCancelConfirmationDialog) {
             YesNoDialog(
