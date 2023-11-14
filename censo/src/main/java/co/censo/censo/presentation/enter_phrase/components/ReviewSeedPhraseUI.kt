@@ -1,11 +1,7 @@
 package co.censo.censo.presentation.enter_phrase.components
 
 import StandardButton
-import LearnMore
-import MessageText
-import TitleText
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -62,7 +59,7 @@ fun ReviewSeedPhraseUI(
     val drawableResource = if (valid) SharedR.drawable.check_circle else VaultR.drawable.warning
 
     val title = if (valid) {
-        stringResource(id = VaultR.string.seed_phrase_verified)
+        stringResource(id = VaultR.string.seed_phrase_validated)
     } else {
         invalidReason!!.errorTitle()
     }
@@ -74,7 +71,7 @@ fun ReviewSeedPhraseUI(
             invalidReason!!.errorMessage()
         }
 
-    val buttonText = if (valid) VaultR.string.save_seed_phrase else VaultR.string.review_phrase
+    val buttonText = if (valid) VaultR.string.next else VaultR.string.review_phrase
 
     val buttonAction = if (valid) saveSeedPhrase else editSeedPhrase
 
@@ -85,36 +82,40 @@ fun ReviewSeedPhraseUI(
         pageCount = { phraseWords.size }
     )
 
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Bottom,
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(12.dp))
 
         Image(
-            painterResource(id = drawableResource),
-            contentDescription = ""
+            modifier = Modifier.size(92.dp),
+            painter = painterResource(id = drawableResource),
+            contentDescription = "",
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        TitleText(
+        Text(
             modifier = Modifier.padding(horizontal = horizontalPadding),
-            title = title
+            text = title,
+            fontSize = 28.sp,
+            color = Color.Black,
+            fontWeight = FontWeight.W400
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        MessageText(
+        Text(
             modifier = Modifier.padding(horizontal = horizontalPadding),
-            message = message
+            text = message,
+            fontSize = 20.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -176,19 +177,13 @@ fun ReviewSeedPhraseUI(
                 .padding(horizontal = horizontalPadding + 12.dp)
                 .fillMaxWidth(),
             color = Color.Black,
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
             onClick = buttonAction) {
             Text(
                 text = stringResource(id = buttonText),
                 color = Color.White,
                 fontSize = 20.sp
             )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        LearnMore {
-            Toast.makeText(context, "Show FAQ Webview", Toast.LENGTH_LONG).show()
         }
 
         Spacer(modifier = Modifier.height(24.dp))

@@ -159,7 +159,7 @@
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
     <string name="incorrect_code">Incorrect Code</string>
-    <string name="seed_phrase_verified">Seed phrase verified</string>
+    <string name="seed_phrase_validated">Seed phrase validated</string>
     <string name="review_seed_phrase">Review seed phrase</string>
     <string name="censo_has_verified_that_this_is_a_valid_seed_phrase">Censo has verified that this is a valid seed phrase. Please review the words to make sure that you have entered them correctly.</string>
     <string name="censo_has_detected_that_this_is_not_a_valid_seed_phrase">Censo has detected that this is not a valid seed phrase. Please make sure each word is correct and revise as needed.</string>

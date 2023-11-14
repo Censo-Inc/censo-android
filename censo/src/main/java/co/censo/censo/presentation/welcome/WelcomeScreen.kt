@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.welcome
 
-import LearnMore
 import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -140,7 +138,9 @@ fun SetupStep(
         }
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            Text(text = content, fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = content, fontSize = 14.sp, lineHeight = 16.0.sp)
+            Spacer(modifier = Modifier.height(2.dp))
             if (completionText != null) {
                 Text(
                     text = "✓ $completionText",
@@ -172,7 +172,7 @@ fun WelcomeScreenUI(
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Start,
             modifier = Modifier
-                .padding(all = 32.dp)
+                .padding(horizontal = 32.dp, vertical = 24.dp)
                 .fillMaxWidth()
         )
         Text(
@@ -185,7 +185,7 @@ fun WelcomeScreenUI(
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp)
         ) {
             SetupStep(
                 imagePainter = painterResource(id = co.censo.shared.R.drawable.google),
@@ -215,7 +215,7 @@ fun WelcomeScreenUI(
         StandardButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp, vertical = 12.dp),
+                .padding(horizontal = 44.dp, vertical = 12.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
             onClick = navigateToPlanSetup,
             color = Color.Black

@@ -202,15 +202,16 @@ fun InitialPlanSetupStandardUI(
             Text(
                 text = stringResource(R.string.scan_phrase_message),
                 fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
             StandardButton(
                 onClick = startPlanSetup,
                 color = Color.Black,
-                contentPadding = PaddingValues(vertical = 12.dp),
+                contentPadding = PaddingValues(vertical = 20.dp),
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
