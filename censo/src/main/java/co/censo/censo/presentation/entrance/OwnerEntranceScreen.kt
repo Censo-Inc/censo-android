@@ -77,6 +77,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.TermsOfUseUtil
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -359,13 +360,13 @@ fun OwnerEntranceStandardUI(
         ) {
             Text(
                 text = stringResource(R.string.terms),
-                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/legal/terms") },
+                modifier = Modifier.clickable { uriHandler.openUri(TermsOfUseUtil.TERMS_URL) },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
             )
             Text(
                 text = stringResource(R.string.privacy),
-                modifier = Modifier.clickable { uriHandler.openUri("https://censo.co/legal/privacy") },
+                modifier = Modifier.clickable { uriHandler.openUri(TermsOfUseUtil.PRIVACY_URL) },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
             )

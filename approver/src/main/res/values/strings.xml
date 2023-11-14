@@ -94,4 +94,6 @@
     <string name="continue_text">Continue</string>
     <string name="please_follow_this_link_to_censo"><![CDATA[If instead you\'re interested in using Censo to securely manage your own seed phrases, please follow <this link> to download the Censo app.]]></string>
     <string name="logged_in_approver_landing_message">You\'re helping someone who trusts you keep their crypto safe.\n\nPlease tap the continue button when they contact you.</string>
+    <string name="tapping_sign_in">By tapping Sign in, you agree to our terms of use.</string>
+    <string name="sign_in_google_explainer">Sign in with Google for enhanced privacy.\n\nWe\'ll only use your Google Drive to save necessary files, keeping your data private and secure.</string>
 </resources>
