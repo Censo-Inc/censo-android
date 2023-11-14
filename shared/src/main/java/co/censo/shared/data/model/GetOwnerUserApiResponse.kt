@@ -215,7 +215,9 @@ data class GuardianSetup(
 sealed class OwnerState {
     @Serializable
     @SerialName("Initial")
-    object Initial : OwnerState()
+    data class Initial(
+        val entropy: Base64EncodedData
+    ) : OwnerState()
 
     @Serializable
     @SerialName("Ready")

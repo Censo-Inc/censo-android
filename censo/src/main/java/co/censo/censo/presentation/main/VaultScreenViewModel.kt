@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.main
 
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -88,7 +89,7 @@ class VaultScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(OwnerState.Initial)
+                onOwnerState(OwnerState.Initial(Base64EncodedData("")))
             }
         }
     }
@@ -150,7 +151,7 @@ class VaultScreenViewModel @Inject constructor(
             val lockResponse = ownerRepository.lock()
 
             if (lockResponse is Resource.Success) {
-                onOwnerState(OwnerState.Initial)
+                onOwnerState(OwnerState.Initial(Base64EncodedData("")))
             }
         }
     }
