@@ -2,18 +2,14 @@ package co.censo.approver.presentation.onboarding
 
 import ParticipantId
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,13 +30,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.approver.R
-import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.approver.presentation.GuardianColors
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproverCodeVerification
 import co.censo.approver.presentation.components.ApproverTopBar
 import co.censo.approver.presentation.components.CodeVerificationStatus
-import co.censo.approver.presentation.components.LockedApproverScreen
 import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
@@ -116,15 +110,6 @@ fun ApproverOnboardingScreen(
         content = { contentPadding ->
 
             when {
-                state.loading -> {
-                    Loading(
-                        strokeWidth = 8.dp,
-                        color = Color.Black,
-                        size = 72.dp,
-                        fullscreen = true
-                    )
-                }
-
                 state.asyncError -> {
                     when {
                         state.userResponse is Resource.Error -> {
@@ -183,6 +168,15 @@ fun ApproverOnboardingScreen(
                         Spacer(modifier = Modifier.weight(0.3f))
 
                         when (state.approverUIState) {
+                            ApproverOnboardingUIState.Loading -> {
+                                Loading(
+                                    strokeWidth = 8.dp,
+                                    color = Color.Black,
+                                    size = 72.dp,
+                                    fullscreen = true
+                                )
+                            }
+
                             ApproverOnboardingUIState.NeedsToSaveKey -> {
                                 NeedsToSaveKey(viewModel::createKeyAndTriggerCloudSave)
                             }
@@ -249,16 +243,6 @@ fun ApproverOnboardingScreen(
             if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
                 viewModel.getEncryptedKeyForUpload()
             } else null
-
-        if (state.loadingCloudAction) {
-            Loading(
-                strokeWidth = 8.dp,
-                color = Color.Black,
-                size = 72.dp,
-                fullscreen = true,
-                fullscreenBackgroundColor = Color.White
-            )
-        }
 
         CloudStorageHandler(
             actionToPerform = state.cloudStorageAction.action,

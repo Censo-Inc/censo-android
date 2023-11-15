@@ -11,9 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import co.censo.approver.R
-import co.censo.approver.data.ApproverAccessUIState
-import co.censo.approver.data.ApproverOnboardingUIState
-import co.censo.approver.data.ApproverUIState
 import co.censo.approver.presentation.GuardianColors
 
 @OptIn(ExperimentalMaterial3Api::class)

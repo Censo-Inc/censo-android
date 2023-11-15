@@ -32,7 +32,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.approver.R
 import co.censo.approver.data.ApproverAccessUIState
-import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.approver.presentation.GuardianColors
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproverTopBar

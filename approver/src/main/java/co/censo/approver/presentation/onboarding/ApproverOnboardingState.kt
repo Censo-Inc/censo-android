@@ -1,12 +1,10 @@
 package co.censo.approver.presentation.onboarding
 
 import InvitationId
-import co.censo.approver.data.ApproverOnboardingUIState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
-import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
@@ -27,7 +25,7 @@ data class ApproverOnboardingState(
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
 
     // UI state
-    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.NeedsToEnterCode,
+    val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.Loading,
     val showTopBarCancelConfirmationDialog: Boolean = false,
     val navToApproverRouting: Boolean = false,
 
@@ -39,13 +37,6 @@ data class ApproverOnboardingState(
     //Success/Error Message
     val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,
 ) {
-    val loading = userResponse is Resource.Loading
-            || acceptGuardianResource is Resource.Loading
-            || submitVerificationResource is Resource.Loading
-
-    val loadingCloudAction = savePrivateKeyToCloudResource is Resource.Loading
-            || retrievePrivateKeyFromCloudResource is Resource.Loading
-
     val asyncError = userResponse is Resource.Error
             || acceptGuardianResource is Resource.Error
             || submitVerificationResource is Resource.Error
@@ -54,4 +45,13 @@ data class ApproverOnboardingState(
 
 enum class OnboardingMessage {
     FailedPasteLink, LinkPastedSuccessfully, LinkAccepted, CodeAccepted
+}
+
+sealed class ApproverOnboardingUIState {
+    object Loading : ApproverOnboardingUIState()
+    object NeedsToSaveKey : ApproverOnboardingUIState()
+    object NeedsToEnterCode : ApproverOnboardingUIState()
+    object WaitingForConfirmation : ApproverOnboardingUIState()
+    object CodeRejected : ApproverOnboardingUIState()
+    object Complete : ApproverOnboardingUIState()
 }

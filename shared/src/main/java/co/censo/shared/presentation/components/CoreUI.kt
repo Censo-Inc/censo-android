@@ -131,11 +131,13 @@ fun SubTitleText(
 fun MessageText(
     modifier: Modifier = Modifier,
     @StringRes message: Int,
+    color: Color = Color.Black,
     textAlign: TextAlign = TextAlign.Center
 ) {
     MessageText(
         modifier = modifier,
         message = stringResource(id = message),
+        color = color,
         textAlign = textAlign
     )
 }
@@ -144,12 +146,13 @@ fun MessageText(
 fun MessageText(
     modifier: Modifier = Modifier,
     message: AnnotatedString,
+    color: Color = Color.Black,
     textAlign: TextAlign = TextAlign.Center
 ) {
     Text(
         modifier = modifier,
         text = message,
-        color = Color.Black,
+        color = color,
         fontSize = 16.sp,
         textAlign = textAlign
     )
@@ -159,12 +162,13 @@ fun MessageText(
 fun MessageText(
     modifier: Modifier = Modifier,
     message: String,
+    color: Color = Color.Black,
     textAlign: TextAlign = TextAlign.Center
 ) {
     Text(
         modifier = modifier,
         text = message,
-        color = Color.Black,
+        color = color,
         fontSize = 16.sp,
         textAlign = textAlign
     )

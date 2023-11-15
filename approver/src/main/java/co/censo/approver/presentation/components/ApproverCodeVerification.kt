@@ -20,6 +20,7 @@ import co.censo.approver.R
 import co.censo.approver.presentation.GuardianColors
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
+import co.censo.shared.presentation.components.Loading
 
 @Composable
 fun ApproverCodeVerification(
@@ -29,7 +30,6 @@ fun ApproverCodeVerification(
     value: String,
     onValueChanged: (String) -> Unit
 ) {
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,7 +41,6 @@ fun ApproverCodeVerification(
         val title =
             if (codeVerificationStatus == CodeVerificationStatus.Waiting) stringResource(R.string.code_entered)
             else stringResource(R.string.enter_the_code)
-
         TitleText(title = title)
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -52,23 +51,31 @@ fun ApproverCodeVerification(
             CodeVerificationStatus.Initial -> stringResource(R.string.enter_the_6_digit_code_from_the_seed_phrase_owner)
         }
 
-        MessageText(message = messageText)
+        if (codeVerificationStatus == CodeVerificationStatus.Waiting) {
+            Loading(
+                strokeWidth = 3.5.dp,
+                size = 24.dp,
+                fullscreen = false,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        val messageTextColor = if (codeVerificationStatus == CodeVerificationStatus.Waiting) SharedColors.GreyText else Color.Black
+        MessageText(message = messageText, color = messageTextColor)
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        if (codeVerificationStatus != CodeVerificationStatus.Waiting) {
-            //Code entry box
-            CodeEntry(
-                length = validCodeLength,
-                enabled = !isLoading || codeVerificationStatus != CodeVerificationStatus.Waiting,
-                value = value,
-                onValueChange = onValueChanged,
-                primaryColor = GuardianColors.PrimaryColor,
-                borderColor = SharedColors.BorderGrey,
-                backgroundColor = SharedColors.WordBoxBackground
-            )
-            Spacer(modifier = Modifier.height(36.dp))
-        }
+        //Code entry box
+        CodeEntry(
+            length = validCodeLength,
+            enabled = !isLoading,
+            value = value,
+            onValueChange = onValueChanged,
+            primaryColor = GuardianColors.PrimaryColor,
+            borderColor = SharedColors.BorderGrey,
+            backgroundColor = SharedColors.WordBoxBackground
+        )
+        Spacer(modifier = Modifier.height(36.dp))
     }
 }
 

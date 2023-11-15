@@ -76,9 +76,9 @@
     <string name="read_code_message">Read aloud this 6-digit code only to the person you are assisting. Once they have successfully entered it, their identity will have been verified and the request approved.</string>
     <string name="read_code">Read code</string>
     <string name="code_entered">Code Entered</string>
-    <string name="waiting_on_owner_to_approve_code">Waiting on owner to approve code...</string>
+    <string name="waiting_on_owner_to_approve_code">Waiting for the code to be verified…</string>
     <string name="incorrect_code_entered_please_try_again">Incorrect code entered. Please try again.</string>
-    <string name="enter_the_6_digit_code_from_the_seed_phrase_owner">Enter the 6-digit code from the seed phrase owner.</string>
+    <string name="enter_the_6_digit_code_from_the_seed_phrase_owner">The person you are assisting will give you a 6-digit code. Enter it below.</string>
     <string name="failed_to_get_invite_clipboard">Failed to get invite from clipboard. Please try again.</string>
     <string name="found_invite_clipboard">Found invite from clipboard!</string>
     <string name="accepted_as_an_approver">Accepted as an approver. Let\'s get you verified.</string>
