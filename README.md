@@ -2,7 +2,7 @@
 
 Run the local script `upload_build.sh`
 
-Need to pass two arguments: 
+Need to pass three arguments: 
 
     --token which is the firebase token needed to upload builds to Firebase App Tester.
 
@@ -15,15 +15,19 @@ Need to pass two arguments:
         - Staging
         - Release
 
+    --type the app you want to build (these are case sensitive): 
+        - censo 
+        - approver 
+
 ## Testing Deep Link
 
 Onboarding case: 
 
-`adb shell am start -W -a android.intent.action.VIEW -d "censo-guardian://invite/[INVITATION_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
+`adb shell am start -W -a android.intent.action.VIEW -d "censo-integration://invite/[INVITATION_ID]" co.censo.approver.[VARIANT_SUFFIX]`
 
-Recovery case:
+Access case:
 
-`adb shell am start -W -a android.intent.action.VIEW -d "censo-guardian://recovery/[PARTICIPANT_ID]" co.censo.guardian.[VARIANT_SUFFIX]`
+`adb shell am start -W -a android.intent.action.VIEW -d "censo-integration://access/[PARTICIPANT_ID]" co.censo.approver.[VARIANT_SUFFIX]`
 
 ## UI Tests
 
@@ -41,12 +45,12 @@ Then run the tests
 
 Run 
 
-`adb shell pm clear co.censo.vault.debug`
+`adb shell pm clear co.censo.censo.debug`
 
 or
 
-`adb shell pm clear co.censo.vault.staging`
+`adb shell pm clear co.censo.approver.staging`
 
-depending on the build variant you are running. 
+depending on the build variant and app type you are running. 
 
 Adb is a tool that is located in `~/Library/Android/sdk/platform-tools`

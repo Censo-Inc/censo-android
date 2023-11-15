@@ -22,7 +22,7 @@ if [[ -z variant ]]; then
 fi
 
 if [[ -z type ]]; then
-  printf "Missing app type. Make sure to pass app type as: --type argument. The two options are main or recovery.\n"
+  printf "Missing app type. Make sure to pass app type as: --type argument. The two options are censo or approver.\n"
   exit 1
 fi
 
