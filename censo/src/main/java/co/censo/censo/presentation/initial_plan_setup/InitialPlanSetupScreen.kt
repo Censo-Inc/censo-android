@@ -113,6 +113,7 @@ fun InitialPlanSetupScreen(
                         errorMessage = errorText,
                         dismissAction = null,
                         retryAction = {
+                            viewModel.resetError()
                             viewModel.determineUIStatus()
                         }
                     )

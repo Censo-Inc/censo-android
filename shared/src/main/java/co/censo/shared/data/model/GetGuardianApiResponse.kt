@@ -10,11 +10,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetGuardianStateApiResponse(
-    val guardianState: GuardianState?,
-)
-
-@Serializable
 data class GuardianState(
     val participantId: ParticipantId,
     val phase: GuardianPhase,
@@ -32,15 +27,22 @@ sealed class GuardianPhase {
 
     @Serializable
     @SerialName("WaitingForCode")
-    object WaitingForCode : GuardianPhase()
+    data class WaitingForCode(
+        val invitationId: InvitationId,
+        val entropy: Base64EncodedData?,
+    ) : GuardianPhase()
 
     @Serializable
     @SerialName("WaitingForVerification")
-    object WaitingForVerification : GuardianPhase()
+    data class WaitingForVerification(
+        val invitationId: InvitationId,
+    ) : GuardianPhase()
 
     @Serializable
     @SerialName("VerificationRejected")
-    object VerificationRejected : GuardianPhase()
+    data class VerificationRejected(
+        val invitationId: InvitationId,
+    ) : GuardianPhase()
 
     @Serializable
     @SerialName("Complete")
@@ -71,6 +73,7 @@ sealed class GuardianPhase {
         val ownerKeySignatureTimeMillis: Long,
         val ownerPublicKey: Base58EncodedDevicePublicKey,
         val guardianEncryptedShard: Base64EncodedData,
+        val guardianEntropy: Base64EncodedData?,
     ) : GuardianPhase()
 }
 

@@ -24,6 +24,8 @@ import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256
 import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
+import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
@@ -189,6 +191,11 @@ interface OwnerRepository {
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData
     ): List<RecoveredSeedPhrase>
+
+    suspend fun completeGuardianOwnership(
+        participantId: ParticipantId,
+        completeOwnerGuardianshipApiRequest: CompleteOwnerGuardianshipApiRequest
+    ) : Resource<CompleteOwnerGuardianshipApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -578,6 +585,18 @@ class OwnerRepositoryImpl(
                     masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)
                 ).joinToString(" "),
                 createdAt = it.createdAt
+            )
+        }
+    }
+
+    override suspend fun completeGuardianOwnership(
+        participantId: ParticipantId,
+        completeOwnerGuardianshipApiRequest: CompleteOwnerGuardianshipApiRequest
+    ): Resource<CompleteOwnerGuardianshipApiResponse> {
+        return retrieveApiResource {
+            apiService.completeOwnerGuardianship(
+                participantId.value,
+                completeOwnerGuardianshipApiRequest
             )
         }
     }

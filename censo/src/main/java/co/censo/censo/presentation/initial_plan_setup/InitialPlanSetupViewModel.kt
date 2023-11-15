@@ -21,6 +21,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -167,6 +168,14 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = InitialPlanSetupScreenState()
     }
 
+    fun resetError() {
+        state = state.copy(
+            createPolicyParamsResponse = Resource.Uninitialized,
+            createPolicyResponse = Resource.Uninitialized,
+            saveKeyToCloudResource = Resource.Uninitialized
+        )
+    }
+
     suspend fun onPolicyCreationFaceScanReady(
         verificationId: BiometryVerificationId,
         facetecData: FacetecBiometry
@@ -176,6 +185,11 @@ class InitialPlanSetupViewModel @Inject constructor(
         )
 
         return viewModelScope.async {
+
+            projectLog(message = "Policy Params: ${state.createPolicyParams}")
+            projectLog(message = "Biometry Id: $verificationId")
+            projectLog(message = "Facetec Data: $facetecData")
+
             val createPolicyResponse = ownerRepository.createPolicy(
                 state.createPolicyParams!!,
                 verificationId,

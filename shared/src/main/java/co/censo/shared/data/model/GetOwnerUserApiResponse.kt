@@ -76,6 +76,13 @@ sealed class GuardianStatus {
     ) : GuardianStatus()
 
     @Serializable
+    @SerialName("OwnerAsApprover")
+    data class OwnerAsApprover(
+        val entropy: Base64EncodedData,
+        val confirmedAt: Instant,
+    ) : GuardianStatus()
+
+    @Serializable
     @SerialName("ImplicitlyOwner")
     data class ImplicitlyOwner(
         val guardianPublicKey: Base58EncodedGuardianPublicKey,
@@ -99,6 +106,13 @@ sealed class Guardian {
     sealed class SetupGuardian : Guardian() {
         abstract override val label: String
         abstract override val participantId: ParticipantId
+
+        @Serializable
+        @SerialName("OwnerAsApprover")
+        data class OwnerAsApprover(
+            override val label: String,
+            override val participantId: ParticipantId,
+        ) : SetupGuardian()
 
         @Serializable
         @SerialName("ImplicitlyOwner")

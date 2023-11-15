@@ -122,10 +122,45 @@ fun PlanSetupScreen(
                             dismissAction = { viewModel.resetVerifyKeyConfirmationSignature() },
                             retryAction = { viewModel.resetVerifyKeyConfirmationSignature() },
                         )
-                    } else {
-                        // FIXME add error cases with appropriate actions
+                    } else if (state.userResponse is Resource.Error){
                         DisplayError(
-                            errorMessage = "Failed to invite approvers",
+                            errorMessage = "User Response Error",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.createPolicySetupResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Create Policy Setup Error",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.initiateRecoveryResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Initiate Recovery Error",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.retrieveRecoveryShardsResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Retrieve Recovery Shards Error",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.replacePolicyResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Replace Policy Error",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.completeGuardianShipResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Complete Guardianship Error",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else {
+                        DisplayError(
+                            errorMessage = "Generic Error",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
@@ -146,7 +181,7 @@ fun PlanSetupScreen(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
-                                onNicknameChanged = viewModel::approverNicknameChanged,
+                                onNicknameChanged = viewModel::onApproverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApprover
                             )
                         }
@@ -179,7 +214,7 @@ fun PlanSetupScreen(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
-                                onNicknameChanged = viewModel::approverNicknameChanged,
+                                onNicknameChanged = viewModel::onApproverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApproverNickname
                             )
                         }
@@ -187,7 +222,7 @@ fun PlanSetupScreen(
                         PlanSetupUIState.AddAlternateApprover -> {
                             AddAlternateApproverUI(
                                 onInviteAlternateSelected = viewModel::onInviteApprover,
-                                onSaveAndFinishSelected = viewModel::saveAndFinish
+                                onSaveAndFinishSelected = viewModel::onSaveAndFinishPlan
                             )
                         }
 
@@ -227,8 +262,8 @@ fun PlanSetupScreen(
     }
 
     if (state.cloudStorageAction.triggerAction) {
-        val encryptedKey = viewModel.getEncryptedKeyForUpload()
-        val participantId = state.tempOwnerApprover?.participantId
+        val encryptedKey = state.keyData?.encryptedPrivateKey
+        val participantId = state.ownerParticipantId
 
         if (encryptedKey != null && participantId != null) {
             CloudStorageHandler(

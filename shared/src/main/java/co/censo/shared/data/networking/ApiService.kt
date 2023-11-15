@@ -11,6 +11,8 @@ import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiRequest
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
+import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
@@ -245,6 +247,12 @@ interface ApiService {
     suspend fun retrieveRecoveryShards(
         @Body apiRequest: RetrieveRecoveryShardsApiRequest
     ): RetrofitResponse<RetrieveRecoveryShardsApiResponse>
+
+    @POST("v1/guardians/{$PARTICIPANT_ID}/owner-completion")
+    suspend fun completeOwnerGuardianship(
+        @Path(value = PARTICIPANT_ID) participantId: String,
+        @Body apiRequest: CompleteOwnerGuardianshipApiRequest
+    ) : RetrofitResponse<CompleteOwnerGuardianshipApiResponse>
 }
 
 class AnalyticsInterceptor(
