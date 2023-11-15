@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
-import co.censo.shared.util.TermsOfUseUtil
+import co.censo.shared.util.LinksUtil
 
 @Composable
 fun ApproverLoginUI(
@@ -117,14 +117,14 @@ fun ApproverLoginUI(
             ) {
                 Text(
                     text = stringResource(co.censo.shared.R.string.terms),
-                    modifier = Modifier.clickable { uriHandler.openUri(TermsOfUseUtil.TERMS_URL) },
+                    modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.TERMS_URL) },
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.width(56.dp))
                 Text(
                     text = stringResource(co.censo.shared.R.string.privacy),
-                    modifier = Modifier.clickable { uriHandler.openUri(TermsOfUseUtil.PRIVACY_URL) },
+                    modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.PRIVACY_URL) },
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp
                 )

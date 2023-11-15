@@ -35,6 +35,7 @@ import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.Loading
+import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -171,7 +172,7 @@ fun PlanSetupScreen(
                                 prospectApprover = state.activatingApprover,
                                 secondsLeft = state.secondsLeft,
                                 verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
-                                storesLink = "https://censo.co/approvers",
+                                storesLink = LinksUtil.CENSO_APPROVER_STORE_LINK,
                                 onContinue = viewModel::onApproverConfirmed,
                                 onEditNickname = viewModel::onEditApproverNickname
                             )

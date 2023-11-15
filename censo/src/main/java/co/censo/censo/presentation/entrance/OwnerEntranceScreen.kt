@@ -31,8 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,7 +75,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.TermsOfUseUtil
+import co.censo.shared.util.LinksUtil
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -360,13 +358,13 @@ fun OwnerEntranceStandardUI(
         ) {
             Text(
                 text = stringResource(R.string.terms),
-                modifier = Modifier.clickable { uriHandler.openUri(TermsOfUseUtil.TERMS_URL) },
+                modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.TERMS_URL) },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
             )
             Text(
                 text = stringResource(R.string.privacy),
-                modifier = Modifier.clickable { uriHandler.openUri(TermsOfUseUtil.PRIVACY_URL) },
+                modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.PRIVACY_URL) },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
             )

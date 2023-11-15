@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
+import co.censo.shared.util.LinksUtil
 
 @Composable
 fun ApproverLanding(
@@ -93,7 +94,7 @@ fun ApproverLanding(
 
                 pushStringAnnotation(
                     tag = linkTag,
-                    annotation = stringResource(R.string.https_censo_co_link)
+                    annotation = LinksUtil.CENSO_WEB_LINK
                 )
                 withStyle(style = SpanStyle(fontWeight = FontWeight.W600)) {
                     append(stringResource(R.string.this_link))

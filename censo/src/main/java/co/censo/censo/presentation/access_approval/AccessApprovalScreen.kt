@@ -1,7 +1,6 @@
 package co.censo.censo.presentation.access_approval
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +37,7 @@ import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApproverUI
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.shared.presentation.components.Loading
+import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -215,7 +214,7 @@ fun AccessApprovalScreen(
                                 approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
                                 verificationCode = state.verificationCode,
                                 onVerificationCodeChanged = viewModel::updateVerificationCode,
-                                storesLink = "https://censo.co/approvers",
+                                storesLink = LinksUtil.CENSO_APPROVER_STORE_LINK,
                             )
                         }
 

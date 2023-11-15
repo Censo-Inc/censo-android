@@ -102,7 +102,6 @@
     <string name="this_link">this link</string>
     <string name="to_download_the_censo_app_span">to download the Censo app.</string>
     <string name="interested_in_using_censo_span">If instead you\'re interested in using Censo to securely manage your own seed phrases, please follow</string>
-    <string name="https_censo_co_link">https://censo.co/</string>
     <string name="deactivate_delete"><![CDATA[Deactivate & Delete]]></string>
     <string name="deactivate_delete_message">You are about to permanently delete your data and stop being an approver.\n\nTHIS CANNOT BE UNDONE!\n\nThe seed phrases you are helping to protect may become inaccessible if you confirm this action.\n\nAre you sure?</string>
     <string name="delete_data">Delete Data</string>
