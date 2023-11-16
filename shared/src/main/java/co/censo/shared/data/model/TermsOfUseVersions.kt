@@ -1,5 +1,7 @@
 package co.censo.shared.data.model
 
+const val touVersion = "v0.2"
+
 val termsOfUseVersions: Map<String, String> = mapOf(
     "v0.2" to """
         <h1 id="acceptance-of-terms">ACCEPTANCE OF TERMS</h1>

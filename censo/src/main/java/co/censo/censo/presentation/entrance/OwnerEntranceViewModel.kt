@@ -9,6 +9,8 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.termsOfUseVersions
+import co.censo.shared.data.model.touVersion
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
@@ -195,7 +197,7 @@ class OwnerEntranceViewModel @Inject constructor(
     private fun triggerNavigation() {
         state = state.copy(
             userFinishedSetup = true,
-            showAcceptTermsOfUse = state.acceptedTermsOfUseVersion != "v0.2"
+            showAcceptTermsOfUse = state.acceptedTermsOfUseVersion != touVersion
         )
     }
 

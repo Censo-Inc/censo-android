@@ -64,6 +64,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.R
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.termsOfUseVersions
+import co.censo.shared.data.model.touVersion
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
@@ -148,7 +149,7 @@ fun OwnerEntranceScreen(
         when {
             state.showAcceptTermsOfUse -> {
                 TermsOfUse {
-                    viewModel.setAcceptedTermsOfUseVersion("v0.2")
+                    viewModel.setAcceptedTermsOfUseVersion(touVersion)
                 }
             }
 
@@ -360,7 +361,7 @@ fun TermsOfUse(
 
             if (isReview) {
                 HtmlText(
-                    termsOfUseVersions["v0.2"]!!,
+                    termsOfUseVersions[touVersion]!!,
                     Modifier
                         .padding(paddingValues)
                         .fillMaxHeight(0.8f)
