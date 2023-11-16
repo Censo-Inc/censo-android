@@ -41,6 +41,8 @@ data class ApproverOnboardingState(
             || acceptGuardianResource is Resource.Error
             || submitVerificationResource is Resource.Error
             || savePrivateKeyToCloudResource is Resource.Error
+
+    val showTopBar = approverUIState !is ApproverOnboardingUIState.Complete
 }
 
 enum class OnboardingMessage {

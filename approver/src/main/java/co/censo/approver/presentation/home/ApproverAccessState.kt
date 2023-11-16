@@ -59,6 +59,8 @@ data class ApproverAccessState(
             || rejectRecoveryResource is Resource.Error
             || accessNotInProgress is Resource.Error
 
+    val showTopBar = (!loading && !asyncError) && approverAccessUIState !is ApproverAccessUIState.Complete
+
     val shouldCheckRecoveryCode =
         userResponse !is Resource.Loading && guardianState?.phase is GuardianPhase.RecoveryVerification
 

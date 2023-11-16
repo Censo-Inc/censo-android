@@ -102,9 +102,8 @@ fun ApproverOnboardingScreen(
 
     Scaffold(
         topBar = {
-            ApproverTopBar {
-                if (state.approverUIState is ApproverOnboardingUIState.Complete) viewModel.triggerApproverRoutingNavigation()
-                else viewModel.showCloseConfirmationDialog()
+            if (state.showTopBar) {
+                ApproverTopBar { viewModel.showCloseConfirmationDialog() }
             }
         },
         content = { contentPadding ->

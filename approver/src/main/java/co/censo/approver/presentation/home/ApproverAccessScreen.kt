@@ -82,13 +82,10 @@ fun ApproverAccessScreen(
 
     Scaffold(
         topBar = {
-            if (!state.loading && !state.asyncError) {
-                ApproverTopBar(
-                    onClose = {
-                        if (state.approverAccessUIState is ApproverAccessUIState.Complete) viewModel.triggerApproverRoutingNavigation()
-                        else viewModel.showCloseConfirmationDialog()
-                    }
-                )
+            if (state.showTopBar) {
+                ApproverTopBar {
+                    viewModel.showCloseConfirmationDialog()
+                }
             }
         },
         content = { contentPadding ->
