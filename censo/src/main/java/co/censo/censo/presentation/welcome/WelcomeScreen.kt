@@ -197,7 +197,7 @@ fun WelcomeScreenUI(
                 imagePainter = painterResource(id = co.censo.shared.R.drawable.small_face_scan),
                 heading = stringResource(id = R.string.scan_your_face),
                 content = stringResource(id = R.string.scan_your_face_blurb),
-                completionText = if (currentStep.order >= WelcomeStep.FaceScanned.order) stringResource(R.string.authenticated) else null
+                completionText = if (currentStep.order >= WelcomeStep.FaceScanned.order) stringResource(R.string.scanned) else null
             )
             SetupStep(
                 imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),

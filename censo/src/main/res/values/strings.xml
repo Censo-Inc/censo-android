@@ -178,6 +178,7 @@
     <string name="authenticate_privately">Authenticate anonymously</string>
     <string name="authenticate_privately_blurb">No personal info collected, ever, from Google or any other source.</string>
     <string name="authenticated">Authenticated</string>
+    <string name="scanned">Scanned</string>
     <string name="scan_your_face_blurb">Anonymous biometrics ensure that only you can access your seed phrase.</string>
     <string name="enter_your_phrase">Enter your phrase</string>
     <string name="enter_your_phrase_blurb">Now your seed phrase is encrypted and entirely in your control.</string>
