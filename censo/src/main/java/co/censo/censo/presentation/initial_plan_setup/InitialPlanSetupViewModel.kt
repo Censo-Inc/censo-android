@@ -185,11 +185,6 @@ class InitialPlanSetupViewModel @Inject constructor(
         )
 
         return viewModelScope.async {
-
-            projectLog(message = "Policy Params: ${state.createPolicyParams}")
-            projectLog(message = "Biometry Id: $verificationId")
-            projectLog(message = "Facetec Data: $facetecData")
-
             val createPolicyResponse = ownerRepository.createPolicy(
                 state.createPolicyParams!!,
                 verificationId,

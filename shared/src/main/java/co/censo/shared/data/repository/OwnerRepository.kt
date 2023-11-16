@@ -18,6 +18,7 @@ import co.censo.shared.data.cryptography.SecretSharerUtils
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.decryptFromByteArray
+import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
@@ -613,7 +614,10 @@ class OwnerRepositoryImpl(
                     } else {
                         val encryptedKey = ownerApproverKeyResource.data!!
                         val base58EncodedPrivateKey =
-                            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+                            encryptedKey.decryptWithEntropy(
+                                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                                entropy = it.ownerEntropy!!
+                            )
 
                         EncryptionKey.generateFromPrivateKeyRaw(base58EncodedPrivateKey.bigInt())
                     }

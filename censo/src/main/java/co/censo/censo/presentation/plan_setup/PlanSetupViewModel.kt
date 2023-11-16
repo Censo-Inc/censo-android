@@ -569,7 +569,7 @@ class PlanSetupViewModel @Inject constructor(
             )
 
             if (completeGuardianShipResponse is Resource.Success) {
-                projectLog(message = "Complete Guardianship Success: $completeGuardianShipResponse")
+                updateOwnerState(completeGuardianShipResponse.data!!.ownerState)
                 initiateRecovery()
             }
 
@@ -694,7 +694,7 @@ class PlanSetupViewModel @Inject constructor(
     //region Extension Functions Mapping Approver Types
 
     private fun List<Guardian.ProspectGuardian>.ownerAsApprovers(): Guardian.ProspectGuardian? {
-        return find { it.status is GuardianStatus.OwnerAsApprover }
+        return find { it.status is GuardianStatus.OwnerAsApprover || it.status is GuardianStatus.ImplicitlyOwner }
     }
     private fun List<Guardian.ProspectGuardian>.implicitOwners(): Guardian.ProspectGuardian? {
         return find { it.status is GuardianStatus.ImplicitlyOwner }
