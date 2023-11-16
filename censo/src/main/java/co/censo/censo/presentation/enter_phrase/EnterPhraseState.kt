@@ -27,6 +27,7 @@ data class EnterPhraseState(
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
     val isSavingFirstSeedPhrase: Boolean = false,
+    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized
 ) {
 
     companion object {

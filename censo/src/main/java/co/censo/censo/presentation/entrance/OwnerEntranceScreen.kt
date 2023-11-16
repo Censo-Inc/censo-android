@@ -3,11 +3,9 @@ package co.censo.censo.presentation.entrance
 import MessageText
 import ParticipantId
 import StandardButton
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
-import android.content.pm.PackageManager
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -59,10 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
@@ -85,43 +80,9 @@ fun OwnerEntranceScreen(
     navController: NavController,
     viewModel: OwnerEntranceViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current as FragmentActivity
+    val context = LocalContext.current
 
     val state = viewModel.state
-
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = {
-            viewModel.finishPushNotificationDialog()
-        }
-    )
-
-    fun checkNotificationsPermissionDialog() {
-        try {
-            val notificationGranted =
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-
-            if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
-                val shownPermissionBefore =
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    )
-                val seenDialogBefore = viewModel.userHasSeenPushDialog()
-
-                if (!shownPermissionBefore && !seenDialogBefore) {
-                    viewModel.setUserSeenPushDialog(true)
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-
-        } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.PermissionDialog)
-        }
-    }
 
     val googleAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -164,10 +125,6 @@ fun OwnerEntranceScreen(
                 viewModel.googleAuthFailure(GoogleAuthError.FailedToLaunchGoogleAuthUI(e))
             }
             viewModel.resetTriggerGoogleSignIn()
-        }
-
-        if (state.showPushNotificationsDialog is Resource.Success) {
-            checkNotificationsPermissionDialog()
         }
 
         if (state.navigationResource is Resource.Success) {
@@ -493,7 +450,7 @@ fun TermsOfUsePreview() {
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun OwnerEntranceStandardUIPreview() {
     Surface {

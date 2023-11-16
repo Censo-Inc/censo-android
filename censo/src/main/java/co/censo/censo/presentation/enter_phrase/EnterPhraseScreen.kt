@@ -1,7 +1,11 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
@@ -41,7 +48,8 @@ import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntry
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
-import co.censo.shared.util.projectLog
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,8 +59,16 @@ fun EnterPhraseScreen(
     navController: NavController,
     viewModel: EnterPhraseViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    val context = LocalContext.current as FragmentActivity
+
     val state = viewModel.state
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {
+            viewModel.finishPushNotificationDialog()
+        }
+    )
 
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
@@ -78,6 +94,33 @@ fun EnterPhraseScreen(
         onDispose {}
     }
 
+    fun checkNotificationsPermissionDialog() {
+        try {
+            val notificationGranted =
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+
+            if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
+                val shownPermissionBefore =
+                    ActivityCompat.shouldShowRequestPermissionRationale(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                val seenDialogBefore = viewModel.userHasSeenPushDialog()
+
+                if (!shownPermissionBefore && !seenDialogBefore) {
+                    viewModel.setUserSeenPushDialog(true)
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.PermissionDialog)
+        }
+    }
+
     LaunchedEffect(key1 = state) {
         if (state.phraseEntryComplete is Resource.Success) {
             if (welcomeFlow) {
@@ -88,6 +131,10 @@ fun EnterPhraseScreen(
                 navController.popBackStack()
             }
             viewModel.resetPhraseEntryComplete()
+        }
+
+        if (state.showPushNotificationsDialog is Resource.Success) {
+            checkNotificationsPermissionDialog()
         }
 
         if (state.exitFlow) {
