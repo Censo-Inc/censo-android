@@ -12,11 +12,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,14 +25,13 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.censo.R
-import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
-import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
@@ -262,21 +259,39 @@ fun PlanSetupScreen(
     }
 
     if (state.cloudStorageAction.triggerAction) {
-        val encryptedKey = state.keyData?.encryptedPrivateKey
-        val participantId = state.ownerParticipantId
+        if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
+            val encryptedKey = state.keyData?.encryptedPrivateKey
+            val participantId = state.ownerApprover?.participantId
 
-        if (encryptedKey != null && participantId != null) {
-            CloudStorageHandler(
-                actionToPerform = state.cloudStorageAction.action,
-                participantId = participantId,
-                encryptedPrivateKey = encryptedKey,
-                onActionSuccess = { viewModel.onKeyUploadSuccess() },
-                onActionFailed = viewModel::onKeyUploadFailed
-            )
-        } else {
-            val exceptionCause =
-                if (encryptedKey == null) "missing private key" else "missing participant id"
-            viewModel.onKeyUploadFailed(Exception("Unable to setup initial policy, $exceptionCause"))
+            if (encryptedKey != null && participantId != null) {
+                CloudStorageHandler(
+                    actionToPerform = state.cloudStorageAction.action,
+                    participantId = participantId,
+                    encryptedPrivateKey = encryptedKey,
+                    onActionSuccess = { viewModel.onKeyUploadSuccess() },
+                    onActionFailed = viewModel::onKeyUploadFailed
+                )
+            } else {
+                val exceptionCause =
+                    if (encryptedKey == null) "missing private key" else "missing participant id"
+                viewModel.onKeyUploadFailed(Exception("Unable to setup initial policy, $exceptionCause"))
+            }
+        } else if (state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
+            val participantId = state.ownerApprover?.participantId
+
+            if (participantId != null) {
+                CloudStorageHandler(
+                    actionToPerform = state.cloudStorageAction.action,
+                    participantId = participantId,
+                    encryptedPrivateKey = null,
+                    onActionSuccess = {
+                        viewModel.onKeyDownloadSuccess(it)
+                    },
+                    onActionFailed = viewModel::onKeyUploadFailed
+                )
+            } else {
+                viewModel.onKeyUploadFailed(Exception("Unable to setup initial policy, missing participant id"))
+            }
         }
     }
 }

@@ -52,7 +52,6 @@ data class PlanSetupState(
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
 
     val keyData: PlanSetupKeyData? = null,
-    val ownerParticipantId: ParticipantId? = null,
     val saveKeyToCloud: Resource<Unit> = Resource.Uninitialized,
 
     // Navigation
