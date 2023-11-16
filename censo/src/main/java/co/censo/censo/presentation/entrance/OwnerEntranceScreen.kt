@@ -148,7 +148,7 @@ fun OwnerEntranceScreen(
         when {
             state.showAcceptTermsOfUse -> {
                 TermsOfUse {
-                    viewModel.setAcceptedTermsOfUseVersion("v0.1")
+                    viewModel.setAcceptedTermsOfUseVersion("v0.2")
                 }
             }
 
@@ -360,7 +360,7 @@ fun TermsOfUse(
 
             if (isReview) {
                 HtmlText(
-                    termsOfUseVersions["v0.1"]!!,
+                    termsOfUseVersions["v0.2"]!!,
                     Modifier
                         .padding(paddingValues)
                         .fillMaxHeight(0.8f)
