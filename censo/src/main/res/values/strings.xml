@@ -325,5 +325,5 @@
     <string name="paste_from_clipboard">Paste From Clipboard</string>
     <string name="subsequent_seed_phrase_saved">Your seed phrase is securely stored.\n\nIt can be accessed only by you.</string>
     <string name="error_occurred_trying_to_get_user_data_please_try_again">Error occurred trying to get user data. Please try again.</string>
-
+    <string name="affirmative_biometric_consent">By tapping Begin face scan, I consent to the collection and processing of a scan of my face for the purposes of authentication in connection with my use of the Censo App.</string>
 </resources>

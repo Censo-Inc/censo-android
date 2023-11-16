@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -206,8 +207,17 @@ fun InitialPlanSetupStandardUI(
                 lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
+            Text(
+                text = stringResource(R.string.affirmative_biometric_consent),
+                fontWeight = FontWeight.Light,
+                fontStyle = FontStyle.Italic,
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(24.dp))
             StandardButton(
                 onClick = startPlanSetup,
                 color = Color.Black,
