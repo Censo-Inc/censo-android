@@ -73,10 +73,7 @@ class OwnerEntranceViewModel @Inject constructor(
                 val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
                 if (tokenValid) {
-                    state = state.copy(
-                        userFinishedSetup = true,
-                        showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
-                    )
+                    triggerNavigation()
                 } else {
                     attemptRefresh(jwtToken)
                 }
@@ -186,6 +183,7 @@ class OwnerEntranceViewModel @Inject constructor(
             )
 
             state = if (signInUserResponse is Resource.Success) {
+                triggerNavigation()
                 state.copy(
                     signInUserResource = signInUserResponse
                 )
@@ -193,6 +191,13 @@ class OwnerEntranceViewModel @Inject constructor(
                 state.copy(signInUserResource = signInUserResponse)
             }
         }
+    }
+
+    private fun triggerNavigation() {
+        state = state.copy(
+            userFinishedSetup = true,
+            showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
+        )
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
