@@ -9,11 +9,9 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
-import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
@@ -43,7 +41,6 @@ import javax.inject.Inject
 class OwnerEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-    private val pushRepository: PushRepository,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
@@ -76,7 +73,10 @@ class OwnerEntranceViewModel @Inject constructor(
                 val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
                 if (tokenValid) {
-                    checkUserHasRespondedToNotificationOptIn()
+                    state = state.copy(
+                        userFinishedSetup = true,
+                        showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
+                    )
                 } else {
                     attemptRefresh(jwtToken)
                 }
@@ -99,9 +99,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
     private fun checkUserTokenAfterRefreshAttempt() {
         val jwtToken = ownerRepository.retrieveJWT()
-        if (jwtToken.isNotEmpty() && ownerRepository.checkJWTValid(jwtToken)) {
-            checkUserHasRespondedToNotificationOptIn()
-        } else {
+        if (jwtToken.isEmpty() || !ownerRepository.checkJWTValid(jwtToken)) {
             signUserOutAfterAttemptedTokenRefresh()
         }
     }
@@ -110,41 +108,6 @@ class OwnerEntranceViewModel @Inject constructor(
         viewModelScope.launch {
             ownerRepository.signUserOut()
             resetSignInUserResource()
-        }
-    }
-
-    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
-
-    fun setUserSeenPushDialog(seenDialog: Boolean) =
-        pushRepository.setUserSeenPushDialog(seenDialog)
-
-    private fun checkUserHasRespondedToNotificationOptIn() {
-        viewModelScope.launch {
-            if (pushRepository.userHasSeenPushDialog()) {
-                submitNotificationTokenForRegistration()
-                triggerNavigation()
-            } else {
-                state = state.copy(
-                    showPushNotificationsDialog = Resource.Success(Unit)
-                )
-            }
-        }
-    }
-
-    private fun submitNotificationTokenForRegistration() {
-        viewModelScope.launch {
-            try {
-                val token = pushRepository.retrievePushToken()
-                if (token.isNotEmpty()) {
-                    val pushBody = PushBody(
-                        deviceType = PushRepositoryImpl.DEVICE_TYPE,
-                        token = token
-                    )
-                    pushRepository.addPushNotification(pushBody = pushBody)
-                }
-            } catch (e: Exception) {
-                e.sendError(CrashReportingUtil.SubmitNotificationToken)
-            }
         }
     }
 
@@ -223,7 +186,6 @@ class OwnerEntranceViewModel @Inject constructor(
             )
 
             state = if (signInUserResponse is Resource.Success) {
-                checkUserHasRespondedToNotificationOptIn()
                 state.copy(
                     signInUserResource = signInUserResponse
                 )
@@ -231,13 +193,6 @@ class OwnerEntranceViewModel @Inject constructor(
                 state.copy(signInUserResource = signInUserResponse)
             }
         }
-    }
-
-    private fun triggerNavigation() {
-        state = state.copy(
-            userFinishedSetup = true,
-            showAcceptTermsOfUse = state.acceptedTermsOfUseVersion == ""
-        )
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
@@ -263,13 +218,6 @@ class OwnerEntranceViewModel @Inject constructor(
 
     private fun resetForceUserToGrantCloudStorageAccess() {
         state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
-    }
-
-    fun finishPushNotificationDialog() {
-        submitNotificationTokenForRegistration()
-        state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
-
-        triggerNavigation()
     }
 
     fun retrieveOwnerStateAndNavigate() {
