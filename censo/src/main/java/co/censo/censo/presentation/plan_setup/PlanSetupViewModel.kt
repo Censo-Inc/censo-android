@@ -237,7 +237,7 @@ class PlanSetupViewModel @Inject constructor(
         if (state.alternateApprover == null) {
             state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
         } else {
-            initiateRecovery()
+            checkUserHasSavedKeyAndSubmittedPolicy()
         }
     }
 
@@ -567,7 +567,7 @@ class PlanSetupViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val loadedKey =
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 

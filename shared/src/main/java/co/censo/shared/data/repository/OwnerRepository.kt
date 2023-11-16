@@ -67,6 +67,7 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
@@ -401,7 +402,7 @@ class OwnerRepositoryImpl(
                         status.guardianKeySignature.bytes
                     )
                 }
-                is GuardianStatus.ImplicitlyOwner -> true
+                is GuardianStatus.ImplicitlyOwner, is GuardianStatus.OwnerAsApprover -> true
                 else -> false
             }
         } catch (e: Exception) {
