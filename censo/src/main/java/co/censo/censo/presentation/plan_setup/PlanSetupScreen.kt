@@ -44,7 +44,6 @@ fun PlanSetupScreen(
     navController: NavController,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val state = viewModel.state
 
     val iconPair = when (state.backArrowType) {
@@ -76,9 +75,6 @@ fun PlanSetupScreen(
 
     Scaffold(topBar = {
         TopAppBar(
-            colors = TopAppBarDefaults.smallTopAppBarColors(
-                containerColor = VaultColors.NavbarColor
-            ),
             navigationIcon = {
                 when (iconPair) {
                     null -> {}

@@ -57,9 +57,10 @@ fun ApproverNicknameUI(
         verticalArrangement = Arrangement.Bottom
     ) {
 
+        //TODO: may need to add more logic to this composable to know when to display first approver text
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = if (isRename) R.string.rename_approver else R.string.add_approver_nickname,
+            title = if (isRename) R.string.rename_approver else R.string.add_first_approver_nickname,
             textAlign = TextAlign.Start
         )
 
@@ -123,7 +124,7 @@ fun ApproverNicknameUI(
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
             Text(
-                text = stringResource(id = R.string.save),
+                text = stringResource(id = R.string.continue_text),
                 color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
                 fontSize = 24.sp
             )

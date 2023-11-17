@@ -212,8 +212,8 @@
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
     <string name="failed_save_seed">Failed to save seed, please ensure you have entered it correctly.</string>
-    <string name="add_approver_nickname">Add approver nickname</string>
-    <string name="add_approver_nickname_message">Give your approver a nickname of your choice so you can identify them in the future.\n\nThis will be visible only to you.</string>
+    <string name="add_first_approver_nickname">Name your first approver</string>
+    <string name="add_approver_nickname_message">Give your approver a unique nickname so you can identify them.</string>
     <string name="get_live_with_your_approver">Get live with your approver</string>
     <string name="get_live_with_your_approver_message">For maximum security, it\'s best to be face-to-face with the person you\'re adding as an approver in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
     <string name="activate_approver">Activate</string>
