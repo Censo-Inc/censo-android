@@ -1,6 +1,5 @@
 package co.censo.shared.presentation.components
 
-import LearnMore
 import MessageText
 import StandardButton
 import TitleText

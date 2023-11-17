@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.components.vault
 
-import LearnMore
 import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -160,9 +159,6 @@ fun UnlockedVaultScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        LearnMore {
-
-        }
 
     }
 }

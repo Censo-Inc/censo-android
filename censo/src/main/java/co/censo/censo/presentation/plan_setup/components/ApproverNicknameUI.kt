@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.plan_setup.components
 
-import LearnMore
 import MessageText
 import StandardButton
 import TitleText
@@ -128,12 +127,6 @@ fun ApproverNicknameUI(
                 color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
                 fontSize = 24.sp
             )
-        }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))

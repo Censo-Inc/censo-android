@@ -1,7 +1,6 @@
 package co.censo.censo.presentation.access_seed_phrases.components
 
 import Base64EncodedData
-import LearnMore
 import StandardButton
 import TitleText
 import VaultSecretId
@@ -84,10 +83,6 @@ fun SelectPhraseUI(
                 fontSize = 22.sp,
                 modifier = Modifier.padding(all = 8.dp)
             )
-        }
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -2,7 +2,6 @@ package co.censo.censo.presentation.enter_phrase.components
 
 import StandardButton
 import androidx.compose.foundation.layout.Column
-import LearnMore
 import MessageText
 import SubTitleText
 import TitleText

@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.enter_phrase.components
 
-import LearnMore
 import MessageText
 import StandardButton
 import TitleText

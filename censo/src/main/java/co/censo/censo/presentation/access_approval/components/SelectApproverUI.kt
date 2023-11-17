@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.access_approval.components
 
-import LearnMore
 import MessageText
 import ParticipantId
 import StandardButton
@@ -101,12 +100,6 @@ fun SelectApproverUI(
                 text = stringResource(id = R.string.continue_text),
                 color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey
             )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(24.dp))

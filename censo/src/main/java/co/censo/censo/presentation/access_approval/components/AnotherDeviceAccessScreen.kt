@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.access_approval.components
 
-import LearnMore
 import MessageText
 import StandardButton
 import TitleText
@@ -72,11 +71,6 @@ fun AnotherDeviceAccessScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        LearnMore {
-
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 
 }

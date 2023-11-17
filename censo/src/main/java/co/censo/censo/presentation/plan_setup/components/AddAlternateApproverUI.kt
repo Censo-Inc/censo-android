@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.plan_setup.components
 
-import LearnMore
 import MessageText
 import StandardButton
 import TitleText
@@ -99,11 +98,6 @@ fun AddAlternateApproverUI(
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-        LearnMore {
-
-        }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
     }
 }
 

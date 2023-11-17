@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.access_approval.components
 
-import LearnMore
 import MessageText
 import TitleText
 import android.content.Intent
@@ -134,10 +133,6 @@ fun ApproveAccessUI(
                 backgroundColor = SharedColors.WordBoxBackground,
                 requestFocus = codeEditable
             )
-        }
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(24.dp))

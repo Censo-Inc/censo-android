@@ -3,7 +3,6 @@ package co.censo.censo.presentation.plan_setup.components
 import Base58EncodedGuardianPublicKey
 import Base64EncodedData
 import InvitationId
-import LearnMore
 import MessageText
 import StandardButton
 import TitleText
@@ -182,11 +181,6 @@ fun ActivateApproverUI(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        LearnMore {
-
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

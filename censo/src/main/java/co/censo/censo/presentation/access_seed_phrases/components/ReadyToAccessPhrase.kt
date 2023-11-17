@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.access_seed_phrases.components
 
-import LearnMore
 import StandardButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -131,10 +130,6 @@ fun ReadyToAccessPhrase(
                 fontSize = 22.sp,
                 modifier = Modifier.padding(all = 8.dp)
             )
-        }
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(16.dp))
