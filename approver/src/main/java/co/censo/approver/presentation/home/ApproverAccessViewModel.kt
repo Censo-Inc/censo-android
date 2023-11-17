@@ -191,7 +191,9 @@ class ApproverAccessViewModel @Inject constructor(
 
                 if (entropy == null) {
                     state =
-                        state.copy(approveRecoveryResource = Resource.Error(exception = Exception("Unable to confirm owner recovery, missing recovery confirmation data")))
+                        state.copy(approveRecoveryResource = Resource.Error(
+                            exception = Exception("Unable to approve this access request, missing information"))
+                        )
                     return@launch
                 }
 

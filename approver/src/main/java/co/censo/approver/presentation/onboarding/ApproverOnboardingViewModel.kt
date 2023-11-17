@@ -208,16 +208,9 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun assignEntropy(guardianState: GuardianState?) {
-        (guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy?.let {
-            state = state.copy(entropy = it)
-        }
-    }
-
     private fun determineApproverUIState(guardianState: GuardianState?) {
         assignGuardianState(guardianState = guardianState)
         assignParticipantId(guardianState = guardianState)
-        assignEntropy(guardianState = guardianState)
 
         val guardianPhase = guardianState?.phase
 
@@ -281,7 +274,6 @@ class ApproverOnboardingViewModel @Inject constructor(
                     onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
                 )
                 assignParticipantId(acceptResource.data?.guardianState)
-                assignEntropy(acceptResource.data?.guardianState)
                 createKeyAndTriggerCloudSave()
             }
         }
@@ -388,7 +380,8 @@ class ApproverOnboardingViewModel @Inject constructor(
     //region Cloud Storage
     fun getEncryptedKeyForUpload(): ByteArray? {
         val encryptionKey = state.guardianEncryptionKey ?: return null
-        val entropy = state.entropy ?: return null
+        val entropy = (state.guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy ?: return null
+
         return encryptionKey.encryptWithEntropy(
             deviceKeyId = keyRepository.retrieveSavedDeviceId(),
             entropy = entropy
@@ -401,7 +394,10 @@ class ApproverOnboardingViewModel @Inject constructor(
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
-        if (state.entropy == null) {
+        val entropy = (state.guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy
+
+
+        if (entropy == null) {
             retrieveApproverState(false)
             return
         }
@@ -410,7 +406,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         val privateKey =
             encryptedKey.decryptWithEntropy(
                 deviceKeyId = keyRepository.retrieveSavedDeviceId(),
-                entropy = state.entropy!!
+                entropy = entropy
             )
 
         when (cloudStorageAction) {
