@@ -17,7 +17,6 @@ import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.SecretSharerUtils
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.cryptography.decryptFromByteArray
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey

@@ -10,11 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.cryptography.decryptFromByteArray
 import co.censo.shared.data.cryptography.decryptWithEntropy
-import co.censo.shared.data.cryptography.encryptToByteArray
+import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.repository.GuardianRepository
@@ -390,7 +388,11 @@ class ApproverOnboardingViewModel @Inject constructor(
     //region Cloud Storage
     fun getEncryptedKeyForUpload(): ByteArray? {
         val encryptionKey = state.guardianEncryptionKey ?: return null
-        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
+        val entropy = state.entropy ?: return null
+        return encryptionKey.encryptWithEntropy(
+            deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+            entropy = entropy
+        )
     }
 
     fun handleCloudStorageActionSuccess(

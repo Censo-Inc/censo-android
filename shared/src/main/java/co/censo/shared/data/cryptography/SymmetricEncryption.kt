@@ -36,19 +36,6 @@ class SymmetricEncryption {
     }
 }
 
-fun ByteArray.decryptFromByteArray(deviceKeyId: String) : Base58EncodedPrivateKey {
-    val decryptedKey = SymmetricEncryption().decrypt(deviceKeyId.sha256digest(), this)
-    return Base58EncodedPrivateKey(Base58.base58Encode(decryptedKey))
-}
-
-fun EncryptionKey.encryptToByteArray(deviceKeyId: String) : ByteArray {
-    return SymmetricEncryption().encrypt(
-        deviceKeyId.sha256digest(),
-        Base58EncodedPrivateKey(Base58.base58Encode(this.privateKeyRaw())).bigInt()
-            .toByteArrayNoSign()
-    )
-}
-
 fun ByteArray.decryptWithEntropy(deviceKeyId: String, entropy: Base64EncodedData) : Base58EncodedPrivateKey {
     val digest = SHA3.Digest256()
 
