@@ -1,5 +1,6 @@
 package co.censo.approver.presentation.onboarding
 
+import Base64EncodedData
 import InvitationId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
@@ -20,6 +21,7 @@ data class ApproverOnboardingState(
     // onboarding
     val verificationCode: String = "",
     val guardianEncryptionKey: EncryptionKey? = null,
+    val entropy: Base64EncodedData? = null,
     val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
     val acceptGuardianResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.decryptFromByteArray
+import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptToByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.Guardian
@@ -209,9 +210,16 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
+    private fun assignEntropy(guardianState: GuardianState?) {
+        (guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy?.let {
+            state = state.copy(entropy = it)
+        }
+    }
+
     private fun determineApproverUIState(guardianState: GuardianState?) {
         assignGuardianState(guardianState = guardianState)
         assignParticipantId(guardianState = guardianState)
+        assignEntropy(guardianState = guardianState)
 
         val guardianPhase = guardianState?.phase
 
@@ -275,6 +283,7 @@ class ApproverOnboardingViewModel @Inject constructor(
                     onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
                 )
                 assignParticipantId(acceptResource.data?.guardianState)
+                assignEntropy(acceptResource.data?.guardianState)
                 createKeyAndTriggerCloudSave()
             }
         }
@@ -390,9 +399,17 @@ class ApproverOnboardingViewModel @Inject constructor(
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
+        if (state.entropy == null) {
+            retrieveApproverState(false)
+            return
+        }
+
         //Decrypt the byteArray
         val privateKey =
-            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+            encryptedKey.decryptWithEntropy(
+                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                entropy = state.entropy!!
+            )
 
         when (cloudStorageAction) {
             CloudStorageActions.UPLOAD -> {
