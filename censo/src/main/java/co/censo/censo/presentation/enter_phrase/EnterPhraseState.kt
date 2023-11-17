@@ -39,13 +39,13 @@ data class EnterPhraseState(
 
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.EDIT,
-        EnterPhraseUIState.PASTE_ENTRY,
+        EnterPhraseUIState.LABEL,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.REVIEW -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
+        EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.LABEL,
         EnterPhraseUIState.DONE-> BackIconType.CLOSE
     }
 

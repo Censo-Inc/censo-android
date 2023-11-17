@@ -193,8 +193,8 @@
     <string name="finish">Finish</string>
     <string name="finished">Finished</string>
     <string name="submit_word">Submit word</string>
-    <string name="add_a_label">Add a label</string>
-    <string name="seed_phrase_label_message">Now, give your seed phrase a label of your choice so you can identify it in the future.\n\nThis will be secured within your face scan encryption and not shared with anyone.</string>
+    <string name="label_your_seed_phrase">Label your seed phrase</string>
+    <string name="seed_phrase_label_message">Give your seed phrase a unique label so you can easily identify it.</string>
     <string name="enter_a_nickname">Enter a nickname…</string>
     <string name="enter_a_label">Enter a label…</string>
     <string name="add_seed_phrases">Add seed phrases</string>
@@ -247,7 +247,7 @@
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
     <string name="the_verification_code_has_been_successfully_confirmed">The verification code has been successfully confirmed.</string>
     <string name="once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed">Once they have accepted the invite, a unique confirmation code will be displayed.</string>
-    <string name="paste_your_phrase">Paste your phrase</string>
+    <string name="paste_your_phrase">Paste seed phrase</string>
     <string name="count_seed_phrases">%1$s seed phrases</string>
     <string name="encrypted_your_data_behind">Censo has encrypted your data behind a live, 3D scan of your face with layered security.</string>
     <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
@@ -319,11 +319,12 @@
     <string name="less_than_1_minute">Less than 1 minute</string>
     <string name="min">min</string>
     <string name="copy_your_seed_phrase">1. Copy your seed phrase</string>
-    <string name="click_the_button_below">2. Click the button below</string>
+    <string name="tap_the_button_below">2. Tap the button below</string>
     <string name="copy_seed_phrase_message">Open the app where your seed phrase is, copy it to the clipboard, and then come back here</string>
     <string name="click_past_button_message">When you tap the Paste From Clipboard button, your seed phrase will be pasted from the clipboard, and the clipboard will then be cleared.\n\nYou will then have the opportunity to review the seed phrase before saving it.</string>
     <string name="paste_from_clipboard">Paste From Clipboard</string>
     <string name="subsequent_seed_phrase_saved">Your seed phrase is securely stored.\n\nIt can be accessed only by you.</string>
     <string name="error_occurred_trying_to_get_user_data_please_try_again">Error occurred trying to get user data. Please try again.</string>
     <string name="affirmative_biometric_consent">By tapping Begin face scan, I consent to the collection and processing of a scan of my face for the purposes of authentication in connection with my use of the Censo App.</string>
+    <string name="swipe_back_and_forth_to_review_words">swipe back and forth to review words</string>
 </resources>

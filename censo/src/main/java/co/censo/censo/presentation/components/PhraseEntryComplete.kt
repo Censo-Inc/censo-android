@@ -85,7 +85,7 @@ fun SeedPhraseAdded(
                 text = stringResource(co.censo.censo.R.string.ok),
                 color = Color.White,
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.W400
             )
         }
 

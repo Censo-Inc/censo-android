@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.censo.R
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.BIP39InvalidReason
 import co.censo.shared.util.errorMessage
@@ -170,7 +171,11 @@ fun ReviewSeedPhraseUI(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(text = stringResource(R.string.swipe_back_and_forth_to_review_words))
+
+        Spacer(modifier = Modifier.height(6.dp))
 
         StandardButton(
             modifier = Modifier

@@ -58,28 +58,6 @@ fun StandardButton(
 }
 
 @Composable
-fun LearnMore(
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.clickable { onClick() },
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.info),
-            contentDescription = null,
-            tint = Color.Black
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = stringResource(R.string.learn_more),
-            color = Color.Black
-        )
-    }
-}
-
-@Composable
 fun TitleText(
     modifier: Modifier = Modifier,
     @StringRes title: Int,
@@ -179,14 +157,5 @@ fun MessageText(
 fun ButtonPreview() {
     StandardButton(color = Color.Black, onClick = { }) {
         Text(text = "Hello", color = Color.White)
-    }
-}
-
-
-@Preview
-@Composable
-fun LearnMorePreview() {
-    LearnMore {
-
     }
 }

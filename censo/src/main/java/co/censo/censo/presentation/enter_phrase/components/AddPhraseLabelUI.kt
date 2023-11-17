@@ -59,7 +59,7 @@ fun AddPhraseLabelUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.add_a_label,
+            title = R.string.label_your_seed_phrase,
             textAlign = TextAlign.Start
         )
 
@@ -121,16 +121,10 @@ fun AddPhraseLabelUI(
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
             Text(
-                text = "Save",
+                text = stringResource(id = R.string.save_seed_phrase),
                 color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
                 fontSize = 24.sp
             )
-        }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        LearnMore {
-
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))

@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -50,6 +52,7 @@ import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
+import org.w3c.dom.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,11 +77,11 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.LABEL,
-        EnterPhraseUIState.SELECTED,
-        EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.REVIEW -> ""
+        EnterPhraseUIState.SELECTED-> ""
 
+        EnterPhraseUIState.REVIEW,
+        EnterPhraseUIState.VIEW,
+        EnterPhraseUIState.LABEL,
         EnterPhraseUIState.DONE -> stringResource(R.string.add_seed_phrase_title)
     }
 
@@ -150,9 +153,6 @@ fun EnterPhraseScreen(
     Scaffold(topBar = {
         if (state.enterWordUIState != EnterPhraseUIState.SELECT_ENTRY_TYPE) {
             TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = VaultColors.NavbarColor
-                ),
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.onBackClicked()
