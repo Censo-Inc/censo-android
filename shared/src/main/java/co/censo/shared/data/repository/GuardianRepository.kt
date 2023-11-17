@@ -74,6 +74,17 @@ interface GuardianRepository {
     suspend fun rejectRecovery(
         participantId: ParticipantId
     ) : Resource<RejectRecoveryApiResponse>
+
+    suspend fun storeAccessTotpSecret(
+        approvalId: String,
+        encryptedTotpSecret: Base64EncodedData
+    ) : Resource<StoreRecoveryTotpSecretApiResponse>
+
+    suspend fun approveAccess(
+        approvalId: String,
+        encryptedShard: Base64EncodedData
+    ) : Resource<ApproveRecoveryApiResponse>
+    suspend fun rejectAccess(approvalId: String) : Resource<RejectRecoveryApiResponse>
 }
 
 class GuardianRepositoryImpl(
@@ -165,6 +176,18 @@ class GuardianRepositoryImpl(
         }
     }
 
+    override suspend fun storeAccessTotpSecret(
+        approvalId: String,
+        encryptedTotpSecret: Base64EncodedData
+    ) : Resource<StoreRecoveryTotpSecretApiResponse> {
+        return retrieveApiResource {
+            apiService.storeAccessTotpSecret(
+                approvalId,
+                StoreRecoveryTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
+            )
+        }
+    }
+
     override fun checkTotpMatches(
         encryptedTotpSecret: Base64EncodedData,
         ownerPublicKey: Base58EncodedPublicKey,
@@ -207,9 +230,27 @@ class GuardianRepositoryImpl(
         }
     }
 
+    override suspend fun approveAccess(
+        approvalId: String,
+        encryptedShard: Base64EncodedData
+    ) : Resource<ApproveRecoveryApiResponse> {
+        return retrieveApiResource {
+            apiService.approveAccess(
+                approvalId,
+                ApproveRecoveryApiRequest(encryptedShard)
+            )
+        }
+    }
+
     override suspend fun rejectRecovery(participantId: ParticipantId): Resource<RejectRecoveryApiResponse> {
         return retrieveApiResource {
             apiService.rejectRecovery(participantId.value)
+        }
+    }
+
+    override suspend fun rejectAccess(approvalId: String) : Resource<RejectRecoveryApiResponse> {
+        return retrieveApiResource {
+            apiService.rejectAccess(approvalId)
         }
     }
 }

@@ -43,7 +43,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ApproverAccessViewModel @Inject constructor(
     private val guardianRepository: GuardianRepository,
-    private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val recoveryTotpTimer: VaultCountDownTimer,
     private val userStatePollingTimer: VaultCountDownTimer
@@ -203,12 +202,24 @@ class ApproverAccessViewModel @Inject constructor(
                 )
 
                 val ownerPublicKey = ExternalEncryptionKey.generateFromPublicKeyBase58(recoveryConfirmation.ownerPublicKey)
-                val response = guardianRepository.approveRecovery(
-                    participantId,
-                    encryptedShard = ownerPublicKey.encrypt(
-                        key.toEncryptionKey().decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
-                    ).base64Encoded()
-                )
+
+
+                val encryptedShard = ownerPublicKey.encrypt(
+                    key.toEncryptionKey().decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
+                ).base64Encoded()
+
+                val response =
+                    if (state.approvalId.isNotEmpty()) {
+                        guardianRepository.approveAccess(
+                            approvalId = state.approvalId,
+                            encryptedShard = encryptedShard
+                        )
+                    } else {
+                        guardianRepository.approveRecovery(
+                            participantId = participantId,
+                            encryptedShard = encryptedShard
+                        )
+                    }
 
                 state = state.copy(approveRecoveryResource = response, ownerEnteredWrongCode = false)
 
@@ -220,7 +231,12 @@ class ApproverAccessViewModel @Inject constructor(
                 stopRecoveryTotpGeneration()
             } else {
                 state = state.copy(rejectRecoveryResource = Resource.Loading())
-                val response = guardianRepository.rejectRecovery(participantId)
+                val response =
+                    if (state.approvalId.isNotEmpty()) {
+                        guardianRepository.rejectAccess(state.approvalId)
+                    } else {
+                        guardianRepository.rejectRecovery(participantId)
+                    }
                 state = state.copy(rejectRecoveryResource = response, ownerEnteredWrongCode = true)
                 if (response is Resource.Success) {
                     determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
@@ -238,7 +254,18 @@ class ApproverAccessViewModel @Inject constructor(
                 .encryptWithDeviceKey(secret.toByteArray())
                 .base64Encoded()
 
-            val submitRecoveryTotpSecretResource = guardianRepository.storeRecoveryTotpSecret(state.participantId, encryptedSecret)
+            val submitRecoveryTotpSecretResource =
+                if (state.approvalId.isNotEmpty()) {
+                    guardianRepository.storeAccessTotpSecret(
+                        approvalId = state.approvalId,
+                        encryptedTotpSecret = encryptedSecret
+                    )
+                } else {
+                    guardianRepository.storeRecoveryTotpSecret(
+                        participantId = state.participantId,
+                        encryptedTotpSecret = encryptedSecret
+                    )
+                }
 
             if (submitRecoveryTotpSecretResource is Resource.Success) {
                 determineApproverAccessUIState(
