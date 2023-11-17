@@ -226,9 +226,7 @@ fun ApproverInfoBox(
 
         Column {
             Text(
-                text =
-                if (primaryApprover) stringResource(R.string.primary_approver)
-                else stringResource(R.string.alternate_approver),
+                text = stringResource(id = R.string.approver),
                 color = Color.Black,
                 fontSize = labelTextSize
             )
@@ -274,7 +272,7 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
 
         else -> {
             ApproverActivatedUIData(
-                text = context.getString(R.string.activated),
+                text = context.getString(R.string.active),
                 color = SharedColors.SuccessGreen
             )
         }

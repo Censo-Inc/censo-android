@@ -21,7 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +50,14 @@ fun AddAlternateApproverUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.optional_increase_security),
+            textAlign = TextAlign.Start
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+        TitleText(
+            modifier = Modifier.fillMaxWidth(),
             title = R.string.add_an_alternate_approver,
             textAlign = TextAlign.Start
         )
@@ -52,9 +65,17 @@ fun AddAlternateApproverUI(
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
 
+
+
+        val spannedMessageText = buildSpannedText(
+            preceding = stringResource(id = R.string.add_second_approver_message_first_span),
+            remaining = stringResource(id = R.string.add_second_approver_message_second_span),
+            textToApplySpanStyle = stringResource(id = R.string.second_approver_spanned_text)
+        )
+
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.add_an_alternate_approver_message,
+            message = spannedMessageText,
             textAlign = TextAlign.Start
         )
 
@@ -108,4 +129,23 @@ fun AddAlternateApproverUIPreview() {
         onInviteAlternateSelected = {},
         onSaveAndFinishSelected = {},
     )
+}
+
+//TODO: Convert this into a util/helper method and centralize all usage
+fun buildSpannedText(
+    preceding: String,
+    remaining: String,
+    textToApplySpanStyle: String
+): AnnotatedString {
+    val boldSpanStyle = SpanStyle(
+        fontWeight = FontWeight.W700
+    )
+
+    return buildAnnotatedString {
+        append("$preceding ")
+        withStyle(boldSpanStyle) {
+            append(textToApplySpanStyle)
+        }
+        append(" $remaining")
+    }
 }

@@ -80,22 +80,10 @@ fun AccessApprovalScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = VaultColors.NavbarColor
-                ),
                 navigationIcon = {
                     when (state.accessApprovalUIState) {
                         AccessApprovalUIState.Approved,
                         AccessApprovalUIState.AnotherDevice -> {
-                        }
-
-                        AccessApprovalUIState.GettingLive -> {
-                            IconButton(onClick = viewModel::onBackClicked) {
-                                Icon(
-                                    imageVector = Icons.Filled.Clear,
-                                    contentDescription = stringResource(id = R.string.exit),
-                                )
-                            }
                         }
 
                         else -> {
@@ -201,6 +189,8 @@ fun AccessApprovalScreen(
                         }
 
                         AccessApprovalUIState.GettingLive -> {
+                            //TODO: Swap this out for the RequestAccess composable + updated logic
+
                             GetLiveWithUserUI(
                                 title = stringResource(R.string.get_live_with_your_approver),
                                 message = stringResource(R.string.get_live_with_your_approver_message),
@@ -211,6 +201,7 @@ fun AccessApprovalScreen(
 
                         AccessApprovalUIState.ApproveAccess -> {
                             ApproveAccessUI(
+                                approverName = state.selectedApprover?.label ?: stringResource(R.string.your_approver_backup_label),
                                 approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
                                 verificationCode = state.verificationCode,
                                 onVerificationCodeChanged = viewModel::updateVerificationCode,

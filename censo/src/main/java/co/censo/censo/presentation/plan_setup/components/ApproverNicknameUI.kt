@@ -38,6 +38,7 @@ import co.censo.censo.presentation.plan_setup.PlanSetupState.Companion.APPROVER_
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApproverNicknameUI(
+    isFirstApprover: Boolean,
     isRename: Boolean = false,
     nickname: String,
     enabled: Boolean,
@@ -57,10 +58,11 @@ fun ApproverNicknameUI(
         verticalArrangement = Arrangement.Bottom
     ) {
 
-        //TODO: may need to add more logic to this composable to know when to display first approver text
+
+        val defaultTitle = if (isFirstApprover) R.string.add_first_approver_nickname else R.string.add_second_approver_nickname
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = if (isRename) R.string.rename_approver else R.string.add_first_approver_nickname,
+            title = if (isRename) R.string.rename_approver else defaultTitle,
             textAlign = TextAlign.Start
         )
 
@@ -138,6 +140,7 @@ fun ApproverNicknameUI(
 @Composable
 fun EnabledAddApproverNicknameUIPreview() {
     ApproverNicknameUI(
+        isFirstApprover = false,
         nickname = "Neo",
         enabled = true,
         onNicknameChanged = {},
@@ -149,6 +152,7 @@ fun EnabledAddApproverNicknameUIPreview() {
 @Composable
 fun PreviewDisabledNickname() {
     ApproverNicknameUI(
+        isFirstApprover = false,
         nickname = "",
         enabled = false,
         onNicknameChanged = {},
@@ -160,6 +164,7 @@ fun PreviewDisabledNickname() {
 @Composable
 fun PreviewNicknameIsTooLong() {
     ApproverNicknameUI(
+        isFirstApprover = false,
         nickname = "",
         enabled = false,
         nicknameIsTooLong = true,
@@ -172,6 +177,7 @@ fun PreviewNicknameIsTooLong() {
 @Composable
 fun EnabledRenameApproverUIPreview() {
     ApproverNicknameUI(
+        isFirstApprover = false,
         isRename = true,
         nickname = "Neo",
         enabled = true,

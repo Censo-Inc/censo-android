@@ -60,7 +60,7 @@ fun OwnerCodeVerification(
     if (errorEnabled) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = stringResource(R.string.owner_entered_wrong_code),
+            text = stringResource(R.string.code_entered_incorrectly),
             color = SharedColors.ErrorRed,
             fontSize = 16.sp
         )

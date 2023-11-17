@@ -2,6 +2,7 @@ package co.censo.censo.presentation.access_seed_phrases.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -36,10 +37,11 @@ fun AccessPhrasesTopBar(
     }
 
     val navIcon = when (accessPhrasesUIState) {
-        AccessPhrasesUIState.SelectPhrase -> Icons.Rounded.ArrowBack to stringResource(id = R.string.back)
         AccessPhrasesUIState.Facetec -> null
-        AccessPhrasesUIState.ReadyToStart,
+        AccessPhrasesUIState.SelectPhrase,
         AccessPhrasesUIState.ViewPhrase -> Icons.Rounded.Close to stringResource(id = R.string.exit)
+
+        AccessPhrasesUIState.ReadyToStart -> Icons.Filled.ArrowBack to stringResource(id = R.string.back)
     }
 
     Column {

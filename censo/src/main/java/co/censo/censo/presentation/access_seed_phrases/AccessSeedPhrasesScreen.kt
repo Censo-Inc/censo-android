@@ -152,10 +152,7 @@ fun AccessSeedPhrasesScreen(
                         }
 
                         AccessPhrasesUIState.ReadyToStart -> {
-                            ReadyToAccessPhrase(
-                                phraseLabel = state.selectedPhrase?.label ?: stringResource(R.string.phrase),
-                                getStarted = viewModel::startFacetec
-                            )
+                            ReadyToAccessPhrase(getStarted = viewModel::startFacetec)
                         }
 
                         AccessPhrasesUIState.Facetec -> {

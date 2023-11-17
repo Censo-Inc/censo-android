@@ -33,6 +33,8 @@ import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
+import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
@@ -94,11 +96,7 @@ fun PlanSetupScreen(
                     when (state.planSetupUIState) {
                         PlanSetupUIState.ApproverActivation,
                         PlanSetupUIState.EditApproverNickname ->
-                            if (state.approverType == ApproverType.Primary) {
-                                stringResource(id = R.string.primary_approver)
-                            } else {
-                                stringResource(id = R.string.alternate_approver)
-                            }
+                            stringResource(R.string.add_approver_title)
 
                         else -> ""
                     }
@@ -144,6 +142,7 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.ApproverNickname -> {
                             ApproverNicknameUI(
+                                isFirstApprover = state.primaryApprover?.status !is GuardianStatus.Confirmed,
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
@@ -164,7 +163,6 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.ApproverActivation -> {
                             ActivateApproverUI(
-                                isPrimaryApprover = state.approverType == ApproverType.Primary,
                                 prospectApprover = state.activatingApprover,
                                 secondsLeft = state.secondsLeft,
                                 verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
@@ -176,6 +174,7 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.EditApproverNickname -> {
                             ApproverNicknameUI(
+                                isFirstApprover = state.primaryApprover?.status !is GuardianStatus.Confirmed,
                                 isRename = true,
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,

@@ -34,7 +34,6 @@ import co.censo.censo.presentation.welcome.SetupStep
 
 @Composable
 fun ReadyToAccessPhrase(
-    phraseLabel: String,
     getStarted: () -> Unit
 ) {
     Column(
@@ -47,38 +46,10 @@ fun ReadyToAccessPhrase(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val message = buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    fontSize = 16.sp,
-                )
-            ) {
-                append(stringResource(R.string.get_ready_message))
-            }
-            append(" ")
-            withStyle(
-                SpanStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
-            ) {
-                append(phraseLabel)
-            }
-        }
-
         Text(
             stringResource(id = R.string.ready_to_start),
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 24.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            message,
-            fontSize = 16.sp,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,15 +75,6 @@ fun ReadyToAccessPhrase(
                 heading = stringResource(id = R.string.access_for_fifteen_title),
                 content = stringResource(id = R.string.access_for_fifteen_message),
             )
-            Divider()
-            SetupStep(
-                imagePainter = painterResource(id = R.drawable.warning),
-                heading = stringResource(id = R.string.dont_leave_title),
-                content = stringResource(id = R.string.dont_leave_message),
-                imageBackgroundColor = SharedColors.DarkGreyBackground,
-                iconColor = Color.White
-            )
-            Divider()
         }
 
         StandardButton(
@@ -139,7 +101,5 @@ fun ReadyToAccessPhrase(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewReadyToAccessPhrase() {
-    ReadyToAccessPhrase("Yankee Hotel Foxtrot") {
-
-    }
+    ReadyToAccessPhrase {}
 }
