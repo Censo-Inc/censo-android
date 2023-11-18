@@ -12,11 +12,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,14 +25,13 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.censo.R
-import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
-import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
@@ -114,7 +111,7 @@ fun PlanSetupScreen(
             when {
                 state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
 
-
+                //TODO: These retries and errors need to get tested and improved.
                 state.asyncError -> {
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
                         DisplayError(
@@ -122,10 +119,45 @@ fun PlanSetupScreen(
                             dismissAction = { viewModel.resetVerifyKeyConfirmationSignature() },
                             retryAction = { viewModel.resetVerifyKeyConfirmationSignature() },
                         )
-                    } else {
-                        // FIXME add error cases with appropriate actions
+                    } else if (state.userResponse is Resource.Error){
                         DisplayError(
-                            errorMessage = "Failed to invite approvers",
+                            errorMessage = "Failed to retrieve user information, try again.",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.createPolicySetupResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to create policy, try again",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.initiateRecoveryResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to replace plan, try again.",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.retrieveRecoveryShardsResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to retrieve recovery data, try again.",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.replacePolicyResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to replace policy, try again.",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else if (state.completeGuardianShipResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to finalize plan, try again.",
+                            dismissAction = { viewModel.reset() },
+                            retryAction = { viewModel.reset() },
+                        )
+                    } else {
+                        DisplayError(
+                            errorMessage = "Something went wrong, please try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
@@ -146,7 +178,7 @@ fun PlanSetupScreen(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
-                                onNicknameChanged = viewModel::approverNicknameChanged,
+                                onNicknameChanged = viewModel::onApproverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApprover
                             )
                         }
@@ -179,7 +211,7 @@ fun PlanSetupScreen(
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
-                                onNicknameChanged = viewModel::approverNicknameChanged,
+                                onNicknameChanged = viewModel::onApproverNicknameChanged,
                                 onSaveNickname = viewModel::onSaveApproverNickname
                             )
                         }
@@ -187,7 +219,7 @@ fun PlanSetupScreen(
                         PlanSetupUIState.AddAlternateApprover -> {
                             AddAlternateApproverUI(
                                 onInviteAlternateSelected = viewModel::onInviteApprover,
-                                onSaveAndFinishSelected = viewModel::saveAndFinish
+                                onSaveAndFinishSelected = viewModel::onSaveAndFinishPlan
                             )
                         }
 
@@ -227,21 +259,39 @@ fun PlanSetupScreen(
     }
 
     if (state.cloudStorageAction.triggerAction) {
-        val encryptedKey = viewModel.getEncryptedKeyForUpload()
-        val participantId = state.tempOwnerApprover?.participantId
+        if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
+            val encryptedKey = state.keyData?.encryptedPrivateKey
+            val participantId = state.ownerApprover?.participantId
 
-        if (encryptedKey != null && participantId != null) {
-            CloudStorageHandler(
-                actionToPerform = state.cloudStorageAction.action,
-                participantId = participantId,
-                encryptedPrivateKey = encryptedKey,
-                onActionSuccess = { viewModel.onKeyUploadSuccess() },
-                onActionFailed = viewModel::onKeyUploadFailed
-            )
-        } else {
-            val exceptionCause =
-                if (encryptedKey == null) "missing private key" else "missing participant id"
-            viewModel.onKeyUploadFailed(Exception("Unable to setup initial policy, $exceptionCause"))
+            if (encryptedKey != null && participantId != null) {
+                CloudStorageHandler(
+                    actionToPerform = state.cloudStorageAction.action,
+                    participantId = participantId,
+                    encryptedPrivateKey = encryptedKey,
+                    onActionSuccess = { viewModel.onKeyUploadSuccess() },
+                    onActionFailed = viewModel::onKeyUploadFailed
+                )
+            } else {
+                val exceptionCause =
+                    if (encryptedKey == null) "missing private key" else "missing participant id"
+                viewModel.onKeyUploadFailed(Exception("Unable to setup policy, $exceptionCause"))
+            }
+        } else if (state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
+            val participantId = state.ownerApprover?.participantId
+
+            if (participantId != null) {
+                CloudStorageHandler(
+                    actionToPerform = state.cloudStorageAction.action,
+                    participantId = participantId,
+                    encryptedPrivateKey = null,
+                    onActionSuccess = {
+                        viewModel.onKeyDownloadSuccess(it)
+                    },
+                    onActionFailed = viewModel::onKeyDownloadFailed
+                )
+            } else {
+                viewModel.onKeyDownloadFailed(Exception("Unable to setup policy, missing participant id"))
+            }
         }
     }
 }

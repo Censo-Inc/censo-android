@@ -17,13 +17,15 @@ import co.censo.shared.data.cryptography.PolicySetupHelper
 import co.censo.shared.data.cryptography.SecretSharerUtils
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.cryptography.decryptFromByteArray
+import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256
 import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
+import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
 import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
@@ -64,6 +66,7 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
@@ -189,6 +192,11 @@ interface OwnerRepository {
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData
     ): List<RecoveredSeedPhrase>
+
+    suspend fun completeGuardianOwnership(
+        participantId: ParticipantId,
+        completeOwnerGuardianshipApiRequest: CompleteOwnerGuardianshipApiRequest
+    ) : Resource<CompleteOwnerGuardianshipApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -393,7 +401,7 @@ class OwnerRepositoryImpl(
                         status.guardianKeySignature.bytes
                     )
                 }
-                is GuardianStatus.ImplicitlyOwner -> true
+                is GuardianStatus.ImplicitlyOwner, is GuardianStatus.OwnerAsApprover -> true
                 else -> false
             }
         } catch (e: Exception) {
@@ -582,6 +590,18 @@ class OwnerRepositoryImpl(
         }
     }
 
+    override suspend fun completeGuardianOwnership(
+        participantId: ParticipantId,
+        completeOwnerGuardianshipApiRequest: CompleteOwnerGuardianshipApiRequest
+    ): Resource<CompleteOwnerGuardianshipApiResponse> {
+        return retrieveApiResource {
+            apiService.completeOwnerGuardianship(
+                participantId.value,
+                completeOwnerGuardianshipApiRequest
+            )
+        }
+    }
+
     private suspend fun recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>): PrivateKey {
         val ownerDeviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
 
@@ -594,7 +614,10 @@ class OwnerRepositoryImpl(
                     } else {
                         val encryptedKey = ownerApproverKeyResource.data!!
                         val base58EncodedPrivateKey =
-                            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+                            encryptedKey.decryptWithEntropy(
+                                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                                entropy = it.ownerEntropy!!
+                            )
 
                         EncryptionKey.generateFromPrivateKeyRaw(base58EncodedPrivateKey.bigInt())
                     }

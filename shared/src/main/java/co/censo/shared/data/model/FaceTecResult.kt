@@ -17,8 +17,10 @@ data class SubmitBiometryVerificationApiResponse(
 data class FacetecBiometry(
     val faceScan: String,
     val auditTrailImage: String,
-    val lowQualityAuditTrailImage: String
+    val lowQualityAuditTrailImage: String,
+    val verificationId: BiometryVerificationId? = null
 )
+
 
 @Serializable
 @JvmInline

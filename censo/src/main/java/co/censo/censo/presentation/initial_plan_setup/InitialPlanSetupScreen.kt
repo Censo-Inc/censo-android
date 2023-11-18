@@ -101,7 +101,7 @@ fun InitialPlanSetupScreen(
                     val errorText =
                         if (state.saveKeyToCloudResource is Resource.Error) {
                             "Error occurred trying to save your approver key"
-                        } else if (state.createPolicyParams is Resource.Error) {
+                        } else if (state.createPolicyParamsResponse is Resource.Error) {
                             "Error occurred trying to create policy params"
                         } else if (state.createPolicyResponse is Resource.Error) {
                             "Error occurred trying to create policy"
@@ -113,6 +113,7 @@ fun InitialPlanSetupScreen(
                         errorMessage = errorText,
                         dismissAction = null,
                         retryAction = {
+                            viewModel.resetError()
                             viewModel.determineUIStatus()
                         }
                     )
@@ -149,15 +150,15 @@ fun InitialPlanSetupScreen(
             }
 
             if (state.cloudStorageAction.triggerAction) {
-                val privateKey = viewModel.getEncryptedKeyForUpload()
+                val privateKey = state.keyData?.encryptedPrivateKey
 
                 CloudStorageHandler(
                     actionToPerform = state.cloudStorageAction.action,
                     participantId = state.participantId,
                     encryptedPrivateKey = privateKey,
-                    onActionSuccess = { byteArray ->
+                    onActionSuccess = { _ ->
                         projectLog(message = "Cloud Storage action success")
-                        viewModel.onKeySaved(byteArray)
+                        viewModel.onKeySaved()
                     },
                     onActionFailed = {
                         projectLog(message = "Cloud Storage action failed")

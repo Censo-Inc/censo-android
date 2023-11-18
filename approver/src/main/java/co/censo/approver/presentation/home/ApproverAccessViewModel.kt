@@ -13,7 +13,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.cryptography.decryptFromByteArray
+import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.sha256digest
@@ -180,17 +180,33 @@ class ApproverAccessViewModel @Inject constructor(
             if (totpIsCorrect) {
                 state = state.copy(approveRecoveryResource = Resource.Loading())
 
-                if (state.guardianEncryptionKey == null) {
+                val guardianKey = state.guardianEncryptionKey
+                val entropy = recoveryConfirmation.guardianEntropy
+
+                if (guardianKey == null) {
                     state = state.copy(approveRecoveryResource = Resource.Uninitialized)
                     loadPrivateKeyFromCloud(recoveryPhase = recoveryConfirmation)
                     return@launch
                 }
 
+                if (entropy == null) {
+                    state =
+                        state.copy(approveRecoveryResource = Resource.Error(
+                            exception = Exception("Unable to approve this access request, missing information"))
+                        )
+                    return@launch
+                }
+
+                val key = guardianKey.key.decryptWithEntropy(
+                    deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                    entropy = entropy
+                )
+
                 val ownerPublicKey = ExternalEncryptionKey.generateFromPublicKeyBase58(recoveryConfirmation.ownerPublicKey)
                 val response = guardianRepository.approveRecovery(
                     participantId,
                     encryptedShard = ownerPublicKey.encrypt(
-                        state.guardianEncryptionKey!!.decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
+                        key.toEncryptionKey().decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
                     ).base64Encoded()
                 )
 
@@ -353,21 +369,16 @@ class ApproverAccessViewModel @Inject constructor(
             loadKeyFromCloudResource = Resource.Uninitialized
         )
 
-        //Decrypt the byteArray
-
-        val privateKey =
-            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
-
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {
-                keyDownloadSuccess(privateEncryptionKey = privateKey.toEncryptionKey())
+                keyDownloadSuccess(privateEncryptionKey = encryptedKey)
             }
             else -> {}
         }
     }
 
-    private fun keyDownloadSuccess(privateEncryptionKey: EncryptionKey) {
-        state = state.copy(guardianEncryptionKey = privateEncryptionKey)
+    private fun keyDownloadSuccess(privateEncryptionKey: ByteArray) {
+        state = state.copy(guardianEncryptionKey = EncryptedKey(privateEncryptionKey))
 
         checkRecoveryConfirmationPhase()
     }

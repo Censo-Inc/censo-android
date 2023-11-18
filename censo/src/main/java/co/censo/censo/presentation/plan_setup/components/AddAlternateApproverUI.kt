@@ -64,9 +64,6 @@ fun AddAlternateApproverUI(
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-
-
-
         val spannedMessageText = buildSpannedText(
             preceding = stringResource(id = R.string.add_second_approver_message_first_span),
             remaining = stringResource(id = R.string.add_second_approver_message_second_span),
@@ -118,7 +115,6 @@ fun AddAlternateApproverUI(
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
     }
 }
 

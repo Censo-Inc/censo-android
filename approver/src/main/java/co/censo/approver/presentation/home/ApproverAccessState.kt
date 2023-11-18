@@ -26,7 +26,7 @@ data class ApproverAccessState(
 
     // Approver data
     val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
-    val guardianEncryptionKey: EncryptionKey? = null,
+    val guardianEncryptionKey: EncryptedKey? = null,
 
     // recovery
     val recoveryTotp: RecoveryTotpState? = null,
@@ -70,4 +70,21 @@ data class ApproverAccessState(
         val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,
         val encryptedSecret: Base64EncodedData
     )
+}
+
+data class EncryptedKey(val key: ByteArray) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as EncryptedKey
+
+        if (!key.contentEquals(other.key)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return key.contentHashCode()
+    }
 }

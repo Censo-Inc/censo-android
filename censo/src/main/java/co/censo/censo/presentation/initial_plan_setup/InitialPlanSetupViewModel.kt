@@ -2,19 +2,14 @@ package co.censo.censo.presentation.initial_plan_setup
 
 import Base58EncodedGuardianPublicKey
 import InvitationId
-import Base58EncodedPrivateKey
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.SymmetricEncryption
-import co.censo.shared.data.cryptography.decryptFromByteArray
-import co.censo.shared.data.cryptography.encryptToByteArray
-import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.cryptography.sha256digest
-import co.censo.shared.data.cryptography.toByteArrayNoSign
+import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
@@ -26,9 +21,9 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,8 +43,8 @@ class InitialPlanSetupViewModel @Inject constructor(
 
     private fun moveToNextAction() {
         when {
-            state.initialPlanData.approverEncryptionKey == null -> createApproverKey()
-            state.initialPlanData.createPolicyParams == null -> createPolicyParams()
+            state.keyData?.encryptedPrivateKey == null -> createApproverKey()
+            state.createPolicyParams == null -> createPolicyParams()
             else -> startFacetec()
         }
     }
@@ -57,8 +52,8 @@ class InitialPlanSetupViewModel @Inject constructor(
 
     fun determineUIStatus() {
         val uiStatus = when {
-            state.initialPlanData.approverEncryptionKey == null -> InitialPlanSetupStep.CreateApproverKey
-            state.initialPlanData.createPolicyParams == null -> InitialPlanSetupStep.CreatePolicyParams
+            state.keyData?.encryptedPrivateKey  == null -> InitialPlanSetupStep.CreateApproverKey
+            state.createPolicyParams == null -> InitialPlanSetupStep.CreatePolicyParams
             else -> InitialPlanSetupStep.Facetec
         }
 
@@ -71,11 +66,38 @@ class InitialPlanSetupViewModel @Inject constructor(
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
         }
+
+        val entropy = retrieveEntropy()
+
+        if (entropy == null) {
+            state = state.copy(
+                saveKeyToCloudResource = Resource.Error(exception = Exception("Missing entropy when trying to save key"))
+            )
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(saveKeyToCloudResource = Resource.Loading())
             try {
                 val approverEncryptionKey = keyRepository.createGuardianKey()
-                savePrivateKeyToCloud(approverEncryptionKey)
+
+                val idToken = keyRepository.retrieveSavedDeviceId()
+
+                val encryptedKey = approverEncryptionKey.encryptWithEntropy(
+                    deviceKeyId = idToken,
+                    entropy = entropy
+                )
+
+                val publicKey = approverEncryptionKey.publicExternalRepresentation()
+
+                state = state.copy(
+                    keyData = InitialKeyData(
+                        encryptedPrivateKey = encryptedKey,
+                        publicKey = publicKey
+                    )
+                )
+
+                savePrivateKeyToCloud()
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.CreateApproverKey)
                 state = state.copy(
@@ -85,9 +107,8 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun savePrivateKeyToCloud(approverEncryptionKey: EncryptionKey) {
+    private fun savePrivateKeyToCloud() {
         state = state.copy(
-            initialPlanData = state.initialPlanData.copy(approverEncryptionKey = approverEncryptionKey),
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true,
                 action = CloudStorageActions.UPLOAD,
@@ -96,21 +117,8 @@ class InitialPlanSetupViewModel @Inject constructor(
         )
     }
 
-    fun getEncryptedKeyForUpload() : ByteArray? {
-        val encryptionKey = state.initialPlanData.approverEncryptionKey ?: return null
-        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
-    }
-
-    fun onKeySaved(approverEncryptedKey: ByteArray) {
-
-        //Decrypt the byteArray
-        val privateKey =
-            approverEncryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
-
+    fun onKeySaved() {
         state = state.copy(
-            initialPlanData = state.initialPlanData.copy(
-                approverEncryptionKey = privateKey.toEncryptionKey()
-            ),
             saveKeyToCloudResource = Resource.Uninitialized,
             cloudStorageAction = CloudStorageActionData()
         )
@@ -121,23 +129,34 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(),
             saveKeyToCloudResource = Resource.Error(exception = exception),
-            initialPlanData = state.initialPlanData.copy(approverEncryptionKey = null),
         )
     }
 
     private fun createPolicyParams() {
-        if (state.createPolicyParams is Resource.Loading) {
+        if (state.createPolicyParamsResponse is Resource.Loading) {
             return
         }
+
+        val publicKey = state.keyData?.publicKey
+
+        if (publicKey == null) {
+            state = state.copy(
+                createPolicyParamsResponse = Resource.Error(
+                    exception = Exception("Missing key information when creating policy params")
+                ),
+            )
+            return
+        }
+
         viewModelScope.launch {
-            state = state.copy(createPolicyParams = Resource.Loading())
+            state = state.copy(createPolicyParamsResponse = Resource.Loading())
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
                 Guardian.ProspectGuardian(
                     invitationId = InvitationId(""),
                     label = "Me",
                     participantId = state.participantId,
                     status = GuardianStatus.ImplicitlyOwner(
-                        Base58EncodedGuardianPublicKey(state.initialPlanData.approverEncryptionKey!!.publicExternalRepresentation().value),
+                        Base58EncodedGuardianPublicKey(publicKey.value),
                         Clock.System.now()
                     )
                 )
@@ -145,19 +164,20 @@ class InitialPlanSetupViewModel @Inject constructor(
 
             if (createPolicyParams is Resource.Success) {
                 state = state.copy(
-                    initialPlanData = state.initialPlanData.copy(
-                        createPolicyParams = createPolicyParams.data
-                    ),
-                    createPolicyParams = createPolicyParams,
+                    createPolicyParams = createPolicyParams.data,
+                    createPolicyParamsResponse = createPolicyParams,
                 )
                 determineUIStatus()
             } else {
                 state = state.copy(
-                    createPolicyParams = createPolicyParams,
+                    createPolicyParamsResponse = createPolicyParams,
                 )
             }
         }
     }
+
+    private fun retrieveEntropy(): Base64EncodedData? =
+        (ownerStateFlow.value.data as? OwnerState.Initial)?.entropy
 
     private fun startFacetec() {
         state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
@@ -165,6 +185,14 @@ class InitialPlanSetupViewModel @Inject constructor(
 
     fun reset() {
         state = InitialPlanSetupScreenState()
+    }
+
+    fun resetError() {
+        state = state.copy(
+            createPolicyParamsResponse = Resource.Uninitialized,
+            createPolicyResponse = Resource.Uninitialized,
+            saveKeyToCloudResource = Resource.Uninitialized
+        )
     }
 
     suspend fun onPolicyCreationFaceScanReady(
@@ -177,7 +205,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
         return viewModelScope.async {
             val createPolicyResponse = ownerRepository.createPolicy(
-                state.initialPlanData.createPolicyParams!!,
+                state.createPolicyParams!!,
                 verificationId,
                 facetecData
             )

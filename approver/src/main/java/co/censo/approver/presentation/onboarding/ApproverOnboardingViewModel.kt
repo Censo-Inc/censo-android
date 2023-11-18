@@ -10,10 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.cryptography.decryptFromByteArray
-import co.censo.shared.data.cryptography.encryptToByteArray
+import co.censo.shared.data.cryptography.decryptWithEntropy
+import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianPhase
 import co.censo.shared.data.model.GuardianState
 import co.censo.shared.data.repository.GuardianRepository
@@ -209,9 +208,16 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
+    private fun assignEntropy(guardianState: GuardianState?) {
+        (guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy?.let {
+            state = state.copy(entropy = it)
+        }
+    }
+
     private fun determineApproverUIState(guardianState: GuardianState?) {
         assignGuardianState(guardianState = guardianState)
         assignParticipantId(guardianState = guardianState)
+        assignEntropy(guardianState = guardianState)
 
         val guardianPhase = guardianState?.phase
 
@@ -275,6 +281,7 @@ class ApproverOnboardingViewModel @Inject constructor(
                     onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
                 )
                 assignParticipantId(acceptResource.data?.guardianState)
+                assignEntropy(acceptResource.data?.guardianState)
                 createKeyAndTriggerCloudSave()
             }
         }
@@ -285,13 +292,14 @@ class ApproverOnboardingViewModel @Inject constructor(
         setLoadingUIState()
 
         val guardianEncryptionKey = keyRepository.createGuardianKey()
+
         state = state.copy(
+            guardianEncryptionKey = guardianEncryptionKey,
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true,
                 action = CloudStorageActions.UPLOAD,
                 reason = null
             ),
-            guardianEncryptionKey = guardianEncryptionKey
         )
     }
 
@@ -381,7 +389,12 @@ class ApproverOnboardingViewModel @Inject constructor(
     //region Cloud Storage
     fun getEncryptedKeyForUpload(): ByteArray? {
         val encryptionKey = state.guardianEncryptionKey ?: return null
-        return encryptionKey.encryptToByteArray(keyRepository.retrieveSavedDeviceId())
+        val entropy = state.entropy ?: return null
+
+        return encryptionKey.encryptWithEntropy(
+            deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+            entropy = entropy
+        )
     }
 
     fun handleCloudStorageActionSuccess(
@@ -390,9 +403,19 @@ class ApproverOnboardingViewModel @Inject constructor(
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
+        val entropy = (state.guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy
+
+        if (entropy == null) {
+            retrieveApproverState(false)
+            return
+        }
+
         //Decrypt the byteArray
         val privateKey =
-            encryptedKey.decryptFromByteArray(keyRepository.retrieveSavedDeviceId())
+            encryptedKey.decryptWithEntropy(
+                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                entropy = entropy
+            )
 
         when (cloudStorageAction) {
             CloudStorageActions.UPLOAD -> {
