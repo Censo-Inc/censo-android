@@ -9,12 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -22,16 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.approver.R
-import co.censo.approver.data.ApproverEntranceUIState
-import co.censo.approver.presentation.GuardianColors
 import co.censo.approver.presentation.entrance.components.ApproverLanding
 import co.censo.approver.presentation.entrance.components.ApproverLoginUI
 import co.censo.approver.presentation.entrance.components.LoggedInPasteLinkUI
@@ -46,7 +35,6 @@ import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.popUpToTop
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -93,7 +81,6 @@ fun ApproverEntranceScreen(
                 navController.navigate(destination) {
                     popUpToTop()
                 }
-
             }
             viewModel.resetNavigationResource()
         }

@@ -12,16 +12,3 @@ sealed class ApproverAccessUIState : ApproverUIState {
 
     object Complete : ApproverAccessUIState()
 }
-
-sealed class ApproverEntranceUIState : ApproverUIState {
-
-    object Initial : ApproverEntranceUIState()
-
-    object Landing : ApproverEntranceUIState()
-
-    object LoggedOutPasteLink : ApproverEntranceUIState()
-
-    object SignIn : ApproverEntranceUIState()
-
-    class LoggedInPasteLink(val isActiveApprover: Boolean) : ApproverEntranceUIState()
-}

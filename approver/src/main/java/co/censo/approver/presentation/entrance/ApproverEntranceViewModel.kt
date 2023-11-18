@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.approver.data.ApproverEntranceUIState
 import co.censo.approver.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
@@ -15,7 +14,6 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -39,8 +37,7 @@ class ApproverEntranceViewModel @Inject constructor(
     var state by mutableStateOf(ApproverEntranceState())
         private set
 
-    fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
-
+    //region Lifecycle Methods
     fun onStart(invitationId: String?, recoveryParticipantId: String?) {
         if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
@@ -51,7 +48,9 @@ class ApproverEntranceViewModel @Inject constructor(
 
         determineLoginState()
     }
+    //endregion
 
+    //region User Actions
     fun onLandingContinue() {
         if (state.loggedIn) {
             loggedInRouting()
@@ -59,6 +58,50 @@ class ApproverEntranceViewModel @Inject constructor(
             loggedOutRouting()
         }
     }
+
+    fun handleLoggedOutLink(clipboardContent: String?) {
+        handleLink(clipboardContent) {
+            loggedOutRouting()
+        }
+    }
+
+    fun handleLoggedInLink(clipboardContent: String?) {
+        handleLink(clipboardContent) {
+            loggedInRouting()
+        }
+    }
+
+    fun setShowDeleteUserWarning() {
+        state = state.copy(showDeleteUserWarningDialog = true)
+    }
+
+    fun setShowDeleteUserConfirmDialog() {
+        resetShowDeleteUserWarning()
+        state = state.copy(showDeleteUserConfirmDialog = true)
+    }
+
+    fun deleteUser() {
+        state = state.copy(deleteUserResource = Resource.Loading())
+        resetShowDeleteUserConfirmDialog()
+
+        viewModelScope.launch {
+            //When deleting the approver user, we don't need to pass in the participantId
+            val deleteUserResource = ownerRepository.deleteUser(null, true)
+
+            state = state.copy(
+                deleteUserResource = deleteUserResource
+            )
+
+            if (deleteUserResource is Resource.Success) {
+                state =
+                    state.copy(navigationResource = Resource.Success(Screen.ApproverEntranceRoute.route))
+            }
+        }
+    }
+    //endregion
+
+    //region Internal Methods
+    fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
     private fun setLandingState(loggedIn: Boolean) {
         state = state.copy(uiState = ApproverEntranceUIState.Landing, loggedIn = loggedIn)
@@ -228,38 +271,6 @@ class ApproverEntranceViewModel @Inject constructor(
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
-    fun retrySignIn() {
-        startGoogleSignInFlow()
-    }
-
-    fun resetTriggerGoogleSignIn() {
-        state = state.copy(triggerGoogleSignIn = Resource.Uninitialized)
-    }
-
-    fun resetNavigationResource() {
-        state = state.copy(navigationResource = Resource.Uninitialized)
-    }
-
-    fun resetSignInUserResource() {
-        state = state.copy(signInUserResource = Resource.Uninitialized)
-    }
-
-    private fun resetForceUserToGrantCloudStorageAccess() {
-        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
-    }
-
-    fun handleLoggedOutLink(clipboardContent: String?) {
-        handleLink(clipboardContent) {
-            loggedOutRouting()
-        }
-    }
-
-    fun handleLoggedInLink(clipboardContent: String?) {
-        handleLink(clipboardContent) {
-            loggedInRouting()
-        }
-    }
-
     private fun handleLink(clipboardContent: String?, routing: () -> Unit) {
         if (clipboardContent == null) {
             state = state.copy(linkError = true)
@@ -301,17 +312,26 @@ class ApproverEntranceViewModel @Inject constructor(
     private fun triggerNavigation(routingDestination: RoutingDestination) {
         state = when (routingDestination) {
             RoutingDestination.ACCESS ->
-                state.copy(navigationResource = Resource.Success(Screen.ApproverAccessScreen.route))
+                state.copy(
+                    navigationResource = Resource.Success(Screen.ApproverAccessScreen.route),
+                    uiState = ApproverEntranceUIState.Initial
+                )
 
             RoutingDestination.ONBOARDING ->
-                state.copy(navigationResource = Resource.Success(Screen.ApproverOnboardingScreen.route))
+                state.copy(
+                    navigationResource = Resource.Success(Screen.ApproverOnboardingScreen.route),
+                    uiState = ApproverEntranceUIState.Initial
+                )
         }
     }
+    //endregion
 
+    //region CensoLink + parseLink Helper
     data class CensoLink(
         val host: String,
         val identifier: String
     )
+
     private fun parseLink(link: String): CensoLink {
         val parts = link.replace(Regex("[\\r\\n]+"), "").trim().split("//")
         if (parts.size != 2 || !parts[0].startsWith("censo")) {
@@ -323,48 +343,43 @@ class ApproverEntranceViewModel @Inject constructor(
         }
         return CensoLink(routeAndIdentifier[0], routeAndIdentifier[1])
     }
+    //endregion
+
+    //region Reset methods
+    private fun resetForceUserToGrantCloudStorageAccess() {
+        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
+    }
+
+    fun retrySignIn() {
+        startGoogleSignInFlow()
+    }
+
+    fun resetTriggerGoogleSignIn() {
+        state = state.copy(triggerGoogleSignIn = Resource.Uninitialized)
+    }
+
+    fun resetNavigationResource() {
+        state = state.copy(navigationResource = Resource.Uninitialized)
+    }
+
+    fun resetSignInUserResource() {
+        state = state.copy(signInUserResource = Resource.Uninitialized)
+    }
 
     fun clearError() {
         state = state.copy(linkError = false)
-    }
-
-    fun setShowDeleteUserWarning() {
-        state = state.copy(showDeleteUserWarningDialog = true)
     }
 
     fun resetShowDeleteUserWarning() {
         state = state.copy(showDeleteUserWarningDialog = false)
     }
 
-    fun setShowDeleteUserConfirmDialog() {
-        resetShowDeleteUserWarning()
-        state = state.copy(showDeleteUserConfirmDialog = true)
-    }
-
     fun resetShowDeleteUserConfirmDialog() {
         state = state.copy(showDeleteUserConfirmDialog = false)
-    }
-
-    fun deleteUser() {
-        state = state.copy(deleteUserResource = Resource.Loading())
-        resetShowDeleteUserConfirmDialog()
-
-        viewModelScope.launch {
-            //When deleting the approver user, we don't need to pass in the participantId
-            val deleteUserResource = ownerRepository.deleteUser(null, true)
-
-            state = state.copy(
-                deleteUserResource = deleteUserResource
-            )
-
-            if (deleteUserResource is Resource.Success) {
-                state =
-                    state.copy(navigationResource = Resource.Success(Screen.ApproverEntranceRoute.route))
-            }
-        }
     }
 
     fun resetDeleteUserResource() {
         state = state.copy(deleteUserResource = Resource.Uninitialized)
     }
+    //endregion
 }

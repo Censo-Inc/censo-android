@@ -1,6 +1,5 @@
 package co.censo.approver.presentation.entrance
 
-import co.censo.approver.data.ApproverEntranceUIState
 import co.censo.shared.data.Resource
 import okhttp3.ResponseBody
 
@@ -31,4 +30,17 @@ data class ForceUserToGrantCloudStorageAccess(
 
 enum class RoutingDestination {
     ONBOARDING, ACCESS
+}
+
+sealed class ApproverEntranceUIState {
+
+    object Initial : ApproverEntranceUIState()
+
+    object Landing : ApproverEntranceUIState()
+
+    object LoggedOutPasteLink : ApproverEntranceUIState()
+
+    object SignIn : ApproverEntranceUIState()
+
+    class LoggedInPasteLink(val isActiveApprover: Boolean) : ApproverEntranceUIState()
 }
