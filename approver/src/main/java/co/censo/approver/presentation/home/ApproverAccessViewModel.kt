@@ -85,6 +85,7 @@ class ApproverAccessViewModel @Inject constructor(
 
     private fun checkApproverHasParticipantData(guardianStates: List<GuardianState>) {
         val participantId = guardianRepository.retrieveParticipantId()
+        state = state.copy(approvalId = guardianRepository.retrieveApprovalId())
 
         //If participantId is empty go back to the paste link
         if (participantId.isEmpty()) {
@@ -117,6 +118,7 @@ class ApproverAccessViewModel @Inject constructor(
             is GuardianPhase.Complete -> {
                 when (state.approveRecoveryResource) {
                     is Resource.Success -> {
+                        guardianRepository.clearApprovalId()
                         guardianRepository.clearParticipantId()
                         state.copy(approverAccessUIState = ApproverAccessUIState.Complete)
                     }
@@ -224,6 +226,7 @@ class ApproverAccessViewModel @Inject constructor(
                 state = state.copy(approveRecoveryResource = response, ownerEnteredWrongCode = false)
 
                 if (response is Resource.Success) {
+                    guardianRepository.clearApprovalId()
                     guardianRepository.clearParticipantId()
                     determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
                 }
@@ -239,6 +242,8 @@ class ApproverAccessViewModel @Inject constructor(
                     }
                 state = state.copy(rejectRecoveryResource = response, ownerEnteredWrongCode = true)
                 if (response is Resource.Success) {
+                    guardianRepository.clearApprovalId()
+                    guardianRepository.clearParticipantId()
                     determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
                 }
             }
@@ -360,8 +365,10 @@ class ApproverAccessViewModel @Inject constructor(
 
     private fun cancelRecovery() {
         guardianRepository.clearParticipantId()
+        guardianRepository.clearApprovalId()
 
         state = state.copy(
+            approvalId = "",
             participantId = "",
             navToApproverRouting = true
         )

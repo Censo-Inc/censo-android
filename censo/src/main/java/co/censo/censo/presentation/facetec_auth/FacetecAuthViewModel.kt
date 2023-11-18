@@ -13,7 +13,6 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.util.projectLog
 import co.censo.censo.R
 import co.censo.censo.data.repository.FacetecRepository
 import com.facetec.sdk.FaceTecCancelButtonCustomization
@@ -80,7 +79,6 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     fun failedToInitializeSDK() {
-        projectLog(message = "Failed to setup Facetec SDK")
         state = state.copy(initFacetecData = Resource.Error())
     }
 
@@ -121,7 +119,6 @@ class FacetecAuthViewModel @Inject constructor(
             return
         }
 
-        projectLog(message = "Successfully received facetec result...")
         state = state.copy(submitResultResponse = Resource.Loading())
 
         viewModelScope.launch {
@@ -135,8 +132,6 @@ class FacetecAuthViewModel @Inject constructor(
                 )
 
             if (submitResultResponse is Resource.Success) {
-                projectLog(message = "Success sending facetec data to backend")
-
                 submitResultResponse.data?.value?.let {
                     scanResultCallback?.proceedToNextStep(it)
                 } ?: scanResultCallback?.succeed()
@@ -149,7 +144,6 @@ class FacetecAuthViewModel @Inject constructor(
                     state.copy(submitResultResponse = Resource.Uninitialized)
                 } ?: run {
                     scanResultCallback?.cancel()
-                    projectLog(message = "Failed to send data to backend")
                     state.copy(submitResultResponse = submitResultResponse)
                 }
             }

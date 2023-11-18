@@ -24,6 +24,7 @@ object CrashReportingUtil {
     const val JWTToken = "JWTToken"
     const val EncryptShard = "EncryptShard"
     const val DeleteUser = "DeleteUser"
+    const val PushNotification = "PushNotification"
     const val RemovePushNotification = "RemovePushNotification"
     const val RetrieveFileContent = "RetrieveFileContent"
     const val DeleteFile = "DeleteFile"

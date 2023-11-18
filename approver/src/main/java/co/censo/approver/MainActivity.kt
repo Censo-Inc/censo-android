@@ -18,12 +18,15 @@ import co.censo.approver.presentation.Screen.Companion.DL_INVITATION_ID_KEY
 import co.censo.approver.presentation.Screen.Companion.DL_PARTICIPANT_ID_KEY
 import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_INVITATION
 import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_ACCESS
+import co.censo.approver.presentation.Screen.Companion.DL_APPROVAL_ID_KEY
 import co.censo.approver.presentation.entrance.ApproverEntranceScreen
+import co.censo.approver.presentation.entrance.ApproverEntranceViewModel
 import co.censo.approver.presentation.home.ApproverAccessScreen
 import co.censo.approver.presentation.onboarding.ApproverOnboardingScreen
 import co.censo.approver.ui.theme.GuardianTheme
 import co.censo.shared.DeepLinkURI.APPROVER_INVITE_URI
 import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_URI
+import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_V2_URI
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -94,6 +97,22 @@ class MainActivity : FragmentActivity() {
                 ApproverEntranceScreen(
                     navController = navController,
                     recoveryParticipantId = participantId
+                )
+            }
+            composable(
+                "$APPROVER_DEEPLINK_ACCESS?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}?$DL_APPROVAL_ID_KEY={$DL_APPROVAL_ID_KEY}",
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "$APPROVER_ACCESS_V2_URI{$DL_PARTICIPANT_ID_KEY}/{$DL_APPROVAL_ID_KEY}"
+                    }
+                )
+            ) { backStackEntry ->
+                val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
+                val approvalId = backStackEntry.arguments?.getString(DL_APPROVAL_ID_KEY) ?: ""
+                ApproverEntranceScreen(
+                    navController = navController,
+                    recoveryParticipantId = participantId,
+                    approvalId = approvalId,
                 )
             }
         }

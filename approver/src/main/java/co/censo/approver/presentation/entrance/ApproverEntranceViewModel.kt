@@ -37,13 +37,18 @@ class ApproverEntranceViewModel @Inject constructor(
     var state by mutableStateOf(ApproverEntranceState())
         private set
 
+
     //region Lifecycle Methods
-    fun onStart(invitationId: String?, recoveryParticipantId: String?) {
+    fun onStart(invitationId: String?, recoveryParticipantId: String?, approvalId: String?) {
         if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
         }
         if (recoveryParticipantId != null) {
             guardianRepository.saveParticipantId(recoveryParticipantId)
+        }
+
+        if (approvalId != null) {
+            guardianRepository.saveApprovalId(approvalId)
         }
 
         determineLoginState()
@@ -283,13 +288,19 @@ class ApproverEntranceViewModel @Inject constructor(
                 when (censoLink.host) {
                     "invite" -> {
                         guardianRepository.clearParticipantId()
-                        guardianRepository.saveInvitationId(censoLink.identifier)
+                        guardianRepository.saveInvitationId(censoLink.identifiers[0])
                         routing()
                     }
 
                     "access" -> {
-                        guardianRepository.clearInvitationId()
-                        guardianRepository.saveParticipantId(censoLink.identifier)
+                        if (censoLink.identifiers.size == 1) {
+                            guardianRepository.clearInvitationId()
+                            guardianRepository.saveParticipantId(censoLink.identifiers[0])
+                        } else {
+                            guardianRepository.clearInvitationId()
+                            guardianRepository.saveParticipantId(censoLink.identifiers[0])
+                            guardianRepository.saveApprovalId(censoLink.identifiers[1])
+                        }
                         routing()
                     }
 
@@ -329,7 +340,7 @@ class ApproverEntranceViewModel @Inject constructor(
     //region CensoLink + parseLink Helper
     data class CensoLink(
         val host: String,
-        val identifier: String
+        val identifiers: List<String>
     )
 
     private fun parseLink(link: String): CensoLink {
@@ -338,10 +349,15 @@ class ApproverEntranceViewModel @Inject constructor(
             throw Exception("invalid link")
         }
         val routeAndIdentifier = parts[1].split("/")
+
+        if (routeAndIdentifier.size == 4 && routeAndIdentifier[1] == "v2") {
+            return CensoLink(routeAndIdentifier[0], listOf(routeAndIdentifier[2], routeAndIdentifier[3]))
+        }
+
         if (routeAndIdentifier.size != 2 && !setOf("access", "invite").contains(routeAndIdentifier[0])) {
             throw Exception("invalid link")
         }
-        return CensoLink(routeAndIdentifier[0], routeAndIdentifier[1])
+        return CensoLink(routeAndIdentifier[0], listOf(routeAndIdentifier[1]))
     }
     //endregion
 

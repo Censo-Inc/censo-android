@@ -1,5 +1,6 @@
 package co.censo.shared.data.model
 
+import ApprovalId
 import Base58EncodedGuardianPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
@@ -193,10 +194,13 @@ enum class RecoveryStatus {
 
 @Serializable
 data class Approval(
+    val approvalId: ApprovalId,
     val participantId: ParticipantId,
     val status: ApprovalStatus,
 ) {
     fun deepLink(): String ="${DeepLinkURI.APPROVER_ACCESS_URI}${participantId.value}"
+
+    fun v2Deeplink(): String = "${DeepLinkURI.APPROVER_ACCESS_V2_URI}${participantId.value}/${approvalId.value}"
 }
 
 @Serializable

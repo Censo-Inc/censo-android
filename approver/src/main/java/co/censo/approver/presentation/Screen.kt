@@ -1,7 +1,5 @@
 package co.censo.approver.presentation
 
-import co.censo.shared.DeepLinkURI
-
 sealed class Screen(val route: String) {
     object ApproverEntranceRoute : Screen("approver_entrance_screen")
     object ApproverOnboardingScreen : Screen("approver_onboarding_screen")
@@ -12,7 +10,9 @@ sealed class Screen(val route: String) {
         const val DL_INVITATION_ID_KEY = "invitation_id_key"
 
         const val APPROVER_DEEPLINK_ACCESS = "approverDeepLinkAccess"
+        const val APPROVER_V2_DEEPLINK_ACCESS = "approverV2DeepLinkAccess"
         const val DL_PARTICIPANT_ID_KEY = "participant_id_key"
+        const val DL_APPROVAL_ID_KEY = "approval_id_key"
 
     }
 }

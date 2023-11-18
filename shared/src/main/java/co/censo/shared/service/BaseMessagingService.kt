@@ -5,12 +5,13 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl.Companion.DEVICE_TYPE
-import co.censo.shared.util.projectLog
 import co.censo.shared.service.BaseMessagingService.Companion.BODY_KEY
 import co.censo.shared.service.BaseMessagingService.Companion.DEFAULT_BODY
 import co.censo.shared.service.BaseMessagingService.Companion.DEFAULT_TITLE
 import co.censo.shared.service.BaseMessagingService.Companion.PUSH_TYPE_KEY
 import co.censo.shared.service.BaseMessagingService.Companion.TITLE_KEY
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.sendError
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +70,7 @@ abstract class BaseMessagingService : FirebaseMessagingService() {
                 val pushResponse = pushRepository.addPushNotification(pushBody)
 
                 if (pushResponse is Resource.Error) {
-                    projectLog(message = "Push notification registration failed")
+                    pushResponse.exception?.sendError(CrashReportingUtil.PushNotification)
                 }
             }
         }

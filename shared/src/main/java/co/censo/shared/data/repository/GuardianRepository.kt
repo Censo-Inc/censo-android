@@ -53,6 +53,9 @@ interface GuardianRepository {
     fun saveParticipantId(participantId: String)
     fun retrieveParticipantId(): String
     fun clearParticipantId()
+    fun saveApprovalId(approvalId: String)
+    fun retrieveApprovalId(): String
+    fun clearApprovalId()
 
     suspend fun storeRecoveryTotpSecret(
         participantId: String,
@@ -163,6 +166,11 @@ class GuardianRepositoryImpl(
         secureStorage.retrieveGuardianParticipantId()
 
     override fun clearParticipantId() = secureStorage.clearGuardianParticipantId()
+    override fun saveApprovalId(approvalId: String) {
+        secureStorage.saveApprovalId(approvalId)
+    }
+    override fun retrieveApprovalId() = secureStorage.retrieveApprovalId()
+    override fun clearApprovalId() = secureStorage.clearApprovalId()
 
     override suspend fun storeRecoveryTotpSecret(
         participantId: String,

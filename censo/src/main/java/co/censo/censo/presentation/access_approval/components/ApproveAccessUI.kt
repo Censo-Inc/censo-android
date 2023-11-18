@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.access_approval.components
 
+import ApprovalId
 import MessageText
 import TitleText
 import android.content.Intent
@@ -49,6 +50,7 @@ fun ApproveAccessUI(
 ) {
     val linkTag = "link"
 
+    //Todo: switch to v2 deeplink once both apps are ready
     val deeplink = approval.deepLink()
     val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
 
@@ -190,7 +192,8 @@ fun ApproveAccessInitialPreview() {
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Initial
+            status = ApprovalStatus.Initial,
+            approvalId = ApprovalId("")
         ),
         verificationCode = "",
         onVerificationCodeChanged = {},
@@ -205,7 +208,8 @@ fun ApproveAccessWaitingForVerificationPreview() {
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.WaitingForVerification
+            status = ApprovalStatus.WaitingForVerification,
+            approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
@@ -220,7 +224,8 @@ fun ApproveAccessWaitingForApprovalPreview() {
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.WaitingForApproval
+            status = ApprovalStatus.WaitingForApproval,
+            approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
@@ -235,7 +240,8 @@ fun ApproveAccessRejectedPreview() {
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Rejected
+            status = ApprovalStatus.Rejected,
+            approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
@@ -250,7 +256,8 @@ fun ApproveAccessApprovedPreview() {
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Approved
+            status = ApprovalStatus.Approved,
+            approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
         onVerificationCodeChanged = {},
