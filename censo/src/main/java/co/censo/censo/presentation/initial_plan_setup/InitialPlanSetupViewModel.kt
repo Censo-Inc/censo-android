@@ -69,6 +69,13 @@ class InitialPlanSetupViewModel @Inject constructor(
 
         val entropy = retrieveEntropy()
 
+        if (entropy == null) {
+            state = state.copy(
+                saveKeyToCloudResource = Resource.Error(exception = Exception("Missing entropy when trying to save key"))
+            )
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(saveKeyToCloudResource = Resource.Loading())
             try {
@@ -78,7 +85,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
                 val encryptedKey = approverEncryptionKey.encryptWithEntropy(
                     deviceKeyId = idToken,
-                    entropy = entropy!!
+                    entropy = entropy
                 )
 
                 val publicKey = approverEncryptionKey.publicExternalRepresentation()
@@ -129,6 +136,18 @@ class InitialPlanSetupViewModel @Inject constructor(
         if (state.createPolicyParamsResponse is Resource.Loading) {
             return
         }
+
+        val publicKey = state.keyData?.publicKey
+
+        if (publicKey == null) {
+            state = state.copy(
+                createPolicyParamsResponse = Resource.Error(
+                    exception = Exception("Missing key information when creating policy params")
+                ),
+            )
+            return
+        }
+
         viewModelScope.launch {
             state = state.copy(createPolicyParamsResponse = Resource.Loading())
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
@@ -137,7 +156,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                     label = "Me",
                     participantId = state.participantId,
                     status = GuardianStatus.ImplicitlyOwner(
-                        Base58EncodedGuardianPublicKey(state.keyData!!.publicKey.value),
+                        Base58EncodedGuardianPublicKey(publicKey.value),
                         Clock.System.now()
                     )
                 )

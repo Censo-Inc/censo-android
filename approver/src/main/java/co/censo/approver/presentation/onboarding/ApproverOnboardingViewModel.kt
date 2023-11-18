@@ -293,9 +293,8 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         val guardianEncryptionKey = keyRepository.createGuardianKey()
 
-        state = state.copy(guardianEncryptionKey = guardianEncryptionKey)
-
         state = state.copy(
+            guardianEncryptionKey = guardianEncryptionKey,
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true,
                 action = CloudStorageActions.UPLOAD,
@@ -405,7 +404,6 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
         val entropy = (state.guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy
-
 
         if (entropy == null) {
             retrieveApproverState(false)

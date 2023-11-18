@@ -111,7 +111,7 @@ fun PlanSetupScreen(
             when {
                 state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
 
-
+                //TODO: These retries and errors need to get tested and improved.
                 state.asyncError -> {
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
                         DisplayError(
@@ -121,43 +121,43 @@ fun PlanSetupScreen(
                         )
                     } else if (state.userResponse is Resource.Error){
                         DisplayError(
-                            errorMessage = "User Response Error",
+                            errorMessage = "Failed to retrieve user information, try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
                     } else if (state.createPolicySetupResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Create Policy Setup Error",
+                            errorMessage = "Failed to create policy, try again",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
                     } else if (state.initiateRecoveryResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Initiate Recovery Error",
+                            errorMessage = "Failed to replace plan, try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
                     } else if (state.retrieveRecoveryShardsResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Retrieve Recovery Shards Error",
+                            errorMessage = "Failed to retrieve recovery data, try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Replace Policy Error",
+                            errorMessage = "Failed to replace policy, try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
                     } else if (state.completeGuardianShipResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Complete Guardianship Error",
+                            errorMessage = "Failed to finalize plan, try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
                     } else {
                         DisplayError(
-                            errorMessage = "Generic Error",
+                            errorMessage = "Something went wrong, please try again.",
                             dismissAction = { viewModel.reset() },
                             retryAction = { viewModel.reset() },
                         )
