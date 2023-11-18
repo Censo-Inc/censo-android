@@ -21,6 +21,7 @@ data class ApproverOnboardingState(
     // onboarding
     val verificationCode: String = "",
     val guardianEncryptionKey: EncryptionKey? = null,
+    val entropy: Base64EncodedData? = null,
     val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
     val acceptGuardianResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
     val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,

@@ -208,9 +208,16 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
+    private fun assignEntropy(guardianState: GuardianState?) {
+        (guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy?.let {
+            state = state.copy(entropy = it)
+        }
+    }
+
     private fun determineApproverUIState(guardianState: GuardianState?) {
         assignGuardianState(guardianState = guardianState)
         assignParticipantId(guardianState = guardianState)
+        assignEntropy(guardianState = guardianState)
 
         val guardianPhase = guardianState?.phase
 
@@ -274,6 +281,7 @@ class ApproverOnboardingViewModel @Inject constructor(
                     onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
                 )
                 assignParticipantId(acceptResource.data?.guardianState)
+                assignEntropy(acceptResource.data?.guardianState)
                 createKeyAndTriggerCloudSave()
             }
         }
@@ -284,13 +292,15 @@ class ApproverOnboardingViewModel @Inject constructor(
         setLoadingUIState()
 
         val guardianEncryptionKey = keyRepository.createGuardianKey()
+
+        state = state.copy(guardianEncryptionKey = guardianEncryptionKey)
+
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true,
                 action = CloudStorageActions.UPLOAD,
                 reason = null
             ),
-            guardianEncryptionKey = guardianEncryptionKey
         )
     }
 
@@ -380,7 +390,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     //region Cloud Storage
     fun getEncryptedKeyForUpload(): ByteArray? {
         val encryptionKey = state.guardianEncryptionKey ?: return null
-        val entropy = (state.guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy ?: return null
+        val entropy = state.entropy ?: return null
 
         return encryptionKey.encryptWithEntropy(
             deviceKeyId = keyRepository.retrieveSavedDeviceId(),
