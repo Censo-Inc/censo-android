@@ -34,6 +34,7 @@ import co.censo.approver.R
 import co.censo.approver.data.ApproverAccessUIState
 import co.censo.approver.presentation.GuardianColors
 import co.censo.approver.presentation.Screen
+import co.censo.approver.presentation.components.ApproveRequest
 import co.censo.approver.presentation.components.ApproverTopBar
 import co.censo.approver.presentation.components.OwnerCodeVerification
 import co.censo.approver.presentation.components.PostApproverAction
@@ -168,13 +169,7 @@ fun ApproverAccessScreen(
                         when (state.approverAccessUIState) {
 
                             ApproverAccessUIState.AccessRequested -> {
-                                GetLiveWithUserUI(
-                                    title = stringResource(R.string.access_requested_title),
-                                    message = stringResource(R.string.access_requested_message),
-                                    onContinueLive = viewModel::storeRecoveryTotpSecret,
-                                    onResumeLater = {},
-                                    showSecondButton = false
-                                )
+                                ApproveRequest(onContinue = viewModel::storeRecoveryTotpSecret)
                             }
 
                             ApproverAccessUIState.VerifyingToTPFromOwner,

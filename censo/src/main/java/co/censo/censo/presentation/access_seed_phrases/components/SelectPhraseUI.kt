@@ -77,7 +77,7 @@ fun SelectPhraseUI(
             color = Color.Black
         ) {
             Text(
-                text = stringResource(id = R.string.finished),
+                text = stringResource(id = R.string.exit_accessing_phrase),
                 color = Color.White,
                 fontWeight = FontWeight.Medium,
                 fontSize = 22.sp,

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
@@ -61,12 +62,14 @@ fun StandardButton(
 fun TitleText(
     modifier: Modifier = Modifier,
     @StringRes title: Int,
+    fontSize: TextUnit = 24.sp,
     textAlign: TextAlign = TextAlign.Center,
     fontWeight: FontWeight = FontWeight.W600
 ) {
     TitleText(
         modifier = modifier,
         title = stringResource(id = title),
+        fontSize = fontSize,
         textAlign = textAlign,
         fontWeight = fontWeight
     )
@@ -76,6 +79,7 @@ fun TitleText(
 fun TitleText(
     modifier: Modifier = Modifier,
     title: String,
+    fontSize: TextUnit = 24.sp,
     textAlign: TextAlign = TextAlign.Center,
     fontWeight: FontWeight = FontWeight.W600
 ) {
@@ -83,7 +87,7 @@ fun TitleText(
         modifier = modifier,
         text = title,
         color = Color.Black,
-        fontSize = 24.sp,
+        fontSize = fontSize,
         fontWeight = fontWeight,
         textAlign = textAlign
     )

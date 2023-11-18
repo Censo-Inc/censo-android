@@ -3,7 +3,6 @@ package co.censo.censo.presentation.plan_setup.components
 import Base58EncodedGuardianPublicKey
 import Base64EncodedData
 import InvitationId
-import MessageText
 import StandardButton
 import TitleText
 import android.content.Context
@@ -24,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -35,8 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,7 +56,6 @@ import kotlinx.datetime.Clock
 
 @Composable
 fun ActivateApproverUI(
-    isPrimaryApprover: Boolean = true,
     prospectApprover: Guardian.ProspectGuardian?,
     secondsLeft: Int,
     verificationCode: String,
@@ -94,24 +96,16 @@ fun ActivateApproverUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = if (isPrimaryApprover) R.string.activate_primary_approver else R.string.activate_alternate_approver,
-            textAlign = TextAlign.Start,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            message = R.string.approver_do_3_things,
-            textAlign = TextAlign.Start,
+            title = stringResource(R.string.activate_approver_name, nickName),
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         ApproverStep(
             imagePainter = painterResource(id = co.censo.shared.R.drawable.share_link),
-            heading = stringResource(id = R.string.download_the_app_title),
-            content = stringResource(id = R.string.dowloand_the_app_message),
+            heading = stringResource(id = R.string.share_the_app_title),
+            content = stringResource(R.string.share_the_app_link_for_download, nickName, nickName),
             actionButtonUIData = ActionButtonUIData(
                 onClick = { shareLink(storesLink) },
                 text = stringResource(R.string.share_app_link),
@@ -123,7 +117,11 @@ fun ActivateApproverUI(
         ApproverStep(
             imagePainter = painterResource(id = co.censo.shared.R.drawable.share_link),
             heading = stringResource(id = R.string.share_the_link_title),
-            content = stringResource(id = R.string.share_the_link_message),
+            content = stringResource(
+                R.string.share_invite_link_approver_onboarding,
+                nickName,
+                nickName
+            ),
             actionButtonUIData = ActionButtonUIData(
                 onClick = { shareLink(deeplink) },
                 text = stringResource(R.string.share_unique_link)
@@ -133,10 +131,10 @@ fun ActivateApproverUI(
         Spacer(modifier = Modifier.height(12.dp))
 
         shareTheCodeStepUIData(
-            isPrimaryApprover,
             prospectApprover?.status,
             secondsLeft,
             verificationCode,
+            nickName,
             context
         )?.let {
             ApproverStep(
@@ -145,6 +143,8 @@ fun ActivateApproverUI(
                 content = it.content,
                 verificationCodeUIData = it.verificationCodeUIData
             )
+            
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
         Divider(
@@ -157,7 +157,6 @@ fun ActivateApproverUI(
 
         ProspectApproverInfoBox(
             nickName = nickName,
-            primaryApprover = isPrimaryApprover,
             status = guardianStatus,
             onEdit = onEditNickname
         )
@@ -187,7 +186,6 @@ fun ActivateApproverUI(
 @Composable
 fun ProspectApproverInfoBox(
     nickName: String,
-    primaryApprover: Boolean,
     status: GuardianStatus?,
     onEdit: () -> Unit
 ) {
@@ -215,9 +213,7 @@ fun ProspectApproverInfoBox(
 
         Column {
             Text(
-                text =
-                if (primaryApprover) stringResource(R.string.primary_approver)
-                else stringResource(R.string.alternate_approver),
+                text = stringResource(id = R.string.approver),
                 color = Color.Black,
                 fontSize = labelTextSize
             )
@@ -252,11 +248,17 @@ fun ProspectApproverInfoBox(
 fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
     when (guardianStatus) {
         is GuardianStatus.Initial,
-        is GuardianStatus.Accepted,
         GuardianStatus.Declined -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.not_yet_active),
-                color = SharedColors.ErrorRed
+                color = SharedColors.GreyText
+            )
+        }
+
+        is GuardianStatus.Accepted -> {
+            ApproverActivatedUIData(
+                text = context.getString(R.string.opened_link_in_app),
+                color = SharedColors.GreyText
             )
         }
 
@@ -269,7 +271,7 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
 
         is GuardianStatus.Confirmed -> {
             ApproverActivatedUIData(
-                text = context.getString(R.string.activated),
+                text = context.getString(R.string.active),
                 color = SharedColors.SuccessGreen
             )
         }
@@ -283,25 +285,29 @@ data class ApproverActivatedUIData(
 )
 
 fun shareTheCodeStepUIData(
-    isPrimaryApprover: Boolean,
     status: GuardianStatus?,
     secondsLeft: Int,
     verificationCode: String,
+    approverNickname: String,
     context: Context
 ) = when (status) {
         is GuardianStatus.Initial,
         GuardianStatus.Declined -> {
             ShareTheCodeUIData(
-                heading = context.getString(R.string.share_the_code_title),
-                content = context.getString(R.string.once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed),
+                heading = context.getString(R.string.read_the_code_title),
+                content = context.getString(
+                    R.string.onboarding_approver_read_auth_code,
+                    approverNickname,
+                    approverNickname
+                ),
             )
         }
 
         is GuardianStatus.Accepted,
         is GuardianStatus.VerificationSubmitted -> {
             ShareTheCodeUIData(
-                heading = context.getString(R.string.share_the_code_title),
-                content = context.getString(R.string.share_the_code_message, if (isPrimaryApprover) context.getString(R.string.primary) else context.getString(R.string.alternate)),
+                heading = context.getString(R.string.read_the_code_title),
+                content = context.getString(R.string.share_the_code_message, approverNickname),
                 verificationCodeUIData = VerificationCodeUIData(
                     code = verificationCode,
                     timeLeft = secondsLeft
@@ -311,8 +317,8 @@ fun shareTheCodeStepUIData(
 
         is GuardianStatus.Confirmed -> {
             ShareTheCodeUIData(
-                heading = context.getString(R.string.share_the_code_title),
-                content = context.getString(R.string.the_verification_code_has_been_successfully_confirmed),
+                heading = context.getString(R.string.read_the_code_title),
+                content = context.getString(R.string.approver_is_activated, approverNickname),
             )
         }
 
@@ -383,6 +389,72 @@ fun ApproverStep(
     }
 }
 
+@Composable
+fun ApproverStep(
+    imagePainter: Painter,
+    heading: String,
+    content: AnnotatedString,
+    stringAnnotationTag: String? = null,
+    verificationCodeUIData: VerificationCodeUIData? = null,
+    actionButtonUIData: ActionButtonUIData? = null,
+) {
+    val uriHandler = LocalUriHandler.current
+
+    Row(
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Box(
+            contentAlignment = Alignment.Center, modifier = Modifier
+                .background(
+                    color = SharedColors.WordBoxBackground,
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .padding(16.dp)
+        ) {
+            Image(
+                painter = imagePainter,
+                contentDescription = null,
+                modifier = Modifier.width(32.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(8.dp))
+            ClickableText(text = content, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp)) { offset ->
+                content.getStringAnnotations(stringAnnotationTag ?: "", start = offset, end = offset).firstOrNull()
+                    ?.let { annotatedLink ->
+                        uriHandler.openUri(annotatedLink.item)
+                    }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            verificationCodeUIData?.let {
+                Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                    TotpCodeView(
+                        code = it.code,
+                        secondsLeft = it.timeLeft,
+                        primaryColor = VaultColors.PrimaryColor
+                    )
+                }
+            }
+
+            actionButtonUIData?.let {
+                StandardButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = it.onClick
+                ) {
+                    Text(
+                        text = it.text,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
 data class ActionButtonUIData(
     val text: String,
     val onClick: () -> Unit
@@ -397,7 +469,6 @@ data class VerificationCodeUIData(
 @Composable
 fun ActivatePrimaryApproverInitialPreview() {
     ActivateApproverUI(
-        isPrimaryApprover = true,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
@@ -418,7 +489,6 @@ fun ActivatePrimaryApproverInitialPreview() {
 @Composable
 fun ActivatePrimaryApproverAcceptedPreview() {
     ActivateApproverUI(
-        isPrimaryApprover = true,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
@@ -440,7 +510,6 @@ fun ActivatePrimaryApproverAcceptedPreview() {
 @Composable
 fun ActivatePrimaryApproverConfirmedPreview() {
     ActivateApproverUI(
-        isPrimaryApprover = true,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
@@ -464,7 +533,6 @@ fun ActivatePrimaryApproverConfirmedPreview() {
 @Composable
 fun ActivateAlternateApproverInitialPreview() {
     ActivateApproverUI(
-        isPrimaryApprover = false,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
@@ -485,7 +553,6 @@ fun ActivateAlternateApproverInitialPreview() {
 @Composable
 fun ActivateAlternateApproverAcceptedPreview() {
     ActivateApproverUI(
-        isPrimaryApprover = false,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
@@ -507,7 +574,6 @@ fun ActivateAlternateApproverAcceptedPreview() {
 @Composable
 fun ActivateAlternateApproverConfirmedPreview() {
     ActivateApproverUI(
-        isPrimaryApprover = false,
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",

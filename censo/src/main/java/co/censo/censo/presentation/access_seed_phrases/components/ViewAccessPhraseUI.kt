@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -30,11 +33,11 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.censo.R
 import co.censo.shared.R as SharedR
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWord
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
@@ -126,6 +129,12 @@ fun ViewAccessPhraseUI(
             }
         }
 
+        //TODO: Need to update this Composable to contain a HorizontalPager for swiping through the words
+//        Spacer(modifier = Modifier.height(36.dp))
+//
+//        Text(text = stringResource(R.string.swipe_back_and_forth_to_review_words))
+
+
         StandardButton(
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,7 +143,7 @@ fun ViewAccessPhraseUI(
             onClick = onDone
         ) {
             Text(
-                text = stringResource(id = co.censo.censo.R.string.done),
+                text = stringResource(id = co.censo.censo.R.string.done_viewing_phrase),
                 color = Color.White,
                 fontSize = 20.sp
             )

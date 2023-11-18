@@ -6,6 +6,7 @@ import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -54,17 +55,24 @@ fun PasteLink(
 
         Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
 
-
-        TitleText(
+        MessageText(
+            message = ApproverR.string.get_unique_link,
             modifier = Modifier.fillMaxWidth(),
-            title = ApproverR.string.get_the_unique_link,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
 
         MessageText(
-            message = ApproverR.string.get_unique_link,
+            message = ApproverR.string.once_receive_it,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
+
+        MessageText(
+            message = ApproverR.string.or_simply_copy_link,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
@@ -77,26 +85,12 @@ fun PasteLink(
             contentPadding = PaddingValues(vertical = 12.dp),
             onClick = onPasteLinkClick,
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(
-                        id = co.censo.shared.R.drawable.paste_phrase_icon
-                    ),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(ApproverR.string.paste_link),
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 24.sp,
-                )
-            }
+            Text(
+                text = stringResource(ApproverR.string.paste_link),
+                color = Color.White,
+                fontWeight = FontWeight.Medium,
+                fontSize = 24.sp,
+            )
         }
     }
 }
@@ -104,7 +98,12 @@ fun PasteLink(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PasteLinkPreview() {
-    PasteLink(
-        onPasteLinkClick = {}
-    )
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.White)) {
+        PasteLink(
+            onPasteLinkClick = {}
+        )
+    }
 }

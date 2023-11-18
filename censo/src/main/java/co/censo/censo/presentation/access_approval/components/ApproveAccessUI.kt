@@ -21,9 +21,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
@@ -32,14 +37,17 @@ import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ActionButtonUIData
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
+import co.censo.shared.presentation.components.Loading
 
 @Composable
 fun ApproveAccessUI(
+    approverName: String,
     approval: Approval,
     verificationCode: String,
     onVerificationCodeChanged: (String) -> Unit,
     storesLink: String, //This should contain both links since approver could be either
 ) {
+    val linkTag = "link"
 
     val deeplink = approval.deepLink()
     val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
@@ -63,7 +71,7 @@ fun ApproveAccessUI(
             .padding(horizontal = 36.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.Top,
     ) {
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -71,35 +79,39 @@ fun ApproveAccessUI(
         TitleText(
             modifier = Modifier.fillMaxWidth(),
             title = R.string.request_access,
-            textAlign = TextAlign.Start,
+            fontSize = 28.sp,
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.approver_do_3_things,
-            textAlign = TextAlign.Start,
+            message = R.string.you_must_do_two_things,
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val firstStepContentSpan = buildAnnotatedString {
+            append(stringResource(R.string.share_this_link_and_have_span))
+            append(" $approverName ")
+            append(stringResource(R.string.tap_on_it_or_paste_it_into_the_censo_approver_app_if_span))
+            append(" $approverName ")
+            append(stringResource(R.string.no_longer_has_the_app_installed_it_can_be_span))
+
+            pushStringAnnotation(tag = linkTag, annotation = storesLink)
+            withStyle(style = SpanStyle(fontWeight = FontWeight.W600)) {
+                append(stringResource(R.string.downloaded_here_url_span))
+            }
+            pop()
+        }
+
         ApproverStep(
             imagePainter = painterResource(id = co.censo.shared.R.drawable.share_link),
-            heading = stringResource(id = R.string.download_the_app_title),
-            content = stringResource(id = R.string.dowloand_the_app_message),
-            actionButtonUIData = ActionButtonUIData(
-                onClick = { shareLink(storesLink) },
-                text = stringResource(R.string.share_app_link),
-            ),
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        ApproverStep(
-            imagePainter = painterResource(id = co.censo.shared.R.drawable.share_link),
-            heading = stringResource(id = R.string.share_the_link_title),
-            content = stringResource(id = R.string.share_the_link_message),
+            heading = stringResource(R.string.share_this_link_request_access),
+            content = firstStepContentSpan,
+            stringAnnotationTag = linkTag,
             actionButtonUIData = ActionButtonUIData(
                 onClick = { shareLink(deeplink) },
                 text = stringResource(R.string.share_unique_link)
@@ -110,32 +122,63 @@ fun ApproveAccessUI(
 
         ApproverStep(
             imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
-            heading = "3. Enter the code",
-            content = "Enter the 6-digit code from your approver.",
+            heading = stringResource(R.string.enter_the_code_request_access_step),
+            content = stringResource(
+                R.string.have_read_aloud_the_6_digit_code_from_the_censo_approver_app_and_enter_it_below,
+                approverName
+            ),
         )
-        if (approval.status == ApprovalStatus.Rejected) {
+
+        if (approval.status == ApprovalStatus.Initial) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Loading(
+                strokeWidth = 3.5.dp,
+                size = 24.dp,
+                fullscreen = false,
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = stringResource(R.string.the_code_you_entered_in_not_correct),
-                textAlign = TextAlign.Center,
-                color = SharedColors.ErrorRed,
-                modifier = Modifier.padding(horizontal = 24.dp)
-
+                text = stringResource(R.string.waiting_for_to_open_the_link, approverName),
+                color = SharedColors.GreyText
             )
-        }
-        Box(modifier = Modifier.padding(vertical = 12.dp)) {
-            CodeEntry(
-                length = TotpGenerator.CODE_LENGTH,
-                enabled = codeEditable,
-                value = verificationCode,
-                onValueChange = onVerificationCodeChanged,
-                primaryColor = Color.Black,
-                borderColor = SharedColors.BorderGrey,
-                backgroundColor = SharedColors.WordBoxBackground,
-                requestFocus = codeEditable
-            )
-        }
+        } else {
+            if (approval.status == ApprovalStatus.Rejected) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.the_code_you_entered_is_not_correct),
+                    textAlign = TextAlign.Center,
+                    color = SharedColors.ErrorRed,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            if (approval.status == ApprovalStatus.WaitingForVerification) {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                CodeEntry(
+                    length = TotpGenerator.CODE_LENGTH,
+                    enabled = codeEditable,
+                    value = verificationCode,
+                    onValueChange = onVerificationCodeChanged,
+                    primaryColor = Color.Black,
+                    borderColor = SharedColors.BorderGrey,
+                    backgroundColor = SharedColors.WordBoxBackground,
+                    requestFocus = codeEditable
+                )
+            }
+
+            if (approval.status == ApprovalStatus.WaitingForApproval) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Loading(
+                    strokeWidth = 3.5.dp,
+                    size = 24.dp,
+                    fullscreen = false,
+                )
+            }
+        }
     }
 }
 
@@ -143,6 +186,7 @@ fun ApproveAccessUI(
 @Composable
 fun ApproveAccessInitialPreview() {
     ApproveAccessUI(
+        approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
@@ -157,6 +201,7 @@ fun ApproveAccessInitialPreview() {
 @Composable
 fun ApproveAccessWaitingForVerificationPreview() {
     ApproveAccessUI(
+        approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
@@ -171,6 +216,7 @@ fun ApproveAccessWaitingForVerificationPreview() {
 @Composable
 fun ApproveAccessWaitingForApprovalPreview() {
     ApproveAccessUI(
+        approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
@@ -185,6 +231,7 @@ fun ApproveAccessWaitingForApprovalPreview() {
 @Composable
 fun ApproveAccessRejectedPreview() {
     ApproveAccessUI(
+        approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
@@ -199,6 +246,7 @@ fun ApproveAccessRejectedPreview() {
 @Composable
 fun ApproveAccessApprovedPreview() {
     ApproveAccessUI(
+        approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
