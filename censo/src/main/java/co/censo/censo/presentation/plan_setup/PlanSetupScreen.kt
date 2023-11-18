@@ -274,7 +274,7 @@ fun PlanSetupScreen(
             } else {
                 val exceptionCause =
                     if (encryptedKey == null) "missing private key" else "missing participant id"
-                viewModel.onKeyUploadFailed(Exception("Unable to setup initial policy, $exceptionCause"))
+                viewModel.onKeyUploadFailed(Exception("Unable to setup policy, $exceptionCause"))
             }
         } else if (state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
             val participantId = state.ownerApprover?.participantId
@@ -287,10 +287,10 @@ fun PlanSetupScreen(
                     onActionSuccess = {
                         viewModel.onKeyDownloadSuccess(it)
                     },
-                    onActionFailed = viewModel::onKeyUploadFailed
+                    onActionFailed = viewModel::onKeyDownloadFailed
                 )
             } else {
-                viewModel.onKeyUploadFailed(Exception("Unable to setup initial policy, missing participant id"))
+                viewModel.onKeyDownloadFailed(Exception("Unable to setup policy, missing participant id"))
             }
         }
     }

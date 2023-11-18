@@ -710,6 +710,14 @@ class PlanSetupViewModel @Inject constructor(
         )
         exception?.sendError(CrashReportingUtil.CloudUpload)
     }
+
+    fun onKeyDownloadFailed(exception: Exception?) {
+        state = state.copy(
+            createPolicySetupResponse = Resource.Error(exception = exception),
+            saveKeyToCloud = Resource.Uninitialized
+        )
+        exception?.sendError(CrashReportingUtil.CloudDownload)
+    }
     //endregion
 
     //region Reset functions

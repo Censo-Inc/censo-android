@@ -28,21 +28,16 @@ sealed class GuardianPhase {
     @Serializable
     @SerialName("WaitingForCode")
     data class WaitingForCode(
-        val invitationId: InvitationId,
         val entropy: Base64EncodedData?,
     ) : GuardianPhase()
 
     @Serializable
     @SerialName("WaitingForVerification")
-    data class WaitingForVerification(
-        val invitationId: InvitationId,
-    ) : GuardianPhase()
+    object WaitingForVerification : GuardianPhase()
 
     @Serializable
     @SerialName("VerificationRejected")
-    data class VerificationRejected(
-        val invitationId: InvitationId,
-    ) : GuardianPhase()
+    object VerificationRejected: GuardianPhase()
 
     @Serializable
     @SerialName("Complete")
