@@ -5,9 +5,7 @@ import ParticipantId
 import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
-import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
@@ -27,7 +25,7 @@ data class PlanSetupState(
     val alternateApprover: Guardian.ProspectGuardian? = null,
 
     // Screen in Plan Setup Flow
-    val planSetupUIState: PlanSetupUIState = PlanSetupUIState.Initial,
+    val planSetupUIState: PlanSetupUIState = PlanSetupUIState.Initial_1,
 
     // inviting approver
     val editedNickname: String = "",
@@ -69,19 +67,19 @@ data class PlanSetupState(
 
     val backArrowType = when {
         planSetupUIState in listOf(
-            PlanSetupUIState.ApproverActivation,
-            PlanSetupUIState.EditApproverNickname
+            PlanSetupUIState.ApproverActivation_5,
+            PlanSetupUIState.EditApproverNickname_3
         ) -> BackIconType.Back
 
         planSetupUIState in listOf(
-            PlanSetupUIState.ApproverGettingLive,
-            PlanSetupUIState.EditApproverNickname
+            PlanSetupUIState.ApproverGettingLive_4,
+            PlanSetupUIState.EditApproverNickname_3
         ) && approverType == ApproverType.Alternate -> BackIconType.Back
 
         planSetupUIState in listOf(
-            PlanSetupUIState.ApproverGettingLive,
-            PlanSetupUIState.AddAlternateApprover,
-            PlanSetupUIState.RecoveryInProgress
+            PlanSetupUIState.ApproverGettingLive_4,
+            PlanSetupUIState.AddAlternateApprover_6,
+            PlanSetupUIState.RecoveryInProgress_7
         ) -> BackIconType.Exit
 
         else -> BackIconType.None
@@ -109,14 +107,31 @@ data class PlanSetupState(
 }
 
 enum class PlanSetupUIState {
-    Initial,
-    ApproverNickname,
-    EditApproverNickname,
-    ApproverGettingLive,
-    ApproverActivation,
-    AddAlternateApprover,
-    RecoveryInProgress,
-    Completed
+    Initial_1,
+    ApproverNickname_2,
+    EditApproverNickname_3,
+    ApproverGettingLive_4,
+    ApproverActivation_5,
+    AddAlternateApprover_6,
+    RecoveryInProgress_7,
+    Completed_8
+}
+
+sealed interface PlanSetupAction {
+    data class ApproverNicknameChanged(val name: String) : PlanSetupAction
+    object EditApproverNickname : PlanSetupAction
+    object EditApproverAndSavePolicy : PlanSetupAction
+    object InviteApprover : PlanSetupAction
+    object SaveApproverAndSavePolicy : PlanSetupAction
+    object GoLiveWithApprover: PlanSetupAction
+    object ApproverConfirmed : PlanSetupAction
+    object Completed : PlanSetupAction
+    object SavePlan: PlanSetupAction
+    object BackClicked : PlanSetupAction
+    object KeyUploadSuccess : PlanSetupAction
+    data class KeyDownloadSuccess(val encryptedKey: ByteArray) : PlanSetupAction
+    data class KeyDownloadFailed(val e: Exception?) : PlanSetupAction
+    data class KeyUploadFailed(val e: Exception?) : PlanSetupAction
 }
 
 enum class ApproverType {

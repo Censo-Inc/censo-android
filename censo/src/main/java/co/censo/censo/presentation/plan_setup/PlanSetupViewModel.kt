@@ -30,6 +30,7 @@ import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -41,36 +42,79 @@ import javax.inject.Inject
 
 
 /**
+ *
+ * Main Processes:
+ *
+ * Process 1: Setup Approvers: Primary and Alternate
+ *      Set the user nickname
+ *          (edit user nickname)
+ *      Activate Approver
+ *      Create Setup Policy as we move forward
+ *          Called multiple times as we are adding each approver
+ *
+ *
+ * Process 2: Create Owner Approver Key
+ *      Create key locally
+ *      Encrypt it with entropy
+ *      Save it to cloud
+ *      Check owner user is finalized
+ *          Once we key saved in the cloud, we need to upload
+ *          the public key for the owner to backend.
+ *
+ *
+ * Process 3: Complete recovery to set new plan
+ *      Complete facetec to get biometry data back
+ *      Retrieve shards from backend
+ *      Replace Policy
+ *
  * User Actions
  *
  * onBackClicked: Not part of major flow. Move user back in flow.
  *
- * onApproverNicknameChanged: update either primary or secondary approver nickname
- * onEditApproverNickname: User needs to update an already entered nickname
+ * onApproverNicknameChanged:
+ *      Update either primary or secondary approver nickname
+ *
+ * onEditApproverNickname:
+ *      User needs to update an already entered nickname
+ *      Will exit by saving approver and creating setup policy
+ *
  * onSaveApproverNickname:
- *      User will save the approver nickname, and then we trigger submitPolicySetup.
- *      submitPolicySetup can be submitted multiple times, so a user could add a secondary approver,
- *      or finish and create their plan.
- * onInviteApprover:
- *      Most times this will send us to create approver nickname
- *      If both approvers have nicknames, we will go directly to Continue Live Holding Screen
- * onSaveApprover:
- *      If ownerApprover is made, call submitPolicySetup
- *      Else create owner approver and upload key
- *      I don't think we need 2 methods for onSaveApprover and onSaveApproverNickname
- * onSaveAndFinish
- *      Badly named method
- * onGoLiveWithApprover: Move us to Approver Activation UI
+ *      Same as onEditApproverNickname, except we know nickname is set
+ *      Will exit by saving approver and creating setup policy
+ *
+ * onInviteAlternateApprover:
+ *      If we already have data for alternate approver, then we go to get live
+ *      If we don't have info on alternate approver, then we need to create their nickname
+ *
+ * saveApproverAndSubmitPolicy:
+ *      Submit policy setup with current approver set
+ *
+ * updateApproverNicknameAndSubmitPolicy
+ *      Update approver nickname on state approver that was being edited
+ *      Submit policy setup
+ *
+ * onGoLiveWithApprover: Simple method to move us to Approver Activation UI.
+ *
  * onApproverConfirmed:
+ *      When an approver TOTP has been verified
  *      If primary approver: Send user to Add Alternate Approver
  *      If alternate approver: Start recovery to create new plan
- * onFullyCompleted: Send user home
+ *
+ * onFullyCompleted: Send user home. They have setup plan.
+ *
  * onSaveAndFinishPlan: User done modifying the plan
  *      If we never confirmed the alternate approver, submit new policy, then initiate recovery
  *      If confirmed alternate approver, then initiate recovery
  *
  *
  * Internal Methods
+ *
+ * updateOwnerState: Called anytime we get new owner state from backend.
+ *      Sets all state data for the 3 approvers
+ *      Generates TOTP codes if needed
+ *      Does necessary navigation if needed
+ *          Don't have strong grasp on this
+ *      Veriify any approvers if needed
  *
  * submitNewPolicy: Done multiple times. Anytime we need to create a new policy.
  *
@@ -94,10 +138,40 @@ class PlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(PlanSetupState())
         private set
 
+    fun receivePlanAction(action: PlanSetupAction) {
+        projectLog(message = "Action Received: $action")
+        when (action) {
+            //Back
+            PlanSetupAction.BackClicked -> onBackClicked()
+
+            //Nickname or Approver Actions
+            is PlanSetupAction.ApproverNicknameChanged ->
+                onApproverNicknameChanged(action.name)
+            PlanSetupAction.ApproverConfirmed -> onApproverConfirmed()
+            PlanSetupAction.EditApproverNickname -> onEditApproverNickname()
+            PlanSetupAction.GoLiveWithApprover -> onGoLiveWithApprover()
+            PlanSetupAction.InviteApprover -> onInviteAlternateApprover()
+            PlanSetupAction.SaveApproverAndSavePolicy -> saveApproverAndSubmitPolicy()
+            PlanSetupAction.EditApproverAndSavePolicy -> updateApproverNicknameAndSubmitPolicy()
+
+
+            //Cloud Actions
+            PlanSetupAction.KeyUploadSuccess -> onKeyUploadSuccess()
+            is PlanSetupAction.KeyDownloadSuccess -> onKeyDownloadSuccess(action.encryptedKey)
+
+            is PlanSetupAction.KeyDownloadFailed -> onKeyDownloadFailed(action.e)
+            is PlanSetupAction.KeyUploadFailed -> onKeyUploadFailed(action.e)
+
+            //Finalizing Actions
+            PlanSetupAction.SavePlan -> onSaveAndFinishPlan()
+            PlanSetupAction.Completed -> onFullyCompleted()
+        }
+    }
+
     //region Lifecycle Methods
     fun onStart() {
-        if (state.planSetupUIState == PlanSetupUIState.Initial) {
-            state = state.copy(planSetupUIState = PlanSetupUIState.ApproverNickname)
+        if (state.planSetupUIState == PlanSetupUIState.Initial_1) {
+            state = state.copy(planSetupUIState = PlanSetupUIState.ApproverNickname_2)
         }
 
         viewModelScope.launch {
@@ -128,11 +202,11 @@ class PlanSetupViewModel @Inject constructor(
     //endregion
 
     //region User Actions
-    fun onBackClicked() {
+    private fun onBackClicked() {
         val backIconNavigation = listOf(
-            PlanSetupUIState.EditApproverNickname to PlanSetupUIState.ApproverActivation,
-            PlanSetupUIState.ApproverActivation to PlanSetupUIState.ApproverGettingLive,
-            PlanSetupUIState.ApproverGettingLive to PlanSetupUIState.AddAlternateApprover,
+            PlanSetupUIState.EditApproverNickname_3 to PlanSetupUIState.ApproverActivation_5,
+            PlanSetupUIState.ApproverActivation_5 to PlanSetupUIState.ApproverGettingLive_4,
+            PlanSetupUIState.ApproverGettingLive_4 to PlanSetupUIState.AddAlternateApprover_6,
         ).toMap()
 
         when (state.backArrowType) {
@@ -150,27 +224,27 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun onInviteApprover() {
+    private fun onInviteAlternateApprover() {
         state = if (state.alternateApprover != null) {
             // skip name entry of alternate approver if it is already set
             state.copy(
-                planSetupUIState = PlanSetupUIState.ApproverGettingLive
+                planSetupUIState = PlanSetupUIState.ApproverGettingLive_4
             )
         } else {
             state.copy(
                 editedNickname = "",
-                planSetupUIState = PlanSetupUIState.ApproverNickname
+                planSetupUIState = PlanSetupUIState.ApproverNickname_2
             )
         }
     }
 
-    fun onApproverNicknameChanged(nickname: String) {
+    private fun onApproverNicknameChanged(nickname: String) {
         state = state.copy(
             editedNickname = nickname
         )
     }
 
-    fun onSaveApprover() {
+    private fun saveApproverAndSubmitPolicy() {
         val ownerAsApprover = state.ownerApprover?.asOwnerAsApprover() ?: createOwnerApprover()
 
         //Can move directly to setting up and submitting policy
@@ -180,7 +254,7 @@ class PlanSetupViewModel @Inject constructor(
         )
     }
 
-    fun onEditApproverNickname() {
+    private fun onEditApproverNickname() {
         val nicknameToUpdate = when (state.approverType) {
             ApproverType.Primary -> state.primaryApprover?.label
             ApproverType.Alternate -> state.alternateApprover?.label
@@ -188,11 +262,11 @@ class PlanSetupViewModel @Inject constructor(
 
         state = state.copy(
             editedNickname = nicknameToUpdate ?: "",
-            planSetupUIState = PlanSetupUIState.EditApproverNickname
+            planSetupUIState = PlanSetupUIState.EditApproverNickname_3
         )
     }
 
-    fun onSaveApproverNickname() {
+    private fun updateApproverNicknameAndSubmitPolicy() {
         state = state.copy(createPolicySetupResponse = Resource.Loading())
 
         val ownerApprover = state.ownerApprover?.asOwnerAsApprover()
@@ -220,7 +294,7 @@ class PlanSetupViewModel @Inject constructor(
         submitPolicySetup(updatedPolicySetupGuardians)
     }
 
-    fun onSaveAndFinishPlan() {
+    private fun onSaveAndFinishPlan() {
         if (state.alternateApprover != null) {
             // finishing flow after primary approver
             dropAlternateApproverAndSaveKeyWithEntropy()
@@ -229,19 +303,19 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun onGoLiveWithApprover() {
-        state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation)
+    private fun onGoLiveWithApprover() {
+        state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation_5)
     }
 
-    fun onApproverConfirmed() {
+    private fun onApproverConfirmed() {
         if (state.alternateApprover == null) {
-            state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
+            state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
         } else {
             checkUserHasSavedKeyAndSubmittedPolicy()
         }
     }
 
-    fun onFullyCompleted() {
+    private fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
     //endregion
@@ -327,19 +401,19 @@ class PlanSetupViewModel @Inject constructor(
 
         // restore UI state on view restart (`overwriteUIState` flag)
         // normally navigation is controlled by pressing "continue" button
-        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.ApproverNickname) {
+        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.ApproverNickname_2) {
             if (externalApprovers.notConfirmed().isNotEmpty()) {
                 state = state.copy(
                     editedNickname = when (state.approverType) {
                         ApproverType.Primary -> state.primaryApprover?.label
                         ApproverType.Alternate -> state.alternateApprover?.label
                     } ?: "",
-                    planSetupUIState = PlanSetupUIState.ApproverActivation
+                    planSetupUIState = PlanSetupUIState.ApproverActivation_5
                 )
             } else if (alternateApprover?.status is GuardianStatus.Confirmed) {
                 checkUserHasSavedKeyAndSubmittedPolicy()
             } else if (primaryApprover?.status is GuardianStatus.Confirmed) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover)
+                state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
             }
         }
 
@@ -385,7 +459,7 @@ class PlanSetupViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive)
+                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive_4)
 
                 updateOwnerState(response.data!!.ownerState)
             }
@@ -609,7 +683,7 @@ class PlanSetupViewModel @Inject constructor(
 
             if (initiateRecoveryResponse is Resource.Success) {
                 // navigate to the facetec view
-                state = state.copy(planSetupUIState = PlanSetupUIState.RecoveryInProgress)
+                state = state.copy(planSetupUIState = PlanSetupUIState.RecoveryInProgress_7)
 
                 updateOwnerState(initiateRecoveryResponse.data!!.ownerState)
             }
@@ -640,7 +714,7 @@ class PlanSetupViewModel @Inject constructor(
             if (response is Resource.Success) {
                 updateOwnerState(response.data!!.ownerState)
 
-                state = state.copy(planSetupUIState = PlanSetupUIState.Completed)
+                state = state.copy(planSetupUIState = PlanSetupUIState.Completed_8)
             }
         }
     }
@@ -670,13 +744,12 @@ class PlanSetupViewModel @Inject constructor(
     //endregion
 
     //region Cloud Storage
-
-    fun onKeyUploadSuccess() {
+    private fun onKeyUploadSuccess() {
         resetCloudStorageActionState()
         completeGuardianOwnership()
     }
 
-    fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
+    private fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
         resetCloudStorageActionState()
 
         val approverSetup = state.ownerState?.guardianSetup?.guardians ?: emptyList()
@@ -703,7 +776,7 @@ class PlanSetupViewModel @Inject constructor(
         checkUserHasSavedKeyAndSubmittedPolicy()
     }
 
-    fun onKeyUploadFailed(exception: Exception?) {
+    private fun onKeyUploadFailed(exception: Exception?) {
         state = state.copy(
             createPolicySetupResponse = Resource.Error(exception = exception),
             saveKeyToCloud = Resource.Uninitialized
@@ -711,7 +784,7 @@ class PlanSetupViewModel @Inject constructor(
         exception?.sendError(CrashReportingUtil.CloudUpload)
     }
 
-    fun onKeyDownloadFailed(exception: Exception?) {
+    private fun onKeyDownloadFailed(exception: Exception?) {
         state = state.copy(
             createPolicySetupResponse = Resource.Error(exception = exception),
             saveKeyToCloud = Resource.Uninitialized
