@@ -62,7 +62,7 @@ fun ApproverLoginUI(
 
             Text(
                 fontSize = 16.sp,
-                text = stringResource(R.string.sign_in_google_explainer),
+                text = stringResource(co.censo.shared.R.string.sign_in_google_explainer),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(8.dp))

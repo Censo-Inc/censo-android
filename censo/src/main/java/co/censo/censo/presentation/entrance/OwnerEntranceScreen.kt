@@ -211,26 +211,27 @@ fun OwnerEntranceStandardUI(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Bottom,
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.weight(1.0f))
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = null,
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
         Image(
             painter = painterResource(id = R.drawable.censo_text),
             contentDescription = null,
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
         Text(
             text = stringResource(R.string.tag_line),
             fontWeight = FontWeight.W600,
             fontSize = 24.sp,
             color = Color.Black
         )
-        Spacer(modifier = Modifier.height(44.dp))
+        Spacer(modifier = Modifier.weight(0.50f))
         StandardButton(
             onClick = authenticate,
             contentPadding = PaddingValues(
@@ -260,7 +261,17 @@ fun OwnerEntranceStandardUI(
             }
         }
 
-        Spacer(modifier = Modifier.height(112.dp))
+
+        Spacer(modifier = Modifier.weight(1.0f))
+
+        Text(
+            modifier = Modifier.padding(horizontal = 44.dp),
+            fontSize = 13.sp,
+            text = stringResource(R.string.sign_in_google_explainer),
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.weight(0.25f))
 
         Row(
             verticalAlignment = Alignment.Top,
