@@ -17,15 +17,14 @@ import co.censo.censo.presentation.VaultColors
 fun VaultTopBar(bottomNavItem: BottomNavItem) {
 
     val title = when (bottomNavItem) {
-        BottomNavItem.Approvers -> stringResource(R.string.approvers_app_bar_title)
-        BottomNavItem.Home -> ""
         BottomNavItem.Phrases -> stringResource(R.string.seed_phrases_app_bar_title)
-        BottomNavItem.Settings -> stringResource(R.string.settings_app_bar_title)
+        BottomNavItem.Approvers -> stringResource(R.string.approvers_app_bar_title)
+        BottomNavItem.Settings,
+        BottomNavItem.Home -> ""
     }
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = VaultColors.NavbarColor,
             navigationIconContentColor = Color.Black,
             titleContentColor = Color.Black,
         ),

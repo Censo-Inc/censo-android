@@ -84,19 +84,11 @@ fun AddAlternateApproverUI(
             onClick = onInviteAlternateSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
-            Row {
-                Icon(
-                    painter = painterResource(id = R.drawable.approvers),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.invite_alternate),
-                    color = Color.White,
-                    fontSize = 24.sp
-                )
-            }
+            Text(
+                text = stringResource(R.string.invite_alternate),
+                color = Color.White,
+                fontSize = 24.sp
+            )
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))

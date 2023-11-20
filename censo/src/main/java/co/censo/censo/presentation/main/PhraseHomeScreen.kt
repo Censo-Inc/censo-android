@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,7 +58,9 @@ fun PhraseHomeScreen(
     ) {
         AddAccessRow(onAddClick = onAddClick, onAccessClick = onAccessClick)
         Divider(
-            modifier = Modifier.height(1.5.dp).fillMaxWidth(),
+            modifier = Modifier
+                .height(1.5.dp)
+                .fillMaxWidth(),
             color = SharedColors.DividerGray
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -65,6 +68,7 @@ fun PhraseHomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
             SeedPhraseItem(
                 vaultSecret = vaultSecret,
+                isDeletable = true,
                 onClick = {
                     onEditPhraseClick(vaultSecret)
                 }
@@ -134,10 +138,15 @@ fun AddAccessRow(
 fun SeedPhraseItem(
     horizontalPadding : Dp = 36.dp,
     vaultSecret: VaultSecret,
+    isDeletable: Boolean = false,
     isSelected: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
-    val modifier = onClick?.let { Modifier.clickable { it() } } ?: Modifier
+    val modifier = onClick?.let {
+        if (!isDeletable) {
+            Modifier.clickable { it() }
+        } else Modifier
+    } ?: Modifier
 
     Box(
         modifier = modifier
@@ -181,6 +190,22 @@ fun SeedPhraseItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+
+        if (isDeletable) {
+            Box(
+                modifier = Modifier
+                    .clickable { onClick?.invoke() }
+                    .padding(end = 6.dp)
+                    .align(Alignment.CenterEnd),
+            ) {
+                Icon(
+                    painterResource(id = co.censo.shared.R.drawable.edit_icon),
+                    modifier = Modifier.size(36.dp),
+                    contentDescription = stringResource(R.string.edit_phrase),
+                    tint = Color.Black
+                )
+            }
         }
     }
 }

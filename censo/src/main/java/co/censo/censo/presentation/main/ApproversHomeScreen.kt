@@ -52,7 +52,8 @@ fun ApproversHomeScreen(
 ) {
     
     val nonOwnerApprovers = approvers.filter { !it.isOwner }
-    
+
+    //TODO: Update check so that when there is a pending approver, we display Resume adding approvers
     if (nonOwnerApprovers.isNotEmpty()) {
         Column(
             modifier = Modifier

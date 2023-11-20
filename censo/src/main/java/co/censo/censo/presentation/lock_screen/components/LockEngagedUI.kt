@@ -55,23 +55,14 @@ fun LockEngagedUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = co.censo.shared.R.string.data_encrypted,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
-
-        MessageText(
-            message = R.string.encrypted_your_data_behind,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+            title = stringResource(R.string.locked),
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
 
         StandardButton(
+            modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
             onClick = initUnlock,
@@ -90,7 +81,7 @@ fun LockEngagedUI(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.face_scan_to_unlock),
+                    text = stringResource(id = R.string.unlock),
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
                     fontSize = 24.sp,

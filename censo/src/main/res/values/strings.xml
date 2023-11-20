@@ -249,9 +249,9 @@
     <string name="once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed">Once they have accepted the invite, a unique confirmation code will be displayed.</string>
     <string name="paste_your_phrase">Paste seed phrase</string>
     <string name="count_seed_phrases">%1$s seed phrases</string>
-    <string name="encrypted_your_data_behind">Censo has encrypted your data behind a live, 3D scan of your face with layered security.</string>
+
     <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
-    <string name="face_scan_to_unlock">Face scan to unlock</string>
+
     <string name="home_nav_title">Home</string>
     <string name="phrases_nav_title">My Phrases</string>
     <string name="settings_nav_title">Settings</string>
@@ -264,7 +264,6 @@
     <string name="access">Access</string>
     <string name="approvers_app_bar_title">Approvers</string>
     <string name="seed_phrases_app_bar_title">Seed Phrases</string>
-    <string name="settings_app_bar_title">Settings</string>
     <string name="select_seed_phrase">Select the seed phrase you would like to access:</string>
     <string name="error_occurred">Error Occurred</string>
     <string name="ready_to_start">Ready to start your 15 minutes of access?</string>
@@ -346,4 +345,6 @@
     <string name="waiting_for_to_open_the_link">Waiting for %1$s to open the link</string>
     <string name="request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identify.\n\nSelect your approver below when you are speaking with them:</string>
     <string name="request_access_title">Request access</string>
+    <string name="locked">Locked</string>
+    <string name="edit_phrase">Edit phrase</string>
 </resources>

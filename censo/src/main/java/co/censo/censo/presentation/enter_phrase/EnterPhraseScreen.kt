@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,7 +78,7 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.SELECTED-> ""
+        EnterPhraseUIState.SELECTED -> ""
 
         EnterPhraseUIState.REVIEW,
         EnterPhraseUIState.VIEW,
@@ -152,7 +153,7 @@ fun EnterPhraseScreen(
 
     Scaffold(topBar = {
         if (state.enterWordUIState != EnterPhraseUIState.SELECT_ENTRY_TYPE) {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.onBackClicked()

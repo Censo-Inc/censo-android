@@ -63,7 +63,7 @@ fun PastePhraseUI(
             )
             Spacer(modifier = Modifier.height(24.dp))
             PastePhraseStep(
-                imagePainter = painterResource(id = co.censo.shared.R.drawable.share_link),
+                imagePainter = painterResource(id = co.censo.shared.R.drawable.import_paste),
                 heading = stringResource(R.string.tap_the_button_below),
                 content = stringResource(R.string.click_past_button_message)
             )

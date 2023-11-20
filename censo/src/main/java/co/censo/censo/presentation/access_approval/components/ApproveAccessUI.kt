@@ -36,7 +36,6 @@ import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
-import co.censo.censo.presentation.plan_setup.components.ActionButtonUIData
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
 import co.censo.shared.presentation.components.Loading
 
@@ -114,10 +113,7 @@ fun ApproveAccessUI(
             heading = stringResource(R.string.share_this_link_request_access),
             content = firstStepContentSpan,
             stringAnnotationTag = linkTag,
-            actionButtonUIData = ActionButtonUIData(
-                onClick = { shareLink(deeplink) },
-                text = stringResource(R.string.share_unique_link)
-            ),
+            onShareLink = { shareLink(deeplink) },
         )
 
         Spacer(modifier = Modifier.height(12.dp))

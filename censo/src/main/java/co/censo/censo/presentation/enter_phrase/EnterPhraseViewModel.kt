@@ -308,6 +308,8 @@ class EnterPhraseViewModel @Inject constructor(
     fun finishPhraseEntry() {
         if (state.isSavingFirstSeedPhrase) {
             checkUserHasRespondedToNotificationOptIn()
+        } else {
+            state = state.copy(phraseEntryComplete = Resource.Success(Unit))
         }
     }
     fun finishPushNotificationDialog() {
