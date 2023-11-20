@@ -30,6 +30,7 @@ import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,10 +92,8 @@ fun AccessSeedPhrasesScreen(
         ) {
 
             when {
-                state.loading -> Loading(
-                    strokeWidth = 8.dp,
+                state.loading -> LargeLoading(
                     color = Color.White,
-                    size = 72.dp,
                     fullscreen = true
                 )
 

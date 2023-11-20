@@ -51,6 +51,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,10 +124,8 @@ fun InitialPlanSetupScreen(
                     when (state.initialPlanSetupStep) {
                         InitialPlanSetupStep.CreateApproverKey,
                         InitialPlanSetupStep.CreatePolicyParams,
-                        InitialPlanSetupStep.PolicyCreation -> Loading(
-                            strokeWidth = 8.dp,
-                            color = VaultColors.PrimaryColor,
-                            size = 72.dp,
+                        InitialPlanSetupStep.PolicyCreation -> LargeLoading(
+                            color = Color.Black,
                             fullscreen = true
                         )
 

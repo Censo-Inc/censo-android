@@ -69,6 +69,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.LinksUtil
@@ -153,10 +154,8 @@ fun OwnerEntranceScreen(
                 }
             }
 
-            state.isLoading -> Loading(
-                strokeWidth = 8.dp,
+            state.isLoading -> LargeLoading(
                 color = Color.Black,
-                size = 72.dp,
                 fullscreen = true,
                 fullscreenBackgroundColor = Color.White
             )

@@ -24,6 +24,7 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.lock_screen.components.LockEngagedUI
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 
 @Composable
@@ -86,10 +87,8 @@ fun LockedScreen(
                         )
                     }
 
-                    else -> Loading(
-                        strokeWidth = 8.dp,
+                    else -> LargeLoading(
                         color = Color.Black,
-                        size = 72.dp,
                         fullscreen = true,
                         fullscreenBackgroundColor = Color.White
                     )

@@ -33,6 +33,7 @@ import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
@@ -112,7 +113,7 @@ fun PlanSetupScreen(
         ) {
 
             when {
-                state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
+                state.loading -> LargeLoading(fullscreen = true)
 
                 state.asyncError -> {
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
@@ -168,9 +169,7 @@ fun PlanSetupScreen(
 
                 else -> {
                     when (state.planSetupUIState) {
-                        PlanSetupUIState.Initial_1 -> Loading(
-                            strokeWidth = 5.dp,
-                            size = 72.dp,
+                        PlanSetupUIState.Initial_1 -> LargeLoading(
                             fullscreen = true
                         )
 
