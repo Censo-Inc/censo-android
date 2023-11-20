@@ -302,7 +302,7 @@ class PlanSetupViewModel @Inject constructor(
             // finishing flow after primary approver
             dropAlternateApproverAndSaveKeyWithEntropy()
         } else {
-            saveKeyWithEntropy()
+            checkUserHasSavedKeyAndSubmittedPolicy()
         }
     }
 
@@ -561,7 +561,7 @@ class PlanSetupViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 state = state.copy(alternateApprover = null)
-                saveKeyWithEntropy()
+                checkUserHasSavedKeyAndSubmittedPolicy()
             }
 
             state = state.copy(
@@ -645,6 +645,11 @@ class PlanSetupViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
+
+            if (owner.status is GuardianStatus.ImplicitlyOwner) {
+                initiateRecovery()
+            }
+
             val loadedKey =
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
@@ -663,11 +668,7 @@ class PlanSetupViewModel @Inject constructor(
             }
 
 
-            if (owner.status !is GuardianStatus.ImplicitlyOwner) {
-                completeGuardianOwnership()
-            } else {
-                initiateRecovery()
-            }
+            completeGuardianOwnership()
         }
     }
 
