@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -29,12 +27,10 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ActionCompleteUI
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.censo.R
-import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
-import co.censo.censo.presentation.access_approval.components.SelectApproverUI
+import co.censo.censo.presentation.access_approval.components.SelectApprover
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
@@ -180,22 +176,11 @@ fun AccessApprovalScreen(
                         }
 
                         AccessApprovalUIState.SelectApprover -> {
-                            SelectApproverUI(
+                            SelectApprover(
                                 approvers = state.approvers.external(),
                                 selectedApprover = state.selectedApprover,
                                 onApproverSelected = viewModel::onApproverSelected,
-                                onContinue = viewModel::onApproverSelected
-                            )
-                        }
-
-                        AccessApprovalUIState.GettingLive -> {
-                            //TODO: Swap this out for the RequestAccess composable + updated logic
-
-                            GetLiveWithUserUI(
-                                title = stringResource(R.string.get_live_with_your_approver),
-                                message = stringResource(R.string.get_live_with_your_approver_message),
-                                onContinueLive = viewModel::onContinueLive,
-                                onResumeLater = viewModel::onResumeLater,
+                                onContinue = viewModel::onContinue
                             )
                         }
 

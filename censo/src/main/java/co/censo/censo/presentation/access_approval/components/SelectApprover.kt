@@ -4,6 +4,7 @@ import MessageText
 import ParticipantId
 import StandardButton
 import TitleText
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +19,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,78 +43,115 @@ import co.censo.censo.R
 import kotlinx.datetime.Clock
 
 @Composable
-fun SelectApproverUI(
+fun SelectApprover(
     approvers: List<Guardian.TrustedGuardian>,
     selectedApprover: Guardian.TrustedGuardian?,
     onApproverSelected: (Guardian.TrustedGuardian) -> Unit,
     onContinue: () -> Unit
 ) {
-
+    val context = LocalContext.current
     val buttonEnabled = selectedApprover != null
+    val verticalSpacingHeight = 28.dp
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 36.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
-    ) {
-
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            title = R.string.request_access
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            message = "Which approver would you like to use to request access?"
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        approvers.sortedBy { it.attributes.onboardedAt }.forEachIndexed { index, approver ->
-            Spacer(modifier = Modifier.height(12.dp))
-
-            ApproverInfoBox(
-                nickName = approver.label,
-                primaryApprover = (index == 0),
-                selected = (approver == selectedApprover),
-                onSelect = { onApproverSelected(approver) }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            enabled = buttonEnabled,
-            disabledColor = SharedColors.DisabledGrey,
-            color = Color.Black,
-            contentPadding = PaddingValues(vertical = 12.dp),
-            onClick = onContinue
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                fontSize = 20.sp,
-                text = stringResource(id = R.string.continue_text),
-                color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey
+
+            TitleText(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
+                title = stringResource(co.censo.censo.R.string.request_access_title),
+                textAlign = TextAlign.Start
             )
+
+            Spacer(modifier = Modifier.height(verticalSpacingHeight - 8.dp))
+
+            MessageText(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
+                message = stringResource(
+                    R.string.request_access_message,
+                    buildApproverNamesText(approvers = approvers, context)
+                ),
+                textAlign = TextAlign.Start
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            approvers.sortedBy { it.attributes.onboardedAt }.forEachIndexed { _, approver ->
+                Spacer(modifier = Modifier.height(12.dp))
+
+                SelectingApproverInfoBox(
+                    nickName = approver.label,
+                    selected = (approver == selectedApprover),
+                    onSelect = { onApproverSelected(approver) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 24.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Divider()
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    StandardButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 36.dp),
+                        enabled = buttonEnabled,
+                        disabledColor = SharedColors.DisabledGrey,
+                        color = Color.Black,
+                        onClick = onContinue,
+                        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
+                    ) {
+                        Text(
+                            text = stringResource(id = co.censo.censo.R.string.continue_text),
+                            color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey,
+                            fontSize = 24.sp
+                        )
+                    }
+                }
+            }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(24.dp))
+fun buildApproverNamesText(approvers: List<Guardian.TrustedGuardian>, context: Context): String {
+    val primaryApproverName =
+        approvers.sortedBy { it.attributes.onboardedAt }.getOrNull(0)?.label ?: ""
+    val alternateApproverName =
+        approvers.sortedBy { it.attributes.onboardedAt }.getOrNull(1)?.label ?: ""
 
+    val primaryApproverNameNotEmpty = primaryApproverName.isNotEmpty()
+    val bothApproverNamesNotEmpty =
+        primaryApproverNameNotEmpty && alternateApproverName.isNotEmpty()
+
+    return if (approvers.size == 1 && primaryApproverNameNotEmpty) {
+        primaryApproverName
+    } else if (approvers.size == 2 && bothApproverNamesNotEmpty) {
+        "$primaryApproverName or $alternateApproverName"
+    } else {
+        context.getString(R.string.your_approver)
     }
 }
 
 @Composable
-fun ApproverInfoBox(
+fun SelectingApproverInfoBox(
     nickName: String,
-    primaryApprover: Boolean,
     selected: Boolean,
     onSelect: () -> Unit
 ) {
@@ -120,6 +161,7 @@ fun ApproverInfoBox(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 36.dp)
             .background(
                 shape = RoundedCornerShape(12.dp),
                 color = Color.Transparent
@@ -153,9 +195,7 @@ fun ApproverInfoBox(
 
         Column {
             Text(
-                text =
-                if (primaryApprover) stringResource(R.string.primary_approver)
-                else stringResource(R.string.alternate_approver),
+                text = stringResource(id = R.string.approver),
                 color = Color.Black,
                 fontSize = labelTextSize
             )
@@ -196,7 +236,7 @@ fun SelectApproverUIPreview() {
         )
     )
 
-    SelectApproverUI(
+    SelectApprover(
         approvers = listOf(
             primaryApprover,
             backupApprover

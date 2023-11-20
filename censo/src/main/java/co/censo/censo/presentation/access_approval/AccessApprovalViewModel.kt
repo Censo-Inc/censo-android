@@ -110,14 +110,7 @@ class AccessApprovalViewModel @Inject constructor(
                     }
                 } else if (state.accessApprovalUIState == AccessApprovalUIState.Initial) {
                     // determine initial UI state
-                    state = if (state.approvers.backupApprover().isDefined()) {
-                        state.copy(accessApprovalUIState = AccessApprovalUIState.SelectApprover)
-                    } else {
-                        state.copy(
-                            selectedApprover = state.approvers.primaryApprover(),
-                            accessApprovalUIState = AccessApprovalUIState.GettingLive
-                        )
-                    }
+                    state = state.copy(accessApprovalUIState = AccessApprovalUIState.SelectApprover)
                 } else {
                     checkForRejections(recovery)
                 }
@@ -212,19 +205,12 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun onResumeLater() {
-        cancelAccess()
-    }
-
     fun resetNavigationResource() {
         state = state.copy(
             navigationResource = Resource.Uninitialized
         )
     }
 
-    fun onContinueLive() {
-        state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
-    }
 
     fun onApproverSelected(selectedApprover: Guardian.TrustedGuardian) {
         state = if (state.selectedApprover == selectedApprover) {
@@ -234,18 +220,14 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun onApproverSelected() {
-        state = state.copy(accessApprovalUIState = AccessApprovalUIState.GettingLive)
+    fun onContinue() {
+        state = state.copy(accessApprovalUIState = AccessApprovalUIState.ApproveAccess)
     }
 
     fun onBackClicked() {
         when (state.accessApprovalUIState) {
-            AccessApprovalUIState.GettingLive -> {
-                state = state.copy(showCancelConfirmationDialog = true)
-            }
-
             AccessApprovalUIState.SelectApprover -> {
-                state = state.copy(accessApprovalUIState = AccessApprovalUIState.GettingLive)
+                state = state.copy(showCancelConfirmationDialog = true)
             }
 
             AccessApprovalUIState.ApproveAccess -> {

@@ -50,5 +50,5 @@ data class AccessApprovalState(
 }
 
 enum class AccessApprovalUIState {
-    Initial, AnotherDevice, GettingLive, SelectApprover, ApproveAccess, Approved
+    Initial, AnotherDevice, SelectApprover, ApproveAccess, Approved
 }

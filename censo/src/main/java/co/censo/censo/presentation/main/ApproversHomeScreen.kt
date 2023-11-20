@@ -68,7 +68,6 @@ fun ApproversHomeScreen(
             for ((index, approver) in nonOwnerApprovers.withIndex()) {
                 ApproverInfoBox(
                     nickName = approver.label,
-                    primaryApprover = index == 0,
                     status = approver.attributes,
                     editEnabled = false
                 )
@@ -199,7 +198,6 @@ private fun buildSpannedParagraph(
 @Composable
 fun ApproverInfoBox(
     nickName: String,
-    primaryApprover: Boolean,
     status: GuardianStatus?,
     editEnabled: Boolean = true
 ) {
