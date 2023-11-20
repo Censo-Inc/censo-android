@@ -118,6 +118,8 @@ enum class PlanSetupUIState {
 }
 
 sealed interface PlanSetupAction {
+
+    //Approver Setup
     data class ApproverNicknameChanged(val name: String) : PlanSetupAction
     object EditApproverNickname : PlanSetupAction
     object EditApproverAndSavePolicy : PlanSetupAction
@@ -125,13 +127,22 @@ sealed interface PlanSetupAction {
     object SaveApproverAndSavePolicy : PlanSetupAction
     object GoLiveWithApprover: PlanSetupAction
     object ApproverConfirmed : PlanSetupAction
+
+    //Plan Finalization
     object Completed : PlanSetupAction
     object SavePlan: PlanSetupAction
+
+    //Back
     object BackClicked : PlanSetupAction
+
+    //Cloud
     object KeyUploadSuccess : PlanSetupAction
     data class KeyDownloadSuccess(val encryptedKey: ByteArray) : PlanSetupAction
     data class KeyDownloadFailed(val e: Exception?) : PlanSetupAction
     data class KeyUploadFailed(val e: Exception?) : PlanSetupAction
+
+    //Retry
+    object Retry : PlanSetupAction
 }
 
 enum class ApproverType {

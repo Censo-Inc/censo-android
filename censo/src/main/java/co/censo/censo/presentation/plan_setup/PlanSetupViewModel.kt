@@ -45,7 +45,7 @@ import javax.inject.Inject
  *
  * Main Processes:
  *
- * Process 1: Setup Approvers: Primary and Alternate
+ * Process 1: Setup Approvers: (Primary and Alternate)
  *      Set the user nickname
  *          (edit user nickname)
  *      Activate Approver
@@ -138,11 +138,15 @@ class PlanSetupViewModel @Inject constructor(
     var state by mutableStateOf(PlanSetupState())
         private set
 
+    //region Events
     fun receivePlanAction(action: PlanSetupAction) {
         projectLog(message = "Action Received: $action")
         when (action) {
             //Back
             PlanSetupAction.BackClicked -> onBackClicked()
+
+            //Retry
+            PlanSetupAction.Retry -> retrieveOwnerState(silent = false)
 
             //Nickname or Approver Actions
             is PlanSetupAction.ApproverNicknameChanged ->
@@ -167,6 +171,7 @@ class PlanSetupViewModel @Inject constructor(
             PlanSetupAction.Completed -> onFullyCompleted()
         }
     }
+    //endregion
 
     //region Lifecycle Methods
     fun onStart() {
@@ -798,20 +803,11 @@ class PlanSetupViewModel @Inject constructor(
         state = state.copy(navigationResource = Resource.Uninitialized)
     }
 
-    fun reset() {
-        state = PlanSetupState()
-        retrieveOwnerState(silent = false, overwriteUIState = true)
-    }
-
     private fun resetCloudStorageActionState() {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(),
             saveKeyToCloud = Resource.Uninitialized
         )
-    }
-
-    fun resetVerifyKeyConfirmationSignature() {
-        state = state.copy(verifyKeyConfirmationSignature = Resource.Uninitialized)
     }
     //endregion
 

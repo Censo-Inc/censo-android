@@ -114,55 +114,54 @@ fun PlanSetupScreen(
             when {
                 state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
 
-                //TODO: These retries and errors need to get tested and improved.
                 state.asyncError -> {
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
                         DisplayError(
                             errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
-                            dismissAction = { viewModel.resetVerifyKeyConfirmationSignature() },
-                            retryAction = { viewModel.resetVerifyKeyConfirmationSignature() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.userResponse is Resource.Error){
                         DisplayError(
                             errorMessage = "Failed to retrieve user information, try again.",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.createPolicySetupResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to create policy, try again",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.initiateRecoveryResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to replace plan, try again.",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.retrieveRecoveryShardsResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve recovery data, try again.",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to replace policy, try again.",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.completeGuardianShipResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to finalize plan, try again.",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",
-                            dismissAction = { viewModel.reset() },
-                            retryAction = { viewModel.reset() },
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     }
                 }
