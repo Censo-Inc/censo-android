@@ -147,7 +147,7 @@ fun PlanSetupScreen(
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Failed to replace policy, try again.",
+                            errorMessage = "Failed to create new policy, try again.",
                             dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                             retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )

@@ -699,28 +699,43 @@ class PlanSetupViewModel @Inject constructor(
 
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
         state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
-        if (state.ownerState!!.guardianSetup!!.guardians.any {  !ownerRepository.verifyKeyConfirmationSignature(it) }) {
-            state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
-            return
-        }
 
-        state = state.copy(replacePolicyResponse = Resource.Loading())
+        try {
 
-        viewModelScope.launch(Dispatchers.IO) {
-            val response = ownerRepository.replacePolicy(
-                encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
-                encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
-                threshold = 2U,
-                guardians = listOfNotNull(state.ownerApprover, state.primaryApprover, state.alternateApprover)
-            )
-
-            state = state.copy(replacePolicyResponse = response)
-
-            if (response is Resource.Success) {
-                updateOwnerState(response.data!!.ownerState)
-
-                state = state.copy(planSetupUIState = PlanSetupUIState.Completed_8)
+            if (state.ownerState!!.guardianSetup!!.guardians.any {
+                    !ownerRepository.verifyKeyConfirmationSignature(
+                        it
+                    )
+                }) {
+                state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
+                return
             }
+
+            state = state.copy(replacePolicyResponse = Resource.Loading())
+
+            viewModelScope.launch(Dispatchers.IO) {
+                val response = ownerRepository.replacePolicy(
+                    encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
+                    encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
+                    threshold = 2U,
+                    guardians = listOfNotNull(
+                        state.ownerApprover,
+                        state.primaryApprover,
+                        state.alternateApprover
+                    )
+                )
+
+                state = state.copy(replacePolicyResponse = response)
+
+                if (response is Resource.Success) {
+                    updateOwnerState(response.data!!.ownerState)
+
+                    state = state.copy(planSetupUIState = PlanSetupUIState.Completed_8)
+                }
+            }
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ReplacePolicy)
+            state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
         }
     }
     //endregion
