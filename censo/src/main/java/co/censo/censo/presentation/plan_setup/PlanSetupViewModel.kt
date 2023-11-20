@@ -648,13 +648,14 @@ class PlanSetupViewModel @Inject constructor(
 
             if (owner.status is GuardianStatus.ImplicitlyOwner) {
                 initiateRecovery()
+                return@launch
             }
 
             val loadedKey =
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
             if (!loadedKey) {
-                if (keyRepository.userHasKeySavedInCloud(owner.participantId)) {
+                if (!keyRepository.userHasKeySavedInCloud(owner.participantId)) {
                     state = state.copy(
                         cloudStorageAction = CloudStorageActionData(
                             triggerAction = true, action = CloudStorageActions.DOWNLOAD
