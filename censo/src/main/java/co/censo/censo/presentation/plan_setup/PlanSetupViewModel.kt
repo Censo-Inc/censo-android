@@ -571,37 +571,41 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     private fun saveKeyWithEntropy() {
-        state = state.copy(saveKeyToCloud = Resource.Loading())
-        val approverEncryptionKey = keyRepository.createGuardianKey()
+        try {
+            state = state.copy(saveKeyToCloud = Resource.Loading())
+            val approverEncryptionKey = keyRepository.createGuardianKey()
 
-        val approverSetup = state.ownerState?.guardianSetup?.guardians ?: emptyList()
-        val ownerApprover: Guardian.ProspectGuardian? = approverSetup.ownerApprovers()
+            val approverSetup = state.ownerState?.guardianSetup?.guardians ?: emptyList()
+            val ownerApprover: Guardian.ProspectGuardian? = approverSetup.ownerApprovers()
 
-        val entropy = (ownerApprover?.status as? GuardianStatus.OwnerAsApprover)?.entropy!!
+            val entropy = (ownerApprover?.status as? GuardianStatus.OwnerAsApprover)?.entropy!!
 
-        val idToken = keyRepository.retrieveSavedDeviceId()
+            val idToken = keyRepository.retrieveSavedDeviceId()
 
-        val encryptedKey = approverEncryptionKey.encryptWithEntropy(
-            deviceKeyId = idToken,
-            entropy = entropy
-        )
-
-        val publicKey = Base58EncodedGuardianPublicKey(
-            approverEncryptionKey.publicExternalRepresentation().value
-        )
-
-        val keyData = PlanSetupKeyData(
-            encryptedPrivateKey = encryptedKey,
-            publicKey = publicKey
-        )
-
-        state = state.copy(
-            keyData = keyData,
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true,
-                action = CloudStorageActions.UPLOAD,
+            val encryptedKey = approverEncryptionKey.encryptWithEntropy(
+                deviceKeyId = idToken,
+                entropy = entropy
             )
-        )
+
+            val publicKey = Base58EncodedGuardianPublicKey(
+                approverEncryptionKey.publicExternalRepresentation().value
+            )
+
+            val keyData = PlanSetupKeyData(
+                encryptedPrivateKey = encryptedKey,
+                publicKey = publicKey
+            )
+
+            state = state.copy(
+                keyData = keyData,
+                cloudStorageAction = CloudStorageActionData(
+                    triggerAction = true,
+                    action = CloudStorageActions.UPLOAD,
+                )
+            )
+        } catch (e: Exception) {
+            state = state.copy(saveKeyToCloud = Resource.Error(exception = e))
+        }
     }
 
 

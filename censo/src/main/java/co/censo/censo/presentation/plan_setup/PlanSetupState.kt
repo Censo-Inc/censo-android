@@ -100,6 +100,7 @@ data class PlanSetupState(
             || replacePolicyResponse is Resource.Error
             || verifyKeyConfirmationSignature is Resource.Error
             || completeGuardianShipResponse is Resource.Error
+            || saveKeyToCloud is Resource.Error
 
     enum class BackIconType {
         None, Back, Exit

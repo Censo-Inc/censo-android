@@ -157,6 +157,12 @@ fun PlanSetupScreen(
                             dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                             retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
+                    } else if (state.saveKeyToCloud is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to setup secure data, try again.",
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                        )
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",
@@ -277,7 +283,7 @@ fun PlanSetupScreen(
                             )
 
                             LaunchedEffect(Unit) {
-                                delay(5000)
+                                delay(8000)
                                 viewModel.receivePlanAction(PlanSetupAction.Completed)
                             }
                         }
