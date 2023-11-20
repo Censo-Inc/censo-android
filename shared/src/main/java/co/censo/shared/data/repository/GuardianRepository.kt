@@ -53,6 +53,9 @@ interface GuardianRepository {
     fun saveParticipantId(participantId: String)
     fun retrieveParticipantId(): String
     fun clearParticipantId()
+    fun saveApprovalId(approvalId: String)
+    fun retrieveApprovalId(): String
+    fun clearApprovalId()
 
     suspend fun storeRecoveryTotpSecret(
         participantId: String,
@@ -74,6 +77,17 @@ interface GuardianRepository {
     suspend fun rejectRecovery(
         participantId: ParticipantId
     ) : Resource<RejectRecoveryApiResponse>
+
+    suspend fun storeAccessTotpSecret(
+        approvalId: String,
+        encryptedTotpSecret: Base64EncodedData
+    ) : Resource<StoreRecoveryTotpSecretApiResponse>
+
+    suspend fun approveAccess(
+        approvalId: String,
+        encryptedShard: Base64EncodedData
+    ) : Resource<ApproveRecoveryApiResponse>
+    suspend fun rejectAccess(approvalId: String) : Resource<RejectRecoveryApiResponse>
 }
 
 class GuardianRepositoryImpl(
@@ -152,6 +166,11 @@ class GuardianRepositoryImpl(
         secureStorage.retrieveGuardianParticipantId()
 
     override fun clearParticipantId() = secureStorage.clearGuardianParticipantId()
+    override fun saveApprovalId(approvalId: String) {
+        secureStorage.saveApprovalId(approvalId)
+    }
+    override fun retrieveApprovalId() = secureStorage.retrieveApprovalId()
+    override fun clearApprovalId() = secureStorage.clearApprovalId()
 
     override suspend fun storeRecoveryTotpSecret(
         participantId: String,
@@ -160,6 +179,18 @@ class GuardianRepositoryImpl(
         return retrieveApiResource {
             apiService.storeRecoveryTotpSecret(
                 participantId,
+                StoreRecoveryTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
+            )
+        }
+    }
+
+    override suspend fun storeAccessTotpSecret(
+        approvalId: String,
+        encryptedTotpSecret: Base64EncodedData
+    ) : Resource<StoreRecoveryTotpSecretApiResponse> {
+        return retrieveApiResource {
+            apiService.storeAccessTotpSecret(
+                approvalId,
                 StoreRecoveryTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
             )
         }
@@ -207,9 +238,27 @@ class GuardianRepositoryImpl(
         }
     }
 
+    override suspend fun approveAccess(
+        approvalId: String,
+        encryptedShard: Base64EncodedData
+    ) : Resource<ApproveRecoveryApiResponse> {
+        return retrieveApiResource {
+            apiService.approveAccess(
+                approvalId,
+                ApproveRecoveryApiRequest(encryptedShard)
+            )
+        }
+    }
+
     override suspend fun rejectRecovery(participantId: ParticipantId): Resource<RejectRecoveryApiResponse> {
         return retrieveApiResource {
             apiService.rejectRecovery(participantId.value)
+        }
+    }
+
+    override suspend fun rejectAccess(approvalId: String) : Resource<RejectRecoveryApiResponse> {
+        return retrieveApiResource {
+            apiService.rejectAccess(approvalId)
         }
     }
 }

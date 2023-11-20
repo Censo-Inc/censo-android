@@ -106,6 +106,12 @@ value class ParticipantId(val value: String) {
     }
 }
 
+@Serializable
+@JvmInline
+value class ApprovalId(val value: String) {
+    override fun toString(): String = value
+}
+
 
 @Serializable
 @JvmInline

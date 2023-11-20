@@ -82,6 +82,7 @@ interface ApiService {
         const val INVITATION_ID = "invitationId"
         const val INTERMEDIATE_KEY = "intermediateKey"
         const val PARTICIPANT_ID = "participantId"
+        const val APPROVAL_ID = "approvalId"
         const val SECRET_ID = "secretId"
 
         const val IS_API = "X-IsApi"
@@ -226,6 +227,12 @@ interface ApiService {
         @Body apiRequest: StoreRecoveryTotpSecretApiRequest
     ): RetrofitResponse<StoreRecoveryTotpSecretApiResponse>
 
+    @POST("/v1/access/{$APPROVAL_ID}/totp")
+    suspend fun storeAccessTotpSecret(
+        @Path(value = APPROVAL_ID) approvalId: String,
+        @Body apiRequest: StoreRecoveryTotpSecretApiRequest
+    ): RetrofitResponse<StoreRecoveryTotpSecretApiResponse>
+
     @POST("/v1/recovery/{$PARTICIPANT_ID}/totp-verification")
     suspend fun submitRecoveryTotpVerification(
         @Path(value = PARTICIPANT_ID) participantId: String,
@@ -238,9 +245,20 @@ interface ApiService {
         @Body apiRequest: ApproveRecoveryApiRequest
     ): RetrofitResponse<ApproveRecoveryApiResponse>
 
+    @POST("/v1/access/{$APPROVAL_ID}/approval")
+    suspend fun approveAccess(
+        @Path(value = APPROVAL_ID) approvalId: String,
+        @Body apiRequest: ApproveRecoveryApiRequest
+    ): RetrofitResponse<ApproveRecoveryApiResponse>
+
     @POST("/v1/recovery/{$PARTICIPANT_ID}/rejection")
     suspend fun rejectRecovery(
         @Path(value = PARTICIPANT_ID) participantId: String
+    ): RetrofitResponse<RejectRecoveryApiResponse>
+
+    @POST("/v1/access/{$APPROVAL_ID}/rejection")
+    suspend fun rejectAccess(
+        @Path(value = APPROVAL_ID) approvalId: String
     ): RetrofitResponse<RejectRecoveryApiResponse>
 
     @POST("/v1/recovery/retrieval")

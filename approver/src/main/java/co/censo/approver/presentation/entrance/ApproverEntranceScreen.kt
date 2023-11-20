@@ -1,5 +1,6 @@
 package co.censo.approver.presentation.entrance
 
+import ApprovalId
 import ParticipantId
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
@@ -44,6 +45,7 @@ fun ApproverEntranceScreen(
     navController: NavController,
     invitationId: String? = null,
     recoveryParticipantId: String? = null,
+    approvalId: String? = null,
     viewModel: ApproverEntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -71,7 +73,11 @@ fun ApproverEntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(invitationId, recoveryParticipantId)
+        viewModel.onStart(
+            invitationId = invitationId,
+            recoveryParticipantId = recoveryParticipantId,
+            approvalId = approvalId
+        )
         onDispose { }
     }
 

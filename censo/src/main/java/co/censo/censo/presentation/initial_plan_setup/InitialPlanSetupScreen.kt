@@ -47,7 +47,6 @@ import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.util.projectLog
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
@@ -157,11 +156,9 @@ fun InitialPlanSetupScreen(
                     participantId = state.participantId,
                     encryptedPrivateKey = privateKey,
                     onActionSuccess = { _ ->
-                        projectLog(message = "Cloud Storage action success")
                         viewModel.onKeySaved()
                     },
                     onActionFailed = {
-                        projectLog(message = "Cloud Storage action failed")
                         viewModel.onKeySaveFailed(exception = it)
                     },
                 )

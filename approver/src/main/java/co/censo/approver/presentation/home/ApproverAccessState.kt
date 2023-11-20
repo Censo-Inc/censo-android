@@ -22,6 +22,7 @@ data class ApproverAccessState(
     val guardianState: GuardianState? = null,
 
     // deep links data
+    val approvalId: String = "",
     val participantId: String = "",
 
     // Approver data

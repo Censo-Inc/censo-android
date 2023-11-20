@@ -6,12 +6,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.presentation.Screen
+import co.censo.shared.CensoLink.Companion.ACCESS_TYPE
+import co.censo.shared.CensoLink.Companion.INVITE_TYPE
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.repository.GuardianRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.parseLink
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
@@ -37,13 +40,18 @@ class ApproverEntranceViewModel @Inject constructor(
     var state by mutableStateOf(ApproverEntranceState())
         private set
 
+
     //region Lifecycle Methods
-    fun onStart(invitationId: String?, recoveryParticipantId: String?) {
+    fun onStart(invitationId: String?, recoveryParticipantId: String?, approvalId: String?) {
         if (invitationId != null) {
             guardianRepository.saveInvitationId(invitationId)
         }
         if (recoveryParticipantId != null) {
             guardianRepository.saveParticipantId(recoveryParticipantId)
+        }
+
+        if (approvalId != null) {
+            guardianRepository.saveApprovalId(approvalId)
         }
 
         determineLoginState()
@@ -279,17 +287,23 @@ class ApproverEntranceViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val censoLink = parseLink(clipboardContent)
-                when (censoLink.host) {
-                    "invite" -> {
+                val censoLink = clipboardContent.parseLink()
+                when (censoLink.type) {
+                    INVITE_TYPE -> {
                         guardianRepository.clearParticipantId()
-                        guardianRepository.saveInvitationId(censoLink.identifier)
+                        guardianRepository.saveInvitationId(censoLink.identifiers.mainId)
                         routing()
                     }
 
-                    "access" -> {
-                        guardianRepository.clearInvitationId()
-                        guardianRepository.saveParticipantId(censoLink.identifier)
+                    ACCESS_TYPE -> {
+                        if (censoLink.identifiers.approvalId == null) {
+                            guardianRepository.clearInvitationId()
+                            guardianRepository.saveParticipantId(censoLink.identifiers.mainId)
+                        } else {
+                            guardianRepository.clearInvitationId()
+                            guardianRepository.saveParticipantId(censoLink.identifiers.mainId)
+                            guardianRepository.saveApprovalId(censoLink.identifiers.approvalId!!)
+                        }
                         routing()
                     }
 
@@ -323,25 +337,6 @@ class ApproverEntranceViewModel @Inject constructor(
                     uiState = ApproverEntranceUIState.Initial
                 )
         }
-    }
-    //endregion
-
-    //region CensoLink + parseLink Helper
-    data class CensoLink(
-        val host: String,
-        val identifier: String
-    )
-
-    private fun parseLink(link: String): CensoLink {
-        val parts = link.replace(Regex("[\\r\\n]+"), "").trim().split("//")
-        if (parts.size != 2 || !parts[0].startsWith("censo")) {
-            throw Exception("invalid link")
-        }
-        val routeAndIdentifier = parts[1].split("/")
-        if (routeAndIdentifier.size != 2 && !setOf("access", "invite").contains(routeAndIdentifier[0])) {
-            throw Exception("invalid link")
-        }
-        return CensoLink(routeAndIdentifier[0], routeAndIdentifier[1])
     }
     //endregion
 
