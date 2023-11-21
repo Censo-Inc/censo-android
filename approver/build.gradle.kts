@@ -72,6 +72,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
+            manifestPlaceholders["SENTRY_ID"] = "https://29e39757e3a25d59f1314d04195b9454@o4506182264815616.ingest.sentry.io/4506264343019520"
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             manifestPlaceholders["URL_SCHEME"] = "censo"
             resValue("string", "app_name", "Approver")
@@ -79,6 +80,7 @@ android {
         create("staging") {
             resValue("string", "app_name", "Staging Approver")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
+            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
@@ -87,6 +89,7 @@ android {
         create("integration") {
             resValue("string", "app_name", "Integration Approver")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
+            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".integration"
             isDebuggable = false

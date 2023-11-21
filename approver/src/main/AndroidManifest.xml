@@ -43,7 +43,7 @@
         </activity>
 
         <!-- Required: set your sentry.io project identifier (DSN) -->
-        <meta-data android:name="io.sentry.dsn" android:value="https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192" />
+        <meta-data android:name="io.sentry.dsn" android:value="${SENTRY_ID}" />
 
         <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
         <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="false" />
