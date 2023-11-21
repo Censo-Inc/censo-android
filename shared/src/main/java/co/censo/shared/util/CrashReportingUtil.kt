@@ -1,8 +1,5 @@
 package co.censo.shared.util
 
-import co.censo.shared.util.CrashReportingUtil.ERROR_MESSAGE_KEY
-import co.censo.shared.util.CrashReportingUtil.MANUALLY_REPORTED_TAG
-import com.raygun.raygun4android.RaygunClient
 import io.sentry.Sentry
 
 object CrashReportingUtil {
