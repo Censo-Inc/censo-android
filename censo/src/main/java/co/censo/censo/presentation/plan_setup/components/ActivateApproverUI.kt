@@ -371,7 +371,7 @@ fun ApproverStep(
         Column {
             Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = content, fontSize = 14.sp)
+            Text(modifier = Modifier.fillMaxWidth(), text = content, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(8.dp))
             verificationCodeUIData?.let {
                 Box(modifier = Modifier.padding(vertical = 12.dp)) {
@@ -427,7 +427,7 @@ fun ApproverStep(
         Column {
             Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(8.dp))
-            ClickableText(text = content, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp)) { offset ->
+            ClickableText(modifier = Modifier.fillMaxWidth(), text = content, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp)) { offset ->
                 content.getStringAnnotations(stringAnnotationTag ?: "", start = offset, end = offset).firstOrNull()
                     ?.let { annotatedLink ->
                         uriHandler.openUri(annotatedLink.item)

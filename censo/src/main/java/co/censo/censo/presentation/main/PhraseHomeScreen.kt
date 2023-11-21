@@ -161,39 +161,28 @@ fun SeedPhraseItem(
                 )
                 .border(
                     width = 1.dp,
-                    color = if (isSelected) VaultColors.PrimaryColor else SharedColors.BorderGrey,
+                    color = if (isSelected) SharedColors.SuccessGreen else SharedColors.BorderGrey,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .weight(0.25f),
-                ) {
-                    Icon(
-                        painterResource(id = co.censo.shared.R.drawable.check_icon),
-                        contentDescription = stringResource(R.string.select_approver),
-                        tint = Color.Black
-                    )
-                }
-            }
-
             Text(
-                modifier = Modifier.padding(
-                    top = 32.dp,
-                    bottom = 32.dp,
-                    start = if (!isDeletable && isSelected) 0.dp else 24.dp,
-                    end = if (isDeletable) 0.dp else 24.dp
-                ).weight(1f),
+                modifier = Modifier
+                    .padding(
+                        top = 32.dp,
+                        bottom = 32.dp,
+                        start = 24.dp,
+                        end = if (isDeletable) 0.dp else 24.dp
+                    )
+                    .weight(1f),
                 text = vaultSecret.label,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.W600,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
+                color = if (isSelected) SharedColors.SuccessGreen else Color.Black
             )
 
             if (isDeletable) {
@@ -219,6 +208,19 @@ fun SeedPhraseItem(
                     .align(Alignment.CenterVertically),
                 imageVector = Icons.Filled.ChevronRight,
                 contentDescription = stringResource(R.string.select_phrase_cont_description)
+            )
+        }
+
+        if (isSelected) {
+            Icon(
+                painterResource(id = co.censo.shared.R.drawable.check_icon),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .size(48.dp)
+                    .weight(0.25f)
+                    .padding(horizontal = 24.dp),
+                contentDescription = stringResource(R.string.phrase_viewed),
+                tint = SharedColors.SuccessGreen
             )
         }
     }

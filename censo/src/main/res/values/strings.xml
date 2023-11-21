@@ -350,4 +350,5 @@
     <string name="your_approver">your approver</string>
     <string name="select_phrase_cont_description">Select phrase</string>
     <string name="activated">Activated</string>
+    <string name="phrase_viewed">phrase viewed</string>
 </resources>
