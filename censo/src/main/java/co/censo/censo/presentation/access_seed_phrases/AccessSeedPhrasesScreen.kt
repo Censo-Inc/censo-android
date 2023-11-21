@@ -168,10 +168,7 @@ fun AccessSeedPhrasesScreen(
                         AccessPhrasesUIState.ViewPhrase -> {
                             state.recoveredPhrases.data?.first()?.let {
                                 ViewAccessPhraseUI(
-                                    wordIndex = state.selectedIndex,
-                                    phraseWord = state.selectedWord,
-                                    decrementIndex = viewModel::decrementIndex,
-                                    incrementIndex = viewModel::incrementIndex,
+                                    phraseWords = it.seedPhrase.split(" "),
                                     onDone = viewModel::reset,
                                     timeLeft = state.timeRemaining
                                 )

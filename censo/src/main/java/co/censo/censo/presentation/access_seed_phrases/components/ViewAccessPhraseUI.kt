@@ -2,6 +2,7 @@ package co.censo.censo.presentation.access_seed_phrases.components
 
 import StandardButton
 import android.content.Context
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,20 +39,25 @@ import co.censo.censo.R
 import co.censo.shared.R as SharedR
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWord
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ViewAccessPhraseUI(
-    wordIndex: Int,
-    phraseWord: String,
-    decrementIndex: () -> Unit,
-    incrementIndex: () -> Unit,
+    phraseWords: List<String>,
     onDone: () -> Unit,
     timeLeft: Duration
 ) {
     val context = LocalContext.current
+
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { phraseWords.size }
+    )
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -68,7 +75,7 @@ fun ViewAccessPhraseUI(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painterResource(id = co.censo.censo.R.drawable.time_left_icon),
+                painterResource(id = R.drawable.time_left_icon),
                 contentDescription = "",
             )
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
@@ -93,16 +100,22 @@ fun ViewAccessPhraseUI(
             )
         }
 
+        Spacer(modifier = Modifier.weight(1f))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val coroutineScope = rememberCoroutineScope()
             IconButton(
                 modifier = Modifier
                     .weight(0.15f)
                     .padding(start = 8.dp),
-                onClick = decrementIndex
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                }
             ) {
                 Icon(
                     painter = painterResource(SharedR.drawable.arrow_left),
@@ -110,16 +123,24 @@ fun ViewAccessPhraseUI(
                     tint = Color.Black
                 )
             }
-            ViewPhraseWord(
+            HorizontalPager(
                 modifier = Modifier.weight(0.7f),
-                index = wordIndex,
-                phraseWord = phraseWord,
-            )
+                state = pagerState
+            ) {
+                ViewPhraseWord(
+                    index = it,
+                    phraseWord = phraseWords[it],
+                )
+            }
             IconButton(
                 modifier = Modifier
                     .weight(0.15f)
                     .padding(end = 8.dp),
-                onClick = incrementIndex
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                }
             ) {
                 Icon(
                     painter = painterResource(SharedR.drawable.arrow_right),
@@ -129,11 +150,11 @@ fun ViewAccessPhraseUI(
             }
         }
 
-        //TODO: Need to update this Composable to contain a HorizontalPager for swiping through the words
-//        Spacer(modifier = Modifier.height(36.dp))
-//
-//        Text(text = stringResource(R.string.swipe_back_and_forth_to_review_words))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        Text(text = stringResource(R.string.swipe_back_and_forth_to_review_words))
+
+        Spacer(modifier = Modifier.weight(1f))
 
         StandardButton(
             modifier = Modifier
@@ -163,10 +184,7 @@ fun formatPhraseAccessDuration(duration: Duration, context: Context) =
 fun PreviewV15MinuteViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
         ViewAccessPhraseUI(
-            wordIndex = 5,
-            phraseWord = "lounge",
-            decrementIndex = { },
-            incrementIndex = { },
+            phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 899.seconds
         )
@@ -178,10 +196,7 @@ fun PreviewV15MinuteViewPhraseWordUI() {
 fun PreviewLess15ViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
         ViewAccessPhraseUI(
-            wordIndex = 5,
-            phraseWord = "lounge",
-            decrementIndex = { },
-            incrementIndex = { },
+            phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 480.seconds
         )
@@ -193,10 +208,7 @@ fun PreviewLess15ViewPhraseWordUI() {
 fun PreviewLess1ViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
         ViewAccessPhraseUI(
-            wordIndex = 5,
-            phraseWord = "lounge",
-            decrementIndex = { },
-            incrementIndex = { },
+            phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 55.seconds
         )

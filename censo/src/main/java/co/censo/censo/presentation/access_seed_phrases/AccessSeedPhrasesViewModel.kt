@@ -186,17 +186,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         )
     }
 
-    fun decrementIndex() {
-        val index = if (state.selectedIndex > 0) state.selectedIndex - 1 else 0
-        state = state.copy(selectedIndex = index)
-    }
-
-    fun incrementIndex() {
-        val index =
-            if (state.selectedIndex >= state.viewedPhrase.size - 1) state.selectedIndex else state.selectedIndex + 1
-        state = state.copy(selectedIndex = index)
-    }
-
     fun onBackClicked() {
         val accessPhrasesUIState = when (state.accessPhrasesUIState) {
             AccessPhrasesUIState.ViewPhrase,

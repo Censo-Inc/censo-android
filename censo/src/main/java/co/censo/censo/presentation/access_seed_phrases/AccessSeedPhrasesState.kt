@@ -18,7 +18,6 @@ data class AccessSeedPhrasesState(
     val accessPhrasesUIState: AccessPhrasesUIState = AccessPhrasesUIState.SelectPhrase,
     val timeRemaining: Duration = 0.seconds,
     val locksAt: Instant? = null,
-    val selectedIndex: Int = 0,
     val viewedPhrase: List<String> = emptyList(),
     val showCancelConfirmationDialog: Boolean = false,
     val viewedPhraseIds: List<VaultSecretId> = emptyList(),
@@ -35,12 +34,6 @@ data class AccessSeedPhrasesState(
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
-
-    val selectedWord = try {
-        viewedPhrase[selectedIndex]
-    } catch (e: Exception) {
-        ""
-    }
 
     val loading = retrieveShardsResponse is Resource.Loading
                 || ownerState is Resource.Loading
