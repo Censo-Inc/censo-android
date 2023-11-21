@@ -74,7 +74,6 @@ android {
             resValue("string", "app_name", "Censo")
             isMinifyEnabled = false
             isDebuggable = false
-            resValue("string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\"")
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             proguardFiles(
@@ -85,7 +84,6 @@ android {
         create("staging") {
             resValue("string", "app_name", "Staging Censo")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
-            resValue("string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
@@ -93,7 +91,6 @@ android {
         create("integration") {
             resValue("string", "app_name", "Integration Censo")
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
-            resValue("string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".integration"
             isDebuggable = false
@@ -172,9 +169,6 @@ dependencies {
 
     //Biometrics
     implementation("androidx.biometric:biometric:1.1.0")
-
-    //Raygun crash reporting
-    implementation("com.raygun:raygun4android:4.0.1")
 
     //Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:32.2.3"))

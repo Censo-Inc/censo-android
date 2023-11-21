@@ -168,9 +168,6 @@ dependencies {
     //Encrypted Preferences
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
 
-    //Raygun crash reporting
-    implementation("com.raygun:raygun4android:4.0.1")
-
     //Sentry
     implementation("io.sentry:sentry-android:6.33.0")
 
