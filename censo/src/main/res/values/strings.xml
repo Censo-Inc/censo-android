@@ -351,4 +351,6 @@
     <string name="select_phrase_cont_description">Select phrase</string>
     <string name="activated">Activated</string>
     <string name="phrase_viewed">phrase viewed</string>
+    <string name="exit_accessing_phrases">Exit accessing phrases</string>
+    <string name="exit_accessing_phrases_message">Are you all finished accessing phrases? If you exit you will need to request approval to access your phrases again.</string>
 </resources>

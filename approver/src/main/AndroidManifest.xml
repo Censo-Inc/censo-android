@@ -24,7 +24,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Guardian"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

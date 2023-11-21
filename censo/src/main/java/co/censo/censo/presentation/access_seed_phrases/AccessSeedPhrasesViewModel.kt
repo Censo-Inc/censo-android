@@ -38,6 +38,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     var state by mutableStateOf(AccessSeedPhrasesState())
         private set
 
+    companion object {
+        const val MULTI_APPROVER_POLICY = 2
+    }
+
     fun onStart() {
         viewModelScope.launch {
             ownerStateFlow.collect { resource: Resource<OwnerState> ->
@@ -224,6 +228,13 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun showCancelConfirmationDialog() {
-        state = state.copy(showCancelConfirmationDialog = true)
+        val approverSize =
+            (state.ownerState.data as? OwnerState.Ready)?.policy?.guardians?.size ?: MULTI_APPROVER_POLICY
+
+        if (approverSize > 1) {
+            state = state.copy(showCancelConfirmationDialog = true)
+        } else {
+            cancelAccess()
+        }
     }
 }
