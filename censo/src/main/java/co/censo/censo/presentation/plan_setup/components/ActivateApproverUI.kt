@@ -486,7 +486,7 @@ fun ApproverStep(
         Column {
             Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = content, fontSize = 14.sp)
+            Text(modifier = Modifier.fillMaxWidth(), text = content, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(8.dp))
             verificationCodeUIData?.let {
                 Box(modifier = Modifier.padding(vertical = 12.dp)) {
