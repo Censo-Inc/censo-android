@@ -211,26 +211,29 @@ fun OwnerEntranceStandardUI(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Bottom,
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.weight(1.0f))
         Image(
+            modifier = Modifier.weight(1.25f),
             painter = painterResource(id = R.drawable.logo),
             contentDescription = null,
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
         Image(
+            modifier = Modifier.weight(0.750f),
             painter = painterResource(id = R.drawable.censo_text),
             contentDescription = null,
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
         Text(
             text = stringResource(R.string.tag_line),
             fontWeight = FontWeight.W600,
-            fontSize = 24.sp,
+            fontSize = 22.sp,
             color = Color.Black
         )
-        Spacer(modifier = Modifier.height(44.dp))
+        Spacer(modifier = Modifier.weight(0.50f))
         StandardButton(
             onClick = authenticate,
             contentPadding = PaddingValues(
@@ -260,7 +263,18 @@ fun OwnerEntranceStandardUI(
             }
         }
 
-        Spacer(modifier = Modifier.height(112.dp))
+
+        Spacer(modifier = Modifier.weight(1.0f))
+
+        Text(
+            modifier = Modifier.padding(horizontal = 44.dp),
+            fontSize = 13.sp,
+            text = stringResource(R.string.sign_in_google_explainer),
+            lineHeight = 14.sp,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.weight(0.25f))
 
         Row(
             verticalAlignment = Alignment.Top,
@@ -302,14 +316,14 @@ fun OwnerEntranceStandardUI(
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }
-        Divider(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp))
+        Divider(modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 4.dp))
         Row(
             modifier = Modifier
                 .padding(
                     start = 32.dp,
                     end = 32.dp,
-                    top = 20.dp,
-                    bottom = 32.dp
+                    top = 12.dp,
+                    bottom = 12.dp
                 )
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround

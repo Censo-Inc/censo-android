@@ -30,6 +30,7 @@
     <string name="activate_now">Activate now</string>
     <string name="continue_live">Continue live</string>
     <string name="resume_later">Resume later</string>
+    <string name="sign_in_google_explainer">Sign in with Google for enhanced privacy.\n\nWe\'ll only use your Google Drive to save necessary files, keeping your data private and secure.</string>
 
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
