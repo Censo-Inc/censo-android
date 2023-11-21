@@ -212,7 +212,7 @@ class OwnerRepositoryImpl(
         retrieveApiResource {
             apiService.signIn(
                 SignInApiRequest(
-                    identityToken = IdentityToken(idToken),
+                    identityToken = IdentityToken(idToken.sha256()),
                     jwtToken = JwtToken(authId)
                 )
             )
