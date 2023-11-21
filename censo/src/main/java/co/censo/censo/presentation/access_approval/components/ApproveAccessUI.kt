@@ -50,8 +50,7 @@ fun ApproveAccessUI(
 ) {
     val linkTag = "link"
 
-    //Todo: switch to v2 deeplink once both apps are ready
-    val deeplink = approval.deepLink()
+    val deeplink = approval.v2Deeplink()
     val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
 
     val context = LocalContext.current
