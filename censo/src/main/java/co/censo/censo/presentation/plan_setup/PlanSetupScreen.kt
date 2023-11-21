@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
@@ -29,12 +28,11 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
-import co.censo.censo.presentation.plan_setup.components.SavedAndShardedUI
+import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
@@ -267,22 +265,10 @@ fun PlanSetupScreen(
                         }
 
                         PlanSetupUIState.Completed_8 -> {
-                            val secrets = state.ownerState?.vault?.secrets
-                            SavedAndShardedUI(
-                                seedPhraseNickname = when {
-                                    secrets.isNullOrEmpty() -> null
-                                    secrets.size == 1 -> secrets.first().label
-                                    else -> stringResource(
-                                        id = R.string.count_seed_phrases,
-                                        secrets.size
-                                    )
-                                },
-                                primaryApproverNickname = state.primaryApprover?.label,
-                                alternateApproverNickname = state.alternateApprover?.label,
-                            )
+                            Activated()
 
                             LaunchedEffect(Unit) {
-                                delay(8000)
+                                delay(6000)
                                 viewModel.receivePlanAction(PlanSetupAction.Completed)
                             }
                         }

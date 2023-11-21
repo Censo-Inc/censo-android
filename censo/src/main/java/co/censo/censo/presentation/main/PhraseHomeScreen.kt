@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -31,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -136,7 +139,7 @@ fun AddAccessRow(
 
 @Composable
 fun SeedPhraseItem(
-    horizontalPadding : Dp = 36.dp,
+    horizontalPadding: Dp = 36.dp,
     vaultSecret: VaultSecret,
     isDeletable: Boolean = false,
     isSelected: Boolean = false,
@@ -148,28 +151,27 @@ fun SeedPhraseItem(
         } else Modifier
     } ?: Modifier
 
-    Box(
-        modifier = modifier
-            .padding(horizontal = horizontalPadding)
-            .background(
-                color = Color.White,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .border(
-                width = 1.dp,
-                color = if (isSelected) VaultColors.PrimaryColor else SharedColors.BorderGrey,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .fillMaxWidth(),
-    ) {
-
+    Row(modifier = Modifier.fillMaxWidth()) {
         Row(
+            modifier = modifier
+                .padding(horizontal = horizontalPadding)
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = if (isSelected) VaultColors.PrimaryColor else SharedColors.BorderGrey,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isSelected) {
                 Box(
                     modifier = Modifier
-                        .padding(start = 16.dp),
+                        .padding(start = 16.dp)
+                        .weight(0.25f),
                 ) {
                     Icon(
                         painterResource(id = co.censo.shared.R.drawable.check_icon),
@@ -181,31 +183,43 @@ fun SeedPhraseItem(
 
             Text(
                 modifier = Modifier.padding(
-                    vertical = 32.dp,
-                    horizontal = 24.dp
-                ),
+                    top = 32.dp,
+                    bottom = 32.dp,
+                    start = if (!isDeletable && isSelected) 0.dp else 24.dp,
+                    end = if (isDeletable) 0.dp else 24.dp
+                ).weight(1f),
                 text = vaultSecret.label,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.W600,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Start
             )
-        }
 
-        if (isDeletable) {
-            Box(
-                modifier = Modifier
-                    .clickable { onClick?.invoke() }
-                    .padding(end = 6.dp)
-                    .align(Alignment.CenterEnd),
-            ) {
+            if (isDeletable) {
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.edit_icon),
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier
+                        .clickable { onClick?.invoke() }
+                        .size(36.dp)
+                        .padding(end = 6.dp)
+                        .weight(0.25f),
                     contentDescription = stringResource(R.string.edit_phrase),
                     tint = Color.Black
                 )
             }
+        }
+
+        if (!isDeletable && !isSelected) {
+            Icon(
+                modifier = Modifier
+                    .clickable { onClick?.invoke() }
+                    .size(48.dp)
+                    .weight(0.25f)
+                    .align(Alignment.CenterVertically),
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = stringResource(R.string.select_phrase_cont_description)
+            )
         }
     }
 }
@@ -214,7 +228,7 @@ fun SeedPhraseItem(
 @Composable
 fun PreviewPhraseHomeScreen() {
     PhraseHomeScreen(
-        onAccessClick ={},
+        onAccessClick = {},
         onAddClick = {},
         vaultSecrets = listOf(
             VaultSecret(
