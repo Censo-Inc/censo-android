@@ -302,7 +302,7 @@ class PlanSetupViewModel @Inject constructor(
             // finishing flow after primary approver
             dropAlternateApproverAndSaveKeyWithEntropy()
         } else {
-            saveKeyWithEntropy()
+            checkUserHasSavedKeyAndSubmittedPolicy()
         }
     }
 
@@ -561,7 +561,7 @@ class PlanSetupViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 state = state.copy(alternateApprover = null)
-                saveKeyWithEntropy()
+                checkUserHasSavedKeyAndSubmittedPolicy()
             }
 
             state = state.copy(
@@ -571,37 +571,41 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     private fun saveKeyWithEntropy() {
-        state = state.copy(saveKeyToCloud = Resource.Loading())
-        val approverEncryptionKey = keyRepository.createGuardianKey()
+        try {
+            state = state.copy(saveKeyToCloud = Resource.Loading())
+            val approverEncryptionKey = keyRepository.createGuardianKey()
 
-        val approverSetup = state.ownerState?.guardianSetup?.guardians ?: emptyList()
-        val ownerApprover: Guardian.ProspectGuardian? = approverSetup.ownerApprovers()
+            val approverSetup = state.ownerState?.guardianSetup?.guardians ?: emptyList()
+            val ownerApprover: Guardian.ProspectGuardian? = approverSetup.ownerApprovers()
 
-        val entropy = (ownerApprover?.status as? GuardianStatus.OwnerAsApprover)?.entropy!!
+            val entropy = (ownerApprover?.status as? GuardianStatus.OwnerAsApprover)?.entropy!!
 
-        val idToken = keyRepository.retrieveSavedDeviceId()
+            val idToken = keyRepository.retrieveSavedDeviceId()
 
-        val encryptedKey = approverEncryptionKey.encryptWithEntropy(
-            deviceKeyId = idToken,
-            entropy = entropy
-        )
-
-        val publicKey = Base58EncodedGuardianPublicKey(
-            approverEncryptionKey.publicExternalRepresentation().value
-        )
-
-        val keyData = PlanSetupKeyData(
-            encryptedPrivateKey = encryptedKey,
-            publicKey = publicKey
-        )
-
-        state = state.copy(
-            keyData = keyData,
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true,
-                action = CloudStorageActions.UPLOAD,
+            val encryptedKey = approverEncryptionKey.encryptWithEntropy(
+                deviceKeyId = idToken,
+                entropy = entropy
             )
-        )
+
+            val publicKey = Base58EncodedGuardianPublicKey(
+                approverEncryptionKey.publicExternalRepresentation().value
+            )
+
+            val keyData = PlanSetupKeyData(
+                encryptedPrivateKey = encryptedKey,
+                publicKey = publicKey
+            )
+
+            state = state.copy(
+                keyData = keyData,
+                cloudStorageAction = CloudStorageActionData(
+                    triggerAction = true,
+                    action = CloudStorageActions.UPLOAD,
+                )
+            )
+        } catch (e: Exception) {
+            state = state.copy(saveKeyToCloud = Resource.Error(exception = e))
+        }
     }
 
 
@@ -645,6 +649,12 @@ class PlanSetupViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
+
+            if (owner.status is GuardianStatus.ImplicitlyOwner) {
+                initiateRecovery()
+                return@launch
+            }
+
             val loadedKey =
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
@@ -663,11 +673,7 @@ class PlanSetupViewModel @Inject constructor(
             }
 
 
-            if (owner.status !is GuardianStatus.ImplicitlyOwner) {
-                completeGuardianOwnership()
-            } else {
-                initiateRecovery()
-            }
+            completeGuardianOwnership()
         }
     }
 
@@ -697,28 +703,43 @@ class PlanSetupViewModel @Inject constructor(
 
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
         state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
-        if (state.ownerState!!.guardianSetup!!.guardians.any {  !ownerRepository.verifyKeyConfirmationSignature(it) }) {
-            state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
-            return
-        }
 
-        state = state.copy(replacePolicyResponse = Resource.Loading())
+        try {
 
-        viewModelScope.launch(Dispatchers.IO) {
-            val response = ownerRepository.replacePolicy(
-                encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
-                encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
-                threshold = 2U,
-                guardians = listOfNotNull(state.ownerApprover, state.primaryApprover, state.alternateApprover)
-            )
-
-            state = state.copy(replacePolicyResponse = response)
-
-            if (response is Resource.Success) {
-                updateOwnerState(response.data!!.ownerState)
-
-                state = state.copy(planSetupUIState = PlanSetupUIState.Completed_8)
+            if (state.ownerState!!.guardianSetup!!.guardians.any {
+                    !ownerRepository.verifyKeyConfirmationSignature(
+                        it
+                    )
+                }) {
+                state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
+                return
             }
+
+            state = state.copy(replacePolicyResponse = Resource.Loading())
+
+            viewModelScope.launch(Dispatchers.IO) {
+                val response = ownerRepository.replacePolicy(
+                    encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
+                    encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
+                    threshold = 2U,
+                    guardians = listOfNotNull(
+                        state.ownerApprover,
+                        state.primaryApprover,
+                        state.alternateApprover
+                    )
+                )
+
+                state = state.copy(replacePolicyResponse = response)
+
+                if (response is Resource.Success) {
+                    updateOwnerState(response.data!!.ownerState)
+
+                    state = state.copy(planSetupUIState = PlanSetupUIState.Completed_8)
+                }
+            }
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ReplacePolicy)
+            state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
         }
     }
     //endregion

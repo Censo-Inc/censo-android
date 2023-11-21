@@ -148,13 +148,19 @@ fun PlanSetupScreen(
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
                         DisplayError(
-                            errorMessage = "Failed to replace policy, try again.",
+                            errorMessage = "Failed to create new policy, try again.",
                             dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                             retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.completeGuardianShipResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to finalize plan, try again.",
+                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                        )
+                    } else if (state.saveKeyToCloud is Resource.Error) {
+                        DisplayError(
+                            errorMessage = "Failed to setup secure data, try again.",
                             dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                             retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
@@ -276,7 +282,7 @@ fun PlanSetupScreen(
                             )
 
                             LaunchedEffect(Unit) {
-                                delay(5000)
+                                delay(8000)
                                 viewModel.receivePlanAction(PlanSetupAction.Completed)
                             }
                         }
