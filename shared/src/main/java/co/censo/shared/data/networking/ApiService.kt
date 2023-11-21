@@ -7,10 +7,13 @@ import android.net.ConnectivityManager
 import android.os.Build
 import co.censo.shared.BuildConfig
 import co.censo.shared.data.Header
+import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
+import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.model.AcceptGuardianshipApiResponse
 import co.censo.shared.data.model.ApproveRecoveryApiRequest
 import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.AttestationChallengeResponse
 import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
 import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
 import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
@@ -52,6 +55,7 @@ import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
+import co.censo.shared.data.repository.PlayIntegrityRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
@@ -70,6 +74,7 @@ import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HeaderMap
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -94,18 +99,25 @@ interface ApiService {
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val APP_PLATFORM_HEADER = "X-Censo-App-Platform"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
+        const val PLAY_INTEGRITY_HEADER = "X-Censo-Play-Integrity"
+        const val PLAY_INTEGRITY_TOKEN_HEADER = "X-Censo-Play-Integrity-Token"
+        const val ATTESTATION_CHALLENGE_HEADER = "X-Censo-Challenge"
 
         fun create(
             secureStorage: SecurePreferences,
             context: Context,
             versionCode: String,
             packageName: String,
-            authUtil: AuthUtil
+            authUtil: AuthUtil,
+            playIntegrityRepository: PlayIntegrityRepository
         ): ApiService {
+
+            val playIntegrityInterceptor = PlayIntegrityInterceptor(playIntegrityRepository)
             val client = OkHttpClient.Builder()
                 .addInterceptor(ConnectivityInterceptor(context))
                 .addInterceptor(AnalyticsInterceptor(versionCode, packageName))
                 .addInterceptor(AuthInterceptor(authUtil, secureStorage))
+                .addInterceptor(playIntegrityInterceptor)
                 .connectTimeout(Duration.ofSeconds(180))
                 .readTimeout(Duration.ofSeconds(180))
                 .callTimeout(Duration.ofSeconds(180))
@@ -119,7 +131,7 @@ interface ApiService {
             }
 
             val contentType = "application/json".toMediaType()
-            return Retrofit.Builder()
+            val apiService = Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(client.build())
                 .addConverterFactory(
@@ -129,12 +141,19 @@ interface ApiService {
                 )
                 .build()
                 .create(ApiService::class.java)
+            playIntegrityInterceptor.apiService = apiService
+            return apiService
         }
+
+        val enablePlayIntegrity = mapOf(PLAY_INTEGRITY_HEADER to "true")
     }
 
 
     @POST("/v1/sign-in")
-    suspend fun signIn(@Body signInApiRequest: SignInApiRequest): RetrofitResponse<ResponseBody>
+    suspend fun signIn(
+        @Body signInApiRequest: SignInApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<ResponseBody>
 
     @GET("/v1/user")
     suspend fun ownerUser(): RetrofitResponse<GetOwnerUserApiResponse>
@@ -143,7 +162,9 @@ interface ApiService {
     suspend fun approverUser(): RetrofitResponse<GetApproverUserApiResponse>
 
     @DELETE("/v1/user")
-    suspend fun deleteUser(): RetrofitResponse<Unit>
+    suspend fun deleteUser(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<Unit>
 
     @POST("/v1/biometry-verifications")
     suspend fun initBiometryVerification(): RetrofitResponse<InitBiometryVerificationApiResponse>
@@ -155,12 +176,14 @@ interface ApiService {
 
     @POST("/v1/policy")
     suspend fun createPolicy(
-        @Body createPolicyApiRequest: CreatePolicyApiRequest
+        @Body createPolicyApiRequest: CreatePolicyApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<CreatePolicyApiResponse>
 
     @PUT("/v1/policy")
     suspend fun replacePolicy(
-        @Body createPolicyApiRequest: ReplacePolicyApiRequest
+        @Body createPolicyApiRequest: ReplacePolicyApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplacePolicyApiResponse>
 
     @POST("/v1/guardianship-invitations/{$INVITATION_ID}/accept")
@@ -176,13 +199,15 @@ interface ApiService {
     @POST("v1/guardianship-invitations/{$INVITATION_ID}/verification")
     suspend fun submitGuardianVerification(
         @Path(value = INVITATION_ID) invitationId: String,
-        @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest
+        @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<SubmitGuardianVerificationApiResponse>
 
     @POST("/v1/guardians/{$PARTICIPANT_ID}/confirmation")
     suspend fun confirmGuardianship(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest
+        @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ConfirmGuardianshipApiResponse>
 
     @POST("/v1/guardians/{$PARTICIPANT_ID}/verification/reject")
@@ -216,11 +241,15 @@ interface ApiService {
 
     @DELETE("/v1/vault/secrets/{$SECRET_ID}")
     suspend fun deleteSecret(
-        @Path(value = SECRET_ID) secretId: VaultSecretId
+        @Path(value = SECRET_ID) secretId: VaultSecretId,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<DeleteSecretApiResponse>
 
     @POST("/v1/recovery")
-    suspend fun requestRecovery(@Body apiRequest: InitiateRecoveryApiRequest): RetrofitResponse<InitiateRecoveryApiResponse>
+    suspend fun requestRecovery(
+        @Body apiRequest: InitiateRecoveryApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<InitiateRecoveryApiResponse>
 
     @DELETE("/v1/recovery")
     suspend fun deleteRecovery(): RetrofitResponse<DeleteRecoveryApiResponse>
@@ -240,19 +269,22 @@ interface ApiService {
     @POST("/v1/recovery/{$PARTICIPANT_ID}/totp-verification")
     suspend fun submitRecoveryTotpVerification(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: SubmitRecoveryTotpVerificationApiRequest
+        @Body apiRequest: SubmitRecoveryTotpVerificationApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<SubmitRecoveryTotpVerificationApiResponse>
 
     @POST("/v1/recovery/{$PARTICIPANT_ID}/approval")
     suspend fun approveRecovery(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: ApproveRecoveryApiRequest
+        @Body apiRequest: ApproveRecoveryApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ApproveRecoveryApiResponse>
 
     @POST("/v1/access/{$APPROVAL_ID}/approval")
     suspend fun approveAccess(
         @Path(value = APPROVAL_ID) approvalId: String,
-        @Body apiRequest: ApproveRecoveryApiRequest
+        @Body apiRequest: ApproveRecoveryApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ApproveRecoveryApiResponse>
 
     @POST("/v1/recovery/{$PARTICIPANT_ID}/rejection")
@@ -267,20 +299,26 @@ interface ApiService {
 
     @POST("/v1/recovery/retrieval")
     suspend fun retrieveRecoveryShards(
-        @Body apiRequest: RetrieveRecoveryShardsApiRequest
+        @Body apiRequest: RetrieveRecoveryShardsApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<RetrieveRecoveryShardsApiResponse>
 
     @POST("/v1/purchases")
     suspend fun submitPurchase(
-        @Body apiRequest: SubmitPurchaseApiRequest
+        @Body apiRequest: SubmitPurchaseApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<SubmitPurchaseApiResponse>
 
 
     @POST("v1/guardians/{$PARTICIPANT_ID}/owner-completion")
     suspend fun completeOwnerGuardianship(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: CompleteOwnerGuardianshipApiRequest
+        @Body apiRequest: CompleteOwnerGuardianshipApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<CompleteOwnerGuardianshipApiResponse>
+
+    @POST("/v1/attestation-challenge")
+    suspend fun createAttestationChallenge(): RetrofitResponse<AttestationChallengeResponse>
 }
 
 class AnalyticsInterceptor(
@@ -366,7 +404,7 @@ class AuthInterceptor(
         }
 
         val deviceKey = InternalDeviceKey(deviceKeyId)
-        val signature = Base64.getEncoder().encodeToString(deviceKey.sign(dataToSign(request, now)))
+        val signature = Base64.getEncoder().encodeToString(deviceKey.sign(request.dataToSign(now.toString())))
 
         return listOf(
             Header(AUTHORIZATION_HEADER, "signature $signature"),
@@ -374,18 +412,60 @@ class AuthInterceptor(
             Header(TIMESTAMP_HEADER, now.toString())
         )
     }
+}
 
-    private fun dataToSign(request: Request, timestamp: Instant): ByteArray {
-        val requestPathAndQueryParams =
-            request.url.encodedPath + (request.url.encodedQuery?.let { "?$it" } ?: "")
-        val requestBody = request.body?.let {
-            val buffer = Buffer()
-            it.writeTo(buffer)
-            buffer.readByteArray()
-        } ?: byteArrayOf()
+class PlayIntegrityInterceptor(private val playIntegrityRepository: PlayIntegrityRepository) : Interceptor {
 
-        return (request.method + requestPathAndQueryParams + Base64.getEncoder()
-            .encodeToString(requestBody) + timestamp.toString()).toByteArray()
+    lateinit var apiService: ApiService
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        var headers : List<Header>
+
+        return when {
+            !BuildConfig.PLAY_INTEGRITY_ENABLED -> {
+                chain.proceed(request.newBuilder().apply {
+                    removeHeader(ApiService.PLAY_INTEGRITY_HEADER)
+                }.build())
+            }
+
+            request.header(ApiService.PLAY_INTEGRITY_HEADER) == null ->
+                chain.proceed(request)
+
+            else -> {
+                runBlocking {
+                    headers = getPlayIntegrityHeaders(request)
+                }
+                chain.proceed(
+                    request.newBuilder().apply {
+                        for (header in headers) {
+                            addHeader(header.name, header.value)
+                        }
+                        removeHeader(ApiService.PLAY_INTEGRITY_HEADER)
+                    }.build()
+                )
+            }
+
+        }
+    }
+
+    private suspend fun getPlayIntegrityHeaders(request: Request): List<Header> {
+        return try {
+            val challenge = apiService.createAttestationChallenge().body()!!.challenge.base64Encoded
+            listOf(
+                Header(
+                    ApiService.ATTESTATION_CHALLENGE_HEADER,
+                    challenge
+                ),
+                Header(
+                    ApiService.PLAY_INTEGRITY_TOKEN_HEADER,
+                    playIntegrityRepository.getIntegrityToken(request.dataToSign(challenge).sha256digest().base64Encoded())
+                )
+            )
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.PlayIntegrity)
+            listOf()
+        }
     }
 }
 
@@ -417,3 +497,16 @@ class NoConnectivityException : IOException() {
 data class PushBody(
     val deviceType: String, val token: String
 )
+
+fun Request.dataToSign(timestampOrChallenge: String): ByteArray {
+    val requestPathAndQueryParams =
+        this.url.encodedPath + (this.url.encodedQuery?.let { "?$it" } ?: "")
+    val requestBody = this.body?.let {
+        val buffer = Buffer()
+        it.writeTo(buffer)
+        buffer.readByteArray()
+    } ?: byteArrayOf()
+
+    return (this.method + requestPathAndQueryParams + Base64.getEncoder()
+        .encodeToString(requestBody) + timestampOrChallenge).toByteArray()
+}

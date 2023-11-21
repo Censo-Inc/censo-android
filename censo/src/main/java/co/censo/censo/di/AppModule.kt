@@ -25,6 +25,8 @@ import co.censo.censo.billing.BillingClientWrapper
 import co.censo.censo.billing.BillingClientWrapperImpl
 import co.censo.censo.data.repository.FacetecRepository
 import co.censo.censo.data.repository.FacetecRepositoryImpl
+import co.censo.shared.data.repository.PlayIntegrityRepository
+import co.censo.shared.data.repository.PlayIntegrityRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,14 +65,16 @@ object AppModule {
     fun provideApiService(
         @ApplicationContext applicationContext: Context,
         authUtil: AuthUtil,
-        secureStorage: SecurePreferences
+        secureStorage: SecurePreferences,
+        playIntegrityRepository: PlayIntegrityRepository
     ): ApiService {
         return ApiService.create(
             context = applicationContext,
             versionCode = BuildConfig.VERSION_CODE.toString(),
             packageName = BuildConfig.APPLICATION_ID,
             authUtil = authUtil,
-            secureStorage = secureStorage
+            secureStorage = secureStorage,
+            playIntegrityRepository = playIntegrityRepository
         )
     }
 
@@ -121,6 +125,14 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): PushRepository {
         return PushRepositoryImpl(api, secureStorage, applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun providesPlayIntegrityRepository(
+        @ApplicationContext applicationContext: Context
+    ): PlayIntegrityRepository {
+        return PlayIntegrityRepositoryImpl(applicationContext)
     }
 
     @Singleton

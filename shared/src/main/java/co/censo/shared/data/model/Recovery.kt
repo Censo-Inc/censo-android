@@ -84,6 +84,11 @@ data class EncryptedShard(
     val ownerEntropy: Base64EncodedData?
 )
 
+@Serializable
+data class AttestationChallengeResponse(
+    val challenge: Base64EncodedData,
+)
+
 data class RecoveredSeedPhrase(
     val guid: VaultSecretId,
     val label: String,
