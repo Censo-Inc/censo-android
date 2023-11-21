@@ -33,6 +33,7 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.shared.presentation.components.ConfirmationDialog
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.popUpToTop
 
@@ -82,10 +83,8 @@ fun MainVaultScreen(
         ) {
 
             when {
-                state.loading -> Loading(
-                    strokeWidth = 8.dp,
+                state.loading -> LargeLoading(
                     color = Color.Black,
-                    size = 72.dp,
                     fullscreen = true
                 )
 

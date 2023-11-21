@@ -38,6 +38,7 @@ import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
 import co.censo.shared.presentation.components.Loading
+import co.censo.shared.presentation.components.SmallLoading
 
 @Composable
 fun ApproveAccessUI(
@@ -170,9 +171,7 @@ fun ApproveAccessUI(
 
             if (approval.status == ApprovalStatus.WaitingForApproval) {
                 Spacer(modifier = Modifier.height(6.dp))
-                Loading(
-                    strokeWidth = 3.5.dp,
-                    size = 24.dp,
+                SmallLoading(
                     fullscreen = false,
                 )
             }

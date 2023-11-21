@@ -21,6 +21,7 @@ import co.censo.approver.presentation.GuardianColors
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
 import co.censo.shared.presentation.components.Loading
+import co.censo.shared.presentation.components.SmallLoading
 
 @Composable
 fun ApproverCodeVerification(
@@ -52,9 +53,7 @@ fun ApproverCodeVerification(
         }
 
         if (codeVerificationStatus == CodeVerificationStatus.Waiting) {
-            Loading(
-                strokeWidth = 3.5.dp,
-                size = 24.dp,
+            SmallLoading(
                 fullscreen = false,
             )
             Spacer(modifier = Modifier.height(12.dp))

@@ -42,6 +42,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 
 @Composable
@@ -61,10 +62,8 @@ fun WelcomeScreen(
 
     when {
         state.loading -> {
-            Loading(
-                strokeWidth = 8.dp,
+            LargeLoading(
                 color = Color.Black,
-                size = 72.dp,
                 fullscreen = true,
                 fullscreenBackgroundColor = Color.White
             )

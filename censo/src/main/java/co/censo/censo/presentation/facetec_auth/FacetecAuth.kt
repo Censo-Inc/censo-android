@@ -28,6 +28,7 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.censo.R
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
@@ -116,10 +117,8 @@ fun FacetecAuth(
                 }
             }
 
-            else -> Loading(
-                strokeWidth = 8.dp,
+            else -> LargeLoading(
                 color = Color.Black,
-                size = 72.dp,
                 fullscreen = false
             )
         }

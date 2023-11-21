@@ -49,6 +49,7 @@ import co.censo.censo.presentation.enter_phrase.components.EditPhraseWordUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
@@ -182,7 +183,7 @@ fun EnterPhraseScreen(
         ) {
 
             when {
-                state.loading -> Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
+                state.loading -> LargeLoading(fullscreen = true)
 
                 state.error -> {
                     if (state.submitResource is Resource.Error) {

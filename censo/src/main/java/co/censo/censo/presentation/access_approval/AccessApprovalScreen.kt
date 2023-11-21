@@ -32,6 +32,7 @@ import co.censo.censo.presentation.access_approval.components.AnotherDeviceAcces
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApprover
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
@@ -123,7 +124,7 @@ fun AccessApprovalScreen(
 
             when {
                 state.loading -> {
-                    Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
+                    LargeLoading(fullscreen = true)
                 }
 
                 state.asyncError -> {
@@ -166,7 +167,7 @@ fun AccessApprovalScreen(
                     when (state.accessApprovalUIState) {
 
                         AccessApprovalUIState.Initial -> {
-                            Loading(strokeWidth = 5.dp, size = 72.dp, fullscreen = true)
+                            LargeLoading(fullscreen = true)
                         }
 
                         AccessApprovalUIState.AnotherDevice -> {
