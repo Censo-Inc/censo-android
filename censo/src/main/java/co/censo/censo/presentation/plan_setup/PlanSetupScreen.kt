@@ -150,9 +150,7 @@ fun PlanSetupScreen(
                             DisplayError(
                                 errorMessage = "Google Drive Access Required for Censo\n\nPlease sign out and sign back in to refresh authentication permissions for your account",
                                 dismissAction = {
-                                    viewModel.resetReplacePolicyResponse()
-                                    viewModel.receivePlanAction(PlanSetupAction.BackClicked)
-                                    viewModel.resetUIState()
+                                    viewModel.dismissCloudError()
                                 },
                                 retryAction = null
                             )

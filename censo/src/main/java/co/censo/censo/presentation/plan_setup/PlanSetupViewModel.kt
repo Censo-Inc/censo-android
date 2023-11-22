@@ -732,6 +732,7 @@ class PlanSetupViewModel @Inject constructor(
                         )
                     )
                 } catch (e: Exception) {
+                    e.sendError(CrashReportingUtil.CloudDownload)
                     state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
                     return@launch
                 }
@@ -836,12 +837,17 @@ class PlanSetupViewModel @Inject constructor(
         )
     }
 
-    fun resetReplacePolicyResponse() {
+    fun dismissCloudError() {
+        //dismiss error
         state = state.copy(replacePolicyResponse = Resource.Uninitialized)
+        //kick user to home
+        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
+        //ensure facetec doesn't block us from leaving
+        state = state.copy(planSetupUIState = PlanSetupUIState.Initial_1)
     }
 
-    fun resetUIState() {
-        state = state.copy(planSetupUIState = PlanSetupUIState.Initial_1)
+    fun resetReplacePolicyResponse() {
+        state = state.copy(replacePolicyResponse = Resource.Uninitialized)
     }
     //endregion
 
