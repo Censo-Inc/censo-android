@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.access_seed_phrases
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessP
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.presentation.enter_phrase.EnterPhraseUIState
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
@@ -64,6 +66,14 @@ fun AccessSeedPhrasesScreen(
                 navController.navigate(it)
                 viewModel.resetNavigationResource()
             }
+        }
+    }
+
+    BackHandler(enabled = true) {
+        if (state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase) {
+            viewModel.showCancelConfirmationDialog()
+        } else {
+            viewModel.onBackClicked()
         }
     }
 
@@ -133,8 +143,8 @@ fun AccessSeedPhrasesScreen(
 
                     if (state.showCancelConfirmationDialog) {
                         YesNoDialog(
-                            title = stringResource(R.string.cancel_access),
-                            message = stringResource(R.string.cancel_access_dialog),
+                            title = stringResource(R.string.exit_accessing_phrases),
+                            message = stringResource(R.string.exit_accessing_phrases_message),
                             onDismiss = viewModel::hideCloseConfirmationDialog,
                             onConfirm = viewModel::cancelAccess
                         )
