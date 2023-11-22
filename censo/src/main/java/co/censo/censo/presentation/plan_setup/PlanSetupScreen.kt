@@ -30,6 +30,7 @@ import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.LargeLoading
@@ -145,11 +146,27 @@ fun PlanSetupScreen(
                             retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
-                        DisplayError(
-                            errorMessage = "Failed to create new policy, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                        )
+                        if (state.replacePolicyResponse.exception is CloudStoragePermissionNotGrantedException) {
+                            DisplayError(
+                                errorMessage = "Google Drive Access Required for Censo\n\nPlease sign out and sign back in to refresh authentication permissions for your account",
+                                dismissAction = {
+                                    viewModel.dismissCloudError()
+                                },
+                                retryAction = null
+                            )
+                        } else {
+                            DisplayError(
+                                errorMessage = "Failed to create new policy, try again.",
+                                dismissAction = {
+                                    viewModel.resetReplacePolicyResponse()
+                                    viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                },
+                                retryAction = {
+                                    viewModel.resetReplacePolicyResponse()
+                                    viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                },
+                            )
+                        }
                     } else if (state.completeGuardianShipResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to finalize plan, try again.",

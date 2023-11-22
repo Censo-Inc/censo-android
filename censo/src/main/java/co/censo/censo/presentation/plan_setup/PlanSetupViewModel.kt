@@ -27,9 +27,11 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -718,16 +720,22 @@ class PlanSetupViewModel @Inject constructor(
             state = state.copy(replacePolicyResponse = Resource.Loading())
 
             viewModelScope.launch(Dispatchers.IO) {
-                val response = ownerRepository.replacePolicy(
-                    encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
-                    encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
-                    threshold = 2U,
-                    guardians = listOfNotNull(
-                        state.ownerApprover,
-                        state.primaryApprover,
-                        state.alternateApprover
+                val response = try {
+                    ownerRepository.replacePolicy(
+                        encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
+                        encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
+                        threshold = 2U,
+                        guardians = listOfNotNull(
+                            state.ownerApprover,
+                            state.primaryApprover,
+                            state.alternateApprover
+                        )
                     )
-                )
+                } catch (e: Exception) {
+                    e.sendError(CrashReportingUtil.CloudDownload)
+                    state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
+                    return@launch
+                }
 
                 state = state.copy(replacePolicyResponse = response)
 
@@ -827,6 +835,19 @@ class PlanSetupViewModel @Inject constructor(
             cloudStorageAction = CloudStorageActionData(),
             saveKeyToCloud = Resource.Uninitialized
         )
+    }
+
+    fun dismissCloudError() {
+        //dismiss error
+        state = state.copy(replacePolicyResponse = Resource.Uninitialized)
+        //kick user to home
+        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
+        //ensure facetec doesn't block us from leaving
+        state = state.copy(planSetupUIState = PlanSetupUIState.Initial_1)
+    }
+
+    fun resetReplacePolicyResponse() {
+        state = state.copy(replacePolicyResponse = Resource.Uninitialized)
     }
     //endregion
 
