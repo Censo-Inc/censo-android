@@ -47,12 +47,6 @@ abstract class BaseRepository {
         } catch (e: Exception) {
             null
         }
-
-
-    companion object {
-        const val HTTP_404 = 404
-        const val HTTP_401 = 401
-    }
 }
 
 @Serializable

@@ -34,4 +34,5 @@
 
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
+    <string name="upgrade_required">App is out-of-date, you must upgrade to continue</string>
 </resources>

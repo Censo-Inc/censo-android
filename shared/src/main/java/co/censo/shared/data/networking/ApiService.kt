@@ -45,6 +45,7 @@ import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
+import co.censo.shared.data.networking.ApiService.Companion.APP_PLATFORM_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
@@ -89,6 +90,7 @@ interface ApiService {
         const val APPLICATION_IDENTIFIER = "X-Censo-App-Identifier"
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
+        const val APP_PLATFORM_HEADER = "X-Censo-App-Platform"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
 
         fun create(
@@ -295,7 +297,11 @@ class AnalyticsInterceptor(
                     )
                     addHeader(
                         APP_VERSION_HEADER,
-                        "${BuildConfig.VERSION_NAME} ($versionCode)"
+                        "${BuildConfig.VERSION_NAME}+$versionCode"
+                    )
+                    addHeader(
+                        APP_PLATFORM_HEADER,
+                        "android"
                     )
                     addHeader(
                         OS_VERSION_HEADER,
