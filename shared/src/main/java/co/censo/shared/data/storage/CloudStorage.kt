@@ -58,7 +58,8 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
 
                 try {
                     localFile.writeText(fileContent)
-                } catch (e: IOException) {
+                } catch (e: Exception) {
+                    localFile.delete()
                     e.sendError(CloudUpload)
                     return Resource.Error(exception = e)
                 }
@@ -82,10 +83,8 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                         Exception("Upload File Null or ID null").sendError(CloudUpload)
                         Resource.Error()
                     }
-                } catch (e: GoogleJsonResponseException) {
-                    e.sendError(CloudUpload)
-                    return Resource.Error(exception = e)
                 } catch (e: Exception) {
+                    localFile.delete()
                     e.sendError(CloudUpload)
                     return Resource.Error(exception = e)
                 }
