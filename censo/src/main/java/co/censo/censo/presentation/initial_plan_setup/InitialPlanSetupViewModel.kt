@@ -151,6 +151,17 @@ class InitialPlanSetupViewModel @Inject constructor(
 
         viewModelScope.launch {
             state = state.copy(createPolicyParamsResponse = Resource.Loading())
+
+            if (!keyRepository.userHasKeySavedInCloud(state.participantId)) {
+                state = state.copy(
+                    createPolicyParamsResponse = Resource.Error(
+                        exception = Exception("Did not save data to Google Drive. Try again.")
+                    ),
+                    keyData = null
+                )
+                return@launch
+            }
+
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
                 Guardian.ProspectGuardian(
                     invitationId = InvitationId(""),
