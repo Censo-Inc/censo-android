@@ -33,6 +33,7 @@ object CrashReportingUtil {
     const val SubmitNotificationToken = "SubmitNotificationToken"
     const val SilentRefreshToken = "SilentRefreshToken"
     const val RetrieveAccount = "RetrieveAccount"
+    const val AccessPhrase = "AccessPhrase"
 }
 
 fun Exception.sendError(reason: String) {
