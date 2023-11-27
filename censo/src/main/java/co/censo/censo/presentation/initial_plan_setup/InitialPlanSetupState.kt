@@ -12,6 +12,7 @@ data class InitialPlanSetupScreenState(
     val initialPlanSetupStep: InitialPlanSetupStep = InitialPlanSetupStep.Initial,
     val participantId: ParticipantId = ParticipantId(generatePartitionId()),
     val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
+    val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val createPolicyParamsResponse: Resource<CreatePolicyParams> = Resource.Uninitialized,
     val createPolicyResponse: Resource<CreatePolicyApiResponse> = Resource.Uninitialized,
     val createPolicyParams: CreatePolicyParams? = null,
@@ -22,6 +23,7 @@ data class InitialPlanSetupScreenState(
     val apiError = createPolicyParamsResponse is Resource.Error
         || createPolicyResponse is Resource.Error
         || saveKeyToCloudResource is Resource.Error
+        || loadKeyFromCloudResource is Resource.Error
 }
 
 sealed class InitialPlanSetupStep {

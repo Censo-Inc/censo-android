@@ -9,7 +9,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
@@ -133,26 +135,41 @@ class InitialPlanSetupViewModel @Inject constructor(
         )
     }
 
+    private fun loadPrivateKeyFromCloud() {
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(
+                triggerAction = true,
+                action = CloudStorageActions.DOWNLOAD,
+                reason = null
+            )
+        )
+    }
+
+    fun onKeyLoaded(encryptedData: ByteArray) {
+        decryptKeyDataAndSetToState(encryptedData)
+    }
+
+    fun onKeyLoadFailed(exception: Exception?) {
+        exception?.sendError(CrashReportingUtil.CloudDownload)
+        resetLoadKeyStateAndCreateNewApproverKey()
+    }
+
     private fun createPolicyParams() {
         if (state.createPolicyParamsResponse is Resource.Loading) {
             return
         }
 
-        val publicKey = state.keyData?.publicKey
-
-        if (publicKey == null) {
-            state = state.copy(
-                createPolicyParamsResponse = Resource.Error(
-                    exception = Exception("Missing key information when creating policy params")
-                ),
-            )
-            return
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            state = state.copy(createPolicyParamsResponse = Resource.Loading())
-
-            if (!keyRepository.userHasKeySavedInCloud(state.participantId)) {
+            val publicKey = if (keyRepository.userHasKeySavedInCloud(state.participantId)) {
+                val keyData = state.keyData
+                if (keyData == null) {
+                    loadPrivateKeyFromCloud()
+                    return@launch
+                } else {
+                    keyData.publicKey
+                }
+            } else {
+                //Set error state to move user to create key step
                 state = state.copy(
                     createPolicyParamsResponse = Resource.Error(
                         exception = Exception("Did not save data to Google Drive. Try again.")
@@ -161,6 +178,8 @@ class InitialPlanSetupViewModel @Inject constructor(
                 )
                 return@launch
             }
+
+            state = state.copy(createPolicyParamsResponse = Resource.Loading())
 
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
                 Guardian.ProspectGuardian(
@@ -203,7 +222,8 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = state.copy(
             createPolicyParamsResponse = Resource.Uninitialized,
             createPolicyResponse = Resource.Uninitialized,
-            saveKeyToCloudResource = Resource.Uninitialized
+            saveKeyToCloudResource = Resource.Uninitialized,
+            loadKeyFromCloudResource = Resource.Uninitialized
         )
     }
 
@@ -234,5 +254,44 @@ class InitialPlanSetupViewModel @Inject constructor(
 
             createPolicyResponse.map { it.scanResultBlob }
         }.await()
+    }
+
+    private fun decryptKeyDataAndSetToState(encryptedKeyData: ByteArray) {
+        try {
+            val entropy = retrieveEntropy()
+            if (entropy == null) {
+                Exception("Missing entropy when trying to decrypt loaded key").sendError(CrashReportingUtil.DecryptingKey)
+                resetLoadKeyStateAndCreateNewApproverKey()
+                return
+            }
+
+            val base58EncodedPrivateKey = encryptedKeyData.decryptWithEntropy(
+                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                entropy = entropy
+            )
+
+            val encryptionKey = EncryptionKey.generateFromPrivateKeyRaw(base58EncodedPrivateKey.bigInt())
+
+            state = state.copy(
+                keyData = InitialKeyData(
+                    encryptedPrivateKey = encryptedKeyData,
+                    publicKey = encryptionKey.publicExternalRepresentation()
+                ),
+                loadKeyFromCloudResource = Resource.Uninitialized,
+                cloudStorageAction = CloudStorageActionData()
+            )
+            determineUIStatus()
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.DecryptingKey)
+            resetLoadKeyStateAndCreateNewApproverKey()
+        }
+    }
+
+    private fun resetLoadKeyStateAndCreateNewApproverKey() {
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            loadKeyFromCloudResource = Resource.Uninitialized,
+        )
+        createApproverKey()
     }
 }
