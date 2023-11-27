@@ -100,7 +100,8 @@ class InitialPlanSetupViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.CreateApproverKey)
                 state = state.copy(
-                    saveKeyToCloudResource = Resource.Error(exception = e)
+                    saveKeyToCloudResource = Resource.Error(exception = e),
+                    keyData = null
                 )
             }
         }
