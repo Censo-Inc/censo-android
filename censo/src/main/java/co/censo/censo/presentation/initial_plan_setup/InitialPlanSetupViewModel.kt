@@ -100,7 +100,8 @@ class InitialPlanSetupViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.CreateApproverKey)
                 state = state.copy(
-                    saveKeyToCloudResource = Resource.Error(exception = e)
+                    saveKeyToCloudResource = Resource.Error(exception = e),
+                    keyData = null
                 )
             }
         }
@@ -128,6 +129,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(),
             saveKeyToCloudResource = Resource.Error(exception = exception),
+            keyData = null
         )
     }
 
@@ -147,8 +149,19 @@ class InitialPlanSetupViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(createPolicyParamsResponse = Resource.Loading())
+
+            if (!keyRepository.userHasKeySavedInCloud(state.participantId)) {
+                state = state.copy(
+                    createPolicyParamsResponse = Resource.Error(
+                        exception = Exception("Did not save data to Google Drive. Try again.")
+                    ),
+                    keyData = null
+                )
+                return@launch
+            }
+
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
                 Guardian.ProspectGuardian(
                     invitationId = InvitationId(""),
