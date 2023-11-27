@@ -149,7 +149,7 @@ class InitialPlanSetupViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(createPolicyParamsResponse = Resource.Loading())
 
             if (!keyRepository.userHasKeySavedInCloud(state.participantId)) {
