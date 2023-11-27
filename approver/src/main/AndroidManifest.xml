@@ -6,8 +6,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-feature android:name="android.hardware.strongbox_keystore" android:required="${STRONGBOX_ENABLED}" />
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-
     <application
         android:name=".ApproverApplication"
         android:icon="@mipmap/ic_launcher"
