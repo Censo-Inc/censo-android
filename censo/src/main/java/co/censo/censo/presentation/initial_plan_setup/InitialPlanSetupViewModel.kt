@@ -128,6 +128,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(),
             saveKeyToCloudResource = Resource.Error(exception = exception),
+            keyData = null
         )
     }
 
