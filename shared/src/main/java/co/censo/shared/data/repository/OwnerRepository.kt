@@ -574,7 +574,7 @@ class OwnerRepositoryImpl(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
     ): List<RecoveredSeedPhrase> {
-        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards, true)
         val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
 
         return encryptedSecrets.map {
@@ -601,13 +601,16 @@ class OwnerRepositoryImpl(
         }
     }
 
-    private suspend fun recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>): PrivateKey {
+    private suspend fun recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>, bypassScopeCheck: Boolean = false): PrivateKey {
         val ownerDeviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
 
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
             val encryptionKey = when (it.isOwnerShard) {
                 true -> {
-                    val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(it.participantId)
+                    val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
+                        participantId = it.participantId,
+                        bypassScopeCheck = bypassScopeCheck
+                    )
                     if (ownerApproverKeyResource is Resource.Error) {
                         throw ownerApproverKeyResource.exception!!
                     } else {

@@ -18,6 +18,8 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.shared.util.CrashReportingUtil.AccessPhrase
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -145,6 +147,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                                 locksAt = Clock.System.now().plus(15.minutes)
                             )
                         }.onFailure {
+                            Exception(it).sendError(AccessPhrase)
                             state = state.copy(
                                 recoveredPhrases = Resource.Error(exception = Exception(it))
                             )
