@@ -9,6 +9,8 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.OwnerRepositoryImpl
+import co.censo.shared.data.repository.PlayIntegrityRepository
+import co.censo.shared.data.repository.PlayIntegrityRepositoryImpl
 import co.censo.shared.data.storage.CloudStorage
 import co.censo.shared.data.storage.GoogleDriveStorage
 import co.censo.shared.data.storage.SecurePreferences
@@ -54,14 +56,16 @@ object AppModule {
     fun provideApiService(
         @ApplicationContext applicationContext: Context,
         authUtil: AuthUtil,
-        secureStorage: SecurePreferences
+        secureStorage: SecurePreferences,
+        playIntegrityRepository: PlayIntegrityRepository
     ): ApiService {
         return ApiService.create(
             context = applicationContext,
             versionCode = BuildConfig.VERSION_CODE.toString(),
             packageName = BuildConfig.APPLICATION_ID,
             authUtil = authUtil,
-            secureStorage = secureStorage
+            secureStorage = secureStorage,
+            playIntegrityRepository = playIntegrityRepository
         )
     }
 
@@ -107,5 +111,13 @@ object AppModule {
     @Provides
     fun provideCountdownTimer() : VaultCountDownTimer {
         return CountDownTimerImpl()
+    }
+
+    @Singleton
+    @Provides
+    fun providesPlayIntegrityRepository(
+        @ApplicationContext applicationContext: Context
+    ): PlayIntegrityRepository {
+        return PlayIntegrityRepositoryImpl(applicationContext)
     }
 }

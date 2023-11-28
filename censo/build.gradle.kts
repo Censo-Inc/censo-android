@@ -162,6 +162,9 @@ dependencies {
     implementation("com.android.billingclient:billing:6.1.0")
     implementation("com.android.billingclient:billing-ktx:6.1.0")
 
+    // Play Integrity
+    implementation("com.google.android.play:integrity:1.3.0")
+
     // Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")

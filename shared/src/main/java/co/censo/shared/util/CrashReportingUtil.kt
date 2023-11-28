@@ -35,6 +35,7 @@ object CrashReportingUtil {
     const val RetrieveAccount = "RetrieveAccount"
     const val BillingSubscription = "BillingSubscription"
     const val AccessPhrase = "AccessPhrase"
+    const val PlayIntegrity = "PlayIntegrity"
 }
 
 fun Exception.sendError(reason: String) {

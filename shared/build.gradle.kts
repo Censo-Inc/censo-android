@@ -68,6 +68,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "URL_SCHEME", "\"censo\"")
+            buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("staging") {
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
@@ -75,6 +76,7 @@ android {
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "URL_SCHEME", "\"censo-staging\"")
+            buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("integration") {
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
@@ -82,11 +84,13 @@ android {
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "URL_SCHEME", "\"censo-integration\"")
+            buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         debug {
             initWith(getByName("integration"))
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
+            buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "false")
         }
     }
     compileOptions {
@@ -179,6 +183,9 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.48")
     kapt("androidx.hilt:hilt-compiler:1.1.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+
+    // Play integrity
+    implementation("com.google.android.play:integrity:1.3.0")
 
     // Base58
     api("org.bouncycastle:bcprov-jdk15to18:1.70")

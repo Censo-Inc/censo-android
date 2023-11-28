@@ -137,6 +137,8 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.1.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
+    // Play Integrity
+    implementation("com.google.android.play:integrity:1.3.0")
 
     // Tests
     testImplementation("junit:junit:4.13.2")
