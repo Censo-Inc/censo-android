@@ -169,13 +169,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                     keyData.publicKey
                 }
             } else {
-                //Set error state to move user to create key step
-                state = state.copy(
-                    createPolicyParamsResponse = Resource.Error(
-                        exception = Exception("Did not save data to Google Drive. Try again.")
-                    ),
-                    keyData = null
-                )
+                createApproverKey()
                 return@launch
             }
 
