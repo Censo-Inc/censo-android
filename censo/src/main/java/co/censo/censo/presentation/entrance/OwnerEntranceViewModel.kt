@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.random.Random
 
 /**
  *
@@ -74,7 +73,7 @@ class OwnerEntranceViewModel @Inject constructor(
                 val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
                 if (tokenValid) {
-                    triggerNavigation()
+                    userAuthenticated()
                 } else {
                     attemptRefresh(jwtToken)
                 }
@@ -87,23 +86,36 @@ class OwnerEntranceViewModel @Inject constructor(
     private fun attemptRefresh(jwt: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val deviceKeyId = secureStorage.retrieveDeviceKeyId()
-            authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId, onDone = {
-                checkUserTokenAfterRefreshAttempt()
-            })
+
+            authUtil.silentlyRefreshTokenIfInvalid(
+                jwt = jwt,
+                deviceKeyId = deviceKeyId,
+                onDone = {
+                    checkUserTokenAfterRefreshAttempt()
+                }
+            )
         }
     }
 
     private fun checkUserTokenAfterRefreshAttempt() {
-        val jwtToken = ownerRepository.retrieveJWT()
-        if (jwtToken.isEmpty() || !ownerRepository.checkJWTValid(jwtToken)) {
+        try {
+            val jwtToken = ownerRepository.retrieveJWT()
+            if (jwtToken.isEmpty() || !ownerRepository.checkJWTValid(jwtToken)) {
+                signUserOutAfterAttemptedTokenRefresh()
+            }
+        } catch (e: Exception) {
             signUserOutAfterAttemptedTokenRefresh()
         }
     }
 
     private fun signUserOutAfterAttemptedTokenRefresh() {
         viewModelScope.launch {
-            ownerRepository.signUserOut()
-            resetSignInUserResource()
+            try {
+                ownerRepository.signUserOut()
+                resetSignInUserResource()
+            } catch (e: Exception) {
+                resetSignInUserResource()
+            }
         }
     }
 
@@ -182,7 +194,7 @@ class OwnerEntranceViewModel @Inject constructor(
             )
 
             state = if (signInUserResponse is Resource.Success) {
-                triggerNavigation()
+                userAuthenticated()
                 state.copy(
                     signInUserResource = signInUserResponse
                 )
@@ -192,7 +204,7 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun triggerNavigation() {
+    private fun userAuthenticated() {
         state = state.copy(
             userFinishedSetup = true,
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion != touVersion
@@ -238,7 +250,10 @@ class OwnerEntranceViewModel @Inject constructor(
 
                 state.copy(userResponse = userResponse)
             } else {
-                state.copy(userResponse = userResponse, signInUserResource = Resource.Uninitialized)
+                state.copy(
+                    userResponse = userResponse,
+                    signInUserResource = Resource.Uninitialized
+                )
             }
         }
     }
