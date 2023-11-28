@@ -77,6 +77,11 @@ android {
             manifestPlaceholders["URL_SCHEME"] = "censo"
             resValue("string", "app_name", "Approver")
         }
+        create("localRelease") {
+            resValue("string", "app_name", "Local Release Approver")
+            initWith(getByName("release"))
+            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
+        }
         create("staging") {
             resValue("string", "app_name", "Staging Approver")
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
