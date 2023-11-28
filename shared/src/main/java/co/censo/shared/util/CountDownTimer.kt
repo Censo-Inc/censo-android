@@ -13,7 +13,6 @@ interface VaultCountDownTimer {
 
 class CountDownTimerImpl : VaultCountDownTimer {
     private var timer: CountDownTimer? = null
-    private var cancelRequested = false
     override fun startWithDelay(
         initialDelay: Long,
         interval: Long,
@@ -29,11 +28,7 @@ class CountDownTimerImpl : VaultCountDownTimer {
         stop()
         timer = object : CountDownTimer(Long.MAX_VALUE, interval) {
             override fun onTick(millisUntilFinished: Long) {
-                if (cancelRequested) {
-                    this.cancel()
-                } else {
-                    onTickCallback()
-                }
+                onTickCallback()
             }
 
             override fun onFinish() {}
@@ -42,12 +37,6 @@ class CountDownTimerImpl : VaultCountDownTimer {
     }
 
     override fun stop() {
-        // timer might be not started yet and hence be null. This may in case when owner view receives
-        // on_stop lifecycle event while its init coroutine still running.
-        // Therefore scheduling cancellation on the next timer tick.
-        cancelRequested = true
-
-        // and attempt to cancel immediately
         timer?.cancel()
     }
 
