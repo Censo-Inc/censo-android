@@ -21,6 +21,8 @@ import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.BuildConfig
+import co.censo.censo.billing.BillingClientWrapper
+import co.censo.censo.billing.BillingClientWrapperImpl
 import co.censo.censo.data.repository.FacetecRepository
 import co.censo.censo.data.repository.FacetecRepositoryImpl
 import dagger.Module
@@ -138,5 +140,12 @@ object AppModule {
     @Provides
     fun providesOwnerStateFlow(): MutableStateFlow<Resource<OwnerState>> {
         return MutableStateFlow(Resource.Uninitialized)
+    }
+
+    @Singleton
+    @Provides
+    fun provideBillingManager(@ApplicationContext context: Context): BillingClientWrapper {
+        // debug/release implementation is provided based on sourcesSet configuration
+        return BillingClientWrapperImpl(context)
     }
 }

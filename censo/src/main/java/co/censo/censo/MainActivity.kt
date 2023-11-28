@@ -32,6 +32,7 @@ import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
+import co.censo.censo.presentation.paywall.PaywallScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
 import co.censo.shared.util.StrongboxUI
@@ -75,6 +76,12 @@ class MainActivity : FragmentActivity() {
                             modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
                             LockedScreen()
+                        }
+
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            PaywallScreen()
                         }
                     }
 

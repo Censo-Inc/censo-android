@@ -74,7 +74,7 @@ class LockScreenViewModel @Inject constructor(
             state = state.copy(ownerStateResource = ownerStateResource)
 
             if (ownerStateResource is Resource.Success) {
-                onOwnerState(ownerStateResource.data!!)
+                ownerStateFlow.value = ownerStateResource
             }
         }
     }

@@ -234,12 +234,14 @@ sealed class OwnerState {
     @Serializable
     @SerialName("Initial")
     data class Initial(
-        val entropy: Base64EncodedData
+        val entropy: Base64EncodedData,
+        val subscriptionStatus: SubscriptionStatus
     ) : OwnerState()
 
     @Serializable
     @SerialName("Ready")
     data class Ready(
+        val subscriptionStatus: SubscriptionStatus,
         val policy: Policy,
         val vault: Vault,
         val unlockedForSeconds: ULong? = null,
@@ -248,12 +250,18 @@ sealed class OwnerState {
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
     }
+
+    fun subscriptionStatus(): SubscriptionStatus = when (this) {
+        is Initial -> subscriptionStatus
+        is Ready -> subscriptionStatus
+    }
+    fun hasActiveSubscription(): Boolean = subscriptionStatus() == SubscriptionStatus.Active
+
 }
 
 fun ULong?.calculateLocksAt(): Instant? {
     return this?.let {
-        Clock.System.now().plus(it.toInt().toDuration(DurationUnit.SECONDS))
-
+        Clock.System.now().plus(it.toLong().toDuration(DurationUnit.SECONDS))
     }
 }
 
@@ -272,4 +280,9 @@ value class HashedValue(val value: String) {
             throw IllegalArgumentException("Invalid hex string")
         }
     }
+}
+
+@Serializable
+enum class SubscriptionStatus {
+    None, Pending, Active, Paused
 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.SubscriptionStatus
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -89,7 +90,7 @@ class VaultScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(OwnerState.Initial(Base64EncodedData("")))
+                onOwnerState(OwnerState.Initial(Base64EncodedData(""), subscriptionStatus = SubscriptionStatus.Active))
             }
         }
     }
@@ -148,10 +149,10 @@ class VaultScreenViewModel @Inject constructor(
     fun lock() {
         state = state.copy(lockResponse = Resource.Loading())
         viewModelScope.launch {
-            val lockResponse = ownerRepository.lock()
+            val lockResponse = ownerRepository.lock().map { it.ownerState }
 
             if (lockResponse is Resource.Success) {
-                onOwnerState(OwnerState.Initial(Base64EncodedData("")))
+                lockResponse.data?.let { onOwnerState(it) }
             }
         }
     }

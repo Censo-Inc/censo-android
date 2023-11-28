@@ -456,7 +456,7 @@ fun HtmlText(html: String, modifier: Modifier = Modifier, @ColorInt color: Int =
     )
 }
 
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun TermsOfUsePreview() {
     TermsOfUse {
@@ -464,7 +464,7 @@ fun TermsOfUsePreview() {
     }
 }
 
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun OwnerEntranceStandardUIPreview() {
     Surface {

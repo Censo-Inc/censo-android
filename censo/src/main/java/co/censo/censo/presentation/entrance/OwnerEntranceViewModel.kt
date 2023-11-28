@@ -9,7 +9,6 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.termsOfUseVersions
 import co.censo.shared.data.model.touVersion
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository

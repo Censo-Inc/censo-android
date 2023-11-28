@@ -56,6 +56,8 @@ import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSecretApiRequest
 import co.censo.shared.data.model.StoreSecretApiResponse
+import co.censo.shared.data.model.SubmitPurchaseApiRequest
+import co.censo.shared.data.model.SubmitPurchaseApiResponse
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
@@ -191,6 +193,10 @@ interface OwnerRepository {
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData
     ): List<RecoveredSeedPhrase>
+
+    suspend fun submitPurchase(
+        purchaseToken: String
+    ): Resource<SubmitPurchaseApiResponse>
 
     suspend fun completeGuardianOwnership(
         participantId: ParticipantId,
@@ -585,6 +591,18 @@ class OwnerRepositoryImpl(
                     masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)
                 ).joinToString(" "),
                 createdAt = it.createdAt
+            )
+        }
+    }
+
+    override suspend fun submitPurchase(purchaseToken: String): Resource<SubmitPurchaseApiResponse> {
+        return retrieveApiResource {
+            apiService.submitPurchase(
+                apiRequest = SubmitPurchaseApiRequest(
+                    purchase = SubmitPurchaseApiRequest.Purchase.PlayStore(
+                        purchaseToken = purchaseToken
+                    )
+                )
             )
         }
     }

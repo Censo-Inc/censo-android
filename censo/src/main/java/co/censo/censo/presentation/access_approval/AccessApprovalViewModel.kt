@@ -65,7 +65,7 @@ class AccessApprovalViewModel @Inject constructor(
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            updateOwnerState(ownerStateResource.data!!)
+            ownerStateResource.data?.let { updateOwnerState(it) }
 
             state = state.copy(userResponse = ownerStateResource)
         }

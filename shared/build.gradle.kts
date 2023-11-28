@@ -115,30 +115,30 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.0")
-    implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.ui:ui-tooling")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.navigation:navigation-compose:2.7.4")
-    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    api("androidx.core:core-ktx:1.12.0")
+    api("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    api("androidx.activity:activity-compose:1.8.0")
+    api(platform("androidx.compose:compose-bom:2023.03.00"))
+    api("androidx.compose.ui:ui")
+    api("androidx.compose.ui:ui-graphics")
+    api("androidx.compose.ui:ui-tooling-preview")
+    api("androidx.compose.ui:ui-tooling")
+    api("androidx.compose.material3:material3")
+    api("androidx.navigation:navigation-compose:2.7.5")
+    api("androidx.compose.material:material-icons-extended:1.5.4")
 
     //KotlinX Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    api("com.squareup.retrofit2:retrofit:2.9.0")
+    api("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
 
     //noinspection GradleDependency
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
+    api("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
     //noinspection GradleDependency
-    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
+    api("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
 
     //Google API Java Client
     implementation("com.google.api-client:google-api-client:2.2.0")
@@ -148,12 +148,15 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
 
     //GoogleAuth (utilizes the One Tap dependency above)
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.20.0")
     implementation("com.google.api-client:google-api-client-android:2.0.0")
 
+    //Biometrics
+    api("androidx.biometric:biometric:1.1.0")
+
     //Push Notifications
-    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
-    implementation("com.google.firebase:firebase-messaging-ktx")
+    api(platform("com.google.firebase:firebase-bom:32.2.3"))
+    api("com.google.firebase:firebase-messaging-ktx")
 
     //GoogleDrive
     api("com.google.android.gms:play-services-drive:17.0.0")
@@ -172,15 +175,16 @@ dependencies {
     implementation("io.sentry:sentry-android:6.33.0")
 
     //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
-    kapt("androidx.hilt:hilt-compiler:1.0.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
+    kapt("androidx.hilt:hilt-compiler:1.1.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     // Base58
-    implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
-    implementation("io.github.novacrypto:Base58:2022.01.17")
+    api("org.bouncycastle:bcprov-jdk15to18:1.70")
+    api("io.github.novacrypto:Base58:2022.01.17")
 
+    // Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.mockito:mockito-inline:4.8.1")

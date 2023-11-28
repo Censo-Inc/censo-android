@@ -1,6 +1,7 @@
 package co.censo.censo.presentation
 
 import Base58EncodedMasterPublicKey
+import co.censo.shared.data.model.OwnerState
 
 sealed class Screen(val route: String) {
     object EntranceRoute : Screen("entrance_screen")

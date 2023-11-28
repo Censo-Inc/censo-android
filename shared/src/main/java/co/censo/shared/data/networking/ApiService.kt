@@ -40,6 +40,8 @@ import co.censo.shared.data.model.StoreSecretApiRequest
 import co.censo.shared.data.model.StoreSecretApiResponse
 import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
 import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.SubmitPurchaseApiRequest
+import co.censo.shared.data.model.SubmitPurchaseApiResponse
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
@@ -267,6 +269,12 @@ interface ApiService {
     suspend fun retrieveRecoveryShards(
         @Body apiRequest: RetrieveRecoveryShardsApiRequest
     ): RetrofitResponse<RetrieveRecoveryShardsApiResponse>
+
+    @POST("/v1/purchases")
+    suspend fun submitPurchase(
+        @Body apiRequest: SubmitPurchaseApiRequest
+    ): RetrofitResponse<SubmitPurchaseApiResponse>
+
 
     @POST("v1/guardians/{$PARTICIPANT_ID}/owner-completion")
     suspend fun completeOwnerGuardianship(

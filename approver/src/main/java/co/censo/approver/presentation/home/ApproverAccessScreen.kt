@@ -1,17 +1,13 @@
 package co.censo.approver.presentation.home
 
 import ParticipantId
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,8 +36,8 @@ import co.censo.approver.presentation.components.OwnerCodeVerification
 import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
-import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
