@@ -4,8 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SignInApiRequest(
-    val identityToken: IdentityToken,
-    val jwtToken: JwtToken,
+    val identityToken: IdentityToken
 )
 
 @Serializable

@@ -220,7 +220,6 @@ class ApproverEntranceViewModel @Inject constructor(
             state = state.copy(signInUserResource = Resource.Loading())
 
             val signInUserResponse = ownerRepository.signInUser(
-                jwtToken = jwt,
                 idToken = idToken
             )
 
