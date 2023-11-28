@@ -70,6 +70,9 @@ android {
             buildConfigField("String", "URL_SCHEME", "\"censo\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
+        create("localRelease") {
+            initWith(getByName("release"))
+        }
         create("staging") {
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)

@@ -82,6 +82,11 @@ android {
                 "proguard-rules.pro"
             )
         }
+        create("localRelease") {
+            resValue("string", "app_name", "Local Release Censo")
+            initWith(getByName("release"))
+            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
+        }
         create("staging") {
             resValue("string", "app_name", "Staging Censo")
             manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
@@ -108,6 +113,9 @@ android {
         }
     }
     sourceSets.getByName("release") {
+        kotlin.setSrcDirs(listOf("src/paid/kotlin"))
+    }
+    sourceSets.getByName("localRelease") {
         kotlin.setSrcDirs(listOf("src/paid/kotlin"))
     }
     sourceSets.getByName("staging") {
