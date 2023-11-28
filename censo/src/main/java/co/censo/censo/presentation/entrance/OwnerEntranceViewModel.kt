@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.random.Random
 
 /**
  *
@@ -78,9 +79,7 @@ class OwnerEntranceViewModel @Inject constructor(
                     attemptRefresh(jwtToken)
                 }
             } else {
-                state = state.copy(
-                    signInUserResource = Resource.Uninitialized
-                )
+                resetSignInUserResource()
             }
         }
     }
@@ -231,29 +230,28 @@ class OwnerEntranceViewModel @Inject constructor(
         viewModelScope.launch {
             val userResponse = ownerRepository.retrieveUser()
 
-            if (userResponse is Resource.Success) {
+            state = if (userResponse is Resource.Success) {
                 // update global state
                 ownerStateFlow.tryEmit(userResponse.map { it.ownerState })
 
                 loggedInRouting(userResponse.data!!.ownerState)
 
-                state = state.copy(userResponse = userResponse)
+                state.copy(userResponse = userResponse)
             } else {
-                state = state.copy(userResponse = Resource.Uninitialized)
-                retrySignIn()
+                state.copy(userResponse = userResponse, signInUserResource = Resource.Uninitialized)
             }
         }
     }
 
     private fun loggedInRouting(ownerState: OwnerState) {
-        if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
+        state = if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
             val destination = when {
                 ownerState.recovery != null -> Screen.AccessApproval.route
                 else -> Screen.OwnerVaultScreen.route
             }
-            state = state.copy(navigationResource = Resource.Success(destination))
+            state.copy(navigationResource = Resource.Success(destination))
         } else {
-            state = state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
+            state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
         }
     }
 
