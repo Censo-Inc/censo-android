@@ -73,14 +73,12 @@ class OwnerEntranceViewModel @Inject constructor(
                 val tokenValid = ownerRepository.checkJWTValid(jwtToken)
 
                 if (tokenValid) {
-                    triggerNavigation()
+                    userAuthenticated()
                 } else {
                     attemptRefresh(jwtToken)
                 }
             } else {
-                state = state.copy(
-                    signInUserResource = Resource.Uninitialized
-                )
+                resetSignInUserResource()
             }
         }
     }
@@ -88,23 +86,36 @@ class OwnerEntranceViewModel @Inject constructor(
     private fun attemptRefresh(jwt: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val deviceKeyId = secureStorage.retrieveDeviceKeyId()
-            authUtil.silentlyRefreshTokenIfInvalid(jwt, deviceKeyId, onDone = {
-                checkUserTokenAfterRefreshAttempt()
-            })
+
+            authUtil.silentlyRefreshTokenIfInvalid(
+                jwt = jwt,
+                deviceKeyId = deviceKeyId,
+                onDone = {
+                    checkUserTokenAfterRefreshAttempt()
+                }
+            )
         }
     }
 
     private fun checkUserTokenAfterRefreshAttempt() {
-        val jwtToken = ownerRepository.retrieveJWT()
-        if (jwtToken.isEmpty() || !ownerRepository.checkJWTValid(jwtToken)) {
+        try {
+            val jwtToken = ownerRepository.retrieveJWT()
+            if (jwtToken.isEmpty() || !ownerRepository.checkJWTValid(jwtToken)) {
+                signUserOutAfterAttemptedTokenRefresh()
+            }
+        } catch (e: Exception) {
             signUserOutAfterAttemptedTokenRefresh()
         }
     }
 
     private fun signUserOutAfterAttemptedTokenRefresh() {
         viewModelScope.launch {
-            ownerRepository.signUserOut()
-            resetSignInUserResource()
+            try {
+                ownerRepository.signUserOut()
+                resetSignInUserResource()
+            } catch (e: Exception) {
+                resetSignInUserResource()
+            }
         }
     }
 
@@ -183,7 +194,7 @@ class OwnerEntranceViewModel @Inject constructor(
             )
 
             state = if (signInUserResponse is Resource.Success) {
-                triggerNavigation()
+                userAuthenticated()
                 state.copy(
                     signInUserResource = signInUserResponse
                 )
@@ -193,7 +204,7 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun triggerNavigation() {
+    private fun userAuthenticated() {
         state = state.copy(
             userFinishedSetup = true,
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion != touVersion
@@ -231,29 +242,31 @@ class OwnerEntranceViewModel @Inject constructor(
         viewModelScope.launch {
             val userResponse = ownerRepository.retrieveUser()
 
-            if (userResponse is Resource.Success) {
+            state = if (userResponse is Resource.Success) {
                 // update global state
                 ownerStateFlow.tryEmit(userResponse.map { it.ownerState })
 
                 loggedInRouting(userResponse.data!!.ownerState)
 
-                state = state.copy(userResponse = userResponse)
+                state.copy(userResponse = userResponse)
             } else {
-                state = state.copy(userResponse = Resource.Uninitialized)
-                retrySignIn()
+                state.copy(
+                    userResponse = userResponse,
+                    signInUserResource = Resource.Uninitialized
+                )
             }
         }
     }
 
     private fun loggedInRouting(ownerState: OwnerState) {
-        if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
+        state = if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
             val destination = when {
                 ownerState.recovery != null -> Screen.AccessApproval.route
                 else -> Screen.OwnerVaultScreen.route
             }
-            state = state.copy(navigationResource = Resource.Success(destination))
+            state.copy(navigationResource = Resource.Success(destination))
         } else {
-            state = state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
+            state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
         }
     }
 
