@@ -403,7 +403,18 @@ class ApproverOnboardingViewModel @Inject constructor(
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
-        val entropy = (state.guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy
+        val entropy = when (val guardianPhase = state.guardianState?.phase) {
+            GuardianPhase.VerificationRejected -> {
+                TODO("Need backend deployment for entropy attached to VerificationRejected here," +
+                        "then we can slot in the cast to VerificationRejected and assignment of entropy here")
+//                guardianPhase.entropy
+            }
+            is GuardianPhase.WaitingForCode -> {
+                guardianPhase.entropy
+            }
+            else -> null
+        }
+
 
         if (entropy == null) {
             retrieveApproverState(false)
