@@ -188,9 +188,9 @@ fun ApproverEntranceScreen(
                         )
                     }
 
-                    ApproverEntranceUIState.Landing -> {
+                    is ApproverEntranceUIState.Landing -> {
                         ApproverLanding(
-                            isLoggedIn = state.loggedIn,
+                            isActiveApprover = uiState.isActiveApprover,
                             onActiveApproverLongPress = viewModel::setShowDeleteUserWarning,
                             onContinue = viewModel::onLandingContinue
                         )

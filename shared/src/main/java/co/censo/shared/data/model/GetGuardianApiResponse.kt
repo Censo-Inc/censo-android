@@ -25,6 +25,9 @@ sealed class GuardianPhase {
     fun isOnboardingPhase() =
         this is WaitingForCode || this is WaitingForVerification || this is VerificationRejected
 
+    fun isActiveApprover() =
+        this is Complete || this.isAccessPhase()
+
     @Serializable
     @SerialName("WaitingForCode")
     data class WaitingForCode(
