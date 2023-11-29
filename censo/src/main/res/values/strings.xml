@@ -366,4 +366,6 @@
     <string name="phrase_viewed">phrase viewed</string>
     <string name="exit_accessing_phrases">Exit accessing phrases</string>
     <string name="exit_accessing_phrases_message">Are you all finished accessing phrases? If you exit you will need to request approval to access your phrases again.</string>
+    <string name="delete_word">Delete word</string>
+    <string name="are_you_sure_you_want_to_delete_this_word">Are you sure you want to delete this word?</string>
 </resources>

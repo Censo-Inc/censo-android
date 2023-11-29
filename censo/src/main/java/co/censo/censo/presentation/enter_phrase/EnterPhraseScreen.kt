@@ -248,7 +248,8 @@ fun EnterPhraseScreen(
                                 decrementEditIndex = viewModel::decrementEditIndex,
                                 incrementEditIndex = viewModel::incrementEditIndex,
                                 enterNextWord = viewModel::enterNextWord,
-                                submitFullPhrase = viewModel::submitFullPhrase
+                                submitFullPhrase = viewModel::submitFullPhrase,
+                                deleteExistingWord = viewModel::deleteExistingWord,
                             )
                         }
 

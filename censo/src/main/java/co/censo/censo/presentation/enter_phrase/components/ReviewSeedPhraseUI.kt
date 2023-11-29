@@ -223,7 +223,8 @@ fun ViewPhraseWord(
     modifier: Modifier = Modifier,
     index: Int,
     phraseWord: String,
-    editWord: (() -> Unit)? = null
+    editWord: (() -> Unit)? = null,
+    deleteWord: (() -> Unit)? = null,
 ) {
 
     val context = LocalContext.current
@@ -260,16 +261,31 @@ fun ViewPhraseWord(
             fontWeight = FontWeight.W600
         )
         Spacer(modifier = Modifier.height(verticalSpacing))
-        editWord?.let {
-            IconButton(onClick = it) {
-                Icon(
-                    painter = painterResource(id = co.censo.shared.R.drawable.edit_icon),
-                    contentDescription = stringResource(VaultR.string.edit_word),
-                    tint = SharedColors.IconGrey
-                )
+        if (editWord != null || deleteWord != null) {
+            Row {
+                editWord?.let {
+                    IconButton(onClick = it) {
+                        Icon(
+                            painter = painterResource(id = co.censo.shared.R.drawable.edit_icon),
+                            contentDescription = stringResource(VaultR.string.edit_word),
+                            tint = SharedColors.IconGrey
+                        )
+                    }
+                }
+                deleteWord?.let {
+                    IconButton(onClick = it) {
+                        Icon(
+                            painter = painterResource(id = co.censo.shared.R.drawable.trash),
+                            contentDescription = stringResource(VaultR.string.delete_word),
+                            tint = SharedColors.IconGrey
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(verticalSpacing))
-        } ?: Spacer(modifier = Modifier.height(verticalSpacing / 4))
+        } else {
+            Spacer(modifier = Modifier.height(verticalSpacing / 4))
+        }
     }
 }
 

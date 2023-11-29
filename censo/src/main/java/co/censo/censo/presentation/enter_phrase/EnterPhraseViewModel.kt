@@ -18,6 +18,8 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.lang.Integer.max
+import java.lang.Integer.min
 import javax.inject.Inject
 
 @HiltViewModel
@@ -133,6 +135,23 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun editExistingWord() {
         state = state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
+    }
+
+    fun deleteExistingWord() {
+        val newEnteredWords = state.enteredWords.filterIndexed { ix, _ -> ix != state.editedWordIndex }
+        state = if (newEnteredWords.isEmpty()) {
+            state.copy(
+                enteredWords = emptyList(),
+                editedWordIndex = 0,
+                enterWordUIState = EnterPhraseUIState.EDIT,
+                editedWord = ""
+            )
+        } else {
+            state.copy(
+                enteredWords = newEnteredWords,
+                editedWordIndex = max(0, min(state.editedWordIndex, newEnteredWords.size - 1))
+            )
+        }
     }
 
     fun moveToLabel() {
