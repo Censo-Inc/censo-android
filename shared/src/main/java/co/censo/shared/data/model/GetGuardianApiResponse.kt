@@ -37,7 +37,9 @@ sealed class GuardianPhase {
 
     @Serializable
     @SerialName("VerificationRejected")
-    object VerificationRejected: GuardianPhase()
+    data class VerificationRejected(
+        val entropy: Base64EncodedData?,
+    ) : GuardianPhase()
 
     @Serializable
     @SerialName("Complete")
