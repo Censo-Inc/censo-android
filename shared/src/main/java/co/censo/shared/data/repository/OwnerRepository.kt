@@ -94,7 +94,7 @@ data class EncryptedSeedPhrase(
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
-    suspend fun signInUser(jwtToken: String, idToken: String): Resource<ResponseBody>
+    suspend fun signInUser(idToken: String): Resource<ResponseBody>
 
     suspend fun getCreatePolicyParams(
         ownerApprover: Guardian.ProspectGuardian
@@ -214,12 +214,11 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.ownerUser() }
     }
 
-    override suspend fun signInUser(authId: String, idToken: String) =
+    override suspend fun signInUser(idToken: String) =
         retrieveApiResource {
             apiService.signIn(
                 SignInApiRequest(
                     identityToken = IdentityToken(idToken.sha256()),
-                    jwtToken = JwtToken(authId)
                 )
             )
         }
