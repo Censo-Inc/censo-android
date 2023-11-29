@@ -20,6 +20,7 @@ object CrashReportingUtil {
     const val ReplacePolicy = "ReplacePolicy"
     const val JWTToken = "JWTToken"
     const val EncryptShard = "EncryptShard"
+    const val DecryptShard = "DecryptShard"
     const val DeleteUser = "DeleteUser"
     const val PushNotification = "PushNotification"
     const val RemovePushNotification = "RemovePushNotification"
@@ -36,6 +37,7 @@ object CrashReportingUtil {
     const val BillingSubscription = "BillingSubscription"
     const val AccessPhrase = "AccessPhrase"
     const val PlayIntegrity = "PlayIntegrity"
+    const val VerifyKeyConfirmation = "VerifyKeyConfirmation"
 }
 
 fun Exception.sendError(reason: String) {

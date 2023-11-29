@@ -147,9 +147,9 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                                 locksAt = Clock.System.now().plus(15.minutes)
                             )
                         }.onFailure {
-                            Exception(it).sendError(AccessPhrase)
+                            Exception("Failed to recover secrets").sendError(AccessPhrase)
                             state = state.copy(
-                                recoveredPhrases = Resource.Error(exception = Exception(it))
+                                recoveredPhrases = Resource.Error(exception = Exception("Failed to recover secrets"))
                             )
                         }
                     }

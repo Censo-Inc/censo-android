@@ -409,7 +409,7 @@ class OwnerRepositoryImpl(
                 else -> false
             }
         } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.EncryptShard)
+            e.sendError(CrashReportingUtil.VerifyKeyConfirmation)
             false
         }
     }
@@ -418,12 +418,17 @@ class OwnerRepositoryImpl(
         deviceEncryptedShard: Base64EncodedData,
         transportKey: Base58EncodedDevicePublicKey
     ): ByteArray? {
-        return try {
-            val guardianDevicePublicKey = transportKey.ecPublicKey
-
-            val decryptedShard = InternalDeviceKey(secureStorage.retrieveDeviceKeyId()).decrypt(
+        val decryptedShard = try {
+            InternalDeviceKey(secureStorage.retrieveDeviceKeyId()).decrypt(
                 Base64.getDecoder().decode(deviceEncryptedShard.base64Encoded)
             )
+        } catch (e: Exception) {
+            Exception("Unable to decrypt shard").sendError(CrashReportingUtil.DecryptShard)
+            return null
+        }
+
+        return try {
+            val guardianDevicePublicKey = transportKey.ecPublicKey
 
             ECIESManager.encryptMessage(
                 dataToEncrypt = decryptedShard,
@@ -432,7 +437,7 @@ class OwnerRepositoryImpl(
                 )
             )
         } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.EncryptShard)
+            Exception("Unable to re-encrypt shard").sendError(CrashReportingUtil.EncryptShard)
             null
         }
     }

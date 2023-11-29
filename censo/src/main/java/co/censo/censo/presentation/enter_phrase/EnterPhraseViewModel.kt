@@ -178,7 +178,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             }.onFailure { throwable ->
                 state = state.copy(
-                    submitResource = Resource.Error(exception = Exception(throwable))
+                    submitResource = Resource.Error(exception = Exception("Unable to encrypt seed phrase"))
                 )
             }
         }
@@ -353,11 +353,12 @@ class EnterPhraseViewModel @Inject constructor(
         val words =
             try {
                 if (pastedPhrase.isEmpty()) {
-                    throw Exception("No Phrase Pasted")
+                    listOf("Unable to create phrase...")
+                } else {
+                    BIP39.splitToWords(pastedPhrase)
                 }
-                BIP39.splitToWords(pastedPhrase)
             } catch (e: Exception) {
-                e.sendError(CrashReportingUtil.PastePhrase)
+                Exception("Unable to split words").sendError(CrashReportingUtil.PastePhrase)
                 listOf("Unable to create phrase...")
             }
 
