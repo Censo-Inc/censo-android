@@ -36,7 +36,7 @@ sealed class ApproverEntranceUIState {
 
     object Initial : ApproverEntranceUIState()
 
-    object Landing : ApproverEntranceUIState()
+    class Landing(val isActiveApprover: Boolean) : ApproverEntranceUIState()
 
     object LoggedOutPasteLink : ApproverEntranceUIState()
 

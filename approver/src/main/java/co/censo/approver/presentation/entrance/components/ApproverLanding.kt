@@ -37,7 +37,7 @@ import co.censo.shared.util.LinksUtil
 
 @Composable
 fun ApproverLanding(
-    isLoggedIn: Boolean = false,
+    isActiveApprover: Boolean = false,
     onActiveApproverLongPress: () -> Unit,
     onContinue: () -> Unit
 ) {
@@ -57,7 +57,7 @@ fun ApproverLanding(
         Spacer(modifier = Modifier.height(48.dp))
 
         val message =
-            if (isLoggedIn) stringResource(R.string.logged_in_approver_landing_message) else stringResource(
+            if (isActiveApprover) stringResource(R.string.logged_in_approver_landing_message) else stringResource(
                 R.string.approver_you_have_been_chosen
             )
 
@@ -83,7 +83,7 @@ fun ApproverLanding(
         }
 
 
-        if (!isLoggedIn) {
+        if (!isActiveApprover) {
             Spacer(modifier = Modifier.height(48.dp))
 
             val preceding = stringResource(R.string.interested_in_using_censo_span)
@@ -116,7 +116,7 @@ fun ApproverLanding(
         }
     }
 
-    if (isLoggedIn) {
+    if (isActiveApprover) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter

@@ -112,7 +112,26 @@ class ApproverEntranceViewModel @Inject constructor(
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
     private fun setLandingState(loggedIn: Boolean) {
-        state = state.copy(uiState = ApproverEntranceUIState.Landing, loggedIn = loggedIn)
+
+        viewModelScope.launch {
+            val isActiveApprover = if (loggedIn) {
+                val retrieveUser = guardianRepository.retrieveUser()
+
+                if (retrieveUser is Resource.Success) {
+                    retrieveUser.data
+                        ?.let { it.guardianStates.any { guardianState -> guardianState.phase.isActiveApprover() } }
+                        ?: false
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+            state = state.copy(
+                uiState = ApproverEntranceUIState.Landing(isActiveApprover),
+                loggedIn = loggedIn
+            )
+        }
     }
 
     private fun determineLoginState() {
@@ -245,7 +264,7 @@ class ApproverEntranceViewModel @Inject constructor(
 
                     if (retrieveUser is Resource.Success) {
                         val isActiveApprover = retrieveUser.data
-                            ?.let { it.guardianStates.any { it.invitationId != null } }
+                            ?.let { it.guardianStates.any { guardianState -> guardianState.phase.isActiveApprover() } }
                             ?: false
 
                         state = state.copy(
