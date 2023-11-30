@@ -51,6 +51,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
 
@@ -100,11 +101,13 @@ fun InitialPlanSetupScreen(
                 state.apiError -> {
                     val errorText =
                         if (state.saveKeyToCloudResource is Resource.Error) {
-                            "Error occurred trying to save your approver key"
-                        } else if (state.createPolicyParamsResponse is Resource.Error) {
-                            "Error occurred trying to create policy params"
-                        } else if (state.createPolicyResponse is Resource.Error) {
-                            "Error occurred trying to create policy"
+                            "Error occurred while trying to save data to Google Drive. Please try again."
+                        } else if (state.loadKeyFromCloudResource is Resource.Error) {
+                            "Error occurred while trying to load data from Google Drive. Please try again."
+                        } else if (state.createPolicyParamsResponse is Resource.Error
+                            || state.createPolicyResponse is Resource.Error
+                        ) {
+                            "Error occurred while trying to create data. Please try again."
                         } else {
                             "Failed to complete facetec, try again."
                         }
@@ -154,11 +157,19 @@ fun InitialPlanSetupScreen(
                     actionToPerform = state.cloudStorageAction.action,
                     participantId = state.participantId,
                     encryptedPrivateKey = privateKey,
-                    onActionSuccess = { _ ->
-                        viewModel.onKeySaved()
+                    onActionSuccess = { encryptedByteArray ->
+                        when (state.cloudStorageAction.action) {
+                            CloudStorageActions.UPLOAD -> viewModel.onKeySaved()
+                            CloudStorageActions.DOWNLOAD -> viewModel.onKeyLoaded(encryptedByteArray)
+                            else -> {}
+                        }
                     },
                     onActionFailed = {
-                        viewModel.onKeySaveFailed(exception = it)
+                        when (state.cloudStorageAction.action) {
+                            CloudStorageActions.UPLOAD -> viewModel.onKeySaveFailed(exception = it)
+                            CloudStorageActions.DOWNLOAD -> viewModel.onKeyLoadFailed(exception = it)
+                            else -> {}
+                        }
                     },
                 )
             }
