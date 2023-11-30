@@ -357,7 +357,7 @@ class EnterPhraseViewModel @Inject constructor(
                 } else {
                     BIP39.splitToWords(pastedPhrase)
                 }
-            } catch (e: Exception) {
+            } catch (t: Throwable) {
                 Exception("Unable to split words").sendError(CrashReportingUtil.PastePhrase)
                 listOf("Unable to create phrase...")
             }

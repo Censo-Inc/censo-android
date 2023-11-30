@@ -422,7 +422,7 @@ class OwnerRepositoryImpl(
             InternalDeviceKey(secureStorage.retrieveDeviceKeyId()).decrypt(
                 Base64.getDecoder().decode(deviceEncryptedShard.base64Encoded)
             )
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
             Exception("Unable to decrypt shard").sendError(CrashReportingUtil.DecryptShard)
             return null
         }
@@ -436,7 +436,7 @@ class OwnerRepositoryImpl(
                     guardianDevicePublicKey.encoded
                 )
             )
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
             Exception("Unable to re-encrypt shard").sendError(CrashReportingUtil.EncryptShard)
             null
         }
