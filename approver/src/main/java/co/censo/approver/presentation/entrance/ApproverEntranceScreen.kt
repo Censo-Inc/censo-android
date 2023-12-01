@@ -4,6 +4,7 @@ import ParticipantId
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -44,7 +45,8 @@ fun ApproverEntranceScreen(
     invitationId: String? = null,
     accessParticipantId: String? = null,
     approvalId: String? = null,
-    viewModel: ApproverEntranceViewModel = hiltViewModel()
+    viewModel: ApproverEntranceViewModel = hiltViewModel(),
+    appLinkUri: Uri? = null
 ) {
     val context = LocalContext.current as FragmentActivity
 
@@ -74,7 +76,8 @@ fun ApproverEntranceScreen(
         viewModel.onStart(
             invitationId = invitationId,
             accessParticipantId = accessParticipantId,
-            approvalId = approvalId
+            approvalId = approvalId,
+            appLinkUri = appLinkUri
         )
         onDispose { }
     }

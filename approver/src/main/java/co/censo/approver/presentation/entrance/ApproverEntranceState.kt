@@ -1,5 +1,6 @@
 package co.censo.approver.presentation.entrance
 
+import android.net.Uri
 import co.censo.shared.data.Resource
 import okhttp3.ResponseBody
 
@@ -16,6 +17,7 @@ data class ApproverEntranceState(
 
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val navigationResource: Resource<String> = Resource.Uninitialized,
+    val appLinkUri: Uri? = null
 ) {
     val isLoading = signInUserResource is Resource.Loading
 

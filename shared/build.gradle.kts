@@ -67,7 +67,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "ENVIRONMENT", "\"prod\"")
             buildConfigField("String", "URL_SCHEME", "\"censo\"")
+            buildConfigField("String", "LINK_HOST", "\"link-prod.censo.dev\"")
+            buildConfigField("String", "L1NK_HOST", "\"l1nk-prod.censo.dev\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("localRelease") {
@@ -78,7 +81,10 @@ android {
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("String", "ENVIRONMENT", "\"staging\"")
             buildConfigField("String", "URL_SCHEME", "\"censo-staging\"")
+            buildConfigField("String", "LINK_HOST", "\"link-staging.censo.dev\"")
+            buildConfigField("String", "L1NK_HOST", "\"l1nk-staging.censo.dev\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("integration") {
@@ -86,7 +92,9 @@ android {
             buildConfigField("String[]", "GOOGLE_AUTH_CLIENT_IDS", googleAuthClientIdsArrayRepresentation)
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("String", "ENVIRONMENT", "\"integration\"")
             buildConfigField("String", "URL_SCHEME", "\"censo-integration\"")
+            buildConfigField("String", "LINK_HOST", "\"link-integration.censo.dev\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         debug {
