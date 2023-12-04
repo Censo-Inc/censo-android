@@ -77,6 +77,7 @@ android {
             manifestPlaceholders["SENTRY_ID"] = "https://29e39757e3a25d59f1314d04195b9454@o4506182264815616.ingest.sentry.io/4506264343019520"
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("boolean", "FACETEC_ENABLED", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -92,6 +93,7 @@ android {
             manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("boolean", "FACETEC_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
         }
@@ -100,6 +102,7 @@ android {
             manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            buildConfigField("boolean", "FACETEC_ENABLED", "false")
             applicationIdSuffix = ".integration"
             isDebuggable = false
         }
@@ -108,6 +111,7 @@ android {
             resValue("string", "app_name", "Debug Censo")
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
+            buildConfigField("boolean", "FACETEC_ENABLED", "false")
             applicationIdSuffix = ".debug"
             isDebuggable = true
         }
