@@ -10,9 +10,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-val versionNameMajor = 0
-val versionNameMinor = 0
-val versionNamePatch = 1
+val versionNameMajor = 1
+val versionNameMinor = 4
+val versionNamePatch = 0
 
 fun createBuildConfigStringArray(strings: List<String>) : String {
     val builder = StringBuilder()
