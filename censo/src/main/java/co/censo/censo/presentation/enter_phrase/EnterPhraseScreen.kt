@@ -216,7 +216,8 @@ fun EnterPhraseScreen(
                         EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
                             SelectSeedPhraseEntryType(
                                 welcomeFlow = state.welcomeFlow,
-                                onManualEntrySelected = { viewModel.entrySelected(EntryType.MANUAL) },
+                                currentLanguage = state.currentLanguage,
+                                onManualEntrySelected = { language -> viewModel.entrySelected(EntryType.MANUAL, language) },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) }
                             )
                         }
@@ -236,7 +237,8 @@ fun EnterPhraseScreen(
                                 enterWordUIState = state.enterWordUIState,
                                 updateEditedWord = viewModel::updateEditedWord,
                                 onWordSelected = viewModel::wordSelected,
-                                wordSubmitted = viewModel::wordSubmitted
+                                wordSubmitted = viewModel::wordSubmitted,
+                                language = state.currentLanguage
                             )
                         }
 

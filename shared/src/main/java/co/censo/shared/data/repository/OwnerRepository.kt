@@ -42,7 +42,6 @@ import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InitiateRecoveryApiRequest
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
-import co.censo.shared.data.model.JwtToken
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
@@ -159,7 +158,7 @@ interface OwnerRepository {
 
     suspend fun encryptSecret(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        seedPhrase: String
+        seedWords: List<String>
     ): EncryptedSeedPhrase
 
     suspend fun storeSecret(
@@ -191,7 +190,8 @@ interface OwnerRepository {
     suspend fun recoverSecrets(
         encryptedSecrets: List<VaultSecret>,
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
-        encryptedMasterPrivateKey: Base64EncodedData
+        encryptedMasterPrivateKey: Base64EncodedData,
+        language: BIP39.WordListLanguage?
     ): List<RecoveredSeedPhrase>
 
     suspend fun submitPurchase(
@@ -463,10 +463,9 @@ class OwnerRepositoryImpl(
 
     override suspend fun encryptSecret(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        seedPhrase: String
+        seedWords: List<String>
     ): EncryptedSeedPhrase {
-        val encodedData = BIP39.phraseToBinaryData(seedPhrase)
-
+        val encodedData = BIP39.wordsToBinaryData(seedWords)
         val encryptedSeedPhrase = ECIESManager.encryptMessage(
             dataToEncrypt = encodedData,
             publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
@@ -583,6 +582,7 @@ class OwnerRepositoryImpl(
         encryptedSecrets: List<VaultSecret>,
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
+        language: BIP39.WordListLanguage?
     ): List<RecoveredSeedPhrase> {
         val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards, true)
         val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
@@ -591,9 +591,9 @@ class OwnerRepositoryImpl(
             RecoveredSeedPhrase(
                 guid = it.guid,
                 label = it.label,
-                seedPhrase = BIP39.binaryDataToWords(
-                    masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes)
-                ).joinToString(" "),
+                phraseWords = BIP39.binaryDataToWords(
+                    masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes), language
+                ),
                 createdAt = it.createdAt
             )
         }

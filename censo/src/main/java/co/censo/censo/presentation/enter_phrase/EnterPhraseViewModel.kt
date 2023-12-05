@@ -167,7 +167,7 @@ class EnterPhraseViewModel @Inject constructor(
                 // encrypt seed phrase and drop single words
                 val encryptedSeedPhrase = ownerRepository.encryptSecret(
                     state.masterPublicKey!!,
-                    state.enteredWords.joinToString(" ").trim()
+                    state.enteredWords
                 )
 
                 state = state.copy(
@@ -218,9 +218,9 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
 
-    fun entrySelected(entryType: EntryType) {
+    fun entrySelected(entryType: EntryType, language: BIP39.WordListLanguage = BIP39.WordListLanguage.English) {
         state = when (entryType) {
-            EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT)
+            EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT, currentLanguage = language)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
         }
     }
@@ -353,7 +353,7 @@ class EnterPhraseViewModel @Inject constructor(
         val words =
             try {
                 if (pastedPhrase.isEmpty()) {
-                    listOf("Unable to create phrase...")
+                    listOf("Clipboard is empty...")
                 } else {
                     BIP39.splitToWords(pastedPhrase)
                 }
@@ -368,6 +368,7 @@ class EnterPhraseViewModel @Inject constructor(
             enteredWords = words,
             editedWordIndex = editedWordIndex,
             editedWord = words[editedWordIndex],
+            currentLanguage = BIP39.determineLanguage(words)
         )
 
         submitFullPhrase()

@@ -54,6 +54,7 @@ object PhraseWordUtil {
 fun PhraseEntryTextField(
     phrase: String,
     wordSelected: Boolean,
+    language: BIP39.WordListLanguage,
     onPhraseUpdated: (String) -> Unit,
     onWordSelected: (String) -> Unit
 ) {
@@ -108,7 +109,8 @@ fun PhraseEntryTextField(
         PhraseAutoCompleteWords(
             phrase = phrase,
             showAutoComplete = phrase.length >= START_FILTER_INDEX,
-            wordSelected = wordSelected
+            wordSelected = wordSelected,
+            language = language
         ) { wordTapped ->
             onWordSelected(wordTapped)
             focusRequester.freeFocus()
@@ -122,6 +124,7 @@ fun PhraseAutoCompleteWords(
     phrase: String,
     showAutoComplete: Boolean,
     wordSelected: Boolean,
+    language: BIP39.WordListLanguage,
     onWordTap: (String) -> Unit
 ) {
 
@@ -134,7 +137,7 @@ fun PhraseAutoCompleteWords(
     ) {
         if (showAutoComplete) {
             val potentialWords =
-                BIP39.wordlists[BIP39.WordListLanguage.English]!!.filter { it.startsWith(phrase.lowercase().trim()) }
+                BIP39.wordLists(language)!!.filter { it.startsWith(phrase.lowercase().trim()) }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -231,6 +234,7 @@ fun PreviewPhraseEntry() {
         phrase = "Ca",
         onPhraseUpdated = {},
         wordSelected = false,
+        language = BIP39.WordListLanguage.English
     ) {
 
     }

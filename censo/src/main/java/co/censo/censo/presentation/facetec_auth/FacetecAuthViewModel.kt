@@ -150,6 +150,30 @@ class FacetecAuthViewModel @Inject constructor(
 
         }
     }
+
+    fun simulateFacetecScanSuccess() {
+        state = state.copy(submitResultResponse = Resource.Loading())
+
+        viewModelScope.launch {
+            val submitResultResponse = onFaceScanReady(
+                state.facetecData?.id ?: BiometryVerificationId(""),
+                FacetecBiometry(
+                    "",
+                    "",
+                    ""
+                )
+            )
+
+            state = if (submitResultResponse is Resource.Success) {
+                state.copy(
+                    submitResultResponse = Resource.Uninitialized
+                )
+            } else {
+                state.copy(submitResultResponse = submitResultResponse)
+            }
+
+        }
+    }
     
     fun facetecCustomizations(): FaceTecCustomization {
         val customization = FaceTecCustomization()
