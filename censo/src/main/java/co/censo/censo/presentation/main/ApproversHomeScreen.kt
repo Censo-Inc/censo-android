@@ -4,7 +4,6 @@ import MessageText
 import StandardButton
 import TitleText
 import android.content.Context
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -44,13 +44,16 @@ import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverActivatedUIData
+import kotlinx.datetime.Clock
 
 @Composable
 fun ApproversHomeScreen(
     approvers: List<Guardian.TrustedGuardian>,
-    onInviteApproversSelected: () -> Unit
+    onInviteApproversSelected: () -> Unit,
+    onRemoveApproversSelected: () -> Unit
 ) {
-    
+    val verticalSpacingHeight = 24.dp
+
     val nonOwnerApprovers = approvers.filter { !it.isOwner }
 
     //TODO: Update check so that when there is a pending approver, we display Resume adding approvers
@@ -65,15 +68,49 @@ fun ApproversHomeScreen(
         ) {
             Spacer(modifier = Modifier.height(36.dp))
 
-            for ((index, approver) in nonOwnerApprovers.withIndex()) {
+            nonOwnerApprovers.forEach { approver ->
                 ApproverInfoBox(
                     nickName = approver.label,
                     status = approver.attributes,
                     editEnabled = false
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(verticalSpacingHeight))
             }
 
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.Black,
+                onClick = onRemoveApproversSelected,
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.approvers),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = pluralStringResource(id = R.plurals.remove_approvers, count = nonOwnerApprovers.size),
+                        color = Color.White,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.W400
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = pluralStringResource(R.plurals.remove_approvers_span, count = nonOwnerApprovers.size),
+                textAlign = TextAlign.Start,
+                fontSize = 12.sp,
+            )
+
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
         }
     } else {
         NoApproversUI(
@@ -130,20 +167,11 @@ fun NoApproversUI(
 
         MessageText(
             message = buildSpannedParagraph(
-                preceding =  stringResource(R.string.adding_a_span),
+                preceding = stringResource(R.string.adding_a_span),
                 bolded = stringResource(R.string.second_approver),
                 remaining = stringResource(R.string.ensures_access_second_approver_span),
             ),
             textAlign = TextAlign.Start
-        )
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight - 12.dp))
-        Text(
-            text = stringResource(R.string.add_approvers_beta_warning),
-            color = Color.Red,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.W500
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
@@ -280,9 +308,56 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun PreviewApproversHome() {
+fun PreviewEmptyApproversHome() {
     ApproversHomeScreen(
         approvers = emptyList(),
-        onInviteApproversSelected = {}
+        onInviteApproversSelected = {},
+        onRemoveApproversSelected = {},
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewSingleApproverHome() {
+    ApproversHomeScreen(
+        approvers = listOf(
+            Guardian.TrustedGuardian(
+                label = "Neo",
+                participantId = ParticipantId.generate(),
+                isOwner = false,
+                attributes = GuardianStatus.Onboarded(
+                    onboardedAt = Clock.System.now(),
+                )
+            ),
+        ),
+        onInviteApproversSelected = {},
+        onRemoveApproversSelected = {},
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewMultipleApproversHome() {
+    ApproversHomeScreen(
+        approvers = listOf(
+            Guardian.TrustedGuardian(
+                label = "Neo",
+                participantId = ParticipantId.generate(),
+                isOwner = false,
+                attributes = GuardianStatus.Onboarded(
+                    onboardedAt = Clock.System.now(),
+                )
+            ),
+            Guardian.TrustedGuardian(
+                label = "John Wick",
+                participantId = ParticipantId.generate(),
+                isOwner = false,
+                attributes = GuardianStatus.Onboarded(
+                    onboardedAt = Clock.System.now(),
+                )
+            )
+        ),
+        onInviteApproversSelected = {},
+        onRemoveApproversSelected = {},
     )
 }

@@ -34,7 +34,9 @@ class AccessApprovalViewModel @Inject constructor(
     var state by mutableStateOf(AccessApprovalState())
         private set
 
-    fun onStart() {
+    fun onStart(accessIntent: RecoveryIntent) {
+        state = state.copy(accessIntent = accessIntent)
+
         viewModelScope.launch {
             val ownerState = ownerStateFlow.value
             if (ownerState is Resource.Success) {
@@ -104,7 +106,7 @@ class AccessApprovalViewModel @Inject constructor(
                 if (recovery.status == RecoveryStatus.Available) {
                     if (ownerState.policy.guardians.all { it.isOwner }) {
                         // owner is single approver, skip to view seed phrases
-                        navigateToViewSeedPhrases()
+                        navigateIntentAware()
                     } else {
                         state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
                     }
@@ -135,7 +137,7 @@ class AccessApprovalViewModel @Inject constructor(
             state = state.copy(initiateRecoveryResource = Resource.Loading())
 
             viewModelScope.launch {
-                val response = ownerRepository.initiateRecovery(RecoveryIntent.AccessPhrases)
+                val response = ownerRepository.initiateRecovery(state.accessIntent)
 
                 if (response is Resource.Success) {
                     updateOwnerState(response.data!!.ownerState)
@@ -242,8 +244,13 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun navigateToViewSeedPhrases() {
-        state = state.copy(navigationResource = Resource.Success(Screen.AccessSeedPhrases.route))
+    fun navigateIntentAware() {
+        val destination = when (state.accessIntent) {
+            RecoveryIntent.AccessPhrases -> Screen.AccessSeedPhrases.route
+            RecoveryIntent.ReplacePolicy -> Screen.PlanSetupRoute.removeApproversRoute()
+        }
+
+        state = state.copy(navigationResource = Resource.Success(destination))
     }
 
     fun hideCloseConfirmationDialog() {

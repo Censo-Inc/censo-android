@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -32,8 +31,8 @@ import co.censo.censo.presentation.access_approval.components.AnotherDeviceAcces
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApprover
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
@@ -42,6 +41,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AccessApprovalScreen(
     navController: NavController,
+    accessIntent: RecoveryIntent,
     viewModel: AccessApprovalViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -50,7 +50,7 @@ fun AccessApprovalScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart()
+                viewModel.onStart(accessIntent)
             }
 
             Lifecycle.Event.ON_PAUSE -> {
@@ -97,8 +97,9 @@ fun AccessApprovalScreen(
                     Text(
                         text = when (state.accessApprovalUIState) {
                             AccessApprovalUIState.Approved -> ""
-                            else -> {
-                                stringResource(id = R.string.access)
+                            else -> when (accessIntent) {
+                                RecoveryIntent.AccessPhrases -> stringResource(id = R.string.access)
+                                RecoveryIntent.ReplacePolicy -> stringResource(id = R.string.remove_approvers)
                             }
                         },
                         textAlign = TextAlign.Center
@@ -178,6 +179,7 @@ fun AccessApprovalScreen(
 
                         AccessApprovalUIState.SelectApprover -> {
                             SelectApprover(
+                                intent = accessIntent,
                                 approvers = state.approvers.external(),
                                 selectedApprover = state.selectedApprover,
                                 onApproverSelected = viewModel::onApproverSelected,
@@ -187,6 +189,7 @@ fun AccessApprovalScreen(
 
                         AccessApprovalUIState.ApproveAccess -> {
                             ApproveAccessUI(
+                                intent = accessIntent,
                                 approverName = state.selectedApprover?.label ?: stringResource(R.string.your_approver_backup_label),
                                 approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
                                 verificationCode = state.verificationCode,
@@ -202,7 +205,7 @@ fun AccessApprovalScreen(
 
                             LaunchedEffect(Unit) {
                                 delay(3000)
-                                viewModel.navigateToViewSeedPhrases()
+                                viewModel.navigateIntentAware()
                             }
                         }
                     }

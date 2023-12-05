@@ -40,10 +40,12 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.shared.data.model.RecoveryIntent
 import kotlinx.datetime.Clock
 
 @Composable
 fun SelectApprover(
+    intent: RecoveryIntent,
     approvers: List<Guardian.TrustedGuardian>,
     selectedApprover: Guardian.TrustedGuardian?,
     onApproverSelected: (Guardian.TrustedGuardian) -> Unit,
@@ -64,7 +66,12 @@ fun SelectApprover(
 
             TitleText(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
-                title = stringResource(co.censo.censo.R.string.request_access_title),
+                title = stringResource(
+                    when (intent) {
+                        RecoveryIntent.AccessPhrases -> R.string.request_access
+                        RecoveryIntent.ReplacePolicy -> R.string.request_approval
+                    }
+                ),
                 textAlign = TextAlign.Start
             )
 
@@ -73,7 +80,10 @@ fun SelectApprover(
             MessageText(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
                 message = stringResource(
-                    R.string.request_access_message,
+                    when (intent) {
+                        RecoveryIntent.AccessPhrases -> R.string.seed_phrase_request_access_message
+                        RecoveryIntent.ReplacePolicy -> R.string.policy_replace_request_access_message
+                    },
                     buildApproverNamesText(approvers = approvers, context)
                 ),
                 textAlign = TextAlign.Start
@@ -119,7 +129,7 @@ fun SelectApprover(
                         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
                     ) {
                         Text(
-                            text = stringResource(id = co.censo.censo.R.string.continue_text),
+                            text = stringResource(id = R.string.continue_text),
                             color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey,
                             fontSize = 24.sp
                         )
@@ -218,7 +228,7 @@ fun SelectingApproverInfoBox(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SelectApproverUIPreview() {
+fun SelectApproverForAccessUIPreview() {
     val primaryApprover = Guardian.TrustedGuardian(
         label = "Neo",
         participantId = ParticipantId.generate(),
@@ -237,6 +247,39 @@ fun SelectApproverUIPreview() {
     )
 
     SelectApprover(
+        intent = RecoveryIntent.AccessPhrases,
+        approvers = listOf(
+            primaryApprover,
+            backupApprover
+        ),
+        selectedApprover = backupApprover,
+        onApproverSelected = {},
+        onContinue = {}
+    )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SelectApproverForPolicyReplaceUIPreview() {
+    val primaryApprover = Guardian.TrustedGuardian(
+        label = "Neo",
+        participantId = ParticipantId.generate(),
+        isOwner = false,
+        attributes = GuardianStatus.Onboarded(
+            onboardedAt = Clock.System.now(),
+        )
+    )
+    val backupApprover = Guardian.TrustedGuardian(
+        label = "John Wick",
+        participantId = ParticipantId.generate(),
+        isOwner = false,
+        attributes = GuardianStatus.Onboarded(
+            onboardedAt = Clock.System.now(),
+        )
+    )
+
+    SelectApprover(
+        intent = RecoveryIntent.ReplacePolicy,
         approvers = listOf(
             primaryApprover,
             backupApprover

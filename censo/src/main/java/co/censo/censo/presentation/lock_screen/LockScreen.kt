@@ -34,8 +34,11 @@ fun LockedScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_START
-            -> {
+            Lifecycle.Event.ON_CREATE -> {
+                viewModel.onCreate()
+            }
+
+            Lifecycle.Event.ON_START -> {
                 viewModel.onStart()
             }
 

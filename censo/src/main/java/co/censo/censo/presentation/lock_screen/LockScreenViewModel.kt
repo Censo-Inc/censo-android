@@ -35,9 +35,7 @@ class LockScreenViewModel @Inject constructor(
     var state by mutableStateOf(LockScreenState())
         private set
 
-    fun onStart() {
-        retrieveOwnerState()
-
+    fun onCreate() {
         viewModelScope.launch {
             ownerStateFlow.collect { resource: Resource<OwnerState> ->
                 if (resource is Resource.Success) {
@@ -45,6 +43,10 @@ class LockScreenViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun onStart() {
+        retrieveOwnerState()
 
         timer.start(interval = 1.seconds.inWholeMilliseconds) {
             val lockStatus = state.lockStatus
@@ -66,12 +68,8 @@ class LockScreenViewModel @Inject constructor(
     }
 
     private fun retrieveOwnerState() {
-        state = state.copy(ownerStateResource = Resource.Loading())
-
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
-
-            state = state.copy(ownerStateResource = ownerStateResource)
 
             if (ownerStateResource is Resource.Success) {
                 ownerStateFlow.value = ownerStateResource
@@ -122,11 +120,10 @@ class LockScreenViewModel @Inject constructor(
                 lockStatus = LockScreenState.LockStatus.UnlockInProgress(
                     apiCall = unlockVaultResponse
                 ),
-                ownerStateResource = unlockVaultResponse.map { it.ownerState },
             )
 
             if (unlockVaultResponse is Resource.Success) {
-                onOwnerState(unlockVaultResponse.data!!.ownerState)
+                ownerStateFlow.value = unlockVaultResponse.map { it.ownerState }
             }
 
             unlockVaultResponse.map { it.scanResultBlob }

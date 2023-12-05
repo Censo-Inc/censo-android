@@ -8,11 +8,9 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 data class LockScreenState(
-    val ownerStateResource: Resource<OwnerState> = Resource.Uninitialized,
     val prolongUnlockResource: Resource<ProlongUnlockApiResponse> = Resource.Uninitialized,
     val lockStatus: LockStatus = LockStatus.None
 ) {
-    val unlocked = lockStatus is LockStatus.Unlocked
 
     sealed class LockStatus {
         object None : LockStatus()

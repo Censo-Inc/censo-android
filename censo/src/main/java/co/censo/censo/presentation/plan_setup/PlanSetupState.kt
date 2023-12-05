@@ -25,6 +25,7 @@ data class PlanSetupState(
     val alternateApprover: Guardian.ProspectGuardian? = null,
 
     // Screen in Plan Setup Flow
+    val planSetupDirection: PlanSetupDirection = PlanSetupDirection.AddApprovers,
     val planSetupUIState: PlanSetupUIState = PlanSetupUIState.Initial_1,
 
     // inviting approver

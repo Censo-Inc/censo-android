@@ -33,8 +33,10 @@ import co.censo.censo.presentation.lock_screen.LockedScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.paywall.PaywallScreen
+import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -106,8 +108,12 @@ class MainActivity : FragmentActivity() {
             composable(route = Screen.OwnerVaultScreen.route) {
                 MainVaultScreen(navController = navController)
             }
-            composable(route = Screen.AccessApproval.route) {
-                AccessApprovalScreen(navController = navController)
+            composable(route = "${Screen.AccessApproval.route}/{${Screen.AccessApproval.ACCESS_INTENT_ARG}}") { backStackEntry ->
+                AccessApprovalScreen(
+                    navController = navController,
+                    accessIntent = backStackEntry.arguments?.getString(Screen.AccessApproval.ACCESS_INTENT_ARG)
+                        ?.let { RecoveryIntent.valueOf(it) } ?: RecoveryIntent.AccessPhrases,
+                )
             }
             composable(
                 route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}/{${Screen.EnterPhraseRoute.WELCOME_FLOW_ARG}}"
@@ -119,16 +125,17 @@ class MainActivity : FragmentActivity() {
                             Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
                         )!!
                     ),
-                    welcomeFlow = (backStackEntry.arguments?.getString(
-                        Screen.EnterPhraseRoute.WELCOME_FLOW_ARG
-                    ) ?: false.toString()).toBoolean()
+                    welcomeFlow = (backStackEntry.arguments?.getString(Screen.EnterPhraseRoute.WELCOME_FLOW_ARG)
+                        ?.toBoolean()) ?: false
                 )
             }
             composable(
-                route = Screen.PlanSetupRoute.route
-            ) {
+                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.SETUP_DIRECTION_ARG}}"
+            ) {backStackEntry ->
                 PlanSetupScreen(
-                    navController = navController
+                    navController = navController,
+                    planSetupDirection = backStackEntry.arguments?.getString(Screen.PlanSetupRoute.SETUP_DIRECTION_ARG)
+                        ?.let { PlanSetupDirection.valueOf(it) } ?: PlanSetupDirection.AddApprovers
                 )
             }
             composable(

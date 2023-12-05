@@ -260,6 +260,15 @@
     <string name="add_seed_phrase">Add seed phrase</string>
     <string name="approvers_home_title">approvers</string>
     <string name="add_approvers_button_text">Add approvers</string>
+    <string name="remove_approvers">Remove approvers</string>
+    <plurals name="remove_approvers">
+        <item quantity="one">Remove approver</item>
+        <item quantity="other">Remove approvers</item>
+    </plurals>
+    <plurals name="remove_approvers_span">
+        <item quantity="one">An approval from current approver is required</item>
+        <item quantity="other">An approval from current approvers is required</item>
+    </plurals>
     <string name="add">Add</string>
     <string name="access">Access</string>
     <string name="approvers_app_bar_title">Approvers</string>
@@ -277,6 +286,7 @@
     <string name="dont_leave_message">You will need to start this process over if you leave or close the app.</string>
     <string name="phrase">Phrase</string>
     <string name="request_access">Request access</string>
+    <string name="request_approval">Request approval</string>
     <string name="request_access_blurb">Which approver would you like to use to request access?</string>
     <string name="cancel_access_dialog">Your access will be cancelled. Continue?</string>
     <string name="access_was_requested_using_another_phone">Access was requested using another phone</string>
@@ -307,7 +317,6 @@
     <string name="require">require</string>
     <string name="adding_approvers_span">Adding approvers makes you more secure. An approver is someone you choose and trust, and will help you when you need to access your seed phrase. Access to your seed phrase will</string>
     <string name="you_can_increase_your_security">You can increase your security!</string>
-    <string name="add_approvers_beta_warning">Note: during the beta, approvers can only be added once, and cannot be changed.</string>
     <string name="paste_seed_phrase">Paste seed phrase</string>
     <string name="input_seed_phrase">Input seed phrase</string>
     <string name="phrase_added_done_message">You\'ll never have to worry about losing access to your valuable crypto again.</string>
@@ -356,13 +365,14 @@
     <string name="enter_the_code_request_access_step">2. Enter the code</string>
     <string name="your_approver_backup_label">your approver</string>
     <string name="waiting_for_to_open_the_link">Waiting for %1$s to open the link</string>
-    <string name="request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identify.\n\nSelect your approver below when you are speaking with them:</string>
-    <string name="request_access_title">Request access</string>
+    <string name="seed_phrase_request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identify.\n\nSelect your approver below when you are speaking with them:</string>
+    <string name="policy_replace_request_access_message">Removing approvers requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identify.\n\nSelect your approver below when you are speaking with them:</string>
     <string name="locked">Locked</string>
     <string name="edit_phrase">Edit phrase</string>
     <string name="your_approver">your approver</string>
     <string name="select_phrase_cont_description">Select phrase</string>
     <string name="activated">Activated</string>
+    <string name="approvers_removed">Approvers removed</string>
     <string name="phrase_viewed">phrase viewed</string>
     <string name="exit_accessing_phrases">Exit accessing phrases</string>
     <string name="exit_accessing_phrases_message">Are you all finished accessing phrases? If you exit you will need to request approval to access your phrases again.</string>

@@ -8,6 +8,7 @@ import co.censo.shared.data.model.Guardian
 import co.censo.shared.data.model.InitiateRecoveryApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Recovery
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
 
 data class AccessApprovalState(
@@ -19,6 +20,7 @@ data class AccessApprovalState(
     val showCancelConfirmationDialog: Boolean = false,
 
     // data
+    val accessIntent: RecoveryIntent = RecoveryIntent.AccessPhrases,
     val ownerState: OwnerState.Ready? = null,
     val recovery: Recovery.ThisDevice? = null,
     val approvers: List<Guardian.TrustedGuardian> = listOf(),

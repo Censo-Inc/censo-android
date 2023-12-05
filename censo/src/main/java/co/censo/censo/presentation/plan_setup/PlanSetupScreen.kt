@@ -29,6 +29,7 @@ import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.Activated
+import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.model.GuardianStatus
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -37,10 +38,15 @@ import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
+enum class PlanSetupDirection(val threshold: UInt) {
+    AddApprovers(2U), RemoveApprovers(1U)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanSetupScreen(
     navController: NavController,
+    planSetupDirection: PlanSetupDirection,
     viewModel: PlanSetupViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -63,7 +69,7 @@ fun PlanSetupScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart()
+                viewModel.onStart(planSetupDirection)
             }
             Lifecycle.Event.ON_PAUSE -> {
                 viewModel.onStop()
@@ -118,32 +124,62 @@ fun PlanSetupScreen(
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
                         DisplayError(
                             errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = {
+                                viewModel.resetVerifyKeyConfirmationSignature()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
+                            retryAction = {
+                                viewModel.resetVerifyKeyConfirmationSignature()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
                         )
-                    } else if (state.userResponse is Resource.Error){
+                    } else if (state.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve user information, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = {
+                                viewModel.resetUserResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
+                            retryAction = {
+                                viewModel.resetUserResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
                         )
                     } else if (state.createPolicySetupResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to create policy, try again",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = {
+                                viewModel.resetCreatePolicySetupResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
+                            retryAction = {
+                                viewModel.resetCreatePolicySetupResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
                         )
                     } else if (state.initiateRecoveryResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to replace plan, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = {
+                                viewModel.resetInitiateRecoveryResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
+                            retryAction = {
+                                viewModel.resetInitiateRecoveryResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
                         )
                     } else if (state.retrieveRecoveryShardsResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve recovery data, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = {
+                                viewModel.resetRetrieveRecoveryShardsResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
+                            retryAction = {
+                                viewModel.resetRetrieveRecoveryShardsResponse()
+                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                            },
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
                         if (state.replacePolicyResponse.exception is CloudStoragePermissionNotGrantedException) {
@@ -282,7 +318,10 @@ fun PlanSetupScreen(
                         }
 
                         PlanSetupUIState.Completed_8 -> {
-                            Activated()
+                            when (planSetupDirection) {
+                                PlanSetupDirection.AddApprovers -> Activated()
+                                PlanSetupDirection.RemoveApprovers -> ApproversRemoved()
+                            }
 
                             LaunchedEffect(Unit) {
                                 delay(6000)

@@ -37,11 +37,13 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.presentation.components.SmallLoading
 
 @Composable
 fun ApproveAccessUI(
+    intent: RecoveryIntent,
     approverName: String,
     approval: Approval,
     verificationCode: String,
@@ -79,7 +81,10 @@ fun ApproveAccessUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.request_access,
+            title = when (intent) {
+                RecoveryIntent.AccessPhrases -> R.string.request_access
+                RecoveryIntent.ReplacePolicy -> R.string.request_approval
+            },
             fontSize = 28.sp,
             textAlign = TextAlign.Center,
         )
@@ -182,6 +187,7 @@ fun ApproveAccessUI(
 @Composable
 fun ApproveAccessInitialPreview() {
     ApproveAccessUI(
+        intent = RecoveryIntent.AccessPhrases,
         approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
@@ -198,6 +204,7 @@ fun ApproveAccessInitialPreview() {
 @Composable
 fun ApproveAccessWaitingForVerificationPreview() {
     ApproveAccessUI(
+        intent = RecoveryIntent.AccessPhrases,
         approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
@@ -214,6 +221,7 @@ fun ApproveAccessWaitingForVerificationPreview() {
 @Composable
 fun ApproveAccessWaitingForApprovalPreview() {
     ApproveAccessUI(
+        intent = RecoveryIntent.AccessPhrases,
         approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
@@ -230,6 +238,7 @@ fun ApproveAccessWaitingForApprovalPreview() {
 @Composable
 fun ApproveAccessRejectedPreview() {
     ApproveAccessUI(
+        intent = RecoveryIntent.AccessPhrases,
         approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
@@ -246,6 +255,7 @@ fun ApproveAccessRejectedPreview() {
 @Composable
 fun ApproveAccessApprovedPreview() {
     ApproveAccessUI(
+        intent = RecoveryIntent.AccessPhrases,
         approverName = "Buddy",
         storesLink = "link",
         approval = Approval(
@@ -254,6 +264,23 @@ fun ApproveAccessApprovedPreview() {
             approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
+        onVerificationCodeChanged = {},
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ApproveRequestInitialPreview() {
+    ApproveAccessUI(
+        intent = RecoveryIntent.ReplacePolicy,
+        approverName = "Buddy",
+        storesLink = "link",
+        approval = Approval(
+            participantId = ParticipantId.generate(),
+            status = ApprovalStatus.Initial,
+            approvalId = ApprovalId("")
+        ),
+        verificationCode = "",
         onVerificationCodeChanged = {},
     )
 }

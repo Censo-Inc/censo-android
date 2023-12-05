@@ -18,6 +18,7 @@ import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -156,9 +157,9 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
                     else -> {
                         // there should be 'available' recovery requested by this device
-                        // navigate back to recovery screen
+                        // navigate back to access approval screen
                         state = state.copy(
-                            navigationResource = Resource.Success(Screen.AccessApproval.route)
+                            navigationResource = Resource.Success(Screen.AccessApproval.withIntent(intent = RecoveryIntent.AccessPhrases))
                         )
                     }
                 }
