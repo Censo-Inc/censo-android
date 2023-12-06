@@ -145,9 +145,9 @@ fun NoApproversUI(
 
         MessageText(
             message = buildSpannedParagraph(
-                preceding = stringResource(R.string.adding_approvers_span),
+                preceding = stringResource(R.string.adding_approvers_makes_you_more_secure_span),
                 bolded = stringResource(R.string.require),
-                remaining = stringResource(R.string.their_approval_in_addition_to_yours_span),
+                remaining = stringResource(R.string.an_approval_from_one_of_your_approvers),
             ),
             textAlign = TextAlign.Start
         )
@@ -155,22 +155,7 @@ fun NoApproversUI(
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
         MessageText(
-            message = buildSpannedParagraph(
-                preceding = stringResource(R.string.adding_a_span),
-                bolded = stringResource(R.string.first_approver),
-                remaining = stringResource(R.string.ensures_access_first_approver_span),
-            ),
-            textAlign = TextAlign.Start
-        )
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        MessageText(
-            message = buildSpannedParagraph(
-                preceding = stringResource(R.string.adding_a_span),
-                bolded = stringResource(R.string.second_approver),
-                remaining = stringResource(R.string.ensures_access_second_approver_span),
-            ),
+            message = stringResource(R.string.adding_approvers_ensures_span),
             textAlign = TextAlign.Start
         )
 

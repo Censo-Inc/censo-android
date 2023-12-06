@@ -36,8 +36,7 @@ import co.censo.censo.R
 
 @Composable
 fun AddAlternateApproverUI(
-    onInviteAlternateSelected: () -> Unit,
-    onSaveAndFinishSelected: () -> Unit
+    onInviteAlternateSelected: () -> Unit
 ) {
 
     val verticalSpacingHeight = 28.dp
@@ -50,14 +49,6 @@ fun AddAlternateApproverUI(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
-
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = stringResource(R.string.optional_increase_security),
-            textAlign = TextAlign.Start
-        )
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
@@ -95,21 +86,6 @@ fun AddAlternateApproverUI(
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
-            onClick = onSaveAndFinishSelected,
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.save_finish),
-                color = Color.White,
-                fontSize = 24.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
     }
 }
 
@@ -118,7 +94,6 @@ fun AddAlternateApproverUI(
 fun AddAlternateApproverUIPreview() {
     AddAlternateApproverUI(
         onInviteAlternateSelected = {},
-        onSaveAndFinishSelected = {},
     )
 }
 

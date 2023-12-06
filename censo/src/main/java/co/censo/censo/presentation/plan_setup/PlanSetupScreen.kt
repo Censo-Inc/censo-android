@@ -299,9 +299,6 @@ fun PlanSetupScreen(
                             AddAlternateApproverUI(
                                 onInviteAlternateSelected = {
                                     viewModel.receivePlanAction(PlanSetupAction.InviteApprover)
-                                },
-                                onSaveAndFinishSelected = {
-                                    viewModel.receivePlanAction(PlanSetupAction.SavePlan)
                                 }
                             )
                         }
