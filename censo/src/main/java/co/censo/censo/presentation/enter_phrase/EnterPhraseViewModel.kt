@@ -106,7 +106,10 @@ class EnterPhraseViewModel @Inject constructor(
     fun incrementEditIndex(): Boolean {
         val currentIndex = state.editedWordIndex
 
-        return if (currentIndex != state.enteredWords.size - 1) {
+        return if (currentIndex != state.enteredWords.size - 1
+            && state.enteredWords.isNotEmpty()
+            && currentIndex <= state.enteredWords.size - 1
+        ) {
             state =
                 state.copy(
                     editedWordIndex = state.editedWordIndex + 1,
@@ -205,11 +208,15 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun editEntirePhrase() {
-        state = state.copy(
-            editedWord = state.enteredWords[0],
-            editedWordIndex = 0,
-            enterWordUIState = EnterPhraseUIState.VIEW
-        )
+        state = if (state.enteredWords.isEmpty()) {
+            state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE)
+        } else {
+            state.copy(
+                editedWord = state.enteredWords[0],
+                editedWordIndex = 0,
+                enterWordUIState = EnterPhraseUIState.VIEW
+            )
+        }
     }
 
     fun updateLabel(updatedLabel: String) {

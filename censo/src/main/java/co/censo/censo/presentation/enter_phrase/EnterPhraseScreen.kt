@@ -245,7 +245,13 @@ fun EnterPhraseScreen(
                         EnterPhraseUIState.VIEW -> {
                             ViewPhraseWordUI(
                                 editedWordIndex = state.editedWordIndex,
-                                phraseWord = state.enteredWords[state.editedWordIndex],
+                                phraseWord = if (state.editedWordIndex < 0
+                                    || state.editedWordIndex >= state.enteredWords.size
+                                ) {
+                                    ""
+                                } else {
+                                    state.enteredWords[state.editedWordIndex]
+                                },
                                 editExistingWord = viewModel::editExistingWord,
                                 decrementEditIndex = viewModel::decrementEditIndex,
                                 incrementEditIndex = viewModel::incrementEditIndex,

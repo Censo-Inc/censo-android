@@ -129,8 +129,10 @@ fun ReviewSeedPhraseUI(
                     .weight(0.1f)
                     .padding(start = 8.dp),
                 onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    if (pagerState.pageCount != 0) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        }
                     }
                 }) {
                 Icon(
@@ -159,8 +161,10 @@ fun ReviewSeedPhraseUI(
                     .weight(0.1f)
                     .padding(end = 8.dp),
                 onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    if (pagerState.pageCount != 0) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
                     }
                 }) {
                 Icon(
