@@ -249,11 +249,11 @@ class OwnerEntranceViewModel @Inject constructor(
                 loggedInRouting(userResponse.data!!.ownerState)
 
                 state.copy(userResponse = userResponse)
+            } else if (userResponse is Resource.Error && userResponse.errorCode == 404) {
+                ownerRepository.clearJWT()
+                state.copy(userResponse = Resource.Uninitialized, signInUserResource = Resource.Uninitialized)
             } else {
-                state.copy(
-                    userResponse = userResponse,
-                    signInUserResource = Resource.Uninitialized
-                )
+                state.copy(userResponse = userResponse, signInUserResource = Resource.Uninitialized)
             }
         }
     }

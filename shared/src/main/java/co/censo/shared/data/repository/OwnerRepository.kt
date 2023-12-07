@@ -121,6 +121,7 @@ interface OwnerRepository {
     suspend fun verifyToken(token: String): String?
     suspend fun saveJWT(jwtToken: String)
     fun retrieveJWT(): String
+    fun clearJWT()
     fun checkJWTValid(jwtToken: String): Boolean
 
     fun verifyKeyConfirmationSignature(guardian: Guardian.ProspectGuardian): Boolean
@@ -385,6 +386,7 @@ class OwnerRepositoryImpl(
     }
 
     override fun retrieveJWT() = secureStorage.retrieveJWT()
+    override fun clearJWT() = secureStorage.clearJWT()
     override fun checkJWTValid(jwtToken: String): Boolean {
         return try {
             val jwtDecoded = JWT(jwtToken)
