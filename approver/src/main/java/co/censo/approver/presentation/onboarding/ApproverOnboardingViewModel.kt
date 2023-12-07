@@ -106,7 +106,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         userStatePollingTimer.start(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
             if (state.userResponse !is Resource.Loading
                 && state.savePrivateKeyToCloudResource !is Resource.Loading
-                && state.guardianState?.phase is GuardianPhase.WaitingForVerification
+                && (shouldPollUserState(state.guardianState?.phase))
             ) {
                 retrieveApproverState(silently = true)
             }
@@ -209,7 +209,13 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
     private fun assignEntropy(guardianState: GuardianState?) {
-        (guardianState?.phase as? GuardianPhase.WaitingForCode)?.entropy?.let {
+        val entropy = when (val phase = guardianState?.phase) {
+            is GuardianPhase.WaitingForCode -> phase.entropy
+            is GuardianPhase.VerificationRejected -> phase.entropy
+            else -> null
+        }
+
+        entropy?.let {
             state = state.copy(entropy = it)
         }
     }
@@ -384,6 +390,12 @@ class ApproverOnboardingViewModel @Inject constructor(
             navToApproverRouting = true
         )
     }
+
+    private fun shouldPollUserState(guardianPhase: GuardianPhase?) =
+        guardianPhase is GuardianPhase.WaitingForCode ||
+                guardianPhase is GuardianPhase.WaitingForVerification ||
+                guardianPhase is GuardianPhase.VerificationRejected
+
     //endregion
 
     //region Cloud Storage
@@ -414,6 +426,8 @@ class ApproverOnboardingViewModel @Inject constructor(
 
             else -> null
         }
+
+        assignEntropy(state.guardianState)
 
 
         if (entropy == null) {
@@ -463,7 +477,6 @@ class ApproverOnboardingViewModel @Inject constructor(
         submitVerificationCode()
     }
     //endregion
-
 
     //region handle key failure
     fun handleCloudStorageActionFailure(
