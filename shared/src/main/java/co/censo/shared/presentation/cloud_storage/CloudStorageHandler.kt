@@ -8,6 +8,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -122,12 +124,14 @@ fun CloudStorageHandler(
         onDispose { viewModel.onDispose() }
     }
 
-    //TODO: Update UI to match design style
     if (state.shouldEnforceCloudStorageAccess) {
+        val interactionSource = remember { MutableInteractionSource()}
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = SharedColors.DisabledGrey),
+                .background(color = SharedColors.DisabledGrey)
+                .clickable(indication = null, interactionSource = interactionSource, onClick = {}),
             contentAlignment = Alignment.Center
         ) {
             Column(

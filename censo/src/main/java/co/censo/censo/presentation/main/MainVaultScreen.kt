@@ -1,5 +1,11 @@
 package co.censo.censo.presentation.main
 
+import android.app.Activity
+import android.content.IntentSender
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,7 +34,12 @@ import co.censo.shared.data.model.RecoveryIntent
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.popUpToTop
+import co.censo.shared.util.sendError
+import com.google.android.gms.auth.api.identity.AuthorizationRequest
+import com.google.android.gms.auth.api.identity.Identity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +59,23 @@ fun MainVaultScreen(
         onDispose { }
     }
 
+    val googleDriveAccessResultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val authResult = Identity.getAuthorizationClient(context)
+                    .getAuthorizationResultFromIntent(result.data)
+                if (authResult.grantedScopes.contains(GoogleAuth.DRIVE_FILE_SCOPE.toString())) {
+                    viewModel.setSyncCloudAccessMessage(SyncCloudAccessMessage.ACCESS_GRANTED)
+                } else {
+                    viewModel.setSyncCloudAccessMessage(SyncCloudAccessMessage.ACCESS_AUTH_FAILED)
+                }
+            } else {
+                viewModel.setSyncCloudAccessMessage(SyncCloudAccessMessage.ACCESS_AUTH_FAILED)
+            }
+        }
+    )
+
     LaunchedEffect(key1 = state) {
         if (state.kickUserOut is Resource.Success) {
             navController.navigate(Screen.EntranceRoute.route) {
@@ -55,6 +83,60 @@ fun MainVaultScreen(
                 popUpToTop()
             }
             viewModel.reset()
+        }
+
+        if (state.resyncCloudAccessRequest) {
+            val authorizationRequest = AuthorizationRequest.builder()
+                .setRequestedScopes(listOf(GoogleAuth.DRIVE_FILE_SCOPE))
+                .build()
+
+            Identity.getAuthorizationClient(context)
+                .authorize(authorizationRequest)
+                .addOnSuccessListener { authResult ->
+
+                    //If the user can grant the access
+                    if (authResult.hasResolution()) {
+                        val pendingIntent = authResult.pendingIntent
+                        try {
+                            pendingIntent?.let {safeIntent ->
+                                val intentSenderRequest = IntentSenderRequest.Builder(safeIntent.intentSender).build()
+                                googleDriveAccessResultLauncher.launch(intentSenderRequest)
+                            } ?: Exception("Pending Intent null").sendError(CrashReportingUtil.CloudStorageIntent)
+                        } catch (e: IntentSender.SendIntentException) {
+                            viewModel.setSyncCloudAccessMessage(SyncCloudAccessMessage.ACCESS_AUTH_FAILED)
+                            e.sendError(CrashReportingUtil.CloudStorageIntent)
+                        }
+                    } else {
+                        viewModel.setSyncCloudAccessMessage(SyncCloudAccessMessage.ALREADY_GRANTED)
+                    }
+
+                    viewModel.resetResyncCloudAccessRequest()
+                }
+                .addOnFailureListener {
+                    viewModel.setSyncCloudAccessMessage(SyncCloudAccessMessage.ACCESS_AUTH_FAILED)
+                    it.sendError(CrashReportingUtil.CloudStorageIntent)
+                    viewModel.resetResyncCloudAccessRequest()
+                }
+        }
+
+        if (state.syncCloudAccessMessage is Resource.Success) {
+            val message = when (state.syncCloudAccessMessage.data) {
+                SyncCloudAccessMessage.ALREADY_GRANTED -> {
+                    context.getString(R.string.drive_access_already_granted)
+                }
+                SyncCloudAccessMessage.ACCESS_GRANTED -> {
+                    context.getString(R.string.drive_access_granted)
+                }
+                SyncCloudAccessMessage.ACCESS_AUTH_FAILED -> {
+                    context.getString(R.string.failed_to_authenticate_drive_access)
+                }
+                null -> null
+            }
+
+            message?.let {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            }
+            viewModel.resetSyncCloudAccessMessage()
         }
     }
 
@@ -171,6 +253,7 @@ fun MainVaultScreen(
 
                         BottomNavItem.Settings ->
                             SettingsHomeScreen(
+                                onResyncCloudAccess = viewModel::resyncCloudAccess,
                                 onLock = viewModel::lock,
                                 onDeleteUser = viewModel::showDeleteUserDialog,
                                 onSignOut = viewModel::signOut,

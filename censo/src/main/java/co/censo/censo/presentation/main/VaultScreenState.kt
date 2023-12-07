@@ -13,11 +13,15 @@ data class VaultScreenState(
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val triggerEditPhraseDialog: Resource<VaultSecret> = Resource.Uninitialized,
 
+    // toast
+    val syncCloudAccessMessage: Resource<SyncCloudAccessMessage> = Resource.Uninitialized,
+
     // api requests
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSecretApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val lockResponse : Resource<Unit> = Resource.Uninitialized,
+    val resyncCloudAccessRequest : Boolean = false,
 
     // navigation
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
@@ -37,4 +41,8 @@ data class VaultScreenState(
                 deleteUserResource is Resource.Error ||
                 lockResponse is Resource.Error
 
+}
+
+enum class SyncCloudAccessMessage {
+    ALREADY_GRANTED, ACCESS_GRANTED, ACCESS_AUTH_FAILED
 }

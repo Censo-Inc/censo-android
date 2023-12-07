@@ -375,4 +375,8 @@
     <string name="current_language">"For input seed phrase, the current language is %1$s. You may change it "</string>
     <string name="here">here</string>
     <string name="seed_phrase_saved_language">"By default, your seed phrase is displayed in the language it was saved. You may select a different display language "</string>
+    <string name="re_sync_drive_access">Re-sync Drive Access</string>
+    <string name="drive_access_already_granted">Drive access already granted</string>
+    <string name="drive_access_granted">Drive access granted</string>
+    <string name="failed_to_authenticate_drive_access">Failed to authenticate drive access</string>
 </resources>

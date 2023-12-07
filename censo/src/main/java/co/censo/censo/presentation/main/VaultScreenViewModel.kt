@@ -161,4 +161,24 @@ class VaultScreenViewModel @Inject constructor(
         state = state.copy(lockResponse = Resource.Uninitialized)
     }
 
+    fun resyncCloudAccess() {
+        state = state.copy(resyncCloudAccessRequest = true)
+    }
+
+    fun resetResyncCloudAccessRequest() {
+        state = state.copy(resyncCloudAccessRequest = false)
+    }
+
+    fun setSyncCloudAccessMessage(syncCloudAccessMessage: SyncCloudAccessMessage) {
+        state = state.copy(
+            syncCloudAccessMessage = Resource.Success(syncCloudAccessMessage)
+        )
+    }
+
+    fun resetSyncCloudAccessMessage() {
+        state = state.copy(
+            syncCloudAccessMessage = Resource.Uninitialized
+        )
+    }
+
 }
