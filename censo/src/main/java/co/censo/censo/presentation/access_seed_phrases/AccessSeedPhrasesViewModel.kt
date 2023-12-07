@@ -19,6 +19,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -137,12 +138,13 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                                 ownerRepository.recoverSecrets(
                                     listOf(requestedSecret),
                                     encryptedShards,
-                                    ownerState.policy.encryptedMasterKey
+                                    ownerState.policy.encryptedMasterKey,
+                                    language = state.currentLanguage
                                 )
 
                             state = state.copy(
                                 recoveredPhrases = Resource.Success(recoveredSecrets),
-                                viewedPhrase = recoveredSecrets.firstOrNull()?.seedPhrase?.split(" ") ?: listOf(""),
+                                viewedPhrase = recoveredSecrets.firstOrNull()?.phraseWords ?: listOf(""),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
                                 viewedPhraseIds = recoveredSecrets.firstOrNull()?.let { state.viewedPhraseIds + it.guid } ?: state.viewedPhraseIds,
                                 locksAt = Clock.System.now().plus(15.minutes)
@@ -188,9 +190,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         )
     }
 
-    fun startFacetec() {
+    fun startFacetec(language: BIP39.WordListLanguage?) {
         state = state.copy(
-            accessPhrasesUIState = AccessPhrasesUIState.Facetec
+            accessPhrasesUIState = AccessPhrasesUIState.Facetec,
+            currentLanguage = language
         )
     }
 

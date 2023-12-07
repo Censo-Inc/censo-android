@@ -178,7 +178,7 @@ fun AccessSeedPhrasesScreen(
                         AccessPhrasesUIState.ViewPhrase -> {
                             state.recoveredPhrases.data?.first()?.let {
                                 ViewAccessPhraseUI(
-                                    phraseWords = it.seedPhrase.split(" "),
+                                    phraseWords = it.phraseWords,
                                     onDone = viewModel::reset,
                                     timeLeft = state.timeRemaining
                                 )

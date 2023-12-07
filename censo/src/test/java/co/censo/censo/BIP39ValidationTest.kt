@@ -1,12 +1,23 @@
 package co.censo.censo
 
+import androidx.test.core.app.ApplicationProvider
 import co.censo.shared.util.BIP39InvalidReason
 import co.censo.shared.util.BIP39
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class BIP39ValidationTest {
+
+    @Before
+    fun setup() {
+        BIP39.setup(ApplicationProvider.getApplicationContext())
+    }
+
     @Test
     fun `test bip39 too short`() {
         assertEquals(BIP39InvalidReason.TooShort(1), BIP39.validateSeedPhrase("wrong"))
@@ -47,8 +58,38 @@ class BIP39ValidationTest {
         testPhrases.forEach { phrase ->
             assertEquals(
                 phrase,
-                BIP39.binaryDataToWords(BIP39.phraseToBinaryData(phrase)).joinToString(" ")
+                BIP39.binaryDataToWords(BIP39.wordsToBinaryData(BIP39.splitToWords(phrase))).joinToString(" ")
             )
+        }
+    }
+
+    @Test
+    fun `test language determination`() {
+        enumValues<BIP39.WordListLanguage>().forEach { language ->
+            assertEquals(language, BIP39.determineLanguage(languageTestPhrases[language]!!), )
+        }
+    }
+
+    @Test
+    fun `test languages`() {
+        enumValues<BIP39.WordListLanguage>().forEach { language ->
+            println(language.displayName())
+            val phrase = languageTestPhrases[language]!!
+            val words = BIP39.splitToWords(phrase)
+            assertNull(BIP39.validateSeedPhrase(phrase))
+            assertNull(BIP39.validateSeedPhrase(words))
+
+            val binaryData = BIP39.wordsToBinaryData(words)
+            assertEquals(binaryData[0], language.toId())
+            assertEquals(words, BIP39.binaryDataToWords(binaryData))
+
+            enumValues<BIP39.WordListLanguage>().forEach { otherLanguage ->
+                println("\t${language.displayName()}")
+                assertEquals(
+                    BIP39.binaryDataToWords(binaryData, otherLanguage),
+                    BIP39.splitToWords(languageTestPhrases[otherLanguage]!!)
+                )
+            }
         }
     }
 
@@ -59,7 +100,20 @@ class BIP39ValidationTest {
         }
     }
 
-    val testPhrases = listOf(
+    private val languageTestPhrases: Map<BIP39.WordListLanguage, String> = mapOf(
+        BIP39.WordListLanguage.English to  "donor tower topic path obey intact lyrics list hair slice cluster grunt glare trap appear immense vibrant vendor document cushion arrow same link tissue",
+        BIP39.WordListLanguage.Spanish to  "derecho tetera teoría odisea nasal jarra macho llorar guerra roble caspa grito género tigre altura imitar usar unidad delfín collar anciano pupila llegar tazón",
+        BIP39.WordListLanguage.French to "déglutir syntaxe surmener muséum maximal grenat isoler innocent flairer remarque cendrier filmer farceur tambour alourdir géranium union tuyau déductif compact analyse potager inhiber strict",
+        BIP39.WordListLanguage.Italian to "duna tifare teorema pilifero palazzina luminoso multiplo mondina india serraglio ciottolo incanto guaio titolo ammenda letterale vagabondo usanza dovuto custode anello salasso molosso tariffa",
+        BIP39.WordListLanguage.Portugese to "cozinha tagarela surpresa moeda manequim goiaba intriga infinito ficheiro rebelde cadastro feriado externo tapar alameda gasoduto tutelar trunfo corvo chefe alienar poeira inerente subtrair",
+        BIP39.WordListLanguage.Czech to "jepice vlnovka vjezd popel placenta nastat odsun odcizit metoda subtropy fond mazurka lucifer vojna bodlina nadobro zakoupit zadusit jednatel honitba brambora skluz odboj veselka",
+        BIP39.WordListLanguage.Japanese to "けおとす　みもと　みつける　てはい　ちんもく　せっきゃく　だいたい　そんかい　しゃうん　ひそむ　かほう　しまう　しごと　むえん　いそがしい　すべて　ようちえん　ゆでる　けいこ　きまる　いっち　のりゆき　そよかぜ　まんが",
+        BIP39.WordListLanguage.Korean to "문득 판단 특수 유난히 옥수수 스물 알루미늄 아스팔트 선풍기 지점 단어 선거 상업 팬티 결혼 수면 해당 함부로 무엇 마음 계곡 정장 아드님 통과",
+        BIP39.WordListLanguage.ChineseSimplified to "望 枯 络 障 筒 屋 毒 伸 乎 彼 元 攻 医 欣 物 振 骑 诺 罪 称 把 辆 纳 钉",
+        BIP39.WordListLanguage.ChineseTraditional to "望 枯 絡 障 筒 屋 毒 伸 乎 彼 元 攻 醫 欣 物 振 騎 諾 罪 稱 把 輛 納 釘"
+    )
+
+    private val testPhrases = listOf(
         "media squirrel pass doll leg across modify candy dash glass amused scorpion",
         "fantasy rain also faith churn acquire wolf salad switch skirt donate shield energy cart possible",
         "ugly pattern possible away witness sword manual soap spin dolphin thrive dinosaur blast tide century program note history",

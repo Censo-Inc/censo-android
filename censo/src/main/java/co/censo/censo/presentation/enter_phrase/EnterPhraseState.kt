@@ -4,6 +4,7 @@ import Base58EncodedMasterPublicKey
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.repository.EncryptedSeedPhrase
+import co.censo.shared.util.BIP39
 import co.censo.shared.util.BIP39InvalidReason
 
 data class EnterPhraseState(
@@ -12,6 +13,7 @@ data class EnterPhraseState(
     val editedWord: String = "",
     val editedWordIndex: Int = 0,
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+    val currentLanguage: BIP39.WordListLanguage = BIP39.WordListLanguage.English,
     val phraseInvalidReason: BIP39InvalidReason? = null,
     val label: String = "",
     val labelTooLong: String? = null,

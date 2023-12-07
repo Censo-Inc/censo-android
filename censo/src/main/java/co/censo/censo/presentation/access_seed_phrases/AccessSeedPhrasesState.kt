@@ -7,6 +7,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
 import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.util.BIP39
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -26,6 +27,7 @@ data class AccessSeedPhrasesState(
     val recoveredPhrases: Resource<List<RecoveredSeedPhrase>> = Resource.Uninitialized,
     val ownerState: Resource<OwnerState> = Resource.Uninitialized,
     val selectedPhrase : VaultSecret? = null,
+    val currentLanguage: BIP39.WordListLanguage? = null,
 
     // api requests
     val retrieveShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,

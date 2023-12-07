@@ -24,10 +24,12 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.enter_phrase.EnterPhraseUIState
+import co.censo.shared.util.BIP39
 
 @Composable
 fun BoxScope.EditPhraseWordUI(
     phraseWord: String,
+    language: BIP39.WordListLanguage,
     enterWordUIState: EnterPhraseUIState,
     updateEditedWord: (String) -> Unit,
     onWordSelected: (String) -> Unit,
@@ -37,7 +39,8 @@ fun BoxScope.EditPhraseWordUI(
         phrase = phraseWord,
         onPhraseUpdated = updateEditedWord,
         onWordSelected = onWordSelected,
-        wordSelected = enterWordUIState == EnterPhraseUIState.SELECTED
+        wordSelected = enterWordUIState == EnterPhraseUIState.SELECTED,
+        language = language
     )
 
     if (enterWordUIState == EnterPhraseUIState.SELECTED) {
@@ -81,7 +84,8 @@ fun ViewPhraseWordPreview() {
             phraseWord = "ban",
             enterWordUIState = EnterPhraseUIState.EDIT,
             updateEditedWord = {},
-            onWordSelected = {}
+            onWordSelected = {},
+            language = BIP39.WordListLanguage.English
         ) {
 
         }
@@ -97,7 +101,8 @@ fun SelectedPhraseWordPreview() {
             phraseWord = "banana",
             enterWordUIState = EnterPhraseUIState.SELECTED,
             updateEditedWord = {},
-            onWordSelected = {}
+            onWordSelected = {},
+            language = BIP39.WordListLanguage.English
         ) {
 
         }

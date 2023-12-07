@@ -30,6 +30,7 @@ import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.censo.R
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.util.projectLog
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 
@@ -86,14 +87,7 @@ fun FacetecAuth(
                     state.facetecData?.sessionToken ?: ""
                 )
             } else {
-                onFaceScanReady(
-                    state.facetecData?.id ?: BiometryVerificationId(""),
-                    FacetecBiometry(
-                        "",
-                        "",
-                        ""
-                    )
-                )
+                viewModel.simulateFacetecScanSuccess()
             }
 
             viewModel.resetStartFacetecAuth()

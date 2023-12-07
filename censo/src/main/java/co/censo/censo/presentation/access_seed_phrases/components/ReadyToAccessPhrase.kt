@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,14 +31,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.censo.presentation.components.LanguageSelectionMenu
 import co.censo.censo.presentation.welcome.SetupStep
+import co.censo.shared.util.BIP39
 
 @Composable
 fun ReadyToAccessPhrase(
-    getStarted: () -> Unit
+    getStarted: (BIP39.WordListLanguage?) -> Unit
 ) {
+    var selectedLanguage: BIP39.WordListLanguage? by remember { mutableStateOf(null) }
+
     Column(
         Modifier
             .background(color = Color.White)
@@ -56,6 +62,32 @@ fun ReadyToAccessPhrase(
                 .padding(end = 24.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
+
+        val basicStyle = SpanStyle(
+            color = Color.Black,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal
+        )
+
+        val languageSelectionText = buildAnnotatedString {
+            withStyle(basicStyle) {
+                append(stringResource(R.string.seed_phrase_saved_language))
+            }
+            withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                append(stringResource(R.string.here))
+            }
+        }
+
+        LanguageSelectionMenu(
+            text = languageSelectionText,
+            currentLanguage = selectedLanguage,
+            action = {
+                selectedLanguage = it
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
@@ -82,7 +114,9 @@ fun ReadyToAccessPhrase(
                 .fillMaxWidth()
                 .padding(vertical = 24.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
-            onClick = getStarted,
+            onClick = {
+                getStarted(selectedLanguage)
+            },
             color = Color.Black
         ) {
             Text(
