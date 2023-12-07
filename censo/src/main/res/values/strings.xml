@@ -259,6 +259,7 @@
     <string name="add_seed_phrase">Add seed phrase</string>
     <string name="approvers_home_title">approvers</string>
     <string name="add_approvers_button_text">Add approvers</string>
+    <string name="resume_adding_approvers_button_text">Resume adding approvers</string>
     <string name="remove_approvers">Remove approvers</string>
     <plurals name="remove_approvers">
         <item quantity="one">Remove approver</item>

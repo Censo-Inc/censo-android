@@ -49,6 +49,7 @@ import kotlinx.datetime.Clock
 @Composable
 fun ApproversHomeScreen(
     approvers: List<Guardian.TrustedGuardian>,
+    approverSetupExists: Boolean,
     onInviteApproversSelected: () -> Unit,
     onRemoveApproversSelected: () -> Unit
 ) {
@@ -114,6 +115,7 @@ fun ApproversHomeScreen(
         }
     } else {
         NoApproversUI(
+            approverSetupExists = approverSetupExists,
             onInviteApproversSelected = onInviteApproversSelected
         )
     }
@@ -121,6 +123,7 @@ fun ApproversHomeScreen(
 
 @Composable
 fun NoApproversUI(
+    approverSetupExists: Boolean,
     onInviteApproversSelected: () -> Unit
 ) {
     val verticalSpacingHeight = 24.dp
@@ -165,7 +168,7 @@ fun NoApproversUI(
             modifier = Modifier.fillMaxWidth(),
             color = Color.Black,
             onClick = onInviteApproversSelected,
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
+            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -177,12 +180,23 @@ fun NoApproversUI(
                     tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.add_approvers_button_text),
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.W400
-                )
+                if (approverSetupExists) {
+                    Text(
+                        text = stringResource(R.string.resume_adding_approvers_button_text),
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.W400,
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.add_approvers_button_text),
+                        color = Color.White,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.W400,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
 
@@ -296,6 +310,18 @@ fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
 fun PreviewEmptyApproversHome() {
     ApproversHomeScreen(
         approvers = emptyList(),
+        approverSetupExists = false,
+        onInviteApproversSelected = {},
+        onRemoveApproversSelected = {},
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewEmptyApproversResumeHome() {
+    ApproversHomeScreen(
+        approvers = emptyList(),
+        approverSetupExists = true,
         onInviteApproversSelected = {},
         onRemoveApproversSelected = {},
     )
@@ -315,6 +341,7 @@ fun PreviewSingleApproverHome() {
                 )
             ),
         ),
+        approverSetupExists = false,
         onInviteApproversSelected = {},
         onRemoveApproversSelected = {},
     )
@@ -342,6 +369,7 @@ fun PreviewMultipleApproversHome() {
                 )
             )
         ),
+        approverSetupExists = false,
         onInviteApproversSelected = {},
         onRemoveApproversSelected = {},
     )

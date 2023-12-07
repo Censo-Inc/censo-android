@@ -243,6 +243,7 @@ fun MainVaultScreen(
                         BottomNavItem.Approvers ->
                             ApproversHomeScreen(
                                 approvers = state.ownerState?.policy?.guardians ?: emptyList(),
+                                approverSetupExists = state.ownerState?.guardianSetup != null,
                                 onInviteApproversSelected = {
                                     navController.navigate(Screen.PlanSetupRoute.addApproversRoute())
                                 },
