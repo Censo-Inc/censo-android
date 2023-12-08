@@ -57,7 +57,6 @@ fun SelectPhraseUI(
         vaultSecrets.forEach { seedPhrase ->
             Spacer(modifier = Modifier.height(12.dp))
             SeedPhraseItem(
-                horizontalPadding = 0.dp,
                 vaultSecret = seedPhrase,
                 isSelected = viewedIds.any { it == seedPhrase.guid}
             ) {
@@ -105,18 +104,17 @@ fun PreviewSelectPhraseUI() {
                 guid = VaultSecretId("2"),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 seedPhraseHash = HashedValue(""),
-                label = "BashOLantern",
+                label = "Robin Hood",
                 createdAt = Clock.System.now(),
             ),
             VaultSecret(
                 guid = VaultSecretId("3"),
-                encryptedSeedPhrase = Base64EncodedData(""),
+                label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
-                label = "Robin Hood",
-                createdAt = Clock.System.now(),
+                encryptedSeedPhrase = Base64EncodedData(""),
+                createdAt = Clock.System.now()
             ),
-
-            ),
+        ),
         viewedIds = listOf(
             VaultSecretId("2"),
         ),

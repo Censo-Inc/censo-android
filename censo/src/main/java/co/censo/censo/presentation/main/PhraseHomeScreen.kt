@@ -36,14 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.censo.R
 import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.VaultSecret
 import co.censo.shared.presentation.SharedColors
-import co.censo.censo.R
-import co.censo.censo.presentation.VaultColors
 import kotlinx.datetime.Clock
 
 @Composable
@@ -59,7 +57,7 @@ fun PhraseHomeScreen(
             .background(color = Color.White)
             .verticalScroll(rememberScrollState())
     ) {
-        AddAccessRow(onAddClick = onAddClick, onAccessClick = onAccessClick)
+        AddOrAccessRow(onAddClick = onAddClick, onAccessClick = onAccessClick)
         Divider(
             modifier = Modifier
                 .height(1.5.dp)
@@ -67,22 +65,28 @@ fun PhraseHomeScreen(
             color = SharedColors.DividerGray
         )
         Spacer(modifier = Modifier.height(12.dp))
-        vaultSecrets.forEach { vaultSecret ->
-            Spacer(modifier = Modifier.height(12.dp))
-            SeedPhraseItem(
-                vaultSecret = vaultSecret,
-                isDeletable = true,
-                onClick = {
-                    onEditPhraseClick(vaultSecret)
-                }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+        ) {
+            vaultSecrets.forEach { vaultSecret ->
+                Spacer(modifier = Modifier.height(12.dp))
+                SeedPhraseItem(
+                    vaultSecret = vaultSecret,
+                    isDeletable = true,
+                    onClick = {
+                        onEditPhraseClick(vaultSecret)
+                    }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
     }
 }
 
 @Composable
-fun AddAccessRow(
+fun AddOrAccessRow(
     onAddClick: () -> Unit,
     onAccessClick: () -> Unit
 ) {
@@ -90,7 +94,7 @@ fun AddAccessRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(SharedColors.BackgroundGrey.copy(alpha = 0.25f))
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 24.dp),
     ) {
         Row(
             modifier = Modifier.padding(vertical = 24.dp),
@@ -139,7 +143,6 @@ fun AddAccessRow(
 
 @Composable
 fun SeedPhraseItem(
-    horizontalPadding: Dp = 36.dp,
     vaultSecret: VaultSecret,
     isDeletable: Boolean = false,
     isSelected: Boolean = false,
@@ -154,7 +157,6 @@ fun SeedPhraseItem(
     Row(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = modifier
-                .padding(horizontal = horizontalPadding)
                 .background(
                     color = Color.White,
                     shape = RoundedCornerShape(12.dp)
@@ -164,22 +166,23 @@ fun SeedPhraseItem(
                     color = if (isSelected) SharedColors.SuccessGreen else SharedColors.BorderGrey,
                     shape = RoundedCornerShape(12.dp)
                 )
+                .height(120.dp)
                 .weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 modifier = Modifier
                     .padding(
-                        top = 32.dp,
-                        bottom = 32.dp,
-                        start = 24.dp,
-                        end = if (isDeletable) 0.dp else 24.dp
+                        top = 18.dp,
+                        bottom = 18.dp,
+                        start = 18.dp,
+                        end = if (isDeletable) 0.dp else 18.dp
                     )
                     .weight(1f),
                 text = vaultSecret.label,
-                fontSize = 28.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.W600,
-                maxLines = 2,
+                maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,
                 color = if (isSelected) SharedColors.SuccessGreen else Color.Black
@@ -234,22 +237,22 @@ fun PreviewPhraseHomeScreen() {
         onAddClick = {},
         vaultSecrets = listOf(
             VaultSecret(
-                guid = VaultSecretId("12345"),
+                guid = VaultSecretId("1"),
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
             VaultSecret(
-                guid = VaultSecretId("12345"),
+                guid = VaultSecretId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
             VaultSecret(
-                guid = VaultSecretId("12345"),
-                label = "Very very very long name here",
+                guid = VaultSecretId("3"),
+                label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
