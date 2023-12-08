@@ -36,11 +36,10 @@ class EnterPhraseViewModel @Inject constructor(
         welcomeFlow: Boolean,
         masterPublicKey: Base58EncodedMasterPublicKey
     ) {
-        state =
-            state.copy(
-                welcomeFlow = welcomeFlow,
-                masterPublicKey = masterPublicKey
-            )
+        state = state.copy(
+            welcomeFlow = welcomeFlow,
+            masterPublicKey = masterPublicKey
+        )
 
         retrieveOwnerState()
     }
@@ -279,12 +278,8 @@ class EnterPhraseViewModel @Inject constructor(
                 }
             }
             EnterPhraseUIState.VIEW ->
-                state.copy(
-                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
-                    editedWordIndex = 0,
-                    editedWord = "",
-                    enteredWords = emptyList()
-                )
+                state.copy(cancelInputSeedPhraseConfirmationDialog = true)
+
             EnterPhraseUIState.REVIEW ->
                  state.copy(
                     editedWord = "",
@@ -385,4 +380,16 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(exitConfirmationDialog = false)
     }
 
+    fun hideCancelInputSeedPhraseConfirmationDialog() {
+        state = state.copy(cancelInputSeedPhraseConfirmationDialog = false)
+    }
+
+    fun navigateToSeedPhraseType() {
+        state = state.copy(
+            enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+            editedWordIndex = 0,
+            editedWord = "",
+            enteredWords = emptyList()
+        )
+    }
 }

@@ -26,6 +26,7 @@ data class EnterPhraseState(
 
     //Flags
     val welcomeFlow: Boolean = false,
+    val cancelInputSeedPhraseConfirmationDialog: Boolean = false,
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
     val isSavingFirstSeedPhrase: Boolean = false,
@@ -48,7 +49,7 @@ data class EnterPhraseState(
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.DONE-> BackIconType.CLOSE
+        EnterPhraseUIState.DONE -> BackIconType.CLOSE
     }
 
     val error = submitResource is Resource.Error || userResource is Resource.Error

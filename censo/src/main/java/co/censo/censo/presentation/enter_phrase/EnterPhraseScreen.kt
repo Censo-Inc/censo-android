@@ -8,7 +8,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -19,8 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -28,8 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -39,7 +34,6 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
@@ -50,11 +44,9 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
-import org.w3c.dom.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -209,6 +201,18 @@ fun EnterPhraseScreen(
                             message = stringResource(R.string.exit_seed_phrase_entry_message),
                             onDismiss = viewModel::hideExitConfirmationDialog,
                             onConfirm = viewModel::exitFlow
+                        )
+                    }
+
+                    if (state.cancelInputSeedPhraseConfirmationDialog) {
+                        YesNoDialog(
+                            title = stringResource(R.string.exit_seed_phrase_entry),
+                            message = stringResource(R.string.exit_seed_phrase_entry_message),
+                            onDismiss = viewModel::hideCancelInputSeedPhraseConfirmationDialog,
+                            onConfirm = {
+                                viewModel.navigateToSeedPhraseType()
+                                viewModel.hideCancelInputSeedPhraseConfirmationDialog()
+                            }
                         )
                     }
 
