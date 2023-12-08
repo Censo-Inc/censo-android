@@ -14,8 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,15 +43,12 @@ import com.google.android.gms.auth.api.identity.Identity
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainVaultScreen(
+    selectedBottomNavItem: MutableState<BottomNavItem>,
     navController: NavController,
     viewModel: VaultScreenViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current
-
-    val selectedItem = remember {
-        mutableStateOf<BottomNavItem>(BottomNavItem.Home)
-    }
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
@@ -98,7 +94,7 @@ fun MainVaultScreen(
                     if (authResult.hasResolution()) {
                         val pendingIntent = authResult.pendingIntent
                         try {
-                            pendingIntent?.let {safeIntent ->
+                            pendingIntent?.let { safeIntent ->
                                 val intentSenderRequest = IntentSenderRequest.Builder(safeIntent.intentSender).build()
                                 googleDriveAccessResultLauncher.launch(intentSenderRequest)
                             } ?: Exception("Pending Intent null").sendError(CrashReportingUtil.CloudStorageIntent)
@@ -142,11 +138,11 @@ fun MainVaultScreen(
 
     Scaffold(
         topBar = {
-            VaultTopBar(selectedItem.value)
+            VaultTopBar(selectedBottomNavItem.value)
         },
         bottomBar = {
-            CensoBottomNavBar(selectedItem.value) {
-                selectedItem.value = it
+            CensoBottomNavBar(selectedBottomNavItem.value) {
+                selectedBottomNavItem.value = it
             }
         }
     ) {
@@ -201,7 +197,7 @@ fun MainVaultScreen(
                 else -> {
 
 
-                    when (selectedItem.value) {
+                    when (selectedBottomNavItem.value) {
                         BottomNavItem.Home ->
                             VaultHomeScreen(
                                 seedPhrasesSaved = state.secretsSize,
@@ -215,7 +211,7 @@ fun MainVaultScreen(
                                     }
                                 },
                                 onAddApprovers = {
-                                    selectedItem.value = BottomNavItem.Approvers
+                                    selectedBottomNavItem.value = BottomNavItem.Approvers
                                 },
                                 showAddApprovers = state.externalApprovers == 0
                             )

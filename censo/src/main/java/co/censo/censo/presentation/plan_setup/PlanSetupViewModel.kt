@@ -446,7 +446,7 @@ class PlanSetupViewModel @Inject constructor(
                         ApproverType.Primary -> state.primaryApprover?.label
                         ApproverType.Alternate -> state.alternateApprover?.label
                     } ?: "",
-                    planSetupUIState = PlanSetupUIState.ApproverActivation_5
+                    planSetupUIState = PlanSetupUIState.ApproverGettingLive_4
                 )
             } else if (alternateApprover?.status is GuardianStatus.Confirmed) {
                 checkUserHasSavedKeyAndSubmittedPolicy()

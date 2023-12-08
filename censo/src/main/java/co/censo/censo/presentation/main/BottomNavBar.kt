@@ -28,7 +28,7 @@ fun CensoBottomNavBar(
         for (item in bottomNavItems) {
             BottomNavBarItemUI(
                 navItem = item,
-                selected = selectedItem.route == item.route
+                selected = selectedItem == item
             ) {
                 onItemSelected(item)
             }
@@ -55,7 +55,7 @@ fun RowScope.BottomNavBarItemUI(
         selected = selected,
         label = {
             Text(
-                text = stringResource(id = navItem.resourceId),
+                text = stringResource(id = navItem.text),
                 color = if (selected) Color.Black else SharedColors.DisabledFontGrey
             )
         },
@@ -64,7 +64,7 @@ fun RowScope.BottomNavBarItemUI(
             Icon(
                 modifier = Modifier.size(28.dp),
                 painter = painterResource(id = navItem.icon),
-                contentDescription = navItem.route,
+                contentDescription = navItem.name,
             )
         })
 }
@@ -77,32 +77,21 @@ fun NavigationBarItemDefaults.censoDefaults() =
         indicatorColor = SharedColors.DisabledGrey
     )
 
-sealed class BottomNavItem(
-    val route: String,
-    @StringRes val resourceId: Int,
-    @DrawableRes val icon: Int,
-) {
-    object Home : BottomNavItem(
-        "home_screen",
-        R.string.home_nav_title,
-        R.drawable.home_tab_icon,
-    )
-
-    object Phrases : BottomNavItem(
-        "phrases_screen",
-        R.string.phrases_nav_title,
-        R.drawable.lock_tab_icon,
-    )
-
-    object Approvers : BottomNavItem(
-        "approvers_screen",
-        R.string.approvers_nav_title,
-        R.drawable.approvers_tab_icon,
-    )
-
-    object Settings : BottomNavItem(
-        "settings_screen",
-        R.string.settings_nav_title,
-        R.drawable.settings_icon_tab,
+enum class BottomNavItem(@StringRes val text: Int, @DrawableRes val icon: Int) {
+    Home(
+        text = R.string.home_nav_title,
+        icon = R.drawable.home_tab_icon
+    ),
+    Phrases(
+        text = R.string.phrases_nav_title,
+        icon = R.drawable.lock_tab_icon
+    ),
+    Approvers(
+        text = R.string.approvers_nav_title,
+        icon = R.drawable.approvers_tab_icon
+    ),
+    Settings(
+        text = R.string.settings_nav_title,
+        icon = R.drawable.settings_icon_tab,
     )
 }

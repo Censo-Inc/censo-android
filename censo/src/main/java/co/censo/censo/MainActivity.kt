@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
@@ -32,6 +35,7 @@ import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
+import co.censo.censo.presentation.main.BottomNavItem
 import co.censo.censo.presentation.paywall.PaywallScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.censo.ui.theme.VaultTheme
@@ -95,6 +99,8 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun CensoNavHost(navController: NavHostController) {
+        val bottomNavItem: MutableState<BottomNavItem> = remember { mutableStateOf(BottomNavItem.Home) }
+
         NavHost(
             navController = navController,
             startDestination = Screen.EntranceRoute.route
@@ -106,7 +112,7 @@ class MainActivity : FragmentActivity() {
                 WelcomeScreen(navController = navController)
             }
             composable(route = Screen.OwnerVaultScreen.route) {
-                MainVaultScreen(navController = navController)
+                MainVaultScreen(selectedBottomNavItem = bottomNavItem, navController = navController)
             }
             composable(route = "${Screen.AccessApproval.route}/{${Screen.AccessApproval.ACCESS_INTENT_ARG}}") { backStackEntry ->
                 AccessApprovalScreen(

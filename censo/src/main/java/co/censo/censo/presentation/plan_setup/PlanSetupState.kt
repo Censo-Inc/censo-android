@@ -74,11 +74,6 @@ data class PlanSetupState(
 
         planSetupUIState in listOf(
             PlanSetupUIState.ApproverGettingLive_4,
-            PlanSetupUIState.EditApproverNickname_3
-        ) && approverType == ApproverType.Alternate -> BackIconType.Back
-
-        planSetupUIState in listOf(
-            PlanSetupUIState.ApproverGettingLive_4,
             PlanSetupUIState.AddAlternateApprover_6,
             PlanSetupUIState.RecoveryInProgress_7
         ) -> BackIconType.Exit
