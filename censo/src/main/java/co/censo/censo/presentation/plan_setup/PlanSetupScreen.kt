@@ -68,8 +68,11 @@ fun PlanSetupScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
+            Lifecycle.Event.ON_CREATE -> {
+                viewModel.onCreate(planSetupDirection)
+            }
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart(planSetupDirection)
+                viewModel.onResume()
             }
             Lifecycle.Event.ON_PAUSE -> {
                 viewModel.onStop()

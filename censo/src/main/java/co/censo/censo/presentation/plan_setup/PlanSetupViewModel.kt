@@ -27,8 +27,6 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
-import co.censo.shared.data.model.InitiateRecoveryApiResponse
-import co.censo.shared.data.model.SubscriptionStatus
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
@@ -176,16 +174,22 @@ class PlanSetupViewModel @Inject constructor(
     //endregion
 
     //region Lifecycle Methods
-    fun onStart(planSetupDirection: PlanSetupDirection) {
+    fun onCreate(planSetupDirection: PlanSetupDirection) {
         state = state.copy(planSetupDirection = planSetupDirection)
 
-        when (state.planSetupDirection) {
-            PlanSetupDirection.AddApprovers -> onStartAddApprovers()
-            PlanSetupDirection.RemoveApprovers -> onStartRemoveApprovers()
+        if (state.planSetupDirection == PlanSetupDirection.RemoveApprovers) {
+            onRemoveApprovers()
         }
     }
 
-    private fun onStartAddApprovers() {
+    fun onResume() {
+        if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
+            // should be called on resume due to polling timers
+            onAddApprovers()
+        }
+    }
+
+    private fun onAddApprovers() {
         if (state.planSetupUIState == PlanSetupUIState.Initial_1) {
             state = state.copy(planSetupUIState = PlanSetupUIState.ApproverNickname_2)
         }
@@ -211,7 +215,7 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun onStartRemoveApprovers() {
+    private fun onRemoveApprovers() {
         // create policy setup only with owner approver, save and exit
         val ownerAsApprover = state.ownerApprover?.asOwnerAsApprover() ?: createOwnerApprover()
         submitPolicySetup(
