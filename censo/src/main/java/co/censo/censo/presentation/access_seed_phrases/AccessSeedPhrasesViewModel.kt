@@ -11,14 +11,14 @@ import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RecoveredSeedPhrase
-import co.censo.shared.data.model.Recovery
-import co.censo.shared.data.model.RecoveryStatus
-import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
-import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.data.model.Access
+import co.censo.shared.data.model.AccessStatus
+import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
+import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
 import co.censo.shared.util.sendError
@@ -100,7 +100,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         state = state.copy(retrieveShardsResponse = Resource.Loading())
 
         return viewModelScope.async {
-            val response = ownerRepository.retrieveRecoveryShards(verificationId, biometry)
+            val response = ownerRepository.retrieveAccessShards(verificationId, biometry)
 
             state = state.copy(
                 retrieveShardsResponse = response,
@@ -108,7 +108,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 viewModelScope.launch(Dispatchers.IO) {
-                    recoverSecrets(response.data!!)
+                    recoverSeedPhrases(response.data!!)
                 }
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
@@ -117,51 +117,51 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         }.await()
     }
 
-    private suspend fun recoverSecrets(response: RetrieveRecoveryShardsApiResponse) {
+    private suspend fun recoverSeedPhrases(response: RetrieveAccessShardsApiResponse) {
         val ownerState = response.ownerState
         val encryptedShards = response.encryptedShards
 
         when (ownerState) {
             is OwnerState.Ready -> {
-                val recovery = ownerState.recovery
+                val access = ownerState.access
 
                 when {
-                    recovery is Recovery.ThisDevice && recovery.status == RecoveryStatus.Available -> {
+                    access is Access.ThisDevice && access.status == AccessStatus.Available -> {
                         state = state.copy(recoveredPhrases = Resource.Loading())
 
                         runCatching {
-                            val requestedSecret = state.selectedPhrase
+                            val requestedSeedPhrase = state.selectedPhrase
 
-                            check(requestedSecret != null)
+                            check(requestedSeedPhrase != null)
 
-                            val recoveredSecrets: List<RecoveredSeedPhrase> =
-                                ownerRepository.recoverSecrets(
-                                    listOf(requestedSecret),
+                            val recoveredSeedPhrases: List<RecoveredSeedPhrase> =
+                                ownerRepository.recoverSeedPhrases(
+                                    listOf(requestedSeedPhrase),
                                     encryptedShards,
                                     ownerState.policy.encryptedMasterKey,
                                     language = state.currentLanguage
                                 )
 
                             state = state.copy(
-                                recoveredPhrases = Resource.Success(recoveredSecrets),
-                                viewedPhrase = recoveredSecrets.firstOrNull()?.phraseWords ?: listOf(""),
+                                recoveredPhrases = Resource.Success(recoveredSeedPhrases),
+                                viewedPhrase = recoveredSeedPhrases.firstOrNull()?.phraseWords ?: listOf(""),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
-                                viewedPhraseIds = recoveredSecrets.firstOrNull()?.let { state.viewedPhraseIds + it.guid } ?: state.viewedPhraseIds,
+                                viewedPhraseIds = recoveredSeedPhrases.firstOrNull()?.let { state.viewedPhraseIds + it.guid } ?: state.viewedPhraseIds,
                                 locksAt = Clock.System.now().plus(15.minutes)
                             )
                         }.onFailure {
-                            Exception("Failed to recover secrets").sendError(AccessPhrase)
+                            Exception("Failed to recover seed phrases").sendError(AccessPhrase)
                             state = state.copy(
-                                recoveredPhrases = Resource.Error(exception = Exception("Failed to recover secrets"))
+                                recoveredPhrases = Resource.Error(exception = Exception("Failed to recover seed phrases"))
                             )
                         }
                     }
 
                     else -> {
-                        // there should be 'available' recovery requested by this device
+                        // there should be 'available' access requested by this device
                         // navigate back to access approval screen
                         state = state.copy(
-                            navigationResource = Resource.Success(Screen.AccessApproval.withIntent(intent = RecoveryIntent.AccessPhrases))
+                            navigationResource = Resource.Success(Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases))
                         )
                     }
                 }
@@ -183,9 +183,9 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         )
     }
 
-    fun onPhraseSelected(vaultSecret: VaultSecret) {
+    fun onPhraseSelected(seedPhrase: SeedPhrase) {
         state = state.copy(
-            selectedPhrase = vaultSecret,
+            selectedPhrase = seedPhrase,
             accessPhrasesUIState = AccessPhrasesUIState.ReadyToStart
         )
     }
@@ -213,11 +213,11 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     fun cancelAccess() {
         state = state.copy(
             showCancelConfirmationDialog = false,
-            cancelRecoveryResource = Resource.Loading()
+            cancelAccessResource = Resource.Loading()
         )
 
         viewModelScope.launch {
-            val response = ownerRepository.cancelRecovery()
+            val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
                 state = state.copy(
@@ -226,7 +226,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
 
-            state = state.copy(cancelRecoveryResource = response)
+            state = state.copy(cancelAccessResource = response)
         }
     }
 
@@ -236,7 +236,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun showCancelConfirmationDialog() {
         val approverSize =
-            (state.ownerState.data as? OwnerState.Ready)?.policy?.guardians?.size ?: MULTI_APPROVER_POLICY
+            (state.ownerState.data as? OwnerState.Ready)?.policy?.approvers?.size ?: MULTI_APPROVER_POLICY
 
         if (approverSize > 1) {
             state = state.copy(showCancelConfirmationDialog = true)

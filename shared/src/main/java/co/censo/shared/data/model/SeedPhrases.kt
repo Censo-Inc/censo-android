@@ -4,18 +4,18 @@ import Base64EncodedData
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class StoreSecretApiRequest(
+data class StoreSeedPhraseApiRequest(
     val encryptedSeedPhrase: Base64EncodedData,
     val seedPhraseHash: String,
     val label: String,
 )
 
 @Serializable
-data class StoreSecretApiResponse(
+data class StoreSeedPhraseApiResponse(
     val ownerState: OwnerState,
 )
 
 @Serializable
-data class DeleteSecretApiResponse(
+data class DeleteSeedPhraseApiResponse(
     val ownerState: OwnerState,
 )

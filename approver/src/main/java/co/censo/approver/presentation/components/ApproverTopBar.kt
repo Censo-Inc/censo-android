@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import co.censo.approver.R
-import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.ApproverColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,7 +21,7 @@ fun ApproverTopBar(
 
     TopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = GuardianColors.NavBar,
+            containerColor = ApproverColors.NavBar,
             navigationIconContentColor = Color.Black,
             titleContentColor = Color.Black,
         ),

@@ -30,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.approver.R
-import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.ApproverColors
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproverCodeVerification
 import co.censo.approver.presentation.components.ApproverTopBar
@@ -43,7 +43,6 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,13 +118,13 @@ fun ApproverOnboardingScreen(
                             ) { viewModel.retrieveApproverState(false) }
                         }
 
-                        state.acceptGuardianResource is Resource.Error -> {
+                        state.acceptApproverResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.acceptGuardianResource.getErrorMessage(
+                                errorMessage = state.acceptApproverResource.getErrorMessage(
                                     context
                                 ),
-                                dismissAction = { viewModel.resetAcceptGuardianResource() },
-                            ) { viewModel.resetAcceptGuardianResource() }
+                                dismissAction = { viewModel.resetAcceptApproverResource() },
+                            ) { viewModel.resetAcceptApproverResource() }
                         }
 
                         state.submitVerificationResource is Resource.Error -> {
@@ -213,7 +212,7 @@ fun ApproverOnboardingScreen(
                 Text(
                     modifier = Modifier.padding(8.dp),
                     text = stringResource(R.string.do_you_really_want_to_cancel),
-                    color = GuardianColors.PrimaryColor,
+                    color = ApproverColors.PrimaryColor,
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal

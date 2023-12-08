@@ -4,15 +4,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import co.censo.shared.BuildConfig
 import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.ACCEPTED_TERMS_OF_USE_VERSION
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.APPROVER_APPROVAL_ID
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.BIP39
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_CREATED_FLAG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.EDITING_SECURITY_PLAN
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.GUARDIAN_INVITATION_ID
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.GUARDIAN_PARTICIPANT_ID
+import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.APPROVER_INVITATION_ID
+import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.APPROVER_PARTICIPANT_ID
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.JWT_KEY
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SECURITY_PLAN
@@ -35,12 +34,12 @@ interface SecurePreferences {
     fun saveDeviceKeyId(id: String)
     fun retrieveDeviceKeyId() : String
     fun clearDeviceKeyId()
-    fun saveGuardianInvitationId(id: String)
-    fun retrieveGuardianInvitationId() : String
-    fun clearGuardianInvitationId()
-    fun saveGuardianParticipantId(id: String)
-    fun retrieveGuardianParticipantId() : String
-    fun clearGuardianParticipantId()
+    fun saveApproverInvitationId(id: String)
+    fun retrieveApproverInvitationId() : String
+    fun clearApproverInvitationId()
+    fun saveApproverParticipantId(id: String)
+    fun retrieveApproverParticipantId() : String
+    fun clearApproverParticipantId()
     fun setEditingSecurityPlan(editingSecurityPlan: Boolean)
     fun isEditingSecurityPlan() : Boolean
     fun setSecurityPlan(securityPlanData: SecurityPlanData)
@@ -66,8 +65,8 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         const val DEVICE_CREATED_FLAG = "device_created_flag"
         const val BIP39 = "bip_39"
         const val DEVICE_KEY = "device_key"
-        const val GUARDIAN_INVITATION_ID = "guardian_invitation_id"
-        const val GUARDIAN_PARTICIPANT_ID = "guardian_participant_id"
+        const val APPROVER_INVITATION_ID = "approver_invitation_id"
+        const val APPROVER_PARTICIPANT_ID = "approver_participant_id"
         const val APPROVER_APPROVAL_ID = "approver_approval_id"
         const val EDITING_SECURITY_PLAN = "editing_security_plan"
         const val SECURITY_PLAN = "security_plan"
@@ -147,30 +146,30 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
     override fun clearDeviceKeyId() = saveDeviceKeyId("")
     //endregion
 
-    //region Guardian Invitation Id
-    override fun saveGuardianInvitationId(id: String) {
+    //region Approver Invitation Id
+    override fun saveApproverInvitationId(id: String) {
         val editor = sharedPrefs.edit()
-        editor.putString(GUARDIAN_INVITATION_ID, id)
+        editor.putString(APPROVER_INVITATION_ID, id)
         editor.apply()
     }
 
-    override fun retrieveGuardianInvitationId() =
-        sharedPrefs.getString(GUARDIAN_INVITATION_ID, "") ?: ""
+    override fun retrieveApproverInvitationId() =
+        sharedPrefs.getString(APPROVER_INVITATION_ID, "") ?: ""
 
-    override fun clearGuardianInvitationId() = saveGuardianInvitationId("")
+    override fun clearApproverInvitationId() = saveApproverInvitationId("")
     //endregion
 
-    //region Guardian Participant Id
-    override fun saveGuardianParticipantId(id: String) {
+    //region Approver Participant Id
+    override fun saveApproverParticipantId(id: String) {
         val editor = sharedPrefs.edit()
-        editor.putString(GUARDIAN_PARTICIPANT_ID, id)
+        editor.putString(APPROVER_PARTICIPANT_ID, id)
         editor.apply()
     }
 
-    override fun retrieveGuardianParticipantId() =
-        sharedPrefs.getString(GUARDIAN_PARTICIPANT_ID, "") ?: ""
+    override fun retrieveApproverParticipantId() =
+        sharedPrefs.getString(APPROVER_PARTICIPANT_ID, "") ?: ""
 
-    override fun clearGuardianParticipantId() = saveGuardianParticipantId("")
+    override fun clearApproverParticipantId() = saveApproverParticipantId("")
     //endregion
 
     //region Approval Id

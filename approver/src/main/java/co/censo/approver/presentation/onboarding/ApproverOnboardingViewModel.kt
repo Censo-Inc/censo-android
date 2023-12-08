@@ -13,9 +13,9 @@ import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.model.GuardianPhase
-import co.censo.shared.data.model.GuardianState
-import co.censo.shared.data.repository.GuardianRepository
+import co.censo.shared.data.model.ApproverPhase
+import co.censo.shared.data.model.ApproverState
+import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -35,13 +35,13 @@ import javax.inject.Inject
  *
  * - Approvers First Entrance into Onboarding
  *
- *      - On the very first entrance into the onboardingVM, the approvers guardianState data will be
- *        retrieved and used to determine the UI states. The approvers guardianState.phase is expected
- *        to be null. If the phase is null then the approver has yet to accept guardianship and we
- *        will automatically trigger the call to accept guardianship. No UI interaction is required at this point.
+ *      - On the very first entrance into the onboardingVM, the approvers approverState data will be
+ *        retrieved and used to determine the UI states. The approvers approverState.phase is expected
+ *        to be null. If the phase is null then the approver has yet to accept approvership and we
+ *        will automatically trigger the call to accept approvership. No UI interaction is required at this point.
  *
- *        Once the guardianship has been accepted, we will assign a participantId to state, we get
- *        the ID from the accept guardianship response. This ID is used to mark the cloud saved key so
+ *        Once the approvership has been accepted, we will assign a participantId to state, we get
+ *        the ID from the accept approvership response. This ID is used to mark the cloud saved key so
  *        we can retrieve it in the future. If the key saving failed, we will put the approver into
  *        a NeedsToSaveKey UI state where they can retry the key creation and saving to the cloud.
  *
@@ -59,11 +59,11 @@ import javax.inject.Inject
  *        When we call submitVerificationCode, we will set UI state for WaitingForConfirmation.
  *        This will set the CodeEntry view to loading so the approver knows the code is being processed.
  *        After the response has been received from submitVerificationCode, we will determine the UI
- *        state from the latest backend values. At this point the approver guardian state should be
+ *        state from the latest backend values. At this point the approver state should be
  *        WaitingForVerification phase / WaitingForConfirmation UI state, while the owner user
  *        verifies the code.
  *
- *        If the verification code was rejected, we will get guardian phase VerificationRejected and
+ *        If the verification code was rejected, we will get approver phase VerificationRejected and
  *        set CodeRejected to UI state. At this point the approver can re-enter the code until it is
  *        verified.
  *
@@ -71,7 +71,7 @@ import javax.inject.Inject
  * - Verification code verified
  *
  *      - After the verification code has been successfully verified, we will retrieve the latest
- *        approver state from the backend. At this point the returned guardian phase should be
+ *        approver state from the backend. At this point the returned approver phase should be
  *        Complete. We will set UI state for Complete, and the approver can leave the app after
  *        having finished their onboarding.
  *
@@ -80,18 +80,18 @@ import javax.inject.Inject
  *
  *      - If at any point the approver left the app during onboarding and needs to pick up where they
  *        left off, the backend will return data that lets us determine the approvers current state
- *        from their guardian phase. If an API or CloudStorage call failed, then we will set that
+ *        from their approver phase. If an API or CloudStorage call failed, then we will set that
  *        error to state and let the user retry. The only exception to this is when the
- *        acceptGuardianship call fails.
+ *        acceptApprovership call fails.
  *
- *        If acceptGuardianship fails, then we will cancel the onboarding and require the user to
+ *        If acceptApprovership fails, then we will cancel the onboarding and require the user to
  *        start the process over again via entering in their invite link
  *
  */
 
 @HiltViewModel
 class ApproverOnboardingViewModel @Inject constructor(
-    private val guardianRepository: GuardianRepository,
+    private val approverRepository: ApproverRepository,
     private val keyRepository: KeyRepository,
     private val userStatePollingTimer: VaultCountDownTimer
 ) : ViewModel() {
@@ -106,7 +106,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         userStatePollingTimer.start(CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN) {
             if (state.userResponse !is Resource.Loading
                 && state.savePrivateKeyToCloudResource !is Resource.Loading
-                && (shouldPollUserState(state.guardianState?.phase))
+                && (shouldPollUserState(state.approverState?.phase))
             ) {
                 retrieveApproverState(silently = true)
             }
@@ -181,37 +181,37 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val userResponse = guardianRepository.retrieveUser()
+            val userResponse = approverRepository.retrieveUser()
 
             state = state.copy(userResponse = userResponse)
 
             if (userResponse is Resource.Success) {
-                checkApproverHasInvitationCode(userResponse.data!!.guardianStates)
+                checkApproverHasInvitationCode(userResponse.data!!.approverStates)
             }
         }
     }
 
-    private fun checkApproverHasInvitationCode(guardianStates: List<GuardianState>) {
+    private fun checkApproverHasInvitationCode(approverStates: List<ApproverState>) {
         loadInvitationId()
-        val guardianState = guardianStates.firstOrNull { it.invitationId == state.invitationId }
+        val approverState = approverStates.firstOrNull { it.invitationId == state.invitationId }
 
-        determineApproverUIState(guardianState)
+        determineApproverUIState(approverState)
     }
 
-    private fun assignGuardianState(guardianState: GuardianState?) {
-        state = state.copy(guardianState = guardianState)
+    private fun assignApproverState(approverState: ApproverState?) {
+        state = state.copy(approverState = approverState)
     }
 
-    private fun assignParticipantId(guardianState: GuardianState?) {
-        guardianState?.participantId?.let { participantId ->
+    private fun assignParticipantId(approverState: ApproverState?) {
+        approverState?.participantId?.let { participantId ->
             state = state.copy(participantId = participantId.value)
         }
     }
 
-    private fun assignEntropy(guardianState: GuardianState?) {
-        val entropy = when (val phase = guardianState?.phase) {
-            is GuardianPhase.WaitingForCode -> phase.entropy
-            is GuardianPhase.VerificationRejected -> phase.entropy
+    private fun assignEntropy(approverState: ApproverState?) {
+        val entropy = when (val phase = approverState?.phase) {
+            is ApproverPhase.WaitingForCode -> phase.entropy
+            is ApproverPhase.VerificationRejected -> phase.entropy
             else -> null
         }
 
@@ -220,25 +220,25 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun determineApproverUIState(guardianState: GuardianState?) {
-        assignGuardianState(guardianState = guardianState)
-        assignParticipantId(guardianState = guardianState)
-        assignEntropy(guardianState = guardianState)
+    private fun determineApproverUIState(approverState: ApproverState?) {
+        assignApproverState(approverState = approverState)
+        assignParticipantId(approverState = approverState)
+        assignEntropy(approverState = approverState)
 
-        val guardianPhase = guardianState?.phase
+        val approverPhase = approverState?.phase
 
-        val guardianNotInOnboarding =
-            guardianPhase?.isAccessPhase() == true
+        val approverNotInOnboarding =
+            approverPhase?.isAccessPhase() == true
 
-        if (guardianNotInOnboarding) {
-            guardianRepository.clearInvitationId()
+        if (approverNotInOnboarding) {
+            approverRepository.clearInvitationId()
             state = state.copy(navToApproverRouting = true)
             return
         }
 
         //Is null always when a user needs to accept
-        if (guardianState?.phase == null) {
-            acceptGuardianship()
+        if (approverState?.phase == null) {
+            acceptApprovership()
             return
         }
 
@@ -248,18 +248,18 @@ class ApproverOnboardingViewModel @Inject constructor(
                 return@launch
             }
 
-            state = when (guardianState.phase) {
-                is GuardianPhase.VerificationRejected ->
+            state = when (approverState.phase) {
+                is ApproverPhase.VerificationRejected ->
                     state.copy(approverUIState = ApproverOnboardingUIState.CodeRejected)
 
-                is GuardianPhase.WaitingForCode ->
+                is ApproverPhase.WaitingForCode ->
                     state.copy(approverUIState = ApproverOnboardingUIState.NeedsToEnterCode)
 
-                is GuardianPhase.WaitingForVerification ->
+                is ApproverPhase.WaitingForVerification ->
                     state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
 
-                is GuardianPhase.Complete -> {
-                    guardianRepository.clearInvitationId()
+                is ApproverPhase.Complete -> {
+                    approverRepository.clearInvitationId()
                     state.copy(approverUIState = ApproverOnboardingUIState.Complete)
                 }
 
@@ -274,20 +274,20 @@ class ApproverOnboardingViewModel @Inject constructor(
      * If this call fails then will cancel onboarding and require the user to retry the flow with a link
      * If this call passes then the key creation and saving to cloud storage is triggered
      */
-    private fun acceptGuardianship() {
+    private fun acceptApprovership() {
         viewModelScope.launch {
-            val acceptResource = guardianRepository.acceptGuardianship(
+            val acceptResource = approverRepository.acceptApprovership(
                 invitationId = state.invitationId,
             )
 
-            state = state.copy(acceptGuardianResource = acceptResource)
+            state = state.copy(acceptApproverResource = acceptResource)
 
             if (acceptResource is Resource.Success) {
                 state = state.copy(
                     onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
                 )
-                assignParticipantId(acceptResource.data?.guardianState)
-                assignEntropy(acceptResource.data?.guardianState)
+                assignParticipantId(acceptResource.data?.approverState)
+                assignEntropy(acceptResource.data?.approverState)
                 createKeyAndTriggerCloudSave()
             }
         }
@@ -297,10 +297,10 @@ class ApproverOnboardingViewModel @Inject constructor(
         //We allow user to retry this method, so we need to set loading here
         setLoadingUIState()
 
-        val guardianEncryptionKey = keyRepository.createGuardianKey()
+        val approverEncryptionKey = keyRepository.createApproverKey()
 
         state = state.copy(
-            guardianEncryptionKey = guardianEncryptionKey,
+            approverEncryptionKey = approverEncryptionKey,
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true,
                 action = CloudStorageActions.UPLOAD,
@@ -312,7 +312,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     private fun checkForPrivateKeyBeforeSubmittingVerificationCode() {
         //Setting WaitingForConfirmation so that the CodeEntry composable shows loading UI while we move forward
         state = state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
-        state.guardianEncryptionKey?.let {
+        state.approverEncryptionKey?.let {
             submitVerificationCode()
         } ?: loadPrivateKeyFromCloud()
     }
@@ -323,7 +323,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            if (state.guardianEncryptionKey == null) {
+            if (state.approverEncryptionKey == null) {
                 loadPrivateKeyFromCloud()
                 return@launch
             }
@@ -333,9 +333,9 @@ class ApproverOnboardingViewModel @Inject constructor(
             }
 
             val signedVerificationData = try {
-                guardianRepository.signVerificationCode(
+                approverRepository.signVerificationCode(
                     verificationCode = state.verificationCode,
-                    encryptionKey = state.guardianEncryptionKey!!
+                    encryptionKey = state.approverEncryptionKey!!
                 )
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.SubmitVerification)
@@ -346,13 +346,13 @@ class ApproverOnboardingViewModel @Inject constructor(
                 return@launch
             }
 
-            val submitVerificationResource = guardianRepository.submitGuardianVerification(
+            val submitVerificationResource = approverRepository.submitApproverVerification(
                 invitationId = state.invitationId.value,
-                submitGuardianVerificationRequest = signedVerificationData
+                submitApproverVerificationRequest = signedVerificationData
             )
 
             state = if (submitVerificationResource is Resource.Success) {
-                determineApproverUIState(submitVerificationResource.data?.guardianState)
+                determineApproverUIState(submitVerificationResource.data?.approverState)
                 state.copy(submitVerificationResource = submitVerificationResource)
             } else {
                 state.copy(
@@ -374,7 +374,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
     private fun loadInvitationId() {
         state = state.copy(
-            invitationId = InvitationId(guardianRepository.retrieveInvitationId())
+            invitationId = InvitationId(approverRepository.retrieveInvitationId())
         )
     }
 
@@ -383,7 +383,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
     private fun cancelOnboarding() {
-        guardianRepository.clearInvitationId()
+        approverRepository.clearInvitationId()
 
         state = state.copy(
             invitationId = InvitationId(""),
@@ -391,16 +391,16 @@ class ApproverOnboardingViewModel @Inject constructor(
         )
     }
 
-    private fun shouldPollUserState(guardianPhase: GuardianPhase?) =
-        guardianPhase is GuardianPhase.WaitingForCode ||
-                guardianPhase is GuardianPhase.WaitingForVerification ||
-                guardianPhase is GuardianPhase.VerificationRejected
+    private fun shouldPollUserState(approverPhase: ApproverPhase?) =
+        approverPhase is ApproverPhase.WaitingForCode ||
+                approverPhase is ApproverPhase.WaitingForVerification ||
+                approverPhase is ApproverPhase.VerificationRejected
 
     //endregion
 
     //region Cloud Storage
     fun getEncryptedKeyForUpload(): ByteArray? {
-        val encryptionKey = state.guardianEncryptionKey ?: return null
+        val encryptionKey = state.approverEncryptionKey ?: return null
         val entropy = state.entropy ?: return null
 
         return encryptionKey.encryptWithEntropy(
@@ -415,19 +415,19 @@ class ApproverOnboardingViewModel @Inject constructor(
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
-        val entropy = when (val guardianPhase = state.guardianState?.phase) {
-            is GuardianPhase.VerificationRejected -> {
-                guardianPhase.entropy
+        val entropy = when (val approverPhase = state.approverState?.phase) {
+            is ApproverPhase.VerificationRejected -> {
+                approverPhase.entropy
             }
 
-            is GuardianPhase.WaitingForCode -> {
-                guardianPhase.entropy
+            is ApproverPhase.WaitingForCode -> {
+                approverPhase.entropy
             }
 
             else -> null
         }
 
-        assignEntropy(state.guardianState)
+        assignEntropy(state.approverState)
 
 
         if (entropy == null) {
@@ -461,7 +461,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     private fun keyUploadSuccess(privateEncryptionKey: EncryptionKey) {
         //User uploaded key successfully, move forward by retrieving user state
         state = state.copy(
-            guardianEncryptionKey = privateEncryptionKey,
+            approverEncryptionKey = privateEncryptionKey,
             savePrivateKeyToCloudResource = Resource.Uninitialized
         )
         retrieveApproverState(false)
@@ -472,7 +472,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     ) {
         state = state.copy(
             retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
-            guardianEncryptionKey = privateEncryptionKey
+            approverEncryptionKey = privateEncryptionKey
         )
         submitVerificationCode()
     }
@@ -523,9 +523,9 @@ class ApproverOnboardingViewModel @Inject constructor(
     //endregion
 
     //region Reset functions
-    fun resetAcceptGuardianResource() {
+    fun resetAcceptApproverResource() {
         state = state.copy(
-            acceptGuardianResource = Resource.Uninitialized
+            acceptApproverResource = Resource.Uninitialized
         )
         cancelOnboarding()
     }

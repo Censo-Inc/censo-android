@@ -1,24 +1,24 @@
 package co.censo.censo.presentation.main
 
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.DeleteSecretApiResponse
+import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.data.model.SeedPhrase
 
 data class VaultScreenState(
     // owner state
     val ownerState: OwnerState.Ready? = null,
 
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
-    val triggerEditPhraseDialog: Resource<VaultSecret> = Resource.Uninitialized,
+    val triggerEditPhraseDialog: Resource<SeedPhrase> = Resource.Uninitialized,
 
     // toast
     val syncCloudAccessMessage: Resource<SyncCloudAccessMessage> = Resource.Uninitialized,
 
     // api requests
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
-    val deleteSeedPhraseResource: Resource<DeleteSecretApiResponse> = Resource.Uninitialized,
+    val deleteSeedPhraseResource: Resource<DeleteSeedPhraseApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val lockResponse : Resource<Unit> = Resource.Uninitialized,
     val resyncCloudAccessRequest : Boolean = false,
@@ -27,8 +27,8 @@ data class VaultScreenState(
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
 ) {
 
-    val externalApprovers = (ownerState?.policy?.guardians?.size?.minus(1)) ?: 0
-    val secretsSize = ownerState?.vault?.secrets?.size ?: 0
+    val externalApprovers = (ownerState?.policy?.approvers?.size?.minus(1)) ?: 0
+    val seedPhrasesSize = ownerState?.vault?.seedPhrases?.size ?: 0
 
     val loading = userResponse is Resource.Loading ||
             deleteSeedPhraseResource is Resource.Loading ||

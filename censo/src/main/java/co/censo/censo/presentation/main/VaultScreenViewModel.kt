@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SubscriptionStatus
-import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +46,7 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
-    fun deleteSecret() {
+    fun deleteSeedPhrase() {
         if (state.triggerEditPhraseDialog !is Resource.Success && state.triggerEditPhraseDialog.data == null) {
             state = state.copy(
                 deleteSeedPhraseResource = Resource.Error()
@@ -54,7 +54,7 @@ class VaultScreenViewModel @Inject constructor(
             return
         }
 
-        val vaultSecret = state.triggerEditPhraseDialog.data
+        val seedPhrase = state.triggerEditPhraseDialog.data
 
         state = state.copy(
             triggerEditPhraseDialog = Resource.Uninitialized,
@@ -62,7 +62,7 @@ class VaultScreenViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            val response = ownerRepository.deleteSecret(vaultSecret!!.guid)
+            val response = ownerRepository.deleteSeedPhrase(seedPhrase!!.guid)
 
             state = state.copy(
                 deleteSeedPhraseResource = response
@@ -80,7 +80,7 @@ class VaultScreenViewModel @Inject constructor(
         )
 
         val participantId =
-            state.ownerState?.policy?.guardians?.first { it.isOwner }?.participantId
+            state.ownerState?.policy?.approvers?.first { it.isOwner }?.participantId
 
         viewModelScope.launch(Dispatchers.IO) {
             val response = ownerRepository.deleteUser(participantId)
@@ -130,8 +130,8 @@ class VaultScreenViewModel @Inject constructor(
         state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
     }
 
-    fun showEditPhraseDialog(vaultSecret: VaultSecret) {
-        state = state.copy(triggerEditPhraseDialog = Resource.Success(vaultSecret))
+    fun showEditPhraseDialog(seedPhrase: SeedPhrase) {
+        state = state.copy(triggerEditPhraseDialog = Resource.Success(seedPhrase))
     }
 
     fun onCancelDeletePhrase() {

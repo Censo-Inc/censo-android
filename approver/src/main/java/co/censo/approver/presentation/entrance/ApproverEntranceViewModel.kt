@@ -10,7 +10,7 @@ import co.censo.shared.CensoLink.Companion.ACCESS_TYPE
 import co.censo.shared.CensoLink.Companion.INVITE_TYPE
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
-import co.censo.shared.data.repository.GuardianRepository
+import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
@@ -31,7 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ApproverEntranceViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val guardianRepository: GuardianRepository,
+    private val approverRepository: ApproverRepository,
     private val keyRepository: KeyRepository,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences
@@ -42,16 +42,16 @@ class ApproverEntranceViewModel @Inject constructor(
 
 
     //region Lifecycle Methods
-    fun onStart(invitationId: String?, recoveryParticipantId: String?, approvalId: String?) {
+    fun onStart(invitationId: String?, accessParticipantId: String?, approvalId: String?) {
         if (invitationId != null) {
-            guardianRepository.saveInvitationId(invitationId)
+            approverRepository.saveInvitationId(invitationId)
         }
-        if (recoveryParticipantId != null) {
-            guardianRepository.saveParticipantId(recoveryParticipantId)
+        if (accessParticipantId != null) {
+            approverRepository.saveParticipantId(accessParticipantId)
         }
 
         if (approvalId != null) {
-            guardianRepository.saveApprovalId(approvalId)
+            approverRepository.saveApprovalId(approvalId)
         }
 
         determineLoginState()
@@ -115,11 +115,11 @@ class ApproverEntranceViewModel @Inject constructor(
 
         viewModelScope.launch {
             val isActiveApprover = if (loggedIn) {
-                val retrieveUser = guardianRepository.retrieveUser()
+                val retrieveUser = approverRepository.retrieveUser()
 
                 if (retrieveUser is Resource.Success) {
                     retrieveUser.data
-                        ?.let { it.guardianStates.any { guardianState -> guardianState.phase.isActiveApprover() } }
+                        ?.let { it.approverStates.any { approverState -> approverState.phase.isActiveApprover() } }
                         ?: false
                 } else {
                     false
@@ -255,16 +255,16 @@ class ApproverEntranceViewModel @Inject constructor(
 
     private fun loggedInRouting() {
         viewModelScope.launch {
-            val participantId = guardianRepository.retrieveParticipantId()
-            val invitationId = guardianRepository.retrieveInvitationId()
+            val participantId = approverRepository.retrieveParticipantId()
+            val invitationId = approverRepository.retrieveInvitationId()
 
             when {
                 participantId.isEmpty() && invitationId.isEmpty() -> {
-                    val retrieveUser = guardianRepository.retrieveUser()
+                    val retrieveUser = approverRepository.retrieveUser()
 
                     if (retrieveUser is Resource.Success) {
                         val isActiveApprover = retrieveUser.data
-                            ?.let { it.guardianStates.any { guardianState -> guardianState.phase.isActiveApprover() } }
+                            ?.let { it.approverStates.any { approverState -> approverState.phase.isActiveApprover() } }
                             ?: false
 
                         state = state.copy(
@@ -282,8 +282,8 @@ class ApproverEntranceViewModel @Inject constructor(
 
     private fun loggedOutRouting() {
         viewModelScope.launch {
-            val participantId = guardianRepository.retrieveParticipantId()
-            val invitationId = guardianRepository.retrieveInvitationId()
+            val participantId = approverRepository.retrieveParticipantId()
+            val invitationId = approverRepository.retrieveInvitationId()
 
             when {
                 participantId.isNotEmpty() || invitationId.isNotEmpty() -> signInUI()
@@ -308,19 +308,19 @@ class ApproverEntranceViewModel @Inject constructor(
                 val censoLink = clipboardContent.parseLink()
                 when (censoLink.type) {
                     INVITE_TYPE -> {
-                        guardianRepository.clearParticipantId()
-                        guardianRepository.saveInvitationId(censoLink.identifiers.mainId)
+                        approverRepository.clearParticipantId()
+                        approverRepository.saveInvitationId(censoLink.identifiers.mainId)
                         routing()
                     }
 
                     ACCESS_TYPE -> {
                         if (censoLink.identifiers.approvalId == null) {
-                            guardianRepository.clearInvitationId()
-                            guardianRepository.saveParticipantId(censoLink.identifiers.mainId)
+                            approverRepository.clearInvitationId()
+                            approverRepository.saveParticipantId(censoLink.identifiers.mainId)
                         } else {
-                            guardianRepository.clearInvitationId()
-                            guardianRepository.saveParticipantId(censoLink.identifiers.mainId)
-                            guardianRepository.saveApprovalId(censoLink.identifiers.approvalId!!)
+                            approverRepository.clearInvitationId()
+                            approverRepository.saveParticipantId(censoLink.identifiers.mainId)
+                            approverRepository.saveApprovalId(censoLink.identifiers.approvalId!!)
                         }
                         routing()
                     }

@@ -9,7 +9,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.touVersion
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -259,9 +259,9 @@ class OwnerEntranceViewModel @Inject constructor(
     }
 
     private fun loggedInRouting(ownerState: OwnerState) {
-        state = if (ownerState is OwnerState.Ready && ownerState.vault.secrets.isNotEmpty()) {
+        state = if (ownerState is OwnerState.Ready && ownerState.vault.seedPhrases.isNotEmpty()) {
             val destination = when {
-                ownerState.recovery != null -> Screen.AccessApproval.withIntent(intent = RecoveryIntent.AccessPhrases)
+                ownerState.access != null -> Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases)
                 else -> Screen.OwnerVaultScreen.route
             }
             state.copy(navigationResource = Resource.Success(destination))

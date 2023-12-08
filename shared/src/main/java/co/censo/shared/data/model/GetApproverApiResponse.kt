@@ -1,7 +1,7 @@
 package co.censo.shared.data.model
 
 import Base58EncodedDevicePublicKey
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
@@ -10,17 +10,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GuardianState(
+data class ApproverState(
     val participantId: ParticipantId,
-    val phase: GuardianPhase,
+    val phase: ApproverPhase,
     val invitationId: InvitationId? = null
 )
 
 @Serializable
-sealed class GuardianPhase {
+sealed class ApproverPhase {
 
     fun isAccessPhase() =
-        this is  RecoveryRequested || this is RecoveryVerification || this is RecoveryConfirmation
+        this is  AccessRequested || this is AccessVerification || this is AccessConfirmation
 
     fun isOnboardingPhase() =
         this is WaitingForCode || this is WaitingForVerification || this is VerificationRejected
@@ -32,49 +32,49 @@ sealed class GuardianPhase {
     @SerialName("WaitingForCode")
     data class WaitingForCode(
         val entropy: Base64EncodedData?,
-    ) : GuardianPhase()
+    ) : ApproverPhase()
 
     @Serializable
     @SerialName("WaitingForVerification")
-    object WaitingForVerification : GuardianPhase()
+    object WaitingForVerification : ApproverPhase()
 
     @Serializable
     @SerialName("VerificationRejected")
     data class VerificationRejected(
         val entropy: Base64EncodedData?,
-    ) : GuardianPhase()
+    ) : ApproverPhase()
 
     @Serializable
     @SerialName("Complete")
-    object Complete : GuardianPhase()
+    object Complete : ApproverPhase()
 
     @Serializable
-    @SerialName("RecoveryRequested")
-    data class RecoveryRequested(
+    @SerialName("AccessRequested")
+    data class AccessRequested(
         val createdAt: Instant,
-        val recoveryPublicKey: Base58EncodedGuardianPublicKey,
-    ) : GuardianPhase()
+        val accessPublicKey: Base58EncodedApproverPublicKey,
+    ) : ApproverPhase()
 
     @Serializable
-    @SerialName("RecoveryVerification")
-    data class RecoveryVerification(
+    @SerialName("AccessVerification")
+    data class AccessVerification(
         val createdAt: Instant,
-        val recoveryPublicKey: Base58EncodedGuardianPublicKey,
+        val accessPublicKey: Base58EncodedApproverPublicKey,
         val encryptedTotpSecret: Base64EncodedData,
-    ) : GuardianPhase()
+    ) : ApproverPhase()
 
     @Serializable
-    @SerialName("RecoveryConfirmation")
-    data class RecoveryConfirmation(
+    @SerialName("AccessConfirmation")
+    data class AccessConfirmation(
         val createdAt: Instant,
-        val recoveryPublicKey: Base58EncodedGuardianPublicKey,
+        val accessPublicKey: Base58EncodedApproverPublicKey,
         val encryptedTotpSecret: Base64EncodedData,
         val ownerKeySignature: Base64EncodedData,
         val ownerKeySignatureTimeMillis: Long,
         val ownerPublicKey: Base58EncodedDevicePublicKey,
-        val guardianEncryptedShard: Base64EncodedData,
-        val guardianEntropy: Base64EncodedData?,
-    ) : GuardianPhase()
+        val approverEncryptedShard: Base64EncodedData,
+        val approverEntropy: Base64EncodedData?,
+    ) : ApproverPhase()
 }
 
 @Serializable

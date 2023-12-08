@@ -39,8 +39,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverActivatedUIData
@@ -48,7 +48,7 @@ import kotlinx.datetime.Clock
 
 @Composable
 fun ApproversHomeScreen(
-    approvers: List<Guardian.TrustedGuardian>,
+    approvers: List<Approver.TrustedApprover>,
     approverSetupExists: Boolean,
     onInviteApproversSelected: () -> Unit,
     onRemoveApproversSelected: () -> Unit
@@ -224,7 +224,7 @@ private fun buildSpannedParagraph(
 @Composable
 fun ApproverInfoBox(
     nickName: String,
-    status: GuardianStatus?,
+    status: ApproverStatus?,
     editEnabled: Boolean = true
 ) {
 
@@ -284,11 +284,11 @@ fun ApproverInfoBox(
     }
 }
 
-fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
-    when (guardianStatus) {
-        is GuardianStatus.Initial,
-        is GuardianStatus.Accepted,
-        GuardianStatus.Declined -> {
+fun activatedUIData(approverStatus: ApproverStatus?, context: Context) =
+    when (approverStatus) {
+        is ApproverStatus.Initial,
+        is ApproverStatus.Accepted,
+        ApproverStatus.Declined -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.not_yet_active),
                 color = SharedColors.ErrorRed
@@ -331,11 +331,11 @@ fun PreviewEmptyApproversResumeHome() {
 fun PreviewSingleApproverHome() {
     ApproversHomeScreen(
         approvers = listOf(
-            Guardian.TrustedGuardian(
+            Approver.TrustedApprover(
                 label = "Neo",
                 participantId = ParticipantId.generate(),
                 isOwner = false,
-                attributes = GuardianStatus.Onboarded(
+                attributes = ApproverStatus.Onboarded(
                     onboardedAt = Clock.System.now(),
                 )
             ),
@@ -351,19 +351,19 @@ fun PreviewSingleApproverHome() {
 fun PreviewMultipleApproversHome() {
     ApproversHomeScreen(
         approvers = listOf(
-            Guardian.TrustedGuardian(
+            Approver.TrustedApprover(
                 label = "Neo",
                 participantId = ParticipantId.generate(),
                 isOwner = false,
-                attributes = GuardianStatus.Onboarded(
+                attributes = ApproverStatus.Onboarded(
                     onboardedAt = Clock.System.now(),
                 )
             ),
-            Guardian.TrustedGuardian(
+            Approver.TrustedApprover(
                 label = "John Wick",
                 participantId = ParticipantId.generate(),
                 isOwner = false,
-                attributes = GuardianStatus.Onboarded(
+                attributes = ApproverStatus.Onboarded(
                     onboardedAt = Clock.System.now(),
                 )
             )

@@ -77,7 +77,7 @@ fun AnotherDeviceAccessScreen(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun AnotherDeviceRecoveryScreenPreview() {
+fun AnotherDeviceAccessScreenPreview() {
     AnotherDeviceAccessScreen(
         onCancel = {}
     )

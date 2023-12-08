@@ -34,12 +34,12 @@ interface Base58EncodedPublicKey {
 
 @Serializable
 @JvmInline
-value class Base58EncodedGuardianPublicKey(override val value: String) : Base58EncodedPublicKey {
+value class Base58EncodedApproverPublicKey(override val value: String) : Base58EncodedPublicKey {
     init {
         runCatching {
             Base58.base58Decode(this.value)
         }.onFailure {
-            throw IllegalArgumentException("Invalid guardian public key format")
+            throw IllegalArgumentException("Invalid approver public key format")
         }
     }
 
@@ -145,4 +145,4 @@ value class InvitationId(val value: String)
 
 @Serializable
 @JvmInline
-value class VaultSecretId(val value: String)
+value class SeedPhraseId(val value: String)

@@ -3,8 +3,8 @@ package co.censo.approver.di
 import android.content.Context
 import co.censo.approver.BuildConfig
 import co.censo.shared.data.networking.ApiService
-import co.censo.shared.data.repository.GuardianRepository
-import co.censo.shared.data.repository.GuardianRepositoryImpl
+import co.censo.shared.data.repository.ApproverRepository
+import co.censo.shared.data.repository.ApproverRepositoryImpl
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
@@ -96,12 +96,12 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideGuardianRepository(
+    fun provideApproverRepository(
         apiService: ApiService,
         secureStorage: SecurePreferences,
         keyRepository: KeyRepository
-    ): GuardianRepository {
-        return GuardianRepositoryImpl(
+    ): ApproverRepository {
+        return ApproverRepositoryImpl(
             apiService = apiService,
             secureStorage = secureStorage,
             keyRepository = keyRepository

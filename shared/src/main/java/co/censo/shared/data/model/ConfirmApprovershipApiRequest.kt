@@ -4,17 +4,17 @@ import Base64EncodedData
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ConfirmGuardianshipApiRequest(
+data class ConfirmApprovershipApiRequest(
     val keyConfirmationSignature: Base64EncodedData,
     val keyConfirmationTimeMillis: Long,
 )
 
 @Serializable
-data class ConfirmGuardianshipApiResponse(
+data class ConfirmApprovershipApiResponse(
     val ownerState: OwnerState,
 )
 
 @Serializable
-data class RejectGuardianVerificationApiResponse(
+data class RejectApproverVerificationApiResponse(
     val ownerState: OwnerState,
 )

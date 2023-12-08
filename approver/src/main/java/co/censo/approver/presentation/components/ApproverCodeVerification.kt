@@ -17,10 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import co.censo.approver.R
-import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.ApproverColors
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
-import co.censo.shared.presentation.components.Loading
 import co.censo.shared.presentation.components.SmallLoading
 
 @Composable
@@ -70,7 +69,7 @@ fun ApproverCodeVerification(
             enabled = !isLoading,
             value = value,
             onValueChange = onValueChanged,
-            primaryColor = GuardianColors.PrimaryColor,
+            primaryColor = ApproverColors.PrimaryColor,
             borderColor = SharedColors.BorderGrey,
             backgroundColor = SharedColors.WordBoxBackground
         )

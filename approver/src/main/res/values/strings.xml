@@ -10,36 +10,8 @@
     <string name="add_content_desc">Add</string>
     <string name="remove_content_desc">Remove</string>
     <string name="threshold">Threshold</string>
-    <string name="add_guardian">Add Guardian</string>
-    <string name="guardians_empty_message">Please start adding guardians to invite to your policy</string>
-    <string name="share_guardian_deeplinks">Share these links with your guardians to continue setting up your policy</string>
-    <string name="missing_guardian_arg_data">The invitation link used for guardianship is missing policy data.\n\nPlease request a new link from the policy owner and try again.</string>
-    <string name="awaiting_confirmation_of_verification_code">Awaiting confirmation of verification code</string>
     <string name="enter_verification_code">Enter verification code</string>
     <string name="submit">Submit</string>
-    <string name="guardian_entrance">Guardian Home</string>
-    <string name="register_guardian_error">Register Guardian Error</string>
-    <string name="accept_guardianship_error">Accept Guardianship Error</string>
-    <string name="successful_biometry_authentication_is_required_to_use_this_app">Successful biometry authentication is required to use this app</string>
-    <string name="register">Register</string>
-    <string name="you_have_been_invited_to_vault_as_a_guardian_do_you_accept_guardianship">You have been invited to Vault as a guardian,\nto accept guardianship please enter the verification code</string>
-    <string name="decline">Decline</string>
-    <string name="declined_guardianship">You have declined guardianship, to restart this process have the owner of the policy send you a new invite</string>
-    <string name="guardian_setup_complete">Guardian setup complete, no further action required at this time</string>
-    <string name="received_shard_from_owner">Received shard from owner, encrypting shard and updating policy data...</string>
-    <string name="accept_guardianship">Accept Guardianship</string>
-    <string name="decline_guardianship_error">Decline Guardianship Error</string>
-    <string name="to_decline_guardianship_tap_the_button_below">To decline Guardianship, tap the button below</string>
-    <string name="registering_guardian">Registering Guardian</string>
-    <string name="display_qr_code">Display this QR code for the owner of social policy to scan</string>
-    <string name="login">Login</string>
-    <string name="authenticate_with_onetap">Authenticate with OneTap</string>
-    <string name="become_an_approver">Become an approver</string>
-    <string name="approver_verification_code_text">Please enter the code provided by the Vault owner</string>
-    <string name="waiting_for_owner_verify_code">Waiting for owner to verify the code.</string>
-    <string name="submit_code_error_occurred">The code you entered is not correct. Please try again.</string>
-    <string name="code_not_approved">Code not approved. Please send new verification code.</string>
-    <string name="code_sent_to_owner_waiting_for_them_to_approve">Code sent to owner, waiting for them to approve.</string>
 
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="default_notification_channel_name" translatable="true">Notifications</string>

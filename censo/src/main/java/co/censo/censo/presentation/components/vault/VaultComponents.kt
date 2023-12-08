@@ -1,7 +1,7 @@
 package co.censo.censo.presentation.components.vault
 
 import Base64EncodedData
-import VaultSecretId
+import SeedPhraseId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.data.cryptography.generateBase64
 import co.censo.shared.data.cryptography.generateHexString
 import co.censo.shared.data.model.HashedValue
-import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.data.model.SeedPhrase
 import co.censo.censo.R
 import co.censo.censo.util.TestTag
 import kotlinx.datetime.Clock
@@ -41,9 +41,9 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun VaultSecretListItem(
-    secret: VaultSecret,
-    onDelete: (VaultSecret) -> Unit
+fun SeedPhrasesListItem(
+    seedPhrase: SeedPhrase,
+    onDelete: (SeedPhrase) -> Unit
 ) {
 
     Row(
@@ -56,7 +56,7 @@ fun VaultSecretListItem(
                 Column {
 
                     Text(
-                        text = secret.label,
+                        text = seedPhrase.label,
                         color = Color.Black,
                         fontSize = 18.sp
                     )
@@ -71,7 +71,7 @@ fun VaultSecretListItem(
                         )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
-                            text = secret
+                            text = seedPhrase
                                 .createdAt
                                 .toLocalDateTime(TimeZone.currentSystemDefault())
                                 .toJavaLocalDateTime()
@@ -85,7 +85,7 @@ fun VaultSecretListItem(
                 Spacer(modifier = Modifier.weight(1f))
 
                 TextButton(
-                    onClick = { onDelete(secret) },
+                    onClick = { onDelete(seedPhrase) },
                     modifier = Modifier
                         .semantics { testTag = TestTag.delete_phrase },
                 ) {
@@ -136,16 +136,16 @@ fun AddBip39PhraseUIPreview() {
 
 @Preview
 @Composable
-fun VaultSecretListItemPreview() {
+fun SeedPhrasesListItemPreview() {
     Box(
         modifier = Modifier.background(color = Color.White)
     ) {
-        VaultSecretListItem(
-            secret = VaultSecret(
-                guid = VaultSecretId("secret id"),
+        SeedPhrasesListItem(
+            seedPhrase = SeedPhrase(
+                guid = SeedPhraseId("seed phrase id"),
                 encryptedSeedPhrase = Base64EncodedData(generateBase64()),
                 seedPhraseHash = HashedValue(generateHexString()),
-                label = "this is a secret",
+                label = "this is a seed phrase",
                 createdAt = Clock.System.now()
             ),
             onDelete = {}

@@ -9,16 +9,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.ApproverColors
 
 
 @Composable
-fun GuardianTheme(
+fun ApproverTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = lightColorScheme(
-        primary = GuardianColors.PrimaryColor,
-        secondary = GuardianColors.AccentColor,
+        primary = ApproverColors.PrimaryColor,
+        secondary = ApproverColors.AccentColor,
         tertiary = Color.White
     )
 
@@ -26,7 +26,7 @@ fun GuardianTheme(
 
     SideEffect {
         val window = (view.context as Activity).window
-        window.statusBarColor = GuardianColors.PrimaryColor.toArgb()
+        window.statusBarColor = ApproverColors.PrimaryColor.toArgb()
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
     }
 

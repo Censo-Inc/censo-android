@@ -1,15 +1,11 @@
 package co.censo.shared.data.repository
 
-import Base58EncodedPrivateKey
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECHelper
-import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.key.KeystoreHelper
-import co.censo.shared.data.cryptography.sha256digest
-import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.storage.CloudStorage
 import org.bouncycastle.util.encoders.Hex
@@ -24,7 +20,7 @@ interface KeyRepository {
     fun setSavedDeviceId(id: String)
     fun retrieveSavedDeviceId(): String
     fun retrieveInternalDeviceKey(): InternalDeviceKey
-    fun createGuardianKey(): EncryptionKey
+    fun createApproverKey(): EncryptionKey
     fun encryptWithDeviceKey(data: ByteArray) : ByteArray
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
     suspend fun saveKeyInCloud(
@@ -64,7 +60,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override fun retrieveInternalDeviceKey() =
         InternalDeviceKey(storage.retrieveDeviceKeyId())
 
-    override fun createGuardianKey(): EncryptionKey {
+    override fun createApproverKey(): EncryptionKey {
         val keyPair = ECHelper.createECKeyPair()
         return EncryptionKey(keyPair)
     }

@@ -4,13 +4,12 @@ import Base64EncodedData
 import co.censo.approver.data.ApproverAccessUIState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.ApproveAccessApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
-import co.censo.shared.data.model.GuardianPhase
-import co.censo.shared.data.model.GuardianState
-import co.censo.shared.data.model.RejectRecoveryApiResponse
-import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
+import co.censo.shared.data.model.ApproverPhase
+import co.censo.shared.data.model.ApproverState
+import co.censo.shared.data.model.RejectAccessApiResponse
+import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -18,8 +17,8 @@ import kotlinx.datetime.toLocalDateTime
 
 data class ApproverAccessState(
 
-    // guardian state
-    val guardianState: GuardianState? = null,
+    // approver state
+    val approverState: ApproverState? = null,
 
     // deep links data
     val approvalId: String = "",
@@ -27,13 +26,13 @@ data class ApproverAccessState(
 
     // Approver data
     val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
-    val guardianEncryptionKey: EncryptedKey? = null,
+    val approverEncryptionKey: EncryptedKey? = null,
 
-    // recovery
-    val recoveryTotp: RecoveryTotpState? = null,
-    val storeRecoveryTotpSecretResource: Resource<StoreRecoveryTotpSecretApiResponse> = Resource.Uninitialized,
-    val approveRecoveryResource: Resource<ApproveRecoveryApiResponse> = Resource.Uninitialized,
-    val rejectRecoveryResource: Resource<RejectRecoveryApiResponse> = Resource.Uninitialized,
+    // access
+    val accessTotp: AccessTotpState? = null,
+    val storeAccessTotpSecretResource: Resource<StoreAccessTotpSecretApiResponse> = Resource.Uninitialized,
+    val approveAccessResource: Resource<ApproveAccessApiResponse> = Resource.Uninitialized,
+    val rejectAccessResource: Resource<RejectAccessApiResponse> = Resource.Uninitialized,
     val ownerEnteredWrongCode: Boolean = false,
     val accessNotInProgress: Resource<Unit> = Resource.Uninitialized,
 
@@ -44,28 +43,28 @@ data class ApproverAccessState(
     //Cloud Storage
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val recoveryConfirmationPhase: GuardianPhase.RecoveryConfirmation? = null,
+    val accessConfirmationPhase: ApproverPhase.AccessConfirmation? = null,
 
     val navToApproverRouting: Boolean = false,
 ) {
 
     val loading = userResponse is Resource.Loading
-            || storeRecoveryTotpSecretResource is Resource.Loading
-            || approveRecoveryResource is Resource.Loading
-            || rejectRecoveryResource is Resource.Loading
+            || storeAccessTotpSecretResource is Resource.Loading
+            || approveAccessResource is Resource.Loading
+            || rejectAccessResource is Resource.Loading
 
     val asyncError = userResponse is Resource.Error
-            || storeRecoveryTotpSecretResource is Resource.Error
-            || approveRecoveryResource is Resource.Error
-            || rejectRecoveryResource is Resource.Error
+            || storeAccessTotpSecretResource is Resource.Error
+            || approveAccessResource is Resource.Error
+            || rejectAccessResource is Resource.Error
             || accessNotInProgress is Resource.Error
 
     val showTopBar = (!loading && !asyncError) && approverAccessUIState !is ApproverAccessUIState.Complete
 
-    val shouldCheckRecoveryCode =
-        userResponse !is Resource.Loading && guardianState?.phase is GuardianPhase.RecoveryVerification
+    val shouldCheckAccessCode =
+        userResponse !is Resource.Loading && approverState?.phase is ApproverPhase.AccessVerification
 
-    data class RecoveryTotpState(
+    data class AccessTotpState(
         val code: String,
         val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
         val currentSecond: Int = Clock.System.now().toLocalDateTime(TimeZone.UTC).second,

@@ -1,24 +1,23 @@
 package co.censo.shared.data.repository
 
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import InvitationId
-import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
-import co.censo.shared.data.model.AcceptGuardianshipApiResponse
-import co.censo.shared.data.model.ApproveRecoveryApiRequest
-import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.AcceptApprovershipApiResponse
+import co.censo.shared.data.model.ApproveAccessApiRequest
+import co.censo.shared.data.model.ApproveAccessApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
-import co.censo.shared.data.model.RejectRecoveryApiResponse
-import co.censo.shared.data.model.StoreRecoveryTotpSecretApiRequest
-import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
-import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
-import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.RejectAccessApiResponse
+import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
+import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
+import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
+import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.CrashReportingUtil
@@ -27,28 +26,28 @@ import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 import java.util.Base64
 
-interface GuardianRepository {
+interface ApproverRepository {
     suspend fun retrieveUser(): Resource<GetApproverUserApiResponse>
-    suspend fun acceptGuardianship(
+    suspend fun acceptApprovership(
         invitationId: InvitationId,
-    ): Resource<AcceptGuardianshipApiResponse>
+    ): Resource<AcceptApprovershipApiResponse>
 
-    suspend fun declineGuardianship(
+    suspend fun declineApprovership(
         invitationId: InvitationId,
     ): Resource<ResponseBody>
 
     fun saveInvitationId(invitationId: String)
     fun retrieveInvitationId(): String
     fun clearInvitationId()
-    suspend fun submitGuardianVerification(
+    suspend fun submitApproverVerification(
         invitationId: String,
-        submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
-    ): Resource<SubmitGuardianVerificationApiResponse>
+        submitApproverVerificationRequest: SubmitApproverVerificationApiRequest
+    ): Resource<SubmitApproverVerificationApiResponse>
 
     fun signVerificationCode(
         verificationCode: String,
         encryptionKey: EncryptionKey
-    ): SubmitGuardianVerificationApiRequest
+    ): SubmitApproverVerificationApiRequest
 
     fun saveParticipantId(participantId: String)
     fun retrieveParticipantId(): String
@@ -57,11 +56,6 @@ interface GuardianRepository {
     fun retrieveApprovalId(): String
     fun clearApprovalId()
 
-    suspend fun storeRecoveryTotpSecret(
-        participantId: String,
-        encryptedTotpSecret: Base64EncodedData
-    ): Resource<StoreRecoveryTotpSecretApiResponse>
-
     fun checkTotpMatches(
         encryptedTotpSecret: Base64EncodedData,
         ownerPublicKey: Base58EncodedPublicKey,
@@ -69,32 +63,23 @@ interface GuardianRepository {
         signature: Base64EncodedData
     ): Boolean
 
-    suspend fun approveRecovery(
-        participantId: ParticipantId,
-        encryptedShard: Base64EncodedData,
-    ): Resource<ApproveRecoveryApiResponse>
-
-    suspend fun rejectRecovery(
-        participantId: ParticipantId
-    ) : Resource<RejectRecoveryApiResponse>
-
     suspend fun storeAccessTotpSecret(
         approvalId: String,
         encryptedTotpSecret: Base64EncodedData
-    ) : Resource<StoreRecoveryTotpSecretApiResponse>
+    ) : Resource<StoreAccessTotpSecretApiResponse>
 
     suspend fun approveAccess(
         approvalId: String,
         encryptedShard: Base64EncodedData
-    ) : Resource<ApproveRecoveryApiResponse>
-    suspend fun rejectAccess(approvalId: String) : Resource<RejectRecoveryApiResponse>
+    ) : Resource<ApproveAccessApiResponse>
+    suspend fun rejectAccess(approvalId: String) : Resource<RejectAccessApiResponse>
 }
 
-class GuardianRepositoryImpl(
+class ApproverRepositoryImpl(
     private val apiService: ApiService,
     private val secureStorage: SecurePreferences,
     private val keyRepository: KeyRepository
-) : GuardianRepository, BaseRepository() {
+) : ApproverRepository, BaseRepository() {
 
     override suspend fun retrieveUser(): Resource<GetApproverUserApiResponse> {
         return retrieveApiResource { apiService.approverUser() }
@@ -103,95 +88,83 @@ class GuardianRepositoryImpl(
     override fun signVerificationCode(
         verificationCode: String,
         encryptionKey: EncryptionKey
-    ): SubmitGuardianVerificationApiRequest {
+    ): SubmitApproverVerificationApiRequest {
         val currentTimeInMillis = Clock.System.now().toEpochMilliseconds()
         val dataToSign =
             verificationCode.generateVerificationCodeSignData(currentTimeInMillis)
         val signature = encryptionKey.sign(dataToSign)
         val base64EncodedData = Base64EncodedData(Base64.getEncoder().encodeToString(signature))
 
-        return SubmitGuardianVerificationApiRequest(
+        return SubmitApproverVerificationApiRequest(
             signature = base64EncodedData,
             timeMillis = currentTimeInMillis,
-            guardianPublicKey = Base58EncodedGuardianPublicKey(
+            approverPublicKey = Base58EncodedApproverPublicKey(
                 encryptionKey.publicExternalRepresentation().value
             )
         )
     }
 
-    override suspend fun acceptGuardianship(
+    override suspend fun acceptApprovership(
         invitationId: InvitationId,
-    ): Resource<AcceptGuardianshipApiResponse> {
+    ): Resource<AcceptApprovershipApiResponse> {
         return retrieveApiResource {
-            apiService.acceptGuardianship(
+            apiService.acceptApprovership(
                 invitationId = invitationId.value,
             )
         }
     }
 
-    override suspend fun declineGuardianship(
+    override suspend fun declineApprovership(
         invitationId: InvitationId,
     ): Resource<ResponseBody> {
         return retrieveApiResource {
-            apiService.declineGuardianship(
+            apiService.declineApprovership(
                 invitationId = invitationId.value,
             )
         }
     }
 
     override fun saveInvitationId(invitationId: String) {
-        secureStorage.saveGuardianInvitationId(invitationId)
+        secureStorage.saveApproverInvitationId(invitationId)
     }
 
-    override fun retrieveInvitationId() = secureStorage.retrieveGuardianInvitationId()
-    override fun clearInvitationId() = secureStorage.clearGuardianInvitationId()
+    override fun retrieveInvitationId() = secureStorage.retrieveApproverInvitationId()
+    override fun clearInvitationId() = secureStorage.clearApproverInvitationId()
 
-    override suspend fun submitGuardianVerification(
+    override suspend fun submitApproverVerification(
         invitationId: String,
-        submitGuardianVerificationRequest: SubmitGuardianVerificationApiRequest
-    ): Resource<SubmitGuardianVerificationApiResponse> {
+        submitApproverVerificationRequest: SubmitApproverVerificationApiRequest
+    ): Resource<SubmitApproverVerificationApiResponse> {
         return retrieveApiResource {
-            apiService.submitGuardianVerification(
+            apiService.submitApproverVerification(
                 invitationId = invitationId,
-                submitGuardianVerificationApiRequest = submitGuardianVerificationRequest
+                submitApproverVerificationApiRequest = submitApproverVerificationRequest
             )
         }
     }
 
     override fun saveParticipantId(participantId: String) {
-        secureStorage.saveGuardianParticipantId(participantId)
+        secureStorage.saveApproverParticipantId(participantId)
     }
 
     override fun retrieveParticipantId(): String =
-        secureStorage.retrieveGuardianParticipantId()
+        secureStorage.retrieveApproverParticipantId()
 
-    override fun clearParticipantId() = secureStorage.clearGuardianParticipantId()
+    override fun clearParticipantId() = secureStorage.clearApproverParticipantId()
     override fun saveApprovalId(approvalId: String) {
         secureStorage.saveApprovalId(approvalId)
     }
     override fun retrieveApprovalId() = secureStorage.retrieveApprovalId()
     override fun clearApprovalId() = secureStorage.clearApprovalId()
 
-    override suspend fun storeRecoveryTotpSecret(
-        participantId: String,
-        encryptedTotpSecret: Base64EncodedData
-    ): Resource<StoreRecoveryTotpSecretApiResponse> {
-        return retrieveApiResource {
-            apiService.storeRecoveryTotpSecret(
-                participantId,
-                StoreRecoveryTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
-            )
-        }
-    }
-
     override suspend fun storeAccessTotpSecret(
         approvalId: String,
         encryptedTotpSecret: Base64EncodedData
-    ) : Resource<StoreRecoveryTotpSecretApiResponse> {
+    ) : Resource<StoreAccessTotpSecretApiResponse> {
         return retrieveApiResource {
             apiService.storeAccessTotpSecret(
                 approvalId,
-                StoreRecoveryTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
+                StoreAccessTotpSecretApiRequest(deviceEncryptedTotpSecret = encryptedTotpSecret)
             )
         }
     }
@@ -229,34 +202,19 @@ class GuardianRepositoryImpl(
             false
         }
 
-    override suspend fun approveRecovery(
-        participantId: ParticipantId,
-        encryptedShard: Base64EncodedData
-    ): Resource<ApproveRecoveryApiResponse> {
-        return retrieveApiResource {
-            apiService.approveRecovery(participantId.value, ApproveRecoveryApiRequest(encryptedShard))
-        }
-    }
-
     override suspend fun approveAccess(
         approvalId: String,
         encryptedShard: Base64EncodedData
-    ) : Resource<ApproveRecoveryApiResponse> {
+    ) : Resource<ApproveAccessApiResponse> {
         return retrieveApiResource {
             apiService.approveAccess(
                 approvalId,
-                ApproveRecoveryApiRequest(encryptedShard)
+                ApproveAccessApiRequest(encryptedShard)
             )
         }
     }
 
-    override suspend fun rejectRecovery(participantId: ParticipantId): Resource<RejectRecoveryApiResponse> {
-        return retrieveApiResource {
-            apiService.rejectRecovery(participantId.value)
-        }
-    }
-
-    override suspend fun rejectAccess(approvalId: String) : Resource<RejectRecoveryApiResponse> {
+    override suspend fun rejectAccess(approvalId: String) : Resource<RejectAccessApiResponse> {
         return retrieveApiResource {
             apiService.rejectAccess(approvalId)
         }

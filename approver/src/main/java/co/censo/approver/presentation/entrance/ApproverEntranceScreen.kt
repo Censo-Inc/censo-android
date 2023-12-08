@@ -1,6 +1,5 @@
 package co.censo.approver.presentation.entrance
 
-import ApprovalId
 import ParticipantId
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -33,7 +31,6 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.popUpToTop
@@ -45,7 +42,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 fun ApproverEntranceScreen(
     navController: NavController,
     invitationId: String? = null,
-    recoveryParticipantId: String? = null,
+    accessParticipantId: String? = null,
     approvalId: String? = null,
     viewModel: ApproverEntranceViewModel = hiltViewModel()
 ) {
@@ -76,7 +73,7 @@ fun ApproverEntranceScreen(
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart(
             invitationId = invitationId,
-            recoveryParticipantId = recoveryParticipantId,
+            accessParticipantId = accessParticipantId,
             approvalId = approvalId
         )
         onDispose { }

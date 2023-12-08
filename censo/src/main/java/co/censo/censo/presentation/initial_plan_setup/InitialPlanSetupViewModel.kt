@@ -1,6 +1,6 @@
 package co.censo.censo.presentation.initial_plan_setup
 
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import InvitationId
 import Base64EncodedData
 import androidx.compose.runtime.getValue
@@ -15,8 +15,8 @@ import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -80,7 +80,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(saveKeyToCloudResource = Resource.Loading())
             try {
-                val approverEncryptionKey = keyRepository.createGuardianKey()
+                val approverEncryptionKey = keyRepository.createApproverKey()
 
                 val idToken = keyRepository.retrieveSavedDeviceId()
 
@@ -176,12 +176,12 @@ class InitialPlanSetupViewModel @Inject constructor(
             state = state.copy(createPolicyParamsResponse = Resource.Loading())
 
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
-                Guardian.ProspectGuardian(
+                Approver.ProspectApprover(
                     invitationId = InvitationId(""),
                     label = "Me",
                     participantId = state.participantId,
-                    status = GuardianStatus.ImplicitlyOwner(
-                        Base58EncodedGuardianPublicKey(publicKey.value),
+                    status = ApproverStatus.ImplicitlyOwner(
+                        Base58EncodedApproverPublicKey(publicKey.value),
                         Clock.System.now()
                     )
                 )

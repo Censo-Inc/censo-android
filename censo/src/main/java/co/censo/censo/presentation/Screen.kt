@@ -2,7 +2,7 @@ package co.censo.censo.presentation
 
 import Base58EncodedMasterPublicKey
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 
 sealed class Screen(val route: String) {
     object EntranceRoute : Screen("entrance_screen")
@@ -26,7 +26,7 @@ sealed class Screen(val route: String) {
         const val ACCESS_INTENT_ARG = "access_intent_key"
 
         fun withIntent(
-            intent: RecoveryIntent,
+            intent: AccessIntent,
         ): String {
             return "${AccessApproval.route}/${intent.name}"
         }

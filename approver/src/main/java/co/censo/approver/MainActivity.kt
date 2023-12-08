@@ -20,10 +20,9 @@ import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_INVITAT
 import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_ACCESS
 import co.censo.approver.presentation.Screen.Companion.DL_APPROVAL_ID_KEY
 import co.censo.approver.presentation.entrance.ApproverEntranceScreen
-import co.censo.approver.presentation.entrance.ApproverEntranceViewModel
 import co.censo.approver.presentation.home.ApproverAccessScreen
 import co.censo.approver.presentation.onboarding.ApproverOnboardingScreen
-import co.censo.approver.ui.theme.GuardianTheme
+import co.censo.approver.ui.theme.ApproverTheme
 import co.censo.shared.DeepLinkURI.APPROVER_INVITE_URI
 import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_URI
 import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_V2_URI
@@ -39,7 +38,7 @@ class MainActivity : FragmentActivity() {
         setContent {
             val navController = rememberNavController()
 
-            GuardianTheme {
+            ApproverTheme {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -96,7 +95,7 @@ class MainActivity : FragmentActivity() {
                 val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
                 ApproverEntranceScreen(
                     navController = navController,
-                    recoveryParticipantId = participantId
+                    accessParticipantId = participantId
                 )
             }
             composable(
@@ -111,7 +110,7 @@ class MainActivity : FragmentActivity() {
                 val approvalId = backStackEntry.arguments?.getString(DL_APPROVAL_ID_KEY) ?: ""
                 ApproverEntranceScreen(
                     navController = navController,
-                    recoveryParticipantId = participantId,
+                    accessParticipantId = participantId,
                     approvalId = approvalId,
                 )
             }

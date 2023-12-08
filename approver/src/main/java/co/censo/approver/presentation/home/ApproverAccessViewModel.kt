@@ -1,6 +1,5 @@
 package co.censo.approver.presentation.home
 
-import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import androidx.compose.runtime.getValue
@@ -10,19 +9,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.data.ApproverAccessUIState
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.SymmetricEncryption
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.decryptWithEntropy
-import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
-import co.censo.shared.data.cryptography.sha256digest
-import co.censo.shared.data.model.GuardianPhase
-import co.censo.shared.data.model.GuardianState
+import co.censo.shared.data.model.ApproverPhase
+import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.forParticipant
-import co.censo.shared.data.repository.GuardianRepository
+import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
@@ -31,7 +26,6 @@ import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -42,9 +36,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApproverAccessViewModel @Inject constructor(
-    private val guardianRepository: GuardianRepository,
+    private val approverRepository: ApproverRepository,
     private val keyRepository: KeyRepository,
-    private val recoveryTotpTimer: VaultCountDownTimer,
+    private val accessTotpTimer: VaultCountDownTimer,
     private val userStatePollingTimer: VaultCountDownTimer
 ) : ViewModel() {
 
@@ -55,7 +49,7 @@ class ApproverAccessViewModel @Inject constructor(
         retrieveApproverState(false)
 
         userStatePollingTimer.start(POLLING_VERIFICATION_COUNTDOWN) {
-            if (state.shouldCheckRecoveryCode) {
+            if (state.shouldCheckAccessCode) {
                 retrieveApproverState(true)
             }
         }
@@ -63,7 +57,7 @@ class ApproverAccessViewModel @Inject constructor(
 
     fun onStop() {
         userStatePollingTimer.stop()
-        stopRecoveryTotpGeneration()
+        stopAccessTotpGeneration()
     }
 
     fun retrieveApproverState(silently: Boolean) {
@@ -72,20 +66,20 @@ class ApproverAccessViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val userResponse = guardianRepository.retrieveUser()
+            val userResponse = approverRepository.retrieveUser()
 
             state = state.copy(userResponse = userResponse)
 
             if (userResponse is Resource.Success) {
-                val guardianStates = userResponse.data!!.guardianStates
-                checkApproverHasParticipantData(guardianStates)
+                val approverStates = userResponse.data!!.approverStates
+                checkApproverHasParticipantData(approverStates)
             }
         }
     }
 
-    private fun checkApproverHasParticipantData(guardianStates: List<GuardianState>) {
-        val participantId = guardianRepository.retrieveParticipantId()
-        state = state.copy(approvalId = guardianRepository.retrieveApprovalId())
+    private fun checkApproverHasParticipantData(approverStates: List<ApproverState>) {
+        val participantId = approverRepository.retrieveParticipantId()
+        state = state.copy(approvalId = approverRepository.retrieveApprovalId())
 
         //If participantId is empty go back to the paste link
         if (participantId.isEmpty()) {
@@ -93,33 +87,33 @@ class ApproverAccessViewModel @Inject constructor(
             return
         }
 
-        when (val guardianState = guardianStates.forParticipant(participantId = participantId)) {
+        when (val approverState = approverStates.forParticipant(participantId = participantId)) {
             null -> {
-                guardianRepository.clearParticipantId()
+                approverRepository.clearParticipantId()
                 state = state.copy(navToApproverRouting = true)
             }
             else -> {
-                assignGuardianStateAndParticipantId(
-                    guardianState = guardianState,
+                assignApproverStateAndParticipantId(
+                    approverState = approverState,
                     participantId = participantId
                 )
-                determineApproverAccessUIState(guardianState)
+                determineApproverAccessUIState(approverState)
             }
         }
     }
 
-    private fun assignGuardianStateAndParticipantId(guardianState: GuardianState?, participantId: String) {
-        state = state.copy(participantId = participantId, guardianState = guardianState)
+    private fun assignApproverStateAndParticipantId(approverState: ApproverState?, participantId: String) {
+        state = state.copy(participantId = participantId, approverState = approverState)
     }
 
 
-    private fun determineApproverAccessUIState(guardianState: GuardianState) {
-        state = when (val phase = guardianState.phase) {
-            is GuardianPhase.Complete -> {
-                when (state.approveRecoveryResource) {
+    private fun determineApproverAccessUIState(approverState: ApproverState) {
+        state = when (val phase = approverState.phase) {
+            is ApproverPhase.Complete -> {
+                when (state.approveAccessResource) {
                     is Resource.Success -> {
-                        guardianRepository.clearApprovalId()
-                        guardianRepository.clearParticipantId()
+                        approverRepository.clearApprovalId()
+                        approverRepository.clearParticipantId()
                         state.copy(approverAccessUIState = ApproverAccessUIState.Complete)
                     }
                     else -> {
@@ -128,23 +122,23 @@ class ApproverAccessViewModel @Inject constructor(
                 }
             }
 
-            is GuardianPhase.RecoveryRequested ->
+            is ApproverPhase.AccessRequested ->
                 state.copy(
                     approverAccessUIState = ApproverAccessUIState.AccessRequested,
-                    guardianState = guardianState
+                    approverState = approverState
                 )
-            is GuardianPhase.RecoveryVerification -> {
-                startRecoveryTotpGeneration(phase.encryptedTotpSecret)
+            is ApproverPhase.AccessVerification -> {
+                startAccessTotpGeneration(phase.encryptedTotpSecret)
                 state.copy(
                     approverAccessUIState = ApproverAccessUIState.WaitingForToTPFromOwner,
-                    guardianState = guardianState
+                    approverState = approverState
                 )
             }
-            is GuardianPhase.RecoveryConfirmation -> {
+            is ApproverPhase.AccessConfirmation -> {
                 loadPrivateKeyFromCloud(phase)
                 state.copy(
                     approverAccessUIState = ApproverAccessUIState.VerifyingToTPFromOwner,
-                    guardianState = guardianState
+                    approverState = approverState
                 )
             }
 
@@ -152,106 +146,93 @@ class ApproverAccessViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrivateKeyFromCloud(recoveryPhase: GuardianPhase.RecoveryConfirmation) {
+    private fun loadPrivateKeyFromCloud(accessPhase: ApproverPhase.AccessConfirmation) {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true, action = CloudStorageActions.DOWNLOAD
             ),
-            recoveryConfirmationPhase = recoveryPhase,
+            accessConfirmationPhase = accessPhase,
             loadKeyFromCloudResource = Resource.Loading()
         )
     }
 
     private fun confirmOrRejectOwnerAccessRequest(
-        participantId: ParticipantId, recoveryConfirmation: GuardianPhase.RecoveryConfirmation
+        participantId: ParticipantId, accessConfirmation: ApproverPhase.AccessConfirmation
     ) {
-        val recoveryTotp = generateRecoveryTotp(
-            recoveryConfirmation.encryptedTotpSecret,
-            Instant.fromEpochMilliseconds(recoveryConfirmation.ownerKeySignatureTimeMillis)
+        val accessTotp = generateAccessTotp(
+            accessConfirmation.encryptedTotpSecret,
+            Instant.fromEpochMilliseconds(accessConfirmation.ownerKeySignatureTimeMillis)
         )
 
-        val totpIsCorrect = guardianRepository.checkTotpMatches(
-            recoveryTotp.encryptedSecret,
-            recoveryConfirmation.ownerPublicKey,
-            signature = recoveryConfirmation.ownerKeySignature,
-            timeMillis = recoveryConfirmation.ownerKeySignatureTimeMillis
+        val totpIsCorrect = approverRepository.checkTotpMatches(
+            accessTotp.encryptedSecret,
+            accessConfirmation.ownerPublicKey,
+            signature = accessConfirmation.ownerKeySignature,
+            timeMillis = accessConfirmation.ownerKeySignatureTimeMillis
         )
 
         viewModelScope.launch(Dispatchers.IO) {
             if (totpIsCorrect) {
-                state = state.copy(approveRecoveryResource = Resource.Loading())
+                state = state.copy(approveAccessResource = Resource.Loading())
 
-                val guardianKey = state.guardianEncryptionKey
-                val entropy = recoveryConfirmation.guardianEntropy
+                val approverKey = state.approverEncryptionKey
+                val entropy = accessConfirmation.approverEntropy
 
-                if (guardianKey == null) {
-                    state = state.copy(approveRecoveryResource = Resource.Uninitialized)
-                    loadPrivateKeyFromCloud(recoveryPhase = recoveryConfirmation)
+                if (approverKey == null) {
+                    state = state.copy(approveAccessResource = Resource.Uninitialized)
+                    loadPrivateKeyFromCloud(accessPhase = accessConfirmation)
                     return@launch
                 }
 
                 if (entropy == null) {
                     state =
-                        state.copy(approveRecoveryResource = Resource.Error(
+                        state.copy(approveAccessResource = Resource.Error(
                             exception = Exception("Unable to approve this access request, missing information"))
                         )
                     return@launch
                 }
 
-                val key = guardianKey.key.decryptWithEntropy(
+                val key = approverKey.key.decryptWithEntropy(
                     deviceKeyId = keyRepository.retrieveSavedDeviceId(),
                     entropy = entropy
                 )
 
-                val ownerPublicKey = ExternalEncryptionKey.generateFromPublicKeyBase58(recoveryConfirmation.ownerPublicKey)
+                val ownerPublicKey = ExternalEncryptionKey.generateFromPublicKeyBase58(accessConfirmation.ownerPublicKey)
 
 
                 val encryptedShard = ownerPublicKey.encrypt(
-                    key.toEncryptionKey().decrypt(recoveryConfirmation.guardianEncryptedShard.bytes)
+                    key.toEncryptionKey().decrypt(accessConfirmation.approverEncryptedShard.bytes)
                 ).base64Encoded()
 
-                val response =
-                    if (state.approvalId.isNotEmpty()) {
-                        guardianRepository.approveAccess(
-                            approvalId = state.approvalId,
-                            encryptedShard = encryptedShard
-                        )
-                    } else {
-                        guardianRepository.approveRecovery(
-                            participantId = participantId,
-                            encryptedShard = encryptedShard
-                        )
-                    }
+                val response = approverRepository.approveAccess(
+                    approvalId = state.approvalId,
+                    encryptedShard = encryptedShard
+                )
 
-                state = state.copy(approveRecoveryResource = response, ownerEnteredWrongCode = false)
+                state = state.copy(approveAccessResource = response, ownerEnteredWrongCode = false)
 
                 if (response is Resource.Success) {
-                    guardianRepository.clearApprovalId()
-                    guardianRepository.clearParticipantId()
-                    determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
+                    approverRepository.clearApprovalId()
+                    approverRepository.clearParticipantId()
+                    determineApproverAccessUIState(response.data?.approverStates?.forParticipant(state.participantId)!!)
                 }
 
-                stopRecoveryTotpGeneration()
+                stopAccessTotpGeneration()
             } else {
-                state = state.copy(rejectRecoveryResource = Resource.Loading())
-                val response =
-                    if (state.approvalId.isNotEmpty()) {
-                        guardianRepository.rejectAccess(state.approvalId)
-                    } else {
-                        guardianRepository.rejectRecovery(participantId)
-                    }
-                state = state.copy(rejectRecoveryResource = response, ownerEnteredWrongCode = true)
+                state = state.copy(rejectAccessResource = Resource.Loading())
+                val response = approverRepository.rejectAccess(state.approvalId)
+                state = state.copy(rejectAccessResource = response, ownerEnteredWrongCode = true)
                 if (response is Resource.Success) {
-                    guardianRepository.clearApprovalId()
-                    guardianRepository.clearParticipantId()
-                    determineApproverAccessUIState(response.data?.guardianStates?.forParticipant(state.participantId)!!)
+                    approverRepository.clearApprovalId()
+                    approverRepository.clearParticipantId()
+                    determineApproverAccessUIState(response.data?.approverStates?.forParticipant(state.participantId)!!)
                 }
             }
         }
     }
 
-    fun storeRecoveryTotpSecret() {
-        state = state.copy(storeRecoveryTotpSecretResource = Resource.Loading())
+    fun storeAccessTotpSecret() {
+        state = state.copy(storeAccessTotpSecretResource = Resource.Loading())
 
         viewModelScope.launch {
             val secret = TotpGenerator.generateSecret()
@@ -259,38 +240,30 @@ class ApproverAccessViewModel @Inject constructor(
                 .encryptWithDeviceKey(secret.toByteArray())
                 .base64Encoded()
 
-            val submitRecoveryTotpSecretResource =
-                if (state.approvalId.isNotEmpty()) {
-                    guardianRepository.storeAccessTotpSecret(
-                        approvalId = state.approvalId,
-                        encryptedTotpSecret = encryptedSecret
-                    )
-                } else {
-                    guardianRepository.storeRecoveryTotpSecret(
-                        participantId = state.participantId,
-                        encryptedTotpSecret = encryptedSecret
-                    )
-                }
+            val submitAccessTotpSecretResource = approverRepository.storeAccessTotpSecret(
+                approvalId = state.approvalId,
+                encryptedTotpSecret = encryptedSecret
+            )
 
-            if (submitRecoveryTotpSecretResource is Resource.Success) {
+            if (submitAccessTotpSecretResource is Resource.Success) {
                 determineApproverAccessUIState(
-                    submitRecoveryTotpSecretResource.data?.guardianStates?.forParticipant(
+                    submitAccessTotpSecretResource.data?.approverStates?.forParticipant(
                         state.participantId
                     )!!
                 )
-                startRecoveryTotpGeneration(encryptedSecret)
+                startAccessTotpGeneration(encryptedSecret)
             }
 
             state = state.copy(
-                storeRecoveryTotpSecretResource = submitRecoveryTotpSecretResource
+                storeAccessTotpSecretResource = submitAccessTotpSecretResource
             )
         }
     }
 
-    private fun generateRecoveryTotp(encryptedTotpSecret: Base64EncodedData, instant: Instant = Clock.System.now()): ApproverAccessState.RecoveryTotpState {
+    private fun generateAccessTotp(encryptedTotpSecret: Base64EncodedData, instant: Instant = Clock.System.now()): ApproverAccessState.AccessTotpState {
         val counter = instant.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
 
-        return ApproverAccessState.RecoveryTotpState(
+        return ApproverAccessState.AccessTotpState(
             code = TotpGenerator.generateCode(
                 secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes)),
                 counter = counter,
@@ -301,21 +274,21 @@ class ApproverAccessViewModel @Inject constructor(
         )
     }
 
-    private fun startRecoveryTotpGeneration(encryptedSecret: Base64EncodedData) {
+    private fun startAccessTotpGeneration(encryptedSecret: Base64EncodedData) {
         viewModelScope.launch {
-            state = state.copy(recoveryTotp = generateRecoveryTotp(encryptedSecret))
-            recoveryTotpTimer.start(UPDATE_COUNTDOWN) {
-                state.recoveryTotp?.also { totp ->
+            state = state.copy(accessTotp = generateAccessTotp(encryptedSecret))
+            accessTotpTimer.start(UPDATE_COUNTDOWN) {
+                state.accessTotp?.also { totp ->
                     val now = Clock.System.now()
 
                     state =
                         if (totp.counter != now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)) {
                             state.copy(
-                                recoveryTotp = generateRecoveryTotp(totp.encryptedSecret)
+                                accessTotp = generateAccessTotp(totp.encryptedSecret)
                             )
                         } else {
                             state.copy(
-                                recoveryTotp = totp.copy(
+                                accessTotp = totp.copy(
                                     currentSecond = now.toLocalDateTime(TimeZone.UTC).second
                                 )
                             )
@@ -325,9 +298,9 @@ class ApproverAccessViewModel @Inject constructor(
         }
     }
 
-    private fun stopRecoveryTotpGeneration() {
-        recoveryTotpTimer.stop()
-        state = state.copy(recoveryTotp = null)
+    private fun stopAccessTotpGeneration() {
+        accessTotpTimer.stop()
+        state = state.copy(accessTotp = null)
     }
 
     fun showCloseConfirmationDialog() {
@@ -352,7 +325,7 @@ class ApproverAccessViewModel @Inject constructor(
         when (state.approverAccessUIState) {
             ApproverAccessUIState.AccessRequested,
             ApproverAccessUIState.VerifyingToTPFromOwner,
-            ApproverAccessUIState.WaitingForToTPFromOwner -> cancelRecovery()
+            ApproverAccessUIState.WaitingForToTPFromOwner -> cancelAccess()
 
             ApproverAccessUIState.Complete -> {}
         }
@@ -363,9 +336,9 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
 
-    private fun cancelRecovery() {
-        guardianRepository.clearParticipantId()
-        guardianRepository.clearApprovalId()
+    private fun cancelAccess() {
+        approverRepository.clearParticipantId()
+        approverRepository.clearApprovalId()
 
         state = state.copy(
             approvalId = "",
@@ -374,22 +347,22 @@ class ApproverAccessViewModel @Inject constructor(
         )
     }
 
-    fun resetStoreRecoveryTotpSecretResource() {
+    fun resetStoreAccessTotpSecretResource() {
         state = state.copy(
-            storeRecoveryTotpSecretResource = Resource.Uninitialized
+            storeAccessTotpSecretResource = Resource.Uninitialized
         )
     }
 
-    fun resetApproveRecoveryResource() {
-        state = state.copy(approveRecoveryResource = Resource.Uninitialized)
+    fun resetApproveAccessResource() {
+        state = state.copy(approveAccessResource = Resource.Uninitialized)
     }
 
-    fun resetRejectRecoveryResource() {
-        state = state.copy(rejectRecoveryResource = Resource.Uninitialized)
+    fun resetRejectAccessResource() {
+        state = state.copy(rejectAccessResource = Resource.Uninitialized)
     }
 
     fun resetAccessNotInProgressResource() {
-        cancelRecovery()
+        cancelAccess()
         state = state.copy(accessNotInProgress = Resource.Uninitialized)
     }
 
@@ -412,20 +385,20 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     private fun keyDownloadSuccess(privateEncryptionKey: ByteArray) {
-        state = state.copy(guardianEncryptionKey = EncryptedKey(privateEncryptionKey))
+        state = state.copy(approverEncryptionKey = EncryptedKey(privateEncryptionKey))
 
-        checkRecoveryConfirmationPhase()
+        checkAccessConfirmationPhase()
     }
 
-    private fun checkRecoveryConfirmationPhase() {
-        //Grab the recoveryConfirmation data from state
-        val recoveryConfirmation = state.recoveryConfirmationPhase
-        if (recoveryConfirmation != null) {
-            confirmOrRejectOwnerAccessRequest(ParticipantId(state.participantId), recoveryConfirmation)
+    private fun checkAccessConfirmationPhase() {
+        //Grab the accessConfirmation data from state
+        val accessConfirmation = state.accessConfirmationPhase
+        if (accessConfirmation != null) {
+            confirmOrRejectOwnerAccessRequest(ParticipantId(state.participantId), accessConfirmation)
         } else {
-            Exception().sendError(CrashReportingUtil.RecoveryConfirmation)
+            Exception().sendError(CrashReportingUtil.AccessConfirmation)
             state =
-                state.copy(approveRecoveryResource = Resource.Error(exception = Exception("Unable to confirm owner recovery, missing recovery confirmation data")))
+                state.copy(approveAccessResource = Resource.Error(exception = Exception("Unable to confirm owner access, missing access confirmation data")))
         }
     }
 
@@ -440,14 +413,14 @@ class ApproverAccessViewModel @Inject constructor(
 
         when (cloudStorageAction) {
             CloudStorageActions.DOWNLOAD -> {
-                setErrorToApproveRecoveryResource(exception)
+                setErrorToApproveAccessResource(exception)
             }
             else -> {}
         }
     }
 
-    private fun setErrorToApproveRecoveryResource(exception: Exception?) {
-        state = state.copy(approveRecoveryResource = Resource.Error(
+    private fun setErrorToApproveAccessResource(exception: Exception?) {
+        state = state.copy(approveAccessResource = Resource.Error(
             exception = exception
         ))
     }

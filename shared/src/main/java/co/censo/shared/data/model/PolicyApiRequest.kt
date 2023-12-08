@@ -1,6 +1,6 @@
 package co.censo.shared.data.model
 
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
@@ -14,7 +14,7 @@ data class CreatePolicyApiRequest(
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
-    val guardianPublicKey: Base58EncodedGuardianPublicKey,
+    val approverPublicKey: Base58EncodedApproverPublicKey,
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,
 )
@@ -28,7 +28,7 @@ data class CreatePolicyApiResponse(
 @Serializable
 data class CreatePolicySetupApiRequest(
     val threshold: UInt,
-    val guardians: List<Guardian.SetupGuardian>,
+    val approvers: List<Approver.SetupApprover>,
 )
 
 @Serializable
@@ -41,12 +41,12 @@ data class ReplacePolicyApiRequest(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-    val guardianShards: List<GuardianShard>,
+    val approverShards: List<ApproverShard>,
     val signatureByPreviousIntermediateKey: Base64EncodedData,
 )
 
 @Serializable
-data class GuardianShard(
+data class ApproverShard(
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
 )

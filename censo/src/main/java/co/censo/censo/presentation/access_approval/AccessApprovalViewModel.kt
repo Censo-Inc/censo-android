@@ -10,11 +10,11 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.ApprovalStatus
-import co.censo.shared.data.model.Guardian
+import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.Recovery
-import co.censo.shared.data.model.RecoveryIntent
-import co.censo.shared.data.model.RecoveryStatus
+import co.censo.shared.data.model.Access
+import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.AccessStatus
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
@@ -34,7 +34,7 @@ class AccessApprovalViewModel @Inject constructor(
     var state by mutableStateOf(AccessApprovalState())
         private set
 
-    fun onStart(accessIntent: RecoveryIntent) {
+    fun onStart(accessIntent: AccessIntent) {
         state = state.copy(accessIntent = accessIntent)
 
         viewModelScope.launch {
@@ -85,26 +85,26 @@ class AccessApprovalViewModel @Inject constructor(
         ownerStateFlow.tryEmit(Resource.Success(ownerState))
 
         // restore state
-        when (val recovery = ownerState.recovery) {
+        when (val access = ownerState.access) {
             null -> {
-                state = state.copy(initiateNewRecovery = true)
+                state = state.copy(initiateNewAccess = true)
             }
 
-            is Recovery.AnotherDevice -> {
+            is Access.AnotherDevice -> {
                 state = state.copy(
                     accessApprovalUIState = AccessApprovalUIState.AnotherDevice
                 )
             }
 
-            is Recovery.ThisDevice -> {
+            is Access.ThisDevice -> {
                 state = state.copy(
-                    recovery = recovery,
-                    approvals = recovery.approvals,
-                    approvers = ownerState.policy.guardians
+                    access = access,
+                    approvals = access.approvals,
+                    approvers = ownerState.policy.approvers
                 )
 
-                if (recovery.status == RecoveryStatus.Available) {
-                    if (ownerState.policy.guardians.all { it.isOwner }) {
+                if (access.status == AccessStatus.Available) {
+                    if (ownerState.policy.approvers.all { it.isOwner }) {
                         // owner is single approver, skip to view seed phrases
                         navigateIntentAware()
                     } else {
@@ -114,14 +114,14 @@ class AccessApprovalViewModel @Inject constructor(
                     // determine initial UI state
                     state = state.copy(accessApprovalUIState = AccessApprovalUIState.SelectApprover)
                 } else {
-                    checkForRejections(recovery)
+                    checkForRejections(access)
                 }
             }
         }
     }
 
-    private fun checkForRejections(recovery: Recovery.ThisDevice) {
-        recovery.approvals.find { it.participantId == state.selectedApprover?.participantId }
+    private fun checkForRejections(access: Access.ThisDevice) {
+        access.approvals.find { it.participantId == state.selectedApprover?.participantId }
             ?.let {
                 if (state.waitingForApproval && it.status == ApprovalStatus.Rejected) {
                     state = state.copy(
@@ -132,20 +132,20 @@ class AccessApprovalViewModel @Inject constructor(
             }
     }
 
-    fun initiateRecovery() {
-        if (state.initiateRecoveryResource !is Resource.Loading) {
-            state = state.copy(initiateRecoveryResource = Resource.Loading())
+    fun initiateAccess() {
+        if (state.initiateAccessResource !is Resource.Loading) {
+            state = state.copy(initiateAccessResource = Resource.Loading())
 
             viewModelScope.launch {
-                val response = ownerRepository.initiateRecovery(state.accessIntent)
+                val response = ownerRepository.initiateAccess(state.accessIntent)
 
                 if (response is Resource.Success) {
                     updateOwnerState(response.data!!.ownerState)
                 }
 
                 state = state.copy(
-                    initiateRecoveryResource = response,
-                    initiateNewRecovery = false
+                    initiateAccessResource = response,
+                    initiateNewAccess = false
                 )
             }
         }
@@ -154,20 +154,20 @@ class AccessApprovalViewModel @Inject constructor(
     fun cancelAccess() {
         state = state.copy(
             showCancelConfirmationDialog = false,
-            cancelRecoveryResource = Resource.Loading()
+            cancelAccessResource = Resource.Loading()
         )
 
         viewModelScope.launch {
-            val response = ownerRepository.cancelRecovery()
+            val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
                 state = state.copy(
-                    recovery = null,
+                    access = null,
                     navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
                 )
             }
 
-            state = state.copy(cancelRecoveryResource = response)
+            state = state.copy(cancelAccessResource = response)
         }
     }
 
@@ -194,7 +194,7 @@ class AccessApprovalViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            val submitVerificationResource = ownerRepository.submitRecoveryTotpVerification(
+            val submitVerificationResource = ownerRepository.submitAccessTotpVerification(
                 participantId = participantId,
                 verificationCode = verificationCode
             )
@@ -214,7 +214,7 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
 
-    fun onApproverSelected(selectedApprover: Guardian.TrustedGuardian) {
+    fun onApproverSelected(selectedApprover: Approver.TrustedApprover) {
         state = if (state.selectedApprover == selectedApprover) {
             state.copy(selectedApprover = null)
         } else {
@@ -246,8 +246,8 @@ class AccessApprovalViewModel @Inject constructor(
 
     fun navigateIntentAware() {
         val destination = when (state.accessIntent) {
-            RecoveryIntent.AccessPhrases -> Screen.AccessSeedPhrases.route
-            RecoveryIntent.ReplacePolicy -> Screen.PlanSetupRoute.removeApproversRoute()
+            AccessIntent.AccessPhrases -> Screen.AccessSeedPhrases.route
+            AccessIntent.ReplacePolicy -> Screen.PlanSetupRoute.removeApproversRoute()
         }
 
         state = state.copy(navigationResource = Resource.Success(destination))
@@ -258,15 +258,15 @@ class AccessApprovalViewModel @Inject constructor(
     }
 }
 
-internal fun List<Guardian.TrustedGuardian>.external(): List<Guardian.TrustedGuardian> {
+internal fun List<Approver.TrustedApprover>.external(): List<Approver.TrustedApprover> {
     return filter { !it.isOwner }
 }
 
-internal fun List<Guardian.TrustedGuardian>.primaryApprover(): Guardian.TrustedGuardian? {
+internal fun List<Approver.TrustedApprover>.primaryApprover(): Approver.TrustedApprover? {
     return external().minByOrNull { it.attributes.onboardedAt }
 }
 
-internal fun List<Guardian.TrustedGuardian>.backupApprover(): Guardian.TrustedGuardian? {
+internal fun List<Approver.TrustedApprover>.backupApprover(): Approver.TrustedApprover? {
     val externalApprovers = external()
 
     return when {
@@ -276,6 +276,6 @@ internal fun List<Guardian.TrustedGuardian>.backupApprover(): Guardian.TrustedGu
     }
 }
 
-internal fun Guardian.TrustedGuardian?.isDefined(): Boolean {
+internal fun Approver.TrustedApprover?.isDefined(): Boolean {
     return this != null
 }

@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -30,10 +28,8 @@ import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessP
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.censo.presentation.components.YesNoDialog
-import co.censo.censo.presentation.enter_phrase.EnterPhraseUIState
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -130,9 +126,9 @@ fun AccessSeedPhrasesScreen(
                             ) { viewModel.reset() }
                         }
 
-                        state.cancelRecoveryResource is Resource.Error -> {
+                        state.cancelAccessResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
+                                errorMessage = state.cancelAccessResource.getErrorMessage(context),
                                 dismissAction = null,
                             ) { viewModel.cancelAccess() }
                         }
@@ -153,7 +149,7 @@ fun AccessSeedPhrasesScreen(
                     when (state.accessPhrasesUIState) {
                         AccessPhrasesUIState.SelectPhrase -> {
                             SelectPhraseUI(
-                                vaultSecrets = (state.ownerState.data as? OwnerState.Ready)?.vault?.secrets ?: listOf(),
+                                seedPhrases = (state.ownerState.data as? OwnerState.Ready)?.vault?.seedPhrases ?: listOf(),
                                 viewedIds = state.viewedPhraseIds,
                                 onPhraseSelected = viewModel::onPhraseSelected,
                                 onFinish = viewModel::showCancelConfirmationDialog

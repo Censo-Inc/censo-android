@@ -1,12 +1,12 @@
 package co.censo.censo.presentation.access_seed_phrases
 
-import VaultSecretId
+import SeedPhraseId
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.DeleteRecoveryApiResponse
+import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RecoveredSeedPhrase
-import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
-import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
+import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.util.BIP39
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
@@ -21,17 +21,17 @@ data class AccessSeedPhrasesState(
     val locksAt: Instant? = null,
     val viewedPhrase: List<String> = emptyList(),
     val showCancelConfirmationDialog: Boolean = false,
-    val viewedPhraseIds: List<VaultSecretId> = emptyList(),
+    val viewedPhraseIds: List<SeedPhraseId> = emptyList(),
 
     // data
     val recoveredPhrases: Resource<List<RecoveredSeedPhrase>> = Resource.Uninitialized,
     val ownerState: Resource<OwnerState> = Resource.Uninitialized,
-    val selectedPhrase : VaultSecret? = null,
+    val selectedPhrase : SeedPhrase? = null,
     val currentLanguage: BIP39.WordListLanguage? = null,
 
     // api requests
-    val retrieveShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,
-    val cancelRecoveryResource: Resource<DeleteRecoveryApiResponse> = Resource.Uninitialized,
+    val retrieveShardsResponse: Resource<RetrieveAccessShardsApiResponse> = Resource.Uninitialized,
+    val cancelAccessResource: Resource<DeleteAccessApiResponse> = Resource.Uninitialized,
 
     // navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
@@ -39,13 +39,13 @@ data class AccessSeedPhrasesState(
 
     val loading = retrieveShardsResponse is Resource.Loading
                 || ownerState is Resource.Loading
-                || cancelRecoveryResource is Resource.Loading
+                || cancelAccessResource is Resource.Loading
                 || recoveredPhrases is Resource.Loading
 
     val asyncError = retrieveShardsResponse is Resource.Error
             || recoveredPhrases is Resource.Error
             || ownerState is Resource.Error
-            || cancelRecoveryResource is Resource.Error
+            || cancelAccessResource is Resource.Error
 }
 
 enum class AccessPhrasesUIState {

@@ -29,7 +29,7 @@ import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
@@ -200,7 +200,7 @@ fun MainVaultScreen(
                     when (selectedBottomNavItem.value) {
                         BottomNavItem.Home ->
                             VaultHomeScreen(
-                                seedPhrasesSaved = state.secretsSize,
+                                seedPhrasesSaved = state.seedPhrasesSize,
                                 onAddSeedPhrase = {
                                     state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
                                         val route = Screen.EnterPhraseRoute.buildNavRoute(
@@ -218,7 +218,7 @@ fun MainVaultScreen(
 
                         BottomNavItem.Phrases ->
                             PhraseHomeScreen(
-                                vaultSecrets = state.ownerState?.vault?.secrets ?: emptyList(),
+                                seedPhrases = state.ownerState?.vault?.seedPhrases ?: emptyList(),
                                 onAddClick = {
                                     state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
                                         val route = Screen.EnterPhraseRoute.buildNavRoute(
@@ -229,22 +229,22 @@ fun MainVaultScreen(
                                     }
                                 },
                                 onAccessClick = {
-                                    navController.navigate(Screen.AccessApproval.withIntent(intent = RecoveryIntent.AccessPhrases))
+                                    navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases))
                                 },
-                                onEditPhraseClick = { vaultSecret ->
-                                    viewModel.showEditPhraseDialog(vaultSecret)
+                                onEditPhraseClick = { seedPhrase ->
+                                    viewModel.showEditPhraseDialog(seedPhrase)
                                 }
                             )
 
                         BottomNavItem.Approvers ->
                             ApproversHomeScreen(
-                                approvers = state.ownerState?.policy?.guardians ?: emptyList(),
-                                approverSetupExists = state.ownerState?.guardianSetup != null,
+                                approvers = state.ownerState?.policy?.approvers ?: emptyList(),
+                                approverSetupExists = state.ownerState?.policySetup != null,
                                 onInviteApproversSelected = {
                                     navController.navigate(Screen.PlanSetupRoute.addApproversRoute())
                                 },
                                 onRemoveApproversSelected = {
-                                    navController.navigate(Screen.AccessApproval.withIntent(intent = RecoveryIntent.ReplacePolicy))
+                                    navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))
                                 }
                             )
 
@@ -291,7 +291,7 @@ fun MainVaultScreen(
                             title = stringResource(id = R.string.delete_phrase),
                             message = message,
                             onCancel = viewModel::onCancelDeletePhrase,
-                            onDelete = viewModel::deleteSecret,
+                            onDelete = viewModel::deleteSeedPhrase,
                         )
                     }
                 }

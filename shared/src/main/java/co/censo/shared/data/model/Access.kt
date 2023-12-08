@@ -3,74 +3,74 @@ package co.censo.shared.data.model
 import Base58EncodedDevicePublicKey
 import Base64EncodedData
 import ParticipantId
-import VaultSecretId
+import SeedPhraseId
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
-enum class RecoveryIntent {
+enum class AccessIntent {
     AccessPhrases, ReplacePolicy
 }
 
 @Serializable
-data class InitiateRecoveryApiRequest(
-    val intent: RecoveryIntent,
+data class InitiateAccessApiRequest(
+    val intent: AccessIntent,
 )
 
 @Serializable
-data class InitiateRecoveryApiResponse(
+data class InitiateAccessApiResponse(
     val ownerState: OwnerState,
 )
 
 @Serializable
-data class DeleteRecoveryApiResponse(
+data class DeleteAccessApiResponse(
     val ownerState: OwnerState,
 )
 
 @Serializable
-data class StoreRecoveryTotpSecretApiRequest(
+data class StoreAccessTotpSecretApiRequest(
     val deviceEncryptedTotpSecret: Base64EncodedData,
 )
 
 @Serializable
-data class StoreRecoveryTotpSecretApiResponse(
-    val guardianStates: List<GuardianState>,
+data class StoreAccessTotpSecretApiResponse(
+    val approverStates: List<ApproverState>,
 )
 
 @Serializable
-data class SubmitRecoveryTotpVerificationApiRequest(
+data class SubmitAccessTotpVerificationApiRequest(
     val signature: Base64EncodedData,
     val timeMillis: Long,
     val ownerDevicePublicKey: Base58EncodedDevicePublicKey,
 )
 
 @Serializable
-data class SubmitRecoveryTotpVerificationApiResponse(
+data class SubmitAccessTotpVerificationApiResponse(
     val ownerState: OwnerState,
 )
 
 @Serializable
-data class ApproveRecoveryApiRequest(
+data class ApproveAccessApiRequest(
     val encryptedShard: Base64EncodedData,
 )
 
 @Serializable
-data class ApproveRecoveryApiResponse(
-    val guardianStates: List<GuardianState>,
+data class ApproveAccessApiResponse(
+    val approverStates: List<ApproverState>,
 )
 
 @Serializable
-data class RejectRecoveryApiResponse(
-    val guardianStates: List<GuardianState>,
+data class RejectAccessApiResponse(
+    val approverStates: List<ApproverState>,
 )
 
 @Serializable
-data class RetrieveRecoveryShardsApiRequest(
+data class RetrieveAccessShardsApiRequest(
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,
 )
 
 @Serializable
-data class RetrieveRecoveryShardsApiResponse(
+data class RetrieveAccessShardsApiResponse(
     val ownerState: OwnerState,
     val encryptedShards: List<EncryptedShard>,
     val scanResultBlob: BiometryScanResultBlob,
@@ -90,11 +90,11 @@ data class AttestationChallengeResponse(
 )
 
 data class RecoveredSeedPhrase(
-    val guid: VaultSecretId,
+    val guid: SeedPhraseId,
     val label: String,
     val phraseWords: List<String>,
     val createdAt: Instant
 )
 
-fun List<GuardianState>.forParticipant(participantId: String): GuardianState? =
+fun List<ApproverState>.forParticipant(participantId: String): ApproverState? =
     this.find { it.participantId.value == participantId }

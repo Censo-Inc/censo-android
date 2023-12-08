@@ -40,7 +40,7 @@ import co.censo.censo.presentation.paywall.PaywallScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -118,7 +118,7 @@ class MainActivity : FragmentActivity() {
                 AccessApprovalScreen(
                     navController = navController,
                     accessIntent = backStackEntry.arguments?.getString(Screen.AccessApproval.ACCESS_INTENT_ARG)
-                        ?.let { RecoveryIntent.valueOf(it) } ?: RecoveryIntent.AccessPhrases,
+                        ?.let { AccessIntent.valueOf(it) } ?: AccessIntent.AccessPhrases,
                 )
             }
             composable(

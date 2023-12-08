@@ -1,6 +1,6 @@
 package co.censo.censo.presentation.plan_setup.components
 
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import Base64EncodedData
 import InvitationId
 import StandardButton
@@ -34,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,8 +50,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.TotpCodeView
@@ -62,7 +61,7 @@ import kotlinx.datetime.Clock
 
 @Composable
 fun ActivateApproverUI(
-    prospectApprover: Guardian.ProspectGuardian?,
+    prospectApprover: Approver.ProspectApprover?,
     secondsLeft: Int,
     verificationCode: String,
     storesLink: String, //This should contain both links since approver could be either
@@ -71,9 +70,9 @@ fun ActivateApproverUI(
 ) {
 
     val nickName: String = prospectApprover?.label ?: ""
-    val guardianStatus = prospectApprover?.status
+    val approverStatus = prospectApprover?.status
     val deeplink = prospectApprover?.deeplink() ?: ""
-    val buttonEnabled = prospectApprover?.status is GuardianStatus.Confirmed
+    val buttonEnabled = prospectApprover?.status is ApproverStatus.Confirmed
 
     val context = LocalContext.current
 
@@ -159,7 +158,7 @@ fun ActivateApproverUI(
 
         ProspectApproverInfoBox(
             nickName = nickName,
-            status = guardianStatus,
+            status = approverStatus,
             onEdit = onEditNickname
         )
 
@@ -188,7 +187,7 @@ fun ActivateApproverUI(
 @Composable
 fun ProspectApproverInfoBox(
     nickName: String,
-    status: GuardianStatus?,
+    status: ApproverStatus?,
     onEdit: () -> Unit
 ) {
 
@@ -247,31 +246,31 @@ fun ProspectApproverInfoBox(
 
 }
 
-fun activatedUIData(guardianStatus: GuardianStatus?, context: Context) =
-    when (guardianStatus) {
-        is GuardianStatus.Initial,
-        GuardianStatus.Declined -> {
+fun activatedUIData(approverStatus: ApproverStatus?, context: Context) =
+    when (approverStatus) {
+        is ApproverStatus.Initial,
+        ApproverStatus.Declined -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.not_yet_active),
                 color = SharedColors.GreyText
             )
         }
 
-        is GuardianStatus.Accepted -> {
+        is ApproverStatus.Accepted -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.opened_link_in_app),
                 color = SharedColors.GreyText
             )
         }
 
-        is GuardianStatus.VerificationSubmitted -> {
+        is ApproverStatus.VerificationSubmitted -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.verifying),
                 color = SharedColors.ErrorRed
             )
         }
 
-        is GuardianStatus.Confirmed -> {
+        is ApproverStatus.Confirmed -> {
             ApproverActivatedUIData(
                 text = context.getString(R.string.active),
                 color = SharedColors.SuccessGreen
@@ -287,14 +286,14 @@ data class ApproverActivatedUIData(
 )
 
 fun shareTheCodeStepUIData(
-    status: GuardianStatus?,
+    status: ApproverStatus?,
     secondsLeft: Int,
     verificationCode: String,
     approverNickname: String,
     context: Context
 ) = when (status) {
-        is GuardianStatus.Initial,
-        GuardianStatus.Declined -> {
+        is ApproverStatus.Initial,
+        ApproverStatus.Declined -> {
             ShareTheCodeUIData(
                 heading = context.getString(R.string.read_the_code_title),
                 content = context.getString(
@@ -305,8 +304,8 @@ fun shareTheCodeStepUIData(
             )
         }
 
-        is GuardianStatus.Accepted,
-        is GuardianStatus.VerificationSubmitted -> {
+        is ApproverStatus.Accepted,
+        is ApproverStatus.VerificationSubmitted -> {
             ShareTheCodeUIData(
                 heading = context.getString(R.string.read_the_code_title),
                 content = context.getString(R.string.share_the_code_message, approverNickname),
@@ -317,7 +316,7 @@ fun shareTheCodeStepUIData(
             )
         }
 
-        is GuardianStatus.Confirmed -> {
+        is ApproverStatus.Confirmed -> {
             ShareTheCodeUIData(
                 heading = context.getString(R.string.read_the_code_title),
                 content = context.getString(R.string.approver_is_activated, approverNickname),
@@ -529,11 +528,11 @@ fun ActivatePrimaryApproverInitialPreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectApprover = Guardian.ProspectGuardian(
+        prospectApprover = Approver.ProspectApprover(
             invitationId = InvitationId(""),
             label = "Neo",
             participantId = ParticipantId.generate(),
-            status = GuardianStatus.Initial(
+            status = ApproverStatus.Initial(
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
             )
         ),
@@ -549,11 +548,11 @@ fun ActivatePrimaryApproverAcceptedPreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectApprover = Guardian.ProspectGuardian(
+        prospectApprover = Approver.ProspectApprover(
             invitationId = InvitationId(""),
             label = "Neo",
             participantId = ParticipantId.generate(),
-            status = GuardianStatus.Accepted(
+            status = ApproverStatus.Accepted(
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
                 acceptedAt = Clock.System.now()
             )
@@ -570,13 +569,13 @@ fun ActivatePrimaryApproverConfirmedPreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectApprover = Guardian.ProspectGuardian(
+        prospectApprover = Approver.ProspectApprover(
             invitationId = InvitationId(""),
             label = "Neo",
             participantId = ParticipantId.generate(),
-            status = GuardianStatus.Confirmed(
-                guardianPublicKey = Base58EncodedGuardianPublicKey(""),
-                guardianKeySignature = Base64EncodedData(""),
+            status = ApproverStatus.Confirmed(
+                approverPublicKey = Base58EncodedApproverPublicKey(""),
+                approverKeySignature = Base64EncodedData(""),
                 timeMillis = 0,
                 confirmedAt = Clock.System.now()
             )
@@ -593,11 +592,11 @@ fun ActivateAlternateApproverInitialPreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectApprover = Guardian.ProspectGuardian(
+        prospectApprover = Approver.ProspectApprover(
             invitationId = InvitationId(""),
             label = "John Wick",
             participantId = ParticipantId.generate(),
-            status = GuardianStatus.Initial(
+            status = ApproverStatus.Initial(
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
             )
         ),
@@ -613,11 +612,11 @@ fun ActivateAlternateApproverAcceptedPreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectApprover = Guardian.ProspectGuardian(
+        prospectApprover = Approver.ProspectApprover(
             invitationId = InvitationId(""),
             label = "John Wick",
             participantId = ParticipantId.generate(),
-            status = GuardianStatus.Accepted(
+            status = ApproverStatus.Accepted(
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
                 acceptedAt = Clock.System.now()
             )
@@ -634,13 +633,13 @@ fun ActivateAlternateApproverConfirmedPreview() {
         secondsLeft = 43,
         verificationCode = "345819",
         storesLink = "link",
-        prospectApprover = Guardian.ProspectGuardian(
+        prospectApprover = Approver.ProspectApprover(
             invitationId = InvitationId(""),
             label = "John Wick",
             participantId = ParticipantId.generate(),
-            status = GuardianStatus.Confirmed(
-                guardianPublicKey = Base58EncodedGuardianPublicKey(""),
-                guardianKeySignature = Base64EncodedData(""),
+            status = ApproverStatus.Confirmed(
+                approverPublicKey = Base58EncodedApproverPublicKey(""),
+                approverKeySignature = Base64EncodedData(""),
                 timeMillis = 0,
                 confirmedAt = Clock.System.now()
             )

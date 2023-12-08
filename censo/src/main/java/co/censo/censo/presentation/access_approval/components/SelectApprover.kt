@@ -36,19 +36,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 import kotlinx.datetime.Clock
 
 @Composable
 fun SelectApprover(
-    intent: RecoveryIntent,
-    approvers: List<Guardian.TrustedGuardian>,
-    selectedApprover: Guardian.TrustedGuardian?,
-    onApproverSelected: (Guardian.TrustedGuardian) -> Unit,
+    intent: AccessIntent,
+    approvers: List<Approver.TrustedApprover>,
+    selectedApprover: Approver.TrustedApprover?,
+    onApproverSelected: (Approver.TrustedApprover) -> Unit,
     onContinue: () -> Unit
 ) {
     val context = LocalContext.current
@@ -68,8 +68,8 @@ fun SelectApprover(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
                 title = stringResource(
                     when (intent) {
-                        RecoveryIntent.AccessPhrases -> R.string.request_access
-                        RecoveryIntent.ReplacePolicy -> R.string.request_approval
+                        AccessIntent.AccessPhrases -> R.string.request_access
+                        AccessIntent.ReplacePolicy -> R.string.request_approval
                     }
                 ),
                 textAlign = TextAlign.Start
@@ -81,8 +81,8 @@ fun SelectApprover(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
                 message = stringResource(
                     when (intent) {
-                        RecoveryIntent.AccessPhrases -> R.string.seed_phrase_request_access_message
-                        RecoveryIntent.ReplacePolicy -> R.string.policy_replace_request_access_message
+                        AccessIntent.AccessPhrases -> R.string.seed_phrase_request_access_message
+                        AccessIntent.ReplacePolicy -> R.string.policy_replace_request_access_message
                     },
                     buildApproverNamesText(approvers = approvers, context)
                 ),
@@ -140,7 +140,7 @@ fun SelectApprover(
     }
 }
 
-fun buildApproverNamesText(approvers: List<Guardian.TrustedGuardian>, context: Context): String {
+fun buildApproverNamesText(approvers: List<Approver.TrustedApprover>, context: Context): String {
     val primaryApproverName =
         approvers.sortedBy { it.attributes.onboardedAt }.getOrNull(0)?.label ?: ""
     val alternateApproverName =
@@ -229,25 +229,25 @@ fun SelectingApproverInfoBox(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SelectApproverForAccessUIPreview() {
-    val primaryApprover = Guardian.TrustedGuardian(
+    val primaryApprover = Approver.TrustedApprover(
         label = "Neo",
         participantId = ParticipantId.generate(),
         isOwner = false,
-        attributes = GuardianStatus.Onboarded(
+        attributes = ApproverStatus.Onboarded(
             onboardedAt = Clock.System.now(),
         )
     )
-    val backupApprover = Guardian.TrustedGuardian(
+    val backupApprover = Approver.TrustedApprover(
         label = "John Wick",
         participantId = ParticipantId.generate(),
         isOwner = false,
-        attributes = GuardianStatus.Onboarded(
+        attributes = ApproverStatus.Onboarded(
             onboardedAt = Clock.System.now(),
         )
     )
 
     SelectApprover(
-        intent = RecoveryIntent.AccessPhrases,
+        intent = AccessIntent.AccessPhrases,
         approvers = listOf(
             primaryApprover,
             backupApprover
@@ -261,25 +261,25 @@ fun SelectApproverForAccessUIPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SelectApproverForPolicyReplaceUIPreview() {
-    val primaryApprover = Guardian.TrustedGuardian(
+    val primaryApprover = Approver.TrustedApprover(
         label = "Neo",
         participantId = ParticipantId.generate(),
         isOwner = false,
-        attributes = GuardianStatus.Onboarded(
+        attributes = ApproverStatus.Onboarded(
             onboardedAt = Clock.System.now(),
         )
     )
-    val backupApprover = Guardian.TrustedGuardian(
+    val backupApprover = Approver.TrustedApprover(
         label = "John Wick",
         participantId = ParticipantId.generate(),
         isOwner = false,
-        attributes = GuardianStatus.Onboarded(
+        attributes = ApproverStatus.Onboarded(
             onboardedAt = Clock.System.now(),
         )
     )
 
     SelectApprover(
-        intent = RecoveryIntent.ReplacePolicy,
+        intent = AccessIntent.ReplacePolicy,
         approvers = listOf(
             primaryApprover,
             backupApprover

@@ -43,7 +43,6 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 
 @Composable
 fun WelcomeScreen(
@@ -89,7 +88,7 @@ fun WelcomeScreen(
                     }
 
                     is OwnerState.Ready -> {
-                        if (ownerState.vault.secrets.isEmpty()) {
+                        if (ownerState.vault.seedPhrases.isEmpty()) {
                             WelcomeScreenUI(currentStep = WelcomeStep.FaceScanned) {
                                 navController.navigate(
                                     Screen.EnterPhraseRoute.buildNavRoute(

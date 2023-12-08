@@ -28,7 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.approver.R
 import co.censo.approver.data.ApproverAccessUIState
-import co.censo.approver.presentation.GuardianColors
+import co.censo.approver.presentation.ApproverColors
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproveRequest
 import co.censo.approver.presentation.components.ApproverTopBar
@@ -38,9 +38,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,31 +102,31 @@ fun ApproverAccessScreen(
                             ) { viewModel.retrieveApproverState(false) }
                         }
 
-                        state.storeRecoveryTotpSecretResource is Resource.Error -> {
+                        state.storeAccessTotpSecretResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.storeRecoveryTotpSecretResource.getErrorMessage(
+                                errorMessage = state.storeAccessTotpSecretResource.getErrorMessage(
                                     context
                                 ),
-                                dismissAction = { viewModel.resetStoreRecoveryTotpSecretResource() },
-                            ) { viewModel.storeRecoveryTotpSecret() }
+                                dismissAction = { viewModel.resetStoreAccessTotpSecretResource() },
+                            ) { viewModel.storeAccessTotpSecret() }
                         }
 
-                        state.approveRecoveryResource is Resource.Error -> {
+                        state.approveAccessResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.approveRecoveryResource.getErrorMessage(context),
-                                dismissAction = { viewModel.resetApproveRecoveryResource() },
+                                errorMessage = state.approveAccessResource.getErrorMessage(context),
+                                dismissAction = { viewModel.resetApproveAccessResource() },
                             ) {
-                                viewModel.resetApproveRecoveryResource()
+                                viewModel.resetApproveAccessResource()
                                 viewModel.retrieveApproverState(false)
                             }
                         }
 
-                        state.rejectRecoveryResource is Resource.Error -> {
+                        state.rejectAccessResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.rejectRecoveryResource.getErrorMessage(context),
-                                dismissAction = { viewModel.resetRejectRecoveryResource() },
+                                errorMessage = state.rejectAccessResource.getErrorMessage(context),
+                                dismissAction = { viewModel.resetRejectAccessResource() },
                             ) {
-                                viewModel.resetRejectRecoveryResource()
+                                viewModel.resetRejectAccessResource()
                                 viewModel.retrieveApproverState(false)
                             }
                         }
@@ -164,14 +162,14 @@ fun ApproverAccessScreen(
                         when (state.approverAccessUIState) {
 
                             ApproverAccessUIState.AccessRequested -> {
-                                ApproveRequest(onContinue = viewModel::storeRecoveryTotpSecret)
+                                ApproveRequest(onContinue = viewModel::storeAccessTotpSecret)
                             }
 
                             ApproverAccessUIState.VerifyingToTPFromOwner,
                             ApproverAccessUIState.WaitingForToTPFromOwner -> {
                                 OwnerCodeVerification(
-                                    totpCode = state.recoveryTotp?.code,
-                                    secondsLeft = state.recoveryTotp?.currentSecond,
+                                    totpCode = state.accessTotp?.code,
+                                    secondsLeft = state.accessTotp?.currentSecond,
                                     errorEnabled = state.ownerEnteredWrongCode
                                 )
                             }
@@ -195,7 +193,7 @@ fun ApproverAccessScreen(
                 Text(
                     modifier = Modifier.padding(8.dp),
                     text = stringResource(R.string.do_you_really_want_to_cancel),
-                    color = GuardianColors.PrimaryColor,
+                    color = ApproverColors.PrimaryColor,
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal

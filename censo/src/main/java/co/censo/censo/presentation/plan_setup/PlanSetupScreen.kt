@@ -30,7 +30,7 @@ import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
-import co.censo.shared.data.model.GuardianStatus
+import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
@@ -160,27 +160,27 @@ fun PlanSetupScreen(
                                 viewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.initiateRecoveryResponse is Resource.Error) {
+                    } else if (state.initiateAccessResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to replace plan, try again.",
                             dismissAction = {
-                                viewModel.resetInitiateRecoveryResponse()
+                                viewModel.resetInitiateAccessResponse()
                                 viewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetInitiateRecoveryResponse()
+                                viewModel.resetInitiateAccessResponse()
                                 viewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.retrieveRecoveryShardsResponse is Resource.Error) {
+                    } else if (state.retrieveAccessShardsResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve recovery data, try again.",
                             dismissAction = {
-                                viewModel.resetRetrieveRecoveryShardsResponse()
+                                viewModel.resetRetrieveAccessShardsResponse()
                                 viewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetRetrieveRecoveryShardsResponse()
+                                viewModel.resetRetrieveAccessShardsResponse()
                                 viewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
@@ -206,7 +206,7 @@ fun PlanSetupScreen(
                                 },
                             )
                         }
-                    } else if (state.completeGuardianShipResponse is Resource.Error) {
+                    } else if (state.completeApprovershipResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to finalize plan, try again.",
                             dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
@@ -235,7 +235,7 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.ApproverNickname_2 -> {
                             ApproverNicknameUI(
-                                isFirstApprover = state.primaryApprover?.status !is GuardianStatus.Confirmed,
+                                isFirstApprover = state.primaryApprover?.status !is ApproverStatus.Confirmed,
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
@@ -250,7 +250,7 @@ fun PlanSetupScreen(
 
                         PlanSetupUIState.EditApproverNickname_3 -> {
                             ApproverNicknameUI(
-                                isFirstApprover = state.primaryApprover?.status !is GuardianStatus.Confirmed,
+                                isFirstApprover = state.primaryApprover?.status !is ApproverStatus.Confirmed,
                                 isRename = true,
                                 nickname = state.editedNickname,
                                 enabled = state.editedNicknameValid,
@@ -306,7 +306,7 @@ fun PlanSetupScreen(
                             )
                         }
 
-                        PlanSetupUIState.RecoveryInProgress_7 -> {
+                        PlanSetupUIState.AccessInProgress_7 -> {
                             FacetecAuth(
                                 onFaceScanReady = { verificationId, biometry ->
                                     viewModel.onFaceScanReady(verificationId, biometry)

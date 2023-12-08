@@ -1,13 +1,13 @@
 package co.censo.shared.data.model
 
 import ApprovalId
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
-import VaultSecretId
+import SeedPhraseId
 import co.censo.shared.DeepLinkURI
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -26,11 +26,11 @@ data class GetOwnerUserApiResponse(
 @Serializable
 data class GetApproverUserApiResponse(
     val identityToken: IdentityToken,
-    val guardianStates: List<GuardianState>,
+    val approverStates: List<ApproverState>,
 )
 
 @Serializable
-sealed class GuardianStatus {
+sealed class ApproverStatus {
 
     fun resolveDeviceEncryptedTotpSecret() =
         when (this) {
@@ -44,18 +44,18 @@ sealed class GuardianStatus {
     @SerialName("Initial")
     data class Initial(
         val deviceEncryptedTotpSecret: Base64EncodedData,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 
     @Serializable
     @SerialName("Declined")
-    object Declined : GuardianStatus()
+    object Declined : ApproverStatus()
 
     @Serializable
     @SerialName("Accepted")
     data class Accepted(
         val deviceEncryptedTotpSecret: Base64EncodedData,
         val acceptedAt: Instant,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 
     @Serializable
     @SerialName("VerificationSubmitted")
@@ -63,48 +63,48 @@ sealed class GuardianStatus {
         val deviceEncryptedTotpSecret: Base64EncodedData,
         val signature: Base64EncodedData,
         val timeMillis: Long,
-        val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        val approverPublicKey: Base58EncodedApproverPublicKey,
         val submittedAt: Instant,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 
     @Serializable
     @SerialName("Confirmed")
     data class Confirmed(
-        val guardianKeySignature: Base64EncodedData, // signature of guardianPublicKey + timeMillis + participantId
-        val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        val approverKeySignature: Base64EncodedData, // signature of approverPublicKey + timeMillis + participantId
+        val approverPublicKey: Base58EncodedApproverPublicKey,
         val timeMillis: Long,
         val confirmedAt: Instant,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 
     @Serializable
     @SerialName("OwnerAsApprover")
     data class OwnerAsApprover(
         val entropy: Base64EncodedData,
         val confirmedAt: Instant,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 
     @Serializable
     @SerialName("ImplicitlyOwner")
     data class ImplicitlyOwner(
-        val guardianPublicKey: Base58EncodedGuardianPublicKey,
+        val approverPublicKey: Base58EncodedApproverPublicKey,
         val confirmedAt: Instant,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 
     @Serializable
     @SerialName("Onboarded")
     data class Onboarded(
         val onboardedAt: Instant,
-    ) : GuardianStatus()
+    ) : ApproverStatus()
 }
 
 @Serializable
-sealed class Guardian {
+sealed class Approver {
     abstract val label: String
     abstract val participantId: ParticipantId
 
     @Serializable
     @SerialName("Setup")
-    sealed class SetupGuardian : Guardian() {
+    sealed class SetupApprover : Approver() {
         abstract override val label: String
         abstract override val participantId: ParticipantId
 
@@ -113,15 +113,15 @@ sealed class Guardian {
         data class OwnerAsApprover(
             override val label: String,
             override val participantId: ParticipantId,
-        ) : SetupGuardian()
+        ) : SetupApprover()
 
         @Serializable
         @SerialName("ImplicitlyOwner")
         data class ImplicitlyOwner(
             override val label: String,
             override val participantId: ParticipantId,
-            val guardianPublicKey: Base58EncodedGuardianPublicKey,
-        ) : SetupGuardian()
+            val approverPublicKey: Base58EncodedApproverPublicKey,
+        ) : SetupApprover()
 
         @Serializable
         @SerialName("ExternalApprover")
@@ -129,66 +129,66 @@ sealed class Guardian {
             override val label: String,
             override val participantId: ParticipantId,
             val deviceEncryptedTotpSecret: Base64EncodedData,
-        ) : SetupGuardian()
+        ) : SetupApprover()
     }
 
     @Serializable
     @SerialName("Prospect")
-    data class ProspectGuardian(
+    data class ProspectApprover(
         val invitationId: InvitationId?,
         override val label: String,
         override val participantId: ParticipantId,
-        val status: GuardianStatus,
-    ) : Guardian()
+        val status: ApproverStatus,
+    ) : Approver()
 
     @Serializable
     @SerialName("Trusted")
-    data class TrustedGuardian(
+    data class TrustedApprover(
         override val label: String,
         override val participantId: ParticipantId,
         val isOwner: Boolean,
-        val attributes: GuardianStatus.Onboarded,
-    ) : Guardian()
+        val attributes: ApproverStatus.Onboarded,
+    ) : Approver()
 }
 
-fun Guardian.ProspectGuardian.deeplink(): String {
+fun Approver.ProspectApprover.deeplink(): String {
     return "${DeepLinkURI.APPROVER_INVITE_URI}${this.invitationId?.value}"
 }
 
 @Serializable
 data class Policy(
     val createdAt: Instant,
-    val guardians: List<Guardian.TrustedGuardian>,
+    val approvers: List<Approver.TrustedApprover>,
     val threshold: UInt,
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
 )
 
 @Serializable
-sealed class Recovery {
-    abstract val guid: RecoveryId
+sealed class Access {
+    abstract val guid: AccessId
 
     @Serializable
     @SerialName("AnotherDevice")
     data class AnotherDevice(
-        override val guid: RecoveryId,
-    ) : Recovery()
+        override val guid: AccessId,
+    ) : Access()
 
     @Serializable
     @SerialName("ThisDevice")
     class ThisDevice(
-        override val guid: RecoveryId,
-        val status: RecoveryStatus,
+        override val guid: AccessId,
+        val status: AccessStatus,
         val createdAt: Instant,
         val unlocksAt: Instant,
         val expiresAt: Instant,
         val approvals: List<Approval>,
-        val intent: RecoveryIntent,
-    ) : Recovery()
+        val intent: AccessIntent,
+    ) : Access()
 }
 
 @Serializable
-enum class RecoveryStatus {
+enum class AccessStatus {
     Requested, Timelocked, Available
 }
 
@@ -209,8 +209,8 @@ enum class ApprovalStatus {
 }
 
 @Serializable
-data class VaultSecret(
-    val guid: VaultSecretId,
+data class SeedPhrase(
+    val guid: SeedPhraseId,
     val encryptedSeedPhrase: Base64EncodedData,
     val seedPhraseHash: HashedValue,
     val label: String,
@@ -219,13 +219,13 @@ data class VaultSecret(
 
 @Serializable
 data class Vault(
-    val secrets: List<VaultSecret>,
+    val seedPhrases: List<SeedPhrase>,
     val publicMasterEncryptionKey: Base58EncodedMasterPublicKey,
 )
 
 @Serializable
-data class GuardianSetup(
-    val guardians: List<Guardian.ProspectGuardian>,
+data class PolicySetup(
+    val approvers: List<Approver.ProspectApprover>,
     val threshold: UInt? = null,
 )
 
@@ -245,8 +245,8 @@ sealed class OwnerState {
         val policy: Policy,
         val vault: Vault,
         val unlockedForSeconds: ULong? = null,
-        val recovery: Recovery?,
-        val guardianSetup: GuardianSetup?
+        val access: Access?,
+        val policySetup: PolicySetup?
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
     }
@@ -267,7 +267,7 @@ fun ULong?.calculateLocksAt(): Instant? {
 
 @Serializable
 @JvmInline
-value class RecoveryId(val value: String)
+value class AccessId(val value: String)
 
 @Serializable
 @JvmInline

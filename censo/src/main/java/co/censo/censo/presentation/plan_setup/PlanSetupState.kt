@@ -1,17 +1,17 @@
 package co.censo.censo.presentation.plan_setup
 
-import Base58EncodedGuardianPublicKey
+import Base58EncodedApproverPublicKey
 import ParticipantId
 import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
+import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
-import co.censo.shared.data.model.Guardian
-import co.censo.shared.data.model.InitiateRecoveryApiResponse
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse
-import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
+import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import kotlinx.datetime.Clock
 
@@ -20,9 +20,9 @@ data class PlanSetupState(
     val ownerState: OwnerState.Ready? = null,
 
     // restored approvers state
-    val ownerApprover: Guardian.ProspectGuardian? = null,
-    val primaryApprover: Guardian.ProspectGuardian? = null,
-    val alternateApprover: Guardian.ProspectGuardian? = null,
+    val ownerApprover: Approver.ProspectApprover? = null,
+    val primaryApprover: Approver.ProspectApprover? = null,
+    val alternateApprover: Approver.ProspectApprover? = null,
 
     // Screen in Plan Setup Flow
     val planSetupDirection: PlanSetupDirection = PlanSetupDirection.AddApprovers,
@@ -40,10 +40,10 @@ data class PlanSetupState(
     // API Calls
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
-    val initiateRecoveryResponse: Resource<InitiateRecoveryApiResponse> = Resource.Uninitialized,
-    val retrieveRecoveryShardsResponse: Resource<RetrieveRecoveryShardsApiResponse> = Resource.Uninitialized,
+    val initiateAccessResponse: Resource<InitiateAccessApiResponse> = Resource.Uninitialized,
+    val retrieveAccessShardsResponse: Resource<RetrieveAccessShardsApiResponse> = Resource.Uninitialized,
     val replacePolicyResponse: Resource<ReplacePolicyApiResponse> = Resource.Uninitialized,
-    val completeGuardianShipResponse : Resource<CompleteOwnerGuardianshipApiResponse> = Resource.Uninitialized,
+    val completeApprovershipResponse : Resource<CompleteOwnerApprovershipApiResponse> = Resource.Uninitialized,
 
     val verifyKeyConfirmationSignature: Resource<Unit> = Resource.Uninitialized,
 
@@ -75,7 +75,7 @@ data class PlanSetupState(
         planSetupUIState in listOf(
             PlanSetupUIState.ApproverGettingLive_4,
             PlanSetupUIState.AddAlternateApprover_6,
-            PlanSetupUIState.RecoveryInProgress_7
+            PlanSetupUIState.AccessInProgress_7
         ) -> BackIconType.Exit
 
         else -> BackIconType.None
@@ -83,19 +83,19 @@ data class PlanSetupState(
 
     val loading = userResponse is Resource.Loading
                 || createPolicySetupResponse is Resource.Loading
-                || initiateRecoveryResponse is Resource.Loading
-                || retrieveRecoveryShardsResponse is Resource.Loading
+                || initiateAccessResponse is Resource.Loading
+                || retrieveAccessShardsResponse is Resource.Loading
                 || replacePolicyResponse is Resource.Loading
                 || saveKeyToCloud is Resource.Loading
-                || completeGuardianShipResponse is Resource.Loading
+                || completeApprovershipResponse is Resource.Loading
 
     val asyncError = userResponse is Resource.Error
             || createPolicySetupResponse is Resource.Error
-            || initiateRecoveryResponse is Resource.Error
-            || retrieveRecoveryShardsResponse is Resource.Error
+            || initiateAccessResponse is Resource.Error
+            || retrieveAccessShardsResponse is Resource.Error
             || replacePolicyResponse is Resource.Error
             || verifyKeyConfirmationSignature is Resource.Error
-            || completeGuardianShipResponse is Resource.Error
+            || completeApprovershipResponse is Resource.Error
             || saveKeyToCloud is Resource.Error
 
     enum class BackIconType {
@@ -110,7 +110,7 @@ enum class PlanSetupUIState {
     ApproverGettingLive_4,
     ApproverActivation_5,
     AddAlternateApprover_6,
-    RecoveryInProgress_7,
+    AccessInProgress_7,
     Completed_8
 }
 
@@ -148,7 +148,7 @@ enum class ApproverType {
 
 data class PlanSetupKeyData(
     val encryptedPrivateKey: ByteArray,
-    val publicKey: Base58EncodedGuardianPublicKey
+    val publicKey: Base58EncodedApproverPublicKey
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

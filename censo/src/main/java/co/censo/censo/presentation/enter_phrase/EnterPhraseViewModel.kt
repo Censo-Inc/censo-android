@@ -55,7 +55,7 @@ class EnterPhraseViewModel @Inject constructor(
             if (response is Resource.Success) {
                 val ownerState = response.data!!.ownerState
                 if (ownerState is OwnerState.Ready) {
-                    state = state.copy(isSavingFirstSeedPhrase = ownerState.vault.secrets.isEmpty())
+                    state = state.copy(isSavingFirstSeedPhrase = ownerState.vault.seedPhrases.isEmpty())
                 }
             }
         }
@@ -167,7 +167,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             runCatching {
                 // encrypt seed phrase and drop single words
-                val encryptedSeedPhrase = ownerRepository.encryptSecret(
+                val encryptedSeedPhrase = ownerRepository.encryptSeedPhrase(
                     state.masterPublicKey!!,
                     state.enteredWords
                 )
@@ -190,7 +190,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(submitResource = Resource.Loading())
 
         viewModelScope.launch {
-            val response = ownerRepository.storeSecret(
+            val response = ownerRepository.storeSeedPhrase(
                 state.label.trim(),
                 state.encryptedSeedPhrase!!
             )

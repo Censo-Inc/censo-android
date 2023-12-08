@@ -2,7 +2,7 @@ package co.censo.censo.presentation.main
 
 import Base64EncodedData
 import StandardButton
-import VaultSecretId
+import SeedPhraseId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,16 +40,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.shared.data.model.HashedValue
-import co.censo.shared.data.model.VaultSecret
+import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
 
 @Composable
 fun PhraseHomeScreen(
-    vaultSecrets: List<VaultSecret>,
+    seedPhrases: List<SeedPhrase>,
     onAddClick: () -> Unit,
     onAccessClick: () -> Unit,
-    onEditPhraseClick: (VaultSecret) -> Unit
+    onEditPhraseClick: (SeedPhrase) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -70,13 +70,13 @@ fun PhraseHomeScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
         ) {
-            vaultSecrets.forEach { vaultSecret ->
+            seedPhrases.forEach { seedPhrase ->
                 Spacer(modifier = Modifier.height(12.dp))
                 SeedPhraseItem(
-                    vaultSecret = vaultSecret,
+                    seedPhrase = seedPhrase,
                     isDeletable = true,
                     onClick = {
-                        onEditPhraseClick(vaultSecret)
+                        onEditPhraseClick(seedPhrase)
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -143,7 +143,7 @@ fun AddOrAccessRow(
 
 @Composable
 fun SeedPhraseItem(
-    vaultSecret: VaultSecret,
+    seedPhrase: SeedPhrase,
     isDeletable: Boolean = false,
     isSelected: Boolean = false,
     onClick: (() -> Unit)? = null
@@ -179,7 +179,7 @@ fun SeedPhraseItem(
                         end = if (isDeletable) 0.dp else 18.dp
                     )
                     .weight(1f),
-                text = vaultSecret.label,
+                text = seedPhrase.label,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.W600,
                 maxLines = 3,
@@ -235,23 +235,23 @@ fun PreviewPhraseHomeScreen() {
     PhraseHomeScreen(
         onAccessClick = {},
         onAddClick = {},
-        vaultSecrets = listOf(
-            VaultSecret(
-                guid = VaultSecretId("1"),
+        seedPhrases = listOf(
+            SeedPhrase(
+                guid = SeedPhraseId("1"),
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
-            VaultSecret(
-                guid = VaultSecretId("2"),
+            SeedPhrase(
+                guid = SeedPhraseId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
                 encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
-            VaultSecret(
-                guid = VaultSecretId("3"),
+            SeedPhrase(
+                guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
                 encryptedSeedPhrase = Base64EncodedData(""),

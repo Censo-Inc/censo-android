@@ -4,15 +4,15 @@ import Base64EncodedData
 import InvitationId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
-import co.censo.shared.data.model.AcceptGuardianshipApiResponse
+import co.censo.shared.data.model.AcceptApprovershipApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
-import co.censo.shared.data.model.GuardianState
-import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.ApproverState
+import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 data class ApproverOnboardingState(
-    // guardian state
-    val guardianState: GuardianState? = null,
+    // approver state
+    val approverState: ApproverState? = null,
 
     // deep links data
     val invitationId: InvitationId = InvitationId(""),
@@ -20,11 +20,11 @@ data class ApproverOnboardingState(
 
     // onboarding
     val verificationCode: String = "",
-    val guardianEncryptionKey: EncryptionKey? = null,
+    val approverEncryptionKey: EncryptionKey? = null,
     val entropy: Base64EncodedData? = null,
     val userResponse: Resource<GetApproverUserApiResponse> = Resource.Uninitialized,
-    val acceptGuardianResource: Resource<AcceptGuardianshipApiResponse> = Resource.Uninitialized,
-    val submitVerificationResource: Resource<SubmitGuardianVerificationApiResponse> = Resource.Uninitialized,
+    val acceptApproverResource: Resource<AcceptApprovershipApiResponse> = Resource.Uninitialized,
+    val submitVerificationResource: Resource<SubmitApproverVerificationApiResponse> = Resource.Uninitialized,
 
     // UI state
     val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.Loading,
@@ -40,7 +40,7 @@ data class ApproverOnboardingState(
     val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,
 ) {
     val asyncError = userResponse is Resource.Error
-            || acceptGuardianResource is Resource.Error
+            || acceptApproverResource is Resource.Error
             || submitVerificationResource is Resource.Error
             || savePrivateKeyToCloudResource is Resource.Error
 

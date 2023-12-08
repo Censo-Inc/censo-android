@@ -8,7 +8,7 @@ object CrashReportingUtil {
     const val MANUALLY_REPORTED_TAG = "ManualReport"
 
     //Values
-    const val RecoveryConfirmation = "RecoveryConfirmation"
+    const val AccessConfirmation = "AccessConfirmation"
     const val CloudUpload = "CloudUpload"
     const val CloudDownload = "CloudDownload"
     const val SubmitVerification = "SubmitVerification"

@@ -31,7 +31,7 @@ import co.censo.censo.presentation.access_approval.components.AnotherDeviceAcces
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApprover
 import co.censo.censo.presentation.components.YesNoDialog
-import co.censo.shared.data.model.RecoveryIntent
+import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AccessApprovalScreen(
     navController: NavController,
-    accessIntent: RecoveryIntent,
+    accessIntent: AccessIntent,
     viewModel: AccessApprovalViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -69,8 +69,8 @@ fun AccessApprovalScreen(
             viewModel.resetNavigationResource()
         }
 
-        if (state.initiateNewRecovery) {
-            viewModel.initiateRecovery()
+        if (state.initiateNewAccess) {
+            viewModel.initiateAccess()
         }
     }
 
@@ -98,8 +98,8 @@ fun AccessApprovalScreen(
                         text = when (state.accessApprovalUIState) {
                             AccessApprovalUIState.Approved -> ""
                             else -> when (accessIntent) {
-                                RecoveryIntent.AccessPhrases -> stringResource(id = R.string.access)
-                                RecoveryIntent.ReplacePolicy -> stringResource(id = R.string.remove_approvers)
+                                AccessIntent.AccessPhrases -> stringResource(id = R.string.access)
+                                AccessIntent.ReplacePolicy -> stringResource(id = R.string.remove_approvers)
                             }
                         },
                         textAlign = TextAlign.Center
@@ -138,17 +138,17 @@ fun AccessApprovalScreen(
                             )
                         }
 
-                        state.initiateRecoveryResource is Resource.Error -> {
+                        state.initiateAccessResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.initiateRecoveryResource.getErrorMessage(context),
+                                errorMessage = state.initiateAccessResource.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.initiateRecovery() }
+                                retryAction = { viewModel.initiateAccess() }
                             )
                         }
 
-                        state.cancelRecoveryResource is Resource.Error -> {
+                        state.cancelAccessResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.cancelRecoveryResource.getErrorMessage(context),
+                                errorMessage = state.cancelAccessResource.getErrorMessage(context),
                                 dismissAction = null,
                                 retryAction = { viewModel.cancelAccess() }
                             )

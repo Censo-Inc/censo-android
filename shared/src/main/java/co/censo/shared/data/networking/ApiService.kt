@@ -1,7 +1,7 @@
 package co.censo.shared.data.networking
 
 import InitBiometryVerificationApiResponse
-import VaultSecretId
+import SeedPhraseId
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
@@ -10,43 +10,43 @@ import co.censo.shared.data.Header
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256digest
-import co.censo.shared.data.model.AcceptGuardianshipApiResponse
-import co.censo.shared.data.model.ApproveRecoveryApiRequest
-import co.censo.shared.data.model.ApproveRecoveryApiResponse
+import co.censo.shared.data.model.AcceptApprovershipApiResponse
+import co.censo.shared.data.model.ApproveAccessApiRequest
+import co.censo.shared.data.model.ApproveAccessApiResponse
 import co.censo.shared.data.model.AttestationChallengeResponse
-import co.censo.shared.data.model.CompleteOwnerGuardianshipApiRequest
-import co.censo.shared.data.model.CompleteOwnerGuardianshipApiResponse
-import co.censo.shared.data.model.ConfirmGuardianshipApiRequest
-import co.censo.shared.data.model.ConfirmGuardianshipApiResponse
+import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
+import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
+import co.censo.shared.data.model.ConfirmApprovershipApiRequest
+import co.censo.shared.data.model.ConfirmApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
-import co.censo.shared.data.model.DeleteSecretApiResponse
+import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
-import co.censo.shared.data.model.DeleteRecoveryApiResponse
+import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
-import co.censo.shared.data.model.InitiateRecoveryApiRequest
-import co.censo.shared.data.model.InitiateRecoveryApiResponse
+import co.censo.shared.data.model.InitiateAccessApiRequest
+import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
-import co.censo.shared.data.model.RejectGuardianVerificationApiResponse
-import co.censo.shared.data.model.RejectRecoveryApiResponse
+import co.censo.shared.data.model.RejectApproverVerificationApiResponse
+import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
-import co.censo.shared.data.model.RetrieveRecoveryShardsApiRequest
-import co.censo.shared.data.model.RetrieveRecoveryShardsApiResponse
+import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
+import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
-import co.censo.shared.data.model.StoreRecoveryTotpSecretApiRequest
-import co.censo.shared.data.model.StoreRecoveryTotpSecretApiResponse
-import co.censo.shared.data.model.StoreSecretApiRequest
-import co.censo.shared.data.model.StoreSecretApiResponse
-import co.censo.shared.data.model.SubmitGuardianVerificationApiRequest
-import co.censo.shared.data.model.SubmitGuardianVerificationApiResponse
+import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
+import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
+import co.censo.shared.data.model.StoreSeedPhraseApiRequest
+import co.censo.shared.data.model.StoreSeedPhraseApiResponse
+import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
+import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.data.model.SubmitPurchaseApiRequest
 import co.censo.shared.data.model.SubmitPurchaseApiResponse
-import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiRequest
-import co.censo.shared.data.model.SubmitRecoveryTotpVerificationApiResponse
+import co.censo.shared.data.model.SubmitAccessTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
@@ -91,7 +91,7 @@ interface ApiService {
         const val INTERMEDIATE_KEY = "intermediateKey"
         const val PARTICIPANT_ID = "participantId"
         const val APPROVAL_ID = "approvalId"
-        const val SECRET_ID = "secretId"
+        const val SEED_PHRASE_ID = "seedPhraseId"
 
         const val IS_API = "X-IsApi"
         const val APPLICATION_IDENTIFIER = "X-Censo-App-Identifier"
@@ -186,34 +186,34 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplacePolicyApiResponse>
 
-    @POST("/v1/guardianship-invitations/{$INVITATION_ID}/accept")
-    suspend fun acceptGuardianship(
+    @POST("/v1/approvership-invitations/{$INVITATION_ID}/accept")
+    suspend fun acceptApprovership(
         @Path(value = INVITATION_ID) invitationId: String
-    ): RetrofitResponse<AcceptGuardianshipApiResponse>
+    ): RetrofitResponse<AcceptApprovershipApiResponse>
 
-    @POST("/v1/guardianship-invitations/{$INVITATION_ID}/decline")
-    suspend fun declineGuardianship(
+    @POST("/v1/approvership-invitations/{$INVITATION_ID}/decline")
+    suspend fun declineApprovership(
         @Path(value = INVITATION_ID) invitationId: String,
     ): RetrofitResponse<ResponseBody>
 
-    @POST("v1/guardianship-invitations/{$INVITATION_ID}/verification")
-    suspend fun submitGuardianVerification(
+    @POST("v1/approvership-invitations/{$INVITATION_ID}/verification")
+    suspend fun submitApproverVerification(
         @Path(value = INVITATION_ID) invitationId: String,
-        @Body submitGuardianVerificationApiRequest: SubmitGuardianVerificationApiRequest,
+        @Body submitApproverVerificationApiRequest: SubmitApproverVerificationApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<SubmitGuardianVerificationApiResponse>
+    ): RetrofitResponse<SubmitApproverVerificationApiResponse>
 
-    @POST("/v1/guardians/{$PARTICIPANT_ID}/confirmation")
-    suspend fun confirmGuardianship(
+    @POST("/v1/approvers/{$PARTICIPANT_ID}/confirmation")
+    suspend fun confirmApprovership(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body confirmGuardianshipApiRequest: ConfirmGuardianshipApiRequest,
+        @Body confirmApprovershipApiRequest: ConfirmApprovershipApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<ConfirmGuardianshipApiResponse>
+    ): RetrofitResponse<ConfirmApprovershipApiResponse>
 
-    @POST("/v1/guardians/{$PARTICIPANT_ID}/verification/reject")
+    @POST("/v1/approvers/{$PARTICIPANT_ID}/verification/reject")
     suspend fun rejectVerification(
         @Path(value = PARTICIPANT_ID) participantId: String,
-    ): RetrofitResponse<RejectGuardianVerificationApiResponse>
+    ): RetrofitResponse<RejectApproverVerificationApiResponse>
 
     @POST("v1/notification-tokens")
     suspend fun addPushNotificationToken(@Body pushData: PushBody): RetrofitResponse<Unit>
@@ -234,74 +234,56 @@ interface ApiService {
     @POST("/v1/lock")
     suspend fun lock(): RetrofitResponse<LockApiResponse>
 
-    @POST("/v1/vault/secrets")
-    suspend fun storeSecret(
-        @Body apiRequest: StoreSecretApiRequest
-    ): RetrofitResponse<StoreSecretApiResponse>
+    @POST("/v1/vault/seed-phrases")
+    suspend fun storeSeedPhrase(
+        @Body apiRequest: StoreSeedPhraseApiRequest
+    ): RetrofitResponse<StoreSeedPhraseApiResponse>
 
-    @DELETE("/v1/vault/secrets/{$SECRET_ID}")
-    suspend fun deleteSecret(
-        @Path(value = SECRET_ID) secretId: VaultSecretId,
+    @DELETE("/v1/vault/seed-phrases/{$SEED_PHRASE_ID}")
+    suspend fun deleteSeedPhrase(
+        @Path(value = SEED_PHRASE_ID) seedPhraseId: SeedPhraseId,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<DeleteSecretApiResponse>
+    ): RetrofitResponse<DeleteSeedPhraseApiResponse>
 
-    @POST("/v1/recovery")
-    suspend fun requestRecovery(
-        @Body apiRequest: InitiateRecoveryApiRequest,
+    @POST("/v1/access")
+    suspend fun requestAccess(
+        @Body apiRequest: InitiateAccessApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<InitiateRecoveryApiResponse>
+    ): RetrofitResponse<InitiateAccessApiResponse>
 
-    @DELETE("/v1/recovery")
-    suspend fun deleteRecovery(): RetrofitResponse<DeleteRecoveryApiResponse>
-
-    @POST("/v1/recovery/{$PARTICIPANT_ID}/totp")
-    suspend fun storeRecoveryTotpSecret(
-        @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: StoreRecoveryTotpSecretApiRequest
-    ): RetrofitResponse<StoreRecoveryTotpSecretApiResponse>
+    @DELETE("/v1/access")
+    suspend fun deleteAccess(): RetrofitResponse<DeleteAccessApiResponse>
 
     @POST("/v1/access/{$APPROVAL_ID}/totp")
     suspend fun storeAccessTotpSecret(
         @Path(value = APPROVAL_ID) approvalId: String,
-        @Body apiRequest: StoreRecoveryTotpSecretApiRequest
-    ): RetrofitResponse<StoreRecoveryTotpSecretApiResponse>
+        @Body apiRequest: StoreAccessTotpSecretApiRequest
+    ): RetrofitResponse<StoreAccessTotpSecretApiResponse>
 
-    @POST("/v1/recovery/{$PARTICIPANT_ID}/totp-verification")
-    suspend fun submitRecoveryTotpVerification(
+    @POST("/v1/access/{$PARTICIPANT_ID}/totp-verification")
+    suspend fun submitAccessTotpVerification(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: SubmitRecoveryTotpVerificationApiRequest,
+        @Body apiRequest: SubmitAccessTotpVerificationApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<SubmitRecoveryTotpVerificationApiResponse>
-
-    @POST("/v1/recovery/{$PARTICIPANT_ID}/approval")
-    suspend fun approveRecovery(
-        @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: ApproveRecoveryApiRequest,
-        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<ApproveRecoveryApiResponse>
+    ): RetrofitResponse<SubmitAccessTotpVerificationApiResponse>
 
     @POST("/v1/access/{$APPROVAL_ID}/approval")
     suspend fun approveAccess(
         @Path(value = APPROVAL_ID) approvalId: String,
-        @Body apiRequest: ApproveRecoveryApiRequest,
+        @Body apiRequest: ApproveAccessApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<ApproveRecoveryApiResponse>
-
-    @POST("/v1/recovery/{$PARTICIPANT_ID}/rejection")
-    suspend fun rejectRecovery(
-        @Path(value = PARTICIPANT_ID) participantId: String
-    ): RetrofitResponse<RejectRecoveryApiResponse>
+    ): RetrofitResponse<ApproveAccessApiResponse>
 
     @POST("/v1/access/{$APPROVAL_ID}/rejection")
     suspend fun rejectAccess(
         @Path(value = APPROVAL_ID) approvalId: String
-    ): RetrofitResponse<RejectRecoveryApiResponse>
+    ): RetrofitResponse<RejectAccessApiResponse>
 
-    @POST("/v1/recovery/retrieval")
-    suspend fun retrieveRecoveryShards(
-        @Body apiRequest: RetrieveRecoveryShardsApiRequest,
+    @POST("/v1/access/retrieval")
+    suspend fun retrieveAccessShards(
+        @Body apiRequest: RetrieveAccessShardsApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<RetrieveRecoveryShardsApiResponse>
+    ): RetrofitResponse<RetrieveAccessShardsApiResponse>
 
     @POST("/v1/purchases")
     suspend fun submitPurchase(
@@ -309,13 +291,12 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<SubmitPurchaseApiResponse>
 
-
-    @POST("v1/guardians/{$PARTICIPANT_ID}/owner-completion")
-    suspend fun completeOwnerGuardianship(
+    @POST("v1/approvers/{$PARTICIPANT_ID}/owner-completion")
+    suspend fun completeOwnerApprovership(
         @Path(value = PARTICIPANT_ID) participantId: String,
-        @Body apiRequest: CompleteOwnerGuardianshipApiRequest,
+        @Body apiRequest: CompleteOwnerApprovershipApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ) : RetrofitResponse<CompleteOwnerGuardianshipApiResponse>
+    ) : RetrofitResponse<CompleteOwnerApprovershipApiResponse>
 
     @POST("/v1/attestation-challenge")
     suspend fun createAttestationChallenge(): RetrofitResponse<AttestationChallengeResponse>
