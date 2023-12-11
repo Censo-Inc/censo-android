@@ -17,7 +17,15 @@ object SharedColors {
     val BackgroundGrey = Color(0xFFF2F2F2)
 
     //New design colors
-    val ButtonBackgroundBlue = Color(0xFF052F69)
+    private val DarkBlue = Color(0xFF052F69)
+    private val SkyBlue = Color(0xFF47F7F7)
+    private val LightBlue = Color(0xFFd7f1f2)
+
+    val ButtonBackgroundBlue = DarkBlue
     val DisabledButtonBackgroundBlue = ButtonBackgroundBlue.copy(alpha = 0.25f)
-    val ButtonTextBlue = Color(0xFF47F7F7)
+    val ButtonTextBlue = SkyBlue
+
+    val BottomNavBarIconColor = DarkBlue
+    val BottomNavBarIndicatorColor = LightBlue
+    val BottomNavBarTextColor = DarkBlue
 }
