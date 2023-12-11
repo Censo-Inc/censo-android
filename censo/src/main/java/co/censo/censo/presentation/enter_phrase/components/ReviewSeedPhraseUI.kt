@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.BIP39InvalidReason
 import co.censo.shared.util.errorMessage
@@ -197,13 +198,11 @@ fun ReviewSeedPhraseUI(
             modifier = Modifier
                 .padding(horizontal = horizontalPadding + 12.dp)
                 .fillMaxWidth(),
-            color = Color.Black,
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
             onClick = buttonAction) {
             Text(
                 text = stringResource(id = buttonText),
-                color = Color.White,
-                fontSize = 20.sp
+                style = ButtonTextStyle
             )
         }
 

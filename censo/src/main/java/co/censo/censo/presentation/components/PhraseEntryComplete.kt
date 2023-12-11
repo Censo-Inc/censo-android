@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun SeedPhraseAdded(
@@ -77,15 +78,12 @@ fun SeedPhraseAdded(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             onClick = onClick,
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
             Text(
                 text = stringResource(co.censo.censo.R.string.ok),
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.W400
+                style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
             )
         }
 

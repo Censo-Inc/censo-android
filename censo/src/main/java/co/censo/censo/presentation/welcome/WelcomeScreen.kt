@@ -42,6 +42,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.components.LargeLoading
 
 @Composable
@@ -216,13 +217,10 @@ fun WelcomeScreenUI(
                 .padding(horizontal = 44.dp, vertical = 12.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
             onClick = navigateToPlanSetup,
-            color = Color.Black
         ) {
             Text(
                 text = buttonText,
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-                fontSize = 22.sp,
+                style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Medium),
                 modifier = Modifier.padding(all = 8.dp)
             )
         }

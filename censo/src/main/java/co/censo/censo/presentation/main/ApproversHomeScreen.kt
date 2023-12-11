@@ -44,6 +44,7 @@ import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverActivatedUIData
+import co.censo.shared.presentation.ButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -81,7 +82,6 @@ fun ApproversHomeScreen(
 
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.Black,
                 onClick = onRemoveApproversSelected,
                 contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp)
             ) {
@@ -92,14 +92,12 @@ fun ApproversHomeScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.approvers),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = SharedColors.ButtonTextBlue
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = pluralStringResource(id = R.plurals.remove_approvers, count = nonOwnerApprovers.size),
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.W400
+                        style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
                     )
                 }
             }
@@ -165,7 +163,6 @@ fun NoApproversUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             onClick = onInviteApproversSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp)
         ) {
@@ -176,26 +173,21 @@ fun NoApproversUI(
                 Icon(
                     painter = painterResource(id = R.drawable.approvers),
                     contentDescription = null,
-                    tint = Color.White
+                    tint = SharedColors.ButtonTextBlue
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 if (approverSetupExists) {
                     Text(
                         text = stringResource(R.string.resume_adding_approvers_button_text),
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.W400,
-                        textAlign = TextAlign.Center
+                        style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.W400)
                     )
                 } else {
                     Text(
                         text = stringResource(R.string.add_approvers_button_text),
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.W400,
-                        textAlign = TextAlign.Center
+                        style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
                     )
                 }
+
             }
         }
 

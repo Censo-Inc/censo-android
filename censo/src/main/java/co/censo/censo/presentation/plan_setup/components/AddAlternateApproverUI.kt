@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun AddAlternateApproverUI(
@@ -74,14 +75,12 @@ fun AddAlternateApproverUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             onClick = onInviteAlternateSelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Text(
                 text = stringResource(R.string.invite_alternate),
-                color = Color.White,
-                fontSize = 24.sp
+                style = ButtonTextStyle.copy(fontSize = 24.sp)
             )
         }
 

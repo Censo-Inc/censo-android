@@ -42,6 +42,7 @@ import co.censo.censo.R
 import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.ButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -103,20 +104,17 @@ fun AddOrAccessRow(
         ) {
             StandardButton(
                 modifier = Modifier.weight(0.5f),
-                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 14.dp),
                 onClick = onAddClick
             ) {
                 Text(
                     text = stringResource(R.string.add),
-                    fontSize = 24.sp,
-                    color = Color.White,
+                    style = ButtonTextStyle.copy(fontSize = 24.sp)
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
             StandardButton(
                 modifier = Modifier.weight(0.5f),
-                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 14.dp),
                 onClick = onAccessClick
             ) {
@@ -127,13 +125,12 @@ fun AddOrAccessRow(
                     Icon(
                         painter = painterResource(id = R.drawable.lock_icon),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = SharedColors.ButtonTextBlue
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.access),
-                        fontSize = 24.sp,
-                        color = Color.White,
+                        style = ButtonTextStyle.copy(fontSize = 24.sp)
                     )
                 }
             }

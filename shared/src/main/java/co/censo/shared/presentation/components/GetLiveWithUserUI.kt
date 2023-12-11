@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun GetLiveWithUserUI(
@@ -66,14 +67,12 @@ fun GetLiveWithUserUI(
         )
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             onClick = onContinueLive,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
             Text(
                 text = buttonText,
-                color = Color.White,
-                fontSize = 24.sp
+                style = ButtonTextStyle.copy(fontSize = 24.sp),
             )
         }
 
@@ -82,14 +81,12 @@ fun GetLiveWithUserUI(
         if (showSecondButton) {
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.Black,
                 onClick = onResumeLater,
                 contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
             ) {
                 Text(
                     text = stringResource(R.string.resume_later),
-                    color = Color.White,
-                    fontSize = 24.sp
+                    style = ButtonTextStyle.copy(fontSize = 24.sp),
                 )
             }
 

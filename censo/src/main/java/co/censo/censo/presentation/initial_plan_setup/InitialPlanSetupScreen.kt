@@ -51,6 +51,8 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.Loading
@@ -228,7 +230,6 @@ fun InitialPlanSetupStandardUI(
             Spacer(modifier = Modifier.height(24.dp))
             StandardButton(
                 onClick = startPlanSetup,
-                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 20.dp),
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -241,14 +242,13 @@ fun InitialPlanSetupStandardUI(
                     Image(
                         painter = painterResource(id = co.censo.shared.R.drawable.small_face_scan_white),
                         contentDescription = null,
-                        modifier = Modifier.width(32.dp)
+                        modifier = Modifier.width(32.dp),
+                        colorFilter = ColorFilter.tint(SharedColors.ButtonTextBlue)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.begin_face_scan),
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 24.sp,
+                        style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium),
                     )
                 }
             }

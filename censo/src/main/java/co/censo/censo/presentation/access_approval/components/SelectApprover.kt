@@ -41,6 +41,8 @@ import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -123,15 +125,14 @@ fun SelectApprover(
                             .fillMaxWidth()
                             .padding(horizontal = 36.dp),
                         enabled = buttonEnabled,
-                        disabledColor = SharedColors.DisabledGrey,
-                        color = Color.Black,
                         onClick = onContinue,
                         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
                     ) {
+                        val continueButtonTextStyle = if (buttonEnabled) ButtonTextStyle else DisabledButtonTextStyle
+
                         Text(
                             text = stringResource(id = R.string.continue_text),
-                            color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey,
-                            fontSize = 24.sp
+                            style = continueButtonTextStyle.copy(fontSize = 24.sp)
                         )
                     }
                 }

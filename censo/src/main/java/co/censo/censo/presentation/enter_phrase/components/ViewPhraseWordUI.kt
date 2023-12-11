@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.shared.R
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 
 @Composable
@@ -113,31 +114,27 @@ fun BoxScope.ViewPhraseWordUI(
                     Spacer(modifier = Modifier.width(12.dp))
                     StandardButton(
                         modifier = Modifier.weight(0.65f),
-                        color = Color.Black,
                         contentPadding = PaddingValues(
                             horizontal = 24.dp, vertical = 16.dp
                         ),
                         onClick = enterNextWord
                     ) {
                         Text(
-                            fontSize = 20.sp,
                             text = stringResource(co.censo.censo.R.string.enter_next_word),
-                            color = Color.White
+                            style = ButtonTextStyle
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     StandardButton(
                         modifier = Modifier.weight(0.35f),
-                        color = Color.Black,
                         contentPadding = PaddingValues(
                             horizontal = 24.dp, vertical = 16.dp
                         ),
                         onClick = submitFullPhrase
                     ) {
                         Text(
-                            fontSize = 20.sp,
                             text = stringResource(co.censo.censo.R.string.finish),
-                            color = Color.White
+                            style = ButtonTextStyle
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))

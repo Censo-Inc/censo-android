@@ -57,6 +57,8 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.TotpCodeView
 import co.censo.censo.R
 import co.censo.censo.presentation.VaultColors
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -167,15 +169,14 @@ fun ActivateApproverUI(
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             enabled = buttonEnabled,
-            disabledColor = SharedColors.DisabledGrey,
-            color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp),
             onClick = onContinue
         ) {
+            val continueButtonTextStyle = if (buttonEnabled) ButtonTextStyle else DisabledButtonTextStyle
+
             Text(
-                fontSize = 20.sp,
                 text = stringResource(id = R.string.continue_text),
-                color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey
+                style = continueButtonTextStyle
             )
         }
 

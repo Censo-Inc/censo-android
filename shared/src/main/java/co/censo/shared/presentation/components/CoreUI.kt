@@ -2,6 +2,10 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -21,6 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -29,8 +35,8 @@ import kotlin.time.Duration
 @Composable
 fun StandardButton(
     modifier: Modifier = Modifier,
-    color: Color = Color.Black,
-    disabledColor : Color = SharedColors.DisabledGrey,
+    color: Color = SharedColors.ButtonBackgroundBlue,
+    disabledColor : Color = SharedColors.DisabledButtonBackgroundBlue,
     borderColor: Color = Color.Transparent,
     border: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(),
@@ -101,22 +107,6 @@ fun TitleText(
 }
 
 @Composable
-fun SubTitleText(
-    modifier: Modifier = Modifier,
-    @StringRes subtitle: Int,
-    textAlign: TextAlign = TextAlign.Center
-) {
-    Text(
-        modifier = modifier,
-        text = stringResource(id = subtitle),
-        color = Color.Black,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.W600,
-        textAlign = textAlign
-    )
-}
-
-@Composable
 fun MessageText(
     modifier: Modifier = Modifier,
     @StringRes message: Int,
@@ -166,7 +156,32 @@ fun MessageText(
 @Preview
 @Composable
 fun ButtonPreview() {
-    StandardButton(color = Color.Black, onClick = { }) {
-        Text(text = "Hello", color = Color.White)
+    Box(
+        modifier = Modifier
+            .background(Color.White)
+            .padding(36.dp),
+    ) {
+        StandardButton(
+            modifier = Modifier.fillMaxWidth(),
+            color = SharedColors.ButtonBackgroundBlue,
+            onClick = { }) {
+            Text(text = "Next", style = ButtonTextStyle)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun DisabledButtonPreview() {
+    Box(
+        modifier = Modifier
+            .background(Color.White)
+            .padding(36.dp),
+    ) {
+        StandardButton(
+            modifier = Modifier.fillMaxWidth(), onClick = { }, enabled = false
+        ) {
+            Text(text = "Finish", style = DisabledButtonTextStyle)
+        }
     }
 }

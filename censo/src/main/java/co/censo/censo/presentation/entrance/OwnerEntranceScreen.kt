@@ -65,6 +65,7 @@ import co.censo.shared.R
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.termsOfUseVersions
 import co.censo.shared.data.model.touVersion
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
@@ -237,6 +238,7 @@ fun OwnerEntranceStandardUI(
         StandardButton(
             onClick = authenticate,
             coolDownDuration = 500.milliseconds,
+            color = Color.Black,
             contentPadding = PaddingValues(
                 horizontal = 48.dp,
                 vertical = 16.dp
@@ -407,13 +409,10 @@ fun TermsOfUse(
                     modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(vertical = 8.dp),
                     onClick = { isReview = true },
-                    color = Color.Black
                 ) {
                     Text(
                         text = stringResource(id = R.string.tou_review),
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 22.sp,
+                        style = ButtonTextStyle.copy(fontSize = 22.sp),
                         modifier = Modifier.padding(all = 8.dp)
                     )
                 }
@@ -423,14 +422,11 @@ fun TermsOfUse(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = 8.dp),
                 onClick = onAccept,
-                color = Color.Black
             ) {
                 Text(
                     text = stringResource(R.string.tou_accept),
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 22.sp,
-                    modifier = Modifier.padding(all = 8.dp)
+                    modifier = Modifier.padding(all = 8.dp),
+                    style = ButtonTextStyle.copy(fontSize = 22.sp)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))

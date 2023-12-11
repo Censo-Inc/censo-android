@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.VaultColors
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun UnlockedVaultScreen(
@@ -58,9 +60,6 @@ fun UnlockedVaultScreen(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = VaultColors.PrimaryColor,
-            borderColor = VaultColors.PrimaryColor,
-            border = true,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             onClick = onEditSeedPhrases,
         ) {
@@ -68,13 +67,12 @@ fun UnlockedVaultScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.manual_entry_icon),
                     contentDescription = null,
-                    tint = Color.White
+                    tint = SharedColors.ButtonTextBlue
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.add_seed_phrases),
-                    color = Color.White,
-                    fontSize = 24.sp
+                    style = ButtonTextStyle.copy(fontSize = 24.sp)
                 )
             }
         }
@@ -83,9 +81,6 @@ fun UnlockedVaultScreen(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = VaultColors.PrimaryColor,
-            borderColor = VaultColors.PrimaryColor,
-            border = true,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 10.dp),
             onClick = onRecoverSeedPhrases,
         ) {
@@ -93,14 +88,13 @@ fun UnlockedVaultScreen(
                 Icon(
                     painter = painterResource(id = co.censo.shared.R.drawable.key),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = SharedColors.ButtonTextBlue,
                     modifier = Modifier.padding(PaddingValues(vertical = 3.dp))
                 )
                 Spacer(modifier = Modifier.width(28.dp))
                 Text(
                     text = stringResource(R.string.access_phrases),
-                    color = Color.White,
-                    fontSize = 24.sp
+                    style = ButtonTextStyle.copy(fontSize = 24.sp)
                 )
             }
         }
@@ -110,9 +104,6 @@ fun UnlockedVaultScreen(
         if (showAddApprovers) {
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
-                color = VaultColors.PrimaryColor,
-                borderColor = VaultColors.PrimaryColor,
-                border = true,
                 contentPadding = PaddingValues(vertical = 12.dp, horizontal = 10.dp),
                 onClick = {},
             ) {
@@ -120,14 +111,13 @@ fun UnlockedVaultScreen(
                     Icon(
                         painter = painterResource(id = co.censo.shared.R.drawable.two_people),
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = SharedColors.ButtonTextBlue,
                         modifier = Modifier.padding(PaddingValues(vertical = 3.dp))
                     )
                     Spacer(modifier = Modifier.width(20.dp))
                     Text(
                         text = stringResource(R.string.invite_approvers),
-                        color = Color.White,
-                        fontSize = 24.sp
+                        style = ButtonTextStyle.copy(fontSize = 24.sp)
                     )
                 }
             }
@@ -136,9 +126,6 @@ fun UnlockedVaultScreen(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = VaultColors.PrimaryColor,
-            borderColor = VaultColors.PrimaryColor,
-            border = true,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 10.dp),
             onClick = onResetUser,
         ) {
@@ -146,14 +133,13 @@ fun UnlockedVaultScreen(
                 Icon(
                     painter = painterResource(id = co.censo.shared.R.drawable.reset),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = SharedColors.ButtonTextBlue,
                     modifier = Modifier.padding(PaddingValues(vertical = 3.dp))
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 Text(
                     text = stringResource(R.string.reset_user_data),
-                    color = Color.White,
-                    fontSize = 24.sp
+                    style = ButtonTextStyle.copy(fontSize = 24.sp)
                 )
             }
         }

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun PastePhraseUI(
@@ -78,8 +79,7 @@ fun PastePhraseUI(
         ) {
             Text(
                 text = stringResource(R.string.paste_from_clipboard),
-                color = Color.White,
-                fontSize = 20.sp
+                style = ButtonTextStyle
             )
         }
     }

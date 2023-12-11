@@ -71,6 +71,7 @@ fun ApproverLanding(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
+            color = Color.Black,
             contentPadding = PaddingValues(vertical = 14.dp),
             onClick = onContinue
         ) {

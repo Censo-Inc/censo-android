@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.paywall.SubscriptionOffer
+import co.censo.shared.presentation.ButtonTextStyle
 import java.time.Period
 
 @Composable
@@ -79,18 +80,12 @@ fun PausedSubscriptionUI(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(co.censo.censo.R.string.continue_text),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 32.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+                    text = stringResource(R.string.continue_text),
+                    style = ButtonTextStyle.copy(fontSize = 32.sp, fontWeight = FontWeight.Medium),
                 )
                 Text(
                     text = "$trialText$priceText",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+                    style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
                 )
             }
         }

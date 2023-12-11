@@ -29,6 +29,7 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.projectLog
 import com.facetec.sdk.FaceTecSDK
@@ -125,9 +126,8 @@ fun FacetecAuth(
                     }
                 ) {
                     Text(
-                        text = "Retry",
-                        color = Color.White,
-                        fontSize = 20.sp
+                        text = stringResource(id = R.string.retry),
+                        style = ButtonTextStyle
                     )
                 }
             }

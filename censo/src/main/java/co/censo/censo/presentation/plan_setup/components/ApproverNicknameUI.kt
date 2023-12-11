@@ -3,6 +3,7 @@ package co.censo.censo.presentation.plan_setup.components
 import MessageText
 import StandardButton
 import TitleText
+import android.widget.Button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.PlanSetupState.Companion.APPROVER_NAME_MAX_LENGTH
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,15 +123,14 @@ fun ApproverNicknameUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             enabled = enabled,
             onClick = onSaveNickname,
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
+            val saveButtonTextStyle = if (enabled) ButtonTextStyle else DisabledButtonTextStyle
             Text(
                 text = stringResource(id = R.string.continue_text),
-                color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
-                fontSize = 24.sp
+                style = saveButtonTextStyle.copy(fontSize = 24.sp)
             )
         }
 

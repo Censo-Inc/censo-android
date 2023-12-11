@@ -39,6 +39,7 @@ import co.censo.censo.R
 import co.censo.shared.R as SharedR
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWord
+import co.censo.shared.presentation.ButtonTextStyle
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
@@ -164,9 +165,8 @@ fun ViewAccessPhraseUI(
             onClick = onDone
         ) {
             Text(
-                text = stringResource(id = co.censo.censo.R.string.done_viewing_phrase),
-                color = Color.White,
-                fontSize = 20.sp
+                text = stringResource(id = R.string.done_viewing_phrase),
+                style = ButtonTextStyle
             )
         }
     }

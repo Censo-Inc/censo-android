@@ -70,6 +70,7 @@ fun ApproverLoginUI(
             StandardButton(
                 onClick = authenticate,
                 coolDownDuration = 500.milliseconds,
+                color = Color.Black,
                 contentPadding = PaddingValues(
                     horizontal = 48.dp,
                     vertical = 16.dp

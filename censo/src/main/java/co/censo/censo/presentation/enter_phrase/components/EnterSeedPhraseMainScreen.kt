@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.components.LanguageSelectionMenu
 import co.censo.shared.util.BIP39
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun SelectSeedPhraseEntryType(
@@ -102,23 +104,23 @@ fun SelectSeedPhraseEntryType(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             onClick = {
                 onManualEntrySelected(selectedLanguage)
             },
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.manual_entry_icon),
                     contentDescription = null,
-                    tint = Color.White
+                    tint = SharedColors.ButtonTextBlue
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.input_seed_phrase),
-                    color = Color.White,
-                    fontSize = 24.sp
+                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = null)
                 )
             }
         }
@@ -127,21 +129,21 @@ fun SelectSeedPhraseEntryType(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             onClick = onPasteEntrySelected,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
         ) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
                     contentDescription = null,
-                    tint = Color.White
+                    tint = SharedColors.ButtonTextBlue
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.paste_seed_phrase),
-                    color = Color.White,
-                    fontSize = 24.sp
+                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = null)
                 )
             }
         }

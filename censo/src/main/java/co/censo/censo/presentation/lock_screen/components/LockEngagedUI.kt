@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun LockEngagedUI(
@@ -63,7 +65,6 @@ fun LockEngagedUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
             onClick = initUnlock,
         ) {
@@ -77,14 +78,12 @@ fun LockEngagedUI(
                         id = co.censo.shared.R.drawable.small_face_scan
                     ),
                     contentDescription = null,
-                    tint = Color.White
+                    tint = SharedColors.ButtonTextBlue
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(id = R.string.unlock),
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 24.sp,
+                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium)
                 )
             }
         }

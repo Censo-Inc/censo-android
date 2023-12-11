@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun VaultHomeScreen(
@@ -70,15 +71,12 @@ fun VaultHomeScreen(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             contentPadding = PaddingValues(vertical = 8.dp),
             onClick = onAddSeedPhrase
         ) {
             Text(
                 text = stringResource(id = R.string.add_seed_phrase),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.W400
+                style = ButtonTextStyle.copy(fontWeight = FontWeight.W400)
             )
         }
 
@@ -98,15 +96,12 @@ fun VaultHomeScreen(
 
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 8.dp),
                 onClick = onAddApprovers
             ) {
                 Text(
                     text = stringResource(id = R.string.add_approvers_button_text),
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.W400
+                    style = ButtonTextStyle.copy(fontWeight = FontWeight.W400)
                 )
             }
         }
