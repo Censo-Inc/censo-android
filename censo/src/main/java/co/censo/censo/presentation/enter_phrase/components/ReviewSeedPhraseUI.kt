@@ -52,6 +52,7 @@ import kotlinx.coroutines.launch
 fun ReviewSeedPhraseUI(
     invalidReason: BIP39InvalidReason?,
     phraseWords: List<String>,
+    isGeneratedPhrase: Boolean = false,
     saveSeedPhrase: () -> Unit,
     editSeedPhrase: () -> Unit
 ) {
@@ -60,14 +61,20 @@ fun ReviewSeedPhraseUI(
     val drawableResource = if (valid) SharedR.drawable.check_circle else VaultR.drawable.warning
 
     val title = if (valid) {
-        stringResource(id = VaultR.string.seed_phrase_validated)
+        if (isGeneratedPhrase) {
+            stringResource(id = VaultR.string.seed_phrase_generated)
+        } else {
+            stringResource(id = VaultR.string.seed_phrase_validated)
+        }
     } else {
         invalidReason!!.errorTitle()
     }
 
     val message =
         if (valid) {
-            stringResource(id = VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase)
+            if (!isGeneratedPhrase) {
+                stringResource(id = VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase)
+            } else null
         } else {
             invalidReason!!.errorMessage()
         }
@@ -108,15 +115,20 @@ fun ReviewSeedPhraseUI(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
-            modifier = Modifier.padding(horizontal = horizontalPadding),
-            text = message,
-            fontSize = 20.sp,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-        )
+        if (message != null) {
+            Text(
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+                text = message,
+                fontSize = 20.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+            )
 
-        Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(6.dp))
+        } else {
+            Spacer(modifier = Modifier.height(30.dp))
+        }
+
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -217,6 +229,20 @@ fun PreviewSeedPhraseVerification() {
     ReviewSeedPhraseUI(
         invalidReason = null,
         phraseWords = words.toList(),
+        saveSeedPhrase = {},
+        editSeedPhrase = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewGeneratedSeedPhraseVerification() {
+    val words = "grocery crush fantasy pulse struggle brain federal equip remember figure lyrics afraid tape ugly gold yard way isolate drill lawn daughter either supply student".split(" ")
+
+    ReviewSeedPhraseUI(
+        invalidReason = null,
+        phraseWords = words.toList(),
+        isGeneratedPhrase = true,
         saveSeedPhrase = {},
         editSeedPhrase = {}
     )

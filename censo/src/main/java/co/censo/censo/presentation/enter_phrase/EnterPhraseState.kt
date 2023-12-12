@@ -19,6 +19,9 @@ data class EnterPhraseState(
     val labelTooLong: String? = null,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
 
+    val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,
+    val seedPhraseWasGenerated: Boolean = false,
+
     //Async
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
@@ -54,13 +57,14 @@ data class EnterPhraseState(
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.PASTE_ENTRY,
+        EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.DONE -> BackIconType.CLOSE
     }
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, SELECTED, VIEW, REVIEW, LABEL, DONE
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE
 }
 
 enum class BackIconType {
@@ -68,5 +72,5 @@ enum class BackIconType {
 }
 
 enum class EntryType {
-    MANUAL, PASTE
+    MANUAL, PASTE, GENERATE
 }

@@ -90,9 +90,10 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
 
-    fun submitFullPhrase() {
+    fun submitFullPhrase(seedPhraseWasGenerated: Boolean = false) {
         state = state.copy(
             phraseInvalidReason = BIP39.validateSeedPhrase(state.enteredWords),
+            seedPhraseWasGenerated = seedPhraseWasGenerated,
             enterWordUIState = EnterPhraseUIState.REVIEW
         )
     }
@@ -237,6 +238,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = when (entryType) {
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT, currentLanguage = language)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
+            EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE)
         }
     }
 
@@ -257,7 +259,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.DONE,
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
-            EnterPhraseUIState.PASTE_ENTRY -> {
+            EnterPhraseUIState.PASTE_ENTRY, EnterPhraseUIState.GENERATE -> {
                 state.copy(
                     enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
                     editedWord = "",
@@ -383,6 +385,19 @@ class EnterPhraseViewModel @Inject constructor(
         )
 
         submitFullPhrase()
+    }
+
+    fun onDesiredGeneratedPhraseLengthSelected(wordCount: BIP39.WordCount) {
+        state = state.copy(
+            desiredGeneratedPhraseLength = wordCount
+        )
+    }
+
+    fun generatePhrase() {
+        state = state.copy(
+            enteredWords = BIP39.generate(state.desiredGeneratedPhraseLength, state.currentLanguage),
+        )
+        submitFullPhrase(seedPhraseWasGenerated = true)
     }
 
     fun hideExitConfirmationDialog() {
