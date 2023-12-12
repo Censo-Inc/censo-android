@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.LinksUtil
 
 @Composable
@@ -49,7 +50,7 @@ fun PaywallBaseUI(
             fontWeight = FontWeight.W600,
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
-            color = Color.Black,
+            color = SharedColors.MainColorText,
         )
         Spacer(modifier = Modifier.weight(0.1f))
         Text(
@@ -58,22 +59,17 @@ fun PaywallBaseUI(
             fontSize = 28.sp,
             lineHeight = 36.sp,
             textAlign = TextAlign.Center,
-            color = Color.Black
+            color = SharedColors.MainColorText
         )
 
-        Spacer(modifier = Modifier.weight(0.5f))
+        Spacer(modifier = Modifier.weight(0.3f))
 
         Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = null,
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Image(
-            painter = painterResource(id = R.drawable.censo_text),
-            contentDescription = null,
+            painter = painterResource(id = co.censo.censo.R.drawable.censo_login_logo),
+            contentDescription = null
         )
 
-        Spacer(modifier = Modifier.weight(0.5f))
+        Spacer(modifier = Modifier.weight(0.3f))
 
         statusSpecificContent()
 
@@ -82,8 +78,8 @@ fun PaywallBaseUI(
                 .padding(
                     start = 32.dp,
                     end = 32.dp,
-                    top = 12.dp,
-                    bottom = 10.dp
+                    top = 32.dp,
+                    bottom = 32.dp
                 )
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
@@ -93,14 +89,14 @@ fun PaywallBaseUI(
                 modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.TERMS_URL) },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
-                color = Color.Black
+                color = SharedColors.MainColorText
             )
             Text(
                 text = stringResource(R.string.privacy),
                 modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.PRIVACY_URL) },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
-                color = Color.Black
+                color = SharedColors.MainColorText
             )
         }
     }

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.paywall.SubscriptionOffer
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import java.time.Period
 
 @Composable
@@ -53,7 +54,7 @@ fun PausedSubscriptionUI(
             fontWeight = FontWeight.W600,
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
-            color = Color.Black
+            color = SharedColors.MainColorText
         )
         Spacer(modifier = Modifier.height(18.dp))
         Text(
@@ -62,7 +63,7 @@ fun PausedSubscriptionUI(
             fontWeight = FontWeight.W600,
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
-            color = Color.Black
+            color = SharedColors.MainColorText
         )
         Spacer(modifier = Modifier.height(24.dp))
         StandardButton(

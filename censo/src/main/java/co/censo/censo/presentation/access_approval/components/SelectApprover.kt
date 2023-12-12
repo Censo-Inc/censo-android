@@ -179,7 +179,7 @@ fun SelectingApproverInfoBox(
             )
             .border(
                 width = 1.dp,
-                color = if (selected) Color.Black else SharedColors.BorderGrey,
+                color = if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
@@ -199,7 +199,7 @@ fun SelectingApproverInfoBox(
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.check_icon),
                     contentDescription = stringResource(R.string.select_approver),
-                    tint = Color.Black
+                    tint = SharedColors.MainIconColor
                 )
             }
         }
@@ -207,13 +207,13 @@ fun SelectingApproverInfoBox(
         Column {
             Text(
                 text = stringResource(id = R.string.approver),
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = labelTextSize
             )
 
             Text(
                 text = nickName,
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 24.sp
             )
 

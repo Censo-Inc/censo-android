@@ -33,6 +33,11 @@ object SharedColors {
     val WordBoxBorder = DarkBlue
 
     val LoginIconColor = DarkBlue
+    val ApproverStepIconColor = DarkBlue
+
+    val MainBorderColor = DarkBlue
+    val MainIconColor = DarkBlue
+    val DefaultLoadingColor = DarkBlue
 
     val WordBoxTextColor = DarkBlue
     val WordBoxBackground = Color.White

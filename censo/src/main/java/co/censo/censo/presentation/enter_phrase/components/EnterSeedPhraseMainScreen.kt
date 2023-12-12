@@ -99,7 +99,7 @@ fun SelectSeedPhraseEntryType(
             Spacer(modifier = Modifier.height(12.dp))
 
             val basicStyle = SpanStyle(
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal
             )

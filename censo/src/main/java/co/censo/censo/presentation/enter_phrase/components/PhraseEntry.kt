@@ -96,14 +96,15 @@ fun PhraseEntryTextField(
             },
             textStyle = TextStyle(
                 fontSize = 24.sp,
-                fontWeight = FontWeight.W500
+                fontWeight = FontWeight.W500,
+                color = SharedColors.MainColorText
             ),
             enabled = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             shape = RoundedCornerShape(0.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Black,
-                unfocusedBorderColor = Color.Black
+                focusedBorderColor = SharedColors.MainBorderColor,
+                unfocusedBorderColor = SharedColors.MainBorderColor
             )
         )
         PhraseAutoCompleteWords(
@@ -144,6 +145,7 @@ fun PhraseAutoCompleteWords(
             Text(
                 modifier = Modifier.padding(start = textStartPadding),
                 textAlign = TextAlign.Start,
+                color = SharedColors.MainColorText,
                 text = stringResource(R.string.of_2_048_potential_words, potentialWords.size),
                 fontSize = 16.sp
             )
@@ -157,7 +159,7 @@ fun PhraseAutoCompleteWords(
             if (potentialWords.isEmpty()) {
 
                 val basicStyle = SpanStyle(
-                    color = Color.Black,
+                    color = SharedColors.MainColorText,
                     fontSize = 24.sp
                 )
 
@@ -180,7 +182,7 @@ fun PhraseAutoCompleteWords(
                 for (word in potentialWords) {
 
                     val basicStyle = SpanStyle(
-                        color = Color.Black,
+                        color = SharedColors.MainColorText,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.W300
                     )

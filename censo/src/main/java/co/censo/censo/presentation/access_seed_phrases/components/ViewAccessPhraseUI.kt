@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -78,12 +79,13 @@ fun ViewAccessPhraseUI(
             Icon(
                 painterResource(id = R.drawable.time_left_icon),
                 contentDescription = "",
+                tint = SharedColors.MainIconColor
             )
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
 
             val accessTextStyle = SpanStyle(
                 fontSize = 16.sp,
-                color = Color.Black
+                color = SharedColors.MainColorText
             )
 
             val timeLeftText = buildAnnotatedString {
@@ -97,7 +99,7 @@ fun ViewAccessPhraseUI(
 
             Text(
                 text = timeLeftText,
-                color = Color.Black
+                color = SharedColors.MainColorText
             )
         }
 
@@ -121,7 +123,7 @@ fun ViewAccessPhraseUI(
                 Icon(
                     painter = painterResource(SharedR.drawable.arrow_left),
                     contentDescription = stringResource(id = co.censo.censo.R.string.move_one_word_back),
-                    tint = Color.Black
+                    tint = SharedColors.MainIconColor
                 )
             }
             HorizontalPager(
@@ -146,14 +148,18 @@ fun ViewAccessPhraseUI(
                 Icon(
                     painter = painterResource(SharedR.drawable.arrow_right),
                     contentDescription = stringResource(id = co.censo.censo.R.string.move_one_word_back),
-                    tint = Color.Black
+                    tint = SharedColors.MainIconColor
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(text = stringResource(R.string.swipe_back_and_forth_to_review_words))
+        Text(
+            text = stringResource(R.string.swipe_back_and_forth_to_review_words),
+            fontSize = 14.sp,
+            color = SharedColors.MainColorText
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 

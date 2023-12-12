@@ -218,6 +218,7 @@ fun InitialPlanSetupStandardUI(
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 20.sp,
+                color = SharedColors.MainColorText,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
@@ -228,6 +229,7 @@ fun InitialPlanSetupStandardUI(
                 fontStyle = FontStyle.Italic,
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
+                color = SharedColors.MainColorText,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))

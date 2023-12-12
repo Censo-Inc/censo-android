@@ -36,6 +36,7 @@ import co.censo.censo.presentation.components.LanguageSelectionMenu
 import co.censo.censo.presentation.welcome.SetupStep
 import co.censo.shared.util.BIP39
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun ReadyToAccessPhrase(
@@ -58,6 +59,7 @@ fun ReadyToAccessPhrase(
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Start,
+            color = SharedColors.MainColorText,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 24.dp)
@@ -65,7 +67,7 @@ fun ReadyToAccessPhrase(
         Spacer(modifier = Modifier.height(16.dp))
 
         val basicStyle = SpanStyle(
-            color = Color.Black,
+            color = SharedColors.MainColorText,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal
         )

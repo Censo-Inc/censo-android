@@ -128,7 +128,7 @@ fun MessageText(
 fun MessageText(
     modifier: Modifier = Modifier,
     message: AnnotatedString,
-    color: Color = Color.Black,
+    color: Color = SharedColors.MainColorText,
     textAlign: TextAlign = TextAlign.Center
 ) {
     Text(
@@ -144,7 +144,7 @@ fun MessageText(
 fun MessageText(
     modifier: Modifier = Modifier,
     message: String,
-    color: Color = Color.Black,
+    color: Color = SharedColors.MainColorText,
     textAlign: TextAlign = TextAlign.Center
 ) {
     Text(

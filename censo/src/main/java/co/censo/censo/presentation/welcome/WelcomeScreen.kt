@@ -116,7 +116,7 @@ fun SetupStep(
     heading: String,
     content: String,
     imageBackgroundColor : Color = SharedColors.BackgroundGrey,
-    iconColor: Color = Color.Black,
+    iconColor: Color = SharedColors.MainIconColor,
     completionText: String? = null
 ) {
     Row(
@@ -136,9 +136,19 @@ fun SetupStep(
             )
         }
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = heading,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = SharedColors.MainColorText
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = content, fontSize = 14.sp, lineHeight = 16.0.sp)
+            Text(
+                text = content,
+                fontSize = 14.sp,
+                lineHeight = 16.0.sp,
+                color = SharedColors.MainColorText
+            )
             Spacer(modifier = Modifier.height(2.dp))
             if (completionText != null) {
                 Text(
@@ -170,6 +180,7 @@ fun WelcomeScreenUI(
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Start,
+            color = SharedColors.MainColorText,
             modifier = Modifier
                 .padding(horizontal = 32.dp, vertical = 24.dp)
                 .fillMaxWidth()
@@ -179,6 +190,7 @@ fun WelcomeScreenUI(
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Start,
+            color = SharedColors.MainColorText,
             modifier = Modifier.padding(horizontal = 32.dp)
         )
         Column(

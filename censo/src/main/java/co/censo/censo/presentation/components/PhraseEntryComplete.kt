@@ -44,8 +44,7 @@ fun SeedPhraseAdded(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = screenWidth * 0.05f),
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -66,7 +65,7 @@ fun SeedPhraseAdded(
             else stringResource(co.censo.censo.R.string.subsequent_seed_phrase_saved)
 
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = screenWidth * 0.05f),
             text = messageText,
             fontSize = 28.sp,
             color = SharedColors.MainColorText,
@@ -78,7 +77,7 @@ fun SeedPhraseAdded(
         Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
         StandardButton(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = screenWidth * 0.05f),
             onClick = onClick,
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {

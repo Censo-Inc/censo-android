@@ -94,7 +94,7 @@ fun ApproversHomeScreen(
                         contentDescription = null,
                         tint = SharedColors.ButtonTextBlue
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = pluralStringResource(id = R.plurals.remove_approvers, count = nonOwnerApprovers.size),
                         style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
@@ -106,6 +106,7 @@ fun ApproversHomeScreen(
                 text = pluralStringResource(R.plurals.remove_approvers_span, count = nonOwnerApprovers.size),
                 textAlign = TextAlign.Start,
                 fontSize = 12.sp,
+                color = SharedColors.MainColorText
             )
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight))

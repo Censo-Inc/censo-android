@@ -19,6 +19,7 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.lock_screen.components.LockEngagedUI
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 
@@ -86,7 +87,7 @@ fun LockedScreen(
                     }
 
                     else -> LargeLoading(
-                        color = Color.Black,
+                        color = SharedColors.DefaultLoadingColor,
                         fullscreen = true,
                         fullscreenBackgroundColor = Color.White
                     )

@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -203,7 +205,7 @@ fun ProspectApproverInfoBox(
             )
             .border(
                 width = 1.dp,
-                color = SharedColors.BorderGrey,
+                color = SharedColors.MainBorderColor,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 20.dp, vertical = 12.dp),
@@ -216,13 +218,13 @@ fun ProspectApproverInfoBox(
         Column {
             Text(
                 text = stringResource(id = R.string.approver),
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = labelTextSize
             )
 
             Text(
                 text = nickName,
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 24.sp
             )
 
@@ -239,7 +241,7 @@ fun ProspectApproverInfoBox(
             Icon(
                 painterResource(id = co.censo.shared.R.drawable.edit_icon),
                 contentDescription = stringResource(R.string.edit_approver_name),
-                tint = Color.Black
+                tint = SharedColors.ApproverStepIconColor
             )
         }
 
@@ -350,35 +352,24 @@ fun ApproverStep(
             contentAlignment = Alignment.Center,
             modifier = createIconBoxModifier(addBorder = onShareLink != null, onClick = onShareLink)
         ) {
-            Image(
-                painter = imagePainter,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(2.dp),
-            )
+            StepIcon(imagePainter)
 
             step?.let {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = 3.dp, top = 2.dp),
-                    text = it.toString(), fontSize = 10.sp, color = Color.Black
-                )
+                IconIndex(index = it)
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            StepTitleText(heading = heading)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(modifier = Modifier.fillMaxWidth(), text = content, fontSize = 14.sp)
+            StepContentText(content = content)
             Spacer(modifier = Modifier.height(8.dp))
             verificationCodeUIData?.let {
                 Box(modifier = Modifier.padding(vertical = 12.dp)) {
                     TotpCodeView(
                         code = it.code,
                         secondsLeft = it.timeLeft,
-                        primaryColor = VaultColors.PrimaryColor
+                        primaryColor = SharedColors.MainColorText
                     )
                 }
             }
@@ -406,26 +397,15 @@ fun ApproverStep(
             contentAlignment = Alignment.Center,
             modifier = createIconBoxModifier(addBorder = onShareLink != null, onClick = onShareLink)
         ) {
-            Image(
-                painter = imagePainter,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(2.dp),
-            )
+            StepIcon(imagePainter)
 
             step?.let {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = 3.dp, top = 2.dp),
-                    text = it.toString(), fontSize = 10.sp, color = Color.Black
-                )
+                IconIndex(index = it)
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            StepTitleText(heading = heading)
             Spacer(modifier = Modifier.height(8.dp))
             ClickableText(modifier = Modifier.fillMaxWidth(), text = content, style = TextStyle(fontSize = 14.sp, lineHeight = 20.sp)) { offset ->
                 content.getStringAnnotations(stringAnnotationTag ?: "", start = offset, end = offset).firstOrNull()
@@ -439,7 +419,7 @@ fun ApproverStep(
                     TotpCodeView(
                         code = it.code,
                         secondsLeft = it.timeLeft,
-                        primaryColor = VaultColors.PrimaryColor
+                        primaryColor = SharedColors.MainColorText
                     )
                 }
             }
@@ -464,36 +444,24 @@ fun ApproverStep(
             contentAlignment = Alignment.Center,
             modifier = createIconBoxModifier(addBorder = onShareLink != null, onClick = onShareLink)
         ) {
-            Image(
-                imageVector = imageVector,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.Center)
-                    .padding(2.dp),
-            )
+            StepIcon(imageVector = imageVector)
 
             step?.let {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = 3.dp, top = 2.dp),
-                    text = it.toString(), fontSize = 10.sp, color = Color.Black
-                )
+                IconIndex(index = it)
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            StepTitleText(heading = heading)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(modifier = Modifier.fillMaxWidth(), text = content, fontSize = 14.sp)
+            StepContentText(content = content)
             Spacer(modifier = Modifier.height(8.dp))
             verificationCodeUIData?.let {
                 Box(modifier = Modifier.padding(vertical = 12.dp)) {
                     TotpCodeView(
                         code = it.code,
                         secondsLeft = it.timeLeft,
-                        primaryColor = VaultColors.PrimaryColor
+                        primaryColor = SharedColors.MainColorText
                     )
                 }
             }
@@ -501,11 +469,73 @@ fun ApproverStep(
     }
 }
 
+@Composable
+fun BoxScope.StepIcon(imageVector: ImageVector) {
+    Image(
+        imageVector = imageVector,
+        contentDescription = null,
+        modifier = Modifier
+            .size(48.dp)
+            .align(Alignment.Center)
+            .padding(2.dp),
+        colorFilter = ColorFilter.tint(color = SharedColors.ApproverStepIconColor)
+    )
+}
+
+@Composable
+fun BoxScope.StepIcon(imagePainter: Painter) {
+    Image(
+        painter = imagePainter,
+        contentDescription = null,
+        modifier = Modifier
+            .size(48.dp)
+            .align(Alignment.Center)
+            .padding(2.dp),
+        colorFilter = ColorFilter.tint(color = SharedColors.ApproverStepIconColor)
+    )
+}
+
+@Composable
+fun BoxScope.IconIndex(index: Int) {
+    Text(
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(start = 3.dp, top = 2.dp),
+        text = index.toString(),
+        fontSize = 10.sp,
+        color = SharedColors.MainColorText
+    )
+}
+
+@Composable
+fun StepTitleText(heading: String) {
+    Text(
+        text = heading,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = SharedColors.MainColorText
+    )
+}
+
+@Composable
+fun StepContentText(content: String) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = content,
+        fontSize = 14.sp,
+        color = SharedColors.MainColorText
+    )
+}
+
 fun createIconBoxModifier(addBorder: Boolean, onClick: (() -> Unit)? = null): Modifier =
     if (addBorder) Modifier
         .size(48.dp)
         .clickable { onClick?.invoke() }
-        .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
+        .border(
+            width = 1.dp,
+            color = SharedColors.MainBorderColor,
+            shape = RoundedCornerShape(8.dp)
+        )
         .background(
             color = SharedColors.WordBoxBackground,
             shape = RoundedCornerShape(8.dp)

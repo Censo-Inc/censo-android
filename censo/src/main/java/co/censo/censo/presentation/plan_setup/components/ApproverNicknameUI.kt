@@ -84,7 +84,7 @@ fun ApproverNicknameUI(
         val textFieldStyle = TextStyle(
             fontSize = 24.sp,
             fontWeight = FontWeight.W500,
-            color = Color.Black,
+            color = SharedColors.MainColorText,
             textAlign = TextAlign.Center
         )
 
