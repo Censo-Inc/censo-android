@@ -63,7 +63,7 @@ fun GetLiveWithUserUI(
             modifier = Modifier.weight(0.1f).fillMaxWidth(),
             painter = painterResource(id = R.drawable.activateapprover),
             contentDescription = null,
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.Fit,
         )
 
         Column(
@@ -137,7 +137,7 @@ fun GetLiveWithUserUIPreview() {
     ) {
         GetLiveWithUserUI(
             title = "Activate Neo",
-            message = "For maximum security yada yada and then go do this thing over there and think about all sorts of things.",
+            message = "For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things.",
             activatingApprover = true,
             onContinueLive = {},
             onResumeLater = {},

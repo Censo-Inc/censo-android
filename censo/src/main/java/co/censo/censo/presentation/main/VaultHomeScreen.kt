@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun VaultHomeScreen(
@@ -52,7 +53,8 @@ fun VaultHomeScreen(
             text = buildSeedPhraseCount(seedPhrasesSaved, context),
             fontSize = 28.sp,
             fontWeight = FontWeight.W700,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = SharedColors.MainColorText
         )
 
         Spacer(modifier = Modifier.height(36.dp))
@@ -64,7 +66,8 @@ fun VaultHomeScreen(
                 multiplePhrases = seedPhrasesSaved > 1
             ),
             fontSize = 24.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = SharedColors.MainColorText
         )
 
         Spacer(modifier = Modifier.height(36.dp))
@@ -89,7 +92,8 @@ fun VaultHomeScreen(
                 fontSize = 26.sp,
                 fontWeight = FontWeight.W700,
                 lineHeight = 30.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText
             )
 
             Spacer(modifier = Modifier.height(36.dp))
@@ -111,11 +115,13 @@ fun VaultHomeScreen(
 private fun buildSeedPhraseCount(count: Int, context: Context) : AnnotatedString {
     val countSpanStyle = SpanStyle(
         fontSize = 38.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        color = SharedColors.MainColorText
     )
 
     val textSpanStyle = SpanStyle(
         fontSize = 26.sp,
+        color = SharedColors.MainColorText
     )
 
     return buildAnnotatedString {
@@ -137,7 +143,8 @@ private fun buildSeedPhraseCount(count: Int, context: Context) : AnnotatedString
 
 private fun buildAddSeedPhraseDisclaimer(context: Context, multiplePhrases: Boolean) : AnnotatedString {
     val emphasisSpanStyle = SpanStyle(
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        color = SharedColors.MainColorText
     )
 
     return buildAnnotatedString {

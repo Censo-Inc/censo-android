@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.access_seed_phrases.AccessPhrasesUIState
+import co.censo.shared.presentation.SharedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,15 +51,15 @@ fun AccessPhrasesTopBar(
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.smallTopAppBarColors(
                 containerColor = VaultColors.NavbarColor,
-                navigationIconContentColor = Color.Black,
-                titleContentColor = Color.Black,
+                navigationIconContentColor = SharedColors.MainIconColor,
+                titleContentColor = SharedColors.MainColorText,
             ),
             title = {
                 if (title.isNotEmpty()) {
                     Text(
                         text = title,
                         fontSize = 24.sp,
-                        color = Color.Black,
+                        color = SharedColors.MainColorText,
                         fontWeight = FontWeight.W400,
                     )
                 }

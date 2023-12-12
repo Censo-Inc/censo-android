@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -34,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun SettingsHomeScreen(
@@ -52,6 +54,7 @@ fun SettingsHomeScreen(
             SpanStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.W400,
+                color = SharedColors.MainColorText
             )
 
         val deleteUserText =
@@ -95,12 +98,10 @@ fun SettingsHomeScreen(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.CloudSync, contentDescription = "")
+            SettingsIcon(Icons.Default.CloudSync)
             Spacer(modifier = Modifier.width(8.dp))
             Text(refreshCloudAccessText)
         }
-        Divider()
-        Spacer(modifier = Modifier.height(44.dp))
         Divider()
         Row(
             modifier = Modifier
@@ -113,7 +114,7 @@ fun SettingsHomeScreen(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.Lock, contentDescription = "")
+            SettingsIcon(Icons.Default.Lock)
             Spacer(modifier = Modifier.width(8.dp))
             Text(lockScreenText)
         }
@@ -129,7 +130,7 @@ fun SettingsHomeScreen(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.Logout, contentDescription = "")
+            SettingsIcon(Icons.Default.Logout)
             Spacer(modifier = Modifier.width(8.dp))
             Text(signOutText)
         }
@@ -145,12 +146,21 @@ fun SettingsHomeScreen(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = "")
+            SettingsIcon(Icons.Default.Refresh)
             Spacer(modifier = Modifier.width(8.dp))
             Text(deleteUserText)
         }
         Divider()
     }
+}
+
+@Composable
+fun SettingsIcon(imageVector: ImageVector) {
+    Icon(
+        imageVector,
+        contentDescription = "",
+        tint = SharedColors.MainIconColor
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)
