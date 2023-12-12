@@ -120,10 +120,10 @@ fun ReviewSeedPhraseUI(
                 text = title,
                 fontSize = 28.sp,
                 color = SharedColors.MainColorText,
-                fontWeight = FontWeight.W400
+                fontWeight = FontWeight.W500
             )
 
-            Spacer(modifier = Modifier.height(screenHeight * 0.012f))
+            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
 
             Text(
                 modifier = Modifier.padding(horizontal = horizontalPadding),
