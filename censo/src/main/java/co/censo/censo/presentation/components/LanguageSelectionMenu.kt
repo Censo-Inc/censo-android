@@ -29,6 +29,7 @@ import co.censo.shared.util.BIP39
 
 @Composable
 fun LanguageSelectionMenu(
+    modifier: Modifier = Modifier.fillMaxWidth(),
     text:  AnnotatedString,
     currentLanguage: BIP39.WordListLanguage?,
     action: (BIP39.WordListLanguage) -> Unit
@@ -36,7 +37,7 @@ fun LanguageSelectionMenu(
 
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = modifier) {
         ClickableText(
             text = text,
             onClick = { _ ->
