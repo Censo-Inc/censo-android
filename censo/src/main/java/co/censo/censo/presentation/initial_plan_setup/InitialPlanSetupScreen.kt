@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -32,8 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -55,7 +57,6 @@ import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,32 +185,34 @@ fun InitialPlanSetupStandardUI(
     startPlanSetup: () -> Unit,
 ) {
 
-    Column(
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = Color.White),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(modifier = Modifier.padding(32.dp)) {
-            Image(
-                painter = painterResource(id = co.censo.shared.R.drawable.large_face_scan),
-                contentScale = ContentScale.FillWidth,
-                contentDescription = null,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
-            )
-        }
+        Image(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(start = screenWidth * 0.20f, top = screenHeight * 0.05f),
+            painter = painterResource(id = R.drawable.facescanhandwithphone),
+            contentDescription = null,
+            contentScale = ContentScale.Fit
+        )
 
-        Column(modifier = Modifier.padding(horizontal = 44.dp)) {
+        Column(modifier = Modifier
+            .padding(horizontal = 44.dp)
+            .align(Alignment.BottomCenter)) {
             TitleText(
                 title = R.string.scan_your_face,
                 textAlign = TextAlign.Start,
                 modifier = Modifier
                     .fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             Text(
                 text = stringResource(R.string.scan_phrase_message),
                 fontWeight = FontWeight.Medium,
@@ -217,7 +220,7 @@ fun InitialPlanSetupStandardUI(
                 lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
 
             Text(
                 text = stringResource(R.string.affirmative_biometric_consent),
@@ -227,7 +230,7 @@ fun InitialPlanSetupStandardUI(
                 lineHeight = 18.sp,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             StandardButton(
                 onClick = startPlanSetup,
                 contentPadding = PaddingValues(vertical = 20.dp),
@@ -253,7 +256,7 @@ fun InitialPlanSetupStandardUI(
                 }
             }
 
-            Spacer(modifier = Modifier.height(44.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
         }
     }
 }

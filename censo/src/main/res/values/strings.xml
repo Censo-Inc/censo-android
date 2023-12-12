@@ -187,7 +187,7 @@
 
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Scan your face</string>
-    <string name="scan_phrase_message">Your face scan ensures that only you have access to your seed phrase.\n\nYou will capture and store an anonymous 3D map of your face to confirm your live physical presence.</string>
+    <string name="scan_phrase_message">A face scan will ensure that only you have access to your seed phrase.\n\nIf you opt in, you can capture and store an anonymous 3D map of your face to confirm your live physical presence.</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
