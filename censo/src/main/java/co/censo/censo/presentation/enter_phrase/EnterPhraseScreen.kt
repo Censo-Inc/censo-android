@@ -44,6 +44,7 @@ import co.censo.censo.presentation.enter_phrase.components.GeneratePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
@@ -163,7 +164,7 @@ fun EnterPhraseScreen(
                     if (title.isNotEmpty()) {
                         Text(
                             text = title,
-                            color = Color.Black
+                            color = SharedColors.MainColorText
                         )
                     }
                 },

@@ -63,7 +63,6 @@ fun WelcomeScreen(
     when {
         state.loading -> {
             LargeLoading(
-                color = Color.Black,
                 fullscreen = true,
                 fullscreenBackgroundColor = Color.White
             )

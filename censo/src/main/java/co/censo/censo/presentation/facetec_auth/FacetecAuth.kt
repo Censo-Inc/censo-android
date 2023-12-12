@@ -136,7 +136,6 @@ fun FacetecAuth(
             }
 
             else -> LargeLoading(
-                color = Color.Black,
                 fullscreen = false
             )
         }

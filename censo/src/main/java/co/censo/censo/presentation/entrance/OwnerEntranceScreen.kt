@@ -158,7 +158,6 @@ fun OwnerEntranceScreen(
             }
 
             state.isLoading -> LargeLoading(
-                color = Color.Black,
                 fullscreen = true,
                 fullscreenBackgroundColor = Color.White
             )

@@ -245,13 +245,13 @@ fun ApproverInfoBox(
         Column {
             Text(
                 text = stringResource(id = R.string.approver),
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = labelTextSize
             )
 
             Text(
                 text = nickName,
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 24.sp
             )
 

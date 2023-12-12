@@ -75,7 +75,6 @@ fun InitialPlanSetupScreen(
 
 
     Scaffold(
-        contentColor = Color.Black,
         containerColor = Color.White,
         topBar = {
             TopAppBar(
@@ -85,7 +84,7 @@ fun InitialPlanSetupScreen(
                         Icon(
                             imageVector = Icons.Rounded.Close,
                             stringResource(R.string.back),
-                            tint = Color.Black
+                            tint = SharedColors.MainIconColor
                         )
                     }
                 },
@@ -130,10 +129,7 @@ fun InitialPlanSetupScreen(
                     when (state.initialPlanSetupStep) {
                         InitialPlanSetupStep.CreateApproverKey,
                         InitialPlanSetupStep.CreatePolicyParams,
-                        InitialPlanSetupStep.PolicyCreation -> LargeLoading(
-                            color = Color.Black,
-                            fullscreen = true
-                        )
+                        InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
 
                         is InitialPlanSetupStep.Initial ->
                             InitialPlanSetupStandardUI {

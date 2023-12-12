@@ -154,10 +154,7 @@ fun MainVaultScreen(
         ) {
 
             when {
-                state.loading -> LargeLoading(
-                    color = Color.Black,
-                    fullscreen = true
-                )
+                state.loading -> LargeLoading(fullscreen = true)
 
                 state.asyncError -> {
                     when {
