@@ -138,8 +138,8 @@
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
     <string name="incorrect_code">Incorrect Code</string>
-    <string name="seed_phrase_validated">Seed phrase validated</string>
-    <string name="seed_phrase_generated">Seed phrase generated</string>
+    <string name="seed_phrase_validated">Validated!</string>
+    <string name="seed_phrase_generated">Seed Phrase Generated!</string>
     <string name="review_seed_phrase">Review seed phrase</string>
     <string name="censo_has_verified_that_this_is_a_valid_seed_phrase">Censo has verified that this is a valid seed phrase. Please review the words to make sure that you have entered them correctly.</string>
     <string name="censo_has_detected_that_this_is_not_a_valid_seed_phrase">Censo has detected that this is not a valid seed phrase. Please make sure each word is correct and revise as needed.</string>
@@ -350,7 +350,7 @@
     <string name="edit_phrase">Edit phrase</string>
     <string name="your_approver">your approver</string>
     <string name="select_phrase_cont_description">Select phrase</string>
-    <string name="activated">Activated</string>
+    <string name="activated">Activated!</string>
     <string name="approvers_removed">Approvers removed</string>
     <string name="phrase_viewed">phrase viewed</string>
     <string name="exit_accessing_phrases">Exit accessing phrases</string>

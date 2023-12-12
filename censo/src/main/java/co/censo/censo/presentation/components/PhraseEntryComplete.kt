@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,38 +30,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun SeedPhraseAdded(
     isSavingFirstSeedPhrase: Boolean,
     onClick: () -> Unit,
 ) {
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 36.dp),
+            .padding(horizontal = screenWidth * 0.05f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+
+        Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
         Image(
-            painterResource(id = R.drawable.check_circle),
-            contentDescription = null
+            modifier = Modifier.fillMaxWidth(),
+            painter = painterResource(id = co.censo.censo.R.drawable.congrats),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
         )
 
-        Spacer(modifier = Modifier.weight(0.2f))
-
-        Text(
-            text = stringResource(co.censo.censo.R.string.congratulations),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.weight(0.15f))
-
+        Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
         val messageText =
             if (isSavingFirstSeedPhrase) stringResource(co.censo.censo.R.string.phrase_added_done_message)
@@ -69,12 +69,13 @@ fun SeedPhraseAdded(
             modifier = Modifier.padding(horizontal = 8.dp),
             text = messageText,
             fontSize = 28.sp,
+            color = SharedColors.MainColorText,
             fontWeight = FontWeight.Bold,
             lineHeight = 36.sp,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.weight(0.55f))
+        Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
@@ -87,7 +88,7 @@ fun SeedPhraseAdded(
             )
         }
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(screenHeight * 0.10f))
     }
 }
 

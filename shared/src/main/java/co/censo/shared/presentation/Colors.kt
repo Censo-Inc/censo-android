@@ -8,7 +8,6 @@ object SharedColors {
     val SuccessGreen = Color(0xFF00D890)
     val ErrorRed = Color(0xFFBC1313)
     val WarningYellow = Color(0xFFFFBF00)
-    val WordBoxBackground = Color(0xFFF2F2F2)
     val BorderGrey = Color(0xFFBDBDBD)
     val IconGrey = Color(0xFFBDBDBD)
     val DisabledGrey = Color(0xFFEDEDED)
@@ -28,4 +27,13 @@ object SharedColors {
     val BottomNavBarIconColor = DarkBlue
     val BottomNavBarIndicatorColor = LightBlue
     val BottomNavBarTextColor = DarkBlue
+
+    val MainColorText = DarkBlue
+    val WordBoxIconTint = DarkBlue
+    val WordBoxBorder = DarkBlue
+
+    val WordBoxTextColor = DarkBlue
+    val WordBoxBackground = Color.White
+
+
 }
