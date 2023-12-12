@@ -32,6 +32,8 @@ object SharedColors {
     val WordBoxIconTint = DarkBlue
     val WordBoxBorder = DarkBlue
 
+    val LoginIconColor = DarkBlue
+
     val WordBoxTextColor = DarkBlue
     val WordBoxBackground = Color.White
 

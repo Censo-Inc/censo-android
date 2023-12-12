@@ -29,14 +29,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -61,7 +61,8 @@ import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.shared.R
+import co.censo.shared.R as SharedR
+import co.censo.censo.R as CensoR
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.termsOfUseVersions
 import co.censo.shared.data.model.touVersion
@@ -207,6 +208,8 @@ fun OwnerEntranceStandardUI(
     authenticate: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     Column(
         modifier = Modifier
@@ -217,22 +220,15 @@ fun OwnerEntranceStandardUI(
     ) {
         Spacer(modifier = Modifier.weight(1.0f))
         Image(
-            modifier = Modifier.weight(1.25f),
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = null,
-        )
-        Spacer(modifier = Modifier.weight(0.25f))
-        Image(
-            modifier = Modifier.weight(0.750f),
-            painter = painterResource(id = R.drawable.censo_text),
+            painter = painterResource(id = co.censo.censo.R.drawable.censo_login_logo),
             contentDescription = null,
         )
         Spacer(modifier = Modifier.weight(0.25f))
         Text(
-            text = stringResource(R.string.tag_line),
+            text = stringResource(SharedR.string.tag_line),
             fontWeight = FontWeight.W600,
             fontSize = 22.sp,
-            color = Color.Black
+            color = SharedColors.MainColorText
         )
         Spacer(modifier = Modifier.weight(0.50f))
         StandardButton(
@@ -251,13 +247,13 @@ fun OwnerEntranceStandardUI(
             ) {
                 Icon(
                     modifier = Modifier.size(16.dp),
-                    painter = painterResource(id = R.drawable.google),
+                    painter = painterResource(id = SharedR.drawable.google),
                     contentDescription = null,
                     tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = stringResource(R.string.google_auth_login),
+                    text = stringResource(SharedR.string.google_auth_login),
                     fontWeight = FontWeight.Medium,
                     fontSize = 20.sp,
                     color = Color.White,
@@ -272,8 +268,9 @@ fun OwnerEntranceStandardUI(
         Text(
             modifier = Modifier.padding(horizontal = 44.dp),
             fontSize = 13.sp,
-            text = stringResource(R.string.sign_in_google_explainer),
+            text = stringResource(SharedR.string.sign_in_google_explainer),
             lineHeight = 14.sp,
+            color = SharedColors.MainColorText,
             textAlign = TextAlign.Center,
         )
 
@@ -291,14 +288,15 @@ fun OwnerEntranceStandardUI(
                     .weight(0.7f)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.eyeslash),
+                    painter = painterResource(id = CensoR.drawable.eye_slash_icon),
                     contentDescription = null,
-                    modifier = Modifier.height(28.dp)
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.no_personal_info),
+                    text = stringResource(SharedR.string.no_personal_info),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(all = 12.dp)
+                    fontSize = 12.sp,
+                    color = SharedColors.MainColorText,
                 )
             }
             Column(
@@ -307,41 +305,44 @@ fun OwnerEntranceStandardUI(
                     .weight(0.7f)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.safe),
+                    painter = painterResource(id = co.censo.censo.R.drawable.safe_icon),
                     contentDescription = null,
-                    modifier = Modifier.height(28.dp)
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.multiple_layers),
+                    text = stringResource(SharedR.string.multiple_layers),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(all = 12.dp)
+                    fontSize = 12.sp,
+                    color = SharedColors.MainColorText,
                 )
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }
-        Divider(modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 4.dp))
+        Divider(modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp))
         Row(
             modifier = Modifier
                 .padding(
                     start = 32.dp,
                     end = 32.dp,
-                    top = 12.dp,
-                    bottom = 12.dp
+                    top = 36.dp,
+                    bottom = 36.dp
                 )
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Text(
-                text = stringResource(R.string.terms),
+                text = stringResource(SharedR.string.terms),
                 modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.TERMS_URL) },
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp
+                color = SharedColors.MainColorText,
+                fontSize = 16.sp
             )
             Text(
-                text = stringResource(R.string.privacy),
+                text = stringResource(SharedR.string.privacy),
                 modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.PRIVACY_URL) },
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp
+                color = SharedColors.MainColorText,
+                fontSize = 16.sp
             )
         }
     }
@@ -356,18 +357,7 @@ fun TermsOfUse(
 
     var isReview by remember { mutableStateOf(false) }
 
-    Scaffold(topBar = {
-        CenterAlignedTopAppBar(
-            colors = TopAppBarDefaults.smallTopAppBarColors(
-                containerColor = SharedColors.BackgroundGrey
-            ),
-            title = {
-                Text(
-                    stringResource(R.string.terms_of_use),
-                )
-            }
-        )
-    }) { paddingValues ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(horizontal = 28.dp)
@@ -389,19 +379,20 @@ fun TermsOfUse(
                 Spacer(modifier = Modifier.height(10.dp))
             } else {
                 Image(
-                    painterResource(id = R.drawable.files),
-                    contentDescription = null
+                    painterResource(id = SharedR.drawable.files),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = SharedColors.LoginIconColor)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
-                    text = stringResource(R.string.terms_of_use),
+                    text = stringResource(SharedR.string.terms_of_use),
                     fontWeight = FontWeight.W600,
                     fontSize = 24.sp,
-                    color = Color.Black
+                    color = SharedColors.MainColorText
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 MessageText(
-                    message = R.string.tou_blurb,
+                    message = SharedR.string.tou_blurb,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(24.dp))
@@ -411,7 +402,7 @@ fun TermsOfUse(
                     onClick = { isReview = true },
                 ) {
                     Text(
-                        text = stringResource(id = R.string.tou_review),
+                        text = stringResource(id = SharedR.string.tou_review),
                         style = ButtonTextStyle.copy(fontSize = 22.sp),
                         modifier = Modifier.padding(all = 8.dp)
                     )
@@ -424,15 +415,16 @@ fun TermsOfUse(
                 onClick = onAccept,
             ) {
                 Text(
-                    text = stringResource(R.string.tou_accept),
+                    text = stringResource(SharedR.string.tou_accept),
                     modifier = Modifier.padding(all = 8.dp),
                     style = ButtonTextStyle.copy(fontSize = 22.sp)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = stringResource(R.string.tou_agreement),
+                text = stringResource(SharedR.string.tou_agreement),
                 fontSize = 11.sp,
+                color = SharedColors.MainColorText,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(10.dp))

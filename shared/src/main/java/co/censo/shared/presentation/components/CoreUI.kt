@@ -76,7 +76,7 @@ fun TitleText(
     modifier: Modifier = Modifier,
     @StringRes title: Int,
     fontSize: TextUnit = 24.sp,
-    color: Color = Color.Black,
+    color: Color = SharedColors.MainColorText,
     textAlign: TextAlign = TextAlign.Center,
     fontWeight: FontWeight = FontWeight.W600
 ) {
@@ -95,7 +95,7 @@ fun TitleText(
     modifier: Modifier = Modifier,
     title: String,
     fontSize: TextUnit = 24.sp,
-    color: Color = Color.Black,
+    color: Color = SharedColors.MainColorText,
     textAlign: TextAlign = TextAlign.Center,
     fontWeight: FontWeight = FontWeight.W600
 ) {
