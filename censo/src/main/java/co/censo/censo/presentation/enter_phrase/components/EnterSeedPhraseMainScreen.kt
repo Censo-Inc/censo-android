@@ -4,7 +4,10 @@ import StandardButton
 import androidx.compose.foundation.layout.Column
 import MessageText
 import TitleText
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -50,128 +55,148 @@ fun SelectSeedPhraseEntryType(
 
     var selectedLanguage by remember { mutableStateOf(currentLanguage) }
 
-    val verticalSpacingHeight = 28.dp
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 36.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        val title = if (welcomeFlow) R.string.add_first_seed_phrase else R.string.add_seed_phrase
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val verticalSpacingHeight = screenHeight * 0.020f
 
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = title,
-            textAlign = TextAlign.Start
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Image(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(start = screenWidth * 0.15f, top = screenHeight * 0.15f),
+            painter = painterResource(id = R.drawable.addyourseedphrase),
+            contentDescription = null,
+            contentScale = ContentScale.Fit
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            message = R.string.add_seed_phrase_message,
-            textAlign = TextAlign.Start
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        val basicStyle = SpanStyle(
-            color = Color.Black,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Normal
-        )
-
-        val languageSelectionText = buildAnnotatedString {
-            withStyle(basicStyle) {
-                append(stringResource(R.string.current_language, selectedLanguage.displayName()))
-            }
-            withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
-                append(stringResource(R.string.here))
-            }
-        }
-
-        LanguageSelectionMenu(
-            text = languageSelectionText,
-            currentLanguage = selectedLanguage,
-            action = {
-                selectedLanguage = it
-            }
-        )
-
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                onManualEntrySelected(selectedLanguage)
-            },
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            val title =
+                if (welcomeFlow) R.string.add_first_seed_phrase else R.string.add_seed_phrase
+
+            TitleText(
+                modifier = Modifier.fillMaxWidth(),
+                title = title,
+                textAlign = TextAlign.Start
+            )
+
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+            MessageText(
+                modifier = Modifier.fillMaxWidth(),
+                message = R.string.add_seed_phrase_message,
+                textAlign = TextAlign.Start
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            val basicStyle = SpanStyle(
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal
+            )
+
+            val languageSelectionText = buildAnnotatedString {
+                withStyle(basicStyle) {
+                    append(
+                        stringResource(
+                            R.string.current_language,
+                            selectedLanguage.displayName()
+                        )
+                    )
+                }
+                withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                    append(stringResource(R.string.here))
+                }
+            }
+
+            LanguageSelectionMenu(
+                text = languageSelectionText,
+                currentLanguage = selectedLanguage,
+                action = {
+                    selectedLanguage = it
+                }
+            )
+
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    onManualEntrySelected(selectedLanguage)
+                },
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.manual_entry_icon),
-                    contentDescription = null,
-                    tint = SharedColors.ButtonTextBlue
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.input_seed_phrase),
-                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = null)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.manual_entry_icon),
+                        contentDescription = null,
+                        tint = SharedColors.ButtonTextBlue
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.input_seed_phrase),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onPasteEntrySelected,
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onGenerateEntrySelected,
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
-                    contentDescription = null,
-                    tint = SharedColors.ButtonTextBlue
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.paste_seed_phrase),
-                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = null)
-                )
+                Row {
+                    Icon(
+                        painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
+                        contentDescription = null,
+                        tint = SharedColors.ButtonTextBlue
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.generate_seed_phrase),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
-            onClick = onGenerateEntrySelected,
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
-        ) {
-            Row {
-                Icon(
-                    painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.generate_seed_phrase),
-                    color = Color.White,
-                    fontSize = 24.sp
-                )
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onPasteEntrySelected,
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
+                        contentDescription = null,
+                        tint = SharedColors.ButtonTextBlue
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.paste_seed_phrase),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        }
     }
 }
 
