@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +53,7 @@ fun SeedPhraseAdded(
         Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
         Image(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().weight(0.1f),
             painter = painterResource(id = co.censo.censo.R.drawable.congrats),
             contentDescription = null,
             contentScale = ContentScale.Fit,
@@ -67,10 +68,10 @@ fun SeedPhraseAdded(
         Text(
             modifier = Modifier.padding(horizontal = screenWidth * 0.05f),
             text = messageText,
-            fontSize = 28.sp,
+            fontSize = 26.sp,
             color = SharedColors.MainColorText,
             fontWeight = FontWeight.Bold,
-            lineHeight = 36.sp,
+            lineHeight = 30.sp,
             textAlign = TextAlign.Center
         )
 
@@ -87,13 +88,37 @@ fun SeedPhraseAdded(
             )
         }
 
-        Spacer(modifier = Modifier.height(screenHeight * 0.10f))
+        Spacer(modifier = Modifier.height(screenHeight * 0.05f))
     }
 }
 
-@Preview
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
-fun SeedPhraseAddedPreview() {
+fun LargeSeedPhraseAddedPreview() {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        SeedPhraseAdded(true) {}
+    }
+}
+
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun NormalSeedPhraseAddedPreview() {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        SeedPhraseAdded(true) {}
+    }
+}
+
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
+@Composable
+fun SmallSeedPhraseAddedPreview() {
     Box(
         Modifier
             .fillMaxSize()

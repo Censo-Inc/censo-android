@@ -10,13 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -184,24 +183,29 @@ fun InitialPlanSetupStandardUI(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = Color.White),
+        verticalArrangement = Arrangement.Bottom
     ) {
-        Image(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(start = screenWidth * 0.20f, top = screenHeight * 0.05f),
-            painter = painterResource(id = R.drawable.facescanhandwithphone),
-            contentDescription = null,
-            contentScale = ContentScale.Fit
-        )
 
-        Column(modifier = Modifier
-            .padding(horizontal = 44.dp)
-            .align(Alignment.BottomCenter)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .weight(0.1f)
+        ) {
+            Image(
+                modifier = Modifier
+                    .padding(top = screenHeight * 0.015f)
+                    .align(Alignment.Center),
+                painter = painterResource(id = R.drawable.facescanhandwithphone),
+                contentDescription = null,
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        Column(modifier = Modifier.padding(horizontal = 44.dp)) {
             TitleText(
                 title = R.string.scan_your_face,
                 textAlign = TextAlign.Start,
@@ -231,9 +235,8 @@ fun InitialPlanSetupStandardUI(
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             StandardButton(
                 onClick = startPlanSetup,
-                contentPadding = PaddingValues(vertical = 20.dp),
-                modifier = Modifier
-                    .fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -249,7 +252,7 @@ fun InitialPlanSetupStandardUI(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.begin_face_scan),
-                        style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
                     )
                 }
             }
@@ -259,8 +262,20 @@ fun InitialPlanSetupStandardUI(
     }
 }
 
-@Preview()
+@Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)
 @Composable
-fun InitialPlanSetupStandardUIPreview() {
+fun LargeInitialPlanSetupStandardUIPreview() {
+    InitialPlanSetupStandardUI {}
+}
+
+@Preview(device = Devices.PIXEL_4, showBackground = true, showSystemUi = true)
+@Composable
+fun MediumInitialPlanSetupStandardUIPreview() {
+    InitialPlanSetupStandardUI {}
+}
+
+@Preview(device = Devices.NEXUS_5, showBackground = true, showSystemUi = true)
+@Composable
+fun SmallInitialPlanSetupStandardUIPreview() {
     InitialPlanSetupStandardUI {}
 }
