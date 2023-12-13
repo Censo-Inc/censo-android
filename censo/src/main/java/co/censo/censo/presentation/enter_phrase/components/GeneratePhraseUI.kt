@@ -35,7 +35,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.shared.util.BIP39
 
-private val wordCountOptions = BIP39.WordCount.values().toList()
+private val wordCountOptions = enumValues<BIP39.WordCount>()
 
 @Composable
 fun GeneratePhraseUI(
