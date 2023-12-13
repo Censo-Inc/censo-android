@@ -14,7 +14,6 @@ data class EnterPhraseState(
     val editedWordIndex: Int = 0,
     val enterWordUIState: EnterPhraseUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
     val currentLanguage: BIP39.WordListLanguage = BIP39.WordListLanguage.English,
-    val phraseInvalidReason: BIP39InvalidReason? = null,
     val label: String = "",
     val labelTooLong: String? = null,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
@@ -34,7 +33,8 @@ data class EnterPhraseState(
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
     val isSavingFirstSeedPhrase: Boolean = false,
-    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized
+    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
+    val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized
 ) {
 
     companion object {

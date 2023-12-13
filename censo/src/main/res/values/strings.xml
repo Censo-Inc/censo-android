@@ -365,4 +365,6 @@
     <string name="drive_access_granted">Drive access granted</string>
     <string name="failed_to_authenticate_drive_access">Failed to authenticate drive access</string>
     <string name="processing_your_transaction">Processing your transaction</string>
+    <string name="error">Error</string>
+    <string name="default_invalid_phrase_message">The seed phrase you entered is not valid.\\n\\nPlease check your seed phrase and try again.</string>
 </resources>

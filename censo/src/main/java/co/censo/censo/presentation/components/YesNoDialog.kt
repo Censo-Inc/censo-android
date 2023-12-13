@@ -70,6 +70,43 @@ fun YesNoDialog(
     )
 }
 
+@Composable
+fun SimpleAlertDialog(title: String, message: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = title,
+                color = SharedColors.MainColorText,
+                textAlign = TextAlign.Left,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = message,
+                color = SharedColors.MainColorText,
+                textAlign = TextAlign.Left,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal
+            )
+        },
+        confirmButton = {
+            StandardButton(
+                onClick = onDismiss
+            ) {
+                Text(
+                    stringResource(R.string.ok),
+                    style = ButtonTextStyle.copy(fontSize = 17.sp)
+                )
+            }
+        },
+    )
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun YesNoPreview() {
@@ -78,5 +115,15 @@ fun YesNoPreview() {
         message = "Can we see what this will look like?",
         onDismiss = {},
         onConfirm = {}
+    )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SimpleAlertPreview() {
+    SimpleAlertDialog(
+        title = "Title Here",
+        message = "Can we see what this will look like?",
+        onDismiss = {},
     )
 }

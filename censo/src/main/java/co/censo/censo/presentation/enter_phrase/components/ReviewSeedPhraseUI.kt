@@ -54,7 +54,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReviewSeedPhraseUI(
-    invalidReason: BIP39InvalidReason?,
     phraseWords: List<String>,
     isGeneratedPhrase: Boolean = false,
     saveSeedPhrase: () -> Unit,
@@ -64,30 +63,23 @@ fun ReviewSeedPhraseUI(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    val valid = invalidReason == null
 
-    val title = if (valid) {
+    val title =
         if (isGeneratedPhrase) {
             stringResource(id = VaultR.string.seed_phrase_generated)
         } else {
             stringResource(id = VaultR.string.seed_phrase_validated)
         }
-    } else {
-        invalidReason!!.errorTitle()
-    }
+
 
     val message =
-        if (valid) {
-            if (!isGeneratedPhrase) {
-                stringResource(id = VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase)
-            } else ""
-        } else {
-            invalidReason!!.errorMessage()
-        }
+        if (!isGeneratedPhrase) {
+            stringResource(id = VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase)
+        } else ""
 
-    val buttonText = if (valid) VaultR.string.next else VaultR.string.review_phrase
+    val buttonText = VaultR.string.next
 
-    val buttonAction = if (valid) saveSeedPhrase else editSeedPhrase
+    val buttonAction = saveSeedPhrase
 
     val horizontalPadding = 32.dp
 
@@ -239,7 +231,6 @@ fun PreviewSeedPhraseVerification() {
         )
 
     ReviewSeedPhraseUI(
-        invalidReason = null,
         phraseWords = words.toList(),
         saveSeedPhrase = {},
         editSeedPhrase = {}
@@ -252,7 +243,6 @@ fun PreviewGeneratedSeedPhraseVerification() {
     val words = "grocery crush fantasy pulse struggle brain federal equip remember figure lyrics afraid tape ugly gold yard way isolate drill lawn daughter either supply student".split(" ")
 
     ReviewSeedPhraseUI(
-        invalidReason = null,
         phraseWords = words.toList(),
         isGeneratedPhrase = true,
         saveSeedPhrase = {},
