@@ -19,6 +19,7 @@ object SharedColors {
     private val DarkBlue = Color(0xFF052F69)
     private val SkyBlue = Color(0xFF47F7F7)
     private val LightBlue = Color(0xFFd7f1f2)
+    private val GreyBackground = Color(0xFFEBF5F6)
 
     val ButtonBackgroundBlue = DarkBlue
     val DisabledButtonBackgroundBlue = ButtonBackgroundBlue.copy(alpha = 0.25f)
@@ -45,5 +46,7 @@ object SharedColors {
     val WordBoxTextColor = DarkBlue
     val WordBoxBackground = Color.White
 
+    val LockScreenBackground = GreyBackground
+    val LightColorLine = SkyBlue
 
 }
