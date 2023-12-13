@@ -27,12 +27,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.util.BIP39
 
 @Composable
 fun GetLiveWithUserUI(
@@ -60,7 +62,7 @@ fun GetLiveWithUserUI(
     ) {
 
         Image(
-            modifier = Modifier.weight(0.1f).fillMaxWidth(),
+            modifier = Modifier.weight(0.1f).fillMaxWidth().padding(top = screenHeight * 0.015f),
             painter = painterResource(id = R.drawable.activateapprover),
             contentDescription = null,
             contentScale = ContentScale.Fit,
@@ -127,9 +129,9 @@ fun GetLiveWithUserUI(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
-fun GetLiveWithUserUIPreview() {
+fun LargeGetLiveWithUserUIPreview() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -137,7 +139,43 @@ fun GetLiveWithUserUIPreview() {
     ) {
         GetLiveWithUserUI(
             title = "Activate Neo",
-            message = "For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things. For maximum security yada yada and then go do this thing over there and think about all sorts of things.",
+            message = "Activating New as an approver will take about 2 minutes. This activation should preferable take place while you're on the phone or in-person to ensure you are activating the proper approver.",
+            activatingApprover = true,
+            onContinueLive = {},
+            onResumeLater = {},
+        )
+    }
+}
+
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun NormalGetLiveWithUserUIPreview() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        GetLiveWithUserUI(
+            title = "Activate Neo",
+            message = "Activating New as an approver will take about 2 minutes. This activation should preferable take place while you're on the phone or in-person to ensure you are activating the proper approver.",
+            activatingApprover = true,
+            onContinueLive = {},
+            onResumeLater = {},
+        )
+    }
+}
+
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
+@Composable
+fun SmallGetLiveWithUserUIPreview() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        GetLiveWithUserUI(
+            title = "Activate Neo",
+            message = "Activating New as an approver will take about 2 minutes. This activation should preferable take place while you're on the phone or in-person to ensure you are activating the proper approver.",
             activatingApprover = true,
             onContinueLive = {},
             onResumeLater = {},

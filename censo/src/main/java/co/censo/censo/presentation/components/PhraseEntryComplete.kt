@@ -54,7 +54,7 @@ fun SeedPhraseAdded(
 
         Image(
             modifier = Modifier.fillMaxWidth().weight(0.1f),
-            painter = painterResource(id = co.censo.censo.R.drawable.congrats),
+            painter = painterResource(id = co.censo.censo.R.drawable.centered_congrats),
             contentDescription = null,
             contentScale = ContentScale.Fit,
         )

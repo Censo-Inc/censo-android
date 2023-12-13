@@ -402,7 +402,7 @@ fun TermsOfUse(
                 ) {
                     Text(
                         text = stringResource(id = SharedR.string.tou_review),
-                        style = ButtonTextStyle.copy(fontSize = 22.sp),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp),
                         modifier = Modifier.padding(all = 8.dp)
                     )
                 }
@@ -416,7 +416,7 @@ fun TermsOfUse(
                 Text(
                     text = stringResource(SharedR.string.tou_accept),
                     modifier = Modifier.padding(all = 8.dp),
-                    style = ButtonTextStyle.copy(fontSize = 22.sp)
+                    style = ButtonTextStyle.copy(fontSize = 20.sp)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
