@@ -67,7 +67,20 @@ fun InitialPlanSetupScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
-            navController.navigate(Screen.OwnerWelcomeScreen.route)
+
+            val publicKey =
+                (state.createPolicyParamsResponse as? Resource.Success)?.data?.masterEncryptionPublicKey
+                    ?: state.createPolicyParams?.masterEncryptionPublicKey
+
+            val route = publicKey?.let {
+                Screen.EnterPhraseRoute.buildNavRoute(
+                    masterPublicKey = it,
+                    welcomeFlow = true
+                )
+            } ?: Screen.OwnerWelcomeScreen.route
+
+
+            navController.navigate(route)
             viewModel.reset()
         }
     }
