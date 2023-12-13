@@ -45,7 +45,7 @@ android {
         applicationId = "co.censo.censo"
         minSdk = 33
         targetSdk = 33
-        versionCode = 38
+        versionCode = 39
         versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
 
         signingConfig = if (signBuild) {
