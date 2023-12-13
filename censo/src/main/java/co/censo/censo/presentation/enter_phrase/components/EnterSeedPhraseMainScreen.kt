@@ -227,8 +227,9 @@ fun LargePreviewEnterPhraseMainScreen() {
     SelectSeedPhraseEntryType(
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
+        onGenerateEntrySelected = {},
         welcomeFlow = false,
-        currentLanguage = BIP39.WordListLanguage.English
+        currentLanguage = BIP39.WordListLanguage.English,
     )
 }
 
@@ -238,6 +239,7 @@ fun NormalPreviewEnterPhraseMainScreen() {
     SelectSeedPhraseEntryType(
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
+        onGenerateEntrySelected = {},
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English
     )
