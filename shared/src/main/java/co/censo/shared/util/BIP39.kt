@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.security.SecureRandom
 
 @Serializable
 data class WordLists(
@@ -55,11 +56,24 @@ fun BIP39InvalidReason.errorMessage() =
     }
 
 object BIP39 {
-
-    lateinit var context: Context
+    private lateinit var wordlists: Map<WordListLanguage, List<String>>
 
     fun setup(context: Context) {
-        this.context = context
+        val wordListsFromJson = context.resources.openRawResource(R.raw.bip39words).let {
+            Json.decodeFromStream<WordLists>(it)
+        }
+        this.wordlists = mapOf(
+            WordListLanguage.English to wordListsFromJson.english,
+            WordListLanguage.Spanish to wordListsFromJson.spanish,
+            WordListLanguage.French to wordListsFromJson.french,
+            WordListLanguage.Italian to wordListsFromJson.italian,
+            WordListLanguage.Portugese to wordListsFromJson.portugese,
+            WordListLanguage.Czech to wordListsFromJson.czech,
+            WordListLanguage.Japanese to wordListsFromJson.japanese,
+            WordListLanguage.Korean to wordListsFromJson.korean,
+            WordListLanguage.ChineseTraditional to wordListsFromJson.chineseTraditional,
+            WordListLanguage.ChineseSimplified to wordListsFromJson.chineseSimplified,
+        )
     }
 
     enum class WordListLanguage {
@@ -130,6 +144,14 @@ object BIP39 {
                 ChineseTraditional -> "中文(繁體)"
             }
         }
+    }
+
+    enum class WordCount(val value: Int) {
+        Twelve(12),
+        Fifteen(15),
+        Eighteen(18),
+        TwentyOne(21),
+        TwentyFour(24)
     }
 
     const val MAX_LENGTH = 24
@@ -274,21 +296,11 @@ object BIP39 {
         }
     }
 
-    private val wordlists: Map<WordListLanguage, List<String>> by lazy {
-        val wordListsFromJson = context.resources.openRawResource(R.raw.bip39words).let {
-            Json.decodeFromStream<WordLists>(it)
-        }
-        mapOf(
-            WordListLanguage.English to wordListsFromJson.english,
-            WordListLanguage.Spanish to wordListsFromJson.spanish,
-            WordListLanguage.French to wordListsFromJson.french,
-            WordListLanguage.Italian to wordListsFromJson.italian,
-            WordListLanguage.Portugese to wordListsFromJson.portugese,
-            WordListLanguage.Czech to wordListsFromJson.czech,
-            WordListLanguage.Japanese to wordListsFromJson.japanese,
-            WordListLanguage.Korean to wordListsFromJson.korean,
-            WordListLanguage.ChineseTraditional to wordListsFromJson.chineseTraditional,
-            WordListLanguage.ChineseSimplified to wordListsFromJson.chineseSimplified,
-        )
+    fun generate(wordCount: WordCount, language: WordListLanguage): List<String> {
+        val entropyBitsCount = wordCount.value / 3 * 32
+        val entropy = ByteArray(entropyBitsCount / 8)
+        val secureRandom = SecureRandom()
+        secureRandom.nextBytes(entropy)
+        return binaryDataToWords(byteArrayOf(language.toId()) + entropy)
     }
 }

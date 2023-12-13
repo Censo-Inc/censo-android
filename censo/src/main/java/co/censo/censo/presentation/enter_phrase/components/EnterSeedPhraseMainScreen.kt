@@ -42,7 +42,8 @@ fun SelectSeedPhraseEntryType(
     welcomeFlow: Boolean,
     currentLanguage: BIP39.WordListLanguage,
     onManualEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
-    onPasteEntrySelected: () -> Unit
+    onPasteEntrySelected: () -> Unit,
+    onGenerateEntrySelected: () -> Unit
 ) {
 
     var selectedLanguage by remember { mutableStateOf(currentLanguage) }
@@ -146,6 +147,29 @@ fun SelectSeedPhraseEntryType(
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+        StandardButton(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.Black,
+            onClick = onGenerateEntrySelected,
+            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
+        ) {
+            Row {
+                Icon(
+                    painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.generate_seed_phrase),
+                    color = Color.White,
+                    fontSize = 24.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(verticalSpacingHeight))
     }
 }
 
@@ -155,6 +179,7 @@ fun PreviewEnterPhraseMainScreen() {
     SelectSeedPhraseEntryType(
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
+        onGenerateEntrySelected = {},
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English
     )

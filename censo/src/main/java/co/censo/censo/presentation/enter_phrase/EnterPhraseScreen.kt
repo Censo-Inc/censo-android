@@ -40,6 +40,7 @@ import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
 import co.censo.censo.presentation.enter_phrase.components.EditPhraseWordUI
+import co.censo.censo.presentation.enter_phrase.components.GeneratePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
@@ -76,6 +77,7 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.REVIEW,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.LABEL,
+        EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.DONE -> stringResource(R.string.add_seed_phrase_title)
     }
 
@@ -222,7 +224,8 @@ fun EnterPhraseScreen(
                                 welcomeFlow = state.welcomeFlow,
                                 currentLanguage = state.currentLanguage,
                                 onManualEntrySelected = { language -> viewModel.entrySelected(EntryType.MANUAL, language) },
-                                onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) }
+                                onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
+                                onGenerateEntrySelected = { viewModel.entrySelected(EntryType.GENERATE) }
                             )
                         }
 
@@ -243,6 +246,14 @@ fun EnterPhraseScreen(
                                 onWordSelected = viewModel::wordSelected,
                                 wordSubmitted = viewModel::wordSubmitted,
                                 language = state.currentLanguage
+                            )
+                        }
+
+                        EnterPhraseUIState.GENERATE -> {
+                            GeneratePhraseUI(
+                                selectedWordCount = state.desiredGeneratedPhraseLength,
+                                onWordCountSelected = viewModel::onDesiredGeneratedPhraseLengthSelected,
+                                onGenerate = viewModel::generatePhrase
                             )
                         }
 
@@ -269,9 +280,9 @@ fun EnterPhraseScreen(
                             ReviewSeedPhraseUI(
                                 invalidReason = state.phraseInvalidReason,
                                 phraseWords = state.enteredWords,
+                                isGeneratedPhrase = state.seedPhraseWasGenerated,
                                 saveSeedPhrase = viewModel::moveToLabel,
                                 editSeedPhrase = viewModel::editEntirePhrase
-
                             )
                         }
 

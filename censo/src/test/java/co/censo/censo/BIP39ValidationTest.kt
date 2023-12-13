@@ -5,6 +5,7 @@ import co.censo.shared.util.BIP39InvalidReason
 import co.censo.shared.util.BIP39
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,6 +99,18 @@ class BIP39ValidationTest {
         testPhrases.forEach { phrase ->
             assertNull(BIP39.validateSeedPhrase(phrase))
         }
+    }
+
+    @Test
+    fun `test generation`() {
+        val phrase1 = BIP39.generate(BIP39.WordCount.Twelve, BIP39.WordListLanguage.English)
+        assertEquals(12, phrase1.size)
+        assertNull(BIP39.validateSeedPhrase(phrase1))
+        assertNotEquals(phrase1, BIP39.generate(BIP39.WordCount.Twelve, BIP39.WordListLanguage.English))
+
+        val phrase2 = BIP39.generate(BIP39.WordCount.TwentyFour, BIP39.WordListLanguage.English)
+        assertEquals(24, phrase2.size)
+        assertNull(BIP39.validateSeedPhrase(phrase2))
     }
 
     private val languageTestPhrases: Map<BIP39.WordListLanguage, String> = mapOf(
