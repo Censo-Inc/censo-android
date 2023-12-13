@@ -173,27 +173,6 @@ fun SelectSeedPhraseEntryType(
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
             StandardButton(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                onClick = onGenerateEntrySelected,
-                contentPadding = PaddingValues(vertical = 12.dp)
-            ) {
-                Row {
-                    Icon(
-                        painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
-                        contentDescription = null,
-                        tint = SharedColors.ButtonTextBlue
-                    )
-                    Spacer(modifier = Modifier.width(screenWidth * 0.020f))
-                    Text(
-                        text = stringResource(R.string.generate_seed_phrase),
-                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-            StandardButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
@@ -211,6 +190,28 @@ fun SelectSeedPhraseEntryType(
                     Spacer(modifier = Modifier.width(screenWidth * 0.010f))
                     Text(
                         text = stringResource(R.string.paste_seed_phrase),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+                    )
+                }
+            }
+
+
+            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+            StandardButton(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                onClick = onGenerateEntrySelected,
+                contentPadding = PaddingValues(vertical = 12.dp)
+            ) {
+                Row {
+                    Icon(
+                        painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
+                        contentDescription = null,
+                        tint = SharedColors.ButtonTextBlue
+                    )
+                    Spacer(modifier = Modifier.width(screenWidth * 0.020f))
+                    Text(
+                        text = stringResource(R.string.generate_seed_phrase),
                         style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
                     )
                 }
