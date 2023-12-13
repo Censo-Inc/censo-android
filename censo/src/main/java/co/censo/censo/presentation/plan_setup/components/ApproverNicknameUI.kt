@@ -130,7 +130,7 @@ fun ApproverNicknameUI(
             val saveButtonTextStyle = if (enabled) ButtonTextStyle else DisabledButtonTextStyle
             Text(
                 text = stringResource(id = R.string.continue_text),
-                style = saveButtonTextStyle.copy(fontSize = 24.sp)
+                style = saveButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
 

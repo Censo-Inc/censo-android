@@ -109,7 +109,7 @@ fun AddOrAccessRow(
             ) {
                 Text(
                     text = stringResource(R.string.add),
-                    style = ButtonTextStyle.copy(fontSize = 24.sp)
+                    style = ButtonTextStyle.copy(fontSize = 20.sp)
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -130,7 +130,7 @@ fun AddOrAccessRow(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.access),
-                        style = ButtonTextStyle.copy(fontSize = 24.sp)
+                        style = ButtonTextStyle.copy(fontSize = 20.sp)
                     )
                 }
             }

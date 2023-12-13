@@ -85,7 +85,7 @@ fun LockEngagedUI(
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = stringResource(id = R.string.unlock),
-                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium)
+                    style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium)
                 )
             }
         }

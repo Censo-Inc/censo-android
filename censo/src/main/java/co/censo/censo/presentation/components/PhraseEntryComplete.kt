@@ -84,7 +84,7 @@ fun SeedPhraseAdded(
         ) {
             Text(
                 text = stringResource(co.censo.censo.R.string.ok),
-                style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
             )
         }
 

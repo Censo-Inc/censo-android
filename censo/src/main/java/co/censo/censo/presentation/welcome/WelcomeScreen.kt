@@ -231,7 +231,7 @@ fun WelcomeScreenUI(
         ) {
             Text(
                 text = buttonText,
-                style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Medium),
+                style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
                 modifier = Modifier.padding(all = 8.dp)
             )
         }

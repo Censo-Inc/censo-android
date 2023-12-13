@@ -97,7 +97,7 @@ fun ApproversHomeScreen(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = pluralStringResource(id = R.plurals.remove_approvers, count = nonOwnerApprovers.size),
-                        style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
                     )
                 }
             }
@@ -185,7 +185,7 @@ fun NoApproversUI(
                 } else {
                     Text(
                         text = stringResource(R.string.add_approvers_button_text),
-                        style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.W400)
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
                     )
                 }
 

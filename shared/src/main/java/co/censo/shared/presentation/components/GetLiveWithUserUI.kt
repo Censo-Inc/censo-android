@@ -105,7 +105,7 @@ fun GetLiveWithUserUI(
             ) {
                 Text(
                     text = buttonText,
-                    style = ButtonTextStyle.copy(fontSize = 24.sp),
+                    style = ButtonTextStyle.copy(fontSize = 20.sp),
                 )
             }
 
@@ -119,7 +119,7 @@ fun GetLiveWithUserUI(
                 ) {
                     Text(
                         text = stringResource(R.string.resume_later),
-                        style = ButtonTextStyle.copy(fontSize = 24.sp),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp),
                     )
                 }
 

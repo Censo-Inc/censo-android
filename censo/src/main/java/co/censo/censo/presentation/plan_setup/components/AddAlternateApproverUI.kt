@@ -80,7 +80,7 @@ fun AddAlternateApproverUI(
         ) {
             Text(
                 text = stringResource(R.string.invite_alternate),
-                style = ButtonTextStyle.copy(fontSize = 24.sp)
+                style = ButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
 

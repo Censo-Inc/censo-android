@@ -7,7 +7,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 val ButtonTextStyle = TextStyle(
-    fontSize = 20.sp,
+    fontSize = 18.sp,
     fontWeight = FontWeight(600),
     color = SharedColors.ButtonTextBlue,
     textAlign = TextAlign.Center,

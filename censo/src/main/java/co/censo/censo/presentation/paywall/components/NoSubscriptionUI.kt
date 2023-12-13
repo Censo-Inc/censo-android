@@ -95,11 +95,11 @@ fun NoSubscriptionUI(
             ) {
                 Text(
                     text = stringResource(R.string.continue_text),
-                    style = ButtonTextStyle.copy(fontSize = 32.sp, fontWeight = FontWeight.Medium),
+                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium),
                 )
                 Text(
                     text = "$trialText$priceText",
-                    style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
+                    style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
                 )
             }
         }

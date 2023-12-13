@@ -123,7 +123,7 @@ fun ReadyToAccessPhrase(
         ) {
             Text(
                 text = stringResource(id = R.string.get_started),
-                style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Medium),
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
                 modifier = Modifier.padding(all = 8.dp)
             )
         }

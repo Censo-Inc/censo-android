@@ -132,7 +132,7 @@ fun SelectApprover(
 
                         Text(
                             text = stringResource(id = R.string.continue_text),
-                            style = continueButtonTextStyle.copy(fontSize = 24.sp)
+                            style = continueButtonTextStyle.copy(fontSize = 20.sp)
                         )
                     }
                 }

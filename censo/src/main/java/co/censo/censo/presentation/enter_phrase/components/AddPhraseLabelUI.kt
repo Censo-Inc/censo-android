@@ -124,7 +124,7 @@ fun AddPhraseLabelUI(
 
             Text(
                 text = stringResource(id = R.string.save_seed_phrase),
-                style = saveButtonTextStyle.copy(fontSize = 24.sp)
+                style = saveButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
 
