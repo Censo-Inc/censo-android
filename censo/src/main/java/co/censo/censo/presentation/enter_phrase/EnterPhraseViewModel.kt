@@ -14,8 +14,11 @@ import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.lang.Integer.max
@@ -157,31 +160,37 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun moveToLabel() {
-        viewModelScope.launch {
+        if (!state.phraseEncryptionInProgress) {
+            state = state.copy(phraseEncryptionInProgress = true)
+
             if (state.masterPublicKey == null) {
                 state = state.copy(
-                    submitResource = Resource.Error(exception = Exception("Missing public key"))
+                    submitResource = Resource.Error(exception = Exception("Missing public key")),
+                    phraseEncryptionInProgress = false
                 )
-                return@launch
+                return
             }
 
-            runCatching {
-                // encrypt seed phrase and drop single words
-                val encryptedSeedPhrase = ownerRepository.encryptSeedPhrase(
-                    state.masterPublicKey!!,
-                    state.enteredWords
-                )
+            viewModelScope.launch(Dispatchers.IO) {
+                runCatching {
+                    // encrypt seed phrase and drop single words
+                    val encryptedSeedPhrase = ownerRepository.encryptSeedPhrase(
+                        state.masterPublicKey!!,
+                        state.enteredWords
+                    )
 
-                state = state.copy(
-                    enterWordUIState = EnterPhraseUIState.LABEL,
-                    encryptedSeedPhrase = encryptedSeedPhrase,
-                    enteredWords = listOf()
-                )
-
-            }.onFailure { throwable ->
-                state = state.copy(
-                    submitResource = Resource.Error(exception = Exception("Unable to encrypt seed phrase"))
-                )
+                    state = state.copy(
+                        enterWordUIState = EnterPhraseUIState.LABEL,
+                        encryptedSeedPhrase = encryptedSeedPhrase,
+                        enteredWords = listOf(),
+                        phraseEncryptionInProgress = false
+                    )
+                }.onFailure { _ ->
+                    state = state.copy(
+                        submitResource = Resource.Error(exception = Exception("Unable to encrypt seed phrase")),
+                        phraseEncryptionInProgress = false
+                    )
+                }
             }
         }
     }

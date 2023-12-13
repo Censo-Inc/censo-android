@@ -23,6 +23,7 @@ data class EnterPhraseState(
     val submitResource: Resource<Unit> = Resource.Uninitialized,
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
     val userResource: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
+    val phraseEncryptionInProgress: Boolean = false,
 
     //Flags
     val welcomeFlow: Boolean = false,
@@ -36,6 +37,11 @@ data class EnterPhraseState(
     companion object {
         const val PHRASE_LABEL_MAX_LENGTH = 50
     }
+
+    val error = submitResource is Resource.Error || userResource is Resource.Error
+    val loading = submitResource is Resource.Loading
+            || userResource is Resource.Loading
+            || phraseEncryptionInProgress
 
     val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH
     val labelValid = label.isNotEmpty() && !labelIsTooLong
@@ -51,9 +57,6 @@ data class EnterPhraseState(
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.DONE -> BackIconType.CLOSE
     }
-
-    val error = submitResource is Resource.Error || userResource is Resource.Error
-    val loading = submitResource is Resource.Loading || userResource is Resource.Loading
 }
 
 enum class EnterPhraseUIState {
