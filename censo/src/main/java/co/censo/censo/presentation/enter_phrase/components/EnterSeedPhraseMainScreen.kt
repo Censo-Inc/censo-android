@@ -203,7 +203,9 @@ fun SelectSeedPhraseEntryType(
                 onClick = onGenerateEntrySelected,
                 contentPadding = PaddingValues(vertical = 12.dp)
             ) {
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
                         contentDescription = null,
