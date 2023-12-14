@@ -34,6 +34,7 @@ import javax.inject.Inject
 //TODO: Build towards being able to test the flow
 // VMs split ---
 // VMs contain only necesarry logic ----
+// Clean up PlanFinalizationVM and determine a strong solution for the two VMs to communicate *****
 // PlanSetupVM can communicate and trigger PlanFinalization methods via View
 // PlanSetupScreen is cleaned up to handle two states/two VMs
 /**
@@ -147,6 +148,7 @@ class PlanSetupViewModel @Inject constructor(
             //Nickname or Approver Actions
             is PlanSetupAction.ApproverNicknameChanged ->
                 onApproverNicknameChanged(action.name)
+            //TODO: Test approver confirmed functionality when alternate approver is added
             PlanSetupAction.ApproverConfirmed -> onApproverConfirmed()
             PlanSetupAction.EditApproverNickname -> onEditApproverNickname()
             PlanSetupAction.GoLiveWithApprover -> onGoLiveWithApprover()
@@ -206,12 +208,11 @@ class PlanSetupViewModel @Inject constructor(
             threshold = state.planSetupDirection.threshold,
             policySetupApprovers = listOf(ownerAsApprover),
             nextAction = {
-                TODO("Next action from here is to trigger the finalization ViewModel")
-//                receivePlanAction(PlanSetupAction.SavePlan)
+                //Next action is to trigger plan finalization
+                triggerPlanFinalization()
             }
         )
     }
-
     fun onStop() {
         verificationCodeTimer.stop()
         pollingVerificationTimer.stop()
@@ -327,10 +328,11 @@ class PlanSetupViewModel @Inject constructor(
         if (state.alternateApprover == null) {
             state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
         } else {
-            TODO("Trigger finalization VM")
+            triggerPlanFinalization()
         }
     }
 
+    //TODO: Update the below method and slot into the updated screen
     private fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
@@ -427,7 +429,7 @@ class PlanSetupViewModel @Inject constructor(
                     planSetupUIState = PlanSetupUIState.ApproverGettingLive_4
                 )
             } else if (alternateApprover?.status is ApproverStatus.Confirmed) {
-                TODO("Trigger plan finalization VM to finish plan setup")
+                triggerPlanFinalization()
             } else if (primaryApprover?.status is ApproverStatus.Confirmed) {
                 state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
             }
@@ -561,9 +563,17 @@ class PlanSetupViewModel @Inject constructor(
             }
         }
     }
+
+    fun triggerPlanFinalization() {
+        state = state.copy(finalizePlanSetup = Resource.Success(Unit))
+    }
+
     //endregion
 
     //region Reset functions
+    fun resetFinalizePlanSetup() {
+        state = state.copy(finalizePlanSetup = Resource.Uninitialized)
+    }
     fun resetNavigationResource() {
         state = state.copy(navigationResource = Resource.Uninitialized)
     }

@@ -47,7 +47,10 @@ data class PlanSetupState(
     val verifyKeyConfirmationSignature: Resource<Unit> = Resource.Uninitialized,
 
     // Navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized
+    val navigationResource: Resource<String> = Resource.Uninitialized,
+
+    // Plan Finalization
+    val finalizePlanSetup: Resource<Unit> = Resource.Uninitialized,
 ) {
     companion object {
         const val APPROVER_NAME_MAX_LENGTH = 20
