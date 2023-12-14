@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.components.LanguageSelectionMenu
-import co.censo.censo.presentation.welcome.SetupStep
+import co.censo.censo.presentation.components.SetupStep
 import co.censo.shared.util.BIP39
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors

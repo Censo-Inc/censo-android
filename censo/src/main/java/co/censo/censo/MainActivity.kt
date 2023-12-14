@@ -28,7 +28,6 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
-import co.censo.censo.presentation.welcome.WelcomeScreen
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.main.MainVaultScreen
 import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
@@ -108,9 +107,6 @@ class MainActivity : FragmentActivity() {
         ) {
             composable(route = Screen.EntranceRoute.route) {
                 OwnerEntranceScreen(navController = navController)
-            }
-            composable(route = Screen.OwnerWelcomeScreen.route) {
-                WelcomeScreen(navController = navController)
             }
             composable(route = Screen.OwnerVaultScreen.route) {
                 MainVaultScreen(selectedBottomNavItem = bottomNavItem, navController = navController)

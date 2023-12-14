@@ -23,8 +23,6 @@ sealed class Screen(val route: String) {
 
     object OwnerVaultScreen : Screen("owner_vault_screen")
 
-    object OwnerWelcomeScreen : Screen("owner_welcome_screen")
-
     object InitialPlanSetupRoute : Screen("initial_plan_setup_route")
 
     object AccessSeedPhrases : Screen("access_seed_phrases")

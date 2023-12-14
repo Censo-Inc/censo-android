@@ -77,7 +77,7 @@ fun InitialPlanSetupScreen(
                     masterPublicKey = it,
                     welcomeFlow = true
                 )
-            } ?: Screen.OwnerWelcomeScreen.route
+            } ?: Screen.EntranceRoute.route
 
 
             navController.navigate(route)
@@ -153,7 +153,6 @@ fun InitialPlanSetupScreen(
                             FacetecAuth(
                                 onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
-                                    navController.navigate(Screen.OwnerWelcomeScreen.route)
                                     viewModel.reset()
                                 }
                             )
