@@ -367,4 +367,7 @@
     <string name="processing_your_transaction">Processing your transaction</string>
     <string name="error">Error</string>
     <string name="default_invalid_phrase_message">The seed phrase you entered is not valid.\\n\\nPlease check your seed phrase and try again.</string>
+    <string name="i_have_my_own">I have my own</string>
+    <string name="time_to_add_your_first_seed_phrase">Time to add your first seed phrase</string>
+    <string name="generate_or_add_own_message">You can add one of your own, or if you would like to try Censo first, generate a new seed phrase with Censo and add that.</string>
 </resources>
