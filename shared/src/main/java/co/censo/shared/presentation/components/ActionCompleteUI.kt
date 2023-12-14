@@ -12,11 +12,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Device
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,15 +53,16 @@ fun ActionCompleteUI(title: String) {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Box(modifier = Modifier.fillMaxWidth().weight(0.1f)) {
-
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.1f)) {
                 Image(
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
+                        .align(Alignment.TopEnd)
                         .padding(top = screenHeight * 0.10f),
                     painter = painterResource(id = R.drawable.top_approved_hand),
                     contentDescription = null,
-                    contentScale = ContentScale.None,
+                    contentScale = ContentScale.Fit,
                 )
             }
 
@@ -69,22 +73,35 @@ fun ActionCompleteUI(title: String) {
                 fontSize = 48.sp
             )
 
-            Box(modifier = Modifier.fillMaxWidth().weight(0.1f)) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.1f)) {
                 Image(
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(bottom = screenHeight * 0.05f),
+                        .align(Alignment.BottomStart),
                     painter = painterResource(id = R.drawable.bottom_approved_hand),
                     contentDescription = null,
-                    contentScale = ContentScale.None,
+                    contentScale = ContentScale.Fit,
                 )
             }
         }
     }
 }
 
-@Preview(showSystemUi = true, showBackground = true)
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
 @Composable
-fun ActionCompleteUIPreview() {
+fun MediumActionCompleteUIPreview() {
+    ActionCompleteUI("Approved!")
+}
+
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
+@Composable
+fun LargeActionCompleteUIPreview() {
+    ActionCompleteUI("Approved!")
+}
+
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
+@Composable
+fun SmallActionCompleteUIPreview() {
     ActionCompleteUI("Approved!")
 }
