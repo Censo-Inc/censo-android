@@ -206,7 +206,7 @@ class FacetecAuthViewModel @Inject constructor(
 
         customization.ovalCustomization.strokeColor = SharedColors.FacetecPrimaryColor.toArgb()
         customization.ovalCustomization.progressColor1 = SharedColors.FacetecSecondaryColor.toArgb()
-        customization.ovalCustomization.progressColor2 = SharedColors.FacetecSecondaryColor.copy(alpha = 0.9f).toArgb()
+        customization.ovalCustomization.progressColor2 = SharedColors.FacetecPrimaryColor.copy(alpha = 0.9f).toArgb()
 
         customization.resultScreenCustomization.foregroundColor = SharedColors.FacetecPrimaryColor.toArgb()
         customization.resultScreenCustomization.uploadProgressFillColor = SharedColors.FacetecPrimaryColor.toArgb()
