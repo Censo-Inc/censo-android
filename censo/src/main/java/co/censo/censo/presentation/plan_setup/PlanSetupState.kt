@@ -42,16 +42,9 @@ data class PlanSetupState(
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
     val initiateAccessResponse: Resource<InitiateAccessApiResponse> = Resource.Uninitialized,
     val retrieveAccessShardsResponse: Resource<RetrieveAccessShardsApiResponse> = Resource.Uninitialized,
-    val replacePolicyResponse: Resource<ReplacePolicyApiResponse> = Resource.Uninitialized,
     val completeApprovershipResponse : Resource<CompleteOwnerApprovershipApiResponse> = Resource.Uninitialized,
 
     val verifyKeyConfirmationSignature: Resource<Unit> = Resource.Uninitialized,
-
-    // Cloud Storage
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
-
-    val keyData: PlanSetupKeyData? = null,
-    val saveKeyToCloud: Resource<Unit> = Resource.Uninitialized,
 
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized
@@ -85,18 +78,14 @@ data class PlanSetupState(
                 || createPolicySetupResponse is Resource.Loading
                 || initiateAccessResponse is Resource.Loading
                 || retrieveAccessShardsResponse is Resource.Loading
-                || replacePolicyResponse is Resource.Loading
-                || saveKeyToCloud is Resource.Loading
                 || completeApprovershipResponse is Resource.Loading
 
     val asyncError = userResponse is Resource.Error
             || createPolicySetupResponse is Resource.Error
             || initiateAccessResponse is Resource.Error
             || retrieveAccessShardsResponse is Resource.Error
-            || replacePolicyResponse is Resource.Error
             || verifyKeyConfirmationSignature is Resource.Error
             || completeApprovershipResponse is Resource.Error
-            || saveKeyToCloud is Resource.Error
 
     enum class BackIconType {
         None, Back, Exit
@@ -125,18 +114,8 @@ sealed interface PlanSetupAction {
     object GoLiveWithApprover: PlanSetupAction
     object ApproverConfirmed : PlanSetupAction
 
-    //Plan Finalization
-    object Completed : PlanSetupAction
-    object SavePlan: PlanSetupAction
-
     //Back
     object BackClicked : PlanSetupAction
-
-    //Cloud
-    object KeyUploadSuccess : PlanSetupAction
-    data class KeyDownloadSuccess(val encryptedKey: ByteArray) : PlanSetupAction
-    data class KeyDownloadFailed(val e: Exception?) : PlanSetupAction
-    data class KeyUploadFailed(val e: Exception?) : PlanSetupAction
 
     //Retry
     object Retry : PlanSetupAction
@@ -144,27 +123,4 @@ sealed interface PlanSetupAction {
 
 enum class ApproverType {
     Primary, Alternate
-}
-
-data class PlanSetupKeyData(
-    val encryptedPrivateKey: ByteArray,
-    val publicKey: Base58EncodedApproverPublicKey
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as InitialKeyData
-
-        if (!encryptedPrivateKey.contentEquals(other.encryptedPrivateKey)) return false
-        if (publicKey != other.publicKey) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = encryptedPrivateKey.contentHashCode()
-        result = 31 * result + publicKey.hashCode()
-        return result
-    }
 }

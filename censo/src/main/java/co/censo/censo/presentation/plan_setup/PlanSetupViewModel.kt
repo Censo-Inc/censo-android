@@ -1,7 +1,5 @@
 package co.censo.censo.presentation.plan_setup
 
-import Base58EncodedApproverPublicKey
-import Base64EncodedData
 import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,35 +9,33 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.base64Encoded
-import co.censo.shared.data.model.BiometryScanResultBlob
-import co.censo.shared.data.model.BiometryVerificationId
-import co.censo.shared.data.model.EncryptedShard
-import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
-import co.censo.shared.data.cryptography.decryptWithEntropy
-import co.censo.shared.data.cryptography.encryptWithEntropy
-import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.sendError
+import co.censo.censo.util.asExternalApprover
+import co.censo.censo.util.asOwnerAsApprover
+import co.censo.censo.util.confirmed
+import co.censo.censo.util.externalApprovers
+import co.censo.censo.util.notConfirmed
+import co.censo.censo.util.ownerApprover
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
 
+//TODO: Update docs
 
+//TODO: Build towards being able to test the flow
+// VMs split ---
+// VMs contain only necesarry logic ----
+// PlanSetupVM can communicate and trigger PlanFinalization methods via View
+// PlanSetupScreen is cleaned up to handle two states/two VMs
 /**
  *
  * Main Processes:
@@ -157,18 +153,6 @@ class PlanSetupViewModel @Inject constructor(
             PlanSetupAction.InviteApprover -> onInviteAlternateApprover()
             PlanSetupAction.SaveApproverAndSavePolicy -> saveApproverAndSubmitPolicy()
             PlanSetupAction.EditApproverAndSavePolicy -> updateApproverNicknameAndSubmitPolicy()
-
-
-            //Cloud Actions
-            PlanSetupAction.KeyUploadSuccess -> onKeyUploadSuccess()
-            is PlanSetupAction.KeyDownloadSuccess -> onKeyDownloadSuccess(action.encryptedKey)
-
-            is PlanSetupAction.KeyDownloadFailed -> onKeyDownloadFailed(action.e)
-            is PlanSetupAction.KeyUploadFailed -> onKeyUploadFailed(action.e)
-
-            //Finalizing Actions
-            PlanSetupAction.SavePlan -> onSaveAndFinishPlan()
-            PlanSetupAction.Completed -> onFullyCompleted()
         }
     }
     //endregion
@@ -221,7 +205,10 @@ class PlanSetupViewModel @Inject constructor(
         submitPolicySetup(
             threshold = state.planSetupDirection.threshold,
             policySetupApprovers = listOf(ownerAsApprover),
-            nextAction = { receivePlanAction(PlanSetupAction.SavePlan) }
+            nextAction = {
+                TODO("Next action from here is to trigger the finalization ViewModel")
+//                receivePlanAction(PlanSetupAction.SavePlan)
+            }
         )
     }
 
@@ -332,15 +319,6 @@ class PlanSetupViewModel @Inject constructor(
         )
     }
 
-    private fun onSaveAndFinishPlan() {
-        if (state.alternateApprover != null) {
-            // finishing flow after primary approver
-            dropAlternateApproverAndSaveKeyWithEntropy()
-        } else {
-            checkUserHasSavedKeyAndSubmittedPolicy()
-        }
-    }
-
     private fun onGoLiveWithApprover() {
         state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation_5)
     }
@@ -349,7 +327,7 @@ class PlanSetupViewModel @Inject constructor(
         if (state.alternateApprover == null) {
             state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
         } else {
-            checkUserHasSavedKeyAndSubmittedPolicy()
+            TODO("Trigger finalization VM")
         }
     }
 
@@ -449,7 +427,7 @@ class PlanSetupViewModel @Inject constructor(
                     planSetupUIState = PlanSetupUIState.ApproverGettingLive_4
                 )
             } else if (alternateApprover?.status is ApproverStatus.Confirmed) {
-                checkUserHasSavedKeyAndSubmittedPolicy()
+                TODO("Trigger plan finalization VM to finish plan setup")
             } else if (primaryApprover?.status is ApproverStatus.Confirmed) {
                 state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
             }
@@ -583,310 +561,11 @@ class PlanSetupViewModel @Inject constructor(
             }
         }
     }
-
-    private fun dropAlternateApproverAndSaveKeyWithEntropy() {
-        state = state.copy(createPolicySetupResponse = Resource.Loading())
-
-        viewModelScope.launch {
-            val response = ownerRepository.createPolicySetup(
-                threshold = state.planSetupDirection.threshold,
-                approvers = listOfNotNull(
-                    state.ownerApprover?.asOwnerAsApprover(),
-                    state.primaryApprover?.asExternalApprover()
-                )
-            )
-
-            if (response is Resource.Success) {
-                state = state.copy(alternateApprover = null)
-                checkUserHasSavedKeyAndSubmittedPolicy()
-            }
-
-            state = state.copy(
-                createPolicySetupResponse = response
-            )
-        }
-    }
-
-    private fun saveKeyWithEntropy() {
-        try {
-            state = state.copy(saveKeyToCloud = Resource.Loading())
-            val approverEncryptionKey = keyRepository.createApproverKey()
-
-            val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
-            val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
-
-            val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy!!
-
-            val idToken = keyRepository.retrieveSavedDeviceId()
-
-            val encryptedKey = approverEncryptionKey.encryptWithEntropy(
-                deviceKeyId = idToken,
-                entropy = entropy
-            )
-
-            val publicKey = Base58EncodedApproverPublicKey(
-                approverEncryptionKey.publicExternalRepresentation().value
-            )
-
-            val keyData = PlanSetupKeyData(
-                encryptedPrivateKey = encryptedKey,
-                publicKey = publicKey
-            )
-
-            state = state.copy(
-                keyData = keyData,
-                cloudStorageAction = CloudStorageActionData(
-                    triggerAction = true,
-                    action = CloudStorageActions.UPLOAD,
-                )
-            )
-        } catch (e: Exception) {
-            state = state.copy(saveKeyToCloud = Resource.Error(exception = e))
-        }
-    }
-
-
-    private fun completeApproverOwnership() {
-        state = state.copy(completeApprovershipResponse = Resource.Loading())
-
-        viewModelScope.launch {
-
-            val completeOwnerApprovershipApiRequest =
-                CompleteOwnerApprovershipApiRequest(
-                    approverPublicKey = state.keyData?.publicKey!!
-                )
-
-            val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
-            val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
-
-            val partId = ownerApprover?.participantId!!
-
-            val completeApprovershipResponse = ownerRepository.completeApproverOwnership(
-                partId,
-                completeOwnerApprovershipApiRequest
-            )
-
-            if (completeApprovershipResponse is Resource.Success) {
-                updateOwnerState(completeApprovershipResponse.data!!.ownerState)
-                initiateAccess()
-            }
-
-            state = state.copy(
-                completeApprovershipResponse = completeApprovershipResponse
-            )
-        }
-    }
-
-    private fun checkUserHasSavedKeyAndSubmittedPolicy() {
-        val owner = state.ownerApprover
-
-        if (owner == null) {
-            retrieveOwnerState()
-            return
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-
-            if (owner.status is ApproverStatus.ImplicitlyOwner) {
-                initiateAccess()
-                return@launch
-            }
-
-            val loadedKey =
-                state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
-
-            if (!loadedKey) {
-                if (keyRepository.userHasKeySavedInCloud(owner.participantId)) {
-                    state = state.copy(
-                        cloudStorageAction = CloudStorageActionData(
-                            triggerAction = true, action = CloudStorageActions.DOWNLOAD
-                        ),
-                    )
-                } else {
-                    saveKeyWithEntropy()
-                }
-
-                return@launch
-            }
-
-            completeApproverOwnership()
-        }
-    }
-
-    private fun initiateAccess() {
-        viewModelScope.launch {
-            if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
-                state = state.copy(initiateAccessResponse = Resource.Loading())
-
-                // cancel previous access if exists
-                state.ownerState?.access?.let {
-                    ownerRepository.cancelAccess()
-                }
-
-                // request new access for policy replacement
-                val initiateAccessResponse =
-                    ownerRepository.initiateAccess(AccessIntent.ReplacePolicy)
-
-
-                if (initiateAccessResponse is Resource.Success) {
-                    // navigate to the facetec view
-                    state = state.copy(planSetupUIState = PlanSetupUIState.AccessInProgress_7)
-
-                    updateOwnerState(initiateAccessResponse.data!!.ownerState)
-                }
-
-                state = state.copy(initiateAccessResponse = initiateAccessResponse)
-            } else {
-                state = state.copy(planSetupUIState = PlanSetupUIState.AccessInProgress_7)
-            }
-        }
-    }
-
-    private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
-        state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
-
-        try {
-
-            if (state.ownerState!!.policySetup!!.approvers.any {
-                    !ownerRepository.verifyKeyConfirmationSignature(
-                        it
-                    )
-                }) {
-                state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
-                return
-            }
-
-            state = state.copy(replacePolicyResponse = Resource.Loading())
-
-            viewModelScope.launch(Dispatchers.IO) {
-                val response = try {
-                    ownerRepository.replacePolicy(
-                        encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
-                        encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
-                        threshold = state.planSetupDirection.threshold,
-                        approvers = listOfNotNull(
-                            state.ownerApprover,
-                            state.primaryApprover,
-                            state.alternateApprover
-                        )
-                    )
-                } catch (e: Exception) {
-                    e.sendError(CrashReportingUtil.CloudDownload)
-                    state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
-                    return@launch
-                }
-
-                state = state.copy(replacePolicyResponse = response)
-
-                if (response is Resource.Success) {
-                    updateOwnerState(response.data!!.ownerState)
-
-                    state = state.copy(planSetupUIState = PlanSetupUIState.Completed_8)
-                }
-            }
-        } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.ReplacePolicy)
-            state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
-        }
-    }
-    //endregion
-
-    //region FaceScan
-    suspend fun onFaceScanReady(
-        verificationId: BiometryVerificationId,
-        biometry: FacetecBiometry
-    ): Resource<BiometryScanResultBlob> {
-        state = state.copy(retrieveAccessShardsResponse = Resource.Loading())
-
-        return viewModelScope.async {
-            val retrieveShardsResponse = ownerRepository.retrieveAccessShards(verificationId, biometry)
-
-            if (retrieveShardsResponse is Resource.Success) {
-                ownerRepository.cancelAccess()
-
-                replacePolicy(retrieveShardsResponse.data!!.encryptedShards)
-            }
-
-            state = state.copy(retrieveAccessShardsResponse = retrieveShardsResponse)
-
-            retrieveShardsResponse.map { it.scanResultBlob }
-        }.await()
-    }
-    //endregion
-
-    //region Cloud Storage
-    private fun onKeyUploadSuccess() {
-        resetCloudStorageActionState()
-        completeApproverOwnership()
-    }
-
-    private fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
-        resetCloudStorageActionState()
-
-        val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
-        val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
-
-        val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy!!
-        val deviceId = keyRepository.retrieveSavedDeviceId()
-
-        val publicKey =
-            Base58EncodedApproverPublicKey(
-                encryptedKey.decryptWithEntropy(
-                    deviceKeyId = deviceId,
-                    entropy = entropy
-                ).toEncryptionKey().publicExternalRepresentation().value
-            )
-
-        state = state.copy(
-            keyData = PlanSetupKeyData(
-                encryptedPrivateKey = encryptedKey,
-                publicKey = publicKey
-            )
-        )
-
-        checkUserHasSavedKeyAndSubmittedPolicy()
-    }
-
-    private fun onKeyUploadFailed(exception: Exception?) {
-        state = state.copy(
-            createPolicySetupResponse = Resource.Error(exception = exception),
-            saveKeyToCloud = Resource.Uninitialized
-        )
-        exception?.sendError(CrashReportingUtil.CloudUpload)
-    }
-
-    private fun onKeyDownloadFailed(exception: Exception?) {
-        state = state.copy(
-            createPolicySetupResponse = Resource.Error(exception = exception),
-            saveKeyToCloud = Resource.Uninitialized
-        )
-        exception?.sendError(CrashReportingUtil.CloudDownload)
-    }
     //endregion
 
     //region Reset functions
     fun resetNavigationResource() {
         state = state.copy(navigationResource = Resource.Uninitialized)
-    }
-
-    private fun resetCloudStorageActionState() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            saveKeyToCloud = Resource.Uninitialized
-        )
-    }
-
-    fun dismissCloudError() {
-        //dismiss error
-        state = state.copy(replacePolicyResponse = Resource.Uninitialized)
-        //kick user to home
-        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
-        //ensure facetec doesn't block us from leaving
-        state = state.copy(planSetupUIState = PlanSetupUIState.Initial_1)
-    }
-
-    fun resetReplacePolicyResponse() {
-        state = state.copy(replacePolicyResponse = Resource.Uninitialized)
     }
 
     fun resetInitiateAccessResponse() {
@@ -907,44 +586,6 @@ class PlanSetupViewModel @Inject constructor(
 
     fun resetRetrieveAccessShardsResponse() {
         state = state.copy(retrieveAccessShardsResponse = Resource.Uninitialized)
-    }
-    //endregion
-
-    //region Extension Functions Mapping Approver Types
-
-    private fun List<Approver.ProspectApprover>.ownerApprover(): Approver.ProspectApprover? {
-        return find { it.status is ApproverStatus.OwnerAsApprover || it.status is ApproverStatus.ImplicitlyOwner }
-    }
-
-    private fun List<Approver.ProspectApprover>.externalApprovers(): List<Approver.ProspectApprover> {
-        return filter { it.status !is ApproverStatus.OwnerAsApprover && it.status !is ApproverStatus.ImplicitlyOwner }
-    }
-
-    private fun List<Approver.ProspectApprover>.confirmed(): List<Approver.ProspectApprover> {
-        return externalApprovers().filter {
-            it.status is ApproverStatus.Confirmed || it.status is ApproverStatus.Onboarded
-        }
-    }
-
-    private fun List<Approver.ProspectApprover>.notConfirmed(): List<Approver.ProspectApprover> {
-        return externalApprovers().filter {
-            it.status !is ApproverStatus.Confirmed && it.status !is ApproverStatus.Onboarded
-        }
-    }
-
-    private fun Approver.ProspectApprover.asExternalApprover(): Approver.SetupApprover.ExternalApprover {
-        return Approver.SetupApprover.ExternalApprover(
-            label = this.label,
-            participantId = this.participantId,
-            deviceEncryptedTotpSecret = this.status.resolveDeviceEncryptedTotpSecret() ?: Base64EncodedData("")
-        )
-    }
-
-    private fun Approver.ProspectApprover.asOwnerAsApprover(): Approver.SetupApprover.OwnerAsApprover {
-        return Approver.SetupApprover.OwnerAsApprover(
-            label = this.label,
-            participantId = this.participantId,
-        )
     }
     //endregion
 }
