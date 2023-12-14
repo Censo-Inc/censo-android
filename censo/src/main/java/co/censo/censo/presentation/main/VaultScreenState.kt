@@ -16,6 +16,9 @@ data class VaultScreenState(
     // toast
     val syncCloudAccessMessage: Resource<SyncCloudAccessMessage> = Resource.Uninitialized,
 
+    //UI
+    val showAddApproversUI: Resource<Unit> = Resource.Uninitialized,
+
     // api requests
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSeedPhraseApiResponse> = Resource.Uninitialized,

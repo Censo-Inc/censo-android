@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Refresh
@@ -43,6 +44,7 @@ fun SettingsHomeScreen(
     onLock: () -> Unit,
     onDeleteUser: () -> Unit,
     onSignOut: () -> Unit,
+    onRemoveApprover: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -85,6 +87,13 @@ fun SettingsHomeScreen(
                 }
             }
 
+        val removeApproversText =
+            buildAnnotatedString {
+                withStyle(itemSpanStyle) {
+                    append(stringResource(R.string.remove_approvers))
+                }
+            }
+
         Spacer(modifier = Modifier.height(44.dp))
         Divider()
         Row(
@@ -92,8 +101,7 @@ fun SettingsHomeScreen(
                 .fillMaxWidth()
                 .clickable { onResyncCloudAccess() }
                 .padding(
-                    horizontal = 24.dp,
-                    vertical = 24.dp
+                    horizontal = 24.dp, vertical = 24.dp
                 ),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -108,8 +116,7 @@ fun SettingsHomeScreen(
                 .fillMaxWidth()
                 .clickable { onLock() }
                 .padding(
-                    horizontal = 24.dp,
-                    vertical = 24.dp
+                    horizontal = 24.dp, vertical = 24.dp
                 ),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -119,13 +126,37 @@ fun SettingsHomeScreen(
             Text(lockScreenText)
         }
         Divider()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onSignOut() }
+                .padding(all = 24.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSignOut() },
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SettingsIcon(Icons.Default.Group)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(removeApproversText)
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.an_approval_from_current_approvers_is_required),
+                color = SharedColors.MainColorText,
+                fontSize = 14.sp
+            )
+        }
+        Divider()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onSignOut() }
                 .padding(
-                    horizontal = 24.dp,
-                    vertical = 24.dp
+                    horizontal = 24.dp, vertical = 24.dp
                 ),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -140,8 +171,7 @@ fun SettingsHomeScreen(
                 .fillMaxWidth()
                 .clickable { onDeleteUser() }
                 .padding(
-                    horizontal = 24.dp,
-                    vertical = 24.dp
+                    horizontal = 24.dp, vertical = 24.dp
                 ),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -171,6 +201,7 @@ fun PreviewSettingsScreen() {
         onLock = {},
         onDeleteUser = {},
         onSignOut = {},
+        onRemoveApprover = {}
     )
 }
 

@@ -18,7 +18,6 @@ fun VaultTopBar(bottomNavItem: BottomNavItem) {
 
     val title = when (bottomNavItem) {
         BottomNavItem.Phrases -> stringResource(R.string.seed_phrases_app_bar_title)
-        BottomNavItem.Approvers -> stringResource(R.string.approvers_app_bar_title)
         BottomNavItem.Settings,
         BottomNavItem.Home -> ""
     }
@@ -44,7 +43,7 @@ fun VaultTopBar(bottomNavItem: BottomNavItem) {
 @Preview
 @Composable
 fun TopBarPreview() {
-    VaultTopBar(bottomNavItem = BottomNavItem.Approvers)
+    VaultTopBar(bottomNavItem = BottomNavItem.Phrases)
 }
 
 @Preview

@@ -39,7 +39,6 @@ fun CensoBottomNavBar(
 val bottomNavItems = listOf(
     BottomNavItem.Home,
     BottomNavItem.Phrases,
-    BottomNavItem.Approvers,
     BottomNavItem.Settings,
 )
 
@@ -84,10 +83,6 @@ enum class BottomNavItem(@StringRes val text: Int, @DrawableRes val icon: Int) {
     Phrases(
         text = R.string.phrases_nav_title,
         icon = R.drawable.lock_tab_icon
-    ),
-    Approvers(
-        text = R.string.approvers_nav_title,
-        icon = R.drawable.approvers_tab_icon
     ),
     Settings(
         text = R.string.settings_nav_title,

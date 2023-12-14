@@ -133,8 +133,16 @@ class VaultScreenViewModel @Inject constructor(
         ownerStateFlow.tryEmit(Resource.Success(ownerState))
     }
 
+    fun showAddApproverUI() {
+        state = state.copy(showAddApproversUI = Resource.Success(Unit))
+    }
+
     fun resetDeleteUserResource() {
         state = state.copy(deleteUserResource = Resource.Uninitialized)
+    }
+
+    fun resetShowApproversUI() {
+        state = state.copy(showAddApproversUI = Resource.Uninitialized)
     }
 
     fun resetDeleteSeedPhraseResponse() {
