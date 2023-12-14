@@ -67,9 +67,6 @@ fun SelectSeedPhraseEntryType(
         R.string.time_to_add_your_first_seed_phrase
     }
 
-    val message =
-        if (userHasOwnPhrase) R.string.add_seed_phrase_message else R.string.generate_or_add_own_message
-
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val verticalSpacingHeight = screenHeight * 0.020f
@@ -123,46 +120,49 @@ fun SelectSeedPhraseEntryType(
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-            MessageText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 36.dp),
-                message = message,
-                textAlign = TextAlign.Start
-            )
+            if (!userHasOwnPhrase) {
+                MessageText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp),
+                    message = R.string.generate_or_add_own_message,
+                    textAlign = TextAlign.Start
+                )
+            } else {
 
-            Spacer(modifier = Modifier.height(12.dp))
+                val basicStyle = SpanStyle(
+                    color = SharedColors.MainColorText,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal
+                )
 
-            val basicStyle = SpanStyle(
-                color = SharedColors.MainColorText,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal
-            )
-
-            val languageSelectionText = buildAnnotatedString {
-                withStyle(basicStyle) {
-                    append(
-                        stringResource(
-                            R.string.current_language,
-                            selectedLanguage.displayName()
+                val languageSelectionText = buildAnnotatedString {
+                    withStyle(basicStyle) {
+                        append(
+                            stringResource(
+                                R.string.current_language,
+                                selectedLanguage.displayName()
+                            )
                         )
-                    )
+                    }
+                    withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                        append(stringResource(R.string.here))
+                    }
                 }
-                withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
-                    append(stringResource(R.string.here))
-                }
+
+                LanguageSelectionMenu(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp),
+                    text = languageSelectionText,
+                    currentLanguage = selectedLanguage,
+                    action = {
+                        selectedLanguage = it
+                    }
+                )
             }
 
-            LanguageSelectionMenu(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 36.dp),
-                text = languageSelectionText,
-                currentLanguage = selectedLanguage,
-                action = {
-                    selectedLanguage = it
-                }
-            )
+            Spacer(modifier = Modifier.height(verticalSpacingHeight * 2))
 
             if (!userHasOwnPhrase) {
                 SelectPhraseCreation(
@@ -313,7 +313,7 @@ fun LargePreviewEnterPhraseMainScreen() {
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
         onGenerateEntrySelected = {},
-        welcomeFlow = false,
+        welcomeFlow = true,
         currentLanguage = BIP39.WordListLanguage.English,
     )
 }
