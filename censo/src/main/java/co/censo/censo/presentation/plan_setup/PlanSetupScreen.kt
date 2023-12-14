@@ -27,7 +27,6 @@ import co.censo.censo.R
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
-import co.censo.censo.presentation.plan_setup.components.AddAlternateApproverUI
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.model.ApproverStatus
@@ -36,6 +35,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
+import co.censo.shared.util.projectLog
 import kotlinx.coroutines.delay
 
 enum class PlanSetupDirection(val threshold: UInt) {
@@ -47,35 +47,46 @@ enum class PlanSetupDirection(val threshold: UInt) {
 fun PlanSetupScreen(
     navController: NavController,
     planSetupDirection: PlanSetupDirection,
-    viewModel: PlanSetupViewModel = hiltViewModel()
+    setupViewModel: PlanSetupViewModel = hiltViewModel(),
+    finalizationViewModel: PlanFinalizationViewModel = hiltViewModel()
 ) {
-    val state = viewModel.state
+    val setupState = setupViewModel.state
+    val finalizationState = finalizationViewModel.state//TODO: Propagate this across the screen
 
-    val iconPair = when (state.backArrowType) {
+    fun displaySetupUI() =
+        finalizationState.planFinalizationUIState == PlanFinalizationUIState.Uninitialized_0
+                && setupState.planSetupUIState != PlanSetupUIState.Uninitialized_0
+
+    val iconPair = when (setupState.backArrowType) {
         PlanSetupState.BackIconType.Back -> Icons.Filled.ArrowBack to R.string.back
         PlanSetupState.BackIconType.Exit -> Icons.Filled.Clear to R.string.exit
         else -> null
     }
 
-    LaunchedEffect(key1 = state) {
-        if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let {
+    LaunchedEffect(key1 = setupState) {
+        if (setupState.navigationResource is Resource.Success) {
+            setupState.navigationResource.data?.let {
                 navController.navigate(it)
-                viewModel.resetNavigationResource()
+                setupViewModel.resetNavigationResource()
             }
+        }
+
+        if (setupState.finalizePlanSetup is Resource.Success) {
+            setupViewModel.resetFinalizePlanSetup()
+            finalizationViewModel.onFinalizePlanSetup(setupState.planSetupDirection)
         }
     }
 
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_CREATE -> {
-                viewModel.onCreate(planSetupDirection)
+                setupViewModel.onCreate(planSetupDirection)
             }
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onResume()
+                setupViewModel.onResume()
             }
             Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onStop()
+                setupViewModel.onStop()
             }
             else -> Unit
         }
@@ -89,7 +100,7 @@ fun PlanSetupScreen(
                     else -> {
                         IconButton(
                             onClick = {
-                                viewModel.receivePlanAction(PlanSetupAction.BackClicked)
+                                setupViewModel.receivePlanAction(PlanSetupAction.BackClicked)
                             }) {
                             Icon(
                                 imageVector = iconPair.first,
@@ -102,7 +113,7 @@ fun PlanSetupScreen(
             title = {
                 Text(
                     text =
-                    when (state.planSetupUIState) {
+                    when (setupState.planSetupUIState) {
                         PlanSetupUIState.ApproverActivation_5,
                         PlanSetupUIState.EditApproverNickname_3 ->
                             stringResource(R.string.add_approver_title)
@@ -121,75 +132,76 @@ fun PlanSetupScreen(
         ) {
 
             when {
-                state.loading -> LargeLoading(fullscreen = true)
+                setupState.loading || finalizationState.loading -> LargeLoading(fullscreen = true)
 
-                state.asyncError -> {
-                    if (state.verifyKeyConfirmationSignature is Resource.Error) {
+                setupState.asyncError || finalizationState.asyncError -> {
+                    //TODO: Diligently walk through these states and update them to reference the correct area
+                    if (setupState.verifyKeyConfirmationSignature is Resource.Error) {
                         DisplayError(
                             errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
                             dismissAction = {
-                                viewModel.resetVerifyKeyConfirmationSignature()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetVerifyKeyConfirmationSignature()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetVerifyKeyConfirmationSignature()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetVerifyKeyConfirmationSignature()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.userResponse is Resource.Error) {
+                    } else if (setupState.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve user information, try again.",
                             dismissAction = {
-                                viewModel.resetUserResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetUserResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetUserResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetUserResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.createPolicySetupResponse is Resource.Error) {
+                    } else if (setupState.createPolicySetupResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to create policy, try again",
                             dismissAction = {
-                                viewModel.resetCreatePolicySetupResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetCreatePolicySetupResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetCreatePolicySetupResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetCreatePolicySetupResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.initiateAccessResponse is Resource.Error) {
+                    } else if (setupState.initiateAccessResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to replace plan, try again.",
                             dismissAction = {
-                                viewModel.resetInitiateAccessResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetInitiateAccessResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetInitiateAccessResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetInitiateAccessResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.retrieveAccessShardsResponse is Resource.Error) {
+                    } else if (setupState.retrieveAccessShardsResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve recovery data, try again.",
                             dismissAction = {
-                                viewModel.resetRetrieveAccessShardsResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetRetrieveAccessShardsResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                             retryAction = {
-                                viewModel.resetRetrieveAccessShardsResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                setupViewModel.resetRetrieveAccessShardsResponse()
+                                setupViewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.replacePolicyResponse is Resource.Error) {
-                        if (state.replacePolicyResponse.exception is CloudStoragePermissionNotGrantedException) {
+                    } else if (finalizationState.replacePolicyResponse is Resource.Error) {
+                        if (finalizationState.replacePolicyResponse.exception is CloudStoragePermissionNotGrantedException) {
                             DisplayError(
                                 errorMessage = "Google Drive Access Required for Censo\n\nPlease sign out and sign back in to refresh authentication permissions for your account",
                                 dismissAction = {
-                                    viewModel.dismissCloudError()
+                                    finalizationViewModel.dismissCloudError()
                                 },
                                 retryAction = null
                             )
@@ -197,136 +209,136 @@ fun PlanSetupScreen(
                             DisplayError(
                                 errorMessage = "Failed to create new policy, try again.",
                                 dismissAction = {
-                                    viewModel.resetReplacePolicyResponse()
-                                    viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                    finalizationViewModel.resetReplacePolicyResponse()
+                                    finalizationViewModel.receivePlanAction(PlanFinalizationAction.Retry)
                                 },
                                 retryAction = {
-                                    viewModel.resetReplacePolicyResponse()
-                                    viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                    finalizationViewModel.resetReplacePolicyResponse()
+                                    finalizationViewModel.receivePlanAction(PlanFinalizationAction.Retry)
                                 },
                             )
                         }
-                    } else if (state.completeApprovershipResponse is Resource.Error) {
+                    } else if (setupState.completeApprovershipResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to finalize plan, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = { setupViewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { setupViewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
-                    } else if (state.saveKeyToCloud is Resource.Error) {
+                    } else if (finalizationState.saveKeyToCloud is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to setup secure data, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = { finalizationViewModel.receivePlanAction(PlanFinalizationAction.Retry) },
+                            retryAction = { finalizationViewModel.receivePlanAction(PlanFinalizationAction.Retry) },
                         )
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = { setupViewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            retryAction = { setupViewModel.receivePlanAction(PlanSetupAction.Retry) },
                         )
                     }
                 }
 
                 else -> {
-                    when (state.planSetupUIState) {
-                        PlanSetupUIState.Initial_1 -> LargeLoading(
-                            fullscreen = true
-                        )
 
-                        PlanSetupUIState.ApproverNickname_2 -> {
-                            ApproverNicknameUI(
-                                isFirstApprover = state.primaryApprover?.status !is ApproverStatus.Confirmed,
-                                nickname = state.editedNickname,
-                                enabled = state.editedNicknameValid,
-                                nicknameIsTooLong = state.editedNicknameIsTooLong,
-                                onNicknameChanged = {
-                                    viewModel.receivePlanAction(PlanSetupAction.ApproverNicknameChanged(it))
-                                },
-                                onSaveNickname = {
-                                    viewModel.receivePlanAction(PlanSetupAction.SaveApproverAndSavePolicy)
-                                }
+                    if (displaySetupUI()) {
+                        when (setupState.planSetupUIState) {
+                            PlanSetupUIState.Initial_1 -> LargeLoading(
+                                fullscreen = true
                             )
-                        }
 
-                        PlanSetupUIState.EditApproverNickname_3 -> {
-                            ApproverNicknameUI(
-                                isFirstApprover = state.primaryApprover?.status !is ApproverStatus.Confirmed,
-                                isRename = true,
-                                nickname = state.editedNickname,
-                                enabled = state.editedNicknameValid,
-                                nicknameIsTooLong = state.editedNicknameIsTooLong,
-                                onNicknameChanged = {
-                                    viewModel.receivePlanAction(PlanSetupAction.ApproverNicknameChanged(it))
-                                },
-                                onSaveNickname = {
-                                    viewModel.receivePlanAction(PlanSetupAction.EditApproverAndSavePolicy)
-                                }
-                            )
-                        }
-
-                        //Really light screen. Just moves us to next UI or let's user back out.
-                        PlanSetupUIState.ApproverGettingLive_4 -> {
-                            GetLiveWithUserUI(
-                                title = "${stringResource(R.string.activate_approver)} ${state.editedNickname}",
-                                message = stringResource(R.string.activate_your_approver_message, state.editedNickname),
-                                activatingApprover = true,
-                                onContinueLive = {
-                                    viewModel.receivePlanAction(PlanSetupAction.GoLiveWithApprover)
-                                },
-                                onResumeLater = {
-                                    viewModel.receivePlanAction(PlanSetupAction.BackClicked)
-                                }
-                            )
-                        }
-
-                        //Verify approver while approver does full onboarding
-                        PlanSetupUIState.ApproverActivation_5 -> {
-                            ActivateApproverUI(
-                                prospectApprover = state.activatingApprover,
-                                secondsLeft = state.secondsLeft,
-                                verificationCode = state.approverCodes[state.activatingApprover?.participantId] ?: "",
-                                storesLink = LinksUtil.CENSO_APPROVER_STORE_LINK,
-                                onContinue = {
-                                    viewModel.receivePlanAction(PlanSetupAction.ApproverConfirmed)
-                                },
-                                onEditNickname = {
-                                    viewModel.receivePlanAction(PlanSetupAction.EditApproverNickname)
-                                }
-                            )
-                        }
-
-
-                        //Send us to Approver Getting Live or Approver Nickname.
-                        //Save plan will send us to cloud flow to save key with entropy.
-                        PlanSetupUIState.AddAlternateApprover_6 -> {
-                            AddAlternateApproverUI(
-                                onInviteAlternateSelected = {
-                                    viewModel.receivePlanAction(PlanSetupAction.InviteApprover)
-                                }
-                            )
-                        }
-
-                        PlanSetupUIState.AccessInProgress_7 -> {
-                            FacetecAuth(
-                                onFaceScanReady = { verificationId, biometry ->
-                                    viewModel.onFaceScanReady(verificationId, biometry)
-                                },
-                                onCancelled = {
-                                    viewModel.receivePlanAction(PlanSetupAction.BackClicked)
-                                }
-                            )
-                        }
-
-                        PlanSetupUIState.Completed_8 -> {
-                            when (planSetupDirection) {
-                                PlanSetupDirection.AddApprovers -> Activated()
-                                PlanSetupDirection.RemoveApprovers -> ApproversRemoved()
+                            PlanSetupUIState.ApproverNickname_2 -> {
+                                ApproverNicknameUI(
+                                    isFirstApprover = setupState.primaryApprover?.status !is ApproverStatus.Confirmed,
+                                    nickname = setupState.editedNickname,
+                                    enabled = setupState.editedNicknameValid,
+                                    nicknameIsTooLong = setupState.editedNicknameIsTooLong,
+                                    onNicknameChanged = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.ApproverNicknameChanged(it))
+                                    },
+                                    onSaveNickname = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.SaveApproverAndSavePolicy)
+                                    }
+                                )
                             }
 
-                            LaunchedEffect(Unit) {
-                                delay(6000)
-                                viewModel.receivePlanAction(PlanSetupAction.Completed)
+                            PlanSetupUIState.EditApproverNickname_3 -> {
+                                ApproverNicknameUI(
+                                    isFirstApprover = setupState.primaryApprover?.status !is ApproverStatus.Confirmed,
+                                    isRename = true,
+                                    nickname = setupState.editedNickname,
+                                    enabled = setupState.editedNicknameValid,
+                                    nicknameIsTooLong = setupState.editedNicknameIsTooLong,
+                                    onNicknameChanged = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.ApproverNicknameChanged(it))
+                                    },
+                                    onSaveNickname = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.EditApproverAndSavePolicy)
+                                    }
+                                )
                             }
+
+                            //Really light screen. Just moves us to next UI or let's user back out.
+                            PlanSetupUIState.ApproverGettingLive_4 -> {
+                                GetLiveWithUserUI(
+                                    title = "${stringResource(R.string.activate_approver)} ${setupState.editedNickname}",
+                                    message = stringResource(R.string.activate_your_approver_message, setupState.editedNickname),
+                                    activatingApprover = true,
+                                    onContinueLive = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.GoLiveWithApprover)
+                                    },
+                                    onResumeLater = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.BackClicked)
+                                    }
+                                )
+                            }
+
+                            //Verify approver while approver does full onboarding
+                            PlanSetupUIState.ApproverActivation_5 -> {
+                                ActivateApproverUI(
+                                    prospectApprover = setupState.activatingApprover,
+                                    secondsLeft = setupState.secondsLeft,
+                                    verificationCode = setupState.approverCodes[setupState.activatingApprover?.participantId] ?: "",
+                                    storesLink = LinksUtil.CENSO_APPROVER_STORE_LINK,
+                                    onContinue = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.ApproverConfirmed)
+                                    },
+                                    onEditNickname = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.EditApproverNickname)
+                                    }
+                                )
+                            }
+
+                            else -> {}
+                        }
+                    } else {
+                        when (finalizationState.planFinalizationUIState) {
+                            //TODO: May need loading UI
+                            PlanFinalizationUIState.AccessInProgress_1 -> {
+                                FacetecAuth(
+                                    onFaceScanReady = { verificationId, biometry ->
+                                        finalizationViewModel.onFaceScanReady(verificationId, biometry)
+                                    },
+                                    onCancelled = {
+                                        setupViewModel.receivePlanAction(PlanSetupAction.BackClicked)
+                                    }
+                                )
+                            }
+
+                            PlanFinalizationUIState.Completed_2 -> {
+                                when (planSetupDirection) {
+                                    PlanSetupDirection.AddApprovers -> Activated()
+                                    PlanSetupDirection.RemoveApprovers -> ApproversRemoved()
+                                }
+
+                                LaunchedEffect(Unit) {
+                                    delay(6000)
+                                    //TODO: Diligently check where this should go in the data after this method
+                                    finalizationViewModel.receivePlanAction(PlanFinalizationAction.Completed)
+                                }
+                            }
+
+                            else -> {}
                         }
                     }
                 }
@@ -334,47 +346,47 @@ fun PlanSetupScreen(
         }
     }
 
-    if (state.cloudStorageAction.triggerAction) {
-        if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-            val encryptedKey = state.keyData?.encryptedPrivateKey
-            val participantId = state.ownerApprover?.participantId
+    if (finalizationState.cloudStorageAction.triggerAction) {
+        if (finalizationState.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
+            val encryptedKey = finalizationState.keyData?.encryptedPrivateKey
+            val participantId = finalizationState.ownerApprover?.participantId
 
             if (encryptedKey != null && participantId != null) {
                 CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
+                    actionToPerform = finalizationState.cloudStorageAction.action,
                     participantId = participantId,
                     encryptedPrivateKey = encryptedKey,
                     onActionSuccess = {
-                        viewModel.receivePlanAction(PlanSetupAction.KeyUploadSuccess)
+                        finalizationViewModel.receivePlanAction(PlanFinalizationAction.KeyUploadSuccess)
                     },
                     onActionFailed = {
-                        viewModel.receivePlanAction(PlanSetupAction.KeyUploadFailed(it))
+                        finalizationViewModel.receivePlanAction(PlanFinalizationAction.KeyUploadFailed(it))
                     }
                 )
             } else {
                 val exceptionCause =
                     if (encryptedKey == null) "missing private key" else "missing participant id"
-                viewModel.receivePlanAction(PlanSetupAction.KeyUploadFailed(
+                finalizationViewModel.receivePlanAction(PlanFinalizationAction.KeyUploadFailed(
                     Exception("Unable to setup policy $exceptionCause")))
             }
-        } else if (state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
-            val participantId = state.ownerApprover?.participantId
+        } else if (finalizationState.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
+            val participantId = setupState.ownerApprover?.participantId
 
             if (participantId != null) {
                 CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
+                    actionToPerform = finalizationState.cloudStorageAction.action,
                     participantId = participantId,
                     encryptedPrivateKey = null,
                     onActionSuccess = {
-                        viewModel.receivePlanAction(PlanSetupAction.KeyDownloadSuccess(it))
+                        finalizationViewModel.receivePlanAction(PlanFinalizationAction.KeyDownloadSuccess(it))
                     },
                     onActionFailed = {
-                        viewModel.receivePlanAction(PlanSetupAction.KeyDownloadFailed(it))
+                        finalizationViewModel.receivePlanAction(PlanFinalizationAction.KeyDownloadFailed(it))
                     }
                 )
             } else {
-                viewModel.receivePlanAction(
-                    PlanSetupAction.KeyDownloadFailed(
+                finalizationViewModel.receivePlanAction(
+                    PlanFinalizationAction.KeyDownloadFailed(
                         Exception("Unable to setup policy, missing participant id")
                     )
                 )

@@ -34,9 +34,15 @@ import javax.inject.Inject
 //TODO: Build towards being able to test the flow
 // VMs split ---
 // VMs contain only necesarry logic ----
-// Clean up PlanFinalizationVM and determine a strong solution for the two VMs to communicate *****
-// PlanSetupVM can communicate and trigger PlanFinalization methods via View
-// PlanSetupScreen is cleaned up to handle two states/two VMs
+// Clean up PlanFinalizationVM and determine a strong solution for the two VMs to communicate ----- Setup a solution
+// PlanSetupVM can communicate and trigger PlanFinalization methods via View ----
+// PlanSetupScreen is cleaned up to handle two states/two VMs -----
+// - Next steps -
+// Test the current setup
+// Focus on testing the plan setup first and making sure it is solid
+// Then test the Plan finalization and make sure that is solid
+// iterate
+// build towards PR
 /**
  *
  * Main Processes:
