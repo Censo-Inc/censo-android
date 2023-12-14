@@ -70,8 +70,8 @@ data class PlanSetupState(
 
         planSetupUIState in listOf(
             PlanSetupUIState.ApproverGettingLive_4,
-            PlanSetupUIState.AddAlternateApprover_6,
-            PlanSetupUIState.AccessInProgress_7
+//            PlanSetupUIState.AddAlternateApprover_6,//Same as below
+//            PlanSetupUIState.AccessInProgress_7//TODO: Do we need this in the finalization state?
         ) -> BackIconType.Exit
 
         else -> BackIconType.None
@@ -96,14 +96,13 @@ data class PlanSetupState(
 }
 
 enum class PlanSetupUIState {
+    Uninitialized_0,
     Initial_1,
     ApproverNickname_2,
     EditApproverNickname_3,
     ApproverGettingLive_4,
     ApproverActivation_5,
-    AddAlternateApprover_6,
-    AccessInProgress_7,
-    Completed_8
+//    AddAlternateApprover_6,
 }
 
 sealed interface PlanSetupAction {
@@ -112,7 +111,6 @@ sealed interface PlanSetupAction {
     data class ApproverNicknameChanged(val name: String) : PlanSetupAction
     object EditApproverNickname : PlanSetupAction
     object EditApproverAndSavePolicy : PlanSetupAction
-    object InviteApprover : PlanSetupAction
     object SaveApproverAndSavePolicy : PlanSetupAction
     object GoLiveWithApprover: PlanSetupAction
     object ApproverConfirmed : PlanSetupAction

@@ -152,7 +152,6 @@ class PlanSetupViewModel @Inject constructor(
             PlanSetupAction.ApproverConfirmed -> onApproverConfirmed()
             PlanSetupAction.EditApproverNickname -> onEditApproverNickname()
             PlanSetupAction.GoLiveWithApprover -> onGoLiveWithApprover()
-            PlanSetupAction.InviteApprover -> onInviteAlternateApprover()
             PlanSetupAction.SaveApproverAndSavePolicy -> saveApproverAndSubmitPolicy()
             PlanSetupAction.EditApproverAndSavePolicy -> updateApproverNicknameAndSubmitPolicy()
         }
@@ -224,7 +223,7 @@ class PlanSetupViewModel @Inject constructor(
         val backIconNavigation = listOf(
             PlanSetupUIState.EditApproverNickname_3 to PlanSetupUIState.ApproverActivation_5,
             PlanSetupUIState.ApproverActivation_5 to PlanSetupUIState.ApproverGettingLive_4,
-            PlanSetupUIState.ApproverGettingLive_4 to PlanSetupUIState.AddAlternateApprover_6,
+//            PlanSetupUIState.ApproverGettingLive_4 to PlanSetupUIState.AddAlternateApprover_6,//TODO: Confirm we dont need this
         ).toMap()
 
         when (state.backArrowType) {
@@ -326,7 +325,7 @@ class PlanSetupViewModel @Inject constructor(
 
     private fun onApproverConfirmed() {
         if (state.alternateApprover == null) {
-            state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
+            onInviteAlternateApprover()
         } else {
             triggerPlanFinalization()
         }
@@ -431,7 +430,7 @@ class PlanSetupViewModel @Inject constructor(
             } else if (alternateApprover?.status is ApproverStatus.Confirmed) {
                 triggerPlanFinalization()
             } else if (primaryApprover?.status is ApproverStatus.Confirmed) {
-                state = state.copy(planSetupUIState = PlanSetupUIState.AddAlternateApprover_6)
+                onInviteAlternateApprover()
             }
         }
 
@@ -565,7 +564,7 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun triggerPlanFinalization() {
-        state = state.copy(finalizePlanSetup = Resource.Success(Unit))
+        state = state.copy(finalizePlanSetup = Resource.Success(Unit), planSetupUIState = PlanSetupUIState.Uninitialized_0)
     }
 
     //endregion
