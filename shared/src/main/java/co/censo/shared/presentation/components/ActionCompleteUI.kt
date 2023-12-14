@@ -1,51 +1,90 @@
 package co.censo.shared.presentation.components
 
-import TitleText
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import co.censo.shared.R
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun ActionCompleteUI(title: String) {
 
-    val verticalSpacingHeight = 28.dp
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 36.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(color = Color.White)
     ) {
+
         Image(
-            painterResource(id = co.censo.shared.R.drawable.check_circle),
-            contentDescription = null
+            modifier = Modifier.align(Alignment.TopCenter),
+            painter = painterResource(id = R.drawable.approved_confetti),
+            contentDescription = null,
+            contentScale = ContentScale.None,
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Transparent),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
 
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = title,
-        )
+            Box(modifier = Modifier.fillMaxWidth().weight(0.1f)) {
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight + 100.dp))
+                Image(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(top = screenHeight * 0.10f),
+                    painter = painterResource(id = R.drawable.top_approved_hand),
+                    contentDescription = null,
+                    contentScale = ContentScale.None,
+                )
+            }
+
+            Text(
+                text = title,
+                fontWeight = FontWeight.W400,
+                color = SharedColors.MainColorText,
+                fontSize = 48.sp
+            )
+
+            Box(modifier = Modifier.fillMaxWidth().weight(0.1f)) {
+                Image(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(bottom = screenHeight * 0.05f),
+                    painter = painterResource(id = R.drawable.bottom_approved_hand),
+                    contentDescription = null,
+                    contentScale = ContentScale.None,
+                )
+            }
+        }
     }
 }
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun ActionCompleteUIPreview() {
-    ActionCompleteUI("Hello")
+    ActionCompleteUI("Approved!")
 }
