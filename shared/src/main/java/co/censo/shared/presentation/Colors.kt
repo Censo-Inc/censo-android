@@ -40,6 +40,7 @@ object SharedColors {
     val DefaultLoadingColor = DarkBlue
 
     val FacetecPrimaryColor = DarkBlue
+    val FacetecSecondaryColor = SkyBlue
 
     val WordBoxTextColor = DarkBlue
     val WordBoxBackground = Color.White
