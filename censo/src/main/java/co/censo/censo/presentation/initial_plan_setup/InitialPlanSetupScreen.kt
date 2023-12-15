@@ -221,20 +221,9 @@ fun InitialPlanSetupStandardUI(
             TitleText(
                 title = R.string.scan_your_face,
                 textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-            Text(
-                text = stringResource(R.string.scan_phrase_message),
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-                color = SharedColors.MainColorText,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-
             Text(
                 text = stringResource(R.string.affirmative_biometric_consent),
                 fontWeight = FontWeight.Light,

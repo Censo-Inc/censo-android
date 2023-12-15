@@ -296,7 +296,6 @@ fun EnterPhraseScreen(
                         EnterPhraseUIState.REVIEW -> {
                             ReviewSeedPhraseUI(
                                 phraseWords = state.enteredWords,
-                                isGeneratedPhrase = state.seedPhraseWasGenerated,
                                 saveSeedPhrase = viewModel::moveToLabel,
                                 editSeedPhrase = viewModel::editEntirePhrase
                             )

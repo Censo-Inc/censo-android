@@ -55,27 +55,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun ReviewSeedPhraseUI(
     phraseWords: List<String>,
-    isGeneratedPhrase: Boolean = false,
     saveSeedPhrase: () -> Unit,
     editSeedPhrase: () -> Unit
 ) {
-
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
-
-    val title =
-        if (isGeneratedPhrase) {
-            stringResource(id = VaultR.string.seed_phrase_generated)
-        } else {
-            stringResource(id = VaultR.string.seed_phrase_validated)
-        }
-
-
-    val message =
-        if (!isGeneratedPhrase) {
-            stringResource(id = VaultR.string.censo_has_verified_that_this_is_a_valid_seed_phrase)
-        } else ""
 
     val buttonText = VaultR.string.next
 
@@ -105,26 +89,6 @@ fun ReviewSeedPhraseUI(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-
-            Text(
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-                text = title,
-                fontSize = 28.sp,
-                color = SharedColors.MainColorText,
-                fontWeight = FontWeight.W500
-            )
-
-            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
-
-            Text(
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-                text = message,
-                fontSize = 16.sp,
-                color = SharedColors.MainColorText,
-                textAlign = TextAlign.Center,
-            )
-
             Spacer(modifier = Modifier.weight(0.75f))
 
             Row(
@@ -244,7 +208,6 @@ fun PreviewGeneratedSeedPhraseVerification() {
 
     ReviewSeedPhraseUI(
         phraseWords = words.toList(),
-        isGeneratedPhrase = true,
         saveSeedPhrase = {},
         editSeedPhrase = {}
     )

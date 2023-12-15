@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
@@ -46,22 +47,12 @@ fun PaywallBaseUI(
     ) {
         Spacer(modifier = Modifier.weight(0.1f))
         Text(
-            text = stringResource(co.censo.censo.R.string.it_s_time_for_a_better_way),
+            text = stringResource(co.censo.censo.R.string.secure_all_your_seed_phrases_for_only_1_99_month),
             fontWeight = FontWeight.W600,
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
             color = SharedColors.MainColorText,
         )
-        Spacer(modifier = Modifier.weight(0.1f))
-        Text(
-            text = stringResource(co.censo.censo.R.string.it_s_time_for_a_seed_phrase_manager),
-            fontWeight = FontWeight.W600,
-            fontSize = 28.sp,
-            lineHeight = 36.sp,
-            textAlign = TextAlign.Center,
-            color = SharedColors.MainColorText
-        )
-
         Spacer(modifier = Modifier.weight(0.3f))
 
         Image(
@@ -99,5 +90,13 @@ fun PaywallBaseUI(
                 color = SharedColors.MainColorText
             )
         }
+    }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewPaywallBaseUI() {
+    PaywallBaseUI {
+        Text(text = "GENERIC CONTENT HERE")
     }
 }
