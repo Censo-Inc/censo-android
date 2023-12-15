@@ -37,6 +37,7 @@ import co.censo.censo.presentation.plan_setup.PlanSetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.main.BottomNavItem
 import co.censo.censo.presentation.paywall.PaywallScreen
+import co.censo.censo.presentation.plan_finalization.PlanFinalizationScreen
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
@@ -141,6 +142,15 @@ class MainActivity : FragmentActivity() {
                 PlanSetupScreen(
                     navController = navController,
                     planSetupDirection = backStackEntry.arguments?.getString(Screen.PlanSetupRoute.SETUP_DIRECTION_ARG)
+                        ?.let { PlanSetupDirection.valueOf(it) } ?: PlanSetupDirection.AddApprovers
+                )
+            }
+            composable(
+                route = "${Screen.PlanFinalizationRoute.route}/{${Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG}}"
+            ) {backStackEntry ->
+                PlanFinalizationScreen(
+                    navController = navController,
+                    planSetupDirection = backStackEntry.arguments?.getString(Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG)
                         ?.let { PlanSetupDirection.valueOf(it) } ?: PlanSetupDirection.AddApprovers
                 )
             }

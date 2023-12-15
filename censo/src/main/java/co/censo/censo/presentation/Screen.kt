@@ -14,6 +14,13 @@ sealed class Screen(val route: String) {
         fun removeApproversRoute(): String = "${PlanSetupRoute.route}/${PlanSetupDirection.RemoveApprovers.name}"
     }
 
+    object PlanFinalizationRoute: Screen("plan_finalization_route") {
+        const val FINALIZATION_DIRECTION_ARG = "finalization_direction_key"
+
+        fun addApproversRoute(): String = "${PlanFinalizationRoute.route}/${PlanSetupDirection.AddApprovers.name}"
+        fun removeApproversRoute(): String = "${PlanFinalizationRoute.route}/${PlanSetupDirection.RemoveApprovers.name}"
+    }
+
     object OwnerVaultScreen : Screen("owner_vault_screen")
 
     object OwnerWelcomeScreen : Screen("owner_welcome_screen")
