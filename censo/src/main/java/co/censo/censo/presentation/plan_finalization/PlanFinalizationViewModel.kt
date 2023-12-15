@@ -38,47 +38,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-//TODO: Update docs
 /**
  *
  * Main Processes:
  *
- * Process 1: Create Owner Approver Key
- *      Create key locally
- *      Encrypt it with entropy
- *      Save it to cloud
- *      Check owner user is finalized
- *          Once we key saved in the cloud, we need to upload
- *          the public key for the owner to backend.
- *
+ * Process 1: Check for Owner Approver Key is saved to cloud and in state
+ *      If no key saved to cloud
+ *          Create key locally
+ *          Encrypt it with entropy
+ *          Save it to cloud
+ *          Check owner user is finalized
+ *              Once we key saved in the cloud, we need to upload
+ *              the public key for the owner to backend.
+ *      If key is saved to cloud
+ *          Load key if it is not in local state
+ *          Check owner user is finalized
  *
  * Process 2: Complete access to set new plan
  *      Complete facetec to get biometry data back
  *      Retrieve shards from backend
  *      Replace Policy
  *
- * User Actions
- *
- * onBackClicked: Not part of major flow. Move user back in flow.
- *
- * onFullyCompleted: Send user home. They have setup plan.
- *
- * onSaveAndFinishPlan: User done modifying the plan
- *      If we never confirmed the alternate approver, submit new policy, then initiate access
- *      If confirmed alternate approver, then initiate access
- *
- *
  * Internal Methods
  *
  * updateOwnerState: Called anytime we get new owner state from backend.
- *      Sets all state data for the 3 approvers
- *      Generates TOTP codes if needed
- *      Does necessary navigation if needed
- *          Don't have strong grasp on this
- *      Veriify any approvers if needed
- *
- * submitNewPolicy: Done multiple times. Anytime we need to create a new policy.
+ *      Sets all state data for the 3 approvers and ownerState
  *
  * initiateAccess: Finalized the plan setup, and need to do access to re-shard and finalize plan.
  *      API call to initiate access. If that is a success, send user to Facetec.
@@ -500,7 +484,6 @@ class PlanFinalizationViewModel @Inject constructor(
         )
     }
 
-    //TODO: Update error state reset usage
     fun dismissCloudError() {
         //dismiss error
         state = state.copy(replacePolicyResponse = Resource.Uninitialized)

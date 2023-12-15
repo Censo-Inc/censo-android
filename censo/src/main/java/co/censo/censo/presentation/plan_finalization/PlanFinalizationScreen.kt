@@ -225,7 +225,8 @@ fun PlanFinalizationScreen(
 
                 else -> {
                     when (state.planFinalizationUIState) {
-                        //TODO: May need loading UI
+                        PlanFinalizationUIState.Uninitialized_0 -> LargeLoading(fullscreen = true)
+
                         PlanFinalizationUIState.AccessInProgress_1 -> {
                             FacetecAuth(
                                 onFaceScanReady = { verificationId, biometry ->
@@ -248,8 +249,6 @@ fun PlanFinalizationScreen(
                                 viewModel.receivePlanAction(PlanFinalizationAction.Completed)
                             }
                         }
-
-                        else -> {}
                     }
                 }
             }

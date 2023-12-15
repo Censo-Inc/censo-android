@@ -29,7 +29,6 @@ data class PlanFinalizationState(
     val primaryApprover: Approver.ProspectApprover? = null,
     val alternateApprover: Approver.ProspectApprover? = null,
 
-
     // API Calls
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
