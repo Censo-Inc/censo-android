@@ -71,7 +71,7 @@ data class PlanSetupState(
         planSetupUIState in listOf(
             PlanSetupUIState.ApproverGettingLive_4,
 //            PlanSetupUIState.AddAlternateApprover_6,//Same as below
-//            PlanSetupUIState.AccessInProgress_7//TODO: Do we need this in the finalization state?
+//            PlanSetupUIState.AccessInProgress_7//TODO: Think through adding back icons as needed for the PlanFinalizationUIs
         ) -> BackIconType.Exit
 
         else -> BackIconType.None

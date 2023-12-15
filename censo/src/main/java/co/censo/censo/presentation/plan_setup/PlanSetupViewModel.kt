@@ -38,9 +38,9 @@ import javax.inject.Inject
 // PlanSetupVM can communicate and trigger PlanFinalization methods via View ----
 // PlanSetupScreen is cleaned up to handle two states/two VMs -----
 // - Next steps -
-// Test the current setup
-// Focus on testing the plan setup first and making sure it is solid
-// Then test the Plan finalization and make sure that is solid
+// Test the current setup ****
+// Focus on testing the plan setup first and making sure it is solid -----
+// Then test the Plan finalization and make sure that is solid ****
 // iterate
 // build towards PR
 /**
@@ -154,7 +154,6 @@ class PlanSetupViewModel @Inject constructor(
             //Nickname or Approver Actions
             is PlanSetupAction.ApproverNicknameChanged ->
                 onApproverNicknameChanged(action.name)
-            //TODO: Test approver confirmed functionality when alternate approver is added
             PlanSetupAction.ApproverConfirmed -> onApproverConfirmed()
             PlanSetupAction.EditApproverNickname -> onEditApproverNickname()
             PlanSetupAction.GoLiveWithApprover -> onGoLiveWithApprover()
@@ -229,7 +228,7 @@ class PlanSetupViewModel @Inject constructor(
         val backIconNavigation = listOf(
             PlanSetupUIState.EditApproverNickname_3 to PlanSetupUIState.ApproverActivation_5,
             PlanSetupUIState.ApproverActivation_5 to PlanSetupUIState.ApproverGettingLive_4,
-//            PlanSetupUIState.ApproverGettingLive_4 to PlanSetupUIState.AddAlternateApprover_6,//TODO: Confirm we dont need this
+//            PlanSetupUIState.ApproverGettingLive_4 to PlanSetupUIState.AddAlternateApprover_6,//TODO: Confirm that we dont need this
         ).toMap()
 
         when (state.backArrowType) {
@@ -337,7 +336,7 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    //TODO: Update the below method and slot into the updated screen
+    //TODO: Update the below method so that we trigger navigation once the policy has been replaced
     private fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
