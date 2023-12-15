@@ -204,6 +204,7 @@ fun MainVaultScreen(
                         BottomNavItem.Home -> {
                             VaultHomeScreen(
                                 seedPhrasesSaved = state.seedPhrasesSize,
+                                approverSetupExists = state.ownerState?.policySetup != null,
                                 approvers = state.ownerState?.policy?.approvers ?: emptyList(),
                                 onAddSeedPhrase = {
                                     state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->

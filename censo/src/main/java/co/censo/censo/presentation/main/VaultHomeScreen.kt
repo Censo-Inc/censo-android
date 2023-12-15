@@ -50,6 +50,7 @@ import kotlinx.datetime.Clock
 @Composable
 fun VaultHomeScreen(
     seedPhrasesSaved: Int,
+    approverSetupExists: Boolean,
     approvers: List<Approver.TrustedApprover>,
     onAddSeedPhrase: () -> Unit,
     onAddApprovers: () -> Unit,
@@ -145,7 +146,7 @@ fun VaultHomeScreen(
                 onClick = onAddApprovers
             ) {
                 Text(
-                    text = stringResource(id = R.string.add_approvers_button_text),
+                    text = if(approverSetupExists) stringResource(R.string.resume_adding_approvers) else stringResource(id = R.string.add_approvers_button_text),
                     style = ButtonTextStyle.copy(fontWeight = FontWeight.W400)
                 )
             }
@@ -297,6 +298,19 @@ fun NoApproversVaultHomePreview() {
         onAddApprovers = {},
         onAddSeedPhrase = {},
         approvers = emptyList(),
+        approverSetupExists = false,
+        seedPhrasesSaved = 2,
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ResumeApproversVaultHomePreview() {
+    VaultHomeScreen(
+        onAddApprovers = {},
+        onAddSeedPhrase = {},
+        approvers = emptyList(),
+        approverSetupExists = true,
         seedPhrasesSaved = 2,
     )
 }
@@ -325,6 +339,7 @@ fun OneApproverVaultHomePreview() {
                 )
             ),
         ),
+        approverSetupExists = false,
         seedPhrasesSaved = 2,
     )
 }
@@ -361,6 +376,7 @@ fun TwoApproversVaultHomePreview() {
                 )
             )
         ),
+        approverSetupExists = false,
         seedPhrasesSaved = 2,
     )
 }

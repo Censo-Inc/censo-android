@@ -372,4 +372,5 @@
     <string name="generate_or_add_own_message">You can add one of your own, or if you would like to try Censo first, generate a new seed phrase with Censo and add that.</string>
     <string name="an_approval_from_current_approvers_is_required">An approval from current approvers is required</string>
     <string name="added_security_with_approvers">Your security is increased by your approvers.</string>
+    <string name="resume_adding_approvers">Resume adding approvers</string>
 </resources>
