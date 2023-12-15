@@ -81,7 +81,9 @@ fun PaywallScreen(
                     }
 
                     SubscriptionStatus.Pending -> {
-                        PendingPaymentUI()
+                        state.subscriptionOffer?.let {
+                            PendingPaymentUI(it)
+                        }
                     }
 
                     SubscriptionStatus.Paused -> {
