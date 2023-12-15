@@ -1,12 +1,9 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
-import ParticipantId
 import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
-import co.censo.censo.presentation.plan_setup.ApproverType
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Approver
@@ -15,13 +12,12 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import kotlinx.datetime.Clock
 
 
 data class PlanFinalizationState(
     val ownerState: OwnerState.Ready? = null,
 
-    val planFinalizationUIState: PlanFinalizationUIState = PlanFinalizationUIState.Uninitialized_0,
+    val planFinalizationUIState: PlanFinalizationUIState = PlanFinalizationUIState.Uninitialized_1,
     val planSetupDirection: PlanSetupDirection = PlanSetupDirection.AddApprovers,
 
     // restored approvers state
@@ -68,9 +64,9 @@ data class PlanFinalizationState(
 }
 
 enum class PlanFinalizationUIState {
-    Uninitialized_0,
-    AccessInProgress_1,
-    Completed_2
+    Uninitialized_1,
+    AccessInProgress_2,
+    Completed_3
 }
 
 sealed interface PlanFinalizationAction {

@@ -3,15 +3,8 @@ package co.censo.censo.presentation.plan_finalization
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -22,7 +15,6 @@ import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
-import co.censo.censo.presentation.plan_setup.PlanSetupAction
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
@@ -197,9 +189,9 @@ fun PlanFinalizationScreen(
 
                 else -> {
                     when (state.planFinalizationUIState) {
-                        PlanFinalizationUIState.Uninitialized_0 -> LargeLoading(fullscreen = true)
+                        PlanFinalizationUIState.Uninitialized_1 -> LargeLoading(fullscreen = true)
 
-                        PlanFinalizationUIState.AccessInProgress_1 -> {
+                        PlanFinalizationUIState.AccessInProgress_2 -> {
                             FacetecAuth(
                                 onFaceScanReady = { verificationId, biometry ->
                                     viewModel.onFaceScanReady(verificationId, biometry)
@@ -210,7 +202,7 @@ fun PlanFinalizationScreen(
                             )
                         }
 
-                        PlanFinalizationUIState.Completed_2 -> {
+                        PlanFinalizationUIState.Completed_3 -> {
                             when (planSetupDirection) {
                                 PlanSetupDirection.AddApprovers -> Activated()
                                 PlanSetupDirection.RemoveApprovers -> ApproversRemoved()

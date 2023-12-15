@@ -326,7 +326,7 @@ class PlanFinalizationViewModel @Inject constructor(
                 if (initiateAccessResponse is Resource.Success) {
                     projectLog(message = "Setting facetec view state")
                     // navigate to the facetec view
-                    state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_1)
+                    state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_2)
 
                     updateOwnerState(initiateAccessResponse.data!!.ownerState)
                 }
@@ -334,7 +334,7 @@ class PlanFinalizationViewModel @Inject constructor(
                 state = state.copy(initiateAccessResponse = initiateAccessResponse)
             } else {
                 projectLog(message = "Setting facetec view state")
-                state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_1)
+                state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_2)
             }
         }
     }
@@ -380,7 +380,7 @@ class PlanFinalizationViewModel @Inject constructor(
                     projectLog(message = "replacePolicy call success")
                     updateOwnerState(response.data!!.ownerState)
                     projectLog(message = "replacePolicy setting complete UI state")
-                    state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Completed_2)
+                    state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Completed_3)
                 }
             }
         } catch (e: Exception) {
@@ -490,7 +490,7 @@ class PlanFinalizationViewModel @Inject constructor(
         //kick user to home
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
         //ensure facetec doesn't block us from leaving
-        state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Uninitialized_0)
+        state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Uninitialized_1)
     }
 
     fun resetReplacePolicyResponse() {
