@@ -40,11 +40,6 @@ data class PlanSetupState(
     // API Calls
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
-    val initiateAccessResponse: Resource<InitiateAccessApiResponse> = Resource.Uninitialized,
-    val retrieveAccessShardsResponse: Resource<RetrieveAccessShardsApiResponse> = Resource.Uninitialized,
-    val completeApprovershipResponse : Resource<CompleteOwnerApprovershipApiResponse> = Resource.Uninitialized,
-
-    val verifyKeyConfirmationSignature: Resource<Unit> = Resource.Uninitialized,
 
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized,
@@ -70,8 +65,6 @@ data class PlanSetupState(
 
         planSetupUIState in listOf(
             PlanSetupUIState.ApproverGettingLive_4,
-//            PlanSetupUIState.AddAlternateApprover_6,//Same as below
-//            PlanSetupUIState.AccessInProgress_7//TODO: Think through adding back icons as needed for the PlanFinalizationUIs
         ) -> BackIconType.Exit
 
         else -> BackIconType.None
@@ -79,16 +72,9 @@ data class PlanSetupState(
 
     val loading = userResponse is Resource.Loading
                 || createPolicySetupResponse is Resource.Loading
-                || initiateAccessResponse is Resource.Loading
-                || retrieveAccessShardsResponse is Resource.Loading
-                || completeApprovershipResponse is Resource.Loading
 
     val asyncError = userResponse is Resource.Error
             || createPolicySetupResponse is Resource.Error
-            || initiateAccessResponse is Resource.Error
-            || retrieveAccessShardsResponse is Resource.Error
-            || verifyKeyConfirmationSignature is Resource.Error
-            || completeApprovershipResponse is Resource.Error
 
     enum class BackIconType {
         None, Back, Exit
@@ -102,7 +88,6 @@ enum class PlanSetupUIState {
     EditApproverNickname_3,
     ApproverGettingLive_4,
     ApproverActivation_5,
-//    AddAlternateApprover_6,
 }
 
 sealed interface PlanSetupAction {

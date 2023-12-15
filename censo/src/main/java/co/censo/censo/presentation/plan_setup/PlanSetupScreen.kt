@@ -153,19 +153,7 @@ fun PlanSetupScreen(
                 state.loading -> LargeLoading(fullscreen = true)
 
                 state.asyncError -> {
-                    if (state.verifyKeyConfirmationSignature is Resource.Error) {
-                        DisplayError(
-                            errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
-                            dismissAction = {
-                                viewModel.resetVerifyKeyConfirmationSignature()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
-                            },
-                            retryAction = {
-                                viewModel.resetVerifyKeyConfirmationSignature()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
-                            },
-                        )
-                    } else if (state.userResponse is Resource.Error) {
+                    if (state.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to retrieve user information, try again.",
                             dismissAction = {

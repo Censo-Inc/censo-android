@@ -30,30 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
 
-//TODO: Update docs
-
-//TODO: Build towards being able to test the flow
-// VMs split ---
-// VMs contain only necesarry logic ----
-// Clean up PlanFinalizationVM and determine a strong solution for the two VMs to communicate ----- Setup a solution
-// PlanSetupVM can communicate and trigger PlanFinalization methods via View ----
-// PlanSetupScreen is cleaned up to handle two states/two VMs -----
-// - Next steps -
-// Test the current setup ****
-// Focus on testing the plan setup first and making sure it is solid -----
-// Then test the Plan finalization and make sure that is solid ****
-// iterate
-// build towards PR
-// - ITERATE & PUSH - WORKING HERE -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-// Remove PlanFinalizationVM from this screen -----
-// Move the PlanFinalizationVM into it's own screen -----
-// Nav to that screen once we are done on the plan setup side -----
-// Get code compiling ------
-// Test from there *****
-// Handle case where user leaves before finalizing the plan and then returning them to this spot
-// Iterate and keep pushing forward
-//
-//
 /**
  *
  * Main Processes:
@@ -67,20 +43,6 @@ import javax.inject.Inject
  *
  * Process 1b: Remove Approvers:
  *      Create Setup Policy with the owner as the only approver
- *
- * Process 2: Create Owner Approver Key
- *      Create key locally
- *      Encrypt it with entropy
- *      Save it to cloud
- *      Check owner user is finalized
- *          Once we key saved in the cloud, we need to upload
- *          the public key for the owner to backend.
- *
- *
- * Process 3: Complete access to set new plan
- *      Complete facetec to get biometry data back
- *      Retrieve shards from backend
- *      Replace Policy
  *
  * User Actions
  *
@@ -115,13 +77,6 @@ import javax.inject.Inject
  *      If primary approver: Send user to Add Alternate Approver
  *      If alternate approver: Start access to create new plan
  *
- * onFullyCompleted: Send user home. They have setup plan.
- *
- * onSaveAndFinishPlan: User done modifying the plan
- *      If we never confirmed the alternate approver, submit new policy, then initiate access
- *      If confirmed alternate approver, then initiate access
- *
- *
  * Internal Methods
  *
  * updateOwnerState: Called anytime we get new owner state from backend.
@@ -133,12 +88,8 @@ import javax.inject.Inject
  *
  * submitNewPolicy: Done multiple times. Anytime we need to create a new policy.
  *
- * initiateAccess: Finalized the plan setup, and need to do access to re-shard and finalize plan.
- *      API call to initiate access. If that is a success, send user to Facetec.
- *
- * faceScanReady: Face scan completed externally in FacetecAuth and we will now call replacePolicy
- *
- * replacePolicy: Replace existing policy, and finalize plan
+ * triggerFinalizePlanSetup: Called after both approvers have been confirmed
+ *      or if the user has finished approver setup but left before plan finalization occurred
  */
 
 
@@ -239,7 +190,6 @@ class PlanSetupViewModel @Inject constructor(
         val backIconNavigation = listOf(
             PlanSetupUIState.EditApproverNickname_3 to PlanSetupUIState.ApproverActivation_5,
             PlanSetupUIState.ApproverActivation_5 to PlanSetupUIState.ApproverGettingLive_4,
-//            PlanSetupUIState.ApproverGettingLive_4 to PlanSetupUIState.AddAlternateApprover_6,//TODO: Confirm that we dont need this
         ).toMap()
 
         when (state.backArrowType) {
@@ -574,11 +524,10 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    fun triggerPlanFinalization() {
+    private fun triggerPlanFinalization() {
         projectLog(message = "Triggering navigation to PlanFinalization")
         state = state.copy(finalizePlanSetup = Resource.Success(Unit), planSetupUIState = PlanSetupUIState.Uninitialized_0)
     }
-
     //endregion
 
     //region Reset functions
@@ -589,24 +538,12 @@ class PlanSetupViewModel @Inject constructor(
         state = state.copy(navigationResource = Resource.Uninitialized)
     }
 
-    fun resetInitiateAccessResponse() {
-        state = state.copy(initiateAccessResponse = Resource.Uninitialized)
-    }
-
     fun resetCreatePolicySetupResponse() {
         state = state.copy(createPolicySetupResponse = Resource.Uninitialized)
     }
 
     fun resetUserResponse() {
         state = state.copy(userResponse = Resource.Uninitialized)
-    }
-
-    fun resetVerifyKeyConfirmationSignature() {
-        state = state.copy(verifyKeyConfirmationSignature = Resource.Uninitialized)
-    }
-
-    fun resetRetrieveAccessShardsResponse() {
-        state = state.copy(retrieveAccessShardsResponse = Resource.Uninitialized)
     }
     //endregion
 }
