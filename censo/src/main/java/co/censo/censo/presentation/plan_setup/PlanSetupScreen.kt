@@ -189,36 +189,6 @@ fun PlanSetupScreen(
                                 viewModel.receivePlanAction(PlanSetupAction.Retry)
                             },
                         )
-                    } else if (state.initiateAccessResponse is Resource.Error) {//TODO: This could be deleted, verify
-                        DisplayError(
-                            errorMessage = "Failed to replace plan, try again.",
-                            dismissAction = {
-                                viewModel.resetInitiateAccessResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
-                            },
-                            retryAction = {
-                                viewModel.resetInitiateAccessResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
-                            },
-                        )
-                    } else if (state.retrieveAccessShardsResponse is Resource.Error) {//TODO: This could be deleted, verify
-                        DisplayError(
-                            errorMessage = "Failed to retrieve recovery data, try again.",
-                            dismissAction = {
-                                viewModel.resetRetrieveAccessShardsResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
-                            },
-                            retryAction = {
-                                viewModel.resetRetrieveAccessShardsResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
-                            },
-                        )
-                    } else if (state.completeApprovershipResponse is Resource.Error) {//TODO: This can be deleted
-                        DisplayError(
-                            errorMessage = "Failed to finalize plan, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                        )
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",

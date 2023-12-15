@@ -21,10 +21,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.censo.presentation.plan_setup.PlanSetupAction
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.Resource
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
@@ -110,7 +112,6 @@ fun PlanFinalizationScreen(
                 state.loading -> LargeLoading(fullscreen = true)
 
                 state.asyncError -> {
-                    //TODO: Diligently walk through these states and update them to reference the correct area
                     if (state.verifyKeyConfirmationSignature is Resource.Error) {
                         DisplayError(
                             errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
@@ -180,11 +181,39 @@ fun PlanFinalizationScreen(
                     } else if (state.saveKeyToCloud is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to setup secure data, try again.",
-                            dismissAction = { viewModel.receivePlanAction(
-                                PlanFinalizationAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(
-                                PlanFinalizationAction.Retry) },
+                            dismissAction = {
+                                viewModel.receivePlanAction(
+                                    PlanFinalizationAction.Retry
+                                )
+                            },
+                            retryAction = {
+                                viewModel.receivePlanAction(
+                                    PlanFinalizationAction.Retry
+                                )
+                            },
                         )
+                    } else if (state.replacePolicyResponse is Resource.Error) {
+                        if (state.replacePolicyResponse.exception is CloudStoragePermissionNotGrantedException) {
+                            DisplayError(
+                                errorMessage = "Google Drive Access Required for Censo\n\nPlease sign out and sign back in to refresh authentication permissions for your account",
+                                dismissAction = {
+                                    viewModel.dismissCloudError()
+                                },
+                                retryAction = null
+                            )
+                        } else {
+                            DisplayError(
+                                errorMessage = "Failed to create new policy, try again.",
+                                dismissAction = {
+                                    viewModel.resetReplacePolicyResponse()
+                                    viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                },
+                                retryAction = {
+                                    viewModel.resetReplacePolicyResponse()
+                                    viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                },
+                            )
+                        }
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",
@@ -195,40 +224,38 @@ fun PlanFinalizationScreen(
                 }
 
                 else -> {
-                        when (state.planFinalizationUIState) {
-                            //TODO: May need loading UI
-                            PlanFinalizationUIState.AccessInProgress_1 -> {
-                                FacetecAuth(
-                                    onFaceScanReady = { verificationId, biometry ->
-                                        viewModel.onFaceScanReady(verificationId, biometry)
-                                    },
-                                    onCancelled = {
-                                        viewModel.receivePlanAction(PlanFinalizationAction.FacetecCancelled)
-                                    }
-                                )
-                            }
-
-                            PlanFinalizationUIState.Completed_2 -> {
-                                when (planSetupDirection) {
-                                    PlanSetupDirection.AddApprovers -> Activated()
-                                    PlanSetupDirection.RemoveApprovers -> ApproversRemoved()
+                    when (state.planFinalizationUIState) {
+                        //TODO: May need loading UI
+                        PlanFinalizationUIState.AccessInProgress_1 -> {
+                            FacetecAuth(
+                                onFaceScanReady = { verificationId, biometry ->
+                                    viewModel.onFaceScanReady(verificationId, biometry)
+                                },
+                                onCancelled = {
+                                    viewModel.receivePlanAction(PlanFinalizationAction.FacetecCancelled)
                                 }
-
-                                LaunchedEffect(Unit) {
-                                    delay(6000)
-                                    viewModel.receivePlanAction(PlanFinalizationAction.Completed)
-                                }
-                            }
-
-                            else -> {}
+                            )
                         }
 
+                        PlanFinalizationUIState.Completed_2 -> {
+                            when (planSetupDirection) {
+                                PlanSetupDirection.AddApprovers -> Activated()
+                                PlanSetupDirection.RemoveApprovers -> ApproversRemoved()
+                            }
+
+                            LaunchedEffect(Unit) {
+                                delay(6000)
+                                viewModel.receivePlanAction(PlanFinalizationAction.Completed)
+                            }
+                        }
+
+                        else -> {}
+                    }
                 }
             }
         }
     }
 
-    //TODO: Move to finalization scree
     if (state.cloudStorageAction.triggerAction) {
         if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
             val encryptedKey = state.keyData?.encryptedPrivateKey

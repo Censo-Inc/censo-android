@@ -103,18 +103,18 @@ class PlanFinalizationViewModel @Inject constructor(
         projectLog(message = "onCreate of PlanFinalization running")
         state = state.copy(planSetupDirection = planSetupDirection)
 
-        //TODO: Think through how we need to get data loaded on this screen,
-        // and if we don't have ownerState maybe we need to refresh and retrieve?
         viewModelScope.launch {
             projectLog(message = "Getting owner state from global")
             val ownerState = ownerStateFlow.value
             if (ownerState is Resource.Success) {
                 projectLog(message = "Updating local owner state from global")
-                updateOwnerState(ownerState.data!!)
-                checkUserHasSavedKeyAndSubmittedPolicy()
+                updateOwnerState(ownerState.data!!, nextAction = {
+                    checkUserHasSavedKeyAndSubmittedPolicy()
+                })
             } else {
-                projectLog(message = "No global owner state")
-                checkUserHasSavedKeyAndSubmittedPolicy()
+                retrieveOwnerState(false, nextAction = {
+                    checkUserHasSavedKeyAndSubmittedPolicy()
+                })
             }
         }
     }
@@ -122,7 +122,10 @@ class PlanFinalizationViewModel @Inject constructor(
     fun receivePlanAction(action: PlanFinalizationAction) {
         when (action) {
             //Retry
-            PlanFinalizationAction.Retry -> retrieveOwnerState(silent = false)
+            PlanFinalizationAction.Retry -> retrieveOwnerState(silent = false, nextAction = {
+                projectLog(message = "After user hit retry and owner state retrieved, running next action: checkUserHasSavedKeyAndSubmittedPolicy")
+                checkUserHasSavedKeyAndSubmittedPolicy()
+            })
 
             //Facetec Cancelled
             PlanFinalizationAction.FacetecCancelled -> onFacetecCancelled()
@@ -140,15 +143,12 @@ class PlanFinalizationViewModel @Inject constructor(
     }
     //endregion
 
-    //region User Actions
+    //region Internal Methods
     private fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
-    //endregion
 
-    //region Internal Methods
-
-    private fun retrieveOwnerState(silent: Boolean = false) {
+    private fun retrieveOwnerState(silent: Boolean = false, nextAction: (() -> Unit)? = null) {
         if (!silent) {
             state = state.copy(userResponse = Resource.Loading())
         }
@@ -156,14 +156,14 @@ class PlanFinalizationViewModel @Inject constructor(
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
             ownerStateResource.data?.let {
-                updateOwnerState(it)
+                updateOwnerState(it, nextAction)
             }
 
             state = state.copy(userResponse = ownerStateResource)
         }
     }
 
-    private fun updateOwnerState(ownerState: OwnerState) {
+    private fun updateOwnerState(ownerState: OwnerState, nextAction: (() -> Unit)? = null) {
         if (ownerState !is OwnerState.Ready) return
 
         // update global state
@@ -198,6 +198,8 @@ class PlanFinalizationViewModel @Inject constructor(
             alternateApprover = alternateApprover ?: state.alternateApprover,
             ownerState = ownerState
         )
+
+        nextAction?.invoke()
     }
 
     private fun saveKeyWithEntropy() {

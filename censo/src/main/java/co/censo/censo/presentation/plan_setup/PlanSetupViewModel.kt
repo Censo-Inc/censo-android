@@ -346,11 +346,6 @@ class PlanSetupViewModel @Inject constructor(
             triggerPlanFinalization()
         }
     }
-
-    //TODO: Delete this, it belongs to finalization now
-    private fun onFullyCompleted() {
-        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
-    }
     //endregion
 
     //region Internal Methods
