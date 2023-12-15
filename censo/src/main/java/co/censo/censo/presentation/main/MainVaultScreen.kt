@@ -137,10 +137,17 @@ fun MainVaultScreen(
 
     Scaffold(
         topBar = {
-            VaultTopBar(selectedBottomNavItem.value)
+            VaultTopBar(
+                bottomNavItem = selectedBottomNavItem.value,
+                showCloseApprover = state.showAddApproversUI is Resource.Success,
+                onDismissApprover = viewModel::resetShowApproversUI
+            )
         },
         bottomBar = {
             CensoBottomNavBar(selectedBottomNavItem.value) {
+                if (it == BottomNavItem.Home) {
+                    viewModel.resetShowApproversUI()
+                }
                 selectedBottomNavItem.value = it
             }
         }
