@@ -21,23 +21,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
-import co.censo.censo.presentation.plan_setup.PlanSetupAction
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
-import co.censo.censo.presentation.plan_setup.PlanSetupState
-import co.censo.censo.presentation.plan_setup.PlanSetupUIState
-import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.Activated
-import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
-import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,23 +57,15 @@ fun PlanFinalizationScreen(
         }
     }
 
-//    OnLifecycleEvent { _, event ->
-//        when (event) {
-//            Lifecycle.Event.ON_CREATE -> {
-//                viewModel.onCreate(planSetupDirection)
-//            }
-//
-//            Lifecycle.Event.ON_RESUME -> {
-//                viewModel.onResume()
-//            }
-//
-//            Lifecycle.Event.ON_PAUSE -> {
-//                viewModel.onStop()
-//            }
-//
-//            else -> Unit
-//        }
-//    }
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_CREATE -> {
+                viewModel.onCreate(planSetupDirection)
+            }
+
+            else -> Unit
+        }
+    }
 
     Scaffold(topBar = {
 //        TopAppBar(
@@ -213,14 +197,13 @@ fun PlanFinalizationScreen(
                 else -> {
                         when (state.planFinalizationUIState) {
                             //TODO: May need loading UI
-                            //TODO: Need a way to handle a canceled facetec scan
                             PlanFinalizationUIState.AccessInProgress_1 -> {
                                 FacetecAuth(
                                     onFaceScanReady = { verificationId, biometry ->
                                         viewModel.onFaceScanReady(verificationId, biometry)
                                     },
                                     onCancelled = {
-                                        viewModel.receivePlanAction(PlanFinalizationAction.BackClicked)
+                                        viewModel.receivePlanAction(PlanFinalizationAction.FacetecCancelled)
                                     }
                                 )
                             }
@@ -233,7 +216,6 @@ fun PlanFinalizationScreen(
 
                                 LaunchedEffect(Unit) {
                                     delay(6000)
-                                    //TODO: Diligently check where this should go in the data after this method
                                     viewModel.receivePlanAction(PlanFinalizationAction.Completed)
                                 }
                             }

@@ -29,14 +29,6 @@ data class PlanFinalizationState(
     val primaryApprover: Approver.ProspectApprover? = null,
     val alternateApprover: Approver.ProspectApprover? = null,
 
-    // inviting approver
-    val editedNickname: String = "",
-
-    // totp
-    val secondsLeft: Int = 0,
-    val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
-    val approverCodes: Map<ParticipantId, String> = emptyMap(),
-
 
     // API Calls
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
@@ -57,10 +49,6 @@ data class PlanFinalizationState(
     // Navigation
     val navigationResource: Resource<String> = Resource.Uninitialized
 ) {
-
-    val activatingApprover = alternateApprover ?: primaryApprover
-    val approverType = if (alternateApprover != null) ApproverType.Alternate else ApproverType.Primary
-
 
     val loading = userResponse is Resource.Loading
             || createPolicySetupResponse is Resource.Loading
@@ -99,6 +87,7 @@ sealed interface PlanFinalizationAction {
 
     //Retry
     object Retry : PlanFinalizationAction
+    object FacetecCancelled : PlanFinalizationAction
 }
 
 data class PlanFinalizationKeyData(

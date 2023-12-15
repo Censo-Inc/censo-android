@@ -44,17 +44,7 @@ import javax.inject.Inject
  *
  * Main Processes:
  *
- * Process 1a: Setup Approvers: (Primary and Alternate)
- *      Set the user nickname
- *          (edit user nickname)
- *      Activate Approver
- *      Create Setup Policy as we move forward
- *          Called multiple times as we are adding each approver
- *
- * Process 1b: Remove Approvers:
- *      Create Setup Policy with the owner as the only approver
- *
- * Process 2: Create Owner Approver Key
+ * Process 1: Create Owner Approver Key
  *      Create key locally
  *      Encrypt it with entropy
  *      Save it to cloud
@@ -63,7 +53,7 @@ import javax.inject.Inject
  *          the public key for the owner to backend.
  *
  *
- * Process 3: Complete access to set new plan
+ * Process 2: Complete access to set new plan
  *      Complete facetec to get biometry data back
  *      Retrieve shards from backend
  *      Replace Policy
@@ -71,35 +61,6 @@ import javax.inject.Inject
  * User Actions
  *
  * onBackClicked: Not part of major flow. Move user back in flow.
- *
- * onApproverNicknameChanged:
- *      Update either primary or secondary approver nickname
- *
- * onEditApproverNickname:
- *      User needs to update an already entered nickname
- *      Will exit by saving approver and creating setup policy
- *
- * onSaveApproverNickname:
- *      Same as onEditApproverNickname, except we know nickname is set
- *      Will exit by saving approver and creating setup policy
- *
- * onInviteAlternateApprover:
- *      If we already have data for alternate approver, then we go to get live
- *      If we don't have info on alternate approver, then we need to create their nickname
- *
- * saveApproverAndSubmitPolicy:
- *      Submit policy setup with current approver set
- *
- * updateApproverNicknameAndSubmitPolicy
- *      Update approver nickname on state approver that was being edited
- *      Submit policy setup
- *
- * onGoLiveWithApprover: Simple method to move us to Approver Activation UI.
- *
- * onApproverConfirmed:
- *      When an approver TOTP has been verified
- *      If primary approver: Send user to Add Alternate Approver
- *      If alternate approver: Start access to create new plan
  *
  * onFullyCompleted: Send user home. They have setup plan.
  *
@@ -138,9 +99,8 @@ class PlanFinalizationViewModel @Inject constructor(
         private set
 
     //region Events
-
-    fun onFinalizePlanSetup(planSetupDirection: PlanSetupDirection) {
-        projectLog(message = "onFinalizePlanSetup running")
+    fun onCreate(planSetupDirection: PlanSetupDirection) {
+        projectLog(message = "onCreate of PlanFinalization running")
         state = state.copy(planSetupDirection = planSetupDirection)
 
         checkUserHasSavedKeyAndSubmittedPolicy()
@@ -150,6 +110,9 @@ class PlanFinalizationViewModel @Inject constructor(
         when (action) {
             //Retry
             PlanFinalizationAction.Retry -> retrieveOwnerState(silent = false)
+
+            //Facetec Cancelled
+            PlanFinalizationAction.FacetecCancelled -> onFacetecCancelled()
 
             //Cloud Actions
             PlanFinalizationAction.KeyUploadSuccess -> onKeyUploadSuccess()
@@ -404,6 +367,10 @@ class PlanFinalizationViewModel @Inject constructor(
             e.sendError(CrashReportingUtil.ReplacePolicy)
             state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
         }
+    }
+
+    private fun onFacetecCancelled() {
+        state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
     //endregion
 
