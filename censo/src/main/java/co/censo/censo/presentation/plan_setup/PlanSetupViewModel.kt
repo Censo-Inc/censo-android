@@ -23,6 +23,7 @@ import co.censo.censo.util.confirmed
 import co.censo.censo.util.externalApprovers
 import co.censo.censo.util.notConfirmed
 import co.censo.censo.util.ownerApprover
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -43,6 +44,16 @@ import javax.inject.Inject
 // Then test the Plan finalization and make sure that is solid ****
 // iterate
 // build towards PR
+// - ITERATE & PUSH - WORKING HERE -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+// Remove PlanFinalizationVM from this screen -----
+// Move the PlanFinalizationVM into it's own screen -----
+// Nav to that screen once we are done on the plan setup side -----
+// Get code compiling ------
+// Test from there *****
+// Handle case where user leaves before finalizing the plan and then returning them to this spot
+// Iterate and keep pushing forward
+//
+//
 /**
  *
  * Main Processes:
@@ -336,7 +347,7 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    //TODO: Update the below method so that we trigger navigation once the policy has been replaced
+    //TODO: Delete this, it belongs to finalization now
     private fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
@@ -569,6 +580,7 @@ class PlanSetupViewModel @Inject constructor(
     }
 
     fun triggerPlanFinalization() {
+        projectLog(message = "Triggering navigation to PlanFinalization")
         state = state.copy(finalizePlanSetup = Resource.Success(Unit), planSetupUIState = PlanSetupUIState.Uninitialized_0)
     }
 

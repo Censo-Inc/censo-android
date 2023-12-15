@@ -38,6 +38,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
+import co.censo.shared.util.projectLog
 import kotlinx.coroutines.delay
 
 enum class PlanSetupDirection(val threshold: UInt) {
@@ -82,6 +83,7 @@ fun PlanSetupScreen(
                 )
             }
 
+            projectLog(message = "Navigating with route: $route")
             navController.navigate(route) {
                 popUpTo(popUpToRoute) {
                     inclusive = true

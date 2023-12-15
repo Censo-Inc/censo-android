@@ -103,7 +103,20 @@ class PlanFinalizationViewModel @Inject constructor(
         projectLog(message = "onCreate of PlanFinalization running")
         state = state.copy(planSetupDirection = planSetupDirection)
 
-        checkUserHasSavedKeyAndSubmittedPolicy()
+        //TODO: Think through how we need to get data loaded on this screen,
+        // and if we don't have ownerState maybe we need to refresh and retrieve?
+        viewModelScope.launch {
+            projectLog(message = "Getting owner state from global")
+            val ownerState = ownerStateFlow.value
+            if (ownerState is Resource.Success) {
+                projectLog(message = "Updating local owner state from global")
+                updateOwnerState(ownerState.data!!)
+                checkUserHasSavedKeyAndSubmittedPolicy()
+            } else {
+                projectLog(message = "No global owner state")
+                checkUserHasSavedKeyAndSubmittedPolicy()
+            }
+        }
     }
 
     fun receivePlanAction(action: PlanFinalizationAction) {
@@ -135,7 +148,7 @@ class PlanFinalizationViewModel @Inject constructor(
 
     //region Internal Methods
 
-    private fun retrieveOwnerState(silent: Boolean = false, overwriteUIState: Boolean = false) {
+    private fun retrieveOwnerState(silent: Boolean = false) {
         if (!silent) {
             state = state.copy(userResponse = Resource.Loading())
         }
@@ -183,21 +196,26 @@ class PlanFinalizationViewModel @Inject constructor(
             ownerApprover = ownerApprover ?: state.ownerApprover,
             primaryApprover = primaryApprover ?: state.primaryApprover,
             alternateApprover = alternateApprover ?: state.alternateApprover,
+            ownerState = ownerState
         )
     }
 
     private fun saveKeyWithEntropy() {
+        projectLog(message = "saveKeyWithEntropy running")
         try {
             state = state.copy(saveKeyToCloud = Resource.Loading())
+            projectLog(message = "saveKeyWithEntropy creating approverEncryptionKey")
             val approverEncryptionKey = keyRepository.createApproverKey()
 
             val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
             val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
 
+            projectLog(message = "saveKeyWithEntropy getting entropy")
             val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy!!
 
             val idToken = keyRepository.retrieveSavedDeviceId()
 
+            projectLog(message = "saveKeyWithEntropy creating encryptedKey")
             val encryptedKey = approverEncryptionKey.encryptWithEntropy(
                 deviceKeyId = idToken,
                 entropy = entropy
@@ -207,11 +225,12 @@ class PlanFinalizationViewModel @Inject constructor(
                 approverEncryptionKey.publicExternalRepresentation().value
             )
 
+            projectLog(message = "saveKeyWithEntropy creating KeyData")
             val keyData = PlanFinalizationKeyData(
                 encryptedPrivateKey = encryptedKey,
                 publicKey = publicKey
             )
-
+            projectLog(message = "saveKeyWithEntropy triggering key upload")
             state = state.copy(
                 keyData = keyData,
                 cloudStorageAction = CloudStorageActionData(
@@ -220,12 +239,14 @@ class PlanFinalizationViewModel @Inject constructor(
                 )
             )
         } catch (e: Exception) {
+            projectLog(message = "saveKeyWithEntropy exception caught: $e")
             state = state.copy(saveKeyToCloud = Resource.Error(exception = e))
         }
     }
 
 
     private fun completeApproverOwnership() {
+        projectLog(message = "Starting complete approver ownership")
         state = state.copy(completeApprovershipResponse = Resource.Loading())
 
         viewModelScope.launch {
@@ -247,6 +268,8 @@ class PlanFinalizationViewModel @Inject constructor(
 
             if (completeApprovershipResponse is Resource.Success) {
                 updateOwnerState(completeApprovershipResponse.data!!.ownerState)
+                projectLog(message = "Complete approvership success")
+                projectLog(message = "Starting initiate access")
                 initiateAccess()
             }
 
@@ -261,6 +284,7 @@ class PlanFinalizationViewModel @Inject constructor(
         val owner = state.ownerApprover
 
         if (owner == null) {
+            projectLog(message = "owner data null")
             retrieveOwnerState()
             return
         }
@@ -268,6 +292,7 @@ class PlanFinalizationViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
 
             if (owner.status is ApproverStatus.ImplicitlyOwner) {
+                projectLog(message = "Owner status is ImplicitlyOwner")
                 initiateAccess()
                 return@launch
             }
@@ -276,13 +301,16 @@ class PlanFinalizationViewModel @Inject constructor(
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
             if (!loadedKey) {
+                projectLog(message = "No key in state")
                 if (keyRepository.userHasKeySavedInCloud(owner.participantId)) {
+                    projectLog(message = "user has key saved, triggering load key")
                     state = state.copy(
                         cloudStorageAction = CloudStorageActionData(
                             triggerAction = true, action = CloudStorageActions.DOWNLOAD
                         ),
                     )
                 } else {
+                    projectLog(message = "Creating key with entropy for saving")
                     saveKeyWithEntropy()
                 }
 
@@ -294,6 +322,7 @@ class PlanFinalizationViewModel @Inject constructor(
     }
 
     private fun initiateAccess() {
+        projectLog(message = "Initiating access")
         viewModelScope.launch {
             if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
                 state = state.copy(initiateAccessResponse = Resource.Loading())
@@ -309,6 +338,7 @@ class PlanFinalizationViewModel @Inject constructor(
 
 
                 if (initiateAccessResponse is Resource.Success) {
+                    projectLog(message = "Setting facetec view state")
                     // navigate to the facetec view
                     state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_1)
 
@@ -317,21 +347,22 @@ class PlanFinalizationViewModel @Inject constructor(
 
                 state = state.copy(initiateAccessResponse = initiateAccessResponse)
             } else {
+                projectLog(message = "Setting facetec view state")
                 state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_1)
             }
         }
     }
 
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
+        projectLog(message = "replacePolicy running")
         state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
 
         try {
 
             if (state.ownerState!!.policySetup!!.approvers.any {
-                    !ownerRepository.verifyKeyConfirmationSignature(
-                        it
-                    )
+                    !ownerRepository.verifyKeyConfirmationSignature(it)
                 }) {
+                projectLog(message = "replacePolicy key confirmation signature false")
                 state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
                 return
             }
@@ -351,6 +382,7 @@ class PlanFinalizationViewModel @Inject constructor(
                         )
                     )
                 } catch (e: Exception) {
+                    projectLog(message = "replacePolicy call failed")
                     e.sendError(CrashReportingUtil.CloudDownload)
                     state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
                     return@launch
@@ -359,7 +391,9 @@ class PlanFinalizationViewModel @Inject constructor(
                 state = state.copy(replacePolicyResponse = response)
 
                 if (response is Resource.Success) {
+                    projectLog(message = "replacePolicy call success")
                     updateOwnerState(response.data!!.ownerState)
+                    projectLog(message = "replacePolicy setting complete UI state")
                     state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Completed_2)
                 }
             }
@@ -370,6 +404,7 @@ class PlanFinalizationViewModel @Inject constructor(
     }
 
     private fun onFacetecCancelled() {
+        projectLog(message = "Facetec cancelled")
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
     //endregion
@@ -379,14 +414,18 @@ class PlanFinalizationViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         biometry: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
+        projectLog(message = "onFaceScanReady")
         state = state.copy(retrieveAccessShardsResponse = Resource.Loading())
 
         return viewModelScope.async {
             val retrieveShardsResponse = ownerRepository.retrieveAccessShards(verificationId, biometry)
 
             if (retrieveShardsResponse is Resource.Success) {
+                projectLog(message = "onFaceScanReady retrieve shards is success")
+                projectLog(message = "onFaceScanReady cancelling access")
                 ownerRepository.cancelAccess()
 
+                projectLog(message = "onFaceScanReady starting replacePolicy")
                 replacePolicy(retrieveShardsResponse.data!!.encryptedShards)
             }
 
@@ -459,6 +498,7 @@ class PlanFinalizationViewModel @Inject constructor(
         )
     }
 
+    //TODO: Update error state reset usage
     fun dismissCloudError() {
         //dismiss error
         state = state.copy(replacePolicyResponse = Resource.Uninitialized)
