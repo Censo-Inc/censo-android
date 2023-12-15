@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.PlanSetupAction
 import co.censo.censo.presentation.plan_setup.PlanSetupDirection
@@ -43,17 +44,20 @@ fun PlanFinalizationScreen(
 ) {
     val state = viewModel.state
 
-    //TODO: Flesh out this screen with necessary UI
-//    val iconPair = when (state.backArrowType) {
-//        PlanSetupState.BackIconType.Back -> Icons.Filled.ArrowBack to R.string.back
-//        PlanSetupState.BackIconType.Exit -> Icons.Filled.Clear to R.string.exit
-//        else -> null
-//    }
-
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
-                navController.navigate(it)
+                navController.navigate(it) {
+                    val popUpToRoute = if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
+                        Screen.PlanFinalizationRoute.addApproversRoute()
+                    } else {
+                        Screen.PlanFinalizationRoute.removeApproversRoute()
+                    }
+
+                    popUpTo(popUpToRoute) {
+                        inclusive = true
+                    }
+                }
                 viewModel.resetNavigationResource()
             }
         }
@@ -69,39 +73,7 @@ fun PlanFinalizationScreen(
         }
     }
 
-    Scaffold(topBar = {
-//        TopAppBar(
-//            navigationIcon = {
-//                when (iconPair) {
-//                    null -> {}
-//                    else -> {
-//                        IconButton(
-//                            onClick = {
-//                                viewModel.receivePlanAction(PlanSetupAction.BackClicked)
-//                            }) {
-//                            Icon(
-//                                imageVector = iconPair.first,
-//                                contentDescription = stringResource(id = iconPair.second),
-//                            )
-//                        }
-//                    }
-//                }
-//            },
-//            title = {
-//                Text(
-//                    text =
-//                    when (state.planSetupUIState) {
-//                        PlanSetupUIState.ApproverActivation_5,
-//                        PlanSetupUIState.EditApproverNickname_3 ->
-//                            stringResource(R.string.add_approver_title)
-//
-//                        else -> ""
-//                    }
-//                )
-//            }
-//        )
-    }) { paddingValues ->
-
+    Scaffold { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
