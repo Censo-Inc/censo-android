@@ -38,12 +38,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-//TODO: Add back icon to the accessInProgress to keep parity
-
-//Do not navigate to the PlanSetupVM
-//Rename PlanSetup/PlanFinalization -----
-//Clear backstack
-
 /**
  *
  * Main Processes:
