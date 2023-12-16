@@ -6,7 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SubscriptionStatus
 import co.censo.shared.data.model.SeedPhrase
@@ -71,6 +74,18 @@ class VaultScreenViewModel @Inject constructor(
             if (response is Resource.Success) {
                 onOwnerState(response.data!!.ownerState)
             }
+        }
+    }
+
+    fun determinePolicyModificationRoute(): String {
+        val ownerState = state.ownerState
+        return if (ownerState is OwnerState.Ready && ownerState.policySetup?.approvers?.all
+            { it.status is ApproverStatus.Confirmed } == true
+        ) {
+            //If all approvers are confirmed then move directly to replacing the policy
+            Screen.ReplacePolicyRoute.addApproversRoute()
+        } else {
+            Screen.PolicySetupRoute.addApproversRoute()
         }
     }
 

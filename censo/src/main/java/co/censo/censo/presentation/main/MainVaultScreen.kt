@@ -237,7 +237,7 @@ fun MainVaultScreen(
                                 approvers = state.ownerState?.policy?.approvers ?: emptyList(),
                                 approverSetupExists = state.ownerState?.policySetup != null,
                                 onInviteApproversSelected = {
-                                    navController.navigate(Screen.PolicySetupRoute.addApproversRoute())
+                                    navController.navigate(viewModel.determinePolicyModificationRoute())
                                 },
                                 onRemoveApproversSelected = {
                                     navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))
