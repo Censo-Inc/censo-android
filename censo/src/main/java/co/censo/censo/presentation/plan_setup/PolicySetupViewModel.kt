@@ -94,56 +94,56 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class PlanSetupViewModel @Inject constructor(
+class PolicySetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
     private val pollingVerificationTimer: VaultCountDownTimer,
 ) : ViewModel() {
-    var state by mutableStateOf(PlanSetupState())
+    var state by mutableStateOf(PolicySetupState())
         private set
 
     //region Events
-    fun receivePlanAction(action: PlanSetupAction) {
+    fun receivePlanAction(action: PolicySetupScreenAction) {
         when (action) {
             //Back
-            PlanSetupAction.BackClicked -> onBackClicked()
+            PolicySetupScreenAction.BackClicked -> onBackClicked()
 
             //Retry
-            PlanSetupAction.Retry -> retrieveOwnerState(silent = false)
+            PolicySetupScreenAction.Retry -> retrieveOwnerState(silent = false)
 
             //Nickname or Approver Actions
-            is PlanSetupAction.ApproverNicknameChanged ->
+            is PolicySetupScreenAction.ApproverNicknameChanged ->
                 onApproverNicknameChanged(action.name)
-            PlanSetupAction.ApproverConfirmed -> onApproverConfirmed()
-            PlanSetupAction.EditApproverNickname -> onEditApproverNickname()
-            PlanSetupAction.GoLiveWithApprover -> onGoLiveWithApprover()
-            PlanSetupAction.SaveApproverAndSavePolicy -> saveApproverAndSubmitPolicy()
-            PlanSetupAction.EditApproverAndSavePolicy -> updateApproverNicknameAndSubmitPolicy()
+            PolicySetupScreenAction.ApproverConfirmed -> onApproverConfirmed()
+            PolicySetupScreenAction.EditApproverNickname -> onEditApproverNickname()
+            PolicySetupScreenAction.GoLiveWithApprover -> onGoLiveWithApprover()
+            PolicySetupScreenAction.SaveApproverAndSavePolicy -> saveApproverAndSubmitPolicy()
+            PolicySetupScreenAction.EditApproverAndSavePolicy -> updateApproverNicknameAndSubmitPolicy()
         }
     }
     //endregion
 
     //region Lifecycle Methods
-    fun onCreate(planSetupDirection: PlanSetupDirection) {
-        state = state.copy(planSetupDirection = planSetupDirection)
+    fun onCreate(policySetupAction: PolicySetupAction) {
+        state = state.copy(policySetupAction = policySetupAction)
 
-        if (state.planSetupDirection == PlanSetupDirection.RemoveApprovers) {
+        if (state.policySetupAction == PolicySetupAction.RemoveApprovers) {
             onRemoveApprovers()
         }
     }
 
     fun onResume() {
-        if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
+        if (state.policySetupAction == PolicySetupAction.AddApprovers) {
             // should be called on resume due to polling timers
             onAddApprovers()
         }
     }
 
     private fun onAddApprovers() {
-        if (state.planSetupUIState == PlanSetupUIState.Initial_1) {
-            state = state.copy(planSetupUIState = PlanSetupUIState.ApproverNickname_2)
+        if (state.policySetupUIState == PolicySetupUIState.Initial_1) {
+            state = state.copy(policySetupUIState = PolicySetupUIState.ApproverNickname_2)
         }
 
         viewModelScope.launch {
@@ -171,11 +171,11 @@ class PlanSetupViewModel @Inject constructor(
         // create policy setup only with owner approver, save and exit
         val ownerAsApprover = state.ownerApprover?.asOwnerAsApprover() ?: createOwnerApprover()
         submitPolicySetup(
-            threshold = state.planSetupDirection.threshold,
+            threshold = state.policySetupAction.threshold,
             policySetupApprovers = listOf(ownerAsApprover),
             nextAction = {
                 //Next action is to trigger plan finalization
-                triggerPlanFinalization()
+                triggerReplacePolicy()
             }
         )
     }
@@ -188,20 +188,20 @@ class PlanSetupViewModel @Inject constructor(
     //region User Actions
     private fun onBackClicked() {
         val backIconNavigation = listOf(
-            PlanSetupUIState.EditApproverNickname_3 to PlanSetupUIState.ApproverActivation_5,
-            PlanSetupUIState.ApproverActivation_5 to PlanSetupUIState.ApproverGettingLive_4,
+            PolicySetupUIState.EditApproverNickname_3 to PolicySetupUIState.ApproverActivation_5,
+            PolicySetupUIState.ApproverActivation_5 to PolicySetupUIState.ApproverGettingLive_4,
         ).toMap()
 
         when (state.backArrowType) {
-            PlanSetupState.BackIconType.None -> {}
+            PolicySetupState.BackIconType.None -> {}
 
-            PlanSetupState.BackIconType.Back -> {
+            PolicySetupState.BackIconType.Back -> {
                 state = state.copy(
-                    planSetupUIState = backIconNavigation[state.planSetupUIState] ?: state.planSetupUIState
+                    policySetupUIState = backIconNavigation[state.policySetupUIState] ?: state.policySetupUIState
                 )
             }
 
-            PlanSetupState.BackIconType.Exit -> {
+            PolicySetupState.BackIconType.Exit -> {
                 state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
             }
         }
@@ -211,12 +211,12 @@ class PlanSetupViewModel @Inject constructor(
         state = if (state.alternateApprover != null) {
             // skip name entry of alternate approver if it is already set
             state.copy(
-                planSetupUIState = PlanSetupUIState.ApproverGettingLive_4
+                policySetupUIState = PolicySetupUIState.ApproverGettingLive_4
             )
         } else {
             state.copy(
                 editedNickname = "",
-                planSetupUIState = PlanSetupUIState.ApproverNickname_2
+                policySetupUIState = PolicySetupUIState.ApproverNickname_2
             )
         }
     }
@@ -231,10 +231,10 @@ class PlanSetupViewModel @Inject constructor(
         val ownerAsApprover = state.ownerApprover?.asOwnerAsApprover() ?: createOwnerApprover()
 
         submitPolicySetup(
-            threshold = state.planSetupDirection.threshold,
+            threshold = state.policySetupAction.threshold,
             policySetupApprovers = getUpdatedPolicySetupApproverList(ownerAsApprover),
             nextAction = {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive_4)
+                state = state.copy(policySetupUIState = PolicySetupUIState.ApproverGettingLive_4)
             }
         )
     }
@@ -247,7 +247,7 @@ class PlanSetupViewModel @Inject constructor(
 
         state = state.copy(
             editedNickname = nicknameToUpdate ?: "",
-            planSetupUIState = PlanSetupUIState.EditApproverNickname_3
+            policySetupUIState = PolicySetupUIState.EditApproverNickname_3
         )
     }
 
@@ -277,23 +277,23 @@ class PlanSetupViewModel @Inject constructor(
         }
 
         submitPolicySetup(
-            threshold = state.planSetupDirection.threshold,
+            threshold = state.policySetupAction.threshold,
             policySetupApprovers = updatedPolicySetupApprovers,
             nextAction = {
-                state = state.copy(planSetupUIState = PlanSetupUIState.ApproverGettingLive_4)
+                state = state.copy(policySetupUIState = PolicySetupUIState.ApproverGettingLive_4)
             }
         )
     }
 
     private fun onGoLiveWithApprover() {
-        state = state.copy(planSetupUIState = PlanSetupUIState.ApproverActivation_5)
+        state = state.copy(policySetupUIState = PolicySetupUIState.ApproverActivation_5)
     }
 
     private fun onApproverConfirmed() {
         if (state.alternateApprover == null) {
             onInviteAlternateApprover()
         } else {
-            triggerPlanFinalization()
+            triggerReplacePolicy()
         }
     }
     //endregion
@@ -379,17 +379,17 @@ class PlanSetupViewModel @Inject constructor(
 
         // restore UI state on view restart (`overwriteUIState` flag)
         // normally navigation is controlled by pressing "continue" button
-        if (overwriteUIState && state.planSetupUIState == PlanSetupUIState.ApproverNickname_2) {
+        if (overwriteUIState && state.policySetupUIState == PolicySetupUIState.ApproverNickname_2) {
             if (externalApprovers.notConfirmed().isNotEmpty()) {
                 state = state.copy(
                     editedNickname = when (state.approverType) {
                         ApproverType.Primary -> state.primaryApprover?.label
                         ApproverType.Alternate -> state.alternateApprover?.label
                     } ?: "",
-                    planSetupUIState = PlanSetupUIState.ApproverGettingLive_4
+                    policySetupUIState = PolicySetupUIState.ApproverGettingLive_4
                 )
             } else if (alternateApprover?.status is ApproverStatus.Confirmed) {
-                triggerPlanFinalization()
+                triggerReplacePolicy()
             } else if (primaryApprover?.status is ApproverStatus.Confirmed) {
                 onInviteAlternateApprover()
             }
@@ -524,15 +524,15 @@ class PlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun triggerPlanFinalization() {
+    private fun triggerReplacePolicy() {
         projectLog(message = "Triggering navigation to PlanFinalization")
-        state = state.copy(finalizePlanSetup = Resource.Success(Unit), planSetupUIState = PlanSetupUIState.Uninitialized_0)
+        state = state.copy(replacePolicy = Resource.Success(Unit), policySetupUIState = PolicySetupUIState.Uninitialized_0)
     }
     //endregion
 
     //region Reset functions
-    fun resetFinalizePlanSetup() {
-        state = state.copy(finalizePlanSetup = Resource.Uninitialized)
+    fun resetReplacePolicy() {
+        state = state.copy(replacePolicy = Resource.Uninitialized)
     }
     fun resetNavigationResource() {
         state = state.copy(navigationResource = Resource.Uninitialized)

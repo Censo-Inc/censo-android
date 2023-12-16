@@ -1,22 +1,15 @@
 package co.censo.censo.presentation.plan_setup
 
-import Base58EncodedApproverPublicKey
 import ParticipantId
-import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Approver
-import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.ReplacePolicyApiResponse
-import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import kotlinx.datetime.Clock
 
 
-data class PlanSetupState(
+data class PolicySetupState(
     val ownerState: OwnerState.Ready? = null,
 
     // restored approvers state
@@ -25,8 +18,8 @@ data class PlanSetupState(
     val alternateApprover: Approver.ProspectApprover? = null,
 
     // Screen in Plan Setup Flow
-    val planSetupDirection: PlanSetupDirection = PlanSetupDirection.AddApprovers,
-    val planSetupUIState: PlanSetupUIState = PlanSetupUIState.Initial_1,
+    val policySetupAction: PolicySetupAction = PolicySetupAction.AddApprovers,
+    val policySetupUIState: PolicySetupUIState = PolicySetupUIState.Initial_1,
 
     // inviting approver
     val editedNickname: String = "",
@@ -45,7 +38,7 @@ data class PlanSetupState(
     val navigationResource: Resource<String> = Resource.Uninitialized,
 
     // Plan Finalization
-    val finalizePlanSetup: Resource<Unit> = Resource.Uninitialized,
+    val replacePolicy: Resource<Unit> = Resource.Uninitialized,
 ) {
     companion object {
         const val APPROVER_NAME_MAX_LENGTH = 20
@@ -58,13 +51,13 @@ data class PlanSetupState(
     val editedNicknameValid = editedNickname.isNotEmpty() && !editedNicknameIsTooLong
 
     val backArrowType = when {
-        planSetupUIState in listOf(
-            PlanSetupUIState.ApproverActivation_5,
-            PlanSetupUIState.EditApproverNickname_3
+        policySetupUIState in listOf(
+            PolicySetupUIState.ApproverActivation_5,
+            PolicySetupUIState.EditApproverNickname_3
         ) -> BackIconType.Back
 
-        planSetupUIState in listOf(
-            PlanSetupUIState.ApproverGettingLive_4,
+        policySetupUIState in listOf(
+            PolicySetupUIState.ApproverGettingLive_4,
         ) -> BackIconType.Exit
 
         else -> BackIconType.None
@@ -81,7 +74,7 @@ data class PlanSetupState(
     }
 }
 
-enum class PlanSetupUIState {
+enum class PolicySetupUIState {
     Uninitialized_0,
     Initial_1,
     ApproverNickname_2,
@@ -90,21 +83,21 @@ enum class PlanSetupUIState {
     ApproverActivation_5,
 }
 
-sealed interface PlanSetupAction {
+sealed interface PolicySetupScreenAction {
 
     //Approver Setup
-    data class ApproverNicknameChanged(val name: String) : PlanSetupAction
-    object EditApproverNickname : PlanSetupAction
-    object EditApproverAndSavePolicy : PlanSetupAction
-    object SaveApproverAndSavePolicy : PlanSetupAction
-    object GoLiveWithApprover: PlanSetupAction
-    object ApproverConfirmed : PlanSetupAction
+    data class ApproverNicknameChanged(val name: String) : PolicySetupScreenAction
+    object EditApproverNickname : PolicySetupScreenAction
+    object EditApproverAndSavePolicy : PolicySetupScreenAction
+    object SaveApproverAndSavePolicy : PolicySetupScreenAction
+    object GoLiveWithApprover: PolicySetupScreenAction
+    object ApproverConfirmed : PolicySetupScreenAction
 
     //Back
-    object BackClicked : PlanSetupAction
+    object BackClicked : PolicySetupScreenAction
 
     //Retry
-    object Retry : PlanSetupAction
+    object Retry : PolicySetupScreenAction
 }
 
 enum class ApproverType {

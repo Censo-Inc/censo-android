@@ -15,7 +15,7 @@ import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
-import co.censo.censo.presentation.plan_setup.PlanSetupDirection
+import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.Resource
@@ -29,10 +29,10 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanFinalizationScreen(
+fun ReplacePolicyScreen(
     navController: NavController,
-    planSetupDirection: PlanSetupDirection,
-    viewModel: PlanFinalizationViewModel = hiltViewModel()
+    policySetupAction: PolicySetupAction,
+    viewModel: ReplacePolicyViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
 
@@ -40,7 +40,7 @@ fun PlanFinalizationScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
                 navController.navigate(it) {
-                    val popUpToRoute = if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
+                    val popUpToRoute = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
                         Screen.PlanFinalizationRoute.addApproversRoute()
                     } else {
                         Screen.PlanFinalizationRoute.removeApproversRoute()
@@ -58,7 +58,7 @@ fun PlanFinalizationScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_CREATE -> {
-                viewModel.onCreate(planSetupDirection)
+                viewModel.onCreate(policySetupAction)
             }
 
             else -> Unit
@@ -81,11 +81,11 @@ fun PlanFinalizationScreen(
                             errorMessage = stringResource(R.string.cannot_verify_confirmation_signature),
                             dismissAction = {
                                 viewModel.resetVerifyKeyConfirmationSignature()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetVerifyKeyConfirmationSignature()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                         )
                     } else if (state.userResponse is Resource.Error) {
@@ -93,11 +93,11 @@ fun PlanFinalizationScreen(
                             errorMessage = "Failed to retrieve user information, try again.",
                             dismissAction = {
                                 viewModel.resetUserResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetUserResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                         )
                     } else if (state.createPolicySetupResponse is Resource.Error) {
@@ -105,11 +105,11 @@ fun PlanFinalizationScreen(
                             errorMessage = "Failed to create policy, try again",
                             dismissAction = {
                                 viewModel.resetCreatePolicySetupResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetCreatePolicySetupResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                         )
                     } else if (state.initiateAccessResponse is Resource.Error) {
@@ -117,11 +117,11 @@ fun PlanFinalizationScreen(
                             errorMessage = "Failed to replace plan, try again.",
                             dismissAction = {
                                 viewModel.resetInitiateAccessResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetInitiateAccessResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                         )
                     } else if (state.retrieveAccessShardsResponse is Resource.Error) {
@@ -129,37 +129,37 @@ fun PlanFinalizationScreen(
                             errorMessage = "Failed to retrieve recovery data, try again.",
                             dismissAction = {
                                 viewModel.resetRetrieveAccessShardsResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetRetrieveAccessShardsResponse()
-                                viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                             },
                         )
                     } else if (state.completeApprovershipResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to finalize plan, try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanFinalizationAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanFinalizationAction.Retry) },
+                            dismissAction = { viewModel.receivePlanAction(ReplacePolicyAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(ReplacePolicyAction.Retry) },
                         )
                     } else if (state.saveKeyToCloud is Resource.Error) {
                         DisplayError(
                             errorMessage = "Failed to setup secure data, try again.",
                             dismissAction = {
                                 viewModel.receivePlanAction(
-                                    PlanFinalizationAction.Retry
+                                    ReplacePolicyAction.Retry
                                 )
                             },
                             retryAction = {
                                 viewModel.receivePlanAction(
-                                    PlanFinalizationAction.Retry
+                                    ReplacePolicyAction.Retry
                                 )
                             },
                         )
                     } else if (state.replacePolicyResponse is Resource.Error) {
                         if (state.replacePolicyResponse.exception is CloudStoragePermissionNotGrantedException) {
                             DisplayError(
-                                errorMessage = "Google Drive Access Required for Censo\n\nPlease sign out and sign back in to refresh authentication permissions for your account",
+                                errorMessage = "Google Drive Access Required for Censo\n\nPlease go to settings to enable Google Drive permissions for your account",
                                 dismissAction = {
                                     viewModel.dismissCloudError()
                                 },
@@ -170,47 +170,47 @@ fun PlanFinalizationScreen(
                                 errorMessage = "Failed to create new policy, try again.",
                                 dismissAction = {
                                     viewModel.resetReplacePolicyResponse()
-                                    viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                    viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                                 },
                                 retryAction = {
                                     viewModel.resetReplacePolicyResponse()
-                                    viewModel.receivePlanAction(PlanFinalizationAction.Retry)
+                                    viewModel.receivePlanAction(ReplacePolicyAction.Retry)
                                 },
                             )
                         }
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanFinalizationAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanFinalizationAction.Retry) },
+                            dismissAction = { viewModel.receivePlanAction(ReplacePolicyAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(ReplacePolicyAction.Retry) },
                         )
                     }
                 }
 
                 else -> {
-                    when (state.planFinalizationUIState) {
-                        PlanFinalizationUIState.Uninitialized_1 -> LargeLoading(fullscreen = true)
+                    when (state.replacePolicyUIState) {
+                        ReplacePolicyUIState.Uninitialized_1 -> LargeLoading(fullscreen = true)
 
-                        PlanFinalizationUIState.AccessInProgress_2 -> {
+                        ReplacePolicyUIState.AccessInProgress_2 -> {
                             FacetecAuth(
                                 onFaceScanReady = { verificationId, biometry ->
                                     viewModel.onFaceScanReady(verificationId, biometry)
                                 },
                                 onCancelled = {
-                                    viewModel.receivePlanAction(PlanFinalizationAction.FacetecCancelled)
+                                    viewModel.receivePlanAction(ReplacePolicyAction.FacetecCancelled)
                                 }
                             )
                         }
 
-                        PlanFinalizationUIState.Completed_3 -> {
-                            when (planSetupDirection) {
-                                PlanSetupDirection.AddApprovers -> Activated()
-                                PlanSetupDirection.RemoveApprovers -> ApproversRemoved()
+                        ReplacePolicyUIState.Completed_3 -> {
+                            when (policySetupAction) {
+                                PolicySetupAction.AddApprovers -> Activated()
+                                PolicySetupAction.RemoveApprovers -> ApproversRemoved()
                             }
 
                             LaunchedEffect(Unit) {
                                 delay(6000)
-                                viewModel.receivePlanAction(PlanFinalizationAction.Completed)
+                                viewModel.receivePlanAction(ReplacePolicyAction.Completed)
                             }
                         }
                     }
@@ -230,11 +230,11 @@ fun PlanFinalizationScreen(
                     participantId = participantId,
                     encryptedPrivateKey = encryptedKey,
                     onActionSuccess = {
-                        viewModel.receivePlanAction(PlanFinalizationAction.KeyUploadSuccess)
+                        viewModel.receivePlanAction(ReplacePolicyAction.KeyUploadSuccess)
                     },
                     onActionFailed = {
                         viewModel.receivePlanAction(
-                            PlanFinalizationAction.KeyUploadFailed(
+                            ReplacePolicyAction.KeyUploadFailed(
                                 it
                             )
                         )
@@ -244,7 +244,7 @@ fun PlanFinalizationScreen(
                 val exceptionCause =
                     if (encryptedKey == null) "missing private key" else "missing participant id"
                 viewModel.receivePlanAction(
-                    PlanFinalizationAction.KeyUploadFailed(
+                    ReplacePolicyAction.KeyUploadFailed(
                         Exception("Unable to setup policy $exceptionCause")
                     )
                 )
@@ -259,14 +259,14 @@ fun PlanFinalizationScreen(
                     encryptedPrivateKey = null,
                     onActionSuccess = {
                         viewModel.receivePlanAction(
-                            PlanFinalizationAction.KeyDownloadSuccess(
+                            ReplacePolicyAction.KeyDownloadSuccess(
                                 it
                             )
                         )
                     },
                     onActionFailed = {
                         viewModel.receivePlanAction(
-                            PlanFinalizationAction.KeyDownloadFailed(
+                            ReplacePolicyAction.KeyDownloadFailed(
                                 it
                             )
                         )
@@ -274,7 +274,7 @@ fun PlanFinalizationScreen(
                 )
             } else {
                 viewModel.receivePlanAction(
-                    PlanFinalizationAction.KeyDownloadFailed(
+                    ReplacePolicyAction.KeyDownloadFailed(
                         Exception("Unable to setup policy, missing participant id")
                     )
                 )

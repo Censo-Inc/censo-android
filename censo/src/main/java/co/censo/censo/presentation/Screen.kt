@@ -1,7 +1,7 @@
 package co.censo.censo.presentation
 
 import Base58EncodedMasterPublicKey
-import co.censo.censo.presentation.plan_setup.PlanSetupDirection
+import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.model.AccessIntent
 
 sealed class Screen(val route: String) {
@@ -10,15 +10,15 @@ sealed class Screen(val route: String) {
     object PlanSetupRoute : Screen("plan_setup_route") {
         const val SETUP_DIRECTION_ARG = "setup_direction_key"
 
-        fun addApproversRoute(): String = "${PlanSetupRoute.route}/${PlanSetupDirection.AddApprovers.name}"
-        fun removeApproversRoute(): String = "${PlanSetupRoute.route}/${PlanSetupDirection.RemoveApprovers.name}"
+        fun addApproversRoute(): String = "${PlanSetupRoute.route}/${PolicySetupAction.AddApprovers.name}"
+        fun removeApproversRoute(): String = "${PlanSetupRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
     }
 
     object PlanFinalizationRoute: Screen("plan_finalization_route") {
         const val FINALIZATION_DIRECTION_ARG = "finalization_direction_key"
 
-        fun addApproversRoute(): String = "${PlanFinalizationRoute.route}/${PlanSetupDirection.AddApprovers.name}"
-        fun removeApproversRoute(): String = "${PlanFinalizationRoute.route}/${PlanSetupDirection.RemoveApprovers.name}"
+        fun addApproversRoute(): String = "${PlanFinalizationRoute.route}/${PolicySetupAction.AddApprovers.name}"
+        fun removeApproversRoute(): String = "${PlanFinalizationRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
     }
 
     object OwnerVaultScreen : Screen("owner_vault_screen")

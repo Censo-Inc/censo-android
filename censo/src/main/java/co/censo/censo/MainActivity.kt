@@ -33,12 +33,12 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.main.MainVaultScreen
 import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
-import co.censo.censo.presentation.plan_setup.PlanSetupScreen
+import co.censo.censo.presentation.plan_setup.PolicySetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.main.BottomNavItem
 import co.censo.censo.presentation.paywall.PaywallScreen
-import co.censo.censo.presentation.plan_finalization.PlanFinalizationScreen
-import co.censo.censo.presentation.plan_setup.PlanSetupDirection
+import co.censo.censo.presentation.plan_finalization.ReplacePolicyScreen
+import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
 import co.censo.shared.data.model.AccessIntent
@@ -139,19 +139,19 @@ class MainActivity : FragmentActivity() {
             composable(
                 route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.SETUP_DIRECTION_ARG}}"
             ) {backStackEntry ->
-                PlanSetupScreen(
+                PolicySetupScreen(
                     navController = navController,
-                    planSetupDirection = backStackEntry.arguments?.getString(Screen.PlanSetupRoute.SETUP_DIRECTION_ARG)
-                        ?.let { PlanSetupDirection.valueOf(it) } ?: PlanSetupDirection.AddApprovers
+                    policySetupAction = backStackEntry.arguments?.getString(Screen.PlanSetupRoute.SETUP_DIRECTION_ARG)
+                        ?.let { PolicySetupAction.valueOf(it) } ?: PolicySetupAction.AddApprovers
                 )
             }
             composable(
                 route = "${Screen.PlanFinalizationRoute.route}/{${Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG}}"
             ) {backStackEntry ->
-                PlanFinalizationScreen(
+                ReplacePolicyScreen(
                     navController = navController,
-                    planSetupDirection = backStackEntry.arguments?.getString(Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG)
-                        ?.let { PlanSetupDirection.valueOf(it) } ?: PlanSetupDirection.AddApprovers
+                    policySetupAction = backStackEntry.arguments?.getString(Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG)
+                        ?.let { PolicySetupAction.valueOf(it) } ?: PolicySetupAction.AddApprovers
                 )
             }
             composable(

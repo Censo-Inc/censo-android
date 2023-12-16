@@ -18,7 +18,7 @@ import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.plan_setup.PlanSetupDirection
+import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.util.confirmed
 import co.censo.censo.util.externalApprovers
 import co.censo.censo.util.notConfirmed
@@ -37,6 +37,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+//TODO: Add back icon to the accessInProgress to keep parity
+
+//Do not navigate to the PlanSetupVM
+//Rename PlanSetup/PlanFinalization -----
+//Clear backstack
 
 /**
  *
@@ -74,18 +80,18 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class PlanFinalizationViewModel @Inject constructor(
+class ReplacePolicyViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
 ) : ViewModel() {
-    var state by mutableStateOf(PlanFinalizationState())
+    var state by mutableStateOf(ReplacePolicyState())
         private set
 
     //region Events
-    fun onCreate(planSetupDirection: PlanSetupDirection) {
+    fun onCreate(policySetupAction: PolicySetupAction) {
         projectLog(message = "onCreate of PlanFinalization running")
-        state = state.copy(planSetupDirection = planSetupDirection)
+        state = state.copy(policySetupAction = policySetupAction)
 
         viewModelScope.launch {
             projectLog(message = "Getting owner state from global")
@@ -103,26 +109,26 @@ class PlanFinalizationViewModel @Inject constructor(
         }
     }
 
-    fun receivePlanAction(action: PlanFinalizationAction) {
+    fun receivePlanAction(action: ReplacePolicyAction) {
         when (action) {
             //Retry
-            PlanFinalizationAction.Retry -> retrieveOwnerState(silent = false, nextAction = {
+            ReplacePolicyAction.Retry -> retrieveOwnerState(silent = false, nextAction = {
                 projectLog(message = "After user hit retry and owner state retrieved, running next action: checkUserHasSavedKeyAndSubmittedPolicy")
                 checkUserHasSavedKeyAndSubmittedPolicy()
             })
 
             //Facetec Cancelled
-            PlanFinalizationAction.FacetecCancelled -> onFacetecCancelled()
+            ReplacePolicyAction.FacetecCancelled -> onFacetecCancelled()
 
             //Cloud Actions
-            PlanFinalizationAction.KeyUploadSuccess -> onKeyUploadSuccess()
-            is PlanFinalizationAction.KeyDownloadSuccess -> onKeyDownloadSuccess(action.encryptedKey)
+            ReplacePolicyAction.KeyUploadSuccess -> onKeyUploadSuccess()
+            is ReplacePolicyAction.KeyDownloadSuccess -> onKeyDownloadSuccess(action.encryptedKey)
 
-            is PlanFinalizationAction.KeyDownloadFailed -> onKeyDownloadFailed(action.e)
-            is PlanFinalizationAction.KeyUploadFailed -> onKeyUploadFailed(action.e)
+            is ReplacePolicyAction.KeyDownloadFailed -> onKeyDownloadFailed(action.e)
+            is ReplacePolicyAction.KeyUploadFailed -> onKeyUploadFailed(action.e)
 
             //Finalizing Actions
-            PlanFinalizationAction.Completed -> onFullyCompleted()
+            ReplacePolicyAction.Completed -> onFullyCompleted()
         }
     }
     //endregion
@@ -212,7 +218,7 @@ class PlanFinalizationViewModel @Inject constructor(
             )
 
             projectLog(message = "saveKeyWithEntropy creating KeyData")
-            val keyData = PlanFinalizationKeyData(
+            val keyData = ReplacePolicyKeyData(
                 encryptedPrivateKey = encryptedKey,
                 publicKey = publicKey
             )
@@ -310,7 +316,7 @@ class PlanFinalizationViewModel @Inject constructor(
     private fun initiateAccess() {
         projectLog(message = "Initiating access")
         viewModelScope.launch {
-            if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
+            if (state.policySetupAction == PolicySetupAction.AddApprovers) {
                 state = state.copy(initiateAccessResponse = Resource.Loading())
 
                 // cancel previous access if exists
@@ -326,7 +332,7 @@ class PlanFinalizationViewModel @Inject constructor(
                 if (initiateAccessResponse is Resource.Success) {
                     projectLog(message = "Setting facetec view state")
                     // navigate to the facetec view
-                    state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_2)
+                    state = state.copy(replacePolicyUIState = ReplacePolicyUIState.AccessInProgress_2)
 
                     updateOwnerState(initiateAccessResponse.data!!.ownerState)
                 }
@@ -334,7 +340,7 @@ class PlanFinalizationViewModel @Inject constructor(
                 state = state.copy(initiateAccessResponse = initiateAccessResponse)
             } else {
                 projectLog(message = "Setting facetec view state")
-                state = state.copy(planFinalizationUIState = PlanFinalizationUIState.AccessInProgress_2)
+                state = state.copy(replacePolicyUIState = ReplacePolicyUIState.AccessInProgress_2)
             }
         }
     }
@@ -360,7 +366,7 @@ class PlanFinalizationViewModel @Inject constructor(
                     ownerRepository.replacePolicy(
                         encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
                         encryptedMasterPrivateKey = state.ownerState!!.policy.encryptedMasterKey,
-                        threshold = state.planSetupDirection.threshold,
+                        threshold = state.policySetupAction.threshold,
                         approvers = listOfNotNull(
                             state.ownerApprover,
                             state.primaryApprover,
@@ -380,7 +386,7 @@ class PlanFinalizationViewModel @Inject constructor(
                     projectLog(message = "replacePolicy call success")
                     updateOwnerState(response.data!!.ownerState)
                     projectLog(message = "replacePolicy setting complete UI state")
-                    state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Completed_3)
+                    state = state.copy(replacePolicyUIState = ReplacePolicyUIState.Completed_3)
                 }
             }
         } catch (e: Exception) {
@@ -446,7 +452,7 @@ class PlanFinalizationViewModel @Inject constructor(
             )
 
         state = state.copy(
-            keyData = PlanFinalizationKeyData(
+            keyData = ReplacePolicyKeyData(
                 encryptedPrivateKey = encryptedKey,
                 publicKey = publicKey
             )
@@ -490,7 +496,7 @@ class PlanFinalizationViewModel @Inject constructor(
         //kick user to home
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
         //ensure facetec doesn't block us from leaving
-        state = state.copy(planFinalizationUIState = PlanFinalizationUIState.Uninitialized_1)
+        state = state.copy(replacePolicyUIState = ReplacePolicyUIState.Uninitialized_1)
     }
 
     fun resetReplacePolicyResponse() {

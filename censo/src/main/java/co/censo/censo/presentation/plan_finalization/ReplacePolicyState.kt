@@ -2,7 +2,7 @@ package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
 import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
-import co.censo.censo.presentation.plan_setup.PlanSetupDirection
+import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
@@ -14,11 +14,11 @@ import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 
-data class PlanFinalizationState(
+data class ReplacePolicyState(
     val ownerState: OwnerState.Ready? = null,
 
-    val planFinalizationUIState: PlanFinalizationUIState = PlanFinalizationUIState.Uninitialized_1,
-    val planSetupDirection: PlanSetupDirection = PlanSetupDirection.AddApprovers,
+    val replacePolicyUIState: ReplacePolicyUIState = ReplacePolicyUIState.Uninitialized_1,
+    val policySetupAction: PolicySetupAction = PolicySetupAction.AddApprovers,
 
     // restored approvers state
     val ownerApprover: Approver.ProspectApprover? = null,
@@ -38,7 +38,7 @@ data class PlanFinalizationState(
     // Cloud Storage
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
 
-    val keyData: PlanFinalizationKeyData? = null,
+    val keyData: ReplacePolicyKeyData? = null,
     val saveKeyToCloud: Resource<Unit> = Resource.Uninitialized,
 
     // Navigation
@@ -63,29 +63,29 @@ data class PlanFinalizationState(
             || saveKeyToCloud is Resource.Error
 }
 
-enum class PlanFinalizationUIState {
+enum class ReplacePolicyUIState {
     Uninitialized_1,
     AccessInProgress_2,
     Completed_3
 }
 
-sealed interface PlanFinalizationAction {
+sealed interface ReplacePolicyAction {
 
     //Plan Finalization
-    object Completed : PlanFinalizationAction
+    object Completed : ReplacePolicyAction
 
     //Cloud
-    object KeyUploadSuccess : PlanFinalizationAction
-    data class KeyDownloadSuccess(val encryptedKey: ByteArray) : PlanFinalizationAction
-    data class KeyDownloadFailed(val e: Exception?) : PlanFinalizationAction
-    data class KeyUploadFailed(val e: Exception?) : PlanFinalizationAction
+    object KeyUploadSuccess : ReplacePolicyAction
+    data class KeyDownloadSuccess(val encryptedKey: ByteArray) : ReplacePolicyAction
+    data class KeyDownloadFailed(val e: Exception?) : ReplacePolicyAction
+    data class KeyUploadFailed(val e: Exception?) : ReplacePolicyAction
 
     //Retry
-    object Retry : PlanFinalizationAction
-    object FacetecCancelled : PlanFinalizationAction
+    object Retry : ReplacePolicyAction
+    object FacetecCancelled : ReplacePolicyAction
 }
 
-data class PlanFinalizationKeyData(
+data class ReplacePolicyKeyData(
     val encryptedPrivateKey: ByteArray,
     val publicKey: Base58EncodedApproverPublicKey
 ) {

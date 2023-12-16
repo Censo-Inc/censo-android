@@ -25,38 +25,29 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.facetec_auth.FacetecAuth
-import co.censo.censo.presentation.plan_finalization.PlanFinalizationAction
-import co.censo.censo.presentation.plan_finalization.PlanFinalizationUIState
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
-import co.censo.censo.presentation.plan_setup.components.Activated
-import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.model.ApproverStatus
-import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
 import co.censo.shared.util.projectLog
-import kotlinx.coroutines.delay
 
-enum class PlanSetupDirection(val threshold: UInt) {
+enum class PolicySetupAction(val threshold: UInt) {
     AddApprovers(2U), RemoveApprovers(1U)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanSetupScreen(
+fun PolicySetupScreen(
     navController: NavController,
-    planSetupDirection: PlanSetupDirection,
-    viewModel: PlanSetupViewModel = hiltViewModel(),
+    policySetupAction: PolicySetupAction,
+    viewModel: PolicySetupViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
 
     val iconPair = when (state.backArrowType) {
-        PlanSetupState.BackIconType.Back -> Icons.Filled.ArrowBack to R.string.back
-        PlanSetupState.BackIconType.Exit -> Icons.Filled.Clear to R.string.exit
+        PolicySetupState.BackIconType.Back -> Icons.Filled.ArrowBack to R.string.back
+        PolicySetupState.BackIconType.Exit -> Icons.Filled.Clear to R.string.exit
         else -> null
     }
 
@@ -68,10 +59,10 @@ fun PlanSetupScreen(
             }
         }
 
-        if (state.finalizePlanSetup is Resource.Success) {
-            viewModel.resetFinalizePlanSetup()
-
-            val (route, popUpToRoute) = if (state.planSetupDirection == PlanSetupDirection.AddApprovers) {
+        if (state.replacePolicy is Resource.Success) {
+            viewModel.resetReplacePolicy()
+            //Pop back stack entirely from here
+            val (route, popUpToRoute) = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
                 Pair(
                     Screen.PlanFinalizationRoute.addApproversRoute(),
                     Screen.PlanSetupRoute.addApproversRoute()
@@ -95,7 +86,7 @@ fun PlanSetupScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_CREATE -> {
-                viewModel.onCreate(planSetupDirection)
+                viewModel.onCreate(policySetupAction)
             }
 
             Lifecycle.Event.ON_RESUME -> {
@@ -118,7 +109,7 @@ fun PlanSetupScreen(
                     else -> {
                         IconButton(
                             onClick = {
-                                viewModel.receivePlanAction(PlanSetupAction.BackClicked)
+                                viewModel.receivePlanAction(PolicySetupScreenAction.BackClicked)
                             }) {
                             Icon(
                                 imageVector = iconPair.first,
@@ -131,9 +122,9 @@ fun PlanSetupScreen(
             title = {
                 Text(
                     text =
-                    when (state.planSetupUIState) {
-                        PlanSetupUIState.ApproverActivation_5,
-                        PlanSetupUIState.EditApproverNickname_3 ->
+                    when (state.policySetupUIState) {
+                        PolicySetupUIState.ApproverActivation_5,
+                        PolicySetupUIState.EditApproverNickname_3 ->
                             stringResource(R.string.add_approver_title)
 
                         else -> ""
@@ -158,11 +149,11 @@ fun PlanSetupScreen(
                             errorMessage = "Failed to retrieve user information, try again.",
                             dismissAction = {
                                 viewModel.resetUserResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                viewModel.receivePlanAction(PolicySetupScreenAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetUserResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                viewModel.receivePlanAction(PolicySetupScreenAction.Retry)
                             },
                         )
                     } else if (state.createPolicySetupResponse is Resource.Error) {
@@ -170,29 +161,29 @@ fun PlanSetupScreen(
                             errorMessage = "Failed to create policy, try again",
                             dismissAction = {
                                 viewModel.resetCreatePolicySetupResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                viewModel.receivePlanAction(PolicySetupScreenAction.Retry)
                             },
                             retryAction = {
                                 viewModel.resetCreatePolicySetupResponse()
-                                viewModel.receivePlanAction(PlanSetupAction.Retry)
+                                viewModel.receivePlanAction(PolicySetupScreenAction.Retry)
                             },
                         )
                     } else {
                         DisplayError(
                             errorMessage = "Something went wrong, please try again.",
-                            dismissAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
-                            retryAction = { viewModel.receivePlanAction(PlanSetupAction.Retry) },
+                            dismissAction = { viewModel.receivePlanAction(PolicySetupScreenAction.Retry) },
+                            retryAction = { viewModel.receivePlanAction(PolicySetupScreenAction.Retry) },
                         )
                     }
                 }
 
                 else -> {
-                    when (state.planSetupUIState) {
-                        PlanSetupUIState.Initial_1 -> LargeLoading(
+                    when (state.policySetupUIState) {
+                        PolicySetupUIState.Initial_1 -> LargeLoading(
                             fullscreen = true
                         )
 
-                        PlanSetupUIState.ApproverNickname_2 -> {
+                        PolicySetupUIState.ApproverNickname_2 -> {
                             ApproverNicknameUI(
                                 isFirstApprover = state.primaryApprover?.status !is ApproverStatus.Confirmed,
                                 nickname = state.editedNickname,
@@ -200,18 +191,18 @@ fun PlanSetupScreen(
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
                                 onNicknameChanged = {
                                     viewModel.receivePlanAction(
-                                        PlanSetupAction.ApproverNicknameChanged(
+                                        PolicySetupScreenAction.ApproverNicknameChanged(
                                             it
                                         )
                                     )
                                 },
                                 onSaveNickname = {
-                                    viewModel.receivePlanAction(PlanSetupAction.SaveApproverAndSavePolicy)
+                                    viewModel.receivePlanAction(PolicySetupScreenAction.SaveApproverAndSavePolicy)
                                 }
                             )
                         }
 
-                        PlanSetupUIState.EditApproverNickname_3 -> {
+                        PolicySetupUIState.EditApproverNickname_3 -> {
                             ApproverNicknameUI(
                                 isFirstApprover = state.primaryApprover?.status !is ApproverStatus.Confirmed,
                                 isRename = true,
@@ -220,19 +211,19 @@ fun PlanSetupScreen(
                                 nicknameIsTooLong = state.editedNicknameIsTooLong,
                                 onNicknameChanged = {
                                     viewModel.receivePlanAction(
-                                        PlanSetupAction.ApproverNicknameChanged(
+                                        PolicySetupScreenAction.ApproverNicknameChanged(
                                             it
                                         )
                                     )
                                 },
                                 onSaveNickname = {
-                                    viewModel.receivePlanAction(PlanSetupAction.EditApproverAndSavePolicy)
+                                    viewModel.receivePlanAction(PolicySetupScreenAction.EditApproverAndSavePolicy)
                                 }
                             )
                         }
 
                         //Really light screen. Just moves us to next UI or let's user back out.
-                        PlanSetupUIState.ApproverGettingLive_4 -> {
+                        PolicySetupUIState.ApproverGettingLive_4 -> {
                             GetLiveWithUserUI(
                                 title = "${stringResource(R.string.activate_approver)} ${state.editedNickname}",
                                 message = stringResource(
@@ -241,16 +232,16 @@ fun PlanSetupScreen(
                                 ),
                                 activatingApprover = true,
                                 onContinueLive = {
-                                    viewModel.receivePlanAction(PlanSetupAction.GoLiveWithApprover)
+                                    viewModel.receivePlanAction(PolicySetupScreenAction.GoLiveWithApprover)
                                 },
                                 onResumeLater = {
-                                    viewModel.receivePlanAction(PlanSetupAction.BackClicked)
+                                    viewModel.receivePlanAction(PolicySetupScreenAction.BackClicked)
                                 }
                             )
                         }
 
                         //Verify approver while approver does full onboarding
-                        PlanSetupUIState.ApproverActivation_5 -> {
+                        PolicySetupUIState.ApproverActivation_5 -> {
                             ActivateApproverUI(
                                 prospectApprover = state.activatingApprover,
                                 secondsLeft = state.secondsLeft,
@@ -258,10 +249,10 @@ fun PlanSetupScreen(
                                     ?: "",
                                 storesLink = LinksUtil.CENSO_APPROVER_STORE_LINK,
                                 onContinue = {
-                                    viewModel.receivePlanAction(PlanSetupAction.ApproverConfirmed)
+                                    viewModel.receivePlanAction(PolicySetupScreenAction.ApproverConfirmed)
                                 },
                                 onEditNickname = {
-                                    viewModel.receivePlanAction(PlanSetupAction.EditApproverNickname)
+                                    viewModel.receivePlanAction(PolicySetupScreenAction.EditApproverNickname)
                                 }
                             )
                         }
