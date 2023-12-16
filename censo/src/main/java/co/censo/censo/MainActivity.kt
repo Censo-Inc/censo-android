@@ -137,20 +137,20 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.SETUP_DIRECTION_ARG}}"
+                route = "${Screen.PolicySetupRoute.route}/{${Screen.PolicySetupRoute.SETUP_ACTION_ARG}}"
             ) {backStackEntry ->
                 PolicySetupScreen(
                     navController = navController,
-                    policySetupAction = backStackEntry.arguments?.getString(Screen.PlanSetupRoute.SETUP_DIRECTION_ARG)
+                    policySetupAction = backStackEntry.arguments?.getString(Screen.PolicySetupRoute.SETUP_ACTION_ARG)
                         ?.let { PolicySetupAction.valueOf(it) } ?: PolicySetupAction.AddApprovers
                 )
             }
             composable(
-                route = "${Screen.PlanFinalizationRoute.route}/{${Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG}}"
+                route = "${Screen.ReplacePolicyRoute.route}/{${Screen.ReplacePolicyRoute.REPLACE_POLICY_ACTION_ARG}}"
             ) {backStackEntry ->
                 ReplacePolicyScreen(
                     navController = navController,
-                    policySetupAction = backStackEntry.arguments?.getString(Screen.PlanFinalizationRoute.FINALIZATION_DIRECTION_ARG)
+                    policySetupAction = backStackEntry.arguments?.getString(Screen.ReplacePolicyRoute.REPLACE_POLICY_ACTION_ARG)
                         ?.let { PolicySetupAction.valueOf(it) } ?: PolicySetupAction.AddApprovers
                 )
             }

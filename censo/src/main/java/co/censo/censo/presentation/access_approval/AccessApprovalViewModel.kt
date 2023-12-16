@@ -247,7 +247,7 @@ class AccessApprovalViewModel @Inject constructor(
     fun navigateIntentAware() {
         val destination = when (state.accessIntent) {
             AccessIntent.AccessPhrases -> Screen.AccessSeedPhrases.route
-            AccessIntent.ReplacePolicy -> Screen.PlanSetupRoute.removeApproversRoute()
+            AccessIntent.ReplacePolicy -> Screen.PolicySetupRoute.removeApproversRoute()
         }
 
         state = state.copy(navigationResource = Resource.Success(destination))

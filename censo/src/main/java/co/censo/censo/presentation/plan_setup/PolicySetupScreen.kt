@@ -64,13 +64,13 @@ fun PolicySetupScreen(
             //Pop back stack entirely from here
             val (route, popUpToRoute) = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
                 Pair(
-                    Screen.PlanFinalizationRoute.addApproversRoute(),
-                    Screen.PlanSetupRoute.addApproversRoute()
+                    Screen.ReplacePolicyRoute.addApproversRoute(),
+                    Screen.PolicySetupRoute.addApproversRoute()
                 )
             } else {
                 Pair(
-                    Screen.PlanFinalizationRoute.removeApproversRoute(),
-                    Screen.PlanSetupRoute.removeApproversRoute()
+                    Screen.ReplacePolicyRoute.removeApproversRoute(),
+                    Screen.PolicySetupRoute.removeApproversRoute()
                 )
             }
 

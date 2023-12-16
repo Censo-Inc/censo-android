@@ -41,9 +41,9 @@ fun ReplacePolicyScreen(
             state.navigationResource.data?.let {
                 navController.navigate(it) {
                     val popUpToRoute = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
-                        Screen.PlanFinalizationRoute.addApproversRoute()
+                        Screen.ReplacePolicyRoute.addApproversRoute()
                     } else {
-                        Screen.PlanFinalizationRoute.removeApproversRoute()
+                        Screen.ReplacePolicyRoute.removeApproversRoute()
                     }
 
                     popUpTo(popUpToRoute) {

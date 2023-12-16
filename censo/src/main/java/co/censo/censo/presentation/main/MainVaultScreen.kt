@@ -17,7 +17,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -238,7 +237,7 @@ fun MainVaultScreen(
                                 approvers = state.ownerState?.policy?.approvers ?: emptyList(),
                                 approverSetupExists = state.ownerState?.policySetup != null,
                                 onInviteApproversSelected = {
-                                    navController.navigate(Screen.PlanSetupRoute.addApproversRoute())
+                                    navController.navigate(Screen.PolicySetupRoute.addApproversRoute())
                                 },
                                 onRemoveApproversSelected = {
                                     navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))

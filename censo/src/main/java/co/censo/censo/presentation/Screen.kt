@@ -7,18 +7,18 @@ import co.censo.shared.data.model.AccessIntent
 sealed class Screen(val route: String) {
     object EntranceRoute : Screen("entrance_screen")
 
-    object PlanSetupRoute : Screen("plan_setup_route") {
-        const val SETUP_DIRECTION_ARG = "setup_direction_key"
+    object PolicySetupRoute : Screen("policy_setup_route") {
+        const val SETUP_ACTION_ARG = "setup_action_key"
 
-        fun addApproversRoute(): String = "${PlanSetupRoute.route}/${PolicySetupAction.AddApprovers.name}"
-        fun removeApproversRoute(): String = "${PlanSetupRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
+        fun addApproversRoute(): String = "${PolicySetupRoute.route}/${PolicySetupAction.AddApprovers.name}"
+        fun removeApproversRoute(): String = "${PolicySetupRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
     }
 
-    object PlanFinalizationRoute: Screen("plan_finalization_route") {
-        const val FINALIZATION_DIRECTION_ARG = "finalization_direction_key"
+    object ReplacePolicyRoute: Screen("replace_policy_route") {
+        const val REPLACE_POLICY_ACTION_ARG = "replace_policy_action_key"
 
-        fun addApproversRoute(): String = "${PlanFinalizationRoute.route}/${PolicySetupAction.AddApprovers.name}"
-        fun removeApproversRoute(): String = "${PlanFinalizationRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
+        fun addApproversRoute(): String = "${ReplacePolicyRoute.route}/${PolicySetupAction.AddApprovers.name}"
+        fun removeApproversRoute(): String = "${ReplacePolicyRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
     }
 
     object OwnerVaultScreen : Screen("owner_vault_screen")
