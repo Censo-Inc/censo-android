@@ -111,6 +111,9 @@ class ReplacePolicyViewModel @Inject constructor(
 
     fun receivePlanAction(action: ReplacePolicyAction) {
         when (action) {
+            //Back Click
+            ReplacePolicyAction.BackClicked -> onBackClicked()
+
             //Retry
             ReplacePolicyAction.Retry -> retrieveOwnerState(silent = false, nextAction = {
                 projectLog(message = "After user hit retry and owner state retrieved, running next action: checkUserHasSavedKeyAndSubmittedPolicy")
@@ -134,6 +137,15 @@ class ReplacePolicyViewModel @Inject constructor(
     //endregion
 
     //region Internal Methods
+    private fun onBackClicked() {
+        when (state.backArrowType) {
+            ReplacePolicyState.BackIconType.NONE -> { }
+            ReplacePolicyState.BackIconType.EXIT -> {
+                state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
+            }
+        }
+    }
+
     private fun onFullyCompleted() {
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }

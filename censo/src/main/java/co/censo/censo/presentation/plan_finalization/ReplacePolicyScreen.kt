@@ -3,8 +3,13 @@ package co.censo.censo.presentation.plan_finalization
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -16,6 +21,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
+import co.censo.censo.presentation.plan_setup.PolicySetupScreenAction
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.shared.data.Resource
@@ -35,6 +41,11 @@ fun ReplacePolicyScreen(
     viewModel: ReplacePolicyViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+
+    val iconPair = when (state.backArrowType) {
+        ReplacePolicyState.BackIconType.EXIT -> Icons.Filled.Clear to R.string.exit
+        else -> null
+    }
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
@@ -65,7 +76,28 @@ fun ReplacePolicyScreen(
         }
     }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    when (iconPair) {
+                        null -> {}
+                        else -> {
+                            IconButton(
+                                onClick = {
+                                    viewModel.receivePlanAction(ReplacePolicyAction.BackClicked)
+                                }) {
+                                Icon(
+                                    imageVector = iconPair.first,
+                                    contentDescription = stringResource(id = iconPair.second),
+                                )
+                            }
+                        }
+                    }
+                },
+                title = { })
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()

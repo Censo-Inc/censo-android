@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
+import androidx.compose.foundation.interaction.HoverInteraction
 import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.Resource
@@ -61,6 +62,18 @@ data class ReplacePolicyState(
             || verifyKeyConfirmationSignature is Resource.Error
             || completeApprovershipResponse is Resource.Error
             || saveKeyToCloud is Resource.Error
+
+    val backArrowType = when {
+        replacePolicyUIState in listOf(
+            ReplacePolicyUIState.AccessInProgress_2,
+        ) -> BackIconType.EXIT
+
+        else -> BackIconType.NONE
+    }
+
+    enum class BackIconType {
+        NONE, EXIT
+    }
 }
 
 enum class ReplacePolicyUIState {
@@ -82,6 +95,7 @@ sealed interface ReplacePolicyAction {
 
     //Retry
     object Retry : ReplacePolicyAction
+    object BackClicked : ReplacePolicyAction
     object FacetecCancelled : ReplacePolicyAction
 }
 
