@@ -90,16 +90,12 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
 
-    fun submitFullPhrase(seedPhraseWasGenerated: Boolean = false) {
-        val phraseInvalidReason = when {
-            seedPhraseWasGenerated -> null
-            else -> BIP39.validateSeedPhrase(state.enteredWords)
-        }
+    fun submitFullPhrase() {
+        val phraseInvalidReason = BIP39.validateSeedPhrase(state.enteredWords)
 
         state = phraseInvalidReason?.let {
             state.copy(showInvalidPhraseDialog = Resource.Success(it))
         } ?: state.copy(
-            seedPhraseWasGenerated = seedPhraseWasGenerated,
             enterWordUIState = EnterPhraseUIState.REVIEW
         )
     }
@@ -403,7 +399,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(
             enteredWords = BIP39.generate(state.desiredGeneratedPhraseLength, state.currentLanguage),
         )
-        submitFullPhrase(seedPhraseWasGenerated = true)
+        submitFullPhrase()
     }
 
     fun hideExitConfirmationDialog() {

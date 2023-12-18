@@ -141,7 +141,6 @@
     <string name="seed_phrase_validated">Validated!</string>
     <string name="seed_phrase_generated">Seed Phrase Generated!</string>
     <string name="review_seed_phrase">Review seed phrase</string>
-    <string name="censo_has_verified_that_this_is_a_valid_seed_phrase">Censo has verified that this is a valid seed phrase. Please review the words to make sure that you have entered them correctly.</string>
     <string name="censo_has_detected_that_this_is_not_a_valid_seed_phrase">Censo has detected that this is not a valid seed phrase. Please make sure each word is correct and revise as needed.</string>
     <string name="submit_again">Submit again</string>
     <string name="more_information">more information</string>
@@ -186,8 +185,7 @@
     <string name="about_to_delete_user_second_half">of your data.\n\nSeed phrases you have added will no longer be accessible. This action cannot be reversed.\n\nAre you sure?</string>
 
     <string name="step_1">Step 1</string>
-    <string name="scan_your_face">Scan your face</string>
-    <string name="scan_phrase_message">A face scan will ensure that only you have access to your seed phrase.\n\nIf you opt in, you can capture and store an anonymous 3D map of your face to confirm your live physical presence.</string>
+    <string name="scan_your_face">Anonymously scan your face</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
@@ -315,10 +313,8 @@
     <string name="error_occurred_trying_to_get_user_data_please_try_again">Error occurred trying to get user data. Please try again.</string>
     <string name="it_s_time_for_a_better_way">It’s time for a better way.</string>
     <string name="it_s_time_for_a_seed_phrase_manager">IT’S TIME FOR A\nSEED PHRASE\nMANAGER</string>
-    <string name="secure_all_your_seed_phrases_for_only">Secure all your seed phrases for only %1$s.</string>
     <string name="cancel_anytime">Cancel anytime</string>
     <string name="try_for_free_cancel_anytime">Try for free, cancel anytime</string>
-    <string name="your_subscription_was_paused">Your subscription was paused. Don\'t worry, we won\'t delete any of your data</string>
     <string name="reactivate_to_continue_cancel_anytime">Reactivate to continue, cancel anytime</string>
     <string name="days_free_then">days free, then</string>
     <string name="day">day</string>
@@ -374,4 +370,6 @@
     <string name="added_security_with_approvers">Your security is increased by your approvers.</string>
     <string name="resume_adding_approvers">Resume adding approvers</string>
     <string name="approvers_activation_progress_made_so_far_will_be_lost">Approvers activation progress made so far will be lost.</string>
+    <string name="secure_all_your_seed_phrases_for_only_1_99_month">Secure all your seed\nphrases for\n%1$s\n\nTry for free,\ncancel anytime</string>
+    <string name="restore_purchases">Restore Purchases</string>
 </resources>

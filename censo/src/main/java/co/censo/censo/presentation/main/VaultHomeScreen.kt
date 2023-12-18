@@ -46,6 +46,7 @@ import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun VaultHomeScreen(

@@ -211,7 +211,7 @@ fun InitialPlanSetupStandardUI(
                 modifier = Modifier
                     .padding(top = screenHeight * 0.015f)
                     .align(Alignment.Center),
-                painter = painterResource(id = R.drawable.facescanhandwithphone),
+                painter = painterResource(id = R.drawable.face_scan_hand_with_phone),
                 contentDescription = null,
                 contentScale = ContentScale.Fit
             )
@@ -221,20 +221,9 @@ fun InitialPlanSetupStandardUI(
             TitleText(
                 title = R.string.scan_your_face,
                 textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-            Text(
-                text = stringResource(R.string.scan_phrase_message),
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-                color = SharedColors.MainColorText,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
-
             Text(
                 text = stringResource(R.string.affirmative_biometric_consent),
                 fontWeight = FontWeight.Light,

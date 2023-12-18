@@ -48,5 +48,5 @@ object SharedColors {
 
     val LockScreenBackground = GreyBackground
     val LightColorLine = SkyBlue
-
+    val DarkColorLine = DarkBlue
 }

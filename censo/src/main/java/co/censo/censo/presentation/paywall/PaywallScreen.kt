@@ -75,19 +75,26 @@ fun PaywallScreen(
                                         context,
                                         productId
                                     )
-                                }
+                                },
+                                onRestorePurchase = viewModel::restorePurchase
                             )
                         }
                     }
 
                     SubscriptionStatus.Pending -> {
-                        PendingPaymentUI()
+                        state.subscriptionOffer?.let {
+                            PendingPaymentUI(
+                                offer = it,
+                                onRestorePurchase = viewModel::restorePurchase
+                            )
+                        }
                     }
 
                     SubscriptionStatus.Paused -> {
                         state.subscriptionOffer?.let {
                             PausedSubscriptionUI(
                                 offer = state.subscriptionOffer,
+                                onRestorePurchase = viewModel::restorePurchase,
                                 onContinue = { productId ->
                                     viewModel.startPurchaseFlow(
                                         context,

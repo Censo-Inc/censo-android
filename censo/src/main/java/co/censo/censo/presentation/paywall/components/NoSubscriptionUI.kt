@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,56 +29,20 @@ import java.time.Period
 @Composable
 fun NoSubscriptionUI(
     offer: SubscriptionOffer,
+    onRestorePurchase: () -> Unit,
     onContinue: (SubscriptionOffer) -> Unit,
 ) {
-
-    val formattedBillingPeriod = Period.parse(offer.billingPeriodISO8601).let {
-        when {
-            it.days == 1 -> stringResource(R.string.day)
-            it.months < 1 -> "${it.days} ${stringResource(R.string.days)}"
-            it.months == 1 -> stringResource(R.string.month)
-            it.years < 1 -> "${it.months} ${stringResource(R.string.months)}"
-            else -> stringResource(R.string.year)
-        }
-    }
-
-    val priceText = "${offer.formattedPrice} / $formattedBillingPeriod"
+    val priceText = offer.priceAndPeriodToUserText(LocalContext.current)
 
     val trialText = offer.feeTrialPeriodISO8601
         ?.let { "${Period.parse(it).days} ${stringResource(R.string.days_free_then)} " }
         ?: ""
 
 
-    PaywallBaseUI(statusSpecificContent = {
-        Text(
-            text = stringResource(
-                R.string.secure_all_your_seed_phrases_for_only,
-                priceText,
-            ),
-            fontWeight = FontWeight.W600,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            color = SharedColors.MainColorText
-        )
-        if (offer.feeTrialPeriodISO8601 != null) {
-            Spacer(modifier = Modifier.height(18.dp))
-            Text(
-                text = stringResource(co.censo.censo.R.string.try_for_free_cancel_anytime),
-                fontWeight = FontWeight.W600,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                color = SharedColors.MainColorText
-            )
-        } else {
-            Spacer(modifier = Modifier.height(18.dp))
-            Text(
-                text = stringResource(R.string.cancel_anytime),
-                fontWeight = FontWeight.W600,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                color = SharedColors.MainColorText
-            )
-        }
+    PaywallBaseUI(
+        userPriceText = priceText,
+        onRestorePurchase = onRestorePurchase,
+        statusSpecificContent = {
         Spacer(modifier = Modifier.height(24.dp))
         StandardButton(
             onClick = { onContinue(offer) },
@@ -117,6 +82,7 @@ fun PreviewNoSubscriptionTrialUI() {
             billingPeriodISO8601 = "P1M",
             feeTrialPeriodISO8601 = "P7D",
         ),
+        onRestorePurchase = {},
         onContinue = {},
     )
 }
@@ -132,6 +98,7 @@ fun PreviewNoSubscriptionUINoTrialUI() {
             billingPeriodISO8601 = "P1M",
             feeTrialPeriodISO8601 = null,
         ),
+        onRestorePurchase = {},
         onContinue = {},
     )
 }
