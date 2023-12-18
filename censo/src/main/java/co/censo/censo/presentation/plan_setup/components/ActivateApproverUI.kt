@@ -191,7 +191,7 @@ fun ActivateApproverUI(
 fun ProspectApproverInfoBox(
     nickName: String,
     status: ApproverStatus?,
-    onEdit: () -> Unit
+    onEdit: (() -> Unit)? = null
 ) {
 
     val context = LocalContext.current
@@ -237,12 +237,14 @@ fun ProspectApproverInfoBox(
             }
         }
 
-        IconButton(onClick = onEdit ) {
-            Icon(
-                painterResource(id = co.censo.shared.R.drawable.edit_icon),
-                contentDescription = stringResource(R.string.edit_approver_name),
-                tint = SharedColors.ApproverStepIconColor
-            )
+        onEdit?.let {
+            IconButton(onClick = onEdit) {
+                Icon(
+                    painterResource(id = co.censo.shared.R.drawable.edit_icon),
+                    contentDescription = stringResource(R.string.edit_approver_name),
+                    tint = SharedColors.ApproverStepIconColor
+                )
+            }
         }
 
     }

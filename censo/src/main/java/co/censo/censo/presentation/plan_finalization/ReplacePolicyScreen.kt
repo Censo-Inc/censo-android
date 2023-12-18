@@ -236,7 +236,7 @@ fun ReplacePolicyScreen(
 
                         ReplacePolicyUIState.Completed_3 -> {
                             when (policySetupAction) {
-                                PolicySetupAction.AddApprovers -> Activated()
+                                PolicySetupAction.AddApprovers -> Activated(state.primaryApprover, state.alternateApprover)
                                 PolicySetupAction.RemoveApprovers -> ApproversRemoved()
                             }
 
