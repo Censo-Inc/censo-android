@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import android.content.Intent
 import android.net.Uri
 import co.censo.approver.presentation.Screen.Companion.APPROVER_UNIVERSAL_DEEPLINK
-import co.censo.shared.BuildConfig
+import co.censo.approver.BuildConfig as ApproverBuildConfig
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -91,10 +91,10 @@ class MainActivity : FragmentActivity() {
                 APPROVER_UNIVERSAL_DEEPLINK,
                 deepLinks = listOf(
                     navDeepLink {
-                        uriPattern = "https://${BuildConfig.LINK_HOST}/"
+                        uriPattern = "https://${ApproverBuildConfig.LINK_HOST}/"
                     },
                     navDeepLink {
-                        uriPattern = "https://${BuildConfig.L1NK_HOST}/"
+                        uriPattern = "https://${ApproverBuildConfig.L1NK_HOST}/"
                     }
                 )
             ) { _ ->
