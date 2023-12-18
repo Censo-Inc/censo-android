@@ -20,6 +20,7 @@ class PolicySetupHelper(
     val threshold: UInt,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val approverShards: List<ApproverShard> = emptyList(),
+    val approverKeysSignatureByIntermediateKey: Base64EncodedData,
     val signatureByPreviousIntermediateKey: Base64EncodedData?
 ) {
 
@@ -47,11 +48,7 @@ class PolicySetupHelper(
                 val shard = sharer.shards.firstOrNull { it.x == approver.participantId.bigInt() }
                 val shardBytes = shard?.y?.toByteArray() ?: byteArrayOf()
 
-                val approverPublicKey = when (val approverStatus = approver.status) {
-                    is ApproverStatus.Confirmed -> approverStatus.approverPublicKey
-                    is ApproverStatus.ImplicitlyOwner -> approverStatus.approverPublicKey
-                    else -> throw Exception("Invalid status for policy setup")
-                }
+                val approverPublicKey = resolveApproverPublicKey(approver)
                 val encryptedShard = ExternalEncryptionKey.generateFromPublicKeyBase58(approverPublicKey).encrypt(shardBytes)
 
                 ApproverShard(
@@ -59,6 +56,13 @@ class PolicySetupHelper(
                     encryptedShard = encryptedShard.base64Encoded()
                 )
             }
+
+            val approverKeysSignatureByIntermediateKey = approvers
+                .map { approver -> resolveApproverPublicKey(approver) }
+                .sortedBy { it.value }  // natural sort order of Base58 key representation
+                .map { it.getBytes() }
+                .reduce { acc, key -> acc + key }
+                .let { intermediateEncryptionKey.sign(it).base64Encoded() }
 
             val signatureByPreviousIntermediateKey = previousIntermediateKey?.let {
                 val privateKey = it as ECPrivateKey
@@ -78,8 +82,16 @@ class PolicySetupHelper(
                 encryptedMasterKey = encryptedMasterKey.base64Encoded(),
                 threshold = threshold,
                 approverShards = approverShards,
+                approverKeysSignatureByIntermediateKey = approverKeysSignatureByIntermediateKey,
                 signatureByPreviousIntermediateKey = signatureByPreviousIntermediateKey,
             )
         }
+
+        private fun resolveApproverPublicKey(approver: Approver.ProspectApprover) =
+            when (val approverStatus = approver.status) {
+                is ApproverStatus.Confirmed -> approverStatus.approverPublicKey
+                is ApproverStatus.ImplicitlyOwner -> approverStatus.approverPublicKey
+                else -> throw Exception("Invalid status for policy setup")
+            }
     }
 }

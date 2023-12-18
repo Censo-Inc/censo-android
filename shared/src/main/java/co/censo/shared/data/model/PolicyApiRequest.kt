@@ -15,6 +15,7 @@ data class CreatePolicyApiRequest(
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
     val approverPublicKey: Base58EncodedApproverPublicKey,
+    val approverPublicKeySignatureByIntermediateKey: Base64EncodedData,
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,
 )
@@ -42,6 +43,7 @@ data class ReplacePolicyApiRequest(
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val approverShards: List<ApproverShard>,
+    val approverKeysSignatureByIntermediateKey: Base64EncodedData,
     val signatureByPreviousIntermediateKey: Base64EncodedData,
 )
 

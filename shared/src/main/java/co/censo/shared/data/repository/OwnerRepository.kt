@@ -79,6 +79,7 @@ import java.util.Base64
 data class CreatePolicyParams(
     val approverPublicKey: Base58EncodedApproverPublicKey,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+    val approverPublicKeySignatureByIntermediateKey: Base64EncodedData,
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterPrivateKey: Base64EncodedData,
     val encryptedShard: Base64EncodedData,
@@ -251,6 +252,7 @@ class OwnerRepositoryImpl(
                     CreatePolicyParams(
                         approverPublicKey = (ownerApprover.status as ApproverStatus.ImplicitlyOwner).approverPublicKey,
                         intermediatePublicKey = it.intermediatePublicKey,
+                        approverPublicKeySignatureByIntermediateKey = it.approverKeysSignatureByIntermediateKey,
                         masterEncryptionPublicKey = it.masterEncryptionPublicKey,
                         encryptedMasterPrivateKey = it.encryptedMasterKey,
                         encryptedShard = it.approverShards.first().encryptedShard,
@@ -279,6 +281,7 @@ class OwnerRepositoryImpl(
             participantId = createPolicyParams.participantId,
             encryptedShard = createPolicyParams.encryptedShard,
             approverPublicKey = createPolicyParams.approverPublicKey,
+            approverPublicKeySignatureByIntermediateKey = createPolicyParams.approverPublicKeySignatureByIntermediateKey,
             biometryVerificationId = biometryVerificationId,
             biometryData = biometryData,
         )
@@ -312,6 +315,7 @@ class OwnerRepositoryImpl(
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
             approverShards = setupHelper.approverShards,
+            approverKeysSignatureByIntermediateKey = setupHelper.approverKeysSignatureByIntermediateKey,
             signatureByPreviousIntermediateKey = setupHelper.signatureByPreviousIntermediateKey!!
         )
 

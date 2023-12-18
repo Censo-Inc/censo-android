@@ -162,6 +162,7 @@ data class Policy(
     val threshold: UInt,
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
+    val approverKeysSignatureByIntermediateKey: Base64EncodedData,
 )
 
 @Serializable
