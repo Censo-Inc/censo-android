@@ -58,6 +58,7 @@ fun PaywallBaseUI(
             text = stringResource(CensoR.string.secure_all_your_seed_phrases_for_only_1_99_month, userPriceText),
             fontWeight = FontWeight.W500,
             fontSize = 26.sp,
+            lineHeight = 32.sp,
             textAlign = TextAlign.Center,
             color = SharedColors.MainColorText,
         )
