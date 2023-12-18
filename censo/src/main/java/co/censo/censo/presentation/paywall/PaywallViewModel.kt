@@ -137,4 +137,8 @@ class PaywallViewModel @Inject constructor(
             subscriptionOffer.offerToken
         )
     }
+
+    fun restorePurchase() {
+        onStart()
+    }
 }

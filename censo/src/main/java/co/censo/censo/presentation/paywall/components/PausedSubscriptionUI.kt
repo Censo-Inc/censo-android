@@ -29,6 +29,7 @@ import java.time.Period
 @Composable
 fun PausedSubscriptionUI(
     offer: SubscriptionOffer,
+    onRestorePurchase: () -> Unit,
     onContinue: (SubscriptionOffer) -> Unit,
 ) {
 
@@ -41,6 +42,7 @@ fun PausedSubscriptionUI(
 
     PaywallBaseUI(
         priceText,
+        onRestorePurchase,
         statusSpecificContent = {
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),
@@ -99,5 +101,6 @@ fun PreviewPausedSubscriptionUI() {
             feeTrialPeriodISO8601 = null,
         ),
         onContinue = {},
+        onRestorePurchase = {},
     )
 }

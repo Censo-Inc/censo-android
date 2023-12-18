@@ -40,6 +40,7 @@ import java.time.Period
 @Composable
 fun PaywallBaseUI(
     userPriceText: String,
+    onRestorePurchase: () -> Unit,
     statusSpecificContent: @Composable () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -113,7 +114,7 @@ fun PaywallBaseUI(
             )
             Text(
                 text = stringResource(co.censo.censo.R.string.restore_purchases),
-                modifier = Modifier.clickable { },
+                modifier = Modifier.clickable { onRestorePurchase() },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
                 color = SharedColors.MainColorText
@@ -141,7 +142,8 @@ fun SubscriptionOffer.priceAndPeriodToUserText(context: Context): String {
 @Composable
 fun PreviewPaywallBaseUI() {
     PaywallBaseUI(
-        userPriceText = "3.99 / month"
+        userPriceText = "3.99 / month",
+        onRestorePurchase = {},
     ) {
         Text(text = "GENERIC CONTENT HERE")
     }

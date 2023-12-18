@@ -20,10 +20,12 @@ import co.censo.shared.presentation.components.SmallLoading
 
 @Composable
 fun PendingPaymentUI(
-    offer: SubscriptionOffer
+    offer: SubscriptionOffer,
+    onRestorePurchase: () -> Unit
 ) {
     PaywallBaseUI(
         userPriceText = offer.priceAndPeriodToUserText(LocalContext.current),
+        onRestorePurchase = onRestorePurchase,
         statusSpecificContent = {
         Text(
             text = stringResource(R.string.processing_your_transaction),
@@ -45,6 +47,7 @@ fun PendingPaymentUI(
 @Composable
 fun PreviewPendingPaymentUI() {
     PendingPaymentUI(
+        onRestorePurchase = {},
         offer = SubscriptionOffer(
             productId = "co.censo.standard.1month",
             offerToken = "YhgOLTsGIrAD8KF",
