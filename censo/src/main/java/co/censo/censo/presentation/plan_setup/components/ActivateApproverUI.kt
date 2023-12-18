@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -65,6 +66,7 @@ import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.lock_screen.components.Line
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
+import co.censo.shared.presentation.SharedColors.ButtonBackgroundBlue
 import kotlinx.datetime.Clock
 
 @Composable
@@ -117,11 +119,11 @@ fun ActivateApproverUI(
 
         ApproverStep(
             heading = stringResource(id = R.string.share_the_app_title),
-            content = stringResource(R.string.share_invite_link_approver_onboarding, nickName),
+            content = stringResource(R.string.share_the_app_link_for_download, nickName),
             onClick = { shareLink(storesLink) }
         ) {
             Image(
-                modifier = Modifier.size(44.dp),
+                modifier = Modifier.size(66.dp),
                 painter = painterResource(id = R.drawable.censo_login_logo),
                 contentDescription = null
             )
@@ -132,14 +134,14 @@ fun ActivateApproverUI(
         ApproverStep(
             heading = stringResource(id = R.string.share_the_link_title),
             content = stringResource(
-                R.string.share_the_app_link_for_download,
+                R.string.share_invite_link_approver_onboarding,
                 nickName,
             ),
             buttonText = stringResource(id = R.string.invite),
             onClick = { shareLink(deeplink) }
         ) {
             Image(
-                modifier = Modifier.size(44.dp),
+                modifier = Modifier.size(66.dp),
                 painter = painterResource(id = co.censo.shared.R.drawable.approver_icon),
                 contentDescription = null
             )
@@ -157,10 +159,11 @@ fun ActivateApproverUI(
             ApproverStep(
                 heading = it.heading,
                 content = it.content,
-                verificationCodeUIData = it.verificationCodeUIData
+                verificationCodeUIData = it.verificationCodeUIData,
+                includeLine = false
             ) {
                 Image(
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(66.dp),
                     painter = painterResource(id = co.censo.shared.R.drawable.phonewaveform),
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
@@ -362,14 +365,29 @@ fun ApproverStep(
     buttonText: String = stringResource(id = R.string.share),
     verificationCodeUIData: VerificationCodeUIData? = null,
     onClick: (() -> Unit)? = null,
-    imageContent: @Composable() ((RowScope.() -> Unit))
+    includeLine: Boolean = true,
+    imageContent: @Composable() ((ColumnScope.() -> Unit))
 ) {
     Row(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = Modifier.height(IntrinsicSize.Min),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Start
     ) {
-        imageContent()
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            imageContent()
+            if (includeLine) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(3.dp)
+                        .background(color = ButtonBackgroundBlue)
+                )
+            }
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Column(
             modifier = Modifier.fillMaxHeight(),

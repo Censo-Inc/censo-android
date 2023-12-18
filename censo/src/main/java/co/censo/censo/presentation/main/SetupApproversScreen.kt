@@ -120,7 +120,7 @@ fun SetupApproversScreen(
             ) {
                 Text(
                     text = stringResource(R.string.cancel),
-                    style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
+                    style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400, color = SharedColors.GreyText)
                 )
             }
         }

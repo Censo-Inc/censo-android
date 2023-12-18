@@ -125,7 +125,8 @@ fun ApproveAccessUI(
             content = stringResource(
                 R.string.enter_code_access_message,
                 approverName,
-            )
+            ),
+            includeLine = false
         ) {
             Image(
                 modifier = Modifier.size(44.dp),
