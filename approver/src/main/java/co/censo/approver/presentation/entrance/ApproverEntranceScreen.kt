@@ -60,7 +60,7 @@ fun ApproverEntranceScreen(
                 }
 
                 RESULT_CANCELED -> {
-                    viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
+                    viewModel.googleAuthCancel()
                 }
 
                 else -> {

@@ -1,22 +1,18 @@
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -25,8 +21,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.R
 import co.censo.shared.presentation.SharedColors
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration
 
 @Composable
 fun StandardButton(
@@ -38,8 +36,11 @@ fun StandardButton(
     contentPadding: PaddingValues = PaddingValues(),
     enabled: Boolean = true,
     onClick: () -> Unit,
+    coolDownDuration: Duration = Duration.ZERO,
     content: @Composable RowScope.() -> Unit
 ) {
+    var lastClickTimestamp by remember { mutableStateOf(Instant.DISTANT_PAST) }
+
     Button(
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
@@ -52,7 +53,13 @@ fun StandardButton(
         border = if (border) BorderStroke(1.dp, borderColor) else null,
         shape = RoundedCornerShape(32.dp),
         enabled = enabled,
-        onClick = onClick
+        onClick = {
+            val now = Clock.System.now()
+            if (lastClickTimestamp < now.minus(coolDownDuration)) {
+                onClick()
+                lastClickTimestamp = now
+            }
+        },
     ) {
         content()
     }

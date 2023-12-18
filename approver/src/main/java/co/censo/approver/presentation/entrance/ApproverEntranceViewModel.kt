@@ -297,6 +297,10 @@ class ApproverEntranceViewModel @Inject constructor(
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
+    fun googleAuthCancel() {
+        state = state.copy(triggerGoogleSignIn = Resource.Uninitialized)
+    }
+
     private fun handleLink(clipboardContent: String?, routing: () -> Unit) {
         if (clipboardContent == null) {
             state = state.copy(linkError = true)

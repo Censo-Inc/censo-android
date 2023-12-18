@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
 import co.censo.shared.util.LinksUtil
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ApproverLoginUI(
@@ -68,6 +69,7 @@ fun ApproverLoginUI(
             Spacer(modifier = Modifier.height(8.dp))
             StandardButton(
                 onClick = authenticate,
+                coolDownDuration = 500.milliseconds,
                 contentPadding = PaddingValues(
                     horizontal = 48.dp,
                     vertical = 16.dp

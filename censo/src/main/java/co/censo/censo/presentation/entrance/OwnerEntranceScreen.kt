@@ -70,11 +70,11 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.LinksUtil
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -96,8 +96,9 @@ fun OwnerEntranceScreen(
                 }
 
                 RESULT_CANCELED -> {
-                    viewModel.googleAuthFailure(GoogleAuthError.UserCanceledGoogleSignIn)
+                    viewModel.googleAuthCancel()
                 }
+
                 else -> {
                     viewModel.googleAuthFailure(GoogleAuthError.IntentResultFailed)
                 }
@@ -235,6 +236,7 @@ fun OwnerEntranceStandardUI(
         Spacer(modifier = Modifier.weight(0.50f))
         StandardButton(
             onClick = authenticate,
+            coolDownDuration = 500.milliseconds,
             contentPadding = PaddingValues(
                 horizontal = 48.dp,
                 vertical = 16.dp

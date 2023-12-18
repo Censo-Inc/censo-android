@@ -216,6 +216,10 @@ class OwnerEntranceViewModel @Inject constructor(
         state = state.copy(triggerGoogleSignIn = Resource.Error(exception = googleAuthError.exception))
     }
 
+    fun googleAuthCancel() {
+        state = state.copy(triggerGoogleSignIn = Resource.Uninitialized)
+    }
+
     fun retrySignIn() {
         startGoogleSignInFlow()
     }
