@@ -368,6 +368,17 @@ class ReplacePolicyViewModel @Inject constructor(
             state = state.copy(replacePolicyResponse = Resource.Loading())
 
             viewModelScope.launch(Dispatchers.IO) {
+
+                val ownerApprover: Approver.ProspectApprover? = state.ownerState?.policySetup?.approvers?.ownerApprover() //TODO: Null check this
+                val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy
+                val ownerApproverKeyData = state.keyData
+                val deviceKeyId = keyRepository.retrieveSavedDeviceId()
+
+                if (entropy == null || ownerApproverKeyData == null) {
+                    //TODO: Error for the user
+                    return@launch
+                }
+
                 val response = try {
                     ownerRepository.replacePolicy(
                         encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
@@ -377,7 +388,10 @@ class ReplacePolicyViewModel @Inject constructor(
                             state.ownerApprover,
                             state.primaryApprover,
                             state.alternateApprover
-                        )
+                        ),
+                        ownerApproverEncryptedPrivateKey = ownerApproverKeyData.encryptedPrivateKey,
+                        entropy = entropy,
+                        deviceKeyId = deviceKeyId,
                     )
                 } catch (e: Exception) {
                     projectLog(message = "replacePolicy call failed")

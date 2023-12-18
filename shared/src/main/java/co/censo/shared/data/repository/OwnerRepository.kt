@@ -84,7 +84,8 @@ data class CreatePolicyParams(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterPrivateKey: Base64EncodedData,
     val encryptedShard: Base64EncodedData,
-    val participantId: ParticipantId
+    val participantId: ParticipantId,
+    val masterKeySignature: Base64EncodedData,
 )
 
 data class EncryptedSeedPhrase(
@@ -98,7 +99,10 @@ interface OwnerRepository {
     suspend fun signInUser(idToken: String): Resource<ResponseBody>
 
     suspend fun getCreatePolicyParams(
-        ownerApprover: Approver.ProspectApprover
+        ownerApprover: Approver.ProspectApprover,
+        ownerApproverEncryptedPrivateKey: ByteArray,
+        entropy: Base64EncodedData,
+        deviceKeyId: String
     ): Resource<CreatePolicyParams>
 
     suspend fun createPolicySetup(
@@ -117,9 +121,11 @@ interface OwnerRepository {
     suspend fun replacePolicy(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
-
         threshold: UInt,
-        approvers: List<Approver.ProspectApprover>
+        approvers: List<Approver.ProspectApprover>,
+        ownerApproverEncryptedPrivateKey: ByteArray,
+        entropy: Base64EncodedData,
+        deviceKeyId: String
     ): Resource<ReplacePolicyApiResponse>
 
     suspend fun verifyToken(token: String): String?
@@ -249,14 +255,21 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun getCreatePolicyParams(
-        ownerApprover: Approver.ProspectApprover
+        ownerApprover: Approver.ProspectApprover,
+        ownerApproverEncryptedPrivateKey: ByteArray,
+        entropy: Base64EncodedData,
+        deviceKeyId: String
     ): Resource<CreatePolicyParams> {
         return try {
             PolicySetupHelper.create(
                 masterEncryptionKey = EncryptionKey.generateRandomKey(),
                 threshold = 1U,
-                approvers = listOf(ownerApprover)
+                approvers = listOf(ownerApprover),
+                ownerApproverEncryptedPrivateKey = ownerApproverEncryptedPrivateKey,
+                entropy = entropy,
+                deviceKeyId = deviceKeyId
             ). let {
+
                 Resource.Success(
                     CreatePolicyParams(
                         approverPublicKey = (ownerApprover.status as ApproverStatus.ImplicitlyOwner).approverPublicKey,
@@ -265,7 +278,8 @@ class OwnerRepositoryImpl(
                         masterEncryptionPublicKey = it.masterEncryptionPublicKey,
                         encryptedMasterPrivateKey = it.encryptedMasterKey,
                         encryptedShard = it.approverShards.first().encryptedShard,
-                        participantId = it.approverShards.first().participantId
+                        participantId = it.approverShards.first().participantId,
+                        masterKeySignature = it.masterKeySignature
                     )
                 )
             }
@@ -282,7 +296,6 @@ class OwnerRepositoryImpl(
         biometryData: FacetecBiometry,
     ): Resource<CreatePolicyApiResponse> {
 
-
         val createPolicyApiRequest = CreatePolicyApiRequest(
             masterEncryptionPublicKey = createPolicyParams.masterEncryptionPublicKey,
             encryptedMasterPrivateKey = createPolicyParams.encryptedMasterPrivateKey,
@@ -293,6 +306,7 @@ class OwnerRepositoryImpl(
             approverPublicKeySignatureByIntermediateKey = createPolicyParams.approverPublicKeySignatureByIntermediateKey,
             biometryVerificationId = biometryVerificationId,
             biometryData = biometryData,
+            masterKeySignature = createPolicyParams.masterKeySignature
         )
 
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
@@ -303,6 +317,9 @@ class OwnerRepositoryImpl(
         encryptedMasterPrivateKey: Base64EncodedData,
         threshold: UInt,
         approvers: List<Approver.ProspectApprover>,
+        ownerApproverEncryptedPrivateKey: ByteArray,
+        entropy: Base64EncodedData,
+        deviceKeyId: String
     ): Resource<ReplacePolicyApiResponse> {
         val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
         val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
@@ -312,7 +329,10 @@ class OwnerRepositoryImpl(
                 threshold = threshold,
                 approvers = approvers,
                 masterEncryptionKey = masterEncryptionKey,
-                previousIntermediateKey = intermediateEncryptionKey
+                previousIntermediateKey = intermediateEncryptionKey,
+                ownerApproverEncryptedPrivateKey = ownerApproverEncryptedPrivateKey,
+                entropy = entropy,
+                deviceKeyId = deviceKeyId
             )
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.ReplacePolicy)
@@ -325,7 +345,8 @@ class OwnerRepositoryImpl(
             intermediatePublicKey = setupHelper.intermediatePublicKey,
             approverShards = setupHelper.approverShards,
             approverPublicKeysSignatureByIntermediateKey = setupHelper.approverKeysSignatureByIntermediateKey,
-            signatureByPreviousIntermediateKey = setupHelper.signatureByPreviousIntermediateKey!!
+            signatureByPreviousIntermediateKey = setupHelper.signatureByPreviousIntermediateKey!!,
+            masterKeySignature = setupHelper.masterKeySignature
         )
 
         return retrieveApiResource { apiService.replacePolicy(replacePolicyApiRequest) }

@@ -163,6 +163,11 @@ data class Policy(
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
     val approverKeysSignatureByIntermediateKey: Base64EncodedData,
+
+    val masterKeySignature: Base64EncodedData?,
+
+    val owner: Approver.TrustedApprover? =
+        approvers.firstOrNull { it.isOwner }
 )
 
 @Serializable

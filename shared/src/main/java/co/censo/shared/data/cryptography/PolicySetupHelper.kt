@@ -8,12 +8,14 @@ import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverShard
 import co.censo.shared.data.model.ApproverStatus
+import co.censo.shared.data.model.InitialKeyData
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.math.BigInteger
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.interfaces.ECPrivateKey
 
+//TODO: Think we will need the masterKeySignature here
 class PolicySetupHelper(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterKey: Base64EncodedData,
@@ -21,7 +23,8 @@ class PolicySetupHelper(
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val approverShards: List<ApproverShard> = emptyList(),
     val approverKeysSignatureByIntermediateKey: Base64EncodedData,
-    val signatureByPreviousIntermediateKey: Base64EncodedData?
+    val signatureByPreviousIntermediateKey: Base64EncodedData?,
+    val masterKeySignature: Base64EncodedData,
 ) {
 
 
@@ -31,6 +34,9 @@ class PolicySetupHelper(
             approvers: List<Approver.ProspectApprover>,
             masterEncryptionKey: EncryptionKey,
             previousIntermediateKey: PrivateKey? = null,
+            ownerApproverEncryptedPrivateKey: ByteArray,
+            entropy: Base64EncodedData,
+            deviceKeyId: String,
         ): PolicySetupHelper {
             val intermediateEncryptionKey = EncryptionKey.generateRandomKey()
 
@@ -76,14 +82,26 @@ class PolicySetupHelper(
                 ).base64Encoded()
             }
 
+
+            val masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value)
+
+            val decryptedOwnerApproverPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
+                deviceKeyId = deviceKeyId,
+                entropy = entropy
+            )
+
+            val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(decryptedOwnerApproverPrivateKey.bigInt())
+            val masterKeySignature = ownerApproverEncryptionKey.sign(masterEncryptionPublicKey.value.toByteArray())
+
             return PolicySetupHelper(
-                masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value),
+                masterEncryptionPublicKey = masterEncryptionPublicKey,
                 intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation().value),
                 encryptedMasterKey = encryptedMasterKey.base64Encoded(),
                 threshold = threshold,
                 approverShards = approverShards,
                 approverKeysSignatureByIntermediateKey = approverKeysSignatureByIntermediateKey,
                 signatureByPreviousIntermediateKey = signatureByPreviousIntermediateKey,
+                masterKeySignature = Base64EncodedData(masterKeySignature.toString())//TODO: Verify this is correct
             )
         }
 

@@ -112,7 +112,7 @@ value class ApprovalId(val value: String) {
     override fun toString(): String = value
 }
 
-
+//TODO: Small improvement here would be to typealias this
 @Serializable
 @JvmInline
 value class Base64EncodedData(val base64Encoded: String) {

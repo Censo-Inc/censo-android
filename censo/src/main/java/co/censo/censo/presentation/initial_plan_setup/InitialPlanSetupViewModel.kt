@@ -17,6 +17,7 @@ import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverStatus
+import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -160,8 +161,8 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
+            val keyData = state.keyData
             val publicKey = if (keyRepository.userHasKeySavedInCloud(state.participantId)) {
-                val keyData = state.keyData
                 if (keyData == null) {
                     loadPrivateKeyFromCloud()
                     return@launch
@@ -175,6 +176,16 @@ class InitialPlanSetupViewModel @Inject constructor(
 
             state = state.copy(createPolicyParamsResponse = Resource.Loading())
 
+            val entropy = retrieveEntropy()
+            if (entropy == null) {
+                state = state.copy(
+                    createPolicyParamsResponse = Resource.Error(exception = Exception("Missing entropy when trying to secure data"))
+                )
+                return@launch
+            }
+
+            val deviceKeyId = keyRepository.retrieveSavedDeviceId()
+
             val createPolicyParams = ownerRepository.getCreatePolicyParams(
                 Approver.ProspectApprover(
                     invitationId = InvitationId(""),
@@ -184,7 +195,10 @@ class InitialPlanSetupViewModel @Inject constructor(
                         Base58EncodedApproverPublicKey(publicKey.value),
                         Clock.System.now()
                     )
-                )
+                ),
+                ownerApproverEncryptedPrivateKey = keyData.encryptedPrivateKey,
+                deviceKeyId = deviceKeyId,
+                entropy = entropy
             )
 
             if (createPolicyParams is Resource.Success) {
