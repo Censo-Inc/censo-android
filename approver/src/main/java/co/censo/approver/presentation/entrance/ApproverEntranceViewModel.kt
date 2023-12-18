@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.presentation.Screen
-import co.censo.shared.BuildConfig
+import co.censo.approver.BuildConfig
 import co.censo.shared.CensoLink.Companion.ACCESS_TYPE
 import co.censo.shared.CensoLink.Companion.INVITE_TYPE
 import co.censo.shared.data.Resource
