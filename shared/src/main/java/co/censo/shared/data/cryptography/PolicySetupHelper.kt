@@ -8,12 +8,14 @@ import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverShard
 import co.censo.shared.data.model.ApproverStatus
+import co.censo.shared.data.model.InitialKeyData
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.math.BigInteger
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.interfaces.ECPrivateKey
 
+//TODO: Think we will need the masterKeySignature here
 class PolicySetupHelper(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterKey: Base64EncodedData,
@@ -80,7 +82,6 @@ class PolicySetupHelper(
                 ).base64Encoded()
             }
 
-            val masterPublicKey = masterEncryptionKey.publicExternalRepresentation()
             val masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value)
 
             val decryptedOwnerApproverPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
