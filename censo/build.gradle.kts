@@ -21,12 +21,16 @@ android {
     compileSdk = 34
 
     var signBuild = false
+    var sentryDevId = ""
+    var sentryProdId = ""
     val configProperties = Properties()
 
     if (file("../config.properties").exists()) {
         configProperties.load(FileInputStream(file("../config.properties")))
 
         signBuild = (configProperties["SIGN_BUILD"] as String).toBoolean()
+        sentryDevId = configProperties["SENTRY_DEV_ID"] as String
+        sentryProdId = configProperties["SENTRY_PROD_ID"] as String
     }
 
     if (signBuild) {
@@ -74,7 +78,7 @@ android {
             resValue("string", "app_name", "Censo")
             isMinifyEnabled = false
             isDebuggable = false
-            manifestPlaceholders["SENTRY_ID"] = "https://29e39757e3a25d59f1314d04195b9454@o4506182264815616.ingest.sentry.io/4506264343019520"
+            manifestPlaceholders["SENTRY_ID"] = sentryProdId
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("boolean", "FACETEC_ENABLED", "true")
@@ -86,11 +90,11 @@ android {
         create("localRelease") {
             resValue("string", "app_name", "Local Release Censo")
             initWith(getByName("release"))
-            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
+            manifestPlaceholders["SENTRY_ID"] = sentryDevId
         }
         create("staging") {
             resValue("string", "app_name", "Staging Censo")
-            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
+            manifestPlaceholders["SENTRY_ID"] = sentryDevId
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("boolean", "FACETEC_ENABLED", "true")
@@ -99,7 +103,7 @@ android {
         }
         create("integration") {
             resValue("string", "app_name", "Integration Censo")
-            manifestPlaceholders["SENTRY_ID"] = "https://763455d463bef636372e98b29323bab2@o4506182264815616.ingest.sentry.io/4506182265864192"
+            manifestPlaceholders["SENTRY_ID"] = sentryDevId
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("boolean", "FACETEC_ENABLED", "false")
