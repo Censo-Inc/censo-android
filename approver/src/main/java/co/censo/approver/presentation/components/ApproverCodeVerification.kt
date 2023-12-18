@@ -58,7 +58,7 @@ fun ApproverCodeVerification(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        val messageTextColor = if (codeVerificationStatus == CodeVerificationStatus.Waiting) SharedColors.GreyText else Color.Black
+        val messageTextColor = if (codeVerificationStatus == CodeVerificationStatus.Waiting) SharedColors.GreyText else SharedColors.MainColorText
         MessageText(message = messageText, color = messageTextColor)
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -69,7 +69,7 @@ fun ApproverCodeVerification(
             enabled = !isLoading,
             value = value,
             onValueChange = onValueChanged,
-            primaryColor = ApproverColors.PrimaryColor,
+            primaryColor = SharedColors.MainColorText,
             borderColor = SharedColors.BorderGrey,
             backgroundColor = SharedColors.WordBoxBackground
         )

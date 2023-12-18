@@ -27,8 +27,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun CodeEntry(
@@ -138,6 +140,20 @@ fun CodeEntry(
             }
         })
 
+}
+
+@Preview()
+@Composable
+fun PreviewCodeEntry() {
+    CodeEntry(
+        length = 6,
+        enabled = true,
+        value = "43561",
+        onValueChange = {},
+        primaryColor = SharedColors.MainColorText,
+        borderColor = SharedColors.BorderGrey,
+        backgroundColor = SharedColors.WordBoxBackground
+    )
 }
 
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun ApproveRequest(
@@ -31,7 +32,9 @@ fun ApproveRequest(
 ) {
     val verticalSpacingHeight = 28.dp
 
-    Box(modifier = Modifier.fillMaxSize().padding(horizontal = 36.dp)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = 36.dp)) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -53,22 +56,18 @@ fun ApproveRequest(
             )
         }
 
-        Box(
-            modifier = Modifier.fillMaxSize().padding(vertical = 24.dp),
-            contentAlignment = Alignment.BottomCenter
+        StandardButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 32.dp, bottom = 32.dp)
+                .align(Alignment.BottomCenter),
+            onClick = onContinue,
+            contentPadding = PaddingValues(vertical = 12.dp),
         ) {
-            StandardButton(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.Black,
-                onClick = onContinue,
-                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
-            ) {
-                Text(
-                    text = stringResource(id = co.censo.approver.R.string.continue_text),
-                    color = Color.White,
-                    fontSize = 24.sp
-                )
-            }
+            Text(
+                text = stringResource(id = co.censo.approver.R.string.continue_text),
+                style = ButtonTextStyle.copy(fontSize = 22.sp)
+            )
         }
     }
 }

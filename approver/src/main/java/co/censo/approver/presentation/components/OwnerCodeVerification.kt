@@ -53,7 +53,7 @@ fun OwnerCodeVerification(
         LargeTotpCodeView(
             totpCode,
             secondsLeft,
-            ApproverColors.PrimaryColor
+            SharedColors.MainColorText
         )
     }
 

@@ -154,7 +154,7 @@ fun ApproverLanding(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun ApproverLandingScreenPreview() {
     ApproverLanding(
