@@ -198,9 +198,11 @@
     <string name="activate_approver">Activate</string>
     <string name="activate_your_approver_message">Activating %1$s as an approver will take about 2 minutes. This activation should preferably take place while you\'re on the phone or in-person to ensure that you are activating the proper approver.</string>
     <string name="you_must_do_two_things">You must do two things:</string>
-    <string name="share_the_app_title">1. Share app link</string>
-    <string name="share_the_link_title">2. Share invitation link</string>
-    <string name="read_the_code_title">3. Read authentication code</string>
+    <string name="share_the_app_title">Step 1:\nShare Approver App</string>
+    <string name="share_the_link_title">Step 2:\nShare Invite Link</string>
+    <string name="read_the_code_title">Step 3:\nRead Code</string>
+    <string name="share_this_link_title">Step 1:\nShare this link</string>
+    <string name="enter_the_code_title">Step 2:\nEnter the Code</string>
     <string name="dowloand_the_app_message">They must download Censo Approver app from the Apple App Store or Google Play Store.</string>
     <string name="share_the_link_message">After they have installed Censo Approver app, send them this unique, secret link.</string>
     <string name="share_the_code_message">Read aloud this code and have %1$s enter it into the Censo Approver app to authenticate you.</string>
@@ -326,9 +328,11 @@
     <string name="swipe_back_and_forth_to_review_words">swipe back and forth to review words</string>
     <string name="add_approver_title">Add Approver</string>
     <string name="activate_approver_name">Activate %1$s</string>
-    <string name="share_the_app_link_for_download">Share the app link with %1$s and have %2$s download the Censo Approver app from the Apple App store or Google Play store.</string>
-    <string name="share_invite_link_approver_onboarding">After %1$s has installed the Censo Approver app, share this invitation link and have %2$s tap on it or paste it into the Censo Approver app.</string>
-    <string name="onboarding_approver_read_auth_code">As soon as %1$s accepts the invitation, a code will appear here. Read aloud this code and have %2$s enter it into the Censo Approver app to authenticate to you.</string>
+    <string name="share_the_app_link_for_download">Share this link so %1$s can download the Censo Approver app</string>
+    <string name="share_invite_link_approver_onboarding">Share this link and have %1$s click it or paste into their Approver app</string>
+    <string name="onboarding_approver_read_auth_code">Read code that appears here and have %1$s enter it in Approver app.</string>
+    <string name="share_link_access_message">Share this link and have %1$s click it or paste into their Approver app.</string>
+    <string name="enter_code_access_message">Have %1$s read aloud the 6-digit code from their Approver app and enter it below. </string>
     <string name="opened_link_in_app">Opened link in app</string>
     <string name="share_this_link_if_approver_needs_to_download">Share this link with your approvers if they no longer have the app installed</string>
     <string name="share_this_link_request_access">1. Share this link</string>
@@ -380,4 +384,6 @@
     <string name="why_censo_sends_notifications">We will never send you marketing communications, but we might need to notify you about security or other important updates. Please tap the button below to enable notifications.</string>
     <string name="enable_notifications">Enable notifications</string>
     <string name="no_thanks">No thanks</string>
+    <string name="share">Share</string>
+    <string name="invite">Invite</string>
 </resources>
