@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.util.BIP39
 
 @Composable
 fun GetLiveWithUserUI(
@@ -63,7 +61,7 @@ fun GetLiveWithUserUI(
 
         Image(
             modifier = Modifier.weight(0.1f).fillMaxWidth().padding(top = screenHeight * 0.015f),
-            painter = painterResource(id = R.drawable.activateapprover),
+            painter = painterResource(id = R.drawable.activate_approver),
             contentDescription = null,
             contentScale = ContentScale.Fit,
         )

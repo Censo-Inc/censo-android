@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.entrance
 
-import MessageText
 import ParticipantId
 import StandardButton
 import android.annotation.SuppressLint
@@ -33,7 +32,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -220,7 +218,7 @@ fun OwnerEntranceStandardUI(
         Spacer(modifier = Modifier.weight(1.0f))
         Image(
             modifier = Modifier.height(120.dp),
-            painter = painterResource(id = co.censo.censo.R.drawable.censologodarkbluestacked),
+            painter = painterResource(id = co.censo.censo.R.drawable.censo_logo_dark_blue_stacked),
             contentDescription = null,
         )
         Spacer(modifier = Modifier.weight(0.25f))

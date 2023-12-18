@@ -211,7 +211,7 @@ fun InitialPlanSetupStandardUI(
                 modifier = Modifier
                     .padding(top = screenHeight * 0.015f)
                     .align(Alignment.Center),
-                painter = painterResource(id = R.drawable.facescanhandwithphone),
+                painter = painterResource(id = R.drawable.face_scan_hand_with_phone),
                 contentDescription = null,
                 contentScale = ContentScale.Fit
             )

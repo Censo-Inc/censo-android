@@ -77,7 +77,7 @@ fun SelectSeedPhraseEntryType(
             modifier = Modifier
                 .padding(start = screenWidth * 0.15f, top = screenHeight * 0.05f)
                 .weight(0.65f),
-            painter = painterResource(id = R.drawable.addyourseedphrase),
+            painter = painterResource(id = R.drawable.add_your_seed_phrase),
             contentDescription = null,
             contentScale = ContentScale.Fit
         )

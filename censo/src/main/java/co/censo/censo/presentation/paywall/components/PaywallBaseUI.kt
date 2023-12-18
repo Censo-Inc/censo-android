@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -66,7 +65,7 @@ fun PaywallBaseUI(
 
         Image(
             modifier = Modifier.size(120.dp),
-            painter = painterResource(id = co.censo.censo.R.drawable.censologodarkbluestacked),
+            painter = painterResource(id = co.censo.censo.R.drawable.censo_logo_dark_blue_stacked),
             contentDescription = null
         )
 
