@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.LinksUtil
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -54,6 +56,7 @@ fun ApproverLoginUI(
             modifier = Modifier.padding(horizontal = 12.dp),
             painter = painterResource(id = R.drawable.censo_approver_logo),
             contentDescription = null,
+            colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
         )
 
         Column(
@@ -65,6 +68,7 @@ fun ApproverLoginUI(
                 fontSize = 16.sp,
                 text = stringResource(co.censo.shared.R.string.sign_in_google_explainer),
                 textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText
             )
             Spacer(modifier = Modifier.height(8.dp))
             StandardButton(
@@ -100,7 +104,7 @@ fun ApproverLoginUI(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.tapping_sign_in),
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -122,6 +126,7 @@ fun ApproverLoginUI(
                     text = stringResource(co.censo.shared.R.string.terms),
                     modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.TERMS_URL) },
                     fontWeight = FontWeight.SemiBold,
+                    color = SharedColors.MainColorText,
                     fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.width(56.dp))
@@ -129,6 +134,7 @@ fun ApproverLoginUI(
                     text = stringResource(co.censo.shared.R.string.privacy),
                     modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.PRIVACY_URL) },
                     fontWeight = FontWeight.SemiBold,
+                    color = SharedColors.MainColorText,
                     fontSize = 18.sp
                 )
             }

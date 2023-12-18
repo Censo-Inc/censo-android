@@ -27,6 +27,7 @@ import co.censo.approver.presentation.entrance.components.LoggedInPasteLinkUI
 import co.censo.approver.presentation.entrance.components.LoggedOutPasteLinkUI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.ConfirmationDialog
@@ -114,7 +115,7 @@ fun ApproverEntranceScreen(
         when {
             state.isLoading -> {
                 LargeLoading(
-                    color = Color.Black,
+                    color = SharedColors.DefaultLoadingColor,
                     fullscreen = true,
                     fullscreenBackgroundColor = Color.White
                 )
@@ -155,7 +156,7 @@ fun ApproverEntranceScreen(
                 when (val uiState = state.uiState) {
                     ApproverEntranceUIState.Initial -> {
                         LargeLoading(
-                            color = Color.Black,
+                            color = SharedColors.DefaultLoadingColor,
                             fullscreen = true,
                             fullscreenBackgroundColor = Color.White
                         )
