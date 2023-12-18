@@ -2,9 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-feature android:name="android.hardware.strongbox_keystore" android:required="${STRONGBOX_ENABLED}" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <uses-feature
+        android:name="android.hardware.strongbox_keystore"
+        android:required="${STRONGBOX_ENABLED}" />
 
     <application
         android:name=".ApproverApplication"
@@ -24,6 +27,7 @@
             android:theme="@style/Theme.Guardian"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,23 +40,41 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="${URL_SCHEME}" android:host="invite" />
-                <data android:scheme="${URL_SCHEME}" android:host="access" />
+                <data android:scheme="${URL_SCHEME}"/>
+                <data android:host="invite"/>
+                <data android:host="access"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="${LINK_HOST}" />
+                <data android:host="${L1NK_HOST}" />
             </intent-filter>
         </activity>
 
         <!-- Required: set your sentry.io project identifier (DSN) -->
-        <meta-data android:name="io.sentry.dsn" android:value="${SENTRY_ID}" />
+        <meta-data
+            android:name="io.sentry.dsn"
+            android:value="${SENTRY_ID}" />
 
         <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
-        <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="false" />
+        <meta-data
+            android:name="io.sentry.traces.user-interaction.enable"
+            android:value="false" />
         <!-- enable screenshot for crashes -->
-        <meta-data android:name="io.sentry.attach-screenshot" android:value="false" />
+        <meta-data
+            android:name="io.sentry.attach-screenshot"
+            android:value="false" />
         <!-- enable view hierarchy for crashes -->
-        <meta-data android:name="io.sentry.attach-view-hierarchy" android:value="false" />
+        <meta-data
+            android:name="io.sentry.attach-view-hierarchy"
+            android:value="false" />
 
     </application>
-
 
 
 </manifest>

@@ -74,7 +74,10 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             manifestPlaceholders["SENTRY_ID"] = "https://29e39757e3a25d59f1314d04195b9454@o4506182264815616.ingest.sentry.io/4506264343019520"
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
+            manifestPlaceholders["ENVIRONMENT"] = "prod"
             manifestPlaceholders["URL_SCHEME"] = "censo"
+            manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
+            manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             resValue("string", "app_name", "Approver")
         }
         create("localRelease") {
@@ -89,7 +92,10 @@ android {
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
-            manifestPlaceholders["URL_SCHEME"] = "censo-staging"
+            manifestPlaceholders["ENVIRONMENT"] = "staging"
+            manifestPlaceholders["URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
+            manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
+            manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
         }
         create("integration") {
             resValue("string", "app_name", "Integration Approver")
@@ -98,7 +104,10 @@ android {
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             applicationIdSuffix = ".integration"
             isDebuggable = false
-            manifestPlaceholders["URL_SCHEME"] = "censo-integration"
+            manifestPlaceholders["ENVIRONMENT"] = "integration"
+            manifestPlaceholders["URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
+            manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
+            manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
         }
         debug {
             initWith(getByName("integration"))

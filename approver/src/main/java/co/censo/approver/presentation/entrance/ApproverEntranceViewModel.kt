@@ -1,11 +1,13 @@
 package co.censo.approver.presentation.entrance
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.approver.presentation.Screen
+import co.censo.shared.BuildConfig
 import co.censo.shared.CensoLink.Companion.ACCESS_TYPE
 import co.censo.shared.CensoLink.Companion.INVITE_TYPE
 import co.censo.shared.data.Resource
@@ -27,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.math.log
 
 @HiltViewModel
 class ApproverEntranceViewModel @Inject constructor(
@@ -42,7 +45,7 @@ class ApproverEntranceViewModel @Inject constructor(
 
 
     //region Lifecycle Methods
-    fun onStart(invitationId: String?, accessParticipantId: String?, approvalId: String?) {
+    fun onStart(invitationId: String?, accessParticipantId: String?, approvalId: String?, appLinkUri: Uri?) {
         if (invitationId != null) {
             approverRepository.saveInvitationId(invitationId)
         }
@@ -53,6 +56,8 @@ class ApproverEntranceViewModel @Inject constructor(
         if (approvalId != null) {
             approverRepository.saveApprovalId(approvalId)
         }
+
+        state = state.copy(appLinkUri = appLinkUri)
 
         determineLoginState()
     }
@@ -127,10 +132,24 @@ class ApproverEntranceViewModel @Inject constructor(
             } else {
                 false
             }
-            state = state.copy(
-                uiState = ApproverEntranceUIState.Landing(isActiveApprover),
-                loggedIn = loggedIn
-            )
+            state.appLinkUri?.let {
+                state = state.copy(appLinkUri = null)
+                if (it.scheme == "https" && (it.host == BuildConfig.LINK_HOST || it.host == BuildConfig.L1NK_HOST)) {
+                    it.getQueryParameter("l")?.let { link ->
+                        if (loggedIn) {
+                            handleLoggedInLink(link)
+                        } else {
+                            handleLoggedOutLink(link)
+                        }
+                        true
+                    }
+                } else null
+            } ?: run {
+                state = state.copy(
+                    uiState = ApproverEntranceUIState.Landing(isActiveApprover),
+                    loggedIn = loggedIn
+                )
+            }
         }
     }
 

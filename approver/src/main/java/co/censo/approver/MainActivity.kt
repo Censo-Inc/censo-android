@@ -28,6 +28,10 @@ import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_URI
 import co.censo.shared.DeepLinkURI.APPROVER_ACCESS_V2_URI
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
+import android.content.Intent
+import android.net.Uri
+import co.censo.approver.presentation.Screen.Companion.APPROVER_UNIVERSAL_DEEPLINK
+import co.censo.shared.BuildConfig
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -56,7 +60,7 @@ class MainActivity : FragmentActivity() {
         NavHost(navController = navController, startDestination = Screen.ApproverEntranceRoute.route) {
             composable(route = Screen.ApproverEntranceRoute.route) {
                 ApproverEntranceScreen(
-                    navController = navController
+                    navController = navController,
                 )
             }
             composable(
@@ -75,13 +79,30 @@ class MainActivity : FragmentActivity() {
                     navDeepLink {
                         uriPattern = "$APPROVER_INVITE_URI{$DL_INVITATION_ID_KEY}"
                     }
-
                 )
             ) { backStackEntry ->
                 val invitationId = backStackEntry.arguments?.getString(DL_INVITATION_ID_KEY) ?: ""
                 ApproverEntranceScreen(
                     navController = navController,
                     invitationId = invitationId
+                )
+            }
+            composable(
+                APPROVER_UNIVERSAL_DEEPLINK,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://${BuildConfig.LINK_HOST}/"
+                    },
+                    navDeepLink {
+                        uriPattern = "https://${BuildConfig.L1NK_HOST}/"
+                    }
+                )
+            ) { _ ->
+                val appLinkIntent: Intent = intent
+                val appLinkUri: Uri? = appLinkIntent.data
+                ApproverEntranceScreen(
+                    navController = navController,
+                    appLinkUri = appLinkUri
                 )
             }
             composable(
