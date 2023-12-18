@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.main
 
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.OwnerState
@@ -15,6 +16,7 @@ data class VaultScreenState(
 
     // toast
     val syncCloudAccessMessage: Resource<SyncCloudAccessMessage> = Resource.Uninitialized,
+    val showDeletePolicySetupConfirmationDialog: Boolean = false,
 
     //UI
     val showAddApproversUI: Resource<Unit> = Resource.Uninitialized,
@@ -25,6 +27,7 @@ data class VaultScreenState(
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val lockResponse : Resource<Unit> = Resource.Uninitialized,
     val resyncCloudAccessRequest : Boolean = false,
+    val deletePolicySetup: Resource<DeletePolicySetupApiResponse> = Resource.Uninitialized,
 
     // navigation
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
@@ -36,13 +39,14 @@ data class VaultScreenState(
     val loading = userResponse is Resource.Loading ||
             deleteSeedPhraseResource is Resource.Loading ||
             deleteUserResource is Resource.Loading ||
-            lockResponse is Resource.Loading
+            lockResponse is Resource.Loading ||
+            deletePolicySetup is Resource.Loading
 
-    val asyncError =
-        userResponse is Resource.Error ||
+    val asyncError = userResponse is Resource.Error ||
                 deleteSeedPhraseResource is Resource.Error ||
                 deleteUserResource is Resource.Error ||
-                lockResponse is Resource.Error
+                lockResponse is Resource.Error ||
+                deletePolicySetup is Resource.Error
 
 }
 

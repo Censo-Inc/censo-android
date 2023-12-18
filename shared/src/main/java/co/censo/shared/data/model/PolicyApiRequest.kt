@@ -38,6 +38,11 @@ data class CreatePolicySetupApiResponse(
 )
 
 @Serializable
+data class DeletePolicySetupApiResponse(
+    val ownerState: OwnerState,
+)
+
+@Serializable
 data class ReplacePolicyApiRequest(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterPrivateKey: Base64EncodedData,

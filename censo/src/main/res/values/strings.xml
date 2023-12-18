@@ -373,4 +373,5 @@
     <string name="an_approval_from_current_approvers_is_required">An approval from current approvers is required</string>
     <string name="added_security_with_approvers">Your security is increased by your approvers.</string>
     <string name="resume_adding_approvers">Resume adding approvers</string>
+    <string name="approvers_activation_progress_made_so_far_will_be_lost">Approvers activation progress made so far will be lost.</string>
 </resources>

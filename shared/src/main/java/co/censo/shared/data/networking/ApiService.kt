@@ -24,6 +24,7 @@ import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteAccessApiResponse
+import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
@@ -173,6 +174,9 @@ interface ApiService {
     suspend fun createOrUpdatePolicySetup(
         @Body apiRequest: CreatePolicySetupApiRequest
     ): RetrofitResponse<CreatePolicySetupApiResponse>
+
+    @DELETE("/v1/policy-setup")
+    suspend fun deletePolicySetup(): RetrofitResponse<DeletePolicySetupApiResponse>
 
     @POST("/v1/policy")
     suspend fun createPolicy(

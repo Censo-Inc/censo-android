@@ -194,6 +194,13 @@ fun MainVaultScreen(
                                 retryAction = viewModel::lock
                             )
                         }
+
+                        state.deletePolicySetup is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.deletePolicySetup.getErrorMessage(context),
+                                dismissAction = viewModel::resetDeletePolicySetupResource
+                            ) { }
+                        }
                     }
                 }
 
@@ -225,7 +232,19 @@ fun MainVaultScreen(
                                         viewModel.resetShowApproversUI()
                                         navController.navigate(viewModel.determinePolicyModificationRoute())
                                     },
+                                    onCancelApproverOnboarding = {
+                                        viewModel.showDeletePolicySetupConfirmationDialog()
+                                    }
                                 )
+
+                                if (state.showDeletePolicySetupConfirmationDialog) {
+                                    ConfirmationDialog(
+                                        title = stringResource(id = R.string.are_you_sure),
+                                        message = stringResource(R.string.approvers_activation_progress_made_so_far_will_be_lost),
+                                        onCancel = viewModel::hideDeletePolicySetupConfirmationDialog,
+                                        onDelete = viewModel::deletePolicySetupConfirmed
+                                    )
+                                }
                             }
                         }
 

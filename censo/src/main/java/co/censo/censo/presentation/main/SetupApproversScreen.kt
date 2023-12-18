@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import co.censo.shared.presentation.ButtonTextStyle
 fun SetupApproversScreen(
     approverSetupExists: Boolean,
     onInviteApproversSelected: () -> Unit,
+    onCancelApproverOnboarding: () -> Unit,
 ) {
     val verticalSpacingHeight = 24.dp
 
@@ -111,6 +113,18 @@ fun SetupApproversScreen(
             }
         }
 
+        if (approverSetupExists) {
+            TextButton(
+                onClick = onCancelApproverOnboarding,
+                modifier = Modifier.padding(end = 8.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.cancel),
+                    style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(verticalSpacingHeight + 24.dp))
     }
 }
@@ -139,6 +153,7 @@ fun PreviewSetupExistsApproversHome() {
     SetupApproversScreen(
         approverSetupExists = true,
         onInviteApproversSelected = {},
+        onCancelApproverOnboarding = {},
     )
 }
 
@@ -148,5 +163,6 @@ fun PreviewNoSetupExistsApproverHome() {
     SetupApproversScreen(
         approverSetupExists = false,
         onInviteApproversSelected = {},
+        onCancelApproverOnboarding = {},
     )
 }

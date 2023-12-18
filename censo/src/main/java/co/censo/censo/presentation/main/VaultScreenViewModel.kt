@@ -204,4 +204,31 @@ class VaultScreenViewModel @Inject constructor(
         )
     }
 
+    fun showDeletePolicySetupConfirmationDialog() {
+        state = state.copy(showDeletePolicySetupConfirmationDialog = true)
+    }
+
+    fun hideDeletePolicySetupConfirmationDialog() {
+        state = state.copy(showDeletePolicySetupConfirmationDialog = false)
+    }
+
+    fun deletePolicySetupConfirmed() {
+        state = state.copy(deletePolicySetup = Resource.Loading())
+        hideDeletePolicySetupConfirmationDialog()
+
+        viewModelScope.launch {
+            val response = ownerRepository.deletePolicySetup()
+
+            if (response is Resource.Success) {
+                response.data?.let { onOwnerState(it.ownerState) }
+            }
+
+            state = state.copy(deletePolicySetup = response)
+        }
+    }
+
+    fun resetDeletePolicySetupResource() {
+        state = state.copy(deletePolicySetup = Resource.Uninitialized)
+    }
+
 }

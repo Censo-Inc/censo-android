@@ -46,6 +46,7 @@ import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
@@ -104,6 +105,8 @@ interface OwnerRepository {
         threshold: UInt,
         approvers: List<Approver.SetupApprover>,
     ): Resource<CreatePolicySetupApiResponse>
+
+    suspend fun deletePolicySetup(): Resource<DeletePolicySetupApiResponse>
 
     suspend fun createPolicy(
         createPolicyParams: CreatePolicyParams,
@@ -236,6 +239,12 @@ class OwnerRepositoryImpl(
                     approvers
                 )
             )
+        }
+    }
+
+    override suspend fun deletePolicySetup(): Resource<DeletePolicySetupApiResponse> {
+        return retrieveApiResource {
+            apiService.deletePolicySetup()
         }
     }
 
