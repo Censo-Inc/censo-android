@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.ConfirmationDialog
@@ -269,16 +270,26 @@ fun MainVaultScreen(
                             )
 
                         BottomNavItem.Settings ->
-                            SettingsHomeScreen(
-                                onResyncCloudAccess = viewModel::resyncCloudAccess,
-                                onLock = viewModel::lock,
-                                onDeleteUser = viewModel::showDeleteUserDialog,
-                                onSignOut = viewModel::signOut,
-                                showRemoveApproverButton = (state.ownerState?.policy?.approvers?.size ?: 1) > 1,
-                                onRemoveApprover = {
-                                    navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))
-                                }
-                            )
+                            if (state.showPushNotificationsUI is Resource.Success) {
+                                PushNotificationScreen(onFinished = viewModel::resetShowPushNotificationsUI)
+                            } else {
+                                SettingsHomeScreen(
+                                    onResyncCloudAccess = viewModel::resyncCloudAccess,
+                                    onLock = viewModel::lock,
+                                    onDeleteUser = viewModel::showDeleteUserDialog,
+                                    onSignOut = viewModel::signOut,
+                                    showRemoveApproverButton = (state.ownerState?.policy?.approvers?.size ?: 1) > 1,
+                                    onRemoveApprover = {
+                                        navController.navigate(
+                                            Screen.AccessApproval.withIntent(
+                                                intent = AccessIntent.ReplacePolicy
+                                            )
+                                        )
+                                    },
+                                    onShowPushNotification = viewModel::showPushNotificationsUI,
+                                    showNotificationsButton = !viewModel.userHasSeenPushDialog()
+                                )
+                            }
                     }
 
 

@@ -8,17 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
-import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.lang.Integer.max
@@ -260,6 +256,7 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.DONE,
+            EnterPhraseUIState.NOTIFICATIONS,
             EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
             EnterPhraseUIState.PASTE_ENTRY, EnterPhraseUIState.GENERATE -> {
                 state.copy(
@@ -309,46 +306,15 @@ class EnterPhraseViewModel @Inject constructor(
     fun setUserSeenPushDialog(seenDialog: Boolean) =
         pushRepository.setUserSeenPushDialog(seenDialog)
 
-    private fun checkUserHasRespondedToNotificationOptIn() {
-        viewModelScope.launch {
-            if (pushRepository.userHasSeenPushDialog()) {
-                submitNotificationTokenForRegistration()
-                state = state.copy(phraseEntryComplete = Resource.Success(Unit))
-            } else {
-                state = state.copy(
-                    showPushNotificationsDialog = Resource.Success(Unit)
-                )
-            }
-        }
-    }
-
-    private fun submitNotificationTokenForRegistration() {
-        viewModelScope.launch {
-            try {
-                val token = pushRepository.retrievePushToken()
-                if (token.isNotEmpty()) {
-                    val pushBody = PushBody(
-                        deviceType = PushRepositoryImpl.DEVICE_TYPE,
-                        token = token
-                    )
-                    pushRepository.addPushNotification(pushBody = pushBody)
-                }
-            } catch (e: Exception) {
-                e.sendError(CrashReportingUtil.SubmitNotificationToken)
-            }
-        }
-    }
-
     fun finishPhraseEntry() {
-        if (state.isSavingFirstSeedPhrase) {
-            checkUserHasRespondedToNotificationOptIn()
+        state = if (state.isSavingFirstSeedPhrase) {
+            state.copy(enterWordUIState = EnterPhraseUIState.NOTIFICATIONS)
         } else {
-            state = state.copy(phraseEntryComplete = Resource.Success(Unit))
+            state.copy(phraseEntryComplete = Resource.Success(Unit))
         }
     }
-    fun finishPushNotificationDialog() {
-        submitNotificationTokenForRegistration()
-        state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
+
+    fun finishPushNotificationScreen() {
         state = state.copy(phraseEntryComplete = Resource.Success(Unit))
     }
 

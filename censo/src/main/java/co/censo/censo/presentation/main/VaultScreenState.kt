@@ -31,6 +31,9 @@ data class VaultScreenState(
 
     // navigation
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
+
+    //UI
+    val showPushNotificationsUI: Resource<Unit> = Resource.Uninitialized,
 ) {
 
     val externalApprovers = (ownerState?.policy?.approvers?.size?.minus(1)) ?: 0
