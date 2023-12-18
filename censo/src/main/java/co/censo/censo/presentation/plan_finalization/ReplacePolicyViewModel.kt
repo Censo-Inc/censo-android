@@ -365,17 +365,24 @@ class ReplacePolicyViewModel @Inject constructor(
                 return
             }
 
-            state = state.copy(replacePolicyResponse = Resource.Loading())
+            state = state.copy(
+                replacePolicyResponse = Resource.Loading(),
+                verifyKeyConfirmationSignature = Resource.Uninitialized
+            )
 
             viewModelScope.launch(Dispatchers.IO) {
 
-                val ownerApprover: Approver.ProspectApprover? = state.ownerState?.policySetup?.approvers?.ownerApprover() //TODO: Null check this
+                val ownerApprover: Approver.ProspectApprover? = state.ownerState?.policySetup?.approvers?.ownerApprover()
                 val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy
                 val ownerApproverKeyData = state.keyData
+
                 val deviceKeyId = keyRepository.retrieveSavedDeviceId()
 
                 if (entropy == null || ownerApproverKeyData == null) {
-                    //TODO: Error for the user
+                    state = state.copy(
+                        replacePolicyResponse =
+                        Resource.Error(exception = Exception("Unable to setup data for secure storage"))
+                    )
                     return@launch
                 }
 
