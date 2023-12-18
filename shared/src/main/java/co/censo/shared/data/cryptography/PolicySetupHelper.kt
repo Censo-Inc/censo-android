@@ -15,7 +15,6 @@ import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.interfaces.ECPrivateKey
 
-//TODO: Think we will need the masterKeySignature here
 class PolicySetupHelper(
     val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
     val encryptedMasterKey: Base64EncodedData,
