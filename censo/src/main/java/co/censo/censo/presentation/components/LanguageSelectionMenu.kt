@@ -24,10 +24,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.BIP39
 
 @Composable
 fun LanguageSelectionMenu(
+    modifier: Modifier = Modifier.fillMaxWidth(),
     text:  AnnotatedString,
     currentLanguage: BIP39.WordListLanguage?,
     action: (BIP39.WordListLanguage) -> Unit
@@ -35,13 +37,13 @@ fun LanguageSelectionMenu(
 
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = modifier) {
         ClickableText(
             text = text,
             onClick = { _ ->
                 expanded = !expanded
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         DropdownMenu(
             expanded = expanded,
@@ -63,7 +65,8 @@ fun LanguageSelectionMenu(
                                 text = "${item.localizedDisplayName()}\n${item.displayName()}",
                                 fontSize = 18.sp,
                                 fontWeight = if (currentLanguage == item) FontWeight.Bold else FontWeight.Light,
-                                textAlign = TextAlign.Left
+                                textAlign = TextAlign.Left,
+                                color = SharedColors.MainColorText
                             )
                         }
                     }

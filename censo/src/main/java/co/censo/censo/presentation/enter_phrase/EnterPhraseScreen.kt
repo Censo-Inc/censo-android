@@ -35,6 +35,7 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.components.SeedPhraseAdded
+import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
@@ -44,9 +45,12 @@ import co.censo.censo.presentation.enter_phrase.components.GeneratePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.errorMessage
+import co.censo.shared.util.errorTitle
 import co.censo.shared.util.sendError
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -163,7 +167,7 @@ fun EnterPhraseScreen(
                     if (title.isNotEmpty()) {
                         Text(
                             text = title,
-                            color = Color.Black
+                            color = SharedColors.MainColorText
                         )
                     }
                 },
@@ -215,6 +219,19 @@ fun EnterPhraseScreen(
                                 viewModel.navigateToSeedPhraseType()
                                 viewModel.hideCancelInputSeedPhraseConfirmationDialog()
                             }
+                        )
+                    }
+
+                    if (state.showInvalidPhraseDialog is Resource.Success) {
+                        val invalidPhraseTitle =
+                            state.showInvalidPhraseDialog.data?.errorTitle() ?: stringResource(id = R.string.error)
+                        val invalidPhraseMessage =
+                            state.showInvalidPhraseDialog.data?.errorMessage() ?: stringResource(id = R.string.default_invalid_phrase_message)
+
+                        SimpleAlertDialog(
+                            title = invalidPhraseTitle,
+                            message = invalidPhraseMessage,
+                            onDismiss = viewModel::removeInvalidPhraseDialog,
                         )
                     }
 
@@ -278,7 +295,6 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.REVIEW -> {
                             ReviewSeedPhraseUI(
-                                invalidReason = state.phraseInvalidReason,
                                 phraseWords = state.enteredWords,
                                 isGeneratedPhrase = state.seedPhraseWasGenerated,
                                 saveSeedPhrase = viewModel::moveToLabel,

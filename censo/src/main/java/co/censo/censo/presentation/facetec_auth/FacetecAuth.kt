@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
@@ -29,6 +30,8 @@ import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.projectLog
 import com.facetec.sdk.FaceTecSDK
@@ -115,6 +118,7 @@ fun FacetecAuth(
                         else -> null
                     } ?: stringResource(R.string.error_occurred),
                     textAlign = TextAlign.Center,
+                    color = SharedColors.MainColorText,
                     fontSize = 20.sp,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
@@ -125,15 +129,13 @@ fun FacetecAuth(
                     }
                 ) {
                     Text(
-                        text = "Retry",
-                        color = Color.White,
-                        fontSize = 20.sp
+                        text = stringResource(id = R.string.retry),
+                        style = ButtonTextStyle,
                     )
                 }
             }
 
             else -> LargeLoading(
-                color = Color.Black,
                 fullscreen = false
             )
         }

@@ -42,6 +42,7 @@ import co.censo.censo.R
 import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.ButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -103,20 +104,17 @@ fun AddOrAccessRow(
         ) {
             StandardButton(
                 modifier = Modifier.weight(0.5f),
-                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 14.dp),
                 onClick = onAddClick
             ) {
                 Text(
                     text = stringResource(R.string.add),
-                    fontSize = 24.sp,
-                    color = Color.White,
+                    style = ButtonTextStyle.copy(fontSize = 20.sp)
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
             StandardButton(
                 modifier = Modifier.weight(0.5f),
-                color = Color.Black,
                 contentPadding = PaddingValues(vertical = 14.dp),
                 onClick = onAccessClick
             ) {
@@ -127,13 +125,12 @@ fun AddOrAccessRow(
                     Icon(
                         painter = painterResource(id = R.drawable.lock_icon),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = SharedColors.ButtonTextBlue
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.access),
-                        fontSize = 24.sp,
-                        color = Color.White,
+                        style = ButtonTextStyle.copy(fontSize = 20.sp)
                     )
                 }
             }
@@ -185,7 +182,7 @@ fun SeedPhraseItem(
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,
-                color = if (isSelected) SharedColors.SuccessGreen else Color.Black
+                color = if (isSelected) SharedColors.SuccessGreen else SharedColors.MainColorText
             )
 
             if (isDeletable) {
@@ -197,7 +194,7 @@ fun SeedPhraseItem(
                         .padding(end = 6.dp)
                         .weight(0.25f),
                     contentDescription = stringResource(R.string.edit_phrase),
-                    tint = Color.Black
+                    tint = SharedColors.MainIconColor
                 )
             }
         }
@@ -210,7 +207,8 @@ fun SeedPhraseItem(
                     .weight(0.25f)
                     .align(Alignment.CenterVertically),
                 imageVector = Icons.Filled.ChevronRight,
-                contentDescription = stringResource(R.string.select_phrase_cont_description)
+                contentDescription = stringResource(R.string.select_phrase_cont_description),
+                tint = SharedColors.MainIconColor
             )
         }
 

@@ -33,8 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.components.LanguageSelectionMenu
-import co.censo.censo.presentation.welcome.SetupStep
+import co.censo.censo.presentation.components.SetupStep
 import co.censo.shared.util.BIP39
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun ReadyToAccessPhrase(
@@ -57,6 +59,7 @@ fun ReadyToAccessPhrase(
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Start,
+            color = SharedColors.MainColorText,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 24.dp)
@@ -64,7 +67,7 @@ fun ReadyToAccessPhrase(
         Spacer(modifier = Modifier.height(16.dp))
 
         val basicStyle = SpanStyle(
-            color = Color.Black,
+            color = SharedColors.MainColorText,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal
         )
@@ -117,13 +120,10 @@ fun ReadyToAccessPhrase(
             onClick = {
                 getStarted(selectedLanguage)
             },
-            color = Color.Black
         ) {
             Text(
                 text = stringResource(id = R.string.get_started),
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-                fontSize = 22.sp,
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
                 modifier = Modifier.padding(all = 8.dp)
             )
         }

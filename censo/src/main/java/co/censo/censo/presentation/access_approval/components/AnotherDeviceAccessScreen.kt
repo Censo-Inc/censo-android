@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun AnotherDeviceAccessScreen(
@@ -56,16 +57,12 @@ fun AnotherDeviceAccessScreen(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            enabled = true,
-            disabledColor = SharedColors.DisabledGrey,
-            color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp),
             onClick = onCancel
         ) {
             Text(
-                fontSize = 20.sp,
                 text = stringResource(R.string.cancel_access),
-                color = Color.White
+                style = ButtonTextStyle
             )
         }
 

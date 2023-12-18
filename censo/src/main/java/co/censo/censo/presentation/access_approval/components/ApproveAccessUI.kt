@@ -166,7 +166,7 @@ fun ApproveAccessUI(
                     enabled = codeEditable,
                     value = verificationCode,
                     onValueChange = onVerificationCodeChanged,
-                    primaryColor = Color.Black,
+                    primaryColor = SharedColors.MainColorText,
                     borderColor = SharedColors.BorderGrey,
                     backgroundColor = SharedColors.WordBoxBackground,
                     requestFocus = codeEditable

@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.paywall.SubscriptionOffer
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import java.time.Period
 
 @Composable
@@ -49,13 +51,13 @@ fun NoSubscriptionUI(
     PaywallBaseUI(statusSpecificContent = {
         Text(
             text = stringResource(
-                co.censo.censo.R.string.secure_all_your_seed_phrases_for_only,
-                priceText
+                R.string.secure_all_your_seed_phrases_for_only,
+                priceText,
             ),
             fontWeight = FontWeight.W600,
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
-            color = Color.Black
+            color = SharedColors.MainColorText
         )
         if (offer.feeTrialPeriodISO8601 != null) {
             Spacer(modifier = Modifier.height(18.dp))
@@ -64,7 +66,7 @@ fun NoSubscriptionUI(
                 fontWeight = FontWeight.W600,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                color = Color.Black
+                color = SharedColors.MainColorText
             )
         } else {
             Spacer(modifier = Modifier.height(18.dp))
@@ -73,7 +75,7 @@ fun NoSubscriptionUI(
                 fontWeight = FontWeight.W600,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                color = Color.Black
+                color = SharedColors.MainColorText
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
@@ -92,18 +94,12 @@ fun NoSubscriptionUI(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(co.censo.censo.R.string.continue_text),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 32.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+                    text = stringResource(R.string.continue_text),
+                    style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium),
                 )
                 Text(
                     text = "$trialText$priceText",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+                    style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
                 )
             }
         }

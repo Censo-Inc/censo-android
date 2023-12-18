@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 
-
 @Composable
 fun CensoBottomNavBar(
     selectedItem: BottomNavItem,
@@ -40,7 +39,6 @@ fun CensoBottomNavBar(
 val bottomNavItems = listOf(
     BottomNavItem.Home,
     BottomNavItem.Phrases,
-    BottomNavItem.Approvers,
     BottomNavItem.Settings,
 )
 
@@ -56,7 +54,7 @@ fun RowScope.BottomNavBarItemUI(
         label = {
             Text(
                 text = stringResource(id = navItem.text),
-                color = if (selected) Color.Black else SharedColors.DisabledFontGrey
+                color = SharedColors.BottomNavBarTextColor
             )
         },
         onClick = onSelected,
@@ -71,10 +69,10 @@ fun RowScope.BottomNavBarItemUI(
 
 @Composable
 fun NavigationBarItemDefaults.censoDefaults() =
-    NavigationBarItemDefaults.colors(
-        selectedIconColor = Color.Black,
-        unselectedIconColor = SharedColors.DisabledFontGrey,
-        indicatorColor = SharedColors.DisabledGrey
+    colors(
+        selectedIconColor = SharedColors.BottomNavBarIconColor,
+        unselectedIconColor = SharedColors.BottomNavBarIconColor,
+        indicatorColor = SharedColors.BottomNavBarIndicatorColor
     )
 
 enum class BottomNavItem(@StringRes val text: Int, @DrawableRes val icon: Int) {
@@ -86,12 +84,8 @@ enum class BottomNavItem(@StringRes val text: Int, @DrawableRes val icon: Int) {
         text = R.string.phrases_nav_title,
         icon = R.drawable.lock_tab_icon
     ),
-    Approvers(
-        text = R.string.approvers_nav_title,
-        icon = R.drawable.approvers_tab_icon
-    ),
     Settings(
         text = R.string.settings_nav_title,
-        icon = R.drawable.settings_icon_tab,
+        icon = R.drawable.settings_tab_icon,
     )
 }

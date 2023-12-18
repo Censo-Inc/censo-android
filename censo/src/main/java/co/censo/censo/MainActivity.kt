@@ -28,16 +28,16 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
-import co.censo.censo.presentation.welcome.WelcomeScreen
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.main.MainVaultScreen
 import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
-import co.censo.censo.presentation.plan_setup.PlanSetupScreen
+import co.censo.censo.presentation.plan_setup.PolicySetupScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.main.BottomNavItem
 import co.censo.censo.presentation.paywall.PaywallScreen
-import co.censo.censo.presentation.plan_setup.PlanSetupDirection
+import co.censo.censo.presentation.plan_finalization.ReplacePolicyScreen
+import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
 import co.censo.shared.data.model.AccessIntent
@@ -108,9 +108,6 @@ class MainActivity : FragmentActivity() {
             composable(route = Screen.EntranceRoute.route) {
                 OwnerEntranceScreen(navController = navController)
             }
-            composable(route = Screen.OwnerWelcomeScreen.route) {
-                WelcomeScreen(navController = navController)
-            }
             composable(route = Screen.OwnerVaultScreen.route) {
                 MainVaultScreen(selectedBottomNavItem = bottomNavItem, navController = navController)
             }
@@ -136,12 +133,21 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.PlanSetupRoute.route}/{${Screen.PlanSetupRoute.SETUP_DIRECTION_ARG}}"
+                route = "${Screen.PolicySetupRoute.route}/{${Screen.PolicySetupRoute.SETUP_ACTION_ARG}}"
             ) {backStackEntry ->
-                PlanSetupScreen(
+                PolicySetupScreen(
                     navController = navController,
-                    planSetupDirection = backStackEntry.arguments?.getString(Screen.PlanSetupRoute.SETUP_DIRECTION_ARG)
-                        ?.let { PlanSetupDirection.valueOf(it) } ?: PlanSetupDirection.AddApprovers
+                    policySetupAction = backStackEntry.arguments?.getString(Screen.PolicySetupRoute.SETUP_ACTION_ARG)
+                        ?.let { PolicySetupAction.valueOf(it) } ?: PolicySetupAction.AddApprovers
+                )
+            }
+            composable(
+                route = "${Screen.ReplacePolicyRoute.route}/{${Screen.ReplacePolicyRoute.REPLACE_POLICY_ACTION_ARG}}"
+            ) {backStackEntry ->
+                ReplacePolicyScreen(
+                    navController = navController,
+                    policySetupAction = backStackEntry.arguments?.getString(Screen.ReplacePolicyRoute.REPLACE_POLICY_ACTION_ARG)
+                        ?.let { PolicySetupAction.valueOf(it) } ?: PolicySetupAction.AddApprovers
                 )
             }
             composable(

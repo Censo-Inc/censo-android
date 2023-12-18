@@ -263,15 +263,27 @@ class OwnerEntranceViewModel @Inject constructor(
     }
 
     private fun loggedInRouting(ownerState: OwnerState) {
-        state = if (ownerState is OwnerState.Ready && ownerState.vault.seedPhrases.isNotEmpty()) {
-            val destination = when {
-                ownerState.access != null -> Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases)
-                else -> Screen.OwnerVaultScreen.route
+        val destination = when (ownerState) {
+            is OwnerState.Ready -> {
+                if (ownerState.vault.seedPhrases.isNotEmpty()) {
+                    when {
+                        ownerState.access != null -> Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases)
+                        else -> Screen.OwnerVaultScreen.route
+                    }
+                } else {
+                    Screen.EnterPhraseRoute.buildNavRoute(
+                        masterPublicKey = ownerState.vault.publicMasterEncryptionKey,
+                        welcomeFlow = true
+                    )
+                }
             }
-            state.copy(navigationResource = Resource.Success(destination))
-        } else {
-            state.copy(navigationResource = Resource.Success(Screen.OwnerWelcomeScreen.route))
+
+            is OwnerState.Initial -> {
+                Screen.InitialPlanSetupRoute.route
+            }
         }
+
+        state = state.copy(navigationResource = Resource.Success(destination))
     }
 
     fun resetNavigationResource() {

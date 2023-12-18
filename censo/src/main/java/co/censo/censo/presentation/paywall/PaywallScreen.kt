@@ -41,7 +41,6 @@ fun PaywallScreen(
 
             state.loading ->
                 LargeLoading(
-                    color = Color.Black,
                     fullscreen = true,
                     fullscreenBackgroundColor = Color.White
                 )

@@ -4,6 +4,7 @@ import StandardButton
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun PastePhraseUI(
@@ -78,8 +80,7 @@ fun PastePhraseUI(
         ) {
             Text(
                 text = stringResource(R.string.paste_from_clipboard),
-                color = Color.White,
-                fontSize = 20.sp
+                style = ButtonTextStyle
             )
         }
     }
@@ -101,20 +102,34 @@ fun PastePhraseStep(
                     color = SharedColors.WordBoxBackground,
                     shape = RoundedCornerShape(20.dp)
                 )
+                .border(
+                    width = 1.dp,
+                    color = SharedColors.MainBorderColor,
+                    shape = RoundedCornerShape(20.dp)
+                )
                 .padding(16.dp)
         ) {
             Image(
                 painter = imagePainter,
                 contentDescription = null,
                 modifier = Modifier.width(32.dp),
-                colorFilter = ColorFilter.tint(color = Color.Black)
+                colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = heading, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = heading,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = SharedColors.MainColorText
+            )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = content, fontSize = 14.sp)
+            Text(
+                text = content,
+                fontSize = 14.sp,
+                color = SharedColors.MainColorText
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }

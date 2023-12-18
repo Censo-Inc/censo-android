@@ -138,8 +138,8 @@
     <string name="verifying">Verifying</string>
     <string name="approved">Approved</string>
     <string name="incorrect_code">Incorrect Code</string>
-    <string name="seed_phrase_validated">Seed phrase validated</string>
-    <string name="seed_phrase_generated">Seed phrase generated</string>
+    <string name="seed_phrase_validated">Validated!</string>
+    <string name="seed_phrase_generated">Seed Phrase Generated!</string>
     <string name="review_seed_phrase">Review seed phrase</string>
     <string name="censo_has_verified_that_this_is_a_valid_seed_phrase">Censo has verified that this is a valid seed phrase. Please review the words to make sure that you have entered them correctly.</string>
     <string name="censo_has_detected_that_this_is_not_a_valid_seed_phrase">Censo has detected that this is not a valid seed phrase. Please make sure each word is correct and revise as needed.</string>
@@ -187,7 +187,7 @@
 
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Scan your face</string>
-    <string name="scan_phrase_message">Your face scan ensures that only you have access to your seed phrase.\n\nYou will capture and store an anonymous 3D map of your face to confirm your live physical presence.</string>
+    <string name="scan_phrase_message">A face scan will ensure that only you have access to your seed phrase.\n\nIf you opt in, you can capture and store an anonymous 3D map of your face to confirm your live physical presence.</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
@@ -350,7 +350,7 @@
     <string name="edit_phrase">Edit phrase</string>
     <string name="your_approver">your approver</string>
     <string name="select_phrase_cont_description">Select phrase</string>
-    <string name="activated">Activated</string>
+    <string name="activated">Activated!</string>
     <string name="approvers_removed">Approvers removed</string>
     <string name="phrase_viewed">phrase viewed</string>
     <string name="exit_accessing_phrases">Exit accessing phrases</string>
@@ -364,4 +364,13 @@
     <string name="drive_access_already_granted">Drive access already granted</string>
     <string name="drive_access_granted">Drive access granted</string>
     <string name="failed_to_authenticate_drive_access">Failed to authenticate drive access</string>
+    <string name="processing_your_transaction">Processing your transaction</string>
+    <string name="error">Error</string>
+    <string name="default_invalid_phrase_message">The seed phrase you entered is not valid.\\n\\nPlease check your seed phrase and try again.</string>
+    <string name="i_have_my_own">I have my own</string>
+    <string name="time_to_add_your_first_seed_phrase">Time to add your first seed phrase</string>
+    <string name="generate_or_add_own_message">You can add one of your own, or if you would like to try Censo first, generate a new seed phrase with Censo and add that.</string>
+    <string name="an_approval_from_current_approvers_is_required">An approval from current approvers is required</string>
+    <string name="added_security_with_approvers">Your security is increased by your approvers.</string>
+    <string name="resume_adding_approvers">Resume adding approvers</string>
 </resources>

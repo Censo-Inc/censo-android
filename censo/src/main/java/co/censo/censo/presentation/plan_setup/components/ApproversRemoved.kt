@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun ApproversRemoved() {
@@ -32,7 +35,8 @@ fun ApproversRemoved() {
 
         Image(
             painterResource(id = co.censo.shared.R.drawable.check_circle),
-            contentDescription = ""
+            contentDescription = "",
+            colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
@@ -40,6 +44,7 @@ fun ApproversRemoved() {
         TitleText(
             modifier = Modifier.fillMaxWidth(),
             title = stringResource(R.string.approvers_removed),
+            fontSize = 28.sp
         )
     }
 }

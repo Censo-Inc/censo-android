@@ -25,6 +25,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.enter_phrase.EnterPhraseUIState
 import co.censo.shared.util.BIP39
+import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun BoxScope.EditPhraseWordUI(
@@ -60,14 +61,13 @@ fun BoxScope.EditPhraseWordUI(
             )
             Spacer(modifier = Modifier.height(24.dp))
             StandardButton(
-                color = Color.Black, contentPadding = PaddingValues(
+                contentPadding = PaddingValues(
                     horizontal = 32.dp, vertical = 16.dp
                 ), onClick = wordSubmitted
             ) {
                 Text(
-                    fontSize = 20.sp,
                     text = stringResource(R.string.submit_word),
-                    color = Color.White
+                    style = ButtonTextStyle
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))

@@ -190,29 +190,29 @@ class FacetecAuthViewModel @Inject constructor(
         customization.overlayCustomization.showBrandingImage = false
 
         customization.feedbackCustomization.textColor = Color.White.toArgb()
-        customization.feedbackCustomization.backgroundColors = Color.Black.toArgb()
+        customization.feedbackCustomization.backgroundColors = SharedColors.FacetecPrimaryColor.toArgb()
         customization.feedbackCustomization.cornerRadius = 20;
 
         // guidance screen
         customization.guidanceCustomization.buttonTextNormalColor = Color.White.toArgb()
-        customization.guidanceCustomization.buttonBackgroundNormalColor = Color.Black.toArgb()
+        customization.guidanceCustomization.buttonBackgroundNormalColor = SharedColors.FacetecPrimaryColor.toArgb()
         customization.guidanceCustomization.buttonTextDisabledColor = Color.White.toArgb()
         customization.guidanceCustomization.buttonBackgroundDisabledColor = SharedColors.GreyText.toArgb()
         customization.guidanceCustomization.buttonTextHighlightColor = Color.White.toArgb()
-        customization.guidanceCustomization.buttonBackgroundHighlightColor = Color.Black.copy(alpha = 0.9f).toArgb()
+        customization.guidanceCustomization.buttonBackgroundHighlightColor = SharedColors.FacetecPrimaryColor.copy(alpha = 0.9f).toArgb()
         customization.guidanceCustomization.cameraPermissionsScreenImage = R.drawable.camera
-        customization.guidanceCustomization.foregroundColor = Color.Black.toArgb()
-        customization.guidanceCustomization.retryScreenImageBorderColor = Color.Black.toArgb()
+        customization.guidanceCustomization.foregroundColor = SharedColors.FacetecPrimaryColor.toArgb()
+        customization.guidanceCustomization.retryScreenImageBorderColor = SharedColors.FacetecPrimaryColor.toArgb()
 
-        customization.ovalCustomization.strokeColor = Color.Black.toArgb()
-        customization.ovalCustomization.progressColor1 = Color.Black.toArgb()
-        customization.ovalCustomization.progressColor2 = Color.Black.copy(alpha = 0.9f).toArgb()
+        customization.ovalCustomization.strokeColor = SharedColors.FacetecPrimaryColor.toArgb()
+        customization.ovalCustomization.progressColor1 = SharedColors.FacetecSecondaryColor.toArgb()
+        customization.ovalCustomization.progressColor2 = SharedColors.FacetecPrimaryColor.copy(alpha = 0.9f).toArgb()
 
-        customization.resultScreenCustomization.foregroundColor = Color.Black.toArgb()
-        customization.resultScreenCustomization.uploadProgressFillColor = Color.Black.toArgb()
-        customization.resultScreenCustomization.uploadProgressTrackColor = Color.Black.copy(alpha = 0.5f).toArgb()
-        customization.resultScreenCustomization.activityIndicatorColor = Color.Black.toArgb()
-        customization.resultScreenCustomization.resultAnimationBackgroundColor = Color.Black.toArgb()
+        customization.resultScreenCustomization.foregroundColor = SharedColors.FacetecPrimaryColor.toArgb()
+        customization.resultScreenCustomization.uploadProgressFillColor = SharedColors.FacetecPrimaryColor.toArgb()
+        customization.resultScreenCustomization.uploadProgressTrackColor = SharedColors.FacetecPrimaryColor.copy(alpha = 0.5f).toArgb()
+        customization.resultScreenCustomization.activityIndicatorColor = SharedColors.FacetecPrimaryColor.toArgb()
+        customization.resultScreenCustomization.resultAnimationBackgroundColor = SharedColors.FacetecPrimaryColor.toArgb()
         customization.resultScreenCustomization.resultAnimationForegroundColor = Color.White.toArgb()
 
         return customization

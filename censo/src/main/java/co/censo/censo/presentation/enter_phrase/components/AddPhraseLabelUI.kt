@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.censo.presentation.enter_phrase.EnterPhraseState.Companion.PHRASE_LABEL_MAX_LENGTH
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +77,7 @@ fun AddPhraseLabelUI(
         val textFieldStyle = TextStyle(
             fontSize = 24.sp,
             fontWeight = FontWeight.W500,
-            color = Color.Black,
+            color = SharedColors.MainColorText,
             textAlign = TextAlign.Center
         )
 
@@ -114,15 +116,15 @@ fun AddPhraseLabelUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             enabled = enabled,
             onClick = onSavePhrase,
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
+            val saveButtonTextStyle = if (enabled) ButtonTextStyle else DisabledButtonTextStyle
+
             Text(
                 text = stringResource(id = R.string.save_seed_phrase),
-                color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
-                fontSize = 24.sp
+                style = saveButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
 

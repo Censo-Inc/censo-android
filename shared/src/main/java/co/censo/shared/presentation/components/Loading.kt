@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun SmallLoading(
@@ -38,7 +39,7 @@ fun SmallLoading(
 
 @Composable
 fun LargeLoading(
-    color: Color = ProgressIndicatorDefaults.circularColor,
+    color: Color = SharedColors.DefaultLoadingColor,
     fullscreen: Boolean,
     fullscreenBackgroundColor: Color? = null
 ) {
@@ -54,7 +55,7 @@ fun LargeLoading(
 @Composable
 fun Loading(
     strokeWidth: Dp,
-    color: Color = ProgressIndicatorDefaults.circularColor,
+    color: Color = SharedColors.DefaultLoadingColor,
     size: Dp,
     fullscreen: Boolean,
     fullscreenBackgroundColor: Color? = null,

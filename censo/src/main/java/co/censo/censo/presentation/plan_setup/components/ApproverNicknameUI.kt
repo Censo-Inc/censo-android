@@ -22,7 +22,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
-import co.censo.censo.presentation.plan_setup.PlanSetupState.Companion.APPROVER_NAME_MAX_LENGTH
+import co.censo.censo.presentation.plan_setup.PolicySetupState.Companion.APPROVER_NAME_MAX_LENGTH
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +82,7 @@ fun ApproverNicknameUI(
         val textFieldStyle = TextStyle(
             fontSize = 24.sp,
             fontWeight = FontWeight.W500,
-            color = Color.Black,
+            color = SharedColors.MainColorText,
             textAlign = TextAlign.Center
         )
 
@@ -120,15 +121,14 @@ fun ApproverNicknameUI(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             enabled = enabled,
             onClick = onSaveNickname,
             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
         ) {
+            val saveButtonTextStyle = if (enabled) ButtonTextStyle else DisabledButtonTextStyle
             Text(
                 text = stringResource(id = R.string.continue_text),
-                color = if (enabled) Color.White else SharedColors.DisabledFontGrey,
-                fontSize = 24.sp
+                style = saveButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
 

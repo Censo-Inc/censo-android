@@ -32,13 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,9 +52,10 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Loading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,14 +67,26 @@ fun InitialPlanSetupScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
-            navController.navigate(Screen.OwnerWelcomeScreen.route)
+
+            val publicKey =
+                (state.createPolicyParamsResponse as? Resource.Success)?.data?.masterEncryptionPublicKey
+                    ?: state.createPolicyParams?.masterEncryptionPublicKey
+
+            val route = publicKey?.let {
+                Screen.EnterPhraseRoute.buildNavRoute(
+                    masterPublicKey = it,
+                    welcomeFlow = true
+                )
+            } ?: Screen.EntranceRoute.route
+
+
+            navController.navigate(route)
             viewModel.reset()
         }
     }
 
 
     Scaffold(
-        contentColor = Color.Black,
         containerColor = Color.White,
         topBar = {
             TopAppBar(
@@ -82,7 +96,7 @@ fun InitialPlanSetupScreen(
                         Icon(
                             imageVector = Icons.Rounded.Close,
                             stringResource(R.string.back),
-                            tint = Color.Black
+                            tint = SharedColors.MainIconColor
                         )
                     }
                 },
@@ -127,10 +141,7 @@ fun InitialPlanSetupScreen(
                     when (state.initialPlanSetupStep) {
                         InitialPlanSetupStep.CreateApproverKey,
                         InitialPlanSetupStep.CreatePolicyParams,
-                        InitialPlanSetupStep.PolicyCreation -> LargeLoading(
-                            color = Color.Black,
-                            fullscreen = true
-                        )
+                        InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
 
                         is InitialPlanSetupStep.Initial ->
                             InitialPlanSetupStandardUI {
@@ -142,7 +153,6 @@ fun InitialPlanSetupScreen(
                             FacetecAuth(
                                 onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
-                                    navController.navigate(Screen.OwnerWelcomeScreen.route)
                                     viewModel.reset()
                                 }
                             )
@@ -182,21 +192,28 @@ fun InitialPlanSetupStandardUI(
     startPlanSetup: () -> Unit,
 ) {
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(color = Color.White),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.Bottom
     ) {
-        Column(modifier = Modifier.padding(32.dp)) {
+
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .weight(0.1f)
+        ) {
             Image(
-                painter = painterResource(id = co.censo.shared.R.drawable.large_face_scan),
-                contentScale = ContentScale.FillWidth,
+                modifier = Modifier
+                    .padding(top = screenHeight * 0.015f)
+                    .align(Alignment.Center),
+                painter = painterResource(id = R.drawable.facescanhandwithphone),
                 contentDescription = null,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+                contentScale = ContentScale.Fit
             )
         }
 
@@ -207,15 +224,16 @@ fun InitialPlanSetupStandardUI(
                 modifier = Modifier
                     .fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             Text(
                 text = stringResource(R.string.scan_phrase_message),
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 20.sp,
+                color = SharedColors.MainColorText,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
 
             Text(
                 text = stringResource(R.string.affirmative_biometric_consent),
@@ -223,15 +241,14 @@ fun InitialPlanSetupStandardUI(
                 fontStyle = FontStyle.Italic,
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
+                color = SharedColors.MainColorText,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             StandardButton(
                 onClick = startPlanSetup,
-                color = Color.Black,
-                contentPadding = PaddingValues(vertical = 20.dp),
-                modifier = Modifier
-                    .fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -241,25 +258,36 @@ fun InitialPlanSetupStandardUI(
                     Image(
                         painter = painterResource(id = co.censo.shared.R.drawable.small_face_scan_white),
                         contentDescription = null,
-                        modifier = Modifier.width(32.dp)
+                        modifier = Modifier.width(32.dp),
+                        colorFilter = ColorFilter.tint(SharedColors.ButtonTextBlue)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.begin_face_scan),
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 24.sp,
+                        style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(44.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
         }
     }
 }
 
-@Preview()
+@Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)
 @Composable
-fun InitialPlanSetupStandardUIPreview() {
+fun LargeInitialPlanSetupStandardUIPreview() {
+    InitialPlanSetupStandardUI {}
+}
+
+@Preview(device = Devices.PIXEL_4, showBackground = true, showSystemUi = true)
+@Composable
+fun MediumInitialPlanSetupStandardUIPreview() {
+    InitialPlanSetupStandardUI {}
+}
+
+@Preview(device = Devices.NEXUS_5, showBackground = true, showSystemUi = true)
+@Composable
+fun SmallInitialPlanSetupStandardUIPreview() {
     InitialPlanSetupStandardUI {}
 }

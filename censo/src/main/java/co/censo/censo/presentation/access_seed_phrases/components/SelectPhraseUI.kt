@@ -29,6 +29,7 @@ import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.censo.R
 import co.censo.censo.presentation.main.SeedPhraseItem
+import co.censo.shared.presentation.ButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -73,13 +74,10 @@ fun SelectPhraseUI(
                 .padding(vertical = 24.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
             onClick = onFinish,
-            color = Color.Black
         ) {
             Text(
                 text = stringResource(id = R.string.exit_accessing_phrase),
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-                fontSize = 22.sp,
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.Medium),
                 modifier = Modifier.padding(all = 8.dp)
             )
         }

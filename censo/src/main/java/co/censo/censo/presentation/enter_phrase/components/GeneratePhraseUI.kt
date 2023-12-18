@@ -27,12 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.util.BIP39
 
 private val wordCountOptions = enumValues<BIP39.WordCount>()
@@ -79,8 +81,7 @@ fun GeneratePhraseUI(
         ) {
             Text(
                 text = stringResource(R.string.generate),
-                color = Color.White,
-                fontSize = 20.sp
+                style = ButtonTextStyle,
             )
         }
     }
@@ -103,7 +104,7 @@ private fun WordCountOption(
             )
             .border(
                 width = 1.dp,
-                color = if (selected) Color.Black else SharedColors.BorderGrey,
+                color = if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
@@ -121,7 +122,7 @@ private fun WordCountOption(
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.check_icon),
                     contentDescription = stringResource(R.string.select_approver),
-                    tint = Color.Black
+                    tint = SharedColors.MainIconColor
                 )
             }
         }
@@ -129,7 +130,7 @@ private fun WordCountOption(
         Column {
             Text(
                 text = stringResource(R.string.seed_phrase_words_count, wordCount.value),
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 24.sp
             )
         }

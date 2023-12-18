@@ -41,6 +41,8 @@ import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 import kotlinx.datetime.Clock
 
 @Composable
@@ -123,15 +125,14 @@ fun SelectApprover(
                             .fillMaxWidth()
                             .padding(horizontal = 36.dp),
                         enabled = buttonEnabled,
-                        disabledColor = SharedColors.DisabledGrey,
-                        color = Color.Black,
                         onClick = onContinue,
                         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp)
                     ) {
+                        val continueButtonTextStyle = if (buttonEnabled) ButtonTextStyle else DisabledButtonTextStyle
+
                         Text(
                             text = stringResource(id = R.string.continue_text),
-                            color = if (buttonEnabled) Color.White else SharedColors.DisabledFontGrey,
-                            fontSize = 24.sp
+                            style = continueButtonTextStyle.copy(fontSize = 20.sp)
                         )
                     }
                 }
@@ -178,7 +179,7 @@ fun SelectingApproverInfoBox(
             )
             .border(
                 width = 1.dp,
-                color = if (selected) Color.Black else SharedColors.BorderGrey,
+                color = if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
@@ -198,7 +199,7 @@ fun SelectingApproverInfoBox(
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.check_icon),
                     contentDescription = stringResource(R.string.select_approver),
-                    tint = Color.Black
+                    tint = SharedColors.MainIconColor
                 )
             }
         }
@@ -206,13 +207,13 @@ fun SelectingApproverInfoBox(
         Column {
             Text(
                 text = stringResource(id = R.string.approver),
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = labelTextSize
             )
 
             Text(
                 text = nickName,
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 24.sp
             )
 

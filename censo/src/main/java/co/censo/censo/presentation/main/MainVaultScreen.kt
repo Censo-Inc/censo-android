@@ -17,7 +17,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -138,10 +137,17 @@ fun MainVaultScreen(
 
     Scaffold(
         topBar = {
-            VaultTopBar(selectedBottomNavItem.value)
+            VaultTopBar(
+                bottomNavItem = selectedBottomNavItem.value,
+                showCloseApprover = state.showAddApproversUI is Resource.Success,
+                onDismissApprover = viewModel::resetShowApproversUI
+            )
         },
         bottomBar = {
             CensoBottomNavBar(selectedBottomNavItem.value) {
+                if (it == BottomNavItem.Home) {
+                    viewModel.resetShowApproversUI()
+                }
                 selectedBottomNavItem.value = it
             }
         }
@@ -154,10 +160,7 @@ fun MainVaultScreen(
         ) {
 
             when {
-                state.loading -> LargeLoading(
-                    color = Color.Black,
-                    fullscreen = true
-                )
+                state.loading -> LargeLoading(fullscreen = true)
 
                 state.asyncError -> {
                     when {
@@ -198,9 +201,11 @@ fun MainVaultScreen(
 
 
                     when (selectedBottomNavItem.value) {
-                        BottomNavItem.Home ->
+                        BottomNavItem.Home -> {
                             VaultHomeScreen(
                                 seedPhrasesSaved = state.seedPhrasesSize,
+                                approverSetupExists = state.ownerState?.policySetup != null,
+                                approvers = state.ownerState?.policy?.approvers ?: emptyList(),
                                 onAddSeedPhrase = {
                                     state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
                                         val route = Screen.EnterPhraseRoute.buildNavRoute(
@@ -210,11 +215,19 @@ fun MainVaultScreen(
                                         navController.navigate(route)
                                     }
                                 },
-                                onAddApprovers = {
-                                    selectedBottomNavItem.value = BottomNavItem.Approvers
-                                },
-                                showAddApprovers = state.externalApprovers == 0
+                                onAddApprovers = viewModel::showAddApproverUI,
                             )
+
+                            if (state.showAddApproversUI is Resource.Success) {
+                                SetupApproversScreen(
+                                    approverSetupExists = state.ownerState?.policySetup != null,
+                                    onInviteApproversSelected = {
+                                        viewModel.resetShowApproversUI()
+                                        navController.navigate(viewModel.determinePolicyModificationRoute())
+                                    },
+                                )
+                            }
+                        }
 
                         BottomNavItem.Phrases ->
                             PhraseHomeScreen(
@@ -236,24 +249,15 @@ fun MainVaultScreen(
                                 }
                             )
 
-                        BottomNavItem.Approvers ->
-                            ApproversHomeScreen(
-                                approvers = state.ownerState?.policy?.approvers ?: emptyList(),
-                                approverSetupExists = state.ownerState?.policySetup != null,
-                                onInviteApproversSelected = {
-                                    navController.navigate(Screen.PlanSetupRoute.addApproversRoute())
-                                },
-                                onRemoveApproversSelected = {
-                                    navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))
-                                }
-                            )
-
                         BottomNavItem.Settings ->
                             SettingsHomeScreen(
                                 onResyncCloudAccess = viewModel::resyncCloudAccess,
                                 onLock = viewModel::lock,
                                 onDeleteUser = viewModel::showDeleteUserDialog,
                                 onSignOut = viewModel::signOut,
+                                onRemoveApprover = {
+                                    navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))
+                                }
                             )
                     }
 
