@@ -78,6 +78,8 @@ android {
             manifestPlaceholders["URL_SCHEME"] = "censo"
             manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
+            buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
+            buildConfigField("String", "L1NK_HOST", "\"l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
             resValue("string", "app_name", "Approver")
         }
         create("localRelease") {
@@ -96,6 +98,8 @@ android {
             manifestPlaceholders["URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
             manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
+            buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
+            buildConfigField("String", "L1NK_HOST", "\"l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
         }
         create("integration") {
             resValue("string", "app_name", "Integration Approver")
@@ -108,6 +112,8 @@ android {
             manifestPlaceholders["URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
             manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
+            buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
+            buildConfigField("String", "L1NK_HOST", "\"l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
         }
         debug {
             initWith(getByName("integration"))
