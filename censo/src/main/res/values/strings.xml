@@ -315,7 +315,6 @@
     <string name="it_s_time_for_a_seed_phrase_manager">IT’S TIME FOR A\nSEED PHRASE\nMANAGER</string>
     <string name="cancel_anytime">Cancel anytime</string>
     <string name="try_for_free_cancel_anytime">Try for free, cancel anytime</string>
-    <string name="your_subscription_was_paused">Your subscription was paused. Don\'t worry, we won\'t delete any of your data</string>
     <string name="reactivate_to_continue_cancel_anytime">Reactivate to continue, cancel anytime</string>
     <string name="days_free_then">days free, then</string>
     <string name="day">day</string>
