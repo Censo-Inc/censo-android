@@ -49,6 +49,8 @@ import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.util.StrongboxUI
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.novacrypto.base58.Base58
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.util.Base64
 import javax.inject.Inject
 
@@ -106,28 +108,11 @@ class MainActivity : FragmentActivity() {
     }
 
     fun fooTest() {
-        //MasterpublicKey : Base58EncodedMasterPublicKey = Rumgf4o6YAtBZER8j8wCeAy9DPnMSZeFJvqLQzK6dtiAqai5AiSeL1jEGAWNyWVQjC1HqibMo5F3gs8a4V1VAbmd
-        //masterKeySig : Base64EncodedData = MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==
-        // ownerApproverEncryptionKey.privateKeyRaw.base64Encoded = Base64EncodedData(base64Encoded=AKitUl+1/ALq9ViFXPZbrYJ8zYXuE2cd9YYednTv+K4r)
-        // ownerApproverEncryptionkey byte array = [0, -88, -83, 82, 95, -75, -4, 2, -22, -11, 88, -123, 92, -10, 91, -83, -126, 124, -51, -123, -18, 19, 103, 29, -11, -122, 30, 118, 116, -17, -8, -82, 43]
-        // ownerAPproverEncreyptionKey base58 Encoded = 1CMSnEWeyoe2t1kTJPQMo27rzENuxMJ3r6FeVx5XKvtiE
-        // entropy =
-        // deviceKeyId = 102236090183538294473
-//        val fooKey = InitialKeyData(encryptedPrivateKey= byteArrayOf(14, 12, -87, -62, 0, -12, 41, 102, 111, 102, -43, -50, -2, 38, 63, 118, -69, -119, 108, -39, 12, -19, -31, 0, 58, -49, 10, 125, 33, 64, -34, -64, -44, 60, -93, 48, 79, 9, 28, -49, 126, -124, 102, -15, -72, 101, 14, -86, -31, -96, -82, 49, 49, 48, 1, -99), publicKey=Base58EncodedApproverPublicKey(value="SGBxgrcqdDrCKRBJDDFXNTrQ3bj8GGojTXBAeWbqv8VtrzaTCsqsBjAr7r4bgPfPGTV8ik4b2pmGkPaLcpbpjNV7"))
-
-        //Can I recreate the key
-        //Can I sign data with the key
-
-//        projectLog(message = "Verifying master public key against master key sig, with ownerApproverEncryptionKey")
-//        ownerApproverEncryptionKey.verify(signedData = masterPublicKey.value.toByteArray(), signature = Base64.getDecoder().decode(masterKeySignature.base64Encoded))
-
-        //Recreate the key
+        //region Recreate the key
         val fooKey = InitialKeyData(encryptedPrivateKey= byteArrayOf(14, 12, -87, -62, 0, -12, 41, 102, 111, 102, -43, -50, -2, 38, 63, 118, -69, -119, 108, -39, 12, -19, -31, 0, 58, -49, 10, 125, 33, 64, -34, -64, -44, 60, -93, 48, 79, 9, 28, -49, 126, -124, 102, -15, -72, 101, 14, -86, -31, -96, -82, 49, 49, 48, 1, -99), publicKey=Base58EncodedApproverPublicKey(value="SGBxgrcqdDrCKRBJDDFXNTrQ3bj8GGojTXBAeWbqv8VtrzaTCsqsBjAr7r4bgPfPGTV8ik4b2pmGkPaLcpbpjNV7"))
 
         val entropy = Base64EncodedData("uG+zFogeQ/XkUbjKPUgSWlp3IAhfinXCiCAfYDxuIAdwv1JoKENUF2mYHiBCBbfdmsW+dIUPgaVLKduAvVWwaQ==")
         val deviceKeyId = "102236090183538294473"
-
-
 
         val recreatedKey = EncryptionKey.generateFromPrivateKeyRaw(
             fooKey.encryptedPrivateKey.decryptWithEntropy(
@@ -136,20 +121,22 @@ class MainActivity : FragmentActivity() {
             ).bigInt()
         )
 
-//        val testData = "Gojira".toByteArray()
-//
-//        val signedTestData = recreatedKey.sign(testData)
-//
-////        val verified = recreatedKey.verify(signedData = signedTestData, signature = Base64.getDecoder().decode(Base64EncodedData("MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==").base64Encoded))
-//        val verified = recreatedKey.verify(signedData = testData, signature = signedTestData)
+        //endregion
+
+        //1. Signature From Backend: Base64EncodedData = MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==
+        //2. Key that was signed: Base58EncodedMasterPublicKey = Rumgf4o6YAtBZER8j8wCeAy9DPnMSZeFJvqLQzK6dtiAqai5AiSeL1jEGAWNyWVQjC1HqibMo5F3gs8a4V1VAbmd
+
+        val signature = Base64EncodedData("MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==")
+        val signedData = Base58EncodedMasterPublicKey("Rumgf4o6YAtBZER8j8wCeAy9DPnMSZeFJvqLQzK6dtiAqai5AiSeL1jEGAWNyWVQjC1HqibMo5F3gs8a4V1VAbmd")
+
+        val signedDataAsBytes = (signedData.ecPublicKey as BCECPublicKey).q.getEncoded(false)
 
         val verified = recreatedKey.verify(
-            signedData = Base58EncodedMasterPublicKey("Rumgf4o6YAtBZER8j8wCeAy9DPnMSZeFJvqLQzK6dtiAqai5AiSeL1jEGAWNyWVQjC1HqibMo5F3gs8a4V1VAbmd").value.toByteArray(),
-            signature = Base64.getDecoder().decode(Base64EncodedData("MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==").base64Encoded)
+            signedData = signedDataAsBytes,
+            signature = signature.bytes //This is correct because it is using backend data
         )
 
-
-        projectLog(message = "Verify result: $verified")
+        projectLog(message = "Verified: $verified")
     }
 
     @Composable
