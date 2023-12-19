@@ -233,32 +233,39 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
 
-    private fun verifyMasterKeySignature() : Boolean {
-        val ownerPolicy = (ownerStateFlow.value.data as OwnerState.Ready).policy
+    private fun verifyMasterKeySignature(): Boolean {
+        try {
+            val ownerPolicy = (ownerStateFlow.value.data as OwnerState.Ready).policy
 
-        val masterPublicKey = state.masterPublicKey
-        val masterKeySignature = state.masterKeySignature
+            val masterPublicKey = state.masterPublicKey
+            val masterKeySignature = state.masterKeySignature
 
-        if (masterKeySignature != null && masterPublicKey != null) {
-            val deviceKeyId = keyRepository.retrieveSavedDeviceId()
-            val entropy = ownerPolicy.ownerEntropy
+            if (masterKeySignature != null && masterPublicKey != null) {
+                val deviceKeyId = keyRepository.retrieveSavedDeviceId()
+                val entropy = ownerPolicy.ownerEntropy
 
-            val ownerApproverKeyData = state.keyData
-            return if (ownerApproverKeyData != null) {
-                val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(
-                    ownerApproverKeyData.encryptedPrivateKey.decryptWithEntropy(
-                        deviceKeyId, entropy
-                    ).bigInt()
-                )
+                val ownerApproverKeyData = state.keyData
+                return if (ownerApproverKeyData != null) {
+                    val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(
+                        raw = ownerApproverKeyData.encryptedPrivateKey.decryptWithEntropy(
+                            deviceKeyId = deviceKeyId, entropy = entropy
+                        ).bigInt()
+                    )
 
-                ownerApproverEncryptionKey.verify(
-                    signedData = (masterPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(false),
-                    signature = masterKeySignature.bytes
-                )
+                    ownerApproverEncryptionKey.verify(
+                        signedData = (masterPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(
+                            false
+                        ),
+                        signature = masterKeySignature.bytes
+                    )
+                } else {
+                    false
+                }
             } else {
-                false
+                return false
             }
-        } else {
+        } catch (exception: Exception) {
+            state = state.copy(submitResource = Resource.Error(exception = exception))
             return false
         }
     }
@@ -472,26 +479,30 @@ class EnterPhraseViewModel @Inject constructor(
     fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
         resetCloudStorageActionState()
 
-        val entropy = (ownerStateFlow.value.data as OwnerState.Ready).policy.ownerEntropy
-        val deviceId = keyRepository.retrieveSavedDeviceId()
+        try {
+            val entropy = (ownerStateFlow.value.data as OwnerState.Ready).policy.ownerEntropy
+            val deviceId = keyRepository.retrieveSavedDeviceId()
 
-        //TODO: Should wrap in try catch
-        val publicKey =
-            Base58EncodedApproverPublicKey(
-                encryptedKey.decryptWithEntropy(
-                    deviceKeyId = deviceId,
-                    entropy = entropy
-                ).toEncryptionKey().publicExternalRepresentation().value
+            val publicKey =
+                Base58EncodedApproverPublicKey(
+                    encryptedKey.decryptWithEntropy(
+                        deviceKeyId = deviceId,
+                        entropy = entropy
+                    ).toEncryptionKey().publicExternalRepresentation().value
+                )
+
+            state = state.copy(
+                keyData = InitialKeyData(
+                    encryptedPrivateKey = encryptedKey,
+                    publicKey = publicKey
+                )
             )
 
-        state = state.copy(
-            keyData = InitialKeyData(
-                encryptedPrivateKey = encryptedKey,
-                publicKey = publicKey
-            )
-        )
-
-        storeSeedPhrase(shouldVerifyMasterKeySignature = true)
+            storeSeedPhrase(shouldVerifyMasterKeySignature = true)
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.CloudDownload)
+            state = state.copy(submitResource = Resource.Error(exception = e))
+        }
     }
 
     fun onKeyDownloadFailed(exception: Exception?) {
