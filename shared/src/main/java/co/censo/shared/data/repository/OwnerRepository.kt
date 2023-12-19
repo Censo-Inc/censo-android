@@ -324,7 +324,7 @@ class OwnerRepositoryImpl(
             encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
             intermediatePublicKey = setupHelper.intermediatePublicKey,
             approverShards = setupHelper.approverShards,
-            approverKeysSignatureByIntermediateKey = setupHelper.approverKeysSignatureByIntermediateKey,
+            approverPublicKeysSignatureByIntermediateKey = setupHelper.approverKeysSignatureByIntermediateKey,
             signatureByPreviousIntermediateKey = setupHelper.signatureByPreviousIntermediateKey!!
         )
 

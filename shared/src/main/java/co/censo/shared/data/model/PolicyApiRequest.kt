@@ -48,7 +48,7 @@ data class ReplacePolicyApiRequest(
     val encryptedMasterPrivateKey: Base64EncodedData,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val approverShards: List<ApproverShard>,
-    val approverKeysSignatureByIntermediateKey: Base64EncodedData,
+    val approverPublicKeysSignatureByIntermediateKey: Base64EncodedData,
     val signatureByPreviousIntermediateKey: Base64EncodedData,
 )
 
