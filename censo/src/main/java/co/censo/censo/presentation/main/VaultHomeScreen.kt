@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -58,8 +59,14 @@ fun VaultHomeScreen(
 ) {
     val context = LocalContext.current
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    val bigSpace = screenHeight * 0.08f
+    val mediumSpace = screenHeight * 0.04f
+
     val approverTextTitleStyle = TextStyle(
-        fontSize = 26.sp,
+        fontSize = 20.sp,
         fontWeight = FontWeight.W700,
         lineHeight = 30.sp,
         textAlign = TextAlign.Center,
@@ -72,19 +79,20 @@ fun VaultHomeScreen(
             .background(color = Color.White)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 32.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(bigSpace))
+
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = buildSeedPhraseCount(seedPhrasesSaved, context),
-            fontSize = 28.sp,
             fontWeight = FontWeight.W700,
             textAlign = TextAlign.Center,
             color = SharedColors.MainColorText
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(mediumSpace))
 
         Text(
             modifier = Modifier.fillMaxWidth(),
@@ -92,16 +100,16 @@ fun VaultHomeScreen(
                 context = context,
                 multiplePhrases = seedPhrasesSaved > 1
             ),
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             textAlign = TextAlign.Center,
             color = SharedColors.MainColorText
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(mediumSpace))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 8.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
             onClick = onAddSeedPhrase
         ) {
             Text(
@@ -112,7 +120,7 @@ fun VaultHomeScreen(
 
         val ownerOnly = approvers.size <= 1
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(bigSpace))
 
         Text(
             modifier = Modifier.fillMaxWidth(),
@@ -122,11 +130,9 @@ fun VaultHomeScreen(
             style = approverTextTitleStyle
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(mediumSpace))
 
         if (!ownerOnly) {
-            val verticalSpacingHeight = 24.dp
-
             val nonOwnerApprovers = approvers.filter { !it.isOwner }
 
             nonOwnerApprovers.sortedBy { it.attributes.onboardedAt }.forEach { approver ->
@@ -135,15 +141,14 @@ fun VaultHomeScreen(
                     status = approver.attributes,
                     editEnabled = false
                 )
-                Spacer(modifier = Modifier.height(verticalSpacingHeight))
+                Spacer(modifier = Modifier.height(mediumSpace))
             }
-
-            Spacer(modifier = Modifier.height(verticalSpacingHeight))
+            Spacer(modifier = Modifier.height(mediumSpace))
         } else {
 
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
                 onClick = onAddApprovers
             ) {
                 Text(
@@ -157,13 +162,13 @@ fun VaultHomeScreen(
 
 private fun buildSeedPhraseCount(count: Int, context: Context): AnnotatedString {
     val countSpanStyle = SpanStyle(
-        fontSize = 38.sp,
+        fontSize = 44.sp,
         fontWeight = FontWeight.W700,
         color = SharedColors.MainColorText
     )
 
     val textSpanStyle = SpanStyle(
-        fontSize = 26.sp,
+        fontSize = 24.sp,
         color = SharedColors.MainColorText
     )
 
