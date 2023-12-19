@@ -125,7 +125,7 @@ fun AddOrAccessRow(
                     Icon(
                         painter = painterResource(id = R.drawable.lock_icon),
                         contentDescription = null,
-                        tint = SharedColors.MainIconColor
+                        tint = SharedColors.ButtonIconColor
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

@@ -62,10 +62,10 @@ fun SelectSeedPhraseEntryType(
     var selectedLanguage by remember { mutableStateOf(currentLanguage) }
     var userHasOwnPhrase by remember { mutableStateOf(false) }
 
-    val title = if (userHasOwnPhrase) {
-        if (welcomeFlow) R.string.add_first_seed_phrase else R.string.add_seed_phrase
-    } else {
-        R.string.time_to_add_your_first_seed_phrase
+    val title = when {
+        welcomeFlow && userHasOwnPhrase -> R.string.add_first_seed_phrase
+        welcomeFlow && !userHasOwnPhrase -> R.string.time_to_add_your_first_seed_phrase
+        else -> R.string.add_another_seed_phrase
     }
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -124,7 +124,7 @@ fun SelectSeedPhraseEntryType(
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-            if (!userHasOwnPhrase) {
+            if (!userHasOwnPhrase && welcomeFlow) {
                 MessageText(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,7 +133,6 @@ fun SelectSeedPhraseEntryType(
                     textAlign = TextAlign.Start
                 )
             } else {
-
                 val basicStyle = SpanStyle(
                     color = SharedColors.MainColorText,
                     fontSize = 16.sp,
@@ -142,12 +141,21 @@ fun SelectSeedPhraseEntryType(
 
                 val languageSelectionText = buildAnnotatedString {
                     withStyle(basicStyle) {
-                        append(
-                            stringResource(
-                                R.string.current_language,
-                                selectedLanguage.displayName()
+                        if (welcomeFlow && userHasOwnPhrase) {
+                            append(
+                                stringResource(
+                                    R.string.current_language_own_phrase,
+                                    selectedLanguage.displayName()
+                                )
                             )
-                        )
+                        } else {
+                            append(
+                                stringResource(
+                                    R.string.current_language,
+                                    selectedLanguage.displayName()
+                                )
+                            )
+                        }
                     }
                     withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
                         append(stringResource(R.string.here))
@@ -168,24 +176,33 @@ fun SelectSeedPhraseEntryType(
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight * 2))
 
-            if (!userHasOwnPhrase) {
-                SelectPhraseCreation(
+            if (!welcomeFlow) {
+                NotInitialPhrase(
                     verticalSpacingHeight = verticalSpacingHeight,
                     screenWidth = screenWidth,
-                    onGenerateEntrySelected = onGenerateEntrySelected,
-                    onUserHasOwnPhrase = {
-                        userHasOwnPhrase = true
-                    }
+                    onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
+                    onPasteEntrySelected = onPasteEntrySelected,
+                    onGenerateEntrySelected = onGenerateEntrySelected
                 )
             } else {
-                UserHasOwnPhrase(
-                    verticalSpacingHeight = verticalSpacingHeight,
-                    screenWidth = screenWidth,
-                    onManualEntrySelected = {
-                        onManualEntrySelected(selectedLanguage)
-                    },
-                    onPasteEntrySelected = onPasteEntrySelected
-                )
+
+                if (!userHasOwnPhrase) {
+                    SelectPhraseCreation(
+                        verticalSpacingHeight = verticalSpacingHeight,
+                        screenWidth = screenWidth,
+                        onGenerateEntrySelected = onGenerateEntrySelected,
+                        onUserHasOwnPhrase = {
+                            userHasOwnPhrase = true
+                        }
+                    )
+                } else {
+                    UserHasOwnPhrase(
+                        verticalSpacingHeight = verticalSpacingHeight,
+                        screenWidth = screenWidth,
+                        onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
+                        onPasteEntrySelected = onPasteEntrySelected
+                    )
+                }
             }
         }
     }
@@ -310,9 +327,107 @@ fun UserHasOwnPhrase(
     Spacer(modifier = Modifier.height(verticalSpacingHeight))
 }
 
+@Composable
+fun NotInitialPhrase(
+    verticalSpacingHeight: Dp, screenWidth: Dp,
+    onManualEntrySelected: () -> Unit,
+    onPasteEntrySelected: () -> Unit,
+    onGenerateEntrySelected: () -> Unit
+) {
+    StandardButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        onClick = {
+            onManualEntrySelected()
+        },
+        contentPadding = PaddingValues(vertical = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.manual_entry_icon),
+                contentDescription = null,
+                tint = SharedColors.ButtonTextBlue
+            )
+            Spacer(modifier = Modifier.width(screenWidth * 0.010f))
+            Text(
+                text = stringResource(R.string.input_seed_phrase),
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+    StandardButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        onClick = onPasteEntrySelected,
+        contentPadding = PaddingValues(vertical = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
+                contentDescription = null,
+                tint = SharedColors.ButtonTextBlue
+            )
+            Spacer(modifier = Modifier.width(screenWidth * 0.010f))
+            Text(
+                text = stringResource(R.string.paste_seed_phrase),
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(verticalSpacingHeight))
+
+    StandardButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        onClick = onGenerateEntrySelected,
+        contentPadding = PaddingValues(vertical = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
+                contentDescription = null,
+                tint = SharedColors.ButtonTextBlue
+            )
+            Spacer(modifier = Modifier.width(screenWidth * 0.020f))
+            Text(
+                text = stringResource(R.string.generate_seed_phrase),
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(verticalSpacingHeight))
+}
+
+
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
 fun LargePreviewEnterPhraseMainScreen() {
+    SelectSeedPhraseEntryType(
+        onManualEntrySelected = {},
+        onPasteEntrySelected = {},
+        onGenerateEntrySelected = {},
+        welcomeFlow = true,
+        currentLanguage = BIP39.WordListLanguage.English,
+    )
+}
+
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
+@Composable
+fun LargePreviewInitialPhraseScreen() {
     SelectSeedPhraseEntryType(
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
