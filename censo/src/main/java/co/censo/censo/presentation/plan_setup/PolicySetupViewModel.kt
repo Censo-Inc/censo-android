@@ -23,7 +23,6 @@ import co.censo.censo.util.confirmed
 import co.censo.censo.util.externalApprovers
 import co.censo.censo.util.notConfirmed
 import co.censo.censo.util.ownerApprover
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -525,7 +524,6 @@ class PolicySetupViewModel @Inject constructor(
     }
 
     private fun triggerReplacePolicy() {
-        projectLog(message = "Triggering navigation to PlanFinalization")
         state = state.copy(replacePolicy = Resource.Success(Unit), policySetupUIState = PolicySetupUIState.Uninitialized_0)
     }
     //endregion

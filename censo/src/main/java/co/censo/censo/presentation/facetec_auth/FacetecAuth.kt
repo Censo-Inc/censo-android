@@ -33,7 +33,6 @@ import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.projectLog
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
 

@@ -21,7 +21,6 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
@@ -69,7 +68,6 @@ class EnterPhraseViewModel @Inject constructor(
                 val ownerState = response.data!!.ownerState
                 ownerStateFlow.emit(Resource.Success(ownerState))
                 if (ownerState is OwnerState.Ready) {
-                    projectLog(message = "Assigning masterKeySig and ownerApproverPartiID to state")
                     state = state.copy(
                         isSavingFirstSeedPhrase = ownerState.vault.seedPhrases.isEmpty(),
                         ownerApproverParticipantId = ownerState.policy.owner?.participantId,
@@ -215,22 +213,18 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun saveSeedPhrase() {
-        projectLog(message = "Checking for masterKeySignature")
         //We only need to verify master key sig if there is one
         val masterKeySignature = state.masterKeySignature
         if (masterKeySignature != null) {
-            projectLog(message = "Triggering key download to verify master key signature")
             //Load the key from the cloud
             triggerKeyDownload()
         } else {
-            projectLog(message = "Storing seed phrase without verifying master key signature")
             storeSeedPhrase(shouldVerifyMasterKeySignature = false)
         }
 
     }
 
     private fun triggerKeyDownload() {
-        projectLog(message = "Triggering key download")
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true, action = CloudStorageActions.DOWNLOAD,
@@ -240,39 +234,31 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     private fun verifyMasterKeySignature() : Boolean {
-        projectLog(message = "Verifying master key signature")
         val ownerPolicy = (ownerStateFlow.value.data as OwnerState.Ready).policy
 
-        projectLog(message = "Grabbing master public key and master key sig from local state")
         val masterPublicKey = state.masterPublicKey
         val masterKeySignature = state.masterKeySignature
 
-        projectLog(message = "null checking master public key + master key sig")
         if (masterKeySignature != null && masterPublicKey != null) {
             val deviceKeyId = keyRepository.retrieveSavedDeviceId()
             val entropy = ownerPolicy.ownerEntropy
-            projectLog(message = "Got entropy and deviceKeyId")
 
             val ownerApproverKeyData = state.keyData
             return if (ownerApproverKeyData != null) {
-                projectLog(message = "Recreating keyData into EncryptionKey")
                 val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(
                     ownerApproverKeyData.encryptedPrivateKey.decryptWithEntropy(
                         deviceKeyId, entropy
                     ).bigInt()
                 )
 
-                projectLog(message = "Verifying master public key against master key sig, with ownerApproverEncryptionKey")
                 ownerApproverEncryptionKey.verify(
                     signedData = (masterPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(false),
                     signature = masterKeySignature.bytes
                 )
             } else {
-                projectLog(message = "owner approver key data null")
                 false
             }
         } else {
-            projectLog(message = "master public key or master key sig is null")
             return false
         }
     }
@@ -283,7 +269,6 @@ class EnterPhraseViewModel @Inject constructor(
         viewModelScope.launch {
 
             if (shouldVerifyMasterKeySignature && !verifyMasterKeySignature()) {
-                projectLog(message = "Master key sig verification failed")
                 state = state.copy(
                     submitResource = Resource.Error(
                         exception = Exception("Unable to verify data, please try again")
@@ -291,12 +276,6 @@ class EnterPhraseViewModel @Inject constructor(
                 )
                 return@launch
             }
-
-            if (shouldVerifyMasterKeySignature) {
-                projectLog(message = "Verified master key sig succesfully")
-            }
-
-            projectLog(message = "Moving forward with storing seed phrase")
 
             val response = ownerRepository.storeSeedPhrase(
                 state.label.trim(),
@@ -491,12 +470,9 @@ class EnterPhraseViewModel @Inject constructor(
 
     //region Cloud Storage
     fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
-        projectLog(message = "Key downloaded successfully")
         resetCloudStorageActionState()
 
-        //TODO: Use a mock here to get entropy from sharedPrefs//Test locally for now
         val entropy = (ownerStateFlow.value.data as OwnerState.Ready).policy.ownerEntropy
-        projectLog(message = "Entropy from ownerState: $entropy")
         val deviceId = keyRepository.retrieveSavedDeviceId()
 
         //TODO: Should wrap in try catch
@@ -508,7 +484,6 @@ class EnterPhraseViewModel @Inject constructor(
                 ).toEncryptionKey().publicExternalRepresentation().value
             )
 
-        projectLog(message = "Setting recreated key data to state")
         state = state.copy(
             keyData = InitialKeyData(
                 encryptedPrivateKey = encryptedKey,
@@ -516,12 +491,10 @@ class EnterPhraseViewModel @Inject constructor(
             )
         )
 
-        projectLog(message = "Recreated key data")
         storeSeedPhrase(shouldVerifyMasterKeySignature = true)
     }
 
     fun onKeyDownloadFailed(exception: Exception?) {
-        projectLog(message = "Key download failed")
         resetCloudStorageActionState()
         state = state.copy(submitResource = Resource.Error(exception = exception))
         exception?.sendError(CrashReportingUtil.CloudDownload)
@@ -530,7 +503,6 @@ class EnterPhraseViewModel @Inject constructor(
 
     //region Reset methods
     private fun resetCloudStorageActionState() {
-        projectLog(message = "Resetting cloud storage action state")
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(),
             loadKeyInProgress = Resource.Uninitialized
