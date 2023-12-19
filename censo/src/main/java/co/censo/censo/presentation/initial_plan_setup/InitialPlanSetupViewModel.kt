@@ -192,6 +192,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                     label = "Me",
                     participantId = state.participantId,
                     status = ApproverStatus.ImplicitlyOwner(
+                        entropy,
                         Base58EncodedApproverPublicKey(publicKey.value),
                         Clock.System.now()
                     )

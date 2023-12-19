@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
+import Base64EncodedData
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse

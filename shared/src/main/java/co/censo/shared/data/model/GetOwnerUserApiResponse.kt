@@ -86,6 +86,7 @@ sealed class ApproverStatus {
     @Serializable
     @SerialName("ImplicitlyOwner")
     data class ImplicitlyOwner(
+        val entropy: Base64EncodedData?,
         val approverPublicKey: Base58EncodedApproverPublicKey,
         val confirmedAt: Instant,
     ) : ApproverStatus()
