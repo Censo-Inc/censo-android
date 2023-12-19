@@ -8,7 +8,6 @@ import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverShard
 import co.censo.shared.data.model.ApproverStatus
-import co.censo.shared.data.model.InitialKeyData
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.math.BigInteger
 import java.security.KeyPair
@@ -81,7 +80,7 @@ class PolicySetupHelper(
                 ).base64Encoded()
             }
 
-
+            val masterPublicKey = masterEncryptionKey.publicExternalRepresentation()
             val masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value)
 
             val decryptedOwnerApproverPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
@@ -89,8 +88,14 @@ class PolicySetupHelper(
                 entropy = entropy
             )
 
-            val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(decryptedOwnerApproverPrivateKey.bigInt())
-            val masterKeySignature = ownerApproverEncryptionKey.sign(masterEncryptionPublicKey.value.toByteArray())
+            val ownerApproverKeyPair = EncryptionKey.generateFromPrivateKeyRaw(decryptedOwnerApproverPrivateKey.bigInt())
+
+            val masterKeySignature = ownerApproverKeyPair.sign(
+                data = (masterEncryptionPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(
+                    false
+                )
+            ).base64Encoded()
+
 
             return PolicySetupHelper(
                 masterEncryptionPublicKey = masterEncryptionPublicKey,
@@ -100,7 +105,7 @@ class PolicySetupHelper(
                 approverShards = approverShards,
                 approverKeysSignatureByIntermediateKey = approverKeysSignatureByIntermediateKey,
                 signatureByPreviousIntermediateKey = signatureByPreviousIntermediateKey,
-                masterKeySignature = Base64EncodedData(masterKeySignature.toString())
+                masterKeySignature = masterKeySignature
             )
         }
 

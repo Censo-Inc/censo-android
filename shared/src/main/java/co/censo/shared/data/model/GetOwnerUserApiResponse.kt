@@ -165,6 +165,7 @@ data class Policy(
     val approverKeysSignatureByIntermediateKey: Base64EncodedData,
 
     val masterKeySignature: Base64EncodedData?,
+    val ownerEntropy: Base64EncodedData,
 
     val owner: Approver.TrustedApprover? =
         approvers.firstOrNull { it.isOwner }

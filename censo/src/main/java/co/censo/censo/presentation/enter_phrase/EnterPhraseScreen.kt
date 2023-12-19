@@ -39,7 +39,10 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
+import co.censo.censo.presentation.plan_finalization.ReplacePolicyAction
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
@@ -279,6 +282,23 @@ fun EnterPhraseScreen(
                     }
                 }
             }
+        }
+    }
+
+    if (state.cloudStorageAction.triggerAction && state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
+        val participantId = state.ownerApproverParticipantId
+        if (participantId != null) {
+            CloudStorageHandler(
+                actionToPerform = state.cloudStorageAction.action,
+                participantId = participantId,
+                encryptedPrivateKey = null,
+                onActionSuccess = { viewModel.onKeyDownloadSuccess(it) },
+                onActionFailed = { viewModel.onKeyDownloadFailed(it) }
+            )
+        } else {
+            viewModel.onKeyDownloadFailed(
+                exception = Exception("Unable to load key data, missing participant id")
+            )
         }
     }
 }

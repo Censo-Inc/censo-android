@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.enter_phrase
 
+import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,9 +8,17 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.decryptWithEntropy
+import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.networking.PushBody
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
+import co.censo.shared.data.repository.PushRepositoryImpl
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
@@ -24,6 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EnterPhraseViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val pushRepository: PushRepository,
     ) : ViewModel() {
@@ -53,8 +63,14 @@ class EnterPhraseViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 val ownerState = response.data!!.ownerState
+                ownerStateFlow.emit(Resource.Success(ownerState))
                 if (ownerState is OwnerState.Ready) {
-                    state = state.copy(isSavingFirstSeedPhrase = ownerState.vault.seedPhrases.isEmpty())
+                    projectLog(message = "Assigning masterKeySig and ownerApproverPartiID to state")
+                    state = state.copy(
+                        isSavingFirstSeedPhrase = ownerState.vault.seedPhrases.isEmpty(),
+                        ownerApproverParticipantId = ownerState.policy.owner?.participantId,
+                        masterKeySignature = ownerState.policy.masterKeySignature
+                    )
                 }
             }
         }
@@ -195,9 +211,86 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun saveSeedPhrase() {
+        projectLog(message = "Checking for masterKeySignature")
+        //We only need to verify master key sig if there is one
+        val masterKeySignature = state.masterKeySignature
+        if (masterKeySignature != null) {
+            projectLog(message = "Triggering key download to verify master key signature")
+            //Load the key from the cloud
+            triggerKeyDownload()
+        } else {
+            projectLog(message = "Storing seed phrase without verifying master key signature")
+            storeSeedPhrase(shouldVerifyMasterKeySignature = false)
+        }
+
+    }
+
+    private fun triggerKeyDownload() {
+        projectLog(message = "Triggering key download")
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(
+                triggerAction = true, action = CloudStorageActions.DOWNLOAD,
+            ),
+            loadKeyInProgress = Resource.Loading()
+        )
+    }
+
+    private fun verifyMasterKeySignature() : Boolean {
+        projectLog(message = "Verifying master key signature")
+        val ownerPolicy = (ownerStateFlow.value.data as OwnerState.Ready).policy
+
+        projectLog(message = "Grabbing master public key and master key sig from local state")
+        val masterPublicKey = state.masterPublicKey
+        val masterKeySignature = state.masterKeySignature
+
+        projectLog(message = "null checking master public key + master key sig")
+        if (masterKeySignature != null && masterPublicKey != null) {
+            val deviceKeyId = keyRepository.retrieveSavedDeviceId()
+            val entropy = ownerPolicy.ownerEntropy
+            projectLog(message = "Got entropy and deviceKeyId")
+
+            val ownerApproverKeyData = state.keyData
+            return if (ownerApproverKeyData != null) {
+                projectLog(message = "Recreating keyData into EncryptionKey")
+                val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(
+                    ownerApproverKeyData.encryptedPrivateKey.decryptWithEntropy(
+                        deviceKeyId, entropy
+                    ).bigInt()
+                )
+
+                projectLog(message = "Verifying master public key against master key sig, with ownerApproverEncryptionKey")
+                ownerApproverEncryptionKey.verify(masterPublicKey.value.toByteArray(), masterKeySignature.bytes)
+            } else {
+                projectLog(message = "owner approver key data null")
+                false
+            }
+        } else {
+            projectLog(message = "master public key or master key sig is null")
+            return false
+        }
+    }
+
+    private fun storeSeedPhrase(shouldVerifyMasterKeySignature: Boolean) {
         state = state.copy(submitResource = Resource.Loading())
 
         viewModelScope.launch {
+
+            if (shouldVerifyMasterKeySignature && !verifyMasterKeySignature()) {
+                projectLog(message = "Master key sig verification failed")
+                state = state.copy(
+                    submitResource = Resource.Error(
+                        exception = Exception("Unable to verify data, please try again")
+                    )
+                )
+                return@launch
+            }
+
+            if (shouldVerifyMasterKeySignature) {
+                projectLog(message = "Verified master key sig succesfully")
+            }
+
+            projectLog(message = "Moving forward with storing seed phrase")
+
             val response = ownerRepository.storeSeedPhrase(
                 state.label.trim(),
                 state.encryptedSeedPhrase!!
@@ -388,4 +481,54 @@ class EnterPhraseViewModel @Inject constructor(
     fun removeInvalidPhraseDialog() {
         state = state.copy(showInvalidPhraseDialog = Resource.Uninitialized)
     }
+
+    //region Cloud Storage
+    fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
+        projectLog(message = "Key downloaded successfully")
+        resetCloudStorageActionState()
+
+        //TODO: Use a mock here to get entropy from sharedPrefs//Test locally for now
+        val entropy = (ownerStateFlow.value.data as OwnerState.Ready).policy.ownerEntropy
+        projectLog(message = "Entropy from ownerState: $entropy")
+        val deviceId = keyRepository.retrieveSavedDeviceId()
+
+        //TODO: Should wrap in try catch
+        val publicKey =
+            Base58EncodedApproverPublicKey(
+                encryptedKey.decryptWithEntropy(
+                    deviceKeyId = deviceId,
+                    entropy = entropy
+                ).toEncryptionKey().publicExternalRepresentation().value
+            )
+
+        projectLog(message = "Setting recreated key data to state")
+        state = state.copy(
+            keyData = InitialKeyData(
+                encryptedPrivateKey = encryptedKey,
+                publicKey = publicKey
+            )
+        )
+
+        projectLog(message = "Recreated key data")
+        storeSeedPhrase(shouldVerifyMasterKeySignature = true)
+    }
+
+    fun onKeyDownloadFailed(exception: Exception?) {
+        projectLog(message = "Key download failed")
+        resetCloudStorageActionState()
+        state = state.copy(submitResource = Resource.Error(exception = exception))
+        exception?.sendError(CrashReportingUtil.CloudDownload)
+    }
+    //endregion
+
+    //region Reset methods
+    private fun resetCloudStorageActionState() {
+        projectLog(message = "Resetting cloud storage action state")
+        state = state.copy(
+            cloudStorageAction = CloudStorageActionData(),
+            loadKeyInProgress = Resource.Uninitialized
+        )
+    }
+    //endregion
+
 }
