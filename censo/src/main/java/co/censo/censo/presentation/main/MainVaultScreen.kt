@@ -274,6 +274,7 @@ fun MainVaultScreen(
                                 onLock = viewModel::lock,
                                 onDeleteUser = viewModel::showDeleteUserDialog,
                                 onSignOut = viewModel::signOut,
+                                showRemoveApproverButton = (state.ownerState?.policy?.approvers?.size ?: 1) > 1,
                                 onRemoveApprover = {
                                     navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.ReplacePolicy))
                                 }
