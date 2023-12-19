@@ -21,6 +21,8 @@ object SharedColors {
     private val LightBlue = Color(0xFFd7f1f2)
     private val GreyBackground = Color(0xFFEBF5F6)
 
+    val ApproverAppIcon = SkyBlue
+
     val ButtonBackgroundBlue = DarkBlue
     val DisabledButtonBackgroundBlue = ButtonBackgroundBlue.copy(alpha = 0.25f)
     val ButtonTextBlue = SkyBlue

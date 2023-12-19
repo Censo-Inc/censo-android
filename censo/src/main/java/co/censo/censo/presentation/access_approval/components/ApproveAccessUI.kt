@@ -1,9 +1,9 @@
 package co.censo.censo.presentation.access_approval.components
 
 import ApprovalId
-import MessageText
 import TitleText
 import android.content.Intent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,13 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -89,14 +90,6 @@ fun ApproveAccessUI(
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            message = R.string.you_must_do_two_things,
-            textAlign = TextAlign.Center,
-        )
-
         Spacer(modifier = Modifier.height(24.dp))
 
         val firstStepContentSpan = buildAnnotatedString {
@@ -114,23 +107,34 @@ fun ApproveAccessUI(
         }
 
         ApproverStep(
-            imagePainter = painterResource(id = co.censo.shared.R.drawable.share_link),
-            heading = stringResource(R.string.share_this_link_request_access),
-            content = firstStepContentSpan,
-            stringAnnotationTag = linkTag,
-            onShareLink = { shareLink(deeplink) },
-        )
+            heading = stringResource(id = R.string.share_this_link_title),
+            content = stringResource(R.string.share_link_access_message, approverName),
+            onClick = { shareLink(storesLink) }
+        ) {
+            Image(
+                modifier = Modifier.size(44.dp),
+                painter = painterResource(id = R.drawable.censo_login_logo),
+                contentDescription = null
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         ApproverStep(
-            imagePainter = painterResource(id = co.censo.shared.R.drawable.phrase_entry),
-            heading = stringResource(R.string.enter_the_code_request_access_step),
+            heading = stringResource(id = R.string.enter_the_code_title),
             content = stringResource(
-                R.string.have_read_aloud_the_6_digit_code_from_the_censo_approver_app_and_enter_it_below,
-                approverName
+                R.string.enter_code_access_message,
+                approverName,
             ),
-        )
+            includeLine = false
+        ) {
+            Image(
+                modifier = Modifier.size(44.dp),
+                painter = painterResource(id = co.censo.shared.R.drawable.phonewaveform),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
+            )
+        }
 
         if (approval.status == ApprovalStatus.Initial) {
             Spacer(modifier = Modifier.height(24.dp))
