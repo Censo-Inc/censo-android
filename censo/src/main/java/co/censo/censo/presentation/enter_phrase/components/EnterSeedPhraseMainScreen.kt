@@ -141,12 +141,21 @@ fun SelectSeedPhraseEntryType(
 
                 val languageSelectionText = buildAnnotatedString {
                     withStyle(basicStyle) {
-                        append(
-                            stringResource(
-                                R.string.current_language,
-                                selectedLanguage.displayName()
+                        if (welcomeFlow && userHasOwnPhrase) {
+                            append(
+                                stringResource(
+                                    R.string.current_language_own_phrase,
+                                    selectedLanguage.displayName()
+                                )
                             )
-                        )
+                        } else {
+                            append(
+                                stringResource(
+                                    R.string.current_language,
+                                    selectedLanguage.displayName()
+                                )
+                            )
+                        }
                     }
                     withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
                         append(stringResource(R.string.here))

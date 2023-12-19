@@ -354,6 +354,7 @@
     <string name="delete_word">Delete word</string>
     <string name="are_you_sure_you_want_to_delete_this_word">Are you sure you want to delete this word?</string>
     <string name="current_language">"For seed phrase input/generation, the current language is %1$s. You may change it "</string>
+    <string name="current_language_own_phrase">"For seed phrase input, the current language is %1$s. You may change it "</string>
     <string name="here">here</string>
     <string name="seed_phrase_saved_language">"By default, your seed phrase is displayed in the language it was saved. You may select a different display language "</string>
     <string name="re_sync_drive_access">Re-sync Drive Access</string>
