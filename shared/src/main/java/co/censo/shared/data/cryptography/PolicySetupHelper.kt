@@ -8,7 +8,6 @@ import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverShard
 import co.censo.shared.data.model.ApproverStatus
-import co.censo.shared.data.model.InitialKeyData
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.math.BigInteger
 import java.security.KeyPair
