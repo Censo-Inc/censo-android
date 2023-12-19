@@ -85,7 +85,7 @@
     <string name="FaceTec_presession_conditions_too_bright">Conditions too bright</string>
     <string name="FaceTec_presession_brighten_your_environment">Brighten your environment</string>
 
-    <string name="FaceTec_result_facescan_upload_message">Uploading\nencrypted\n3D face scan</string>
+    <string name="FaceTec_result_facescan_upload_message">Uploading\nanonymous\nface scan</string>
     <string name="FaceTec_result_success_message">Authenticated</string>
     <string name="FaceTec_result_idscan_upload_message">Uploading\nencrypted\nID scan</string>
     <string name="FaceTec_result_nfc_upload_message">Uploading\nencrypted\nNFC details</string>
