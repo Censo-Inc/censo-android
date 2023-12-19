@@ -14,3 +14,11 @@ val ButtonTextStyle = TextStyle(
 )
 
 val DisabledButtonTextStyle = ButtonTextStyle.copy(color = Color.White)
+
+val InvertedButtonTextStyle = TextStyle(
+    fontSize = 18.sp,
+    fontWeight = FontWeight(600),
+    color = SharedColors.ButtonBackgroundBlue,
+    textAlign = TextAlign.Center,
+    background = SharedColors.ButtonTextBlue
+)

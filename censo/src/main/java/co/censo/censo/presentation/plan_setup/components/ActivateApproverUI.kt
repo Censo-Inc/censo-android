@@ -299,7 +299,7 @@ fun activatedUIData(approverStatus: ApproverStatus?, context: Context) =
 
         is ApproverStatus.Confirmed -> {
             ApproverActivatedUIData(
-                text = context.getString(R.string.active),
+                text = context.getString(R.string.verified),
                 color = SharedColors.SuccessGreen
             )
         }

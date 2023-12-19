@@ -112,7 +112,7 @@ fun VaultHomeScreen(
 
         val ownerOnly = approvers.size <= 1
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(100.dp))
 
         Text(
             modifier = Modifier.fillMaxWidth(),
