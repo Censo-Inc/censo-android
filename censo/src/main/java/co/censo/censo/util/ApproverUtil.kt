@@ -42,10 +42,10 @@ fun Approver.ProspectApprover.asOwnerAsApprover(): Approver.SetupApprover.OwnerA
 }
 //endregion
 
-fun Approver.ProspectApprover.getEntropyFromImplicitOwnerApprover() : Base64EncodedData? {
+fun Approver.ProspectApprover.getEntropyFromImplicitOwnerApprover(): Base64EncodedData? {
     return try {
-        val implicitOwner = this.status as ApproverStatus.ImplicitlyOwner
-        implicitOwner.entropy
+        val implicitOwner = this.status as? ApproverStatus.ImplicitlyOwner
+        return implicitOwner?.entropy ?: (this.status as? ApproverStatus.OwnerAsApprover)?.entropy
     } catch (e: Exception) {
         null
     }

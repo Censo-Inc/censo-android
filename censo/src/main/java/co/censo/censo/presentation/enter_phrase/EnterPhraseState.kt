@@ -3,7 +3,6 @@ package co.censo.censo.presentation.enter_phrase
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import ParticipantId
-import co.censo.censo.presentation.plan_finalization.ReplacePolicyKeyData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitialKeyData
@@ -39,7 +38,6 @@ data class EnterPhraseState(
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
     val isSavingFirstSeedPhrase: Boolean = false,
-    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized,
 
     // Cloud Storage

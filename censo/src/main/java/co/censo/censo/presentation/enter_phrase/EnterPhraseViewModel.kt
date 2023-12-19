@@ -12,25 +12,21 @@ import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.networking.PushBody
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
-import co.censo.shared.data.repository.PushRepositoryImpl
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
 import java.lang.Integer.min
-import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,7 +34,6 @@ class EnterPhraseViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
-    private val pushRepository: PushRepository,
     ) : ViewModel() {
 
     var state by mutableStateOf(EnterPhraseState())
@@ -239,10 +234,10 @@ class EnterPhraseViewModel @Inject constructor(
 
             val masterPublicKey = state.masterPublicKey
             val masterKeySignature = state.masterKeySignature
+            val entropy = ownerPolicy.ownerEntropy
 
-            if (masterKeySignature != null && masterPublicKey != null) {
+            if (masterKeySignature != null && masterPublicKey != null && entropy != null) {
                 val deviceKeyId = keyRepository.retrieveSavedDeviceId()
-                val entropy = ownerPolicy.ownerEntropy
 
                 val ownerApproverKeyData = state.keyData
                 return if (ownerApproverKeyData != null) {
@@ -387,11 +382,6 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
-
-    fun setUserSeenPushDialog(seenDialog: Boolean) =
-        pushRepository.setUserSeenPushDialog(seenDialog)
-
     fun finishPhraseEntry() {
         state = if (state.isSavingFirstSeedPhrase) {
             state.copy(enterWordUIState = EnterPhraseUIState.NOTIFICATIONS)
@@ -481,6 +471,14 @@ class EnterPhraseViewModel @Inject constructor(
 
         try {
             val entropy = (ownerStateFlow.value.data as OwnerState.Ready).policy.ownerEntropy
+
+            if (entropy == null) {
+                val exception = Exception("Missing data to access key")
+                exception.sendError(CrashReportingUtil.CloudDownload)
+                state = state.copy(submitResource = Resource.Error(exception = exception))
+                return
+            }
+
             val deviceId = keyRepository.retrieveSavedDeviceId()
 
             val publicKey =

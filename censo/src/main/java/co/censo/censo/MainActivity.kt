@@ -1,8 +1,6 @@
 package co.censo.censo
 
-import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
-import Base64EncodedData
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
@@ -42,15 +40,9 @@ import co.censo.censo.presentation.plan_finalization.ReplacePolicyScreen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
-import co.censo.shared.data.cryptography.decryptWithEntropy
-import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AccessIntent
-import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.novacrypto.base58.Base58
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
-import java.util.Base64
 import javax.inject.Inject
 
 @AndroidEntryPoint
