@@ -372,4 +372,5 @@
     <string name="approvers_activation_progress_made_so_far_will_be_lost">Approvers activation progress made so far will be lost.</string>
     <string name="secure_all_your_seed_phrases_for_only_1_99_month">Secure all your seed\nphrases for\n%1$s\n\nTry for free,\ncancel anytime</string>
     <string name="restore_purchases">Restore Purchases</string>
+    <string name="your_subscription_was_paused">Don\'t worry, we won\'t delete any of your data as long as you are still subscribed.</string>
 </resources>
