@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
 import co.censo.approver.presentation.components.PasteLink
+import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun LoggedInPasteLinkUI(
@@ -56,13 +57,14 @@ fun LoggedInPasteLinkUI(
                     painterResource(
                         id = R.drawable.active_approvers_icon
                     ),
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = SharedColors.MainIconColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(R.string.active_approver),
                     fontSize = 14.sp,
-                    color = Color.Black,
+                    color = SharedColors.MainColorText,
                     fontWeight = FontWeight.W500
                 )
                 Spacer(modifier = Modifier.height(24.dp))

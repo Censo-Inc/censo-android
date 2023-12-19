@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import co.censo.shared.R
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 
 @Composable
@@ -81,7 +82,8 @@ fun DisplayError(
                     Icon(
                         modifier = Modifier.size(44.dp),
                         imageVector = Icons.Default.Close,
-                        contentDescription = "dismiss error alert"
+                        contentDescription = "dismiss error alert",
+                        tint = SharedColors.MainIconColor
                     )
                 }
             } ?: Spacer(modifier = Modifier.height(24.dp))
@@ -100,7 +102,7 @@ fun DisplayError(
                     .fillMaxWidth()
                     .padding(16.dp),
                 text = errorMessage,
-                color = Color.Black,
+                color = SharedColors.MainColorText,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center
             )
@@ -119,8 +121,7 @@ fun DisplayError(
                     ) {
                         Text(
                             text = stringResource(R.string.retry),
-                            color = Color.White,
-                            fontSize = 20.sp
+                            style = ButtonTextStyle
                         )
                     }
                 }

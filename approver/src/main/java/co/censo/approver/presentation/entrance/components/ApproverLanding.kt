@@ -33,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.LinksUtil
 
 @Composable
@@ -52,7 +54,11 @@ fun ApproverLanding(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text(text = stringResource(R.string.hello_approver), fontSize = 38.sp)
+        Text(
+            text = stringResource(R.string.hello_approver),
+            fontSize = 38.sp,
+            color = SharedColors.MainColorText
+        )
 
         Spacer(modifier = Modifier.height(48.dp))
 
@@ -65,21 +71,19 @@ fun ApproverLanding(
             text = message,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
+            color = SharedColors.MainColorText
         )
 
         Spacer(modifier = Modifier.height(48.dp))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             contentPadding = PaddingValues(vertical = 14.dp),
             onClick = onContinue
         ) {
             Text(
                 text = stringResource(id = R.string.continue_text),
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.W400
+                style = ButtonTextStyle.copy(fontSize = 24.sp)
             )
         }
 
@@ -90,19 +94,27 @@ fun ApproverLanding(
             val preceding = stringResource(R.string.interested_in_using_censo_span)
             val remaining = stringResource(R.string.to_download_the_censo_app_span)
 
+            val basicStyle = SpanStyle(
+                color = SharedColors.MainColorText
+            )
+
             val builtText = buildAnnotatedString {
-                append("$preceding ")
+                withStyle(basicStyle) {
+                    append("$preceding ")
+                }
 
                 pushStringAnnotation(
                     tag = linkTag,
                     annotation = LinksUtil.CENSO_WEB_LINK
                 )
-                withStyle(style = SpanStyle(fontWeight = FontWeight.W600)) {
+                withStyle(style = basicStyle.copy(fontWeight = FontWeight.W600)) {
                     append(stringResource(R.string.this_link))
                 }
                 pop()
 
-                append(" $remaining")
+                withStyle(basicStyle) {
+                    append(" $remaining")
+                }
             }
 
             ClickableText(
@@ -139,13 +151,14 @@ fun ApproverLanding(
                     painterResource(
                         id = R.drawable.active_approvers_icon
                     ), contentDescription = null,
-                    modifier = Modifier.size(44.dp)
+                    modifier = Modifier.size(44.dp),
+                    tint = SharedColors.MainIconColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(id = R.string.active_approver),
                     fontSize = 16.sp,
-                    color = Color.Black,
+                    color = SharedColors.MainColorText,
                     fontWeight = FontWeight.W500
                 )
                 Spacer(modifier = Modifier.height(36.dp))
@@ -154,7 +167,7 @@ fun ApproverLanding(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun ApproverLandingScreenPreview() {
     ApproverLanding(

@@ -38,7 +38,7 @@ import co.censo.shared.presentation.SharedColors
 fun LargeTotpCodeView(
     code: String,
     secondsLeft: Int,
-    primaryColor: Color
+    primaryColor: Color = SharedColors.MainColorText
 ) {
     val countdownSeconds = CODE_EXPIRATION - secondsLeft
     val formattedCode = if (code.length == CODE_LENGTH) {
@@ -77,7 +77,7 @@ fun LargeTotpCodeView(
 fun TotpCodeView(
     code: String,
     secondsLeft: Int,
-    primaryColor: Color
+    primaryColor: Color = SharedColors.MainColorText
 ) {
 
     val countdownSeconds = CODE_EXPIRATION - secondsLeft
@@ -163,7 +163,6 @@ fun TotpCodePreview() {
         TotpCodeView(
             code = "123456",
             secondsLeft = 24,
-            primaryColor = SharedColors.SuccessGreen
         )
     }
 }
@@ -183,7 +182,6 @@ fun LargeTotp() {
         LargeTotpCodeView(
             code = "123456",
             secondsLeft = 44,
-            primaryColor = Color.White
         )
     }
 }

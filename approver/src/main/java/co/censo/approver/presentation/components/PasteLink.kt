@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import co.censo.approver.R as ApproverR
 
 @Composable
@@ -50,7 +53,8 @@ fun PasteLink(
 
         Image(
             painter = painterResource(id = ApproverR.drawable.main_export_link),
-            contentDescription = null
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
         )
 
         Spacer(modifier = Modifier.height(verticalSpacingBetweenItems))
@@ -81,15 +85,12 @@ fun PasteLink(
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
-            color = Color.Black,
             contentPadding = PaddingValues(vertical = 12.dp),
             onClick = onPasteLinkClick,
         ) {
             Text(
                 text = stringResource(ApproverR.string.paste_link),
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-                fontSize = 24.sp,
+                style = ButtonTextStyle.copy(fontSize = 22.sp)
             )
         }
     }

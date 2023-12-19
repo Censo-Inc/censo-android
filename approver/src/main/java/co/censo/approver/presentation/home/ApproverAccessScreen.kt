@@ -36,6 +36,7 @@ import co.censo.approver.presentation.components.OwnerCodeVerification
 import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
@@ -88,7 +89,7 @@ fun ApproverAccessScreen(
             when {
                 state.loading -> {
                     LargeLoading(
-                        color = Color.Black,
+                        color = SharedColors.DefaultLoadingColor,
                         fullscreen = true
                     )
                 }
@@ -220,7 +221,7 @@ fun ApproverAccessScreen(
 
         if (state.loadKeyFromCloudResource is Resource.Loading) {
             LargeLoading(
-                color = Color.Black,
+                color = SharedColors.DefaultLoadingColor,
                 fullscreen = true,
                 fullscreenBackgroundColor = Color.White
             )

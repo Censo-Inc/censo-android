@@ -10,8 +10,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import co.censo.approver.R
 import co.censo.approver.presentation.ApproverColors
+import co.censo.shared.presentation.SharedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +33,8 @@ fun ApproverTopBar(
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Close,
-                    stringResource(R.string.close),
+                    contentDescription = stringResource(R.string.close),
+                    tint = SharedColors.MainIconColor
                 )
             }
         },
@@ -39,4 +42,12 @@ fun ApproverTopBar(
             // Titles are part of the screen content
         },
     )
+}
+
+@Preview
+@Composable
+fun PreviewTopBar() {
+    ApproverTopBar {
+
+    }
 }
