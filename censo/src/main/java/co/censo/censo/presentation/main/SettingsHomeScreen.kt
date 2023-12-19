@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -114,13 +115,10 @@ fun SettingsItem(
     onSelected: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(all = 24.dp),
+        modifier = Modifier.fillMaxWidth().padding(all = 24.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -129,19 +127,20 @@ fun SettingsItem(
                 fontSize = 24.sp,
                 modifier = Modifier.weight(1.0f)
             )
-            Spacer(Modifier.weight(0.05f))
+            Spacer(Modifier.weight(0.025f))
             StandardButton(
+                modifier = Modifier.weight(0.5f).fillMaxWidth(),
                 color = SharedColors.ButtonTextBlue,
-                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(vertical = 6.dp, horizontal = 2.dp),
                 onClick = {
                     onSelected()
                 },
-                modifier = Modifier.weight(0.5f)
             ) {
                 Text(
                     text = buttonText,
                     style = InvertedButtonTextStyle,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
