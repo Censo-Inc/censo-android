@@ -1,14 +1,19 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
+import Base64EncodedData
+import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
+import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.repository.EncryptedSeedPhrase
+import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.BIP39InvalidReason
 
 data class EnterPhraseState(
     val masterPublicKey: Base58EncodedMasterPublicKey? = null,
+    val masterKeySignature: Base64EncodedData? = null,
     val enteredWords: List<String> = emptyList(),
     val editedWord: String = "",
     val editedWordIndex: Int = 0,
@@ -33,7 +38,14 @@ data class EnterPhraseState(
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
     val isSavingFirstSeedPhrase: Boolean = false,
-    val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized
+    val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized,
+
+    // Cloud Storage
+    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
+    val loadKeyInProgress: Resource<Unit> = Resource.Uninitialized,
+    val ownerApproverParticipantId: ParticipantId? = null,
+
+    val keyData: InitialKeyData? = null,
 ) {
 
     companion object {
@@ -44,6 +56,7 @@ data class EnterPhraseState(
     val loading = submitResource is Resource.Loading
             || userResource is Resource.Loading
             || phraseEncryptionInProgress
+            || loadKeyInProgress is Resource.Loading
 
     val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH
     val labelValid = label.isNotEmpty() && !labelIsTooLong

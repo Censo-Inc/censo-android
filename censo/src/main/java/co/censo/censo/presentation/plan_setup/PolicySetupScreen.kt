@@ -30,7 +30,6 @@ import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
-import co.censo.shared.util.projectLog
 
 enum class PolicySetupAction(val threshold: UInt) {
     AddApprovers(2U), RemoveApprovers(1U)
@@ -74,7 +73,6 @@ fun PolicySetupScreen(
                 )
             }
 
-            projectLog(message = "Navigating with route: $route")
             navController.navigate(route) {
                 popUpTo(popUpToRoute) {
                     inclusive = true

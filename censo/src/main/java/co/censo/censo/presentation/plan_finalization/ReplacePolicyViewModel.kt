@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,6 +22,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.util.confirmed
 import co.censo.censo.util.externalApprovers
+import co.censo.censo.util.getEntropyFromImplicitOwnerApprover
 import co.censo.censo.util.notConfirmed
 import co.censo.censo.util.ownerApprover
 import co.censo.shared.data.cryptography.decryptWithEntropy
@@ -29,7 +31,6 @@ import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -84,14 +85,11 @@ class ReplacePolicyViewModel @Inject constructor(
 
     //region Events
     fun onCreate(policySetupAction: PolicySetupAction) {
-        projectLog(message = "onCreate of PlanFinalization running")
         state = state.copy(policySetupAction = policySetupAction)
 
         viewModelScope.launch {
-            projectLog(message = "Getting owner state from global")
             val ownerState = ownerStateFlow.value
             if (ownerState is Resource.Success) {
-                projectLog(message = "Updating local owner state from global")
                 updateOwnerState(ownerState.data!!, nextAction = {
                     checkUserHasSavedKeyAndSubmittedPolicy()
                 })
@@ -110,7 +108,6 @@ class ReplacePolicyViewModel @Inject constructor(
 
             //Retry
             ReplacePolicyAction.Retry -> retrieveOwnerState(silent = false, nextAction = {
-                projectLog(message = "After user hit retry and owner state retrieved, running next action: checkUserHasSavedKeyAndSubmittedPolicy")
                 checkUserHasSavedKeyAndSubmittedPolicy()
             })
 
@@ -199,21 +196,17 @@ class ReplacePolicyViewModel @Inject constructor(
     }
 
     private fun saveKeyWithEntropy() {
-        projectLog(message = "saveKeyWithEntropy running")
         try {
             state = state.copy(saveKeyToCloud = Resource.Loading())
-            projectLog(message = "saveKeyWithEntropy creating approverEncryptionKey")
             val approverEncryptionKey = keyRepository.createApproverKey()
 
             val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
             val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
 
-            projectLog(message = "saveKeyWithEntropy getting entropy")
             val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy!!
 
             val idToken = keyRepository.retrieveSavedDeviceId()
 
-            projectLog(message = "saveKeyWithEntropy creating encryptedKey")
             val encryptedKey = approverEncryptionKey.encryptWithEntropy(
                 deviceKeyId = idToken,
                 entropy = entropy
@@ -223,12 +216,10 @@ class ReplacePolicyViewModel @Inject constructor(
                 approverEncryptionKey.publicExternalRepresentation().value
             )
 
-            projectLog(message = "saveKeyWithEntropy creating KeyData")
             val keyData = ReplacePolicyKeyData(
                 encryptedPrivateKey = encryptedKey,
                 publicKey = publicKey
             )
-            projectLog(message = "saveKeyWithEntropy triggering key upload")
             state = state.copy(
                 keyData = keyData,
                 cloudStorageAction = CloudStorageActionData(
@@ -237,14 +228,12 @@ class ReplacePolicyViewModel @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            projectLog(message = "saveKeyWithEntropy exception caught: $e")
             state = state.copy(saveKeyToCloud = Resource.Error(exception = e))
         }
     }
 
 
     private fun completeApproverOwnership() {
-        projectLog(message = "Starting complete approver ownership")
         state = state.copy(completeApprovershipResponse = Resource.Loading())
 
         viewModelScope.launch {
@@ -266,8 +255,6 @@ class ReplacePolicyViewModel @Inject constructor(
 
             if (completeApprovershipResponse is Resource.Success) {
                 updateOwnerState(completeApprovershipResponse.data!!.ownerState)
-                projectLog(message = "Complete approvership success")
-                projectLog(message = "Starting initiate access")
                 initiateAccess()
             }
 
@@ -278,40 +265,34 @@ class ReplacePolicyViewModel @Inject constructor(
     }
 
     private fun checkUserHasSavedKeyAndSubmittedPolicy() {
-        projectLog(message = "Checking user has saved key and submitted policy")
         val owner = state.ownerApprover
 
         if (owner == null) {
-            projectLog(message = "owner data null")
             retrieveOwnerState()
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-
-            if (owner.status is ApproverStatus.ImplicitlyOwner) {
-                projectLog(message = "Owner status is ImplicitlyOwner")
-                initiateAccess()
-                return@launch
-            }
-
+            //Check that the user has a key in local state or in the cloud before moving forward
             val loadedKey =
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
             if (!loadedKey) {
-                projectLog(message = "No key in state")
                 if (keyRepository.userHasKeySavedInCloud(owner.participantId)) {
-                    projectLog(message = "user has key saved, triggering load key")
                     state = state.copy(
                         cloudStorageAction = CloudStorageActionData(
                             triggerAction = true, action = CloudStorageActions.DOWNLOAD
                         ),
                     )
                 } else {
-                    projectLog(message = "Creating key with entropy for saving")
                     saveKeyWithEntropy()
                 }
 
+                return@launch
+            }
+
+            if (owner.status is ApproverStatus.ImplicitlyOwner) {
+                initiateAccess()
                 return@launch
             }
 
@@ -320,7 +301,6 @@ class ReplacePolicyViewModel @Inject constructor(
     }
 
     private fun initiateAccess() {
-        projectLog(message = "Initiating access")
         viewModelScope.launch {
             if (state.policySetupAction == PolicySetupAction.AddApprovers) {
                 state = state.copy(initiateAccessResponse = Resource.Loading())
@@ -336,7 +316,6 @@ class ReplacePolicyViewModel @Inject constructor(
 
 
                 if (initiateAccessResponse is Resource.Success) {
-                    projectLog(message = "Setting facetec view state")
                     // navigate to the facetec view
                     state = state.copy(replacePolicyUIState = ReplacePolicyUIState.AccessInProgress_2)
 
@@ -345,14 +324,12 @@ class ReplacePolicyViewModel @Inject constructor(
 
                 state = state.copy(initiateAccessResponse = initiateAccessResponse)
             } else {
-                projectLog(message = "Setting facetec view state")
                 state = state.copy(replacePolicyUIState = ReplacePolicyUIState.AccessInProgress_2)
             }
         }
     }
 
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
-        projectLog(message = "replacePolicy running")
         state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
 
         try {
@@ -360,14 +337,31 @@ class ReplacePolicyViewModel @Inject constructor(
             if (state.ownerState!!.policySetup!!.approvers.any {
                     !ownerRepository.verifyKeyConfirmationSignature(it)
                 }) {
-                projectLog(message = "replacePolicy key confirmation signature false")
                 state = state.copy(verifyKeyConfirmationSignature = Resource.Error())
                 return
             }
 
-            state = state.copy(replacePolicyResponse = Resource.Loading())
+            state = state.copy(
+                replacePolicyResponse = Resource.Loading(),
+                verifyKeyConfirmationSignature = Resource.Uninitialized
+            )
 
             viewModelScope.launch(Dispatchers.IO) {
+
+                val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
+                val entropy = approverSetup.ownerApprover()?.getEntropyFromImplicitOwnerApprover()
+
+                val ownerApproverKeyData = state.keyData
+                val deviceKeyId = keyRepository.retrieveSavedDeviceId()
+
+                if (entropy == null || ownerApproverKeyData == null) {
+                    state = state.copy(
+                        replacePolicyResponse =
+                        Resource.Error(exception = Exception("Unable to setup data for secure storage"))
+                    )
+                    return@launch
+                }
+
                 val response = try {
                     ownerRepository.replacePolicy(
                         encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards,
@@ -377,10 +371,12 @@ class ReplacePolicyViewModel @Inject constructor(
                             state.ownerApprover,
                             state.primaryApprover,
                             state.alternateApprover
-                        )
+                        ),
+                        ownerApproverEncryptedPrivateKey = ownerApproverKeyData.encryptedPrivateKey,
+                        entropy = entropy,
+                        deviceKeyId = deviceKeyId,
                     )
                 } catch (e: Exception) {
-                    projectLog(message = "replacePolicy call failed")
                     e.sendError(CrashReportingUtil.CloudDownload)
                     state = state.copy(replacePolicyResponse = Resource.Error(exception = e))
                     return@launch
@@ -389,9 +385,7 @@ class ReplacePolicyViewModel @Inject constructor(
                 state = state.copy(replacePolicyResponse = response)
 
                 if (response is Resource.Success) {
-                    projectLog(message = "replacePolicy call success")
                     updateOwnerState(response.data!!.ownerState)
-                    projectLog(message = "replacePolicy setting complete UI state")
                     state = state.copy(replacePolicyUIState = ReplacePolicyUIState.Completed_3)
                 }
             }
@@ -402,7 +396,6 @@ class ReplacePolicyViewModel @Inject constructor(
     }
 
     private fun onFacetecCancelled() {
-        projectLog(message = "Facetec cancelled")
         state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
     }
     //endregion
@@ -412,18 +405,14 @@ class ReplacePolicyViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         biometry: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        projectLog(message = "onFaceScanReady")
         state = state.copy(retrieveAccessShardsResponse = Resource.Loading())
 
         return viewModelScope.async {
             val retrieveShardsResponse = ownerRepository.retrieveAccessShards(verificationId, biometry)
 
             if (retrieveShardsResponse is Resource.Success) {
-                projectLog(message = "onFaceScanReady retrieve shards is success")
-                projectLog(message = "onFaceScanReady cancelling access")
                 ownerRepository.cancelAccess()
 
-                projectLog(message = "onFaceScanReady starting replacePolicy")
                 replacePolicy(retrieveShardsResponse.data!!.encryptedShards)
             }
 
@@ -443,28 +432,43 @@ class ReplacePolicyViewModel @Inject constructor(
     private fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
         resetCloudStorageActionState()
 
-        val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
-        val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
+        try {
+            val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
+            val entropy = approverSetup.ownerApprover()?.getEntropyFromImplicitOwnerApprover()
+            if (entropy == null) {
+                val exception = Exception("Missing entropy when decrypting key")
+                exception.sendError(CrashReportingUtil.ReplacePolicy)
 
-        val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy!!
-        val deviceId = keyRepository.retrieveSavedDeviceId()
+                state = state.copy(
+                    replacePolicyResponse = Resource.Error(exception = exception)
+                )
+                return
+            }
 
-        val publicKey =
-            Base58EncodedApproverPublicKey(
-                encryptedKey.decryptWithEntropy(
-                    deviceKeyId = deviceId,
-                    entropy = entropy
-                ).toEncryptionKey().publicExternalRepresentation().value
+            val deviceId = keyRepository.retrieveSavedDeviceId()
+
+            val publicKey =
+                Base58EncodedApproverPublicKey(
+                    encryptedKey.decryptWithEntropy(
+                        deviceKeyId = deviceId,
+                        entropy = entropy
+                    ).toEncryptionKey().publicExternalRepresentation().value
+                )
+
+            state = state.copy(
+                keyData = ReplacePolicyKeyData(
+                    encryptedPrivateKey = encryptedKey,
+                    publicKey = publicKey
+                )
             )
 
-        state = state.copy(
-            keyData = ReplacePolicyKeyData(
-                encryptedPrivateKey = encryptedKey,
-                publicKey = publicKey
+            checkUserHasSavedKeyAndSubmittedPolicy()
+        } catch (exception: Exception) {
+            exception.sendError(CrashReportingUtil.CloudDownload)
+            state = state.copy(
+                replacePolicyResponse = Resource.Error(exception = exception)
             )
-        )
-
-        checkUserHasSavedKeyAndSubmittedPolicy()
+        }
     }
 
     private fun onKeyUploadFailed(exception: Exception?) {

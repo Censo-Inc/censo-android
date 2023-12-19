@@ -112,7 +112,6 @@ value class ApprovalId(val value: String) {
     override fun toString(): String = value
 }
 
-
 @Serializable
 @JvmInline
 value class Base64EncodedData(val base64Encoded: String) {

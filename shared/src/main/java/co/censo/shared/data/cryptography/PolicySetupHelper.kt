@@ -21,7 +21,8 @@ class PolicySetupHelper(
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
     val approverShards: List<ApproverShard> = emptyList(),
     val approverKeysSignatureByIntermediateKey: Base64EncodedData,
-    val signatureByPreviousIntermediateKey: Base64EncodedData?
+    val signatureByPreviousIntermediateKey: Base64EncodedData?,
+    val masterKeySignature: Base64EncodedData,
 ) {
 
 
@@ -31,6 +32,9 @@ class PolicySetupHelper(
             approvers: List<Approver.ProspectApprover>,
             masterEncryptionKey: EncryptionKey,
             previousIntermediateKey: PrivateKey? = null,
+            ownerApproverEncryptedPrivateKey: ByteArray,
+            entropy: Base64EncodedData,
+            deviceKeyId: String,
         ): PolicySetupHelper {
             val intermediateEncryptionKey = EncryptionKey.generateRandomKey()
 
@@ -76,14 +80,31 @@ class PolicySetupHelper(
                 ).base64Encoded()
             }
 
+            //region Master Key Signature + Master Encryption Public Key
+            val masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value)
+
+            val decryptedOwnerApproverPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
+                deviceKeyId = deviceKeyId,
+                entropy = entropy
+            )
+
+            val ownerApproverKeyPair = EncryptionKey.generateFromPrivateKeyRaw(decryptedOwnerApproverPrivateKey.bigInt())
+            val masterKeySignature = ownerApproverKeyPair.sign(
+                data = (masterEncryptionPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(
+                    false
+                )
+            ).base64Encoded()
+            //endregion
+
             return PolicySetupHelper(
-                masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value),
+                masterEncryptionPublicKey = masterEncryptionPublicKey,
                 intermediatePublicKey = Base58EncodedIntermediatePublicKey(intermediateEncryptionKey.publicExternalRepresentation().value),
                 encryptedMasterKey = encryptedMasterKey.base64Encoded(),
                 threshold = threshold,
                 approverShards = approverShards,
                 approverKeysSignatureByIntermediateKey = approverKeysSignatureByIntermediateKey,
                 signatureByPreviousIntermediateKey = signatureByPreviousIntermediateKey,
+                masterKeySignature = masterKeySignature
             )
         }
 

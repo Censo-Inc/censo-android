@@ -5,6 +5,7 @@ import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.repository.CreatePolicyParams
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
@@ -36,27 +37,4 @@ sealed class InitialPlanSetupStep {
     object Facetec : InitialPlanSetupStep()
     //Policy creation always kicked off by facetec completion
     object PolicyCreation : InitialPlanSetupStep()
-}
-
-data class InitialKeyData(
-    val encryptedPrivateKey: ByteArray,
-    val publicKey: Base58EncodedPublicKey
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as InitialKeyData
-
-        if (!encryptedPrivateKey.contentEquals(other.encryptedPrivateKey)) return false
-        if (publicKey != other.publicKey) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = encryptedPrivateKey.contentHashCode()
-        result = 31 * result + publicKey.hashCode()
-        return result
-    }
 }

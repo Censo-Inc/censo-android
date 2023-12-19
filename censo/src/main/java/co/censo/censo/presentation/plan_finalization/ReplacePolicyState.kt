@@ -1,13 +1,13 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
-import androidx.compose.foundation.interaction.HoverInteraction
-import co.censo.censo.presentation.initial_plan_setup.InitialKeyData
+import Base64EncodedData
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse

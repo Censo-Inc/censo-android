@@ -49,10 +49,7 @@ fun ApproveAccessUI(
     approval: Approval,
     verificationCode: String,
     onVerificationCodeChanged: (String) -> Unit,
-    storesLink: String, //This should contain both links since approver could be either
 ) {
-    val linkTag = "link"
-
     val deeplink = approval.v2Deeplink()
     val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
 
@@ -92,24 +89,10 @@ fun ApproveAccessUI(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val firstStepContentSpan = buildAnnotatedString {
-            append(stringResource(R.string.share_this_link_and_have_span))
-            append(" $approverName ")
-            append(stringResource(R.string.tap_on_it_or_paste_it_into_the_censo_approver_app_if_span))
-            append(" $approverName ")
-            append(stringResource(R.string.no_longer_has_the_app_installed_it_can_be_span))
-
-            pushStringAnnotation(tag = linkTag, annotation = storesLink)
-            withStyle(style = SpanStyle(fontWeight = FontWeight.W600)) {
-                append(stringResource(R.string.downloaded_here_url_span))
-            }
-            pop()
-        }
-
         ApproverStep(
             heading = stringResource(id = R.string.share_this_link_title),
             content = stringResource(R.string.share_link_access_message, approverName),
-            onClick = { shareLink(storesLink) }
+            onClick = { shareLink(deeplink) }
         ) {
             Image(
                 modifier = Modifier.size(44.dp),
@@ -193,7 +176,6 @@ fun ApproveAccessInitialPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.Initial,
@@ -210,7 +192,6 @@ fun ApproveAccessWaitingForVerificationPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.WaitingForVerification,
@@ -227,7 +208,6 @@ fun ApproveAccessWaitingForApprovalPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.WaitingForApproval,
@@ -244,7 +224,6 @@ fun ApproveAccessRejectedPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.Rejected,
@@ -261,7 +240,6 @@ fun ApproveAccessApprovedPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.Approved,
@@ -278,7 +256,6 @@ fun ApproveRequestInitialPreview() {
     ApproveAccessUI(
         intent = AccessIntent.ReplacePolicy,
         approverName = "Buddy",
-        storesLink = "link",
         approval = Approval(
             participantId = ParticipantId.generate(),
             status = ApprovalStatus.Initial,
