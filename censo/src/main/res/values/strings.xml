@@ -300,7 +300,7 @@
     <string name="an_approval_from_one_of_your_approvers">an approval from one of your approvers, in addition to yours</string>
     <string name="require">require</string>
     <string name="adding_approvers_makes_you_more_secure_span">Adding two Trusted Approvers increases your security by eliminating any single point of compromise while providing extra backup should you or your Approvers lose your credentials.</string>
-    <string name="adding_approvers_ensures_span">Choose approvers who you think are reliable and you can trust.\n\nWhile they can never access your seed phrase (only you can), you will need at least on of the two you choose to help you access it.</string>
+    <string name="adding_approvers_ensures_span">Choose approvers who you think are reliable and you can trust.\n\nWhile they can never access your seed phrase (only you can), you will need at least one of the two you choose to help you access it.</string>
     <string name="you_can_increase_your_security">Increase your security</string>
     <string name="paste_seed_phrase">Paste seed phrase</string>
     <string name="input_seed_phrase">Input seed phrase</string>
