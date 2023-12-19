@@ -1,6 +1,8 @@
 package co.censo.censo
 
+import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import Base64EncodedData
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
@@ -40,9 +42,14 @@ import co.censo.censo.presentation.plan_finalization.ReplacePolicyScreen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
+import co.censo.shared.data.cryptography.decryptWithEntropy
+import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.util.StrongboxUI
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Base64
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -54,47 +61,95 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setupPushChannel()
+        fooTest()
+//        setupPushChannel()
+//
+//        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+//
+//        setContent {
+//            val navController = rememberNavController()
+//
+//            VaultTheme {
+//                // A surface container using the 'background' color from the theme
+//                Surface(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .semantics {
+//                            testTag = TestTag.main_activity_surface_container
+//                        },
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+//                    Box {
+//                        Box(
+//                            modifier = Modifier.fillMaxHeight(),
+//                        ) {
+//                            CensoNavHost(navController = navController)
+//                        }
+//
+//                        Box(
+//                            modifier = Modifier.align(Alignment.BottomCenter)
+//                        ) {
+//                            LockedScreen()
+//                        }
+//
+//                        Box(
+//                            modifier = Modifier.fillMaxSize()
+//                        ) {
+//                            PaywallScreen()
+//                        }
+//                    }
+//
+//                    StrongboxUI()
+//                }
+//            }
+//        }
+    }
 
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+    fun fooTest() {
+        //MasterpublicKey : Base58EncodedMasterPublicKey = Rumgf4o6YAtBZER8j8wCeAy9DPnMSZeFJvqLQzK6dtiAqai5AiSeL1jEGAWNyWVQjC1HqibMo5F3gs8a4V1VAbmd
+        //masterKeySig : Base64EncodedData = MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==
+        // ownerApproverEncryptionKey.privateKeyRaw.base64Encoded = Base64EncodedData(base64Encoded=AKitUl+1/ALq9ViFXPZbrYJ8zYXuE2cd9YYednTv+K4r)
+        // ownerApproverEncryptionkey byte array = [0, -88, -83, 82, 95, -75, -4, 2, -22, -11, 88, -123, 92, -10, 91, -83, -126, 124, -51, -123, -18, 19, 103, 29, -11, -122, 30, 118, 116, -17, -8, -82, 43]
+        // ownerAPproverEncreyptionKey base58 Encoded = 1CMSnEWeyoe2t1kTJPQMo27rzENuxMJ3r6FeVx5XKvtiE
+        // entropy =
+        // deviceKeyId = 102236090183538294473
+//        val fooKey = InitialKeyData(encryptedPrivateKey= byteArrayOf(14, 12, -87, -62, 0, -12, 41, 102, 111, 102, -43, -50, -2, 38, 63, 118, -69, -119, 108, -39, 12, -19, -31, 0, 58, -49, 10, 125, 33, 64, -34, -64, -44, 60, -93, 48, 79, 9, 28, -49, 126, -124, 102, -15, -72, 101, 14, -86, -31, -96, -82, 49, 49, 48, 1, -99), publicKey=Base58EncodedApproverPublicKey(value="SGBxgrcqdDrCKRBJDDFXNTrQ3bj8GGojTXBAeWbqv8VtrzaTCsqsBjAr7r4bgPfPGTV8ik4b2pmGkPaLcpbpjNV7"))
 
-        setContent {
-            val navController = rememberNavController()
+        //Can I recreate the key
+        //Can I sign data with the key
 
-            VaultTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .semantics {
-                            testTag = TestTag.main_activity_surface_container
-                        },
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Box {
-                        Box(
-                            modifier = Modifier.fillMaxHeight(),
-                        ) {
-                            CensoNavHost(navController = navController)
-                        }
+//        projectLog(message = "Verifying master public key against master key sig, with ownerApproverEncryptionKey")
+//        ownerApproverEncryptionKey.verify(signedData = masterPublicKey.value.toByteArray(), signature = Base64.getDecoder().decode(masterKeySignature.base64Encoded))
 
-                        Box(
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        ) {
-                            LockedScreen()
-                        }
+        //Recreate the key
+        val fooKey = InitialKeyData(encryptedPrivateKey= byteArrayOf(14, 12, -87, -62, 0, -12, 41, 102, 111, 102, -43, -50, -2, 38, 63, 118, -69, -119, 108, -39, 12, -19, -31, 0, 58, -49, 10, 125, 33, 64, -34, -64, -44, 60, -93, 48, 79, 9, 28, -49, 126, -124, 102, -15, -72, 101, 14, -86, -31, -96, -82, 49, 49, 48, 1, -99), publicKey=Base58EncodedApproverPublicKey(value="SGBxgrcqdDrCKRBJDDFXNTrQ3bj8GGojTXBAeWbqv8VtrzaTCsqsBjAr7r4bgPfPGTV8ik4b2pmGkPaLcpbpjNV7"))
 
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            PaywallScreen()
-                        }
-                    }
+        val entropy = Base64EncodedData("uG+zFogeQ/XkUbjKPUgSWlp3IAhfinXCiCAfYDxuIAdwv1JoKENUF2mYHiBCBbfdmsW+dIUPgaVLKduAvVWwaQ==")
+        val deviceKeyId = "102236090183538294473"
 
-                    StrongboxUI()
-                }
-            }
-        }
+
+
+        val recreatedKey = EncryptionKey.generateFromPrivateKeyRaw(
+            fooKey.encryptedPrivateKey.decryptWithEntropy(
+                deviceKeyId = deviceKeyId,
+                entropy = entropy
+            ).bigInt()
+        )
+
+//        val testData = "Gojira".toByteArray()
+//
+//        val signedTestData = recreatedKey.sign(testData)
+//
+////        val verified = recreatedKey.verify(signedData = signedTestData, signature = Base64.getDecoder().decode(Base64EncodedData("MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==").base64Encoded))
+//        val verified = recreatedKey.verify(signedData = testData, signature = signedTestData)
+
+        val verified = recreatedKey.verify(
+            signedData = Base58EncodedMasterPublicKey("Rumgf4o6YAtBZER8j8wCeAy9DPnMSZeFJvqLQzK6dtiAqai5AiSeL1jEGAWNyWVQjC1HqibMo5F3gs8a4V1VAbmd").value.toByteArray(),
+            signature = Base64.getDecoder().decode(Base64EncodedData("MEQCIEaJHF6qlsUxV98b622P6rCIDNdwl29CVO36NgrpbIyoAiBS6NiLFHcY4PdbHhWbF98ERdBvyRq26kR4IYntSnPrAw==").base64Encoded)
+        )
+
+
+        projectLog(message = "Verify result: $verified")
     }
 
     @Composable
