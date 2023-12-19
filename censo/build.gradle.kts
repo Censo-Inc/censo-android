@@ -14,7 +14,7 @@ plugins {
 
 val versionNameMajor = 1
 val versionNameMinor = 5
-val versionNamePatch = 0
+val versionNamePatch = 1
 
 android {
     namespace = "co.censo.censo"
