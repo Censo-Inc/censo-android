@@ -80,6 +80,7 @@ class PolicySetupHelper(
                 ).base64Encoded()
             }
 
+            //region Master Key Signature + Master Encryption Public Key
             val masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value)
 
             val decryptedOwnerApproverPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
@@ -88,13 +89,12 @@ class PolicySetupHelper(
             )
 
             val ownerApproverKeyPair = EncryptionKey.generateFromPrivateKeyRaw(decryptedOwnerApproverPrivateKey.bigInt())
-
             val masterKeySignature = ownerApproverKeyPair.sign(
                 data = (masterEncryptionPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(
                     false
                 )
             ).base64Encoded()
-
+            //endregion
 
             return PolicySetupHelper(
                 masterEncryptionPublicKey = masterEncryptionPublicKey,
