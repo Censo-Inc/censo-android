@@ -31,7 +31,6 @@ import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -205,8 +204,6 @@ class ReplacePolicyViewModel @Inject constructor(
             val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
 
             val entropy = (ownerApprover?.status as? ApproverStatus.OwnerAsApprover)?.entropy!!
-            projectLog(message = "Entropy when saving new key, retrieved from ownerApprover.status as OwnerAsApprover")
-            projectLog(message = "Entropy: $entropy")
 
             val idToken = keyRepository.retrieveSavedDeviceId()
 
@@ -354,10 +351,6 @@ class ReplacePolicyViewModel @Inject constructor(
                 val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
                 val entropy = approverSetup.ownerApprover()?.getEntropyFromImplicitOwnerApprover()
 
-                projectLog(message = "Entropy when replacing policy, retrieved from owner state as owner state ready, policy.ownerEntropy")
-                projectLog(message = "Entropy: $entropy")
-
-
                 val ownerApproverKeyData = state.keyData
                 val deviceKeyId = keyRepository.retrieveSavedDeviceId()
 
@@ -452,8 +445,6 @@ class ReplacePolicyViewModel @Inject constructor(
                 return
             }
 
-            projectLog(message = "Entropy after downloading key, retrieved from owner state as owner state ready, policy.ownerEntropy")
-            projectLog(message = "Entropy: $entropy")
             val deviceId = keyRepository.retrieveSavedDeviceId()
 
             val publicKey =
