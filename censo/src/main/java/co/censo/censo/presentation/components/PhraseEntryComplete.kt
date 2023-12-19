@@ -61,9 +61,7 @@ fun SeedPhraseAdded(
 
         Spacer(modifier = Modifier.height(screenHeight * 0.05f))
 
-        val messageText =
-            if (isSavingFirstSeedPhrase) stringResource(co.censo.censo.R.string.phrase_added_done_message)
-            else stringResource(co.censo.censo.R.string.subsequent_seed_phrase_saved)
+        val messageText = stringResource(co.censo.censo.R.string.subsequent_seed_phrase_saved)
 
         Text(
             modifier = Modifier.padding(horizontal = screenWidth * 0.05f),

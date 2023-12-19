@@ -49,9 +49,9 @@ fun Activated(
 
             TitleText(
                 modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.activated),
+                title = stringResource(R.string.approvers_activated),
                 color = SharedColors.MainColorText,
-                fontSize = 44.sp
+                fontSize = 32.sp
             )
 
             firstApprover?.let {

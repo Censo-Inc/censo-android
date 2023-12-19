@@ -53,7 +53,7 @@ fun SetupApproversScreen(
             .padding(horizontal = 36.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Bottom
     ) {
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
@@ -66,11 +66,7 @@ fun SetupApproversScreen(
         Spacer(modifier = Modifier.height(verticalSpacingHeight + 12.dp))
 
         MessageText(
-            message = buildSpannedParagraph(
-                preceding = stringResource(R.string.adding_approvers_makes_you_more_secure_span),
-                bolded = stringResource(R.string.require),
-                remaining = stringResource(R.string.an_approval_from_one_of_your_approvers),
-            ),
+            message = stringResource(R.string.adding_approvers_makes_you_more_secure_span),
             textAlign = TextAlign.Start
         )
 
