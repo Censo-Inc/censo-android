@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -45,7 +46,9 @@ fun SettingsHomeScreen(
     onDeleteUser: () -> Unit,
     onSignOut: () -> Unit,
     showRemoveApproverButton: Boolean,
-    onRemoveApprover: () -> Unit
+    onRemoveApprover: () -> Unit,
+    onShowPushNotification: () -> Unit,
+    showNotificationsButton: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -92,6 +95,13 @@ fun SettingsHomeScreen(
             buildAnnotatedString {
                 withStyle(itemSpanStyle) {
                     append(stringResource(R.string.remove_approvers))
+                }
+            }
+
+        val enableNotificationsText =
+            buildAnnotatedString {
+                withStyle(itemSpanStyle) {
+                    append(stringResource(R.string.allow_push_notifications))
                 }
             }
 
@@ -185,6 +195,23 @@ fun SettingsHomeScreen(
             Text(deleteUserText)
         }
         Divider()
+        if (showNotificationsButton) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onShowPushNotification() }
+                    .padding(
+                        horizontal = 24.dp, vertical = 24.dp
+                    ),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SettingsIcon(Icons.Default.Notifications)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(enableNotificationsText)
+            }
+            Divider()
+        }
     }
 }
 
@@ -206,7 +233,9 @@ fun PreviewSettingsScreenWithoutRemoveApprover() {
         onDeleteUser = {},
         onSignOut = {},
         onRemoveApprover = {},
-        showRemoveApproverButton = false
+        showRemoveApproverButton = false,
+        onShowPushNotification = {},
+        showNotificationsButton = true
     )
 }
 
@@ -219,7 +248,9 @@ fun PreviewSettingsScreenWithRemoveApprover() {
         onDeleteUser = {},
         onSignOut = {},
         onRemoveApprover = {},
-        showRemoveApproverButton = true
+        showRemoveApproverButton = true,
+        onShowPushNotification = {},
+        showNotificationsButton = true
     )
 }
 

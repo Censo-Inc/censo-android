@@ -14,6 +14,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SubscriptionStatus
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.repository.PushRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultScreenViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
+    private val pushRepository: PushRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(VaultScreenState())
@@ -32,6 +34,8 @@ class VaultScreenViewModel @Inject constructor(
     fun onStart() {
         retrieveOwnerState()
     }
+
+    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
 
     fun retrieveOwnerState() {
         state = state.copy(userResponse = Resource.Loading())
@@ -115,6 +119,14 @@ class VaultScreenViewModel @Inject constructor(
             ownerRepository.signUserOut()
             state = state.copy(kickUserOut = Resource.Success(Unit))
         }
+    }
+
+    fun showPushNotificationsUI() {
+        state = state.copy(showPushNotificationsUI = Resource.Success(Unit))
+    }
+
+    fun resetShowPushNotificationsUI() {
+        state = state.copy(showPushNotificationsUI = Resource.Uninitialized)
     }
 
     private fun onOwnerState(ownerState: OwnerState) {

@@ -1,11 +1,7 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
-import android.Manifest
-import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,11 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -45,13 +38,12 @@ import co.censo.censo.presentation.enter_phrase.components.GeneratePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
+import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
-import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
-import co.censo.shared.util.sendError
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,18 +57,12 @@ fun EnterPhraseScreen(
 
     val state = viewModel.state
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = {
-            viewModel.finishPushNotificationDialog()
-        }
-    )
-
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.SELECTED -> ""
+        EnterPhraseUIState.SELECTED,
+        EnterPhraseUIState.NOTIFICATIONS -> ""
 
         EnterPhraseUIState.REVIEW,
         EnterPhraseUIState.VIEW,
@@ -97,33 +83,6 @@ fun EnterPhraseScreen(
         onDispose {}
     }
 
-    fun checkNotificationsPermissionDialog() {
-        try {
-            val notificationGranted =
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-
-            if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
-                val shownPermissionBefore =
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    )
-                val seenDialogBefore = viewModel.userHasSeenPushDialog()
-
-                if (!shownPermissionBefore && !seenDialogBefore) {
-                    viewModel.setUserSeenPushDialog(true)
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-
-        } catch (e: Exception) {
-            e.sendError(CrashReportingUtil.PermissionDialog)
-        }
-    }
-
     LaunchedEffect(key1 = state) {
         if (state.phraseEntryComplete is Resource.Success) {
             if (welcomeFlow) {
@@ -134,10 +93,6 @@ fun EnterPhraseScreen(
                 navController.popBackStack()
             }
             viewModel.resetPhraseEntryComplete()
-        }
-
-        if (state.showPushNotificationsDialog is Resource.Success) {
-            checkNotificationsPermissionDialog()
         }
 
         if (state.exitFlow) {
@@ -316,6 +271,10 @@ fun EnterPhraseScreen(
                                 isSavingFirstSeedPhrase = state.isSavingFirstSeedPhrase,
                                 onClick = viewModel::finishPhraseEntry
                             )
+                        }
+
+                        EnterPhraseUIState.NOTIFICATIONS -> {
+                            PushNotificationScreen(onFinished = viewModel::finishPushNotificationScreen )
                         }
                     }
                 }

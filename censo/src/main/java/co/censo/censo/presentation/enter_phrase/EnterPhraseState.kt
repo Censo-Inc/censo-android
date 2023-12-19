@@ -33,7 +33,6 @@ data class EnterPhraseState(
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
     val isSavingFirstSeedPhrase: Boolean = false,
-    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized
 ) {
 
@@ -59,12 +58,13 @@ data class EnterPhraseState(
         EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.VIEW,
-        EnterPhraseUIState.DONE -> BackIconType.CLOSE
+        EnterPhraseUIState.DONE,
+        EnterPhraseUIState.NOTIFICATIONS -> BackIconType.CLOSE
     }
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE
+    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE, NOTIFICATIONS
 }
 
 enum class BackIconType {
