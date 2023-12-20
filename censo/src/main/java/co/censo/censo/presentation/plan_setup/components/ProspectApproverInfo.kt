@@ -81,7 +81,6 @@ fun ProspectApproverInfoBox(
             }
         }
 
-        //TODO: Fix this resizing itself
         onEdit?.let {
             IconButton(onClick = onEdit) {
                 Icon(
