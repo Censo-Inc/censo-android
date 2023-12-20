@@ -188,6 +188,17 @@ class VaultScreenViewModel @Inject constructor(
 
             if (lockResponse is Resource.Success) {
                 lockResponse.data?.let { onOwnerState(it) }
+                resetLockResource()
+            }
+
+            if (lockResponse is Resource.Error) {
+                state =
+                    state.copy(
+                        lockResponse = Resource.Error(
+                            exception = lockResponse.exception,
+                            errorCode = lockResponse.errorCode
+                        )
+                    )
             }
         }
     }
