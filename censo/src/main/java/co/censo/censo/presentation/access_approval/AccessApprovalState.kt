@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.access_approval
 
+import co.censo.censo.presentation.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.DeleteAccessApiResponse
@@ -37,7 +38,7 @@ data class AccessApprovalState(
     val submitTotpVerificationResource: Resource<SubmitAccessTotpVerificationApiResponse> = Resource.Uninitialized,
 
     // navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
 
     val loading = userResponse is Resource.Loading

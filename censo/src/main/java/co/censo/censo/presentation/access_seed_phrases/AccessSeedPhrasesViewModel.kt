@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -21,6 +22,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -158,20 +160,28 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                     }
 
                     else -> {
+                        val navData = NavigationData(
+                            route = Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases),
+                            popSelfFromBackStack = true
+                        )
                         // there should be 'available' access requested by this device
                         // navigate back to access approval screen
                         state = state.copy(
-                            navigationResource = Resource.Success(Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases))
+                            navigationResource = Resource.Success(navData)
                         )
                     }
                 }
             }
 
             else -> {
+                val navData = NavigationData(
+                    route = Screen.EntranceRoute.route,
+                    popSelfFromBackStack = true
+                )
                 // other owner states are not supported on this view
                 // navigate back to start of the app so it can fix itself
                 state = state.copy(
-                    navigationResource = Resource.Success(Screen.EntranceRoute.route)
+                    navigationResource = Resource.Success(navData)
                 )
             }
         }
@@ -198,6 +208,9 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun onBackClicked() {
+        projectLog(message = "Current accessPhrasesUIState when hitting backNav")
+        projectLog(message = state.accessPhrasesUIState.name)
+
         val accessPhrasesUIState = when (state.accessPhrasesUIState) {
             AccessPhrasesUIState.ViewPhrase,
             AccessPhrasesUIState.ReadyToStart -> AccessPhrasesUIState.SelectPhrase
@@ -215,15 +228,32 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             showCancelConfirmationDialog = false,
             cancelAccessResource = Resource.Loading()
         )
+        projectLog(message = "Cancelling access")
 
         viewModelScope.launch {
+            val navData = NavigationData(
+                route = Screen.OwnerVaultScreen.route,
+                popSelfFromBackStack = true
+            )
+
             val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
+                projectLog(message = "Access cancel success")
                 state = state.copy(
-                    navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
+                    navigationResource = Resource.Success(navData)
                 )
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
+            }
+
+            //TODO: Be diligent with this check, we may not need it
+            if (response is Resource.Error) {
+                projectLog(message = "Access cancel failed with code: ${response.errorCode}")
+                if (response.errorCode == 404) {
+                    state = state.copy(
+                        navigationResource = Resource.Success(navData)
+                    )
+                }
             }
 
             state = state.copy(cancelAccessResource = response)

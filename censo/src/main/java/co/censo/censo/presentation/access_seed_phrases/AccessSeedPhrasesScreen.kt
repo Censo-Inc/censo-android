@@ -23,6 +23,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_seed_phrases.components.AccessPhrasesTopBar
 import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
@@ -30,6 +31,7 @@ import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhra
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -59,13 +61,21 @@ fun AccessSeedPhrasesScreen(
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
-                navController.navigate(it)
+                navController.navigate(it.route) {
+                    if (it.popSelfFromBackStack) {
+                        popUpTo(Screen.AccessSeedPhrases.route) {
+                            inclusive = true
+                        }
+                    }
+                }
                 viewModel.resetNavigationResource()
             }
         }
     }
 
     BackHandler(enabled = true) {
+        projectLog(message = "BackHandler running onBack")
+        projectLog(message = "UI state: ${state.accessPhrasesUIState.name}")
         if (state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase) {
             viewModel.showCancelConfirmationDialog()
         } else {

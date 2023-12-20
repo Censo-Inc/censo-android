@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.ApprovalStatus
@@ -20,6 +21,7 @@ import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.model.Approval
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -76,9 +78,14 @@ class AccessApprovalViewModel @Inject constructor(
 
     private fun updateOwnerState(ownerState: OwnerState) {
         if (ownerState !is OwnerState.Ready) {
+            val navData = NavigationData(
+                route = Screen.EntranceRoute.route,
+                popSelfFromBackStack = true
+            )
+
             // other owner states are not supported on this view
             // navigate back to start of the app so it can fix itself
-            state = state.copy(navigationResource = Resource.Success(Screen.EntranceRoute.route))
+            state = state.copy(navigationResource = Resource.Success(navData))
             return
         }
 
@@ -169,9 +176,15 @@ class AccessApprovalViewModel @Inject constructor(
             val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
+
+                val navData = NavigationData(
+                    route = Screen.OwnerVaultScreen.route,
+                    popSelfFromBackStack = true
+                )
+
                 state = state.copy(
                     access = null,
-                    navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
+                    navigationResource = Resource.Success(navData)
                 )
             }
 
@@ -235,6 +248,9 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun onBackClicked() {
+        projectLog(message = "Current accessApprovalUIState when hitting backNav")
+        projectLog(message = state.accessApprovalUIState.name)
+
         when (state.accessApprovalUIState) {
             AccessApprovalUIState.SelectApprover -> {
                 state = state.copy(showCancelConfirmationDialog = true)
@@ -259,7 +275,12 @@ class AccessApprovalViewModel @Inject constructor(
             AccessIntent.RecoverOwnerKey -> Screen.OwnerKeyRecoveryRoute.route
         }
 
-        state = state.copy(navigationResource = Resource.Success(destination))
+        val navData = NavigationData(
+            route = destination,
+            popSelfFromBackStack = false
+        )
+
+        state = state.copy(navigationResource = Resource.Success(navData))
     }
 
     fun hideCloseConfirmationDialog() {

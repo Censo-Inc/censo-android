@@ -27,6 +27,7 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ActionCompleteUI
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApprover
@@ -64,7 +65,13 @@ fun AccessApprovalScreen(
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
-                navController.navigate(it)
+                navController.navigate(it.route) {
+                    if (it.popSelfFromBackStack) {
+                        popUpTo(Screen.AccessApproval.withIntent(state.accessIntent)) {
+                            inclusive = true
+                        }
+                    }
+                }
             }
             viewModel.resetNavigationResource()
         }

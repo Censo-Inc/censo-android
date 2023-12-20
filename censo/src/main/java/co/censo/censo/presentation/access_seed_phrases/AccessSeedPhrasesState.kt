@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.access_seed_phrases
 
 import SeedPhraseId
+import co.censo.censo.presentation.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.OwnerState
@@ -34,7 +35,7 @@ data class AccessSeedPhrasesState(
     val cancelAccessResource: Resource<DeleteAccessApiResponse> = Resource.Uninitialized,
 
     // navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
 
     val loading = retrieveShardsResponse is Resource.Loading

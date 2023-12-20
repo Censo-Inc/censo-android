@@ -58,6 +58,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.R as SharedR
 import co.censo.censo.R as CensoR
@@ -133,7 +134,7 @@ fun OwnerEntranceScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let { destination ->
                 navController.navigate(destination) {
-                    popUpTo(destination) {
+                    popUpTo(Screen.EntranceRoute.route) {
                         inclusive = true
                     }
                 }
