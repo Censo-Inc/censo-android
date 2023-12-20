@@ -1,8 +1,11 @@
 package co.censo.censo.presentation.plan_setup.components
 
+import Base58EncodedApproverPublicKey
+import Base64EncodedData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,11 +21,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.util.projectLog
+import kotlinx.datetime.Clock
 
 @Composable
 fun ProspectApproverInfoBox(
@@ -37,8 +43,7 @@ fun ProspectApproverInfoBox(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                shape = RoundedCornerShape(12.dp),
-                color = Color.Transparent
+                shape = RoundedCornerShape(12.dp), color = Color.Transparent
             )
             .border(
                 width = 1.dp,
@@ -52,7 +57,9 @@ fun ProspectApproverInfoBox(
 
         val labelTextSize = 14.sp
 
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
                 text = stringResource(id = R.string.approver),
                 color = SharedColors.MainColorText,
@@ -87,4 +94,42 @@ fun ProspectApproverInfoBox(
     }
 }
 
-//TODO: Setup preview for quick iteration
+@Preview
+@Composable
+fun ProspectApproverInfoBoxLongNamePreview() {
+    Box(
+        Modifier
+            .background(Color.White)
+            .padding(24.dp)
+    ) {
+        ProspectApproverInfoBox(nickName = "Super Long Name To Check The Edit Icon Does Not Shrink",
+            status = ApproverStatus.Confirmed(
+                approverKeySignature = Base64EncodedData(base64Encoded = "AA"),
+                approverPublicKey = Base58EncodedApproverPublicKey(value = "AA"),
+                timeMillis = 0,
+                confirmedAt = Clock.System.now()
+            ),
+            onEdit = {
+                projectLog(message = "Tapped")
+            })
+    }
+}
+
+@Preview
+@Composable
+fun ProspectApproverInfoBoxRegularPreview() {
+    Box(
+        Modifier
+            .background(Color.White)
+            .padding(24.dp)
+    ) {
+        ProspectApproverInfoBox(nickName = "Goji", status = ApproverStatus.Confirmed(
+            approverKeySignature = Base64EncodedData(base64Encoded = "AA"),
+            approverPublicKey = Base58EncodedApproverPublicKey(value = "AA"),
+            timeMillis = 0,
+            confirmedAt = Clock.System.now()
+        ), onEdit = {
+            projectLog(message = "Tapped")
+        })
+    }
+}
