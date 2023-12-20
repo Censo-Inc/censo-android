@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.plan_setup.components
 
-import Base58EncodedApproverPublicKey
 import Base64EncodedData
 import InvitationId
 import StandardButton
@@ -9,17 +8,13 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,14 +24,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,13 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,12 +48,9 @@ import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.TotpCodeView
 import co.censo.censo.R
-import co.censo.censo.presentation.VaultColors
-import co.censo.censo.presentation.lock_screen.components.Line
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
 import co.censo.shared.presentation.SharedColors.ButtonBackgroundBlue
-import kotlinx.datetime.Clock
 
 @Composable
 fun ActivateApproverUI(
@@ -207,70 +190,6 @@ fun ActivateApproverUI(
         Spacer(modifier = Modifier.height(24.dp))
 
     }
-}
-
-@Composable
-fun ProspectApproverInfoBox(
-    nickName: String,
-    status: ApproverStatus?,
-    onEdit: (() -> Unit)? = null
-) {
-
-    val context = LocalContext.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                shape = RoundedCornerShape(12.dp),
-                color = Color.Transparent
-            )
-            .border(
-                width = 1.dp,
-                color = SharedColors.MainBorderColor,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        val labelTextSize = 14.sp
-
-        Column {
-            Text(
-                text = stringResource(id = R.string.approver),
-                color = SharedColors.MainColorText,
-                fontSize = labelTextSize
-            )
-
-            Text(
-                text = nickName,
-                color = SharedColors.MainColorText,
-                fontSize = 24.sp
-            )
-
-            activatedUIData(status, context)?.let {
-                Text(
-                    text = it.text,
-                    color = it.color,
-                    fontSize = labelTextSize
-                )
-            }
-        }
-
-        onEdit?.let {
-            IconButton(onClick = onEdit) {
-                Icon(
-                    painterResource(id = co.censo.shared.R.drawable.edit_icon),
-                    contentDescription = stringResource(R.string.edit_approver_name),
-                    tint = SharedColors.ApproverStepIconColor
-                )
-            }
-        }
-
-    }
-
 }
 
 fun activatedUIData(approverStatus: ApproverStatus?, context: Context) =
@@ -418,32 +337,6 @@ fun ApproverStep(
 }
 
 @Composable
-fun BoxScope.StepIcon(imageVector: ImageVector) {
-    Image(
-        imageVector = imageVector,
-        contentDescription = null,
-        modifier = Modifier
-            .size(48.dp)
-            .align(Alignment.Center)
-            .padding(2.dp),
-        colorFilter = ColorFilter.tint(color = SharedColors.ApproverStepIconColor)
-    )
-}
-
-@Composable
-fun BoxScope.StepIcon(imagePainter: Painter) {
-    Image(
-        painter = imagePainter,
-        contentDescription = null,
-        modifier = Modifier
-            .size(48.dp)
-            .align(Alignment.Center)
-            .padding(2.dp),
-        colorFilter = ColorFilter.tint(color = SharedColors.ApproverStepIconColor)
-    )
-}
-
-@Composable
 fun StepButton(icon: Painter, text: String, onClick: () -> Unit) {
     StandardButton(
         onClick = onClick,
@@ -468,18 +361,6 @@ fun StepButton(icon: Painter, text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BoxScope.IconIndex(index: Int) {
-    Text(
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(start = 3.dp, top = 2.dp),
-        text = index.toString(),
-        fontSize = 10.sp,
-        color = SharedColors.MainColorText
-    )
-}
-
-@Composable
 fun StepTitleText(heading: String) {
     Text(
         text = heading,
@@ -497,26 +378,6 @@ fun StepContentText(content: String) {
         color = SharedColors.MainColorText
     )
 }
-
-fun createIconBoxModifier(addBorder: Boolean, onClick: (() -> Unit)? = null): Modifier =
-    if (addBorder) Modifier
-        .size(48.dp)
-        .clickable { onClick?.invoke() }
-        .border(
-            width = 1.dp,
-            color = SharedColors.MainBorderColor,
-            shape = RoundedCornerShape(8.dp)
-        )
-        .background(
-            color = SharedColors.WordBoxBackground,
-            shape = RoundedCornerShape(8.dp)
-        )
-    else Modifier
-        .size(48.dp)
-        .background(
-            color = SharedColors.WordBoxBackground,
-            shape = RoundedCornerShape(8.dp)
-        )
 
 data class VerificationCodeUIData(
     val code: String,
@@ -542,111 +403,3 @@ fun ActivatePrimaryApproverInitialPreview() {
         onEditNickname = {}
     )
 }
-
-//@Preview(showSystemUi = true, showBackground = true)
-//@Composable
-//fun ActivatePrimaryApproverAcceptedPreview() {
-//    ActivateApproverUI(
-//        secondsLeft = 43,
-//        verificationCode = "345819",
-//        storesLink = "link",
-//        prospectApprover = Approver.ProspectApprover(
-//            invitationId = InvitationId(""),
-//            label = "Neo",
-//            participantId = ParticipantId.generate(),
-//            status = ApproverStatus.Accepted(
-//                deviceEncryptedTotpSecret = Base64EncodedData(""),
-//                acceptedAt = Clock.System.now()
-//            )
-//        ),
-//        onContinue = {},
-//        onEditNickname = {}
-//    )
-//}
-//
-//@Preview(showSystemUi = true, showBackground = true)
-//@Composable
-//fun ActivatePrimaryApproverConfirmedPreview() {
-//    ActivateApproverUI(
-//        secondsLeft = 43,
-//        verificationCode = "345819",
-//        storesLink = "link",
-//        prospectApprover = Approver.ProspectApprover(
-//            invitationId = InvitationId(""),
-//            label = "Neo",
-//            participantId = ParticipantId.generate(),
-//            status = ApproverStatus.Confirmed(
-//                approverPublicKey = Base58EncodedApproverPublicKey(""),
-//                approverKeySignature = Base64EncodedData(""),
-//                timeMillis = 0,
-//                confirmedAt = Clock.System.now()
-//            )
-//        ),
-//        onContinue = {},
-//        onEditNickname = {}
-//    )
-//}
-//
-//@Preview(showSystemUi = true, showBackground = true)
-//@Composable
-//fun ActivateAlternateApproverInitialPreview() {
-//    ActivateApproverUI(
-//        secondsLeft = 43,
-//        verificationCode = "345819",
-//        storesLink = "link",
-//        prospectApprover = Approver.ProspectApprover(
-//            invitationId = InvitationId(""),
-//            label = "John Wick",
-//            participantId = ParticipantId.generate(),
-//            status = ApproverStatus.Initial(
-//                deviceEncryptedTotpSecret = Base64EncodedData(""),
-//            )
-//        ),
-//        onContinue = {},
-//        onEditNickname = {}
-//    )
-//}
-//
-//@Preview(showSystemUi = true, showBackground = true)
-//@Composable
-//fun ActivateAlternateApproverAcceptedPreview() {
-//    ActivateApproverUI(
-//        secondsLeft = 43,
-//        verificationCode = "345819",
-//        storesLink = "link",
-//        prospectApprover = Approver.ProspectApprover(
-//            invitationId = InvitationId(""),
-//            label = "John Wick",
-//            participantId = ParticipantId.generate(),
-//            status = ApproverStatus.Accepted(
-//                deviceEncryptedTotpSecret = Base64EncodedData(""),
-//                acceptedAt = Clock.System.now()
-//            )
-//        ),
-//        onContinue = {},
-//        onEditNickname = {}
-//    )
-//}
-//
-//@Preview(showSystemUi = true, showBackground = true)
-//@Composable
-//fun ActivateAlternateApproverConfirmedPreview() {
-//    ActivateApproverUI(
-//        secondsLeft = 43,
-//        verificationCode = "345819",
-//        storesLink = "link",
-//        prospectApprover = Approver.ProspectApprover(
-//            invitationId = InvitationId(""),
-//            label = "John Wick",
-//            participantId = ParticipantId.generate(),
-//            status = ApproverStatus.Confirmed(
-//                approverPublicKey = Base58EncodedApproverPublicKey(""),
-//                approverKeySignature = Base64EncodedData(""),
-//                timeMillis = 0,
-//                confirmedAt = Clock.System.now()
-//            )
-//        ),
-//        onContinue = {},
-//        onEditNickname = {}
-//    )
-//}
