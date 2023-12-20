@@ -14,7 +14,7 @@ plugins {
 
 val versionNameMajor = 1
 val versionNameMinor = 5
-val versionNamePatch = 1
+val versionNamePatch = 2
 
 android {
     namespace = "co.censo.censo"
@@ -49,7 +49,7 @@ android {
         applicationId = "co.censo.censo"
         minSdk = 33
         targetSdk = 33
-        versionCode = 45
+        versionCode = 46
         versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
 
         signingConfig = if (signBuild) {
