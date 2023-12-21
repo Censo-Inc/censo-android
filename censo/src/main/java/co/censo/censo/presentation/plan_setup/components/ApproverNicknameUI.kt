@@ -91,6 +91,7 @@ fun ApproverNicknameUI(
             modifier = Modifier.fillMaxWidth(),
             value = nickname,
             onValueChange = onNicknameChanged,
+            maxLines = 4,
             shape = CircleShape,
             placeholder = {
                 Text(
@@ -108,7 +109,7 @@ fun ApproverNicknameUI(
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = SharedColors.BorderGrey,
                 unfocusedBorderColor = SharedColors.BorderGrey
-            )
+            ),
         )
 
         Text(

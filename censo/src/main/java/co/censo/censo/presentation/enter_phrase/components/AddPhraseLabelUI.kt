@@ -85,6 +85,7 @@ fun AddPhraseLabelUI(
             modifier = Modifier.fillMaxWidth(),
             value = label,
             onValueChange = onLabelChanged,
+            maxLines = 4,
             shape = CircleShape,
             placeholder = {
                 Text(
