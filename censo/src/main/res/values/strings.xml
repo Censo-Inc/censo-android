@@ -299,7 +299,7 @@
     <string name="only_span">only</string>
     <string name="an_approval_from_one_of_your_approvers">an approval from one of your approvers, in addition to yours</string>
     <string name="require">require</string>
-    <string name="adding_approvers_makes_you_more_secure_span">Adding two Trusted Approvers increases your security by eliminating any single point of compromise while providing extra backup should you or your Approvers lose your credentials.</string>
+    <string name="adding_approvers_makes_you_more_secure_span">Adding two trusted approvers increases your security by eliminating any single point of compromise while providing extra backup should you or your approvers lose your credentials.</string>
     <string name="adding_approvers_ensures_span">Choose approvers who you think are reliable and you can trust.\n\nWhile they can never access your seed phrase (only you can), you will need at least one of the two you choose to help you access it.</string>
     <string name="you_can_increase_your_security">Increase your security</string>
     <string name="paste_seed_phrase">Paste seed phrase</string>
@@ -335,7 +335,7 @@
     <string name="add_approver_title">Add Approver</string>
     <string name="share_the_app_link_for_download">Share this link so %1$s can download the Censo Approver app</string>
     <string name="share_invite_link_approver_onboarding">Share this link and have %1$s click it or paste into their Approver app</string>
-    <string name="onboarding_approver_read_auth_code">Read code that appears here and have %1$s enter it in Approver app.</string>
+    <string name="onboarding_approver_read_auth_code">Read code that appears here and have %1$s enter it in their Approver app.</string>
     <string name="share_link_access_message">Share this link and have %1$s click it or paste into their Approver app.</string>
     <string name="enter_code_access_message">Have %1$s read aloud the 6-digit code from their Approver app and enter it below. </string>
     <string name="activate_approver_name">Verify %1$s</string>
