@@ -3,7 +3,6 @@ package co.censo.censo.util
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import co.censo.censo.presentation.Screen
-import co.censo.shared.util.projectLog
 
 data class NavigationData(
     val route: String,
@@ -18,7 +17,6 @@ fun NavOptionsBuilder.popCurrentDestinationFromBackStack(navController: NavContr
 
 fun NavOptionsBuilder.launchSingleTopIfNavigatingToHomeScreen(destinationRoute: String) {
     if (destinationRoute == Screen.OwnerVaultScreen.route) {
-        projectLog(message = "Navigating to OwnerVaultScreen/HomeScreen")
         launchSingleTop = true
     }
 }

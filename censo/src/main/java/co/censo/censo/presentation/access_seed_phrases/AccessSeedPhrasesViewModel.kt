@@ -22,7 +22,6 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -208,9 +207,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun onBackClicked() {
-        projectLog(message = "Current accessPhrasesUIState when hitting backNav")
-        projectLog(message = state.accessPhrasesUIState.name)
-
         val accessPhrasesUIState = when (state.accessPhrasesUIState) {
             AccessPhrasesUIState.ViewPhrase,
             AccessPhrasesUIState.ReadyToStart -> AccessPhrasesUIState.SelectPhrase
@@ -228,7 +224,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             showCancelConfirmationDialog = false,
             cancelAccessResource = Resource.Loading()
         )
-        projectLog(message = "Cancelling access")
 
         viewModelScope.launch {
             val navData = NavigationData(
@@ -239,7 +234,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
-                projectLog(message = "Access cancel success")
                 state = state.copy(
                     navigationResource = Resource.Success(navData)
                 )

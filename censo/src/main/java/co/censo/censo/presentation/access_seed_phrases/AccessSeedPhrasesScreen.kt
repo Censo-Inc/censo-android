@@ -33,7 +33,6 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -75,8 +74,6 @@ fun AccessSeedPhrasesScreen(
     }
 
     BackHandler(enabled = true) {
-        projectLog(message = "BackHandler running onBack")
-        projectLog(message = "UI state: ${state.accessPhrasesUIState.name}")
         if (state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase) {
             viewModel.showCancelConfirmationDialog()
         } else {

@@ -39,8 +39,6 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
-import co.censo.censo.presentation.plan_finalization.ReplacePolicyAction
-import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -49,9 +47,6 @@ import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
-import co.censo.shared.util.projectLog
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

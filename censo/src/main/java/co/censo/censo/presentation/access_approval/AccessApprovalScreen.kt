@@ -36,9 +36,6 @@ import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.LinksUtil
-import co.censo.shared.util.popUpToTop
-import co.censo.shared.util.projectLog
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)

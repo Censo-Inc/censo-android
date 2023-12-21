@@ -21,7 +21,6 @@ import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.model.Approval
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -248,9 +247,6 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun onBackClicked() {
-        projectLog(message = "Current accessApprovalUIState when hitting backNav")
-        projectLog(message = state.accessApprovalUIState.name)
-
         when (state.accessApprovalUIState) {
             AccessApprovalUIState.SelectApprover -> {
                 state = state.copy(showCancelConfirmationDialog = true)
