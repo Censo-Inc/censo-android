@@ -277,7 +277,7 @@ class AccessApprovalViewModel @Inject constructor(
 
         val navData = NavigationData(
             route = destination,
-            popSelfFromBackStack = false
+            popSelfFromBackStack = true
         )
 
         state = state.copy(navigationResource = Resource.Success(navData))
