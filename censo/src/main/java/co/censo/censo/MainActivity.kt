@@ -78,7 +78,7 @@ class MainActivity : FragmentActivity() {
 
                         LockedScreen()
 
-                        PaywallScreen()
+                        PaywallScreen(navController = navController)
                     }
 
                     StrongboxUI()

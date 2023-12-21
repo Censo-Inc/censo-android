@@ -28,6 +28,9 @@ data class PaywallState(
 
     // api requests
     val submitPurchaseResource: Resource<SubmitPurchaseApiResponse> = Resource.Uninitialized,
+
+    // navigation
+    val kickUserOut: Resource<Unit> = Resource.Uninitialized,
 ) {
 
     val loading = billingClientReadyResource is Resource.Loading

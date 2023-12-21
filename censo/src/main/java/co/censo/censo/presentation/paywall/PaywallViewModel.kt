@@ -141,4 +141,18 @@ class PaywallViewModel @Inject constructor(
     fun restorePurchase() {
         onStart()
     }
+
+    fun logout() {
+        viewModelScope.launch {
+            ownerRepository.signUserOut()
+            state = state.copy(kickUserOut = Resource.Success(Unit))
+        }
+    }
+
+    fun reset() {
+        if (state.billingClientReadyResource !is Resource.Uninitialized) {
+            billingClient.terminateBillingConnection()
+        }
+        state = PaywallState()
+    }
 }
