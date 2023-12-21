@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,7 +83,10 @@ fun ProspectApproverInfoBox(
         }
 
         onEdit?.let {
-            IconButton(onClick = onEdit) {
+            IconButton(
+                modifier = Modifier.size(48.dp),
+                onClick = onEdit
+            ) {
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.edit_icon),
                     contentDescription = stringResource(R.string.edit_approver_name),

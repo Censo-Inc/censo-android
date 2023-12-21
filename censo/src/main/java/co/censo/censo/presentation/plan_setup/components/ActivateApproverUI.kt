@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.plan_setup.components
 
+import Base58EncodedApproverPublicKey
 import Base64EncodedData
 import InvitationId
 import StandardButton
@@ -39,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +53,7 @@ import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
 import co.censo.shared.presentation.SharedColors.ButtonBackgroundBlue
+import kotlinx.datetime.Clock
 
 @Composable
 fun ActivateApproverUI(
@@ -397,6 +400,114 @@ fun ActivatePrimaryApproverInitialPreview() {
             participantId = ParticipantId.generate(),
             status = ApproverStatus.Initial(
                 deviceEncryptedTotpSecret = Base64EncodedData(""),
+            )
+        ),
+        onContinue = {},
+        onEditNickname = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivatePrimaryApproverAcceptedPreview() {
+    ActivateApproverUI(
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Approver.ProspectApprover(
+            invitationId = InvitationId(""),
+            label = "Neo",
+            participantId = ParticipantId.generate(),
+            status = ApproverStatus.Accepted(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+                acceptedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {},
+        onEditNickname = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivatePrimaryApproverConfirmedPreview() {
+    ActivateApproverUI(
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Approver.ProspectApprover(
+            invitationId = InvitationId(""),
+            label = "Neo",
+            participantId = ParticipantId.generate(),
+            status = ApproverStatus.Confirmed(
+                approverPublicKey = Base58EncodedApproverPublicKey(""),
+                approverKeySignature = Base64EncodedData(""),
+                timeMillis = 0,
+                confirmedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {},
+        onEditNickname = {}
+    )
+}
+
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
+@Composable
+fun ActivateAlternateApproverInitialPreview() {
+    ActivateApproverUI(
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Approver.ProspectApprover(
+            invitationId = InvitationId(""),
+            label = "John Wick has a really nice car",
+            participantId = ParticipantId.generate(),
+            status = ApproverStatus.Initial(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+            )
+        ),
+        onContinue = {},
+        onEditNickname = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivateAlternateApproverAcceptedPreview() {
+    ActivateApproverUI(
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Approver.ProspectApprover(
+            invitationId = InvitationId(""),
+            label = "John Wick",
+            participantId = ParticipantId.generate(),
+            status = ApproverStatus.Accepted(
+                deviceEncryptedTotpSecret = Base64EncodedData(""),
+                acceptedAt = Clock.System.now()
+            )
+        ),
+        onContinue = {},
+        onEditNickname = {}
+    )
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActivateAlternateApproverConfirmedPreview() {
+    ActivateApproverUI(
+        secondsLeft = 43,
+        verificationCode = "345819",
+        storesLink = "link",
+        prospectApprover = Approver.ProspectApprover(
+            invitationId = InvitationId(""),
+            label = "John Wick",
+            participantId = ParticipantId.generate(),
+            status = ApproverStatus.Confirmed(
+                approverPublicKey = Base58EncodedApproverPublicKey(""),
+                approverKeySignature = Base64EncodedData(""),
+                timeMillis = 0,
+                confirmedAt = Clock.System.now()
             )
         ),
         onContinue = {},
