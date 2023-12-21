@@ -23,7 +23,7 @@ import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
-import co.censo.censo.util.popCurrentDestinationFromBackStack
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.Resource
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.OnLifecycleEvent

@@ -19,6 +19,7 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.parseLink
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.NavigationData
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -106,8 +107,14 @@ class ApproverEntranceViewModel @Inject constructor(
             )
 
             if (deleteUserResource is Resource.Success) {
-                state =
-                    state.copy(navigationResource = Resource.Success(Screen.ApproverEntranceRoute.route))
+                state = state.copy(
+                        navigationResource = Resource.Success(
+                            NavigationData(
+                                route = Screen.ApproverEntranceRoute.route,
+                                popSelfFromBackStack = false
+                            )
+                        )
+                    )
             }
         }
     }
@@ -368,13 +375,23 @@ class ApproverEntranceViewModel @Inject constructor(
         state = when (routingDestination) {
             RoutingDestination.ACCESS ->
                 state.copy(
-                    navigationResource = Resource.Success(Screen.ApproverAccessScreen.route),
+                    navigationResource = Resource.Success(
+                        NavigationData(
+                            route = Screen.ApproverAccessScreen.route,
+                            popSelfFromBackStack = false
+                        )
+                    ),
                     uiState = ApproverEntranceUIState.Initial
                 )
 
             RoutingDestination.ONBOARDING ->
                 state.copy(
-                    navigationResource = Resource.Success(Screen.ApproverOnboardingScreen.route),
+                    navigationResource = Resource.Success(
+                        NavigationData(
+                            route = Screen.ApproverOnboardingScreen.route,
+                            popSelfFromBackStack = false
+                        )
+                    ),
                     uiState = ApproverEntranceUIState.Initial
                 )
         }

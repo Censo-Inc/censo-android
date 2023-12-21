@@ -29,7 +29,7 @@ data class ApproverOnboardingState(
     // UI state
     val approverUIState: ApproverOnboardingUIState = ApproverOnboardingUIState.Loading,
     val showTopBarCancelConfirmationDialog: Boolean = false,
-    val navToApproverRouting: Boolean = false,
+    val navToApproverEntrance: Boolean = false,
 
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,

@@ -39,7 +39,7 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
-import co.censo.censo.util.popCurrentDestinationFromBackStack
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler

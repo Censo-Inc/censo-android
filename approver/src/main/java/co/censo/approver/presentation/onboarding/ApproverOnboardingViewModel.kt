@@ -232,7 +232,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         if (approverNotInOnboarding) {
             approverRepository.clearInvitationId()
-            state = state.copy(navToApproverRouting = true)
+            state = state.copy(navToApproverEntrance = true)
             return
         }
 
@@ -378,8 +378,8 @@ class ApproverOnboardingViewModel @Inject constructor(
         )
     }
 
-    fun triggerApproverRoutingNavigation() {
-        state = state.copy(navToApproverRouting = true)
+    fun triggerApproverEntranceNavigation() {
+        state = state.copy(navToApproverEntrance = true)
     }
 
     private fun cancelOnboarding() {
@@ -387,7 +387,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         state = state.copy(
             invitationId = InvitationId(""),
-            navToApproverRouting = true
+            navToApproverEntrance = true
         )
     }
 
@@ -536,8 +536,8 @@ class ApproverOnboardingViewModel @Inject constructor(
         )
     }
 
-    fun resetApproverRoutingNavigationTrigger() {
-        state = state.copy(navToApproverRouting = false)
+    fun resetApproverEntranceNavigationTrigger() {
+        state = state.copy(navToApproverEntrance = false)
     }
 
     fun resetMessage() {

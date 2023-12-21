@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.access_approval
 
-import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.DeleteAccessApiResponse
@@ -11,6 +10,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
+import co.censo.shared.util.NavigationData
 
 data class AccessApprovalState(
     // UI state

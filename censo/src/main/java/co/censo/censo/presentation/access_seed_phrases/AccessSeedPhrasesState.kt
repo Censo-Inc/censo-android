@@ -1,7 +1,6 @@
 package co.censo.censo.presentation.access_seed_phrases
 
 import SeedPhraseId
-import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.OwnerState
@@ -9,6 +8,7 @@ import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.util.BIP39
+import co.censo.shared.util.NavigationData
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds

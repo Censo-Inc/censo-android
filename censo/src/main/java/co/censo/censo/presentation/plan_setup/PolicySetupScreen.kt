@@ -28,10 +28,10 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
-import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 
 enum class PolicySetupAction(val threshold: UInt) {
     AddApprovers(2U), RemoveApprovers(1U)

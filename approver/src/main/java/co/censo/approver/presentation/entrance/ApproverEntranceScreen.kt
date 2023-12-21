@@ -85,8 +85,8 @@ fun ApproverEntranceScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { destination ->
-                navController.navigate(destination) {
+            state.navigationResource.data?.let { navigationData ->
+                navController.navigate(navigationData.route) {
                     popUpToTop()
                 }
             }

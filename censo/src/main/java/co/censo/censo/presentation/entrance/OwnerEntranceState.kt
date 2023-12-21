@@ -1,8 +1,8 @@
 package co.censo.censo.presentation.entrance
 
-import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
+import co.censo.shared.util.NavigationData
 import okhttp3.ResponseBody
 
 data class OwnerEntranceState(

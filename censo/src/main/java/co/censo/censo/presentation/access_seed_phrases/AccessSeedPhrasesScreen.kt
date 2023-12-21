@@ -31,7 +31,7 @@ import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhra
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
-import co.censo.censo.util.popCurrentDestinationFromBackStack
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.LargeLoading
 
 @OptIn(ExperimentalMaterial3Api::class)

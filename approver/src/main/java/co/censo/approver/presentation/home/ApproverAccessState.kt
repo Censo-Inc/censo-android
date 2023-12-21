@@ -45,7 +45,7 @@ data class ApproverAccessState(
     val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val accessConfirmationPhase: ApproverPhase.AccessConfirmation? = null,
 
-    val navToApproverRouting: Boolean = false,
+    val navToApproverEntrance: Boolean = false,
 ) {
 
     val loading = userResponse is Resource.Loading

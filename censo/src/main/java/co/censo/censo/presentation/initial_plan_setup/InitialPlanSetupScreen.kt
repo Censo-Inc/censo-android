@@ -52,7 +52,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
-import co.censo.censo.util.popCurrentDestinationFromBackStack
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions

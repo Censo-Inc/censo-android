@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -22,6 +21,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
+import co.censo.shared.util.NavigationData
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

@@ -18,7 +18,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +43,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +60,7 @@ fun ApproverOnboardingScreen(
 
             Lifecycle.Event.ON_PAUSE -> {
                 if (state.approverUIState is ApproverOnboardingUIState.Complete) {
-                    viewModel.triggerApproverRoutingNavigation()
+                    viewModel.triggerApproverEntranceNavigation()
                 } else {
                     viewModel.onStop()
                 }
@@ -75,14 +75,12 @@ fun ApproverOnboardingScreen(
     }
 
     LaunchedEffect(key1 = state) {
-        if (state.navToApproverRouting) {
+        if (state.navToApproverEntrance) {
             navController.navigate(Screen.ApproverEntranceRoute.route) {
-                popUpTo(Screen.ApproverOnboardingScreen.route) {
-                    inclusive = true
-                }
+                popCurrentDestinationFromBackStack(navController)
             }
 
-            viewModel.resetApproverRoutingNavigationTrigger()
+            viewModel.resetApproverEntranceNavigationTrigger()
         }
 
         if (state.onboardingMessage is Resource.Success) {

@@ -1,12 +1,12 @@
 package co.censo.censo.presentation.plan_setup
 
 import ParticipantId
-import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.util.NavigationData
 import kotlinx.datetime.Clock
 
 

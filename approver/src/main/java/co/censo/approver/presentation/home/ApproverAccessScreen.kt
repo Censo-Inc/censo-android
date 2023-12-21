@@ -40,6 +40,7 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,14 +67,12 @@ fun ApproverAccessScreen(
     }
 
     LaunchedEffect(key1 = state) {
-        if (state.navToApproverRouting) {
+        if (state.navToApproverEntrance) {
             navController.navigate(Screen.ApproverEntranceRoute.route) {
-                popUpTo(Screen.ApproverAccessScreen.route) {
-                    inclusive = true
-                }
+                popCurrentDestinationFromBackStack(navController)
             }
 
-            viewModel.resetApproverRoutingNavigationTrigger()
+            viewModel.resetApproverEntranceNavigationTrigger()
         }
     }
 

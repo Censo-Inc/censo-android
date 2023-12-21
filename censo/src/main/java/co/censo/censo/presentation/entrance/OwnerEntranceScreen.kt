@@ -58,7 +58,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.Resource
 import co.censo.shared.R as SharedR
 import co.censo.censo.R as CensoR
@@ -73,6 +72,7 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.LinksUtil
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import kotlin.time.Duration.Companion.milliseconds
