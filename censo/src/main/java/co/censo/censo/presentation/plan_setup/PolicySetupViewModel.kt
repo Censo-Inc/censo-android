@@ -17,6 +17,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.censo.util.NavigationData
 import co.censo.censo.util.asExternalApprover
 import co.censo.censo.util.asOwnerAsApprover
 import co.censo.censo.util.confirmed
@@ -201,7 +202,14 @@ class PolicySetupViewModel @Inject constructor(
             }
 
             PolicySetupState.BackIconType.Exit -> {
-                state = state.copy(navigationResource = Resource.Success(Screen.OwnerVaultScreen.route))
+                state = state.copy(
+                    navigationResource = Resource.Success(
+                        NavigationData(
+                            route = Screen.OwnerVaultScreen.route,
+                            popSelfFromBackStack = true
+                        )
+                    )
+                )
             }
         }
     }

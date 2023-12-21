@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.plan_setup
 
 import ParticipantId
+import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
@@ -35,7 +36,7 @@ data class PolicySetupState(
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
 
     // Navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 
     // Plan Finalization
     val replacePolicy: Resource<Unit> = Resource.Uninitialized,

@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
+import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
@@ -283,7 +284,11 @@ class OwnerEntranceViewModel @Inject constructor(
             }
         }
 
-        state = state.copy(navigationResource = Resource.Success(destination))
+        state = state.copy(
+            navigationResource = Resource.Success(
+                NavigationData(route = destination, popSelfFromBackStack = true)
+            )
+        )
     }
 
     fun resetNavigationResource() {

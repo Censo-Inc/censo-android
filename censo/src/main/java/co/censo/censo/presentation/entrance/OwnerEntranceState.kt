@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.entrance
 
+import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import okhttp3.ResponseBody
@@ -14,7 +15,7 @@ data class OwnerEntranceState(
     val userFinishedSetup: Boolean = false,
 
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
     val isLoading = signInUserResource is Resource.Loading
             || userResponse is Resource.Loading
