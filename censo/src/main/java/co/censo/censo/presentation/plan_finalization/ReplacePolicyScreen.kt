@@ -22,6 +22,7 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
+import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.Resource
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
@@ -50,6 +51,7 @@ fun ReplacePolicyScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
                 navController.navigate(it) {
+                    launchSingleTopIfNavigatingToHomeScreen(it)
                     popCurrentDestinationFromBackStack(navController)
                 }
                 viewModel.resetNavigationResource()
