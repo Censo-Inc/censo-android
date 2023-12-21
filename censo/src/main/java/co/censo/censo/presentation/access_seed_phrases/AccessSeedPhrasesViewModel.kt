@@ -246,16 +246,6 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
 
-            //TODO: Be diligent with this check, we may not need it
-            if (response is Resource.Error) {
-                projectLog(message = "Access cancel failed with code: ${response.errorCode}")
-                if (response.errorCode == 404) {
-                    state = state.copy(
-                        navigationResource = Resource.Success(navData)
-                    )
-                }
-            }
-
             state = state.copy(cancelAccessResource = response)
         }
     }
