@@ -100,6 +100,7 @@ fun AccessApprovalScreen(
                             else -> when (accessIntent) {
                                 AccessIntent.AccessPhrases -> stringResource(id = R.string.access)
                                 AccessIntent.ReplacePolicy -> stringResource(id = R.string.remove_approvers)
+                                AccessIntent.RecoverOwnerKey -> stringResource(id = R.string.recover_key)
                             }
                         },
                         textAlign = TextAlign.Center
@@ -180,6 +181,7 @@ fun AccessApprovalScreen(
                         AccessApprovalUIState.SelectApprover -> {
                             SelectApprover(
                                 intent = accessIntent,
+                                approvals = state.approvals,
                                 approvers = state.approvers.external(),
                                 selectedApprover = state.selectedApprover,
                                 onApproverSelected = viewModel::onApproverSelected,

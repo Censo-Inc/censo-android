@@ -4,33 +4,20 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.ACCEPTED_TERMS_OF_USE_VERSION
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.APPROVER_APPROVAL_ID
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.BIP39
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_CREATED_FLAG
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.EDITING_SECURITY_PLAN
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.APPROVER_INVITATION_ID
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.APPROVER_PARTICIPANT_ID
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.JWT_KEY
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
-import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SECURITY_PLAN
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.USER_SEEN_PERMISSION_DIALOG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_KEY
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 interface SecurePreferences {
     fun saveJWT(jwt: String)
     fun retrieveJWT() : String
     fun clearJWT()
-    fun setDeviceCreatedFlag()
-    fun retrieveDeviceCreatedFlag() : Boolean
-    fun saveBIP39Phrases(phrases: BIP39Phrases)
-    fun retrieveBIP39Phrases(): BIP39Phrases
-    fun clearStoredPhrases()
-    fun storedPhrasesIsNotEmpty() : Boolean
     fun saveDeviceKeyId(id: String)
     fun retrieveDeviceKeyId() : String
     fun clearDeviceKeyId()
@@ -40,11 +27,6 @@ interface SecurePreferences {
     fun saveApproverParticipantId(id: String)
     fun retrieveApproverParticipantId() : String
     fun clearApproverParticipantId()
-    fun setEditingSecurityPlan(editingSecurityPlan: Boolean)
-    fun isEditingSecurityPlan() : Boolean
-    fun setSecurityPlan(securityPlanData: SecurityPlanData)
-    fun clearSecurityPlanData()
-    fun retrieveSecurityPlan() : SecurityPlanData?
     fun userHasSeenPermissionDialog(): Boolean
     fun setUserSeenPermissionDialog(seenDialog: Boolean)
     fun acceptedTermsOfUseVersion(): String
@@ -62,14 +44,10 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         //Stored Values
         const val JWT_KEY = "jwt"
         const val USER_SEEN_PERMISSION_DIALOG = "user_seen_permission_dialog"
-        const val DEVICE_CREATED_FLAG = "device_created_flag"
-        const val BIP39 = "bip_39"
         const val DEVICE_KEY = "device_key"
         const val APPROVER_INVITATION_ID = "approver_invitation_id"
         const val APPROVER_PARTICIPANT_ID = "approver_participant_id"
         const val APPROVER_APPROVAL_ID = "approver_approval_id"
-        const val EDITING_SECURITY_PLAN = "editing_security_plan"
-        const val SECURITY_PLAN = "security_plan"
         const val ACCEPTED_TERMS_OF_USE_VERSION = "accepted_terms_of_use_version"
     }
 
@@ -98,40 +76,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     override fun clearJWT() =
         saveJWT("")
-
-    //region editing security plan
-    override fun isEditingSecurityPlan(): Boolean {
-        return sharedPrefs.getBoolean(EDITING_SECURITY_PLAN, false)
-    }
-
-    override fun setEditingSecurityPlan(editingSecurityPlan: Boolean) {
-        val editor = sharedPrefs.edit()
-        editor.putBoolean(EDITING_SECURITY_PLAN, editingSecurityPlan)
-        editor.apply()
-    }
-    //endregion
-
-    //region security plan
-    override fun setSecurityPlan(securityPlanData: SecurityPlanData) {
-        val editor = sharedPrefs.edit()
-        editor.putString(SECURITY_PLAN, Json.encodeToString(securityPlanData))
-        editor.apply()
-    }
-
-    override fun clearSecurityPlanData() {
-        val editor = sharedPrefs.edit()
-        editor.putString(SECURITY_PLAN, "")
-        editor.apply()
-    }
-
-    override fun retrieveSecurityPlan(): SecurityPlanData? {
-        val securityJson = sharedPrefs.getString(SECURITY_PLAN, "") ?: ""
-
-        if (securityJson.isEmpty()) return null
-
-        return Json.decodeFromString(securityJson)
-    }
-    //endregion
 
     //region device key id
     override fun saveDeviceKeyId(id: String) {
@@ -208,40 +152,4 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         editor.apply()
     }
     // endregion
-
-    //region device created
-    override fun setDeviceCreatedFlag() {
-        val editor = sharedPrefs.edit()
-        editor.putBoolean(DEVICE_CREATED_FLAG, true)
-        editor.apply()
-    }
-
-    override fun retrieveDeviceCreatedFlag(): Boolean {
-        return sharedPrefs.getBoolean(DEVICE_CREATED_FLAG, false)
-    }
-    //endregion
-
-    //region bip 39 phrases
-    override fun saveBIP39Phrases(phrases: BIP39Phrases) {
-        val editor = sharedPrefs.edit()
-        editor.putString(BIP39, Json.encodeToString(phrases))
-        editor.apply()
-    }
-
-    override fun retrieveBIP39Phrases(): BIP39Phrases {
-        val savedPhraseJson = sharedPrefs.getString(BIP39, null)
-
-        if (savedPhraseJson.isNullOrEmpty()) return emptyMap()
-
-        return Json.decodeFromString(savedPhraseJson)
-    }
-
-    override fun clearStoredPhrases() {
-        val editor = sharedPrefs.edit()
-        editor.putString(BIP39, "")
-        editor.apply()
-    }
-    //endregion
-
-    override fun storedPhrasesIsNotEmpty() = retrieveBIP39Phrases().isNotEmpty()
 }

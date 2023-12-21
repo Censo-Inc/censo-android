@@ -248,7 +248,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
             state = if (userResponse is Resource.Success) {
                 // update global state
-                ownerStateFlow.tryEmit(userResponse.map { it.ownerState })
+                ownerStateFlow.value = userResponse.map { it.ownerState }
 
                 loggedInRouting(userResponse.data!!.ownerState)
 

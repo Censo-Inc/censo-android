@@ -1,13 +1,16 @@
 package co.censo.shared.data.cryptography
 
+import Base58EncodedApproverPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
+import Base58EncodedPrivateKey
 import Base64EncodedData
+import ParticipantId
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.Approver
-import co.censo.shared.data.model.ApproverShard
 import co.censo.shared.data.model.ApproverStatus
+import co.censo.shared.data.model.ReplacePolicyApiRequest
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.math.BigInteger
 import java.security.KeyPair
@@ -19,7 +22,7 @@ class PolicySetupHelper(
     val encryptedMasterKey: Base64EncodedData,
     val threshold: UInt,
     val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
-    val approverShards: List<ApproverShard> = emptyList(),
+    val approverShards: List<ReplacePolicyApiRequest.ApproverShard> = emptyList(),
     val approverKeysSignatureByIntermediateKey: Base64EncodedData,
     val signatureByPreviousIntermediateKey: Base64EncodedData?,
     val masterKeySignature: Base64EncodedData,
@@ -36,6 +39,32 @@ class PolicySetupHelper(
             entropy: Base64EncodedData,
             deviceKeyId: String,
         ): PolicySetupHelper {
+            return create(
+                threshold = threshold,
+                approverPublicKeys = approvers.associate { approver ->
+                    approver.participantId to when (val approverStatus = approver.status) {
+                        is ApproverStatus.Confirmed -> approverStatus.approverPublicKey
+                        is ApproverStatus.ImplicitlyOwner -> approverStatus.approverPublicKey
+                        else -> throw Exception("Invalid status for policy setup")
+                    }
+                },
+                masterEncryptionKey = masterEncryptionKey,
+                previousIntermediateKey = previousIntermediateKey,
+                ownerApproverEncryptedPrivateKey = ownerApproverEncryptedPrivateKey,
+                entropy = entropy,
+                deviceKeyId = deviceKeyId,
+            )
+        }
+
+        fun create(
+            threshold: UInt,
+            approverPublicKeys: Map<ParticipantId, Base58EncodedApproverPublicKey>,
+            masterEncryptionKey: EncryptionKey,
+            previousIntermediateKey: PrivateKey? = null,
+            ownerApproverEncryptedPrivateKey: ByteArray,
+            entropy: Base64EncodedData,
+            deviceKeyId: String,
+        ): PolicySetupHelper {
             val intermediateEncryptionKey = EncryptionKey.generateRandomKey()
 
             val encryptedMasterKey = intermediateEncryptionKey.encrypt(
@@ -45,24 +74,24 @@ class PolicySetupHelper(
             val sharer = SecretSharer(
                 secret = BigInteger(intermediateEncryptionKey.privateKeyRaw()),
                 threshold = threshold.toInt(),
-                participants = approvers.map { it.participantId.bigInt() }
+                participants = approverPublicKeys.keys.map { it.bigInt() }
             )
 
-            val approverShards = approvers.map { approver ->
-                val shard = sharer.shards.firstOrNull { it.x == approver.participantId.bigInt() }
+            val approverShards = approverPublicKeys.map { (participantId, approverPublicKey) ->
+                val shard = sharer.shards.firstOrNull { it.x == participantId.bigInt() }
                 val shardBytes = shard?.y?.toByteArray() ?: byteArrayOf()
 
-                val approverPublicKey = resolveApproverPublicKey(approver)
-                val encryptedShard = ExternalEncryptionKey.generateFromPublicKeyBase58(approverPublicKey).encrypt(shardBytes)
+                val encryptedShard = ExternalEncryptionKey.generateFromPublicKeyBase58(approverPublicKey)
+                    .encrypt(shardBytes)
 
-                ApproverShard(
-                    participantId = approver.participantId,
+                ReplacePolicyApiRequest.ApproverShard(
+                    participantId = participantId,
                     encryptedShard = encryptedShard.base64Encoded()
                 )
             }
 
-            val approverKeysSignatureByIntermediateKey = approvers
-                .map { approver -> resolveApproverPublicKey(approver) }
+            val approverKeysSignatureByIntermediateKey = approverPublicKeys
+                .values
                 .sortedBy { it.value }  // natural sort order of Base58 key representation
                 .map { it.getBytes() }
                 .reduce { acc, key -> acc + key }
@@ -83,7 +112,7 @@ class PolicySetupHelper(
             //region Master Key Signature + Master Encryption Public Key
             val masterEncryptionPublicKey = Base58EncodedMasterPublicKey(masterEncryptionKey.publicExternalRepresentation().value)
 
-            val decryptedOwnerApproverPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
+            val decryptedOwnerApproverPrivateKey: Base58EncodedPrivateKey = ownerApproverEncryptedPrivateKey.decryptWithEntropy(
                 deviceKeyId = deviceKeyId,
                 entropy = entropy
             )
@@ -107,12 +136,5 @@ class PolicySetupHelper(
                 masterKeySignature = masterKeySignature
             )
         }
-
-        private fun resolveApproverPublicKey(approver: Approver.ProspectApprover) =
-            when (val approverStatus = approver.status) {
-                is ApproverStatus.Confirmed -> approverStatus.approverPublicKey
-                is ApproverStatus.ImplicitlyOwner -> approverStatus.approverPublicKey
-                else -> throw Exception("Invalid status for policy setup")
-            }
     }
 }

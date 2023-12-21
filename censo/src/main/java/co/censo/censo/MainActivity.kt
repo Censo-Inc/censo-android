@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -15,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -24,23 +22,25 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import co.censo.shared.data.storage.SecurePreferences
-import co.censo.censo.presentation.entrance.OwnerEntranceScreen
+import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
-import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.main.MainVaultScreen
+import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
-import co.censo.censo.presentation.plan_setup.PolicySetupScreen
-import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.main.BottomNavItem
+import co.censo.censo.presentation.main.MainVaultScreen
+import co.censo.censo.presentation.owner_key_recovery.OwnerKeyRecoveryScreen
+import co.censo.censo.presentation.owner_key_validation.ValidateApproverKeyScreen
 import co.censo.censo.presentation.paywall.PaywallScreen
 import co.censo.censo.presentation.plan_finalization.ReplacePolicyScreen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
+import co.censo.censo.presentation.plan_setup.PolicySetupScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -72,23 +72,13 @@ class MainActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
-                        Box(
-                            modifier = Modifier.fillMaxHeight(),
-                        ) {
-                            CensoNavHost(navController = navController)
-                        }
+                        CensoNavHost(navController = navController)
 
-                        Box(
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        ) {
-                            LockedScreen()
-                        }
+                        ValidateApproverKeyScreen(navController = navController)
 
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            PaywallScreen()
-                        }
+                        LockedScreen()
+
+                        PaywallScreen()
                     }
 
                     StrongboxUI()
@@ -107,6 +97,9 @@ class MainActivity : FragmentActivity() {
         ) {
             composable(route = Screen.EntranceRoute.route) {
                 OwnerEntranceScreen(navController = navController)
+            }
+            composable(route = Screen.OwnerKeyRecoveryRoute.route) {
+                OwnerKeyRecoveryScreen(navController = navController)
             }
             composable(route = Screen.OwnerVaultScreen.route) {
                 MainVaultScreen(selectedBottomNavItem = bottomNavItem, navController = navController)

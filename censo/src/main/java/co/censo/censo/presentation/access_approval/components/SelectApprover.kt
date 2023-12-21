@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.access_approval.components
 
+import ApprovalId
 import MessageText
 import ParticipantId
 import StandardButton
@@ -43,11 +44,14 @@ import co.censo.censo.R
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
+import co.censo.shared.data.model.Approval
+import co.censo.shared.data.model.ApprovalStatus
 import kotlinx.datetime.Clock
 
 @Composable
 fun SelectApprover(
     intent: AccessIntent,
+    approvals: List<Approval>,
     approvers: List<Approver.TrustedApprover>,
     selectedApprover: Approver.TrustedApprover?,
     onApproverSelected: (Approver.TrustedApprover) -> Unit,
@@ -67,11 +71,14 @@ fun SelectApprover(
         ) {
 
             TitleText(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 36.dp),
                 title = stringResource(
                     when (intent) {
                         AccessIntent.AccessPhrases -> R.string.request_access
-                        AccessIntent.ReplacePolicy -> R.string.request_approval
+                        AccessIntent.ReplacePolicy,
+                        AccessIntent.RecoverOwnerKey -> R.string.request_approval
                     }
                 ),
                 textAlign = TextAlign.Start
@@ -80,13 +87,16 @@ fun SelectApprover(
             Spacer(modifier = Modifier.height(verticalSpacingHeight - 8.dp))
 
             MessageText(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 36.dp),
                 message = stringResource(
                     when (intent) {
                         AccessIntent.AccessPhrases -> R.string.seed_phrase_request_access_message
                         AccessIntent.ReplacePolicy -> R.string.policy_replace_request_access_message
+                        AccessIntent.RecoverOwnerKey -> R.string.recover_key_request_access_message
                     },
-                    buildApproverNamesText(approvers = approvers, context)
+                    buildApproverNamesText(intent, approvers, context)
                 ),
                 textAlign = TextAlign.Start
             )
@@ -96,10 +106,13 @@ fun SelectApprover(
             approvers.sortedBy { it.attributes.onboardedAt }.forEachIndexed { _, approver ->
                 Spacer(modifier = Modifier.height(12.dp))
 
+                val approved = approvals.any { it.participantId == approver.participantId && it.status == ApprovalStatus.Approved }
+                val selected = approver == selectedApprover
                 SelectingApproverInfoBox(
                     nickName = approver.label,
-                    selected = (approver == selectedApprover),
-                    onSelect = { onApproverSelected(approver) }
+                    selected = selected,
+                    approved = approved,
+                    onSelect = { if (!approved) onApproverSelected(approver) }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -141,7 +154,11 @@ fun SelectApprover(
     }
 }
 
-fun buildApproverNamesText(approvers: List<Approver.TrustedApprover>, context: Context): String {
+fun buildApproverNamesText(
+    intent: AccessIntent,
+    approvers: List<Approver.TrustedApprover>,
+    context: Context,
+): String {
     val primaryApproverName =
         approvers.sortedBy { it.attributes.onboardedAt }.getOrNull(0)?.label ?: ""
     val alternateApproverName =
@@ -164,6 +181,7 @@ fun buildApproverNamesText(approvers: List<Approver.TrustedApprover>, context: C
 fun SelectingApproverInfoBox(
     nickName: String,
     selected: Boolean,
+    approved: Boolean,
     onSelect: () -> Unit
 ) {
 
@@ -179,7 +197,7 @@ fun SelectingApproverInfoBox(
             )
             .border(
                 width = 1.dp,
-                color = if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
+                color = if (approved) SharedColors.DisabledGrey else if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
@@ -195,11 +213,11 @@ fun SelectingApproverInfoBox(
                 .width(25.dp)
                 .align(Alignment.CenterVertically),
         ) {
-            if (selected) {
+            if (selected || approved) {
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.check_icon),
                     contentDescription = stringResource(R.string.select_approver),
-                    tint = SharedColors.MainIconColor
+                    tint = if (approved) SharedColors.DisabledGrey else SharedColors.MainIconColor
                 )
             }
         }
@@ -207,19 +225,19 @@ fun SelectingApproverInfoBox(
         Column {
             Text(
                 text = stringResource(id = R.string.approver),
-                color = SharedColors.MainColorText,
+                color = if (approved) SharedColors.GreyText else SharedColors.MainColorText,
                 fontSize = labelTextSize
             )
 
             Text(
                 text = nickName,
-                color = SharedColors.MainColorText,
+                color = if (approved) SharedColors.GreyText else SharedColors.MainColorText,
                 fontSize = 24.sp
             )
 
             Text(
                 text = context.getString(R.string.active),
-                color = SharedColors.SuccessGreen,
+                color = if (approved) SharedColors.GreyText else SharedColors.SuccessGreen,
                 fontSize = labelTextSize
             )
 
@@ -249,6 +267,7 @@ fun SelectApproverForAccessUIPreview() {
 
     SelectApprover(
         intent = AccessIntent.AccessPhrases,
+        approvals = listOf(),
         approvers = listOf(
             primaryApprover,
             backupApprover
@@ -281,6 +300,46 @@ fun SelectApproverForPolicyReplaceUIPreview() {
 
     SelectApprover(
         intent = AccessIntent.ReplacePolicy,
+        approvals = listOf(),
+        approvers = listOf(
+            primaryApprover,
+            backupApprover
+        ),
+        selectedApprover = backupApprover,
+        onApproverSelected = {},
+        onContinue = {}
+    )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SelectApproverForKeyRecoveryUIPreview() {
+    val primaryApprover = Approver.TrustedApprover(
+        label = "Neo",
+        participantId = ParticipantId.generate(),
+        isOwner = false,
+        attributes = ApproverStatus.Onboarded(
+            onboardedAt = Clock.System.now(),
+        )
+    )
+    val backupApprover = Approver.TrustedApprover(
+        label = "John Wick",
+        participantId = ParticipantId.generate(),
+        isOwner = false,
+        attributes = ApproverStatus.Onboarded(
+            onboardedAt = Clock.System.now(),
+        )
+    )
+
+    SelectApprover(
+        intent = AccessIntent.RecoverOwnerKey,
+        approvals = listOf(
+            Approval(
+                approvalId = ApprovalId("1"),
+                participantId = primaryApprover.participantId,
+                status = ApprovalStatus.Approved
+            )
+        ),
         approvers = listOf(
             primaryApprover,
             backupApprover

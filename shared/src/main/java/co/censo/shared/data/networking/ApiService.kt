@@ -35,6 +35,8 @@ import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
+import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
+import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
@@ -189,6 +191,12 @@ interface ApiService {
         @Body createPolicyApiRequest: ReplacePolicyApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplacePolicyApiResponse>
+
+    @PUT("/v1/policy/shards")
+    suspend fun replacePolicyShards(
+        @Body replacePolicyApiRequest: ReplacePolicyShardsApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<ReplacePolicyShardsApiResponse>
 
     @POST("/v1/approvership-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptApprovership(

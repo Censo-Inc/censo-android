@@ -1,5 +1,6 @@
 package co.censo.shared.data.model
 
+import Base58EncodedApproverPublicKey
 import Base58EncodedDevicePublicKey
 import Base64EncodedData
 import ParticipantId
@@ -8,7 +9,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 enum class AccessIntent {
-    AccessPhrases, ReplacePolicy
+    AccessPhrases, ReplacePolicy, RecoverOwnerKey
 }
 
 @Serializable
@@ -81,7 +82,8 @@ data class EncryptedShard(
     val participantId: ParticipantId,
     val encryptedShard: Base64EncodedData,
     val isOwnerShard: Boolean,
-    val ownerEntropy: Base64EncodedData?
+    val ownerEntropy: Base64EncodedData?,
+    val approverPublicKey: Base58EncodedApproverPublicKey?
 )
 
 @Serializable

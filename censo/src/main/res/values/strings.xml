@@ -350,14 +350,17 @@
     <string name="enter_the_code_request_access_step">2. Enter the code</string>
     <string name="your_approver_backup_label">your approver</string>
     <string name="waiting_for_to_open_the_link">Waiting for %1$s to open the link</string>
-    <string name="seed_phrase_request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identify.\n\nSelect your approver below when you are speaking with them:</string>
-    <string name="policy_replace_request_access_message">This will make you the sole approver when complete, and allow you to optionally add new approvers.\n\nRemoving approvers requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identify.\n\nSelect your approver below when you are speaking with them:</string>
+    <string name="recover_key">"Recover Key"</string>
+    <string name="recover_key_request_access_message">Key recovery requires assistance from both of your approvers.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect an approver to start with when you are speaking with them:</string>
+    <string name="seed_phrase_request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect your approver below when you are speaking with them:</string>
+    <string name="policy_replace_request_access_message">This will make you the sole approver when complete, and allow you to optionally add new approvers.\n\nRemoving approvers requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect your approver below when you are speaking with them:</string>
     <string name="locked">Locked</string>
     <string name="edit_phrase">Edit phrase</string>
     <string name="your_approver">your approver</string>
     <string name="select_phrase_cont_description">Select phrase</string>
     <string name="approvers_activated">Approvers activated!</string>
     <string name="approvers_removed">Approvers removed</string>
+    <string name="you_are_all_set">You are all set!</string>
     <string name="phrase_viewed">phrase viewed</string>
     <string name="exit_accessing_phrases">Exit accessing phrases</string>
     <string name="exit_accessing_phrases_message">Are you all finished accessing phrases? If you exit you will need to request approval to access your phrases again.</string>
@@ -396,4 +399,8 @@
     <string name="no_thanks">No thanks</string>
     <string name="share">Share</string>
     <string name="invite">Invite</string>
+    <string name="failed_to_validate_key">failed to validate key</string>
+    <string name="censo_was_not_able_to_access_your_key">Censo was not able to access your key</string>
+    <string name="collect_approvals_key_recovery_message">Collect approvals from both of your approvers in order to restore access to your seed phrases</string>
+    <string name="recovery_my_key">Recovery my key</string>
 </resources>

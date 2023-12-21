@@ -4,6 +4,7 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedApproverPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
+import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import SeedPhraseId
@@ -50,9 +51,10 @@ import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
+import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
+import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
-import co.censo.shared.data.model.SecurityPlanData
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSeedPhraseApiRequest
 import co.censo.shared.data.model.StoreSeedPhraseApiResponse
@@ -74,7 +76,9 @@ import io.github.novacrypto.base58.Base58
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 import java.math.BigInteger
+import java.security.KeyPair
 import java.security.PrivateKey
+import java.security.interfaces.ECPrivateKey
 import java.util.Base64
 
 data class CreatePolicyParams(
@@ -128,6 +132,22 @@ interface OwnerRepository {
         deviceKeyId: String
     ): Resource<ReplacePolicyApiResponse>
 
+    suspend fun verifyApproverPublicKeysSignature(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        approverPublicKeys: List<Base58EncodedApproverPublicKey>,
+        approverPublicKeysSignature: Base64EncodedData
+    ): Boolean
+
+    suspend fun replaceShards(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        encryptedMasterPrivateKey: Base64EncodedData,
+        threshold: UInt,
+        approverPublicKeys: Map<ParticipantId, Base58EncodedApproverPublicKey>,
+        ownerApproverEncryptedPrivateKey: ByteArray,
+        entropy: Base64EncodedData,
+        deviceKeyId: String
+    ): Resource<ReplacePolicyShardsApiResponse>
+
     suspend fun verifyToken(token: String): String?
     suspend fun saveJWT(jwtToken: String)
     fun retrieveJWT(): String
@@ -180,11 +200,6 @@ interface OwnerRepository {
     suspend fun deleteSeedPhrase(guid: SeedPhraseId): Resource<DeleteSeedPhraseApiResponse>
     suspend fun deleteUser(participantId: ParticipantId?, deletingApproverUser: Boolean = false): Resource<Unit>
 
-    fun isUserEditingSecurityPlan(): Boolean
-    fun setEditingSecurityPlan(editingPlan: Boolean)
-    fun retrieveSecurityPlan(): SecurityPlanData?
-    fun saveSecurityPlanData(securityPlanData: SecurityPlanData)
-    fun clearSecurityPlanData()
     suspend fun initiateAccess(intent: AccessIntent): Resource<InitiateAccessApiResponse>
     suspend fun cancelAccess(): Resource<DeleteAccessApiResponse>
     suspend fun signUserOut()
@@ -350,6 +365,74 @@ class OwnerRepositoryImpl(
         )
 
         return retrieveApiResource { apiService.replacePolicy(replacePolicyApiRequest) }
+    }
+
+    override suspend fun verifyApproverPublicKeysSignature(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        approverPublicKeys: List<Base58EncodedApproverPublicKey>,
+        approverPublicKeysSignature: Base64EncodedData
+    ): Boolean {
+        val intermediatePrivateKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+
+        return runCatching {
+            val encryptionKey = intermediatePrivateKey.let {
+                val privateKey = intermediatePrivateKey as ECPrivateKey
+                val publicKey = ECPublicKeyDecoder.getPublicKeyFromPrivateKey(privateKey)
+                EncryptionKey(KeyPair(publicKey, privateKey))
+            }
+
+            encryptionKey.verify(
+                signedData = approverPublicKeys
+                    .sortedBy { it.value }
+                    .map { it.getBytes() }
+                    .reduce { acc, key -> acc + key },
+                signature = approverPublicKeysSignature.bytes
+            )
+        }.getOrNull() ?: false
+    }
+
+    override suspend fun replaceShards(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        encryptedMasterPrivateKey: Base64EncodedData,
+        threshold: UInt,
+        approverPublicKeys: Map<ParticipantId, Base58EncodedApproverPublicKey>,
+        ownerApproverEncryptedPrivateKey: ByteArray,
+        entropy: Base64EncodedData,
+        deviceKeyId: String
+    ): Resource<ReplacePolicyShardsApiResponse> {
+        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
+
+        val setupHelper = try {
+            PolicySetupHelper.create(
+                threshold = threshold,
+                approverPublicKeys = approverPublicKeys,
+                masterEncryptionKey = masterEncryptionKey,
+                previousIntermediateKey = intermediateEncryptionKey,
+                ownerApproverEncryptedPrivateKey = ownerApproverEncryptedPrivateKey,
+                entropy = entropy,
+                deviceKeyId = deviceKeyId,
+            )
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ReplacePolicy)
+            return Resource.Error(exception = e)
+        }
+
+        val replacePolicyApiRequest = ReplacePolicyShardsApiRequest(
+            masterEncryptionPublicKey = setupHelper.masterEncryptionPublicKey,
+            encryptedMasterPrivateKey = setupHelper.encryptedMasterKey,
+            intermediatePublicKey = setupHelper.intermediatePublicKey,
+            approverShards = setupHelper.approverShards.map {
+                ReplacePolicyShardsApiRequest.ApproverShard(
+                    it.participantId, it.encryptedShard, approverPublicKeys[it.participantId]!!
+                )
+            },
+            approverPublicKeysSignatureByIntermediateKey = setupHelper.approverKeysSignatureByIntermediateKey,
+            signatureByPreviousIntermediateKey = setupHelper.signatureByPreviousIntermediateKey!!,
+            masterKeySignature = setupHelper.masterKeySignature
+        )
+
+        return retrieveApiResource { apiService.replacePolicyShards(replacePolicyApiRequest) }
     }
 
     override suspend fun verifyToken(token: String): String? {
@@ -552,16 +635,6 @@ class OwnerRepositoryImpl(
         return response
     }
 
-    override fun isUserEditingSecurityPlan() = secureStorage.isEditingSecurityPlan()
-    override fun setEditingSecurityPlan(editingPlan: Boolean) =
-        secureStorage.setEditingSecurityPlan(editingPlan)
-
-    override fun retrieveSecurityPlan() = secureStorage.retrieveSecurityPlan()
-
-    override fun saveSecurityPlanData(securityPlanData: SecurityPlanData) =
-        secureStorage.setSecurityPlan(securityPlanData)
-
-    override fun clearSecurityPlanData() = secureStorage.clearSecurityPlanData()
     override suspend fun initiateAccess(intent: AccessIntent): Resource<InitiateAccessApiResponse> {
         return retrieveApiResource { apiService.requestAccess(InitiateAccessApiRequest(intent)) }
     }

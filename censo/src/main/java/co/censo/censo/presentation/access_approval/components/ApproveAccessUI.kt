@@ -81,7 +81,8 @@ fun ApproveAccessUI(
             modifier = Modifier.fillMaxWidth(),
             title = when (intent) {
                 AccessIntent.AccessPhrases -> R.string.request_access
-                AccessIntent.ReplacePolicy -> R.string.request_approval
+                AccessIntent.ReplacePolicy,
+                AccessIntent.RecoverOwnerKey -> R.string.request_approval
             },
             fontSize = 28.sp,
             textAlign = TextAlign.Center,

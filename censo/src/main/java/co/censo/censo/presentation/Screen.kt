@@ -30,12 +30,12 @@ sealed class Screen(val route: String) {
     object AccessApproval : Screen("access_approval") {
         const val ACCESS_INTENT_ARG = "access_intent_key"
 
-        fun withIntent(
-            intent: AccessIntent,
-        ): String {
+        fun withIntent(intent: AccessIntent): String {
             return "${AccessApproval.route}/${intent.name}"
         }
     }
+
+    object OwnerKeyRecoveryRoute : Screen("owner_key_recovery")
 
     object EnterPhraseRoute : Screen("enter_phrase_screen") {
         const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"

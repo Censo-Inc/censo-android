@@ -18,6 +18,7 @@ object CrashReportingUtil {
     const val AuthHeaders = "AuthHeaders"
     const val TotpVerification = "TotpVerification"
     const val ReplacePolicy = "ReplacePolicy"
+    const val ReplacePolicyShards = "ReplacePolicyShards"
     const val JWTToken = "JWTToken"
     const val EncryptShard = "EncryptShard"
     const val DecryptShard = "DecryptShard"

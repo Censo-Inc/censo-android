@@ -19,6 +19,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.shared.data.model.Approval
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -110,6 +111,13 @@ class AccessApprovalViewModel @Inject constructor(
                     } else {
                         state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
                     }
+                } else if (state.accessApprovalUIState == AccessApprovalUIState.ApproveAccess && state.approvals.isApprovedFor(state.selectedApprover))  {
+                    state = state.copy(
+                        selectedApprover = null,
+                        verificationCode = "",
+                        waitingForApproval = false,
+                        accessApprovalUIState = AccessApprovalUIState.SelectApprover
+                    )
                 } else if (state.accessApprovalUIState == AccessApprovalUIState.Initial) {
                     // determine initial UI state
                     state = state.copy(accessApprovalUIState = AccessApprovalUIState.SelectApprover)
@@ -248,6 +256,7 @@ class AccessApprovalViewModel @Inject constructor(
         val destination = when (state.accessIntent) {
             AccessIntent.AccessPhrases -> Screen.AccessSeedPhrases.route
             AccessIntent.ReplacePolicy -> Screen.PolicySetupRoute.removeApproversRoute()
+            AccessIntent.RecoverOwnerKey -> Screen.OwnerKeyRecoveryRoute.route
         }
 
         state = state.copy(navigationResource = Resource.Success(destination))
@@ -256,6 +265,10 @@ class AccessApprovalViewModel @Inject constructor(
     fun hideCloseConfirmationDialog() {
         state = state.copy(showCancelConfirmationDialog = false)
     }
+}
+
+internal fun List<Approval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
+    return any { it.participantId == approver?.participantId && it.status == ApprovalStatus.Approved }
 }
 
 internal fun List<Approver.TrustedApprover>.external(): List<Approver.TrustedApprover> {

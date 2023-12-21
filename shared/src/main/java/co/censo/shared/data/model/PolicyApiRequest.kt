@@ -52,15 +52,38 @@ data class ReplacePolicyApiRequest(
     val approverPublicKeysSignatureByIntermediateKey: Base64EncodedData,
     val signatureByPreviousIntermediateKey: Base64EncodedData,
     val masterKeySignature: Base64EncodedData
-)
-
-@Serializable
-data class ApproverShard(
-    val participantId: ParticipantId,
-    val encryptedShard: Base64EncodedData,
-)
+) {
+    @Serializable
+    data class ApproverShard(
+        val participantId: ParticipantId,
+        val encryptedShard: Base64EncodedData,
+    )
+}
 
 @Serializable
 data class ReplacePolicyApiResponse(
+    val ownerState: OwnerState,
+)
+
+@Serializable
+data class ReplacePolicyShardsApiRequest(
+    val masterEncryptionPublicKey: Base58EncodedMasterPublicKey,
+    val encryptedMasterPrivateKey: Base64EncodedData,
+    val intermediatePublicKey: Base58EncodedIntermediatePublicKey,
+    val approverShards: List<ApproverShard>,
+    val approverPublicKeysSignatureByIntermediateKey: Base64EncodedData,
+    val signatureByPreviousIntermediateKey: Base64EncodedData,
+    val masterKeySignature: Base64EncodedData
+) {
+    @Serializable
+    data class ApproverShard(
+        val participantId: ParticipantId,
+        val encryptedShard: Base64EncodedData,
+        val approverPublicKey: Base58EncodedApproverPublicKey,
+    )
+}
+
+@Serializable
+data class ReplacePolicyShardsApiResponse(
     val ownerState: OwnerState,
 )
