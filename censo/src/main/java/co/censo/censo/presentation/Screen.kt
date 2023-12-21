@@ -17,8 +17,10 @@ sealed class Screen(val route: String) {
     object ReplacePolicyRoute: Screen("replace_policy_route") {
         const val REPLACE_POLICY_ACTION_ARG = "replace_policy_action_key"
 
-        fun addApproversRoute(): String = "${ReplacePolicyRoute.route}/${PolicySetupAction.AddApprovers.name}"
-        fun removeApproversRoute(): String = "${ReplacePolicyRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
+        private fun addApproversRoute(): String = "${ReplacePolicyRoute.route}/${PolicySetupAction.AddApprovers.name}"
+        private fun removeApproversRoute(): String = "${ReplacePolicyRoute.route}/${PolicySetupAction.RemoveApprovers.name}"
+
+        fun buildNavRoute(addApprovers: Boolean) : String = if (addApprovers) addApproversRoute() else removeApproversRoute()
     }
 
     object OwnerVaultScreen : Screen("owner_vault_screen")

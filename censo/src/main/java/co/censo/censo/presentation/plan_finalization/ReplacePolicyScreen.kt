@@ -18,12 +18,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
-import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
-import co.censo.censo.presentation.plan_setup.PolicySetupScreenAction
 import co.censo.censo.presentation.plan_setup.components.Activated
 import co.censo.censo.presentation.plan_setup.components.ApproversRemoved
+import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.Resource
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.OnLifecycleEvent
@@ -51,15 +50,7 @@ fun ReplacePolicyScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
                 navController.navigate(it) {
-                    val popUpToRoute = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
-                        Screen.ReplacePolicyRoute.addApproversRoute()
-                    } else {
-                        Screen.ReplacePolicyRoute.removeApproversRoute()
-                    }
-
-                    popUpTo(popUpToRoute) {
-                        inclusive = true
-                    }
+                    popCurrentDestinationFromBackStack(navController)
                 }
                 viewModel.resetNavigationResource()
             }

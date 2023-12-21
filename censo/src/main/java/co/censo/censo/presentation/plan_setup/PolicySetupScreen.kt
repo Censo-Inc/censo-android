@@ -27,6 +27,8 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
+import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
+import co.censo.censo.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
@@ -53,30 +55,23 @@ fun PolicySetupScreen(
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let {
-                navController.navigate(it)
+                navController.navigate(it) {
+                    launchSingleTopIfNavigatingToHomeScreen(it)
+                    popCurrentDestinationFromBackStack(navController)
+                }
                 viewModel.resetNavigationResource()
             }
         }
 
         if (state.replacePolicy is Resource.Success) {
             viewModel.resetReplacePolicy()
-            //Pop back stack entirely from here
-            val (route, popUpToRoute) = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
-                Pair(
-                    Screen.ReplacePolicyRoute.addApproversRoute(),
-                    Screen.PolicySetupRoute.addApproversRoute()
-                )
-            } else {
-                Pair(
-                    Screen.ReplacePolicyRoute.removeApproversRoute(),
-                    Screen.PolicySetupRoute.removeApproversRoute()
-                )
-            }
+
+            val route = Screen.ReplacePolicyRoute.buildNavRoute(
+                addApprovers = state.policySetupAction == PolicySetupAction.AddApprovers
+            )
 
             navController.navigate(route) {
-                popUpTo(popUpToRoute) {
-                    inclusive = true
-                }
+                popCurrentDestinationFromBackStack(navController)
             }
         }
     }

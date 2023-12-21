@@ -87,7 +87,7 @@ class VaultScreenViewModel @Inject constructor(
             { it.status is ApproverStatus.Confirmed } == true
         ) {
             //If all approvers are confirmed then move directly to replacing the policy
-            Screen.ReplacePolicyRoute.addApproversRoute()
+            Screen.ReplacePolicyRoute.buildNavRoute(addApprovers = true)
         } else {
             Screen.PolicySetupRoute.addApproversRoute()
         }
