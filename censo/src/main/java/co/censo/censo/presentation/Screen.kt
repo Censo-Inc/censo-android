@@ -49,8 +49,3 @@ sealed class Screen(val route: String) {
         }
     }
 }
-
-data class NavigationData(
-    val route: String,
-    val popSelfFromBackStack: Boolean
-)

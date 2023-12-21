@@ -1,7 +1,7 @@
 package co.censo.censo.presentation.access_seed_phrases
 
 import SeedPhraseId
-import co.censo.censo.presentation.NavigationData
+import co.censo.censo.util.NavigationData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.OwnerState
