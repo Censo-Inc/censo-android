@@ -24,6 +24,7 @@ import co.censo.censo.util.externalApprovers
 import co.censo.censo.util.notConfirmed
 import co.censo.censo.util.ownerApprover
 import co.censo.shared.util.NavigationData
+import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -203,12 +204,9 @@ class PolicySetupViewModel @Inject constructor(
 
             PolicySetupState.BackIconType.Exit -> {
                 state = state.copy(
-                    navigationResource = Resource.Success(
-                        NavigationData(
-                            route = Screen.OwnerVaultScreen.route,
-                            popSelfFromBackStack = true
-                        )
-                    )
+                    navigationResource = Screen.OwnerVaultScreen
+                        .navToAndPopCurrentDestination()
+                        .asResource()
                 )
             }
         }

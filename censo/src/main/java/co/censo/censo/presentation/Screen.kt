@@ -3,6 +3,7 @@ package co.censo.censo.presentation
 import Base58EncodedMasterPublicKey
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.util.NavigationData
 
 sealed class Screen(val route: String) {
     object EntranceRoute : Screen("entrance_screen")
@@ -49,5 +50,31 @@ sealed class Screen(val route: String) {
         ): String {
             return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}"
         }
+    }
+
+    fun navTo() : NavigationData {
+        return NavigationData(
+            route = this.route,
+            popSelfFromBackStack = false
+        )
+    }
+
+    fun navToAndPopCurrentDestination() : NavigationData {
+        return NavigationData(
+            route = this.route,
+            popSelfFromBackStack = true
+        )
+    }
+
+    fun String.navTo() : NavigationData {
+        return NavigationData(
+            route = this, popSelfFromBackStack = false
+        )
+    }
+
+    fun String.navToAndPopCurrentDestination() : NavigationData {
+        return NavigationData(
+            route = this, popSelfFromBackStack = true
+        )
     }
 }
