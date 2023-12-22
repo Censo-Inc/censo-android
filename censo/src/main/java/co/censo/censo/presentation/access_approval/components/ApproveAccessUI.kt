@@ -39,6 +39,7 @@ import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.presentation.components.KeepScreenOn
 import co.censo.shared.presentation.components.Loading
 import co.censo.shared.presentation.components.SmallLoading
 
@@ -169,6 +170,7 @@ fun ApproveAccessUI(
             }
         }
     }
+    KeepScreenOn()
 }
 
 @Preview(showSystemUi = true, showBackground = true)

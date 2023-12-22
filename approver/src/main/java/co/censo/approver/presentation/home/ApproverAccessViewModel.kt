@@ -20,6 +20,7 @@ import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import co.censo.shared.util.CrashReportingUtil
@@ -56,7 +57,7 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     fun onStop() {
-        userStatePollingTimer.stop()
+        userStatePollingTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
         stopAccessTotpGeneration()
     }
 
@@ -218,6 +219,7 @@ class ApproverAccessViewModel @Inject constructor(
                 }
 
                 stopAccessTotpGeneration()
+                userStatePollingTimer.stop()
             } else {
                 state = state.copy(rejectAccessResource = Resource.Loading())
                 val response = approverRepository.rejectAccess(state.approvalId)

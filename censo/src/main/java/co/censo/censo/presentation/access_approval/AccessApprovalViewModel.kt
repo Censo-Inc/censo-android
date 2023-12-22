@@ -57,7 +57,7 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun onStop() {
-        pollingVerificationTimer.stop()
+        pollingVerificationTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
     }
 
     fun retrieveOwnerState(silent: Boolean = false) {
@@ -111,6 +111,7 @@ class AccessApprovalViewModel @Inject constructor(
                     } else {
                         state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
                     }
+                    pollingVerificationTimer.stop()
                 } else if (state.accessApprovalUIState == AccessApprovalUIState.ApproveAccess && state.approvals.isApprovedFor(state.selectedApprover))  {
                     state = state.copy(
                         selectedApprover = null,

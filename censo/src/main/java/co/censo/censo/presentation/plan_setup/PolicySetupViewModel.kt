@@ -180,7 +180,7 @@ class PolicySetupViewModel @Inject constructor(
     }
     fun onStop() {
         verificationCodeTimer.stop()
-        pollingVerificationTimer.stop()
+        pollingVerificationTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
     }
     //endregion
 
@@ -292,6 +292,7 @@ class PolicySetupViewModel @Inject constructor(
         if (state.alternateApprover == null) {
             onInviteAlternateApprover()
         } else {
+            pollingVerificationTimer.stop()
             triggerReplacePolicy()
         }
     }

@@ -18,8 +18,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.approver.R
-import co.censo.approver.presentation.ApproverColors
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.components.KeepScreenOn
 import co.censo.shared.presentation.components.LargeTotpCodeView
 
 @Composable
@@ -65,6 +65,8 @@ fun OwnerCodeVerification(
             fontSize = 16.sp
         )
     }
+
+    KeepScreenOn()
 }
 
 @Preview(showSystemUi = true, showBackground = true)
