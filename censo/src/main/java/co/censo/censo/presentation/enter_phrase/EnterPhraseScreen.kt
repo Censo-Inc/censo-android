@@ -200,7 +200,7 @@ fun EnterPhraseScreen(
                                 currentLanguage = state.currentLanguage,
                                 onManualEntrySelected = { language -> viewModel.entrySelected(EntryType.MANUAL, language) },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
-                                onGenerateEntrySelected = { viewModel.entrySelected(EntryType.GENERATE) }
+                                onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) }
                             )
                         }
 

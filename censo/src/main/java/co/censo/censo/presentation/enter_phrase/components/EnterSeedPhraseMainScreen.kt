@@ -57,7 +57,7 @@ fun SelectSeedPhraseEntryType(
     currentLanguage: BIP39.WordListLanguage,
     onManualEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
     onPasteEntrySelected: () -> Unit,
-    onGenerateEntrySelected: () -> Unit
+    onGenerateEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit
 ) {
     var selectedLanguage by remember { mutableStateOf(currentLanguage) }
     var userHasOwnPhrase by remember { mutableStateOf(false) }
@@ -182,7 +182,7 @@ fun SelectSeedPhraseEntryType(
                     screenWidth = screenWidth,
                     onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
                     onPasteEntrySelected = onPasteEntrySelected,
-                    onGenerateEntrySelected = onGenerateEntrySelected
+                    onGenerateEntrySelected = { onGenerateEntrySelected(selectedLanguage) },
                 )
             } else {
 
@@ -190,7 +190,7 @@ fun SelectSeedPhraseEntryType(
                     SelectPhraseCreation(
                         verticalSpacingHeight = verticalSpacingHeight,
                         screenWidth = screenWidth,
-                        onGenerateEntrySelected = onGenerateEntrySelected,
+                        onGenerateEntrySelected = { onGenerateEntrySelected(selectedLanguage) },
                         onUserHasOwnPhrase = {
                             userHasOwnPhrase = true
                         }

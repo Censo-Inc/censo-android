@@ -317,7 +317,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = when (entryType) {
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT, currentLanguage = language)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
-            EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE)
+            EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE, currentLanguage = language)
         }
     }
 
