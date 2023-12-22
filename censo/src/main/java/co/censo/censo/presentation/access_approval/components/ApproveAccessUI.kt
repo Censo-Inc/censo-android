@@ -166,6 +166,12 @@ fun ApproveAccessUI(
                 SmallLoading(
                     fullscreen = false,
                 )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.waiting_for_to_verify_the_code, approverName),
+                    color = SharedColors.MainColorText,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

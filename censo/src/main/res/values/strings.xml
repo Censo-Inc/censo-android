@@ -350,6 +350,7 @@
     <string name="enter_the_code_request_access_step">2. Enter the code</string>
     <string name="your_approver_backup_label">your approver</string>
     <string name="waiting_for_to_open_the_link">Waiting for %1$s to open the link</string>
+    <string name="waiting_for_to_verify_the_code">Waiting for %1$s to verify the code</string>
     <string name="recover_key">"Recover Key"</string>
     <string name="recover_key_request_access_message">Key recovery requires assistance from both of your approvers.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect an approver to start with when you are speaking with them:</string>
     <string name="seed_phrase_request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect your approver below when you are speaking with them:</string>
