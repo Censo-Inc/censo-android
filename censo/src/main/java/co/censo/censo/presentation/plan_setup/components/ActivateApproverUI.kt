@@ -54,6 +54,7 @@ import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
 import co.censo.shared.presentation.SharedColors.ButtonBackgroundBlue
 import co.censo.shared.presentation.components.KeepScreenOn
+import kotlinx.datetime.Clock
 
 @Composable
 fun ActivateApproverUI(
