@@ -124,6 +124,7 @@ class LockScreenViewModel @Inject constructor(
 
             if (unlockVaultResponse is Resource.Success) {
                 ownerStateFlow.value = unlockVaultResponse.map { it.ownerState }
+                ownerStateFlow.value.data?.let { onOwnerState(it) }
             }
 
             unlockVaultResponse.map { it.scanResultBlob }

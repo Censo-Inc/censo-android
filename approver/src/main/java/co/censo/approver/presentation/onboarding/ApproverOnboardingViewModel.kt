@@ -114,7 +114,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     }
 
     fun onStop() {
-        userStatePollingTimer.stop()
+        userStatePollingTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
     }
 
     fun onDispose() {
@@ -260,6 +260,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
                 is ApproverPhase.Complete -> {
                     approverRepository.clearInvitationId()
+                    userStatePollingTimer.stop()
                     state.copy(approverUIState = ApproverOnboardingUIState.Complete)
                 }
 
@@ -384,6 +385,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
     private fun cancelOnboarding() {
         approverRepository.clearInvitationId()
+        userStatePollingTimer.stop()
 
         state = state.copy(
             invitationId = InvitationId(""),

@@ -53,7 +53,7 @@ import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
 import co.censo.shared.presentation.SharedColors.ButtonBackgroundBlue
-import kotlinx.datetime.Clock
+import co.censo.shared.presentation.components.KeepScreenOn
 
 @Composable
 fun ActivateApproverUI(
@@ -193,6 +193,7 @@ fun ActivateApproverUI(
         Spacer(modifier = Modifier.height(24.dp))
 
     }
+    KeepScreenOn()
 }
 
 fun activatedUIData(approverStatus: ApproverStatus?, context: Context) =
