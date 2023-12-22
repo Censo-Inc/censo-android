@@ -444,17 +444,20 @@ class PlayIntegrityInterceptor(private val playIntegrityRepository: PlayIntegrit
 
     private suspend fun getPlayIntegrityHeaders(request: Request): List<Header> {
         return try {
-            val challenge = apiService.createAttestationChallenge().body()!!.challenge.base64Encoded
-            listOf(
-                Header(
-                    ApiService.ATTESTATION_CHALLENGE_HEADER,
-                    challenge
-                ),
-                Header(
-                    ApiService.PLAY_INTEGRITY_TOKEN_HEADER,
-                    playIntegrityRepository.getIntegrityToken(request.dataToSign(challenge).sha256digest().base64Encoded())
+            apiService.createAttestationChallenge().body()?.challenge?.base64Encoded?.let { challenge ->
+                listOf(
+                    Header(
+                        ApiService.ATTESTATION_CHALLENGE_HEADER,
+                        challenge
+                    ),
+                    Header(
+                        ApiService.PLAY_INTEGRITY_TOKEN_HEADER,
+                        playIntegrityRepository.getIntegrityToken(
+                            request.dataToSign(challenge).sha256digest().base64Encoded()
+                        )
+                    )
                 )
-            )
+            } ?: listOf()
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.PlayIntegrity)
             listOf()
