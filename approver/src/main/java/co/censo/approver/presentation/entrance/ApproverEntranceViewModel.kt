@@ -20,6 +20,7 @@ import co.censo.shared.parseLink
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.NavigationData
+import co.censo.shared.util.asResource
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -30,7 +31,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.math.log
 
 @HiltViewModel
 class ApproverEntranceViewModel @Inject constructor(
@@ -108,13 +108,8 @@ class ApproverEntranceViewModel @Inject constructor(
 
             if (deleteUserResource is Resource.Success) {
                 state = state.copy(
-                        navigationResource = Resource.Success(
-                            NavigationData(
-                                route = Screen.ApproverEntranceRoute.route,
-                                popSelfFromBackStack = false
-                            )
-                        )
-                    )
+                    navigationResource = Screen.ApproverEntranceRoute.navTo().asResource()
+                )
             }
         }
     }
@@ -375,23 +370,13 @@ class ApproverEntranceViewModel @Inject constructor(
         state = when (routingDestination) {
             RoutingDestination.ACCESS ->
                 state.copy(
-                    navigationResource = Resource.Success(
-                        NavigationData(
-                            route = Screen.ApproverAccessScreen.route,
-                            popSelfFromBackStack = false
-                        )
-                    ),
+                    navigationResource = Screen.ApproverAccessScreen.navTo().asResource(),
                     uiState = ApproverEntranceUIState.Initial
                 )
 
             RoutingDestination.ONBOARDING ->
                 state.copy(
-                    navigationResource = Resource.Success(
-                        NavigationData(
-                            route = Screen.ApproverOnboardingScreen.route,
-                            popSelfFromBackStack = false
-                        )
-                    ),
+                    navigationResource = Screen.ApproverOnboardingScreen.navTo().asResource(),
                     uiState = ApproverEntranceUIState.Initial
                 )
         }

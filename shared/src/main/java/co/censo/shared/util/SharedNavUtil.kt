@@ -2,6 +2,7 @@ package co.censo.shared.util
 
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
+import co.censo.shared.data.Resource
 
 data class NavigationData(
     val route: String,
@@ -20,4 +21,8 @@ fun NavOptionsBuilder.popUpToTop(shouldPopTopDestination: Boolean = true) {
     popUpTo(START_DESTINATION) {
         inclusive = shouldPopTopDestination
     }
+}
+
+fun NavigationData.asResource(): Resource<NavigationData> {
+    return Resource.Success(this)
 }
