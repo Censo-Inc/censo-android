@@ -39,7 +39,7 @@ import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
-import co.censo.censo.presentation.plan_finalization.ReplacePolicyAction
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
@@ -91,7 +91,10 @@ fun EnterPhraseScreen(
             if (welcomeFlow) {
                 navController.navigate(
                     Screen.OwnerVaultScreen.route
-                )
+                ) {
+                    launchSingleTop = true
+                    popCurrentDestinationFromBackStack(navController)
+                }
             } else {
                 navController.popBackStack()
             }
@@ -99,12 +102,21 @@ fun EnterPhraseScreen(
         }
 
         if (state.exitFlow) {
-            navController.navigate(Screen.EntranceRoute.route)
+            //If welcomeFlow then nav back to the Entrance route, else nav back to Owner Vault route
+            val route =
+                if (welcomeFlow) Screen.EntranceRoute.route else Screen.OwnerVaultScreen.route
+
+            navController.navigate(route) {
+                launchSingleTop = true
+                popCurrentDestinationFromBackStack(navController)
+            }
+
             viewModel.resetExitFlow()
         }
     }
 
-    BackHandler(enabled = state.enterWordUIState == EnterPhraseUIState.SELECT_ENTRY_TYPE) {
+    //enabled = true, keeps the back OS button behavior in line with the back nav icon functionality
+    BackHandler(enabled = true) {
         viewModel.onBackClicked()
     }
 

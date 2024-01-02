@@ -23,12 +23,15 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_seed_phrases.components.AccessPhrasesTopBar
 import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.LargeLoading
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,8 +61,13 @@ fun AccessSeedPhrasesScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let {
-                navController.navigate(it)
+            state.navigationResource.data?.let { navigationData ->
+                navController.navigate(navigationData.route) {
+                    launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
+                    if (navigationData.popSelfFromBackStack) {
+                        popCurrentDestinationFromBackStack(navController)
+                    }
+                }
                 viewModel.resetNavigationResource()
             }
         }

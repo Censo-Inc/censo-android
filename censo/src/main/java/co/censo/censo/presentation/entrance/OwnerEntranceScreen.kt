@@ -72,6 +72,7 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.LinksUtil
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import kotlin.time.Duration.Companion.milliseconds
@@ -131,10 +132,10 @@ fun OwnerEntranceScreen(
         }
 
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { destination ->
-                navController.navigate(destination) {
-                    popUpTo(destination) {
-                        inclusive = true
+            state.navigationResource.data?.let { navigationData ->
+                navController.navigate(navigationData.route) {
+                    if (navigationData.popSelfFromBackStack) {
+                        popCurrentDestinationFromBackStack(navController)
                     }
                 }
             }

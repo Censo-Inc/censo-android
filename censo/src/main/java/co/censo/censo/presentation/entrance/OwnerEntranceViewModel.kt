@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
@@ -16,6 +17,8 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.NavigationData
+import co.censo.shared.util.asResource
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -268,22 +271,24 @@ class OwnerEntranceViewModel @Inject constructor(
                 if (ownerState.vault.seedPhrases.isNotEmpty()) {
                     when {
                         ownerState.access != null -> Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases)
-                        else -> Screen.OwnerVaultScreen.route
+                            .navToAndPopCurrentDestination().asResource()
+
+                        else -> Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource()
                     }
                 } else {
                     Screen.EnterPhraseRoute.buildNavRoute(
                         masterPublicKey = ownerState.vault.publicMasterEncryptionKey,
                         welcomeFlow = true
-                    )
+                    ).navToAndPopCurrentDestination().asResource()
                 }
             }
 
             is OwnerState.Initial -> {
-                Screen.InitialPlanSetupRoute.route
+                Screen.InitialPlanSetupRoute.navToAndPopCurrentDestination().asResource()
             }
         }
 
-        state = state.copy(navigationResource = Resource.Success(destination))
+        state = state.copy(navigationResource = destination)
     }
 
     fun resetNavigationResource() {

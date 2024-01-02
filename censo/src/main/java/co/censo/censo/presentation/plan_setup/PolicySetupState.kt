@@ -6,6 +6,7 @@ import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.util.NavigationData
 import kotlinx.datetime.Clock
 
 
@@ -35,7 +36,7 @@ data class PolicySetupState(
     val createPolicySetupResponse: Resource<CreatePolicySetupApiResponse> = Resource.Uninitialized,
 
     // Navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 
     // Plan Finalization
     val replacePolicy: Resource<Unit> = Resource.Uninitialized,

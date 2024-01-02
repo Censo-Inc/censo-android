@@ -1,5 +1,7 @@
 package co.censo.approver.presentation
 
+import co.censo.shared.util.NavigationData
+
 sealed class Screen(val route: String) {
     object ApproverEntranceRoute : Screen("approver_entrance_screen")
     object ApproverOnboardingScreen : Screen("approver_onboarding_screen")
@@ -16,5 +18,20 @@ sealed class Screen(val route: String) {
         const val DL_APPROVAL_ID_KEY = "approval_id_key"
 
         const val APPROVER_UNIVERSAL_DEEPLINK = "approverUniversalDeepLink"
+    }
+
+    fun navTo() : NavigationData {
+        return NavigationData(
+            route = this.route,
+            popSelfFromBackStack = false
+        )
+    }
+
+
+    fun navToAndPopCurrentDestination() : NavigationData {
+        return NavigationData(
+            route = this.route,
+            popSelfFromBackStack = true
+        )
     }
 }

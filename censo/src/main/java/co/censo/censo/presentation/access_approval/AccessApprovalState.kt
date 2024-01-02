@@ -10,6 +10,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
+import co.censo.shared.util.NavigationData
 
 data class AccessApprovalState(
     // UI state
@@ -37,7 +38,7 @@ data class AccessApprovalState(
     val submitTotpVerificationResource: Resource<SubmitAccessTotpVerificationApiResponse> = Resource.Uninitialized,
 
     // navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
 
     val loading = userResponse is Resource.Loading

@@ -52,6 +52,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -79,8 +80,9 @@ fun InitialPlanSetupScreen(
                 )
             } ?: Screen.EntranceRoute.route
 
-
-            navController.navigate(route)
+            navController.navigate(route) {
+                popCurrentDestinationFromBackStack(navController)
+            }
             viewModel.reset()
         }
     }
@@ -92,7 +94,12 @@ fun InitialPlanSetupScreen(
             TopAppBar(
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.NavbarColor),
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        navController.navigate(Screen.EntranceRoute.route) {
+                            launchSingleTop = true
+                            popCurrentDestinationFromBackStack(navController)
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.Close,
                             stringResource(R.string.back),

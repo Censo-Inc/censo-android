@@ -8,6 +8,7 @@ import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.util.BIP39
+import co.censo.shared.util.NavigationData
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -34,7 +35,7 @@ data class AccessSeedPhrasesState(
     val cancelAccessResource: Resource<DeleteAccessApiResponse> = Resource.Uninitialized,
 
     // navigation
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
 
     val loading = retrieveShardsResponse is Resource.Loading

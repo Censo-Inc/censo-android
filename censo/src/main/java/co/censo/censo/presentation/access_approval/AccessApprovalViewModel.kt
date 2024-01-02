@@ -19,7 +19,10 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.model.Approval
+import co.censo.shared.util.NavigationData
+import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -78,7 +81,11 @@ class AccessApprovalViewModel @Inject constructor(
         if (ownerState !is OwnerState.Ready) {
             // other owner states are not supported on this view
             // navigate back to start of the app so it can fix itself
-            state = state.copy(navigationResource = Resource.Success(Screen.EntranceRoute.route))
+            state = state.copy(
+                navigationResource = Screen.EntranceRoute
+                    .navToAndPopCurrentDestination()
+                    .asResource()
+            )
             return
         }
 
@@ -172,7 +179,9 @@ class AccessApprovalViewModel @Inject constructor(
             if (response is Resource.Success) {
                 state = state.copy(
                     access = null,
-                    navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
+                    navigationResource = Screen.OwnerVaultScreen
+                        .navToAndPopCurrentDestination()
+                        .asResource()
                 )
             }
 
@@ -260,7 +269,9 @@ class AccessApprovalViewModel @Inject constructor(
             AccessIntent.RecoverOwnerKey -> Screen.OwnerKeyRecoveryRoute.route
         }
 
-        state = state.copy(navigationResource = Resource.Success(destination))
+        state = state.copy(
+            navigationResource = destination.navToAndPopCurrentDestination().asResource()
+        )
     }
 
     fun hideCloseConfirmationDialog() {

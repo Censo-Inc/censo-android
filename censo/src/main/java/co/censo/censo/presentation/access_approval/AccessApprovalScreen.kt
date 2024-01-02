@@ -27,13 +27,15 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ActionCompleteUI
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_approval.components.AnotherDeviceAccessScreen
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApprover
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.LinksUtil
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,8 +65,13 @@ fun AccessApprovalScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let {
-                navController.navigate(it)
+            state.navigationResource.data?.let { navigationData ->
+                navController.navigate(navigationData.route) {
+                    launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
+                    if (navigationData.popSelfFromBackStack) {
+                        popCurrentDestinationFromBackStack(navController)
+                    }
+                }
             }
             viewModel.resetNavigationResource()
         }

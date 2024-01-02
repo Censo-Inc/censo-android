@@ -18,9 +18,12 @@ import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
+import co.censo.shared.util.NavigationData
+import co.censo.shared.util.asResource
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -161,7 +164,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                         // there should be 'available' access requested by this device
                         // navigate back to access approval screen
                         state = state.copy(
-                            navigationResource = Resource.Success(Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases))
+                            navigationResource = Screen.AccessApproval
+                                .withIntent(intent = AccessIntent.AccessPhrases)
+                                .navToAndPopCurrentDestination()
+                                .asResource()
                         )
                     }
                 }
@@ -171,7 +177,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 // other owner states are not supported on this view
                 // navigate back to start of the app so it can fix itself
                 state = state.copy(
-                    navigationResource = Resource.Success(Screen.EntranceRoute.route)
+                    navigationResource = Screen.EntranceRoute.navToAndPopCurrentDestination().asResource()
                 )
             }
         }
@@ -221,7 +227,9 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 state = state.copy(
-                    navigationResource = Resource.Success(Screen.OwnerVaultScreen.route)
+                    navigationResource = Screen.OwnerVaultScreen
+                        .navToAndPopCurrentDestination()
+                        .asResource()
                 )
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }

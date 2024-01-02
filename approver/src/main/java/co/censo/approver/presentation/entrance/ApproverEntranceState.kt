@@ -2,6 +2,7 @@ package co.censo.approver.presentation.entrance
 
 import android.net.Uri
 import co.censo.shared.data.Resource
+import co.censo.shared.util.NavigationData
 import okhttp3.ResponseBody
 
 data class ApproverEntranceState(
@@ -16,7 +17,7 @@ data class ApproverEntranceState(
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
 
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
-    val navigationResource: Resource<String> = Resource.Uninitialized,
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
     val appLinkUri: Uri? = null
 ) {
     val isLoading = signInUserResource is Resource.Loading

@@ -27,9 +27,11 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.components.ActivateApproverUI
 import co.censo.censo.presentation.plan_setup.components.ApproverNicknameUI
+import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.LinksUtil
+import co.censo.shared.util.popCurrentDestinationFromBackStack
 
 enum class PolicySetupAction(val threshold: UInt) {
     AddApprovers(2U), RemoveApprovers(1U)
@@ -52,31 +54,26 @@ fun PolicySetupScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let {
-                navController.navigate(it)
+            state.navigationResource.data?.let { navigationData ->
+                navController.navigate(navigationData.route) {
+                    launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
+                    if (navigationData.popSelfFromBackStack) {
+                        popCurrentDestinationFromBackStack(navController)
+                    }
+                }
                 viewModel.resetNavigationResource()
             }
         }
 
         if (state.replacePolicy is Resource.Success) {
             viewModel.resetReplacePolicy()
-            //Pop back stack entirely from here
-            val (route, popUpToRoute) = if (state.policySetupAction == PolicySetupAction.AddApprovers) {
-                Pair(
-                    Screen.ReplacePolicyRoute.addApproversRoute(),
-                    Screen.PolicySetupRoute.addApproversRoute()
-                )
-            } else {
-                Pair(
-                    Screen.ReplacePolicyRoute.removeApproversRoute(),
-                    Screen.PolicySetupRoute.removeApproversRoute()
-                )
-            }
+
+            val route = Screen.ReplacePolicyRoute.buildNavRoute(
+                addApprovers = state.policySetupAction == PolicySetupAction.AddApprovers
+            )
 
             navController.navigate(route) {
-                popUpTo(popUpToRoute) {
-                    inclusive = true
-                }
+                popCurrentDestinationFromBackStack(navController)
             }
         }
     }

@@ -84,14 +84,14 @@ class ApproverAccessViewModel @Inject constructor(
 
         //If participantId is empty go back to the paste link
         if (participantId.isEmpty()) {
-            state = state.copy(navToApproverRouting = true)
+            state = state.copy(navToApproverEntrance = true)
             return
         }
 
         when (val approverState = approverStates.forParticipant(participantId = participantId)) {
             null -> {
                 approverRepository.clearParticipantId()
-                state = state.copy(navToApproverRouting = true)
+                state = state.copy(navToApproverEntrance = true)
             }
             else -> {
                 assignApproverStateAndParticipantId(
@@ -317,8 +317,8 @@ class ApproverAccessViewModel @Inject constructor(
         )
     }
 
-    fun resetApproverRoutingNavigationTrigger() {
-        state = state.copy(navToApproverRouting = false)
+    fun resetApproverEntranceNavigationTrigger() {
+        state = state.copy(navToApproverEntrance = false)
     }
 
     fun onTopBarCloseConfirmed() {
@@ -333,10 +333,6 @@ class ApproverAccessViewModel @Inject constructor(
         }
     }
 
-    fun triggerApproverRoutingNavigation() {
-        state = state.copy(navToApproverRouting = true)
-    }
-
 
     private fun cancelAccess() {
         approverRepository.clearParticipantId()
@@ -345,7 +341,7 @@ class ApproverAccessViewModel @Inject constructor(
         state = state.copy(
             approvalId = "",
             participantId = "",
-            navToApproverRouting = true
+            navToApproverEntrance = true
         )
     }
 
