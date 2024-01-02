@@ -11,7 +11,7 @@ plugins {
 }
 
 val versionNameMajor = 1
-val versionNameMinor = 6
+val versionNameMinor = 7
 val versionNamePatch = 0
 
 fun createBuildConfigStringArray(strings: List<String>) : String {
