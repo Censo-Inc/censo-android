@@ -27,7 +27,9 @@ data class GetOwnerUserApiResponse(
 data class GetApproverUserApiResponse(
     val identityToken: IdentityToken,
     val approverStates: List<ApproverState>,
-)
+) {
+    val activeApproversCount: Int = approverStates.count { it.phase.isActiveApprover() }
+}
 
 @Serializable
 sealed class ApproverStatus {

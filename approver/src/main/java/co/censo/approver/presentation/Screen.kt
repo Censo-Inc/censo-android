@@ -1,11 +1,22 @@
 package co.censo.approver.presentation
 
 import co.censo.shared.util.NavigationData
+import ParticipantId
 
 sealed class Screen(val route: String) {
     object ApproverEntranceRoute : Screen("approver_entrance_screen")
     object ApproverOnboardingScreen : Screen("approver_onboarding_screen")
     object ApproverAccessScreen : Screen("approver_access_screen")
+    object ApproverSettingsScreen : Screen("approver_settings_screen")
+    object ApproverOwnersListScreen : Screen("approver_owners_list_screen")
+    object ApproverLabelOwnerScreen : Screen("approver_owners_list_screen/{participantId}") {
+        fun navTo(participantId: ParticipantId): NavigationData =
+            NavigationData(
+                route = route.replace("{participantId}", participantId.value),
+                popSelfFromBackStack = false,
+                popUpToTop = false
+            )
+    }
 
     companion object {
         const val APPROVER_DEEPLINK_INVITATION = "approverDeepLinkInvitation"
@@ -23,7 +34,8 @@ sealed class Screen(val route: String) {
     fun navTo() : NavigationData {
         return NavigationData(
             route = this.route,
-            popSelfFromBackStack = false
+            popSelfFromBackStack = false,
+            popUpToTop = false
         )
     }
 
@@ -31,7 +43,8 @@ sealed class Screen(val route: String) {
     fun navToAndPopCurrentDestination() : NavigationData {
         return NavigationData(
             route = this.route,
-            popSelfFromBackStack = true
+            popSelfFromBackStack = true,
+            popUpToTop = false
         )
     }
 }

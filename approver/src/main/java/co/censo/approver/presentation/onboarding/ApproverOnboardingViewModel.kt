@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.approver.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.decryptWithEntropy
@@ -22,10 +23,12 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.asResource
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import javax.inject.Inject
 
 /**
@@ -259,9 +262,20 @@ class ApproverOnboardingViewModel @Inject constructor(
                     state.copy(approverUIState = ApproverOnboardingUIState.WaitingForConfirmation)
 
                 is ApproverPhase.Complete -> {
-                    approverRepository.clearInvitationId()
                     userStatePollingTimer.stop()
-                    state.copy(approverUIState = ApproverOnboardingUIState.Complete)
+                    // we require to label the owner unless it is the first owner for this approver
+                    if (
+                        state.userResponse is Resource.Success &&
+                        (state.userResponse.data?.approverStates?.count { it.participantId.value != state.participantId } ?: 0) > 0 &&
+                        state.approverState?.ownerLabel == null
+                    ) {
+                        state.copy(
+                            navigationResource = Screen.ApproverLabelOwnerScreen.navTo(ParticipantId(state.participantId)).asResource()
+                        )
+                    } else {
+                        approverRepository.clearInvitationId()
+                        state.copy(approverUIState = ApproverOnboardingUIState.Complete)
+                    }
                 }
 
                 else -> state
@@ -546,5 +560,8 @@ class ApproverOnboardingViewModel @Inject constructor(
         state = state.copy(onboardingMessage = Resource.Uninitialized)
     }
 
+    fun resetNavigationResource() {
+        state = state.copy(navigationResource = Resource.Uninitialized)
+    }
     //endregion
 }

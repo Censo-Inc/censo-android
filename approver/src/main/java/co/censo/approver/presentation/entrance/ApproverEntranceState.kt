@@ -1,6 +1,7 @@
 package co.censo.approver.presentation.entrance
 
 import android.net.Uri
+import androidx.navigation.NavOptionsBuilder
 import co.censo.shared.data.Resource
 import co.censo.shared.util.NavigationData
 import okhttp3.ResponseBody
@@ -9,8 +10,6 @@ data class ApproverEntranceState(
     val uiState: ApproverEntranceUIState = ApproverEntranceUIState.Initial,
     val linkError: Boolean = false,
     val loggedIn: Boolean = false,
-    val showDeleteUserWarningDialog: Boolean = false,
-    val showDeleteUserConfirmDialog: Boolean = false,
 
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<ResponseBody> = Resource.Uninitialized,

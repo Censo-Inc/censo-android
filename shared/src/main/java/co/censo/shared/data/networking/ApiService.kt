@@ -29,6 +29,7 @@ import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
 import co.censo.shared.data.model.InitiateAccessApiResponse
+import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
@@ -325,6 +326,13 @@ interface ApiService {
 
     @POST("/v1/attestation-challenge")
     suspend fun createAttestationChallenge(): RetrofitResponse<AttestationChallengeResponse>
+
+    @PUT("v1/approvers/{$PARTICIPANT_ID}/owner-label")
+    suspend fun labelOwnerByApprover(
+        @Path(value = PARTICIPANT_ID) participantId: String,
+        @Body apiRequest: LabelOwnerByApproverApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<GetApproverUserApiResponse>
 }
 
 class AnalyticsInterceptor(

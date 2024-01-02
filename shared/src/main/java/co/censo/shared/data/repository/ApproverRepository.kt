@@ -4,6 +4,7 @@ import Base58EncodedApproverPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import InvitationId
+import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
@@ -13,6 +14,7 @@ import co.censo.shared.data.model.AcceptApprovershipApiResponse
 import co.censo.shared.data.model.ApproveAccessApiRequest
 import co.censo.shared.data.model.ApproveAccessApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
+import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
@@ -20,6 +22,7 @@ import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import kotlinx.datetime.Clock
@@ -73,10 +76,15 @@ interface ApproverRepository {
         encryptedShard: Base64EncodedData
     ) : Resource<ApproveAccessApiResponse>
     suspend fun rejectAccess(approvalId: String) : Resource<RejectAccessApiResponse>
+
+    suspend fun deleteUser(): Resource<Unit>
+    suspend fun signUserOut()
+    suspend fun labelOwner(participantId: String, label: String) : Resource<GetApproverUserApiResponse>
 }
 
 class ApproverRepositoryImpl(
     private val apiService: ApiService,
+    private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
     private val keyRepository: KeyRepository
 ) : ApproverRepository, BaseRepository() {
@@ -218,6 +226,33 @@ class ApproverRepositoryImpl(
     override suspend fun rejectAccess(approvalId: String) : Resource<RejectAccessApiResponse> {
         return retrieveApiResource {
             apiService.rejectAccess(approvalId)
+        }
+    }
+
+    override suspend fun signUserOut() {
+        authUtil.signOut()
+        secureStorage.clearJWT()
+    }
+
+    override suspend fun deleteUser(): Resource<Unit> {
+        val response = retrieveApiResource { apiService.deleteUser() }
+
+        if (response is Resource.Success) {
+            try {
+                keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
+                secureStorage.clearDeviceKeyId()
+                signUserOut()
+            } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.DeleteUser)
+            }
+        }
+
+        return response
+    }
+
+    override suspend fun labelOwner(participantId: String, label: String): Resource<GetApproverUserApiResponse> {
+        return retrieveApiResource {
+            apiService.labelOwnerByApprover(participantId, LabelOwnerByApproverApiRequest(label))
         }
     }
 }

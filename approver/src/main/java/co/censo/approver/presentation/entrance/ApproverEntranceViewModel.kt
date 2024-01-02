@@ -85,33 +85,10 @@ class ApproverEntranceViewModel @Inject constructor(
         }
     }
 
-    fun setShowDeleteUserWarning() {
-        state = state.copy(showDeleteUserWarningDialog = true)
-    }
-
-    fun setShowDeleteUserConfirmDialog() {
-        resetShowDeleteUserWarning()
-        state = state.copy(showDeleteUserConfirmDialog = true)
-    }
-
-    fun deleteUser() {
-        state = state.copy(deleteUserResource = Resource.Loading())
-        resetShowDeleteUserConfirmDialog()
-
-        viewModelScope.launch {
-            //When deleting the approver user, we don't need to pass in the participantId
-            val deleteUserResource = ownerRepository.deleteUser(null, true)
-
-            state = state.copy(
-                deleteUserResource = deleteUserResource
-            )
-
-            if (deleteUserResource is Resource.Success) {
-                state = state.copy(
-                    navigationResource = Screen.ApproverEntranceRoute.navTo().asResource()
-                )
-            }
-        }
+    fun navToSettingsScreen() {
+        state = state.copy(
+            navigationResource = Screen.ApproverSettingsScreen.navTo().asResource()
+        )
     }
     //endregion
 
@@ -370,13 +347,13 @@ class ApproverEntranceViewModel @Inject constructor(
         state = when (routingDestination) {
             RoutingDestination.ACCESS ->
                 state.copy(
-                    navigationResource = Screen.ApproverAccessScreen.navTo().asResource(),
+                    navigationResource = Screen.ApproverAccessScreen.navTo().copy(popUpToTop = true).asResource(),
                     uiState = ApproverEntranceUIState.Initial
                 )
 
             RoutingDestination.ONBOARDING ->
                 state.copy(
-                    navigationResource = Screen.ApproverOnboardingScreen.navTo().asResource(),
+                    navigationResource = Screen.ApproverOnboardingScreen.navTo().copy(popUpToTop = true).asResource(),
                     uiState = ApproverEntranceUIState.Initial
                 )
         }
@@ -406,18 +383,6 @@ class ApproverEntranceViewModel @Inject constructor(
 
     fun clearError() {
         state = state.copy(linkError = false)
-    }
-
-    fun resetShowDeleteUserWarning() {
-        state = state.copy(showDeleteUserWarningDialog = false)
-    }
-
-    fun resetShowDeleteUserConfirmDialog() {
-        state = state.copy(showDeleteUserConfirmDialog = false)
-    }
-
-    fun resetDeleteUserResource() {
-        state = state.copy(deleteUserResource = Resource.Uninitialized)
     }
     //endregion
 }

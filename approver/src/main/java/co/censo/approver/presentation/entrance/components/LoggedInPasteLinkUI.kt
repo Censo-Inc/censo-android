@@ -4,9 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +30,8 @@ import co.censo.shared.presentation.SharedColors
 @Composable
 fun LoggedInPasteLinkUI(
     isApprover: Boolean,
-    onPasteLinkClick: () -> Unit
+    onPasteLinkClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Box(
         Modifier
@@ -35,40 +40,46 @@ fun LoggedInPasteLinkUI(
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(0.3f))
-
             PasteLink(
                 onPasteLinkClick = onPasteLinkClick
             )
 
-            Spacer(modifier = Modifier.weight(0.7f))
+            if (isApprover) {
+                Spacer(modifier = Modifier.height(36.dp))
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painterResource(
+                            id = R.drawable.active_approvers_icon
+                        ),
+                        contentDescription = null,
+                        tint = SharedColors.MainIconColor
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.active_approver),
+                        fontSize = 14.sp,
+                        color = SharedColors.MainColorText,
+                        fontWeight = FontWeight.W500
+                    )
+                }
+            }
         }
 
-        if (isApprover) {
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painterResource(
-                        id = R.drawable.active_approvers_icon
-                    ),
-                    contentDescription = null,
-                    tint = SharedColors.MainIconColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.active_approver),
-                    fontSize = 14.sp,
-                    color = SharedColors.MainColorText,
-                    fontWeight = FontWeight.W500
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+        Spacer(modifier = Modifier.height(24.dp))
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            SettingsButton(onClick = onSettingsClick)
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -78,6 +89,7 @@ fun LoggedInPasteLinkUI(
 fun LoggedInPasteLinkUIPreview() {
     LoggedInPasteLinkUI(
         isApprover = true,
-        onPasteLinkClick = {}
+        onPasteLinkClick = {},
+        onSettingsClick = {}
     )
 }
