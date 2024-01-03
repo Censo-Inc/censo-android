@@ -113,6 +113,12 @@ fun BigInteger.toByteArrayNoSign(len: Int): ByteArray {
     }
 }
 
+fun String.hexStringToByteArray(): ByteArray {
+    return this.chunked(2)
+        .map { it.toInt(16).toByte() }
+        .toByteArray()
+}
+
 fun ByteArray.sha256digest(): ByteArray {
     return MessageDigest
         .getInstance("SHA-256")
@@ -121,6 +127,7 @@ fun ByteArray.sha256digest(): ByteArray {
 
 fun String.sha256digest() = this.toByteArray().sha256digest()
 fun String.sha256() = this.sha256digest().toHexString()
+fun ByteArray.sha256Base64() = this.sha256digest().base64Encoded()
 fun ByteArray.sha256() = this.sha256digest().toHexString()
 
 fun BigInteger.toByteArrayNoSign(): ByteArray {

@@ -2,6 +2,7 @@ package co.censo.shared.data.repository
 
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
+import co.censo.shared.data.networking.IgnoreKeysJson.baseKotlinXJson
 import co.censo.shared.data.networking.NoConnectivityException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -53,7 +54,7 @@ abstract class BaseRepository {
 data class ErrorResponse(val errors: List<ErrorInfo>) {
     companion object {
         fun fromJson(json: String): ErrorResponse {
-            return Json { ignoreUnknownKeys = true }.decodeFromString(json)
+            return baseKotlinXJson.decodeFromString(json)
         }
     }
 }

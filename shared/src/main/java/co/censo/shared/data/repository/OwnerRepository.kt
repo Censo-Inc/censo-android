@@ -48,6 +48,9 @@ import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
+import co.censo.shared.data.model.Import
+import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
@@ -239,6 +242,10 @@ interface OwnerRepository {
         participantId: ParticipantId,
         completeOwnerApprovershipApiRequest: CompleteOwnerApprovershipApiRequest
     ) : Resource<CompleteOwnerApprovershipApiResponse>
+
+    suspend fun acceptImport(channel: String, ownerProof: OwnerProof) : Resource<Unit>
+
+    suspend fun checkForCompletedImport(channel: String) : Resource<GetImportEncryptedDataApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -768,6 +775,21 @@ class OwnerRepositoryImpl(
                 participantId.value,
                 completeOwnerApprovershipApiRequest
             )
+        }
+    }
+
+    override suspend fun acceptImport(channel: String, ownerProof: OwnerProof): Resource<Unit> {
+        return retrieveApiResource {
+            apiService.acceptImport(
+                channel = channel,
+                ownerProof = ownerProof
+            )
+        }
+    }
+
+    override suspend fun checkForCompletedImport(channel: String): Resource<GetImportEncryptedDataApiResponse> {
+        return retrieveApiResource {
+            apiService.importedEncryptedData(channel)
         }
     }
 
