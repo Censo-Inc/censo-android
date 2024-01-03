@@ -81,12 +81,12 @@
     <string name="delete_data_settings_title"><![CDATA[Deactivate & Delete]]></string>
     <string name="delete_data_settings_button">Delete</string>
     <string name="delete_data_settings_description">This will securely delete all of your information stored in the app.  After completing this, you will no longer be an approver.  This operation cannot be undone.</string>
-    <string name="view_owners_settings_title">View Owners</string>
+    <string name="view_owners_settings_title">Who I\'m Helping</string>
     <string name="view_owners_settings_button">View</string>
-    <string name="view_owners_settings_description">View people you are helping out as an approver.</string>
+    <string name="view_owners_settings_description">View the people that you are an approver for.</string>
     <string name="approving_request_message">Approving a request will take about 2 minutes. This approval should preferably take place while you\'re on the phone or in-person to ensure that you are assisting the proper individual.\n\nIn the next step you will verify the identity of the person you are assisting before approving the request.</string>
     <string name="approve_request">Approve request</string>
-    <string name="owners_list_title">Owners</string>
+    <string name="owners_list_title">Who I\'m Helping</string>
     <string name="edit_owner_label">Edit</string>
     <string name="label_owner_screen_title">Name the person</string>
     <string name="label_owner_screen_text">Give this person a unique nickname so you can identify them.</string>
