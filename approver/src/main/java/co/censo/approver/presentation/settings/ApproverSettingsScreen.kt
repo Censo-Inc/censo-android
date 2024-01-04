@@ -105,7 +105,7 @@ fun ApproverSettingsScreen(
                     } else if (state.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = state.userResponse.getErrorMessage(context),
-                            retryAction = { viewModel.retrieveApproverState(false) },
+                            retryAction = { viewModel.retrieveApproverState() },
                             dismissAction = null
                         )
                     }

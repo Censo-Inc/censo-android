@@ -188,7 +188,7 @@ fun LabelOwner(
 
                         StandardButton(
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = state.saveEnabled,
+                            enabled = state.saveEnabled && state.saveResource !is Resource.Loading,
                             onClick = viewModel::save,
                             contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
                         ) {

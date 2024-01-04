@@ -11,8 +11,7 @@ data class LabelOwnerState(
     val saveEnabled: Boolean = false,
     val saveResource: Resource<GetApproverUserApiResponse> = Resource.Uninitialized
 ) {
-    val loading = saveResource is Resource.Loading
-            || labelResource is Resource.Loading
+    val loading = labelResource is Resource.Loading
     val asyncError = saveResource is Resource.Error
             || labelResource is Resource.Error
 }

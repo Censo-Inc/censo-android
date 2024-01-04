@@ -22,13 +22,11 @@ class ApproverSettingsViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveApproverState(false)
+        retrieveApproverState()
     }
 
-    fun retrieveApproverState(silently: Boolean) {
-        if (!silently) {
-            state = state.copy(userResponse = Resource.Loading())
-        }
+    fun retrieveApproverState() {
+        state = state.copy(userResponse = Resource.Loading())
 
         viewModelScope.launch {
             val userResponse = approverRepository.retrieveUser()
