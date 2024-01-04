@@ -22,13 +22,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.LoginIdResetRoute.DL_RESET_TOKEN_KEY
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
+import co.censo.censo.presentation.login_id_reset.LoginIdResetScreen
 import co.censo.censo.presentation.main.BottomNavItem
 import co.censo.censo.presentation.main.MainVaultScreen
 import co.censo.censo.presentation.owner_key_recovery.OwnerKeyRecoveryScreen
@@ -39,6 +42,7 @@ import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.presentation.plan_setup.PolicySetupScreen
 import co.censo.censo.ui.theme.VaultTheme
 import co.censo.censo.util.TestTag
+import co.censo.shared.DeepLinkURI.OWNER_LOGIN_ID_RESET_URI
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.StrongboxUI
@@ -152,6 +156,17 @@ class MainActivity : FragmentActivity() {
             }
             composable(route = Screen.AccessSeedPhrases.route) {
                 AccessSeedPhrasesScreen(navController = navController)
+            }
+            composable(
+                route = Screen.LoginIdResetRoute.route,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "$OWNER_LOGIN_ID_RESET_URI{$DL_RESET_TOKEN_KEY}"
+                    }
+                )
+            ) {backStackEntry ->
+                val resetToken = backStackEntry.arguments?.getString(DL_RESET_TOKEN_KEY)
+                LoginIdResetScreen(resetToken, navController = navController)
             }
         }
     }

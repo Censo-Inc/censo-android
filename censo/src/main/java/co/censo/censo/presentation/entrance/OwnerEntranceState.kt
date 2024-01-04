@@ -8,7 +8,6 @@ import okhttp3.ResponseBody
 data class OwnerEntranceState(
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<ResponseBody> = Resource.Loading(),
-    val authId: String = "",
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
     val acceptedTermsOfUseVersion: String? = null,
     val showAcceptTermsOfUse: Boolean = false,

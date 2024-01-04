@@ -32,6 +32,7 @@ object CrashReportingUtil {
     const val PermissionDialog = "PermissionDialog"
     const val SignIn = "SignIn"
     const val SignOut = "SignOut"
+    const val LoginIdReset = "LoginIdReset"
     const val SubmitNotificationToken = "SubmitNotificationToken"
     const val SilentRefreshToken = "SilentRefreshToken"
     const val RetrieveAccount = "RetrieveAccount"

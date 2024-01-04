@@ -40,7 +40,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="${URL_SCHEME}"/>
+                <data android:scheme="${APPROVER_URL_SCHEME}"/>
                 <data android:host="invite"/>
                 <data android:host="access"/>
             </intent-filter>

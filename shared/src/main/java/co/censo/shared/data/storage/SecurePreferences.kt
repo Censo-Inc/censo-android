@@ -12,6 +12,7 @@ import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.JWT_KEY
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.USER_SEEN_PERMISSION_DIALOG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_KEY
+import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.LOGIN_ID_RESET_TOKENS
 import javax.inject.Inject
 
 interface SecurePreferences {
@@ -34,6 +35,9 @@ interface SecurePreferences {
     fun saveApprovalId(id: String)
     fun retrieveApprovalId() : String
     fun clearApprovalId()
+    fun saveResetTokens(resetTokens: Set<String>)
+    fun retrieveResetTokens(): Set<String>
+    fun clearResetTokens()
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -47,6 +51,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         const val DEVICE_KEY = "device_key"
         const val APPROVER_INVITATION_ID = "approver_invitation_id"
         const val APPROVER_PARTICIPANT_ID = "approver_participant_id"
+        const val LOGIN_ID_RESET_TOKENS = "login_id_reset_tokens"
         const val APPROVER_APPROVAL_ID = "approver_approval_id"
         const val ACCEPTED_TERMS_OF_USE_VERSION = "accepted_terms_of_use_version"
     }
@@ -127,6 +132,20 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         sharedPrefs.getString(APPROVER_APPROVAL_ID, "") ?: ""
 
     override fun clearApprovalId() = saveApprovalId("")
+    //endregion
+
+    //region Reset Tokens
+    override fun saveResetTokens(resetTokens: Set<String>) {
+        val editor = sharedPrefs.edit()
+        editor.putStringSet(LOGIN_ID_RESET_TOKENS, resetTokens)
+        editor.apply()
+    }
+
+    override fun retrieveResetTokens(): Set<String> {
+        return sharedPrefs.getStringSet(LOGIN_ID_RESET_TOKENS, null) ?: setOf()
+    }
+
+    override fun clearResetTokens() = saveResetTokens(setOf())
     //endregion
 
     //region push dialog

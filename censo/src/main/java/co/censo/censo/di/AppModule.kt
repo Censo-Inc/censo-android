@@ -32,6 +32,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Singleton
 
@@ -84,13 +85,15 @@ object AppModule {
         apiService: ApiService,
         secureStorage: SecurePreferences,
         authUtil: AuthUtil,
-        keyRepository: KeyRepository
+        keyRepository: KeyRepository,
+        ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             apiService = apiService,
             secureStorage = secureStorage,
             authUtil = authUtil,
-            keyRepository = keyRepository
+            keyRepository = keyRepository,
+            ownerStateFlow = ownerStateFlow
         )
     }
 
@@ -152,6 +155,12 @@ object AppModule {
     @Provides
     fun providesOwnerStateFlow(): MutableStateFlow<Resource<OwnerState>> {
         return MutableStateFlow(Resource.Uninitialized)
+    }
+
+    @Singleton
+    @Provides
+    fun providesKeyValidationTrigger(): MutableSharedFlow<String> {
+        return MutableSharedFlow<String>()
     }
 
     @Singleton

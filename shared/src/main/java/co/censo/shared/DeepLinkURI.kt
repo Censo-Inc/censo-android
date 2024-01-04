@@ -14,9 +14,10 @@ import co.censo.shared.CensoLink.Companion.V2_PART_ID_INDEX
 
 
 object DeepLinkURI {
-    const val APPROVER_INVITE_URI = "${BuildConfig.URL_SCHEME}://invite/"
-    const val APPROVER_ACCESS_URI = "${BuildConfig.URL_SCHEME}://access/"
-    const val APPROVER_ACCESS_V2_URI = "${BuildConfig.URL_SCHEME}://access/v2/"
+    const val APPROVER_INVITE_URI = "${BuildConfig.APPROVER_URL_SCHEME}://invite/"
+    const val APPROVER_ACCESS_URI = "${BuildConfig.APPROVER_URL_SCHEME}://access/"
+    const val APPROVER_ACCESS_V2_URI = "${BuildConfig.APPROVER_URL_SCHEME}://access/v2/"
+    const val OWNER_LOGIN_ID_RESET_URI = "${BuildConfig.OWNER_URL_SCHEME}://reset/"
 }
 
 fun String.parseLink(): CensoLink {
@@ -65,8 +66,9 @@ data class CensoLink(
         const val LINK_TYPE_INDEX = 0
         const val ACCESS_TYPE = "access"
         const val INVITE_TYPE = "invite"
+        const val RESET_TYPE = "reset"
         const val CENSO_HOST = "censo"
-        val TYPES = setOf(ACCESS_TYPE, INVITE_TYPE)
+        val TYPES = setOf(ACCESS_TYPE, INVITE_TYPE, RESET_TYPE)
 
         //V1
         const val V1_PART_ID_INDEX = 1

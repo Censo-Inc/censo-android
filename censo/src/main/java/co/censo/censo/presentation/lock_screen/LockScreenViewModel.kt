@@ -38,9 +38,7 @@ class LockScreenViewModel @Inject constructor(
     fun onCreate() {
         viewModelScope.launch {
             ownerStateFlow.collect { resource: Resource<OwnerState> ->
-                if (resource is Resource.Success) {
-                    onOwnerState(resource.data!!)
-                }
+                onOwnerState(resource.data)
             }
         }
     }
@@ -88,10 +86,12 @@ class LockScreenViewModel @Inject constructor(
         retrieveOwnerState()
     }
 
-    private fun onOwnerState(ownerState: OwnerState) {
-        state = state.copy(
-            lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState)
-        )
+    private fun onOwnerState(ownerState: OwnerState?) {
+        state = if (ownerState == null) {
+            state.copy(lockStatus = LockScreenState.LockStatus.None)
+        } else {
+            state.copy(lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState))
+        }
     }
 
     fun initUnlock() {

@@ -81,7 +81,7 @@ fun InvalidOwnerKeyUI(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(id = co.censo.censo.R.string.recovery_my_key),
+                    text = stringResource(id = co.censo.censo.R.string.recover_my_key),
                     style = ButtonTextStyle.copy(fontSize = 20.sp)
                 )
             }

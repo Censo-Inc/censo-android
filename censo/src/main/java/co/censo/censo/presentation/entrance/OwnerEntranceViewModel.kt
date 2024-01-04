@@ -26,6 +26,7 @@ import com.google.android.gms.tasks.Task
 import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -48,6 +49,7 @@ class OwnerEntranceViewModel @Inject constructor(
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
+    private val keyValidationTrigger: MutableSharedFlow<String>,
 ) : ViewModel() {
 
     var state by mutableStateOf(OwnerEntranceState())
@@ -253,7 +255,9 @@ class OwnerEntranceViewModel @Inject constructor(
                 // update global state
                 ownerStateFlow.value = userResponse.map { it.ownerState }
 
-                loggedInRouting(userResponse.data!!.ownerState)
+                val ownerState = userResponse.data!!.ownerState
+                loggedInRouting(ownerState)
+                approverKeyValidation(ownerState)
 
                 state.copy(userResponse = userResponse)
             } else if (userResponse is Resource.Error && userResponse.errorCode == 404) {
@@ -261,6 +265,17 @@ class OwnerEntranceViewModel @Inject constructor(
                 state.copy(userResponse = Resource.Uninitialized, signInUserResource = Resource.Uninitialized)
             } else {
                 state.copy(userResponse = userResponse, signInUserResource = Resource.Uninitialized)
+            }
+        }
+    }
+
+    private suspend fun approverKeyValidation(ownerState: OwnerState) {
+        (ownerState as? OwnerState.Ready)?.let { readyState ->
+            val hasExternalApprovers = readyState.policy.approvers.any { !it.isOwner }
+            val ownerParticipantId = readyState.policy.approvers.firstOrNull { it.isOwner }?.participantId
+
+            if (hasExternalApprovers && ownerParticipantId != null) {
+                keyValidationTrigger.emit(ownerParticipantId.value)
             }
         }
     }
@@ -289,6 +304,10 @@ class OwnerEntranceViewModel @Inject constructor(
         }
 
         state = state.copy(navigationResource = destination)
+    }
+
+    fun startLoginIdRecovery() {
+        state = state.copy(navigationResource = Screen.LoginIdResetRoute.navTo().asResource())
     }
 
     fun resetNavigationResource() {

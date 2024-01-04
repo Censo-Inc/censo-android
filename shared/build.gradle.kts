@@ -68,7 +68,8 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "ENVIRONMENT", "\"prod\"")
-            buildConfigField("String", "URL_SCHEME", "\"censo\"")
+            buildConfigField("String", "APPROVER_URL_SCHEME", "\"censo\"")
+            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-reset\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("localRelease") {
@@ -80,7 +81,8 @@ android {
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "ENVIRONMENT", "\"staging\"")
-            buildConfigField("String", "URL_SCHEME", "\"censo-staging\"")
+            buildConfigField("String", "APPROVER_URL_SCHEME", "\"censo-staging\"")
+            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-reset-staging\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("integration") {
@@ -89,7 +91,8 @@ android {
             buildConfigField("String", "GOOGLE_AUTH_SERVER_ID", "\"$googleAuthServerId\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "ENVIRONMENT", "\"integration\"")
-            buildConfigField("String", "URL_SCHEME", "\"censo-integration\"")
+            buildConfigField("String", "APPROVER_URL_SCHEME", "\"censo-integration\"")
+            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-reset-integration\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         debug {

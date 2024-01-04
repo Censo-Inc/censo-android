@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,8 +50,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +63,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.censo.R
 import co.censo.shared.data.Resource
 import co.censo.shared.R as SharedR
 import co.censo.censo.R as CensoR
@@ -183,7 +189,8 @@ fun OwnerEntranceScreen(
 
             else -> {
                 OwnerEntranceStandardUI(
-                    authenticate = { viewModel.startGoogleSignInFlow() }
+                    authenticate = { viewModel.startGoogleSignInFlow() },
+                    recover = { viewModel.startLoginIdRecovery() },
                 )
             }
         }
@@ -204,10 +211,12 @@ fun OwnerEntranceScreen(
 @Composable
 fun OwnerEntranceStandardUI(
     authenticate: () -> Unit,
+    recover: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val resetTag = "reset"
 
     Column(
         modifier = Modifier
@@ -261,8 +270,36 @@ fun OwnerEntranceStandardUI(
             }
         }
 
+        Spacer(modifier = Modifier.weight(0.1f))
 
-        Spacer(modifier = Modifier.weight(1.0f))
+        val basicStyle = SpanStyle(
+            color = SharedColors.MainColorText,
+        )
+        val recoveryText = buildAnnotatedString {
+            withStyle(basicStyle) {
+                append(stringResource(R.string.need_to_reset_login_id))
+            }
+            pushStringAnnotation(tag = resetTag, annotation = "Reset Login ID")
+            withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                append(stringResource(R.string.here))
+            }
+            pop()
+            withStyle(basicStyle) {
+                append(".")
+            }
+        }
+        ClickableText(
+            text = recoveryText,
+            style = TextStyle(textAlign = TextAlign.Center, fontSize = 13.sp),
+            onClick = { offset ->
+                recoveryText.getStringAnnotations(tag = resetTag, start = offset, end = offset)
+                    .firstOrNull()?.let {
+                        recover()
+                    }
+            },
+        )
+
+        Spacer(modifier = Modifier.weight(0.7f))
 
         Text(
             modifier = Modifier.padding(horizontal = 44.dp),
@@ -451,7 +488,8 @@ fun TermsOfUsePreview() {
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun OwnerEntranceStandardUIPreview() {
-    OwnerEntranceStandardUI {
-
-    }
+    OwnerEntranceStandardUI(
+        authenticate = {},
+        recover = {},
+    )
 }

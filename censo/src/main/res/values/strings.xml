@@ -403,5 +403,17 @@
     <string name="failed_to_validate_key">failed to validate key</string>
     <string name="censo_was_not_able_to_access_your_key">Censo was not able to access your key</string>
     <string name="collect_approvals_key_recovery_message">Collect approvals from both of your approvers in order to restore access to your seed phrases</string>
-    <string name="recovery_my_key">Recovery my key</string>
+    <string name="recover_my_key">Recover my key</string>
+    <string name="need_to_reset_login_id">"Need to reset your Login ID? Click "</string>
+    <string name="reset_login_id">Reset Login ID</string>
+    <string name="step_1_collect_reset_links">1. Collect Reset Links</string>
+    <string name="step_1_collect_reset_links_message">Request reset links from your approvers. Once received, tap each link to proceed, or copy and paste them using the \"Paste From Clipboard\" button.</string>
+    <string name="collected_reset_links">Collected %1$s from %2$s links</string>
+    <string name="step_2_select_new_google_id">2. Select New Google ID</string>
+    <string name="step_2_select_new_google_id_message">Sign in with the new Google Account you wish to associate with Censo.</string>
+    <string name="step_3_biometric_verification">3. Biometric Verification</string>
+    <string name="step_3_biometric_verification_message">For your security, we\'ll confirm your identity through biometric verification. Please follow the on-screen instructions to complete this step. This ensures that only you can make the change.</string>
+    <string name="start_verification">Start verification</string>
+    <string name="step_4_key_recovery">4. Key Recovery</string>
+    <string name="step_4_key_recovery_message">Once your Google Account is updated, your key will need to be recovered. Assistance of both approvers is required to restore access to your seed phrases.</string>
 </resources>

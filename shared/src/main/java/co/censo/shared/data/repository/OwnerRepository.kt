@@ -4,7 +4,6 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedApproverPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
-import Base58EncodedPrivateKey
 import Base64EncodedData
 import ParticipantId
 import SeedPhraseId
@@ -48,11 +47,15 @@ import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
 import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
+import co.censo.shared.data.model.ResetLoginIdApiRequest
+import co.censo.shared.data.model.ResetLoginIdApiResponse
+import co.censo.shared.data.model.ResetToken
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
@@ -73,6 +76,7 @@ import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.Clock
 import okhttp3.ResponseBody
 import java.math.BigInteger
@@ -101,6 +105,13 @@ interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
     suspend fun signInUser(idToken: String): Resource<ResponseBody>
+    suspend fun createDevice(): Resource<ResponseBody>
+    suspend fun resetLoginId(
+        idToken: String,
+        resetTokens: List<ResetToken>,
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry,
+    ): Resource<ResetLoginIdApiResponse>
 
     suspend fun getCreatePolicyParams(
         ownerApprover: Approver.ProspectApprover,
@@ -234,7 +245,8 @@ class OwnerRepositoryImpl(
     private val apiService: ApiService,
     private val secureStorage: SecurePreferences,
     private val authUtil: AuthUtil,
-    private val keyRepository: KeyRepository
+    private val keyRepository: KeyRepository,
+    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>? = null,
 ) : OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse> {
         return retrieveApiResource { apiService.ownerUser() }
@@ -248,6 +260,30 @@ class OwnerRepositoryImpl(
                 )
             )
         }
+
+    override suspend fun createDevice(): Resource<ResponseBody> {
+        return retrieveApiResource {
+            apiService.createDevice()
+        }
+    }
+
+    override suspend fun resetLoginId(
+        idToken: String,
+        resetTokens: List<ResetToken>,
+        biometryVerificationId: BiometryVerificationId,
+        biometryData: FacetecBiometry
+    ): Resource<ResetLoginIdApiResponse> {
+        return retrieveApiResource {
+            apiService.resetLoginId(
+                ResetLoginIdApiRequest(
+                    identityToken = IdentityToken(idToken.sha256()),
+                    resetTokens = resetTokens,
+                    biometryVerificationId = biometryVerificationId,
+                    biometryData = biometryData
+                )
+            )
+        }
+    }
 
     override suspend fun createPolicySetup(
         threshold: UInt,
@@ -644,8 +680,11 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun signUserOut() {
-        authUtil.signOut()
+        ownerStateFlow?.let {
+            it.value = Resource.Uninitialized
+        }
         secureStorage.clearJWT()
+        authUtil.signOut()
     }
 
     override suspend fun submitAccessTotpVerification(

@@ -79,7 +79,7 @@ android {
             manifestPlaceholders["SENTRY_ID"] = sentryProdId
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             manifestPlaceholders["ENVIRONMENT"] = "prod"
-            manifestPlaceholders["URL_SCHEME"] = "censo"
+            manifestPlaceholders["APPROVER_URL_SCHEME"] = "censo"
             manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
@@ -99,7 +99,7 @@ android {
             applicationIdSuffix = ".staging"
             isDebuggable = false
             manifestPlaceholders["ENVIRONMENT"] = "staging"
-            manifestPlaceholders["URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
+            manifestPlaceholders["APPROVER_URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
             manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
@@ -113,7 +113,7 @@ android {
             applicationIdSuffix = ".integration"
             isDebuggable = false
             manifestPlaceholders["ENVIRONMENT"] = "integration"
-            manifestPlaceholders["URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
+            manifestPlaceholders["APPROVER_URL_SCHEME"] = "censo-${manifestPlaceholders["ENVIRONMENT"]}"
             manifestPlaceholders["LINK_HOST"] = "link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")

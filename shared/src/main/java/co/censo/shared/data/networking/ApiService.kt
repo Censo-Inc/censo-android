@@ -37,6 +37,8 @@ import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
 import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
+import co.censo.shared.data.model.ResetLoginIdApiRequest
+import co.censo.shared.data.model.ResetLoginIdApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
@@ -157,6 +159,17 @@ interface ApiService {
         @Body signInApiRequest: SignInApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ResponseBody>
+
+    @POST("/v1/device")
+    suspend fun createDevice(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<ResponseBody>
+
+    @PUT("/v1/login-id")
+    suspend fun resetLoginId(
+        @Body resetLoginIdApiRequest: ResetLoginIdApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<ResetLoginIdApiResponse>
 
     @GET("/v1/user")
     suspend fun ownerUser(): RetrofitResponse<GetOwnerUserApiResponse>
