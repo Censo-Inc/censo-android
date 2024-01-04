@@ -30,7 +30,6 @@ import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
-import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
@@ -87,7 +86,9 @@ fun ApproverEntranceScreen(
         if (state.navigationResource is Resource.Success) {
             state.navigationResource.data?.let { navigationData ->
                 navController.navigate(navigationData.route) {
-                    popUpToTop()
+                    if (navigationData.popUpToTop) {
+                        popUpToTop()
+                    }
                 }
             }
             viewModel.resetNavigationResource()
@@ -132,11 +133,6 @@ fun ApproverEntranceScreen(
                         errorMessage = state.triggerGoogleSignIn.getErrorMessage(context),
                         dismissAction = viewModel::resetTriggerGoogleSignIn,
                     ) { viewModel.retrySignIn() }
-                } else if (state.deleteUserResource is Resource.Error) {
-                    DisplayError(
-                        errorMessage = state.deleteUserResource.getErrorMessage(context),
-                        dismissAction = viewModel::resetDeleteUserResource,
-                    ) { }
                 }
             }
 
@@ -179,7 +175,8 @@ fun ApproverEntranceScreen(
                                 viewModel.handleLoggedInLink(
                                     ClipboardHelper.getClipboardContent(context)
                                 )
-                            }
+                            },
+                            onSettingsClick = viewModel::navToSettingsScreen,
                         )
                     }
 
@@ -191,28 +188,11 @@ fun ApproverEntranceScreen(
 
                     is ApproverEntranceUIState.Landing -> {
                         ApproverLanding(
+                            loggedIn = state.loggedIn,
                             isActiveApprover = uiState.isActiveApprover,
-                            onActiveApproverLongPress = viewModel::setShowDeleteUserWarning,
+                            onSettingsClick = viewModel::navToSettingsScreen,
                             onContinue = viewModel::onLandingContinue
                         )
-
-                        if (state.showDeleteUserWarningDialog) {
-                            ConfirmationDialog(
-                                title = "",
-                                message = stringResource(R.string.delete_data),
-                                onCancel = viewModel::resetShowDeleteUserWarning,
-                                onDelete = viewModel::setShowDeleteUserConfirmDialog
-                            )
-                        }
-
-                        if (state.showDeleteUserConfirmDialog) {
-                            ConfirmationDialog(
-                                title = stringResource(R.string.deactivate_delete),
-                                message = stringResource(R.string.deactivate_delete_message),
-                                onCancel = { viewModel.resetShowDeleteUserConfirmDialog() },
-                                onDelete = viewModel::deleteUser,
-                            )
-                        }
                     }
                 }
             }

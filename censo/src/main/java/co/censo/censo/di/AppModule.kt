@@ -110,13 +110,15 @@ object AppModule {
     @Provides
     fun provideApproverRepository(
         apiService: ApiService,
+        authUtil: AuthUtil,
         storage: SecurePreferences,
         keyRepository: KeyRepository
     ): ApproverRepository {
         return ApproverRepositoryImpl(
             secureStorage = storage,
             apiService = apiService,
-            keyRepository = keyRepository
+            keyRepository = keyRepository,
+            authUtil = authUtil
         )
     }
 

@@ -59,26 +59,32 @@ sealed class Screen(val route: String) {
     fun navTo() : NavigationData {
         return NavigationData(
             route = this.route,
-            popSelfFromBackStack = false
+            popSelfFromBackStack = false,
+            popUpToTop = false
         )
     }
 
     fun navToAndPopCurrentDestination() : NavigationData {
         return NavigationData(
             route = this.route,
-            popSelfFromBackStack = true
+            popSelfFromBackStack = true,
+            popUpToTop = false
         )
     }
 
     fun String.navTo() : NavigationData {
         return NavigationData(
-            route = this, popSelfFromBackStack = false
+            route = this,
+            popSelfFromBackStack = false,
+            popUpToTop = false
         )
     }
 
     fun String.navToAndPopCurrentDestination() : NavigationData {
         return NavigationData(
-            route = this, popSelfFromBackStack = true
+            route = this,
+            popSelfFromBackStack = true,
+            popUpToTop = false
         )
     }
 }

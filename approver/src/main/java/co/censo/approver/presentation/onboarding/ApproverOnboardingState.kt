@@ -9,6 +9,7 @@ import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
+import co.censo.shared.util.NavigationData
 
 data class ApproverOnboardingState(
     // approver state
@@ -38,6 +39,8 @@ data class ApproverOnboardingState(
 
     //Success/Error Message
     val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,
+
+    val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
     val asyncError = userResponse is Resource.Error
             || acceptApproverResource is Resource.Error

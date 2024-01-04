@@ -1,7 +1,6 @@
 package co.censo.approver.presentation.entrance.components
 
 import StandardButton
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,8 +37,9 @@ import co.censo.shared.util.LinksUtil
 
 @Composable
 fun ApproverLanding(
+    loggedIn: Boolean = false,
     isActiveApprover: Boolean = false,
-    onActiveApproverLongPress: () -> Unit,
+    onSettingsClick: () -> Unit,
     onContinue: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -50,8 +50,9 @@ fun ApproverLanding(
             .fillMaxSize()
             .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
+
+        Spacer(modifier = Modifier.height(48.dp))
 
         Text(
             text = stringResource(R.string.hello_approver),
@@ -125,24 +126,10 @@ fun ApproverLanding(
                         uriHandler.openUri(annotatedLink.item)
                     }
             }
-        }
-    }
+        } else {
+            Spacer(modifier = Modifier.height(36.dp))
 
-    if (isActiveApprover) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
             Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onLongPress = {
-                                onActiveApproverLongPress()
-                            }
-                        )
-                    },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -160,7 +147,23 @@ fun ApproverLanding(
                     color = SharedColors.MainColorText,
                     fontWeight = FontWeight.W500
                 )
-                Spacer(modifier = Modifier.height(36.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+
+    if (loggedIn) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                SettingsButton(onClick = onSettingsClick)
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -170,6 +173,24 @@ fun ApproverLanding(
 @Composable
 fun ApproverLandingScreenPreview() {
     ApproverLanding(
-        onActiveApproverLongPress = {}
+        onSettingsClick = {}
+    ) { }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ApproverLoggedInLandingScreenPreview() {
+    ApproverLanding(
+        loggedIn = true,
+        onSettingsClick = {}
+    ) { }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ActiveApproverLandingScreenPreview() {
+    ApproverLanding(
+        isActiveApprover = true,
+        onSettingsClick = {}
     ) { }
 }

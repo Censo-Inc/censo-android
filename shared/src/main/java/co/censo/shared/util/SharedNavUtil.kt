@@ -6,7 +6,8 @@ import co.censo.shared.data.Resource
 
 data class NavigationData(
     val route: String,
-    val popSelfFromBackStack: Boolean
+    val popSelfFromBackStack: Boolean,
+    val popUpToTop: Boolean
 )
 
 const val START_DESTINATION = 0

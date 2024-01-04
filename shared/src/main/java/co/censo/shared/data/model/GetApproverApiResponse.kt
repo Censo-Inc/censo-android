@@ -13,7 +13,8 @@ import kotlinx.serialization.Serializable
 data class ApproverState(
     val participantId: ParticipantId,
     val phase: ApproverPhase,
-    val invitationId: InvitationId? = null
+    val invitationId: InvitationId? = null,
+    val ownerLabel: String? = null
 )
 
 @Serializable

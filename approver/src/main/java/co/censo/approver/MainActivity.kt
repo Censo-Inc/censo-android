@@ -1,5 +1,6 @@
 package co.censo.approver
 
+import ParticipantId
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +31,13 @@ import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import android.content.Intent
 import android.net.Uri
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import co.censo.approver.presentation.Screen.Companion.APPROVER_UNIVERSAL_DEEPLINK
+import co.censo.approver.presentation.settings.ApproverSettingsScreen
+import co.censo.approver.presentation.owners.ApproverOwnersList
+import co.censo.approver.presentation.owners.LabelOwner
 import co.censo.approver.BuildConfig as ApproverBuildConfig
 
 @AndroidEntryPoint
@@ -133,6 +140,25 @@ class MainActivity : FragmentActivity() {
                     navController = navController,
                     accessParticipantId = participantId,
                     approvalId = approvalId,
+                )
+            }
+            composable(
+                Screen.ApproverSettingsScreen.route
+            ) {
+                ApproverSettingsScreen(navController = navController)
+            }
+            composable(
+                Screen.ApproverOwnersListScreen.route
+            ) {
+                ApproverOwnersList(navController = navController)
+            }
+            composable(
+                Screen.ApproverLabelOwnerScreen.route,
+                arguments = listOf(navArgument("participantId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                LabelOwner(
+                    navController,
+                    ParticipantId(backStackEntry.arguments?.getString("participantId") ?: "")
                 )
             }
         }

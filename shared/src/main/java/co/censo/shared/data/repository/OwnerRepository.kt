@@ -209,7 +209,7 @@ interface OwnerRepository {
     ): Resource<StoreSeedPhraseApiResponse>
 
     suspend fun deleteSeedPhrase(guid: SeedPhraseId): Resource<DeleteSeedPhraseApiResponse>
-    suspend fun deleteUser(participantId: ParticipantId?, deletingApproverUser: Boolean = false): Resource<Unit>
+    suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit>
 
     suspend fun initiateAccess(intent: AccessIntent): Resource<InitiateAccessApiResponse>
     suspend fun cancelAccess(): Resource<DeleteAccessApiResponse>
@@ -652,13 +652,13 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.deleteSeedPhrase(guid) }
     }
 
-    override suspend fun deleteUser(participantId: ParticipantId?, deletingApproverUser: Boolean): Resource<Unit> {
+    override suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit> {
         val response = retrieveApiResource { apiService.deleteUser() }
 
         if (response is Resource.Success) {
             try {
                 keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
-                if (participantId != null && !deletingApproverUser) {
+                if (participantId != null) {
                     keyRepository.deleteSavedKeyFromCloud(participantId)
                 }
                 secureStorage.clearDeviceKeyId()

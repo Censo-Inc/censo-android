@@ -99,6 +99,15 @@ fun ApproverOnboardingScreen(
         }
     }
 
+    LaunchedEffect(key1 = state) {
+        if (state.navigationResource is Resource.Success) {
+            state.navigationResource.data?.let { navigationData ->
+                navController.navigate(navigationData.route)
+            }
+            viewModel.resetNavigationResource()
+        }
+    }
+
     Scaffold(
         topBar = {
             if (state.showTopBar) {
