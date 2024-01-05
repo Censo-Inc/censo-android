@@ -55,6 +55,11 @@ class BIP39ValidationTest {
     }
 
     @Test
+    fun `test phrase with entropy value with zero first byte`() {
+        assertNull(BIP39.validateSeedPhrase("abstract mom mother cool quantum giant humble salute deputy cradle ride cricket"))
+    }
+
+    @Test
     fun `test to binary entropy round trip`() {
         testPhrases.forEach { phrase ->
             assertEquals(
@@ -127,6 +132,8 @@ class BIP39ValidationTest {
     )
 
     private val testPhrases = listOf(
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+        "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
         "media squirrel pass doll leg across modify candy dash glass amused scorpion",
         "fantasy rain also faith churn acquire wolf salad switch skirt donate shield energy cart possible",
         "ugly pattern possible away witness sword manual soap spin dolphin thrive dinosaur blast tide century program note history",
