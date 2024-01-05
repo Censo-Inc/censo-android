@@ -80,6 +80,7 @@ interface ApproverRepository {
     suspend fun deleteUser(): Resource<Unit>
     suspend fun signUserOut()
     suspend fun labelOwner(participantId: String, label: String) : Resource<GetApproverUserApiResponse>
+    suspend fun createLoginIdResetToken(participantId: String) : Resource<GetApproverUserApiResponse>
 }
 
 class ApproverRepositoryImpl(
@@ -253,6 +254,12 @@ class ApproverRepositoryImpl(
     override suspend fun labelOwner(participantId: String, label: String): Resource<GetApproverUserApiResponse> {
         return retrieveApiResource {
             apiService.labelOwnerByApprover(participantId, LabelOwnerByApproverApiRequest(label))
+        }
+    }
+
+    override suspend fun createLoginIdResetToken(participantId: String): Resource<GetApproverUserApiResponse> {
+        return retrieveApiResource {
+            apiService.createLoginIdResetToken(participantId)
         }
     }
 }

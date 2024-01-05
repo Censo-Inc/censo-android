@@ -1,8 +1,10 @@
+import co.censo.shared.DeepLinkURI
 import co.censo.shared.data.cryptography.ECPublicKeyDecoder
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.data.cryptography.toPaddedHexString
+import co.censo.shared.data.model.Approver
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -145,3 +147,11 @@ value class InvitationId(val value: String)
 @Serializable
 @JvmInline
 value class SeedPhraseId(val value: String)
+
+@Serializable
+@JvmInline
+value class LoginIdResetToken(val value: String) {
+    fun deeplink(): String {
+        return "${DeepLinkURI.OWNER_LOGIN_ID_RESET_URI}${this.value}"
+    }
+}

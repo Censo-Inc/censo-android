@@ -38,6 +38,7 @@ import co.censo.approver.presentation.Screen.Companion.APPROVER_UNIVERSAL_DEEPLI
 import co.censo.approver.presentation.settings.ApproverSettingsScreen
 import co.censo.approver.presentation.owners.ApproverOwnersList
 import co.censo.approver.presentation.owners.LabelOwner
+import co.censo.approver.presentation.reset_links.ResetLinksScreen
 import co.censo.approver.BuildConfig as ApproverBuildConfig
 
 @AndroidEntryPoint
@@ -160,6 +161,11 @@ class MainActivity : FragmentActivity() {
                     navController,
                     ParticipantId(backStackEntry.arguments?.getString("participantId") ?: "")
                 )
+            }
+            composable(
+                Screen.ApproverResetLinksScreen.route
+            ) {
+                ResetLinksScreen(navController = navController)
             }
         }
     }

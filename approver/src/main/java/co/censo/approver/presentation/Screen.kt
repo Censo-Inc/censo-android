@@ -9,6 +9,7 @@ sealed class Screen(val route: String) {
     object ApproverAccessScreen : Screen("approver_access_screen")
     object ApproverSettingsScreen : Screen("approver_settings_screen")
     object ApproverOwnersListScreen : Screen("approver_owners_list_screen")
+    object ApproverResetLinksScreen : Screen("approver_reset_links_screen")
     object ApproverLabelOwnerScreen : Screen("approver_owners_list_screen/{participantId}") {
         fun navTo(participantId: ParticipantId): NavigationData =
             NavigationData(

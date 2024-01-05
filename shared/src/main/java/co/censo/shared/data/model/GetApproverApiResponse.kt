@@ -5,6 +5,7 @@ import Base58EncodedApproverPublicKey
 import Base64EncodedData
 import InvitationId
 import ParticipantId
+import LoginIdResetToken
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,7 +15,8 @@ data class ApproverState(
     val participantId: ParticipantId,
     val phase: ApproverPhase,
     val invitationId: InvitationId? = null,
-    val ownerLabel: String? = null
+    val ownerLabel: String? = null,
+    val ownerLoginIdResetToken: LoginIdResetToken? = null,
 )
 
 @Serializable

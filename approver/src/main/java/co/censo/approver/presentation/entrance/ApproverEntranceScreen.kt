@@ -176,7 +176,8 @@ fun ApproverEntranceScreen(
                                     ClipboardHelper.getClipboardContent(context)
                                 )
                             },
-                            onSettingsClick = viewModel::navToSettingsScreen,
+                            onAssistClick = viewModel::navToResetLinks,
+                            onBackClick = viewModel::backToLanding
                         )
                     }
 

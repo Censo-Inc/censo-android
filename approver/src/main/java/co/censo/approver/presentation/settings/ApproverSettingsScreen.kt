@@ -132,7 +132,8 @@ fun ApproverSettingsScreen(
                                 .background(color = Color.White)
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            if (state.userResponse is Resource.Success && (state.userResponse.data?.activeApproversCount ?: 0) > 1) {
+                            val activeApproversCount = (state.userResponse as? Resource.Success)?.data?.activeApproversCount ?: 0
+                            if (activeApproversCount > 1) {
                                 Divider()
                                 SettingsItem(
                                     title = stringResource(R.string.view_owners_settings_title),

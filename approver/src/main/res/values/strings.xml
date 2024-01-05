@@ -19,6 +19,7 @@
     <string name="access_approval">Access Approval</string>
     <string name="the_code_you_entered_in_not_correct_please_try_again">The code you entered in not correct. Please try again.</string>
     <string name="close">Close</string>
+    <string name="back">Back</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="link_not_valid">Link is not valid</string>
     <string name="do_you_really_want_to_cancel">Do you really want to cancel?</string>
@@ -93,4 +94,15 @@
     <string name="label_owner_screen_save_button">Save</string>
     <string name="enter_a_nickname">Enter a nickname…</string>
     <string name="input_string_is_too_long">Can\'t be longer than %1$s characters</string>
+    <string name="share">Share</string>
+    <string name="received_a_link">Received a link?</string>
+    <string name="if_the_person_you_are_assisting_has_set_you_a_link_you_can_tap_on_it_to_continue">If the person you are assisting has set you a link, you can tap on it to continue.</string>
+    <string name="asked_for_login_assistance">Asked for login assistance?</string>
+    <string name="assist">Assist</string>
+    <string name="login_assistance">Login assistance</string>
+    <string name="get_live_with_owner_title">Get live with the person that contacted you.</string>
+    <string name="get_live_with_owner_message">This process should preferably take place while you’re on the phone or in-person to ensure that you are assisting the proper individual.</string>
+    <string name="please_select_the_person_that_has_contacted_you">Please select the person that has contacted you:</string>
+    <string name="select_person">select person</string>
+    <string name="share_recovery_link_message">Please send the login recovery link back to the person that has contacted you.</string>
 </resources>

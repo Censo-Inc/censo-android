@@ -31,7 +31,9 @@ fun LoggedOutPasteLinkUI(
             Spacer(modifier = Modifier.weight(0.3f))
 
             PasteLink(
-                onPasteLinkClick = onPasteLinkClick
+                isApprover = false,
+                onPasteLinkClick = onPasteLinkClick,
+                onAssistClick = { /* not rendered when isApprover is false */}
             )
 
             Spacer(modifier = Modifier.weight(0.7f))

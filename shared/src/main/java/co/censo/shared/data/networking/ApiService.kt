@@ -172,6 +172,11 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ResetLoginIdApiResponse>
 
+    @POST("v1/login-id-reset-token/{$PARTICIPANT_ID}")
+    suspend fun createLoginIdResetToken(
+        @Path(value = PARTICIPANT_ID) participantId: String
+    ): RetrofitResponse<GetApproverUserApiResponse>
+
     @GET("/v1/user")
     suspend fun ownerUser(): RetrofitResponse<GetOwnerUserApiResponse>
 

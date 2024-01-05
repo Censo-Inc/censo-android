@@ -69,7 +69,7 @@ class ApproverEntranceViewModel @Inject constructor(
         if (state.loggedIn) {
             loggedInRouting()
         } else {
-            loggedOutRouting()
+            signInUI()
         }
     }
 
@@ -89,6 +89,16 @@ class ApproverEntranceViewModel @Inject constructor(
         state = state.copy(
             navigationResource = Screen.ApproverSettingsScreen.navTo().asResource()
         )
+    }
+
+    fun navToResetLinks() {
+        state = state.copy(
+            navigationResource = Screen.ApproverResetLinksScreen.navTo().asResource()
+        )
+    }
+
+    fun backToLanding() {
+        determineLoginState()
     }
     //endregion
 
