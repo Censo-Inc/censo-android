@@ -182,7 +182,7 @@ object BIP39 {
     private fun computeChecksum(entropy: BigInteger, checksumBits: Int): UByte {
         return MessageDigest
             .getInstance("SHA-256")
-            .digest(entropy.toByteArrayNoSign()).first().toUByte().toInt().shr(
+            .digest(entropy.toByteArrayNoSign(checksumBits * 4)).first().toUByte().toInt().shr(
                 8 - checksumBits
             ).toByte().toUByte()
     }
@@ -268,7 +268,7 @@ object BIP39 {
             throw Exception("Checksums did not match when encoding phrase")
         }
 
-        return byteArrayOf(language.toId()) + entropy.toByteArrayNoSign()
+        return byteArrayOf(language.toId()) + entropy.toByteArrayNoSign(checksumBits * 4)
     }
 
     fun wordLists(language: WordListLanguage): List<String>? {
