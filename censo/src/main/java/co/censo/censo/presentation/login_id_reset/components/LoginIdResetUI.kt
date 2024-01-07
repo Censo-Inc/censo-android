@@ -100,8 +100,8 @@ fun LoginIdResetUI(
         Spacer(modifier = Modifier.height(24.dp))
         BaseResetStep(
             imagePainter = painterResource(id = co.censo.shared.R.drawable.google),
-            heading = stringResource(R.string.step_2_select_new_google_id),
-            message = stringResource(R.string.step_2_select_new_google_id_message)
+            heading = stringResource(R.string.step_2_select_new_login_id),
+            message = stringResource(R.string.step_2_select_new_login_id_message)
         ) {
             StandardButton(
                 onClick = onSelectGoogleId,
