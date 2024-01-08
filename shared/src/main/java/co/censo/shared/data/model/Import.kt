@@ -4,6 +4,7 @@ import Base58EncodedDevicePublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import SimpleBase58PublicKey
+import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.hexStringToByteArray
 import co.censo.shared.data.cryptography.sha256Base64
 import co.censo.shared.data.cryptography.toPaddedHexString
@@ -13,6 +14,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.math.BigInteger
+import java.util.Base64
 
 @Serializable
 data class Import(
@@ -23,17 +25,6 @@ data class Import(
 ) {
 
     companion object {
-        private fun base64UrlToBase64(base64url: String): String {
-            var base64 = base64url
-                .replace("-", "+")
-                .replace("_", "/")
-
-            if (base64.length % 4 != 0) {
-                base64 += "=".repeat(4 - base64.length % 4)
-            }
-
-            return base64
-        }
         fun fromDeeplink(
             importKey: String,
             timestamp: String,
@@ -41,32 +32,19 @@ data class Import(
             name: String,
         ): Import {
 
-            val signatureModified = base64UrlToBase64(signature)
-            val base64EncodedSignature = Base64EncodedData(signatureModified)
-
             return Import(
                 importKey = SimpleBase58PublicKey(importKey),
                 timestamp = timestamp.toLong(),
-                signature = base64EncodedSignature,
+                signature = Base64.getUrlDecoder().decode(signature).base64Encoded(),
                 name = name
             )
         }
     }
 
-    private fun base64ToBase64Url(base64: Base64EncodedData): String {
-        return base64.base64Encoded
-            .replace("+", "-")
-            .replace("/", "_")
-            .replace("=", "")
-    }
-
     fun channel(): String {
-
         val importBytes = Base58.base58Decode(importKey.value)
 
-        return base64ToBase64Url(
-            base64 = importBytes.sha256Base64()
-        )
+        return Base64.getUrlEncoder().encodeToString(importBytes.sha256Base64().bytes)
     }
 }
 

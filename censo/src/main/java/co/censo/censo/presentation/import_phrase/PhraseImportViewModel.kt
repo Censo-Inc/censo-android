@@ -53,7 +53,7 @@ class PhraseImportViewModel @Inject constructor(
         private set
 
     private fun startTimer(channel: String) {
-        countDownTimer.start(5000) {
+        countDownTimer.start(2000) {
             checkForCompletedImport(channel)
         }
     }
@@ -229,7 +229,7 @@ class PhraseImportViewModel @Inject constructor(
                             val words = BIP39.binaryDataToWords(
                                 binaryData = importedPhrase.binaryPhrase.value.hexStringToByteArray(),
                                 language = importedPhrase.language,
-                                importedSize = true
+                                hasLanguageByte = true
                             )
 
                             val route = Screen.EnterPhraseRoute.buildNavRoute(

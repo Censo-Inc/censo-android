@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.import_phrase
 
+import Base64EncodedData
 import StandardButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import java.util.Base64
 
 @Composable
 fun PhraseImportScreen(
@@ -114,8 +116,18 @@ fun PhraseImportUI(
 
         when (phraseImportState) {
             ImportPhase.None -> {
+
+                val decodedName = try {
+                    val decodedURL = Base64.getUrlDecoder().decode(name)
+                    val intoBase64 =
+                        Base64EncodedData(Base64.getEncoder().encodeToString(decodedURL))
+                    String(intoBase64.bytes, Charsets.UTF_8)
+                } catch (e: Exception) {
+                    ""
+                }
+
                 Text(
-                    "$name would like to export a seed phrase to you.",
+                    "$decodedName would like to export a seed phrase to you.",
                     fontSize = 24.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Center,

@@ -268,8 +268,8 @@ object BIP39 {
         return wordlists[language]
     }
 
-    fun binaryDataToWords(binaryData: ByteArray, language: WordListLanguage? = null, importedSize: Boolean = false): List<String> {
-        val entropy = if (importedSize) {
+    fun binaryDataToWords(binaryData: ByteArray, language: WordListLanguage? = null, hasLanguageByte: Boolean = false): List<String> {
+        val entropy = if (hasLanguageByte) {
             binaryData.slice(indices = binaryData.indices).toByteArray()
         } else {
             binaryData.slice(indices = 1 until binaryData.size).toByteArray()
