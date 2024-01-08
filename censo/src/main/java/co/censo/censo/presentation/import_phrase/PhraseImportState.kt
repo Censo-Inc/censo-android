@@ -26,7 +26,7 @@ sealed class ImportPhase {
     object None : ImportPhase()
     object Accepting : ImportPhase()
     data class Completing(val import: Import) : ImportPhase()
-    data class Completed(val importedPhrase: ImportedPhrase) : ImportPhase()
+    object Completed : ImportPhase()
 }
 
 enum class ImportErrorType {

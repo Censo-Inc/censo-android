@@ -133,12 +133,12 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}/{${Screen.EnterPhraseRoute.WELCOME_FLOW_ARG}}/{${Screen.EnterPhraseRoute.IMPORTING_PHRASE_ARG}}/{${Screen.EnterPhraseRoute.WORDS_ARG}}"
+                route = "${Screen.EnterPhraseRoute.route}/{${Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG}}/{${Screen.EnterPhraseRoute.WELCOME_FLOW_ARG}}/{${Screen.EnterPhraseRoute.IMPORTING_PHRASE_ARG}}/{${Screen.EnterPhraseRoute.ENCRYPTED_PHRASE_ARG}}"
             ) { backStackEntry ->
                 val importingPhrase = (backStackEntry.arguments?.getString(Screen.EnterPhraseRoute.IMPORTING_PHRASE_ARG)
                     ?.toBoolean()) ?: false
 
-                val words = (backStackEntry.arguments?.getString(Screen.EnterPhraseRoute.WORDS_ARG) ?: "").split("_")
+                val encryptedPhraseData = backStackEntry.arguments?.getString(Screen.EnterPhraseRoute.ENCRYPTED_PHRASE_ARG) ?: ""
 
                 EnterPhraseScreen(
                     navController = navController,
@@ -150,7 +150,7 @@ class MainActivity : FragmentActivity() {
                     welcomeFlow = (backStackEntry.arguments?.getString(Screen.EnterPhraseRoute.WELCOME_FLOW_ARG)
                         ?.toBoolean()) ?: false,
                     importingPhrase = importingPhrase,
-                    words = words
+                    encryptedPhrase = encryptedPhraseData
                 )
             }
             composable(

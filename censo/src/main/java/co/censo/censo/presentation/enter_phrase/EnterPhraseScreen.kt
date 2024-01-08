@@ -55,7 +55,7 @@ fun EnterPhraseScreen(
     welcomeFlow: Boolean,
     navController: NavController,
     importingPhrase: Boolean = false,
-    words: List<String> = emptyList(),
+    encryptedPhrase: String,
     viewModel: EnterPhraseViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -85,7 +85,7 @@ fun EnterPhraseScreen(
             importingPhrase = importingPhrase,
             welcomeFlow = welcomeFlow,
             masterPublicKey = masterPublicKey,
-            words = words
+            encryptedPhrase = encryptedPhrase
         )
         onDispose {}
     }

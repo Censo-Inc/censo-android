@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,9 +10,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.decryptWithEntropy
+import co.censo.shared.data.cryptography.hexStringToByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.networking.IgnoreKeysJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
@@ -42,11 +46,11 @@ class EnterPhraseViewModel @Inject constructor(
         welcomeFlow: Boolean,
         importingPhrase: Boolean,
         masterPublicKey: Base58EncodedMasterPublicKey,
-        words: List<String> = emptyList()
+        encryptedPhrase: String = ""
     ) {
         if (importingPhrase) {
             importingPhrase(
-                words = words,
+                encryptedPhraseData = encryptedPhrase,
                 masterPublicKey = masterPublicKey
             )
         } else {
@@ -59,7 +63,19 @@ class EnterPhraseViewModel @Inject constructor(
         retrieveOwnerState()
     }
 
-    private fun importingPhrase(words: List<String>, masterPublicKey: Base58EncodedMasterPublicKey) {
+    private fun importingPhrase(encryptedPhraseData: String, masterPublicKey: Base58EncodedMasterPublicKey) {
+        val deviceKey = keyRepository.retrieveInternalDeviceKey()
+        val base64EncodedPhraseData = Base64EncodedData(encryptedPhraseData)
+        val decryptedData = deviceKey.decrypt(base64EncodedPhraseData.bytes)
+
+        val importedPhrase: ImportedPhrase =
+            IgnoreKeysJson.baseKotlinXJson.decodeFromString(decryptedData.toString(Charsets.UTF_8))
+
+        val words = BIP39.binaryDataToWords(
+            binaryData = importedPhrase.binaryPhrase.value.hexStringToByteArray(),
+            language = importedPhrase.language,
+            hasLanguageByte = true
+        )
 
         val editedWordIndex = if (words.size > 1) words.size - 1 else 0
 

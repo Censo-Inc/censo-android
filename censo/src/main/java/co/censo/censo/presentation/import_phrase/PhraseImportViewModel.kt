@@ -217,31 +217,19 @@ class PhraseImportViewModel @Inject constructor(
                 response.data?.let {
                     when (val importState = it.importState) {
                         is ImportState.Completed -> {
-                            val deviceKey = keyRepository.retrieveInternalDeviceKey()
-                            val decryptedData = deviceKey.decrypt(importState.encryptedData.bytes)
-
-                            val importedPhrase: ImportedPhrase =
-                                baseKotlinXJson.decodeFromString(decryptedData.toString(Charsets.UTF_8))
-
                             val masterPublicKey =
                                 (state.userResponse.data as OwnerState.Ready).vault.publicMasterEncryptionKey
-
-                            val words = BIP39.binaryDataToWords(
-                                binaryData = importedPhrase.binaryPhrase.value.hexStringToByteArray(),
-                                language = importedPhrase.language,
-                                hasLanguageByte = true
-                            )
 
                             val route = Screen.EnterPhraseRoute.buildNavRoute(
                                 masterPublicKey = masterPublicKey,
                                 welcomeFlow = true,
-                                words = words,
+                                encryptedPhraseData = importState.encryptedData.base64Encoded,
                                 importingPhrase = true
                             )
 
                             state =
                                 state.copy(
-                                    importPhraseState = ImportPhase.Completed(importedPhrase),
+                                    importPhraseState = ImportPhase.Completed,
                                     sendToSeedVerification = Resource.Success(route)
                                 )
                         }

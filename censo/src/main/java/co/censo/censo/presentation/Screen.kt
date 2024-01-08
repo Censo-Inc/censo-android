@@ -44,18 +44,18 @@ sealed class Screen(val route: String) {
         const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"
         const val WELCOME_FLOW_ARG = "welcome_flow_key"
         const val IMPORTING_PHRASE_ARG = "importing_phrase_arg"
-        const val WORDS_ARG = "words_arg"
+        const val ENCRYPTED_PHRASE_ARG = "encrypted_phrase_arg"
 
-        const val NO_WORDS = "empty"
+        private const val NO_PHRASE = "empty"
 
         fun buildNavRoute(
             masterPublicKey: Base58EncodedMasterPublicKey,
             welcomeFlow: Boolean,
             importingPhrase: Boolean = false,
-            words: List<String> = emptyList()
+            encryptedPhraseData: String = ""
         ): String {
 
-            val wordsList = if (words.isEmpty()) NO_WORDS else words.joinToString("_")
+            val wordsList = encryptedPhraseData.ifEmpty { NO_PHRASE }
 
             return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}/${importingPhrase}/${wordsList}"
         }
