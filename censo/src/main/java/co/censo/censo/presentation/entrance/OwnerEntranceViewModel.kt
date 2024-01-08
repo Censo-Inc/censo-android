@@ -17,9 +17,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.NavigationData
 import co.censo.shared.util.asResource
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
