@@ -80,6 +80,12 @@ fun PhraseImportScreen(
                     dismissAction = viewModel::resetGetEncryptedResponse,
                     retryAction = { viewModel.acceptImport(import) }
                 )
+            } else if (state.importErrorType != ImportErrorType.NONE) {
+                DisplayError(
+                    errorMessage = state.importErrorType.getErrorMessage(context),
+                    dismissAction = {},
+                    retryAction = { viewModel.kickOffPhraseImport(import)}
+                )
             }
         }
         else -> {

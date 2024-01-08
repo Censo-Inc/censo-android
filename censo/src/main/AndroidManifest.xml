@@ -54,8 +54,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="${URL_SCHEME}"/>
-                <data android:host="censo-import"/>
+                <data android:scheme="${OWNER_URL_SCHEME}"/>
+                <data android:host="import"/>
             </intent-filter>
         </activity>
 

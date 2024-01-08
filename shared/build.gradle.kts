@@ -69,8 +69,7 @@ android {
             )
             buildConfigField("String", "ENVIRONMENT", "\"prod\"")
             buildConfigField("String", "APPROVER_URL_SCHEME", "\"censo\"")
-            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-reset\"")
-            buildConfigField("String", "IMPORT_URL_SCHEME", "\"censo-import\"")
+            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-main\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("localRelease") {
@@ -83,8 +82,7 @@ android {
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "ENVIRONMENT", "\"staging\"")
             buildConfigField("String", "APPROVER_URL_SCHEME", "\"censo-staging\"")
-            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-reset-staging\"")
-            buildConfigField("String", "IMPORT_URL_SCHEME", "\"censo-import-staging\"")
+            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-main-staging\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         create("integration") {
@@ -94,8 +92,7 @@ android {
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("String", "ENVIRONMENT", "\"integration\"")
             buildConfigField("String", "APPROVER_URL_SCHEME", "\"censo-integration\"")
-            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-reset-integration\"")
-            buildConfigField("String", "IMPORT_URL_SCHEME", "\"censo-import-integration\"")
+            buildConfigField("String", "OWNER_URL_SCHEME", "\"censo-main-integration\"")
             buildConfigField("boolean", "PLAY_INTEGRITY_ENABLED", "true")
         }
         debug {
