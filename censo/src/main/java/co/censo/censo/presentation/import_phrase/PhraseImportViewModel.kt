@@ -29,7 +29,14 @@ import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.jce.spec.ECNamedCurveSpec
+import java.math.BigInteger
 import java.nio.ByteBuffer
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.spec.ECPoint
+import java.security.spec.ECPublicKeySpec
 import java.util.Base64
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
@@ -111,7 +118,8 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     private fun verifySignature(import: Import): Boolean {
-        val key = ExternalEncryptionKey.generateFromPublicKeyBase58(import.importKey)
+        val publicKey = recreateECPublicKey(import.importKey.getBytes())
+        val key = ExternalEncryptionKey(publicKey)
 
         val nameAsUTF8 = String(Base64EncodedData(import.name).bytes, Charsets.UTF_8)
 
@@ -153,6 +161,24 @@ class PhraseImportViewModel @Inject constructor(
             state = state.copy(importErrorType = ImportErrorType.BAD_SIGNATURE)
             false
         }
+    }
+
+    private fun recreateECPublicKey(rawBytes: ByteArray): PublicKey {
+        val xAndYCoordinatesOnly = rawBytes.copyOfRange(1, rawBytes.size)
+        val coordinateLength = xAndYCoordinatesOnly.size / 2
+        val x = xAndYCoordinatesOnly.copyOfRange(0, coordinateLength)
+        val y = xAndYCoordinatesOnly.copyOfRange(coordinateLength, xAndYCoordinatesOnly.size)
+
+        val ecPoint = ECPoint(BigInteger(1, x), BigInteger(1, y))
+
+        // Replace "secp256r1" with the name of the curve you are using
+        val parameterSpec = ECNamedCurveTable.getParameterSpec("secp256r1")
+        val params = ECNamedCurveSpec("secp256r1", parameterSpec.curve, parameterSpec.g, parameterSpec.n)
+
+        val publicKeySpec = ECPublicKeySpec(ecPoint, params)
+
+        val keyFactory = KeyFactory.getInstance("EC")
+        return keyFactory.generatePublic(publicKeySpec)
     }
 
     private fun convertRawSignatureToDerFormat(signature: ByteArray) : ByteArray {
