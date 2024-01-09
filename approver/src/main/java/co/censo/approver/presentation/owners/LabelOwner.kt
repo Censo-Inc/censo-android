@@ -111,11 +111,17 @@ fun LabelOwner(
                 }
 
                 state.asyncError -> {
-                    if (state.saveResource is Resource.Error) {
+                    if (state.labelResource is Resource.Error) {
+                        DisplayError(
+                            errorMessage = state.labelResource.getErrorMessage(context),
+                            dismissAction = null,
+                            retryAction = { viewModel.onStart(participantId) }
+                        )
+                    } else if (state.saveResource is Resource.Error) {
                         DisplayError(
                             errorMessage = state.saveResource.getErrorMessage(context),
-                            dismissAction = {},
-                            retryAction = {}
+                            dismissAction = viewModel::resetSaveResource,
+                            retryAction = viewModel::save
                         )
                     }
                 }

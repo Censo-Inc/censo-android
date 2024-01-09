@@ -101,7 +101,8 @@ fun ApproverSettingsScreen(
                         DisplayError(
                             errorMessage = state.deleteUserResource.getErrorMessage(context),
                             dismissAction = viewModel::resetDeleteUserResource,
-                        ) { }
+                            retryAction = null
+                        )
                     } else if (state.userResponse is Resource.Error) {
                         DisplayError(
                             errorMessage = state.userResponse.getErrorMessage(context),

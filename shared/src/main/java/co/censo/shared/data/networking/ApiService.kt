@@ -10,6 +10,7 @@ import co.censo.shared.data.Header
 import co.censo.shared.data.cryptography.base64Encoded
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256digest
+import co.censo.shared.data.maintenance.GlobalMaintenanceState
 import co.censo.shared.data.model.AcceptApprovershipApiResponse
 import co.censo.shared.data.model.ApproveAccessApiRequest
 import co.censo.shared.data.model.ApproveAccessApiResponse
@@ -20,11 +21,11 @@ import co.censo.shared.data.model.ConfirmApprovershipApiRequest
 import co.censo.shared.data.model.ConfirmApprovershipApiResponse
 import co.censo.shared.data.model.CreatePolicyApiRequest
 import co.censo.shared.data.model.CreatePolicyApiResponse
-import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.CreatePolicySetupApiRequest
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
+import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
@@ -32,8 +33,8 @@ import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
-import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.RejectAccessApiResponse
+import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
@@ -47,12 +48,12 @@ import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
 import co.censo.shared.data.model.StoreSeedPhraseApiRequest
 import co.censo.shared.data.model.StoreSeedPhraseApiResponse
+import co.censo.shared.data.model.SubmitAccessTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.data.model.SubmitPurchaseApiRequest
 import co.censo.shared.data.model.SubmitPurchaseApiResponse
-import co.censo.shared.data.model.SubmitAccessTotpVerificationApiRequest
-import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
@@ -72,8 +73,12 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okhttp3.*
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import retrofit2.Retrofit
@@ -124,6 +129,7 @@ interface ApiService {
                 .addInterceptor(AnalyticsInterceptor(versionCode, packageName))
                 .addInterceptor(AuthInterceptor(authUtil, secureStorage))
                 .addInterceptor(playIntegrityInterceptor)
+                .addInterceptor(MaintenanceModeInterceptor())
                 .connectTimeout(Duration.ofSeconds(180))
                 .readTimeout(Duration.ofSeconds(180))
                 .callTimeout(Duration.ofSeconds(180))
@@ -513,6 +519,14 @@ class ConnectivityInterceptor(private val context: Context) : Interceptor {
 class NoConnectivityException : IOException() {
     override val message: String
         get() = "No network connection established"
+}
+
+class MaintenanceModeInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val response = chain.proceed(chain.request())
+        GlobalMaintenanceState.isMaintenanceMode.value = response.code == 418
+        return response
+    }
 }
 
 @Serializable

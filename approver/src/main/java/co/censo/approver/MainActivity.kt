@@ -39,6 +39,7 @@ import co.censo.approver.presentation.settings.ApproverSettingsScreen
 import co.censo.approver.presentation.owners.ApproverOwnersList
 import co.censo.approver.presentation.owners.LabelOwner
 import co.censo.approver.presentation.reset_links.ResetLinksScreen
+import co.censo.shared.presentation.maintenance.MaintenanceScreen
 import co.censo.approver.BuildConfig as ApproverBuildConfig
 
 @AndroidEntryPoint
@@ -58,6 +59,7 @@ class MainActivity : FragmentActivity() {
                 ) {
                     CensoNavHost(navController = navController)
                 }
+                MaintenanceScreen()
                 StrongboxUI()
             }
         }

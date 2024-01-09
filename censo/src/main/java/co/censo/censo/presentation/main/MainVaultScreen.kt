@@ -178,14 +178,16 @@ fun MainVaultScreen(
                                     context
                                 ),
                                 dismissAction = viewModel::resetDeleteSeedPhraseResponse,
-                            ) {}
+                                retryAction = null,
+                            )
                         }
 
                         state.deleteUserResource is Resource.Error -> {
                             DisplayError(
                                 errorMessage = state.deleteUserResource.getErrorMessage(context),
-                                dismissAction = viewModel::resetDeleteUserResource
-                            ) { }
+                                dismissAction = viewModel::resetDeleteUserResource,
+                                retryAction = null
+                            )
                         }
 
                         state.lockResponse is Resource.Error -> {
@@ -199,8 +201,9 @@ fun MainVaultScreen(
                         state.deletePolicySetup is Resource.Error -> {
                             DisplayError(
                                 errorMessage = state.deletePolicySetup.getErrorMessage(context),
-                                dismissAction = viewModel::resetDeletePolicySetupResource
-                            ) { }
+                                dismissAction = viewModel::resetDeletePolicySetupResource,
+                                retryAction = null
+                            )
                         }
                     }
                 }

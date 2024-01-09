@@ -45,6 +45,7 @@ import co.censo.censo.util.TestTag
 import co.censo.shared.DeepLinkURI.OWNER_LOGIN_ID_RESET_URI
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.presentation.maintenance.MaintenanceScreen
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -83,6 +84,8 @@ class MainActivity : FragmentActivity() {
                         LockedScreen()
 
                         PaywallScreen(navController = navController)
+
+                        MaintenanceScreen()
                     }
 
                     StrongboxUI()

@@ -1,15 +1,10 @@
 package co.censo.censo.presentation.facetec_auth
 
-import StandardButton
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -17,11 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.censo.BuildConfig
@@ -29,9 +19,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
-import co.censo.censo.R
-import co.censo.shared.presentation.ButtonTextStyle
-import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import com.facetec.sdk.FaceTecSDK
 import com.facetec.sdk.FaceTecSessionActivity
@@ -111,25 +99,17 @@ fun FacetecAuth(
 
         when {
             state.apiError -> {
-                Text(
-                    text = when (state.submitResultResponse) {
-                        is Resource.Error -> state.submitResultResponse.exception?.message
-                        else -> null
-                    } ?: stringResource(R.string.error_occurred),
-                    textAlign = TextAlign.Center,
-                    color = SharedColors.MainColorText,
-                    fontSize = 20.sp,
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                StandardButton(
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                    onClick = {
-                        viewModel.retry()
-                    }
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.retry),
-                        style = ButtonTextStyle,
+                if (state.submitResultResponse is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.submitResultResponse.getErrorMessage(context),
+                        dismissAction = null,
+                        retryAction = viewModel::retry
+                    )
+                } else if (state.initFacetecData is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.initFacetecData.getErrorMessage(context),
+                        dismissAction = null,
+                        retryAction = viewModel::retry,
                     )
                 }
             }
