@@ -284,7 +284,7 @@
     <string name="delete_user_button">Delete</string>
     <string name="delete_user_description">This will securely delete all of your information stored in the Censo app.  After completing this, you will no longer have access to any seed phrases you have entered.  This operation cannot be undone.</string>
     <string name="sign_out">Sign Out</string>
-    <string name="sign_out_description">Sign out from your Google login</string>
+    <string name="sign_out_description">Sign out from your Google login.</string>
     <string name="you_are_about_to_delete_phrase">You are about to delete this phrase</string>
     <string name="delete_phrase">Delete Phrase</string>
     <string name="input_string_is_too_long">Can\'t be longer than %1$s characters</string>
