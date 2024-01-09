@@ -18,6 +18,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -309,11 +310,16 @@ fun MainVaultScreen(
                             append(" ")
 
                             append(stringResource(id = R.string.about_to_delete_user_second_half))
+                            append(pluralStringResource(
+                                id = R.plurals.delete_my_data_confirmation_text,
+                                count = state.ownerState?.vault?.seedPhrases?.size ?: 0
+                            ))
                         }
 
                         ConfirmationDialog(
                             title = stringResource(id = R.string.delete_user),
                             message = annotatedString,
+                            confirmationText = pluralStringResource(id = R.plurals.delete_my_data_confirmation_text, count = state.ownerState?.vault?.seedPhrases?.size ?: 0),
                             onCancel = viewModel::onCancelResetUser,
                             onDelete = viewModel::deleteUser,
                         )
