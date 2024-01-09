@@ -54,6 +54,7 @@ class PhraseImportViewModel @Inject constructor(
 
     private fun startTimer(channel: String) {
         countDownTimer.start(2000) {
+            //todo: Need to check link expiration time so we don't try after it has expired
             checkForCompletedImport(channel)
         }
     }
@@ -123,8 +124,13 @@ class PhraseImportViewModel @Inject constructor(
 
         val nameAsUTF8 = String(Base64EncodedData(import.name).bytes, Charsets.UTF_8)
 
-        var signedData = import.timestamp.toString().toByteArray(Charsets.UTF_8)
-        signedData += nameAsUTF8.sha256digest()
+        val timestampBytes = import.timestamp.toString().toByteArray(Charsets.UTF_8)
+        val nameBytes = nameAsUTF8.toByteArray(Charsets.UTF_8).sha256digest()
+
+        val signedData = ByteBuffer.allocate(timestampBytes.size + nameBytes.size).apply {
+            put(timestampBytes)
+            put(nameBytes)
+        }.array()
 
         val derSignature = if (import.signature.bytes.size > 64) {
             import.signature.bytes
@@ -171,7 +177,6 @@ class PhraseImportViewModel @Inject constructor(
 
         val ecPoint = ECPoint(BigInteger(1, x), BigInteger(1, y))
 
-        // Replace "secp256r1" with the name of the curve you are using
         val parameterSpec = ECNamedCurveTable.getParameterSpec("secp256r1")
         val params = ECNamedCurveSpec("secp256r1", parameterSpec.curve, parameterSpec.g, parameterSpec.n)
 
@@ -182,10 +187,10 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     private fun convertRawSignatureToDerFormat(signature: ByteArray) : ByteArray {
-        fun isNegative(input: ByteArray) = input[0].toInt() < 0
+        fun isNegative(input: ByteArray) = input[0].toUByte() > 0x7f.toUByte()
 
         fun makePositive(input: ByteArray): ByteArray {
-            return if (!isNegative(input)) {
+            return if (isNegative(input)) {
                 byteArrayOf(0x00) + input
             } else {
                 input
@@ -241,7 +246,6 @@ class PhraseImportViewModel @Inject constructor(
 
                         else -> {
                             //We will continue polling until completed so no need to respond to other states
-                            //TODO: what would happen if the user rejected the share?
                         }
                     }
                 }
