@@ -298,6 +298,7 @@ fun MainVaultScreen(
 
 
                     if (state.triggerDeleteUserDialog is Resource.Success) {
+                        val seedCount = state.ownerState?.vault?.seedPhrases?.size ?: 0
 
                         val annotatedString = buildAnnotatedString {
                             append(stringResource(id = R.string.about_to_delete_user_first_half))
@@ -312,14 +313,15 @@ fun MainVaultScreen(
                             append(stringResource(id = R.string.about_to_delete_user_second_half))
                             append(pluralStringResource(
                                 id = R.plurals.delete_my_data_confirmation_text,
-                                count = state.ownerState?.vault?.seedPhrases?.size ?: 0
+                                count = seedCount,
+                                seedCount
                             ))
                         }
 
                         ConfirmationDialog(
                             title = stringResource(id = R.string.delete_user),
                             message = annotatedString,
-                            confirmationText = pluralStringResource(id = R.plurals.delete_my_data_confirmation_text, count = state.ownerState?.vault?.seedPhrases?.size ?: 0),
+                            confirmationText = pluralStringResource(id = R.plurals.delete_my_data_confirmation_text, count = seedCount, seedCount),
                             onCancel = viewModel::onCancelResetUser,
                             onDelete = viewModel::deleteUser,
                         )
