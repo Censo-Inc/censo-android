@@ -118,7 +118,6 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     private fun verifySignature(import: Import): Boolean {
-        return true
         val publicKey = recreateECPublicKey(import.importKey.getBytes())
         val key = ExternalEncryptionKey(publicKey)
 
