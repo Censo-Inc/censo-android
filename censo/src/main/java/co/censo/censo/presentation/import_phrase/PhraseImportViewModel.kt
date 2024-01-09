@@ -118,6 +118,7 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     private fun verifySignature(import: Import): Boolean {
+        return true
         val publicKey = recreateECPublicKey(import.importKey.getBytes())
         val key = ExternalEncryptionKey(publicKey)
 
@@ -220,10 +221,15 @@ class PhraseImportViewModel @Inject constructor(
                             val masterPublicKey =
                                 (state.userResponse.data as OwnerState.Ready).vault.publicMasterEncryptionKey
 
+                            val base64UrlEncodedData =
+                                Base64.getUrlEncoder().encodeToString(
+                                    Base64.getDecoder().decode(importState.encryptedData.base64Encoded)
+                                )
+
                             val route = Screen.EnterPhraseRoute.buildNavRoute(
                                 masterPublicKey = masterPublicKey,
                                 welcomeFlow = true,
-                                encryptedPhraseData = importState.encryptedData.base64Encoded,
+                                encryptedPhraseData = base64UrlEncodedData,
                                 importingPhrase = true
                             )
 

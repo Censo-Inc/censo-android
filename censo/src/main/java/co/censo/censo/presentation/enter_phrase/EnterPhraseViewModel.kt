@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
 import java.lang.Integer.min
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -65,8 +66,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     private fun importingPhrase(encryptedPhraseData: String, masterPublicKey: Base58EncodedMasterPublicKey) {
         val deviceKey = keyRepository.retrieveInternalDeviceKey()
-        val base64EncodedPhraseData = Base64EncodedData(encryptedPhraseData)
-        val decryptedData = deviceKey.decrypt(base64EncodedPhraseData.bytes)
+        val decryptedData = deviceKey.decrypt(Base64.getUrlDecoder().decode(encryptedPhraseData))
 
         val importedPhrase: ImportedPhrase =
             IgnoreKeysJson.baseKotlinXJson.decodeFromString(decryptedData.toString(Charsets.UTF_8))
