@@ -184,8 +184,11 @@
     <string name="step_2">Step 2</string>
     <string name="about_to_delete_user_first_half">You are about to delete</string>
     <string name="all">ALL</string>
-    <string name="about_to_delete_user_second_half">of your data.\n\nSeed phrases you have added will no longer be accessible. This action cannot be reversed.\n\nAre you sure?</string>
-
+    <string name="about_to_delete_user_second_half">of your data.\n\nSeed phrases you have added will no longer be accessible. This action cannot be reversed.\n\nIf you are sure, please type:\n\n</string>
+    <plurals name="delete_my_data_confirmation_text">
+        <item quantity="one">Delete my 1 seed phrase</item>
+        <item quantity="other">Delete my %d seed phrases</item>
+    </plurals>
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Anonymously scan your face</string>
     <string name="begin_face_scan">Begin face scan</string>
