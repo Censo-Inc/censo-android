@@ -1,46 +1,32 @@
 package co.censo.censo.presentation.import_phrase
 
 import Base64EncodedData
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.import_phrase.ImportKeyUtil.convertRawSignatureToDerFormat
+import co.censo.censo.presentation.import_phrase.ImportKeyUtil.isLinkExpired
+import co.censo.censo.presentation.import_phrase.ImportKeyUtil.recreateECPublicKey
 import co.censo.shared.data.Resource
-import co.censo.shared.data.cryptography.hexStringToByteArray
-import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.model.Import
 import co.censo.shared.data.model.ImportState
-import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.networking.IgnoreKeysJson.baseKotlinXJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.util.BIP39
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import org.bouncycastle.jce.ECNamedCurveTable
-import org.bouncycastle.jce.spec.ECNamedCurveSpec
-import java.math.BigInteger
 import java.nio.ByteBuffer
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.spec.ECPoint
-import java.security.spec.ECPublicKeySpec
 import java.util.Base64
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class PhraseImportViewModel @Inject constructor(
@@ -52,14 +38,23 @@ class PhraseImportViewModel @Inject constructor(
     var state by mutableStateOf(PhraseImportState())
         private set
 
-    private fun startTimer(channel: String) {
+    private fun startTimer(importToAccept: Import) {
         countDownTimer.start(2000) {
-            //todo: Need to check link expiration time so we don't try after it has expired
-            checkForCompletedImport(channel)
+            if(isLinkExpired(timestamp = importToAccept.timestamp) != ImportErrorType.NONE) {
+                countDownTimer.stop()
+            } else {
+                checkForCompletedImport(importToAccept.channel())
+            }
         }
     }
 
     fun kickOffPhraseImport(importToAccept: Import) {
+        val verified = verifySignature(importToAccept)
+
+        if (!verified) {
+            return
+        }
+
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
@@ -77,12 +72,6 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     fun acceptImport(importToAccept: Import) {
-        val validSignature = verifySignature(importToAccept)
-
-        if (!validSignature) {
-            return
-        }
-
         viewModelScope.launch {
             try {
                 val deviceKey = keyRepository.retrieveInternalDeviceKey()
@@ -108,7 +97,7 @@ class PhraseImportViewModel @Inject constructor(
                     state = state.copy(
                         importPhraseState = ImportPhase.Completing(importToAccept)
                     )
-                    startTimer(importToAccept.channel())
+                    startTimer(importToAccept)
                 }
 
                 state = state.copy(acceptImportResource = acceptImportResponse)
@@ -146,21 +135,12 @@ class PhraseImportViewModel @Inject constructor(
         projectLog(message = "Signature verified: $verified")
 
         return if (verified) {
-            val linkCreationTime = Instant.fromEpochMilliseconds(import.timestamp)
-            val linkValidityStart = linkCreationTime.minus(10.seconds)
-            val linkValidityEnd = linkCreationTime.plus(10.minutes)
-            val now = Clock.System.now()
+            val importErrorType = isLinkExpired(import.timestamp)
 
-            if (now > linkValidityEnd) {
-                projectLog(message = "Signature expired: $linkCreationTime")
-                state = state.copy(importErrorType = ImportErrorType.LINK_EXPIRED)
-                false
-            } else if (now < linkValidityStart) {
-                projectLog(message = "Signature in future: $linkCreationTime")
+            if (importErrorType == ImportErrorType.NONE) {
                 state = state.copy(importErrorType = ImportErrorType.LINK_IN_FUTURE)
                 false
             } else {
-                projectLog(message = "Signature valid")
                 true
             }
         } else {
@@ -168,52 +148,6 @@ class PhraseImportViewModel @Inject constructor(
             false
         }
     }
-
-    private fun recreateECPublicKey(rawBytes: ByteArray): PublicKey {
-        val xAndYCoordinatesOnly = rawBytes.copyOfRange(1, rawBytes.size)
-        val coordinateLength = xAndYCoordinatesOnly.size / 2
-        val x = xAndYCoordinatesOnly.copyOfRange(0, coordinateLength)
-        val y = xAndYCoordinatesOnly.copyOfRange(coordinateLength, xAndYCoordinatesOnly.size)
-
-        val ecPoint = ECPoint(BigInteger(1, x), BigInteger(1, y))
-
-        val parameterSpec = ECNamedCurveTable.getParameterSpec("secp256r1")
-        val params = ECNamedCurveSpec("secp256r1", parameterSpec.curve, parameterSpec.g, parameterSpec.n)
-
-        val publicKeySpec = ECPublicKeySpec(ecPoint, params)
-
-        val keyFactory = KeyFactory.getInstance("EC")
-        return keyFactory.generatePublic(publicKeySpec)
-    }
-
-    private fun convertRawSignatureToDerFormat(signature: ByteArray) : ByteArray {
-        fun isNegative(input: ByteArray) = input[0].toUByte() > 0x7f.toUByte()
-
-        fun makePositive(input: ByteArray): ByteArray {
-            return if (isNegative(input)) {
-                byteArrayOf(0x00) + input
-            } else {
-                input
-            }
-        }
-
-        val r = makePositive(signature.copyOfRange(0, 32))
-        val s = makePositive(signature.copyOfRange(32, 64))
-
-        val derSignature = ByteBuffer.allocate(2 + r.size + 2 + s.size + 2).apply {
-            put(0x30)
-            put((r.size + s.size + 4).toByte())
-            put(0x02)
-            put(r.size.toByte())
-            put(r)
-            put(0x02)
-            put(s.size.toByte())
-            put(s)
-        }
-
-        return derSignature.array()
-    }
-
     private fun checkForCompletedImport(channel: String) {
         viewModelScope.launch {
             val response = ownerRepository.checkForCompletedImport(channel)

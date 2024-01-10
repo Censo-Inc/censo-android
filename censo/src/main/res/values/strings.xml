@@ -419,4 +419,7 @@
     <string name="start_verification">Start verification</string>
     <string name="step_4_key_recovery">4. Key Recovery</string>
     <string name="step_4_key_recovery_message">Once your Google Account is updated, your key will need to be recovered. Assistance of both approvers is required to restore access to your seed phrases.</string>
+    <string name="invalid_link">This link is invalid, please get a new one.</string>
+    <string name="link_expired">This link has expired, please get a new one.</string>
+    <string name="something_went_wrong">Something went wrong</string>
 </resources>

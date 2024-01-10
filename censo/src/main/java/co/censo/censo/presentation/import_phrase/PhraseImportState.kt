@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.import_phrase
 
 import android.content.Context
+import co.censo.censo.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
@@ -34,9 +35,8 @@ enum class ImportErrorType {
 
     fun getErrorMessage(context: Context) =
         when {
-            this == LINK_IN_FUTURE -> "This link is invalid, please get a new one."
-            this == LINK_EXPIRED -> "This link has expired, please get a new one."
-            this == BAD_SIGNATURE -> "This link is invalid, please get a new one."
-            else -> "Something went wrong"
+            this == LINK_IN_FUTURE || this == BAD_SIGNATURE -> context.getString(R.string.invalid_link)
+            this == LINK_EXPIRED -> context.getString(R.string.link_expired)
+            else -> context.getString(R.string.something_went_wrong)
         }
 }
