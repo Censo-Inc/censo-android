@@ -18,7 +18,9 @@ import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.launch
@@ -110,40 +112,46 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     private fun verifySignature(import: Import): Boolean {
-        val publicKey = recreateECPublicKey(import.importKey.getBytes())
-        val key = ExternalEncryptionKey(publicKey)
+        return try {
+            val publicKey = recreateECPublicKey(import.importKey.getBytes())
+            val key = ExternalEncryptionKey(publicKey)
 
-        val nameAsUTF8 = String(Base64EncodedData(import.name).bytes, Charsets.UTF_8)
+            val nameAsUTF8 = String(Base64EncodedData(import.name).bytes, Charsets.UTF_8)
 
-        val timestampBytes = import.timestamp.toString().toByteArray(Charsets.UTF_8)
-        val nameBytes = nameAsUTF8.toByteArray(Charsets.UTF_8).sha256digest()
+            val timestampBytes = import.timestamp.toString().toByteArray(Charsets.UTF_8)
+            val nameBytes = nameAsUTF8.toByteArray(Charsets.UTF_8).sha256digest()
 
-        val signedData = ByteBuffer.allocate(timestampBytes.size + nameBytes.size).apply {
-            put(timestampBytes)
-            put(nameBytes)
-        }.array()
+            val signedData = ByteBuffer.allocate(timestampBytes.size + nameBytes.size).apply {
+                put(timestampBytes)
+                put(nameBytes)
+            }.array()
 
-        val derSignature = if (import.signature.bytes.size > 64) {
-            import.signature.bytes
-        } else {
-            convertRawSignatureToDerFormat(import.signature.bytes)
-        }
-
-        val verified = key.verify(
-            signedData = signedData,
-            signature = derSignature
-        )
-
-        return if (verified) {
-            val importErrorType = isLinkExpired(import.timestamp)
-
-            if (importErrorType == ImportErrorType.NONE) {
-                true
+            val derSignature = if (import.signature.bytes.size > 64) {
+                import.signature.bytes
             } else {
-                state = state.copy(importErrorType = importErrorType)
+                convertRawSignatureToDerFormat(import.signature.bytes)
+            }
+
+            val verified = key.verify(
+                signedData = signedData,
+                signature = derSignature
+            )
+
+            if (verified) {
+                val importErrorType = isLinkExpired(import.timestamp)
+
+                if (importErrorType == ImportErrorType.NONE) {
+                    true
+                } else {
+                    state = state.copy(importErrorType = importErrorType)
+                    false
+                }
+            } else {
+                state = state.copy(importErrorType = ImportErrorType.BAD_SIGNATURE)
                 false
             }
-        } else {
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImportPhrase)
             state = state.copy(importErrorType = ImportErrorType.BAD_SIGNATURE)
             false
         }

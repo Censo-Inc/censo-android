@@ -41,6 +41,7 @@ object CrashReportingUtil {
     const val PlayIntegrity = "PlayIntegrity"
     const val VerifyKeyConfirmation = "VerifyKeyConfirmation"
     const val DecryptingKey = "DecryptingKey"
+    const val ImportPhrase = "ImportPhrase"
 }
 
 fun Exception.sendError(reason: String) {
