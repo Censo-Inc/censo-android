@@ -54,10 +54,9 @@ sealed class Screen(val route: String) {
             importingPhrase: Boolean = false,
             encryptedPhraseData: String = ""
         ): String {
+            val phraseData = encryptedPhraseData.ifEmpty { NO_PHRASE }
 
-            val wordsList = encryptedPhraseData.ifEmpty { NO_PHRASE }
-
-            return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}/${importingPhrase}/${wordsList}"
+            return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}/${importingPhrase}/${phraseData}"
         }
     }
 

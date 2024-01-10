@@ -8,6 +8,10 @@ import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.Import
 import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.OwnerState
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 data class PhraseImportState(
     val importPhraseState: ImportPhase = ImportPhase.None,
@@ -39,4 +43,19 @@ enum class ImportErrorType {
             this == LINK_EXPIRED -> context.getString(R.string.link_expired)
             else -> context.getString(R.string.something_went_wrong)
         }
+}
+
+fun isLinkExpired(timestamp: Long): ImportErrorType {
+    val linkCreationTime = Instant.fromEpochMilliseconds(timestamp)
+    val linkValidityStart = linkCreationTime.minus(10.seconds)
+    val linkValidityEnd = linkCreationTime.plus(10.minutes)
+    val now = Clock.System.now()
+
+    return if (now > linkValidityEnd) {
+        ImportErrorType.LINK_EXPIRED
+    } else if (now < linkValidityStart) {
+        ImportErrorType.LINK_IN_FUTURE
+    } else {
+        ImportErrorType.NONE
+    }
 }

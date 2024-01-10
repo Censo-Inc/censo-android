@@ -7,10 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.import_phrase.ImportKeyUtil.convertRawSignatureToDerFormat
-import co.censo.censo.presentation.import_phrase.ImportKeyUtil.isLinkExpired
-import co.censo.censo.presentation.import_phrase.ImportKeyUtil.recreateECPublicKey
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.ECHelper.convertRawSignatureToDerFormat
+import co.censo.shared.data.cryptography.ECPublicKeyDecoder.recreateECPublicKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.model.Import
