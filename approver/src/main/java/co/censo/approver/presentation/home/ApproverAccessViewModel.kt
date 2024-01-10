@@ -40,7 +40,8 @@ class ApproverAccessViewModel @Inject constructor(
     private val approverRepository: ApproverRepository,
     private val keyRepository: KeyRepository,
     private val accessTotpTimer: VaultCountDownTimer,
-    private val userStatePollingTimer: VaultCountDownTimer
+    private val userStatePollingTimer: VaultCountDownTimer,
+    private val totpGenerator: TotpGenerator
 ) : ViewModel() {
 
     var state by mutableStateOf(ApproverAccessState())
@@ -237,7 +238,7 @@ class ApproverAccessViewModel @Inject constructor(
         state = state.copy(storeAccessTotpSecretResource = Resource.Loading())
 
         viewModelScope.launch {
-            val secret = TotpGenerator.generateSecret()
+            val secret = totpGenerator.generateSecret()
             val encryptedSecret = keyRepository
                 .encryptWithDeviceKey(secret.toByteArray())
                 .base64Encoded()
@@ -266,7 +267,7 @@ class ApproverAccessViewModel @Inject constructor(
         val counter = instant.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
 
         return ApproverAccessState.AccessTotpState(
-            code = TotpGenerator.generateCode(
+            code = totpGenerator.generateCode(
                 secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes)),
                 counter = counter,
             ),

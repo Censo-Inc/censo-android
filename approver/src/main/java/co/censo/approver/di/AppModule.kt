@@ -2,6 +2,8 @@ package co.censo.approver.di
 
 import android.content.Context
 import co.censo.approver.BuildConfig
+import co.censo.shared.data.cryptography.TotpGenerator
+import co.censo.shared.data.cryptography.TotpGeneratorImpl
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.ApproverRepositoryImpl
@@ -84,13 +86,15 @@ object AppModule {
         apiService: ApiService,
         secureStorage: SecurePreferences,
         authUtil: AuthUtil,
-        keyRepository: KeyRepository
+        keyRepository: KeyRepository,
+        totpGenerator: TotpGenerator
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             apiService = apiService,
             secureStorage = secureStorage,
             authUtil = authUtil,
-            keyRepository = keyRepository
+            keyRepository = keyRepository,
+            totpGenerator = totpGenerator
         )
     }
 
@@ -100,13 +104,15 @@ object AppModule {
         apiService: ApiService,
         authUtil: AuthUtil,
         secureStorage: SecurePreferences,
-        keyRepository: KeyRepository
+        keyRepository: KeyRepository,
+        totpGenerator: TotpGenerator
     ): ApproverRepository {
         return ApproverRepositoryImpl(
             apiService = apiService,
             authUtil = authUtil,
             secureStorage = secureStorage,
-            keyRepository = keyRepository
+            keyRepository = keyRepository,
+            totpGenerator = totpGenerator
         )
     }
 
@@ -121,5 +127,11 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): PlayIntegrityRepository {
         return PlayIntegrityRepositoryImpl(applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun provideTotpGenerator() : TotpGenerator {
+        return TotpGeneratorImpl
     }
 }
