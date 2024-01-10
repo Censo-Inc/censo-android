@@ -1,15 +1,17 @@
 package co.censo.censo
 
-import co.censo.censo.BaseViewModelTest
 import co.censo.censo.test_helper.genericParticipantId
+import co.censo.shared.data.Resource
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandlerArgs
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandlerState
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandlerViewModel
-import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.atLeastOnce
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -37,10 +39,15 @@ class CloudStorageHandlerViewModelTest : BaseViewModelTest() {
     //region test data
     private val downloadAction = CloudStorageActions.DOWNLOAD
     private val uploadAction = CloudStorageActions.UPLOAD
+    private val enforceAccessAction = CloudStorageActions.ENFORCE_ACCESS
 
     private val mockParticipantId = genericParticipantId
 
     private val mockEncryptedPrivateKey = byteArrayOf(1, 0, 1, 0)
+
+    private val expectedMockCloudStorageHandlerArgs = CloudStorageHandlerArgs(
+        participantId = mockParticipantId, encryptedPrivateKey = mockEncryptedPrivateKey
+    )
     //endregion
 
     //region setup tear down
@@ -72,10 +79,7 @@ class CloudStorageHandlerViewModelTest : BaseViewModelTest() {
         )
 
         //Assert download action and data was set to state
-        val expectedCloudStorageHandlerArgs = CloudStorageHandlerArgs(
-            participantId = mockParticipantId, encryptedPrivateKey = mockEncryptedPrivateKey
-        )
-        assertEquals(expectedCloudStorageHandlerArgs, cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
+        assertEquals(expectedMockCloudStorageHandlerArgs, cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
         assertEquals(downloadAction, cloudStorageHandlerViewModel.state.cloudActionToPerform)
 
 
@@ -92,7 +96,7 @@ class CloudStorageHandlerViewModelTest : BaseViewModelTest() {
         )
 
         //Assert upload action and data was set to state
-        assertEquals(expectedCloudStorageHandlerArgs, cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
+        assertEquals(expectedMockCloudStorageHandlerArgs, cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
         assertEquals(uploadAction, cloudStorageHandlerViewModel.state.cloudActionToPerform)
     }
 
@@ -109,22 +113,87 @@ class CloudStorageHandlerViewModelTest : BaseViewModelTest() {
         Mockito.verify(keyRepository, never()).saveKeyInCloud(key = mockEncryptedPrivateKey, participantId = mockParticipantId)
     }
 
-    //TODO:
-    //Enforce access action
-    // download/upload actions
+    @Test
+    fun `call onStart with download action then VM should download key from the cloud`() = runTest {
+        assertDefaultVMState()
 
+        //Mock the keyRepository.retrieveKeyFromCloud
+        whenever(keyRepository.retrieveKeyFromCloud(genericParticipantId)).thenAnswer {
+            Resource.Success(mockEncryptedPrivateKey)
+        }
 
-    //endregion
+        cloudStorageHandlerViewModel.onStart(
+            actionToPerform = downloadAction,
+            participantId = mockParticipantId,
+            privateKey = mockEncryptedPrivateKey
+        )
 
-    //region Flow tests
+        testScheduler.advanceUntilIdle()
+
+        //Assert download action and data was set to state
+        assertEquals(expectedMockCloudStorageHandlerArgs, cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
+        assertEquals(downloadAction, cloudStorageHandlerViewModel.state.cloudActionToPerform)
+
+        //Verify repo method was called
+        Mockito.verify(keyRepository, atLeastOnce()).retrieveKeyFromCloud(genericParticipantId)
+
+        //Assert key data was loaded
+        assertTrue(cloudStorageHandlerViewModel.state.cloudStorageActionResource is Resource.Success)
+        assertEquals(mockEncryptedPrivateKey, cloudStorageHandlerViewModel.state.cloudStorageActionResource.data)
+    }
+
+    @Test
+    fun `call onStart with upload action then VM should upload key to the cloud`() = runTest {
+        assertDefaultVMState()
+
+        //Mock the keyRepository.saveKeyInCloud
+        whenever(keyRepository.saveKeyInCloud(mockEncryptedPrivateKey, genericParticipantId)).thenAnswer {
+            Resource.Success(Unit)
+        }
+
+        cloudStorageHandlerViewModel.onStart(
+            actionToPerform = uploadAction,
+            participantId = mockParticipantId,
+            privateKey = mockEncryptedPrivateKey
+        )
+
+        testScheduler.advanceUntilIdle()
+
+        //Assert upload action and data was set to state
+        assertEquals(expectedMockCloudStorageHandlerArgs, cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
+        assertEquals(uploadAction, cloudStorageHandlerViewModel.state.cloudActionToPerform)
+
+        //Verify repo method was called
+        Mockito.verify(keyRepository, atLeastOnce()).saveKeyInCloud(mockEncryptedPrivateKey, genericParticipantId)
+
+        //Assert key data was saved
+        assertTrue(cloudStorageHandlerViewModel.state.cloudStorageActionResource is Resource.Success)
+        assertEquals(mockEncryptedPrivateKey, cloudStorageHandlerViewModel.state.cloudStorageActionResource.data)
+    }
+
+    @Test
+    fun `call onStart with enforce access action then VM should set state for enforcing cloud access`() = runTest {
+        assertDefaultVMState()
+
+        cloudStorageHandlerViewModel.onStart(
+            actionToPerform = enforceAccessAction,
+            participantId = mockParticipantId,
+            privateKey = null
+        )
+
+        testScheduler.advanceUntilIdle()
+
+        //Assert upload action and data was set to state
+        assertEquals(expectedMockCloudStorageHandlerArgs.copy(encryptedPrivateKey = null), cloudStorageHandlerViewModel.state.cloudStorageHandlerArgs)
+        assertEquals(enforceAccessAction, cloudStorageHandlerViewModel.state.cloudActionToPerform)
+
+        assertTrue(cloudStorageHandlerViewModel.state.shouldEnforceCloudStorageAccess)
+    }
     //endregion
 
     //region Custom asserts
     private fun assertDefaultVMState() {
         assertEquals(CloudStorageHandlerState(), cloudStorageHandlerViewModel.state)
     }
-    //endregion
-
-    //region Helper methods
     //endregion
 }
