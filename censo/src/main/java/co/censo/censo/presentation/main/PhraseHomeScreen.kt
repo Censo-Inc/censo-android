@@ -7,17 +7,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,11 +29,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,32 +47,32 @@ import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.ButtonTextStyle
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun PhraseHomeScreen(
     seedPhrases: List<SeedPhrase>,
     onAddClick: () -> Unit,
     onAccessClick: () -> Unit,
-    onEditPhraseClick: (SeedPhrase) -> Unit
+    onEditPhraseClick: (SeedPhrase) -> Unit,
+    onCancelAccessClick: () -> Unit,
+    accessButtonLabel: AccessButtonLabelEnum,
+    timelockExpiration: Instant?
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White)
-            .verticalScroll(rememberScrollState())
     ) {
-        AddOrAccessRow(onAddClick = onAddClick, onAccessClick = onAccessClick)
-        Divider(
-            modifier = Modifier
-                .height(1.5.dp)
-                .fillMaxWidth(),
-            color = SharedColors.DividerGray
-        )
         Spacer(modifier = Modifier.height(12.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+                .fillMaxHeight(0.60f )
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
             seedPhrases.forEach { seedPhrase ->
                 Spacer(modifier = Modifier.height(12.dp))
@@ -83,53 +86,106 @@ fun PhraseHomeScreen(
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
-    }
-}
 
-@Composable
-fun AddOrAccessRow(
-    onAddClick: () -> Unit,
-    onAccessClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(SharedColors.BackgroundGrey.copy(alpha = 0.25f))
-            .padding(horizontal = 24.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        Column(
+            Modifier
+                .background(color = Color.White)
+                .padding(horizontal = 32.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
         ) {
-            StandardButton(
-                modifier = Modifier.weight(0.5f),
-                contentPadding = PaddingValues(vertical = 14.dp),
-                onClick = onAddClick
+            Spacer(modifier = Modifier.height(3.dp))
+            Divider(
+                modifier = Modifier
+                    .height(1.5.dp)
+                    .fillMaxWidth(),
+                color = SharedColors.DividerGray
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp, horizontal = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.add),
-                    style = ButtonTextStyle.copy(fontSize = 20.sp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            StandardButton(
-                modifier = Modifier.weight(0.5f),
-                contentPadding = PaddingValues(vertical = 14.dp),
-                onClick = onAccessClick
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                if (timelockExpiration != null) {
                     Icon(
-                        painter = painterResource(id = R.drawable.lock_icon),
-                        contentDescription = null,
-                        tint = SharedColors.ButtonIconColor
+                        painterResource(id = R.drawable.time_left_icon),
+                        contentDescription = "",
+                        tint = SharedColors.MainIconColor
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+
+                    val accessTextStyle = SpanStyle(
+                        fontSize = 16.sp,
+                        color = SharedColors.MainColorText
+                    )
+
+                    val timeLeftText = buildAnnotatedString {
+                        withStyle(accessTextStyle) {
+                            append(stringResource(R.string.timelock_expires_in))
+                        }
+                        withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
+                            append(
+                                formatTimelockDuration(
+                                    timelockExpiration - Clock.System.now(),
+                                    context
+                                )
+                            )
+                        }
+                    }
+
                     Text(
-                        text = stringResource(R.string.access),
+                        text = timeLeftText,
+                        color = SharedColors.MainColorText
+                    )
+                } else {
+                    Text(text = "", fontSize = 16.sp)
+                }
+            }
+
+            Row(
+                modifier = Modifier.padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                StandardButton(
+                    modifier = Modifier.weight(0.5f),
+                    contentPadding = PaddingValues(vertical = 14.dp),
+                    onClick = {
+                        if (accessButtonLabel == AccessButtonLabelEnum.CancelAccess) {
+                            onCancelAccessClick()
+                        } else {
+                            onAccessClick()
+                        }
+                    }
+                ) {
+                    Text(
+                        text = stringResource(when (accessButtonLabel) {
+                            AccessButtonLabelEnum.BeginAccess -> R.string.begin_access
+                            AccessButtonLabelEnum.RequestAccess -> R.string.request_access
+                            AccessButtonLabelEnum.CancelAccess -> R.string.cancel_access
+                            AccessButtonLabelEnum.ShowSeedPhrases -> R.string.show_seed_phrases
+                        }),
+                        style = ButtonTextStyle.copy(fontSize = 20.sp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                StandardButton(
+                    modifier = Modifier.weight(0.5f),
+                    contentPadding = PaddingValues(vertical = 14.dp),
+                    onClick = onAddClick
+                ) {
+                    Text(
+                        text = stringResource(R.string.add_seed_phrase),
                         style = ButtonTextStyle.copy(fontSize = 20.sp)
                     )
                 }
@@ -258,6 +314,9 @@ fun PreviewPhraseHomeScreen() {
         ),
         onEditPhraseClick = {
 
-        }
+        },
+        onCancelAccessClick = {},
+        accessButtonLabel = AccessButtonLabelEnum.RequestAccess,
+        timelockExpiration = Clock.System.now() + 5.minutes
     )
 }

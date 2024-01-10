@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.touVersion
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -285,8 +285,8 @@ class OwnerEntranceViewModel @Inject constructor(
         val destination = when (ownerState) {
             is OwnerState.Ready -> {
                 if (ownerState.vault.seedPhrases.isNotEmpty()) {
-                    when {
-                        ownerState.access != null -> Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases)
+                    when (val access = ownerState.access) {
+                        is Access.ThisDevice -> Screen.AccessApproval.withIntent(intent = access.intent)
                             .navToAndPopCurrentDestination().asResource()
 
                         else -> Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource()

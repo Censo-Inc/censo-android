@@ -240,6 +240,13 @@ data class PolicySetup(
 )
 
 @Serializable
+data class TimelockSetting(
+    val defaultTimelockInSeconds: Long,
+    val currentTimelockInSeconds: Long?,
+    val disabledAt: Instant?,
+)
+
+@Serializable
 sealed class OwnerState {
     @Serializable
     @SerialName("Initial")
@@ -256,9 +263,17 @@ sealed class OwnerState {
         val vault: Vault,
         val unlockedForSeconds: ULong? = null,
         val access: Access?,
-        val policySetup: PolicySetup?
+        val policySetup: PolicySetup?,
+        val timelockSetting: TimelockSetting,
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
+
+        fun hasBlockingPhraseAccessRequest(): Boolean {
+            return when (access) {
+                is Access.ThisDevice -> access.intent == AccessIntent.AccessPhrases && listOf(AccessStatus.Timelocked, AccessStatus.Available).contains(access.status)
+                else -> false
+            }
+        }
     }
 
     fun subscriptionStatus(): SubscriptionStatus = when (this) {

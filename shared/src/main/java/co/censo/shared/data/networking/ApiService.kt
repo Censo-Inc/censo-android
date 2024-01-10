@@ -56,6 +56,7 @@ import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.data.model.SubmitPurchaseApiRequest
 import co.censo.shared.data.model.SubmitPurchaseApiResponse
+import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
@@ -350,6 +351,19 @@ interface ApiService {
 
     @POST("/v1/attestation-challenge")
     suspend fun createAttestationChallenge(): RetrofitResponse<AttestationChallengeResponse>
+
+    @POST("/v1/timelock/enable")
+    suspend fun enableTimelock(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<TimelockApiResponse>
+
+    @POST("/v1/timelock/disable")
+    suspend fun disableTimelock(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<TimelockApiResponse>
+
+    @DELETE("/v1/timelock/disable")
+    suspend fun cancelDisableTimelock(): RetrofitResponse<Unit>
 
     @PUT("v1/approvers/{$PARTICIPANT_ID}/owner-label")
     suspend fun labelOwnerByApprover(

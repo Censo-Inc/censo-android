@@ -148,7 +148,14 @@ fun AccessSeedPhrasesScreen(
                     if (state.showCancelConfirmationDialog) {
                         YesNoDialog(
                             title = stringResource(R.string.exit_accessing_phrases),
-                            message = stringResource(R.string.exit_accessing_phrases_message),
+                            message = stringResource(
+                                R.string.exit_accessing_phrases_message,
+                                stringResource(if (state.hasExternalApprovers) {
+                                    R.string.request_approval_lower
+                                } else {
+                                    R.string.wait_for_timelock
+                                })
+                            ),
                             onDismiss = viewModel::hideCloseConfirmationDialog,
                             onConfirm = viewModel::cancelAccess
                         )

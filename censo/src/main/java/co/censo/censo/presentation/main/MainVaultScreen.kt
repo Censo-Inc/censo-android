@@ -25,12 +25,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.TimelockSetting
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
@@ -51,8 +54,15 @@ fun MainVaultScreen(
     val state = viewModel.state
     val context = LocalContext.current
 
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START -> viewModel.onStart()
+            Lifecycle.Event.ON_PAUSE -> viewModel.onStop()
+            else -> Unit
+        }
+    }
+
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
         onDispose { }
     }
 
@@ -206,6 +216,54 @@ fun MainVaultScreen(
                                 retryAction = null
                             )
                         }
+
+                        state.enableTimelockResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.enableTimelockResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetEnableTimelockResource,
+                                retryAction = null
+                            )
+                        }
+
+                        state.disableTimelockResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.disableTimelockResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetDisableTimelockResource,
+                                retryAction = null
+                            )
+                        }
+
+                        state.cancelDisableTimelockResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.cancelDisableTimelockResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetCancelDisableTimelockResource,
+                                retryAction = null
+                            )
+                        }
+
+                        state.cancelAccessResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.cancelAccessResource.getErrorMessage(context),
+                                dismissAction = viewModel::resetCancelAccess,
+                                retryAction = null
+                            )
+                        }
+
+                        state.showAddApproversUI is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = stringResource(id = R.string.cannot_add_approvers),
+                                dismissAction = viewModel::resetShowApproversUI,
+                                retryAction = null
+                            )
+                        }
+
+                        state.removeApprovers is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = stringResource(id = R.string.cannot_remove_approvers),
+                                dismissAction = viewModel::resetRemoveApprovers,
+                                retryAction = null
+                            )
+                        }
                     }
                 }
 
@@ -270,7 +328,10 @@ fun MainVaultScreen(
                                 },
                                 onEditPhraseClick = { seedPhrase ->
                                     viewModel.showEditPhraseDialog(seedPhrase)
-                                }
+                                },
+                                onCancelAccessClick = viewModel::onCancelAccess,
+                                accessButtonLabel = viewModel.determineAccessButtonLabel(),
+                                timelockExpiration = viewModel.accessTimelockExpiration()
                             )
 
                         BottomNavItem.Settings ->
@@ -284,14 +345,22 @@ fun MainVaultScreen(
                                     onSignOut = viewModel::signOut,
                                     showRemoveApproverButton = (state.ownerState?.policy?.approvers?.size ?: 1) > 1,
                                     onRemoveApprover = {
-                                        navController.navigate(
-                                            Screen.AccessApproval.withIntent(
-                                                intent = AccessIntent.ReplacePolicy
+                                        if (state.ownerState?.hasBlockingPhraseAccessRequest() == true) {
+                                            viewModel.setRemoveApproversError()
+                                        } else {
+                                            navController.navigate(
+                                                Screen.AccessApproval.withIntent(
+                                                    intent = AccessIntent.ReplacePolicy
+                                                )
                                             )
-                                        )
+                                        }
                                     },
                                     onShowPushNotification = viewModel::showPushNotificationsUI,
-                                    showNotificationsButton = !viewModel.userHasSeenPushDialog()
+                                    showNotificationsButton = !viewModel.userHasSeenPushDialog(),
+                                    onEnableTimelock = viewModel::enableTimelock,
+                                    onDisableTimelock = viewModel::disableTimelock,
+                                    onCancelDisableTimelock = viewModel::onCancelDisableTimelock,
+                                    timelockSetting = viewModel.state.ownerState?.timelockSetting ?: TimelockSetting(0L, null,  null)
                                 )
                             }
                     }
@@ -341,6 +410,34 @@ fun MainVaultScreen(
                             confirmationText = confirmationText,
                             onCancel = viewModel::onCancelDeletePhrase,
                             onDelete = viewModel::deleteSeedPhrase,
+                        )
+                    }
+
+                    if (state.triggerCancelDisableTimelockDialog is Resource.Success) {
+
+                        val message = buildAnnotatedString {
+                            append(stringResource(R.string.cancel_disable_timelock_confirmation))
+                        }
+
+                        ConfirmationDialog(
+                            title = stringResource(id = R.string.cancel_disable_timelock),
+                            message = message,
+                            onCancel = viewModel::resetCancelDisableTimelockDialog,
+                            onDelete = viewModel::cancelDisableTimelock,
+                        )
+                    }
+
+                    if (state.triggerCancelAccessDialog is Resource.Success) {
+
+                        val message = buildAnnotatedString {
+                            append(stringResource(R.string.cancel_access_dialog_confirmation))
+                        }
+
+                        ConfirmationDialog(
+                            title = stringResource(id = R.string.cancel_access),
+                            message = message,
+                            onCancel = viewModel::resetCancelAccess,
+                            onDelete = viewModel::cancelAccess,
                         )
                     }
                 }
