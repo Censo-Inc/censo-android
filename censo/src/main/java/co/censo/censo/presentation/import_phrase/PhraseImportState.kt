@@ -4,9 +4,7 @@ import android.content.Context
 import co.censo.censo.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
-import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.Import
-import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.OwnerState
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -25,6 +23,7 @@ data class PhraseImportState(
     val error = acceptImportResource is Resource.Error
             || sendToSeedVerification is Resource.Error
             || importErrorType != ImportErrorType.NONE
+            || userResponse is Resource.Error
 }
 
 sealed class ImportPhase {

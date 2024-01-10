@@ -45,6 +45,9 @@ fun PhraseImportScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
+            Lifecycle.Event.ON_START -> {
+                viewModel.onStart(import)
+            }
             Lifecycle.Event.ON_STOP -> {
                 viewModel.onStop()
             }
@@ -79,14 +82,22 @@ fun PhraseImportScreen(
             } else if (state.getEncryptedResponse is Resource.Error) {
                 DisplayError(
                     errorMessage = state.getEncryptedResponse.getErrorMessage(context),
-                    dismissAction = viewModel::resetGetEncryptedResponse,
+                    dismissAction = viewModel::exitFlow,
                     retryAction = { viewModel.acceptImport(import) }
                 )
             } else if (state.importErrorType != ImportErrorType.NONE) {
                 DisplayError(
                     errorMessage = state.importErrorType.getErrorMessage(context),
-                    dismissAction = {},
-                    retryAction = { viewModel.kickOffPhraseImport(import)}
+                    dismissAction = viewModel::exitFlow,
+                    retryAction = null
+                )
+            } else if (state.userResponse is Resource.Error) {
+                DisplayError(
+                    errorMessage = "Unable to get user information. Please try again.",
+                    dismissAction = viewModel::exitFlow,
+                    retryAction = {
+                        viewModel.kickOffPhraseImport(import)
+                    }
                 )
             }
         }

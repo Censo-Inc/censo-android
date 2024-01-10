@@ -19,7 +19,6 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.launch
@@ -39,8 +38,10 @@ class PhraseImportViewModel @Inject constructor(
 
     private fun startTimer(importToAccept: Import) {
         countDownTimer.start(2000) {
-            if(isLinkExpired(timestamp = importToAccept.timestamp) != ImportErrorType.NONE) {
+            val importErrorType = isLinkExpired(importToAccept.timestamp)
+            if (importErrorType != ImportErrorType.NONE) {
                 countDownTimer.stop()
+                state = state.copy(importErrorType = importErrorType)
             } else {
                 checkForCompletedImport(importToAccept.channel())
             }
@@ -48,22 +49,24 @@ class PhraseImportViewModel @Inject constructor(
     }
 
     fun kickOffPhraseImport(importToAccept: Import) {
-        val verified = verifySignature(importToAccept)
-
-        if (!verified) {
-            return
-        }
-
         viewModelScope.launch {
+            state = state.copy(importPhraseState = ImportPhase.Accepting)
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
             state = state.copy(userResponse = ownerStateResource)
 
-
             if (ownerStateResource is Resource.Success) {
-                acceptImport(importToAccept)
+                if (ownerStateResource.data !is OwnerState.Ready) {
+                    state = state.copy(userResponse = Resource.Error())
+                } else {
+                    acceptImport(importToAccept)
+                }
             }
         }
+    }
+
+    fun onStart(importToAccept: Import) {
+        verifySignature(importToAccept)
     }
 
     fun onStop() {
@@ -131,22 +134,21 @@ class PhraseImportViewModel @Inject constructor(
             signature = derSignature
         )
 
-        projectLog(message = "Signature verified: $verified")
-
         return if (verified) {
             val importErrorType = isLinkExpired(import.timestamp)
 
             if (importErrorType == ImportErrorType.NONE) {
-                state = state.copy(importErrorType = ImportErrorType.LINK_IN_FUTURE)
-                false
-            } else {
                 true
+            } else {
+                state = state.copy(importErrorType = importErrorType)
+                false
             }
         } else {
             state = state.copy(importErrorType = ImportErrorType.BAD_SIGNATURE)
             false
         }
     }
+
     private fun checkForCompletedImport(channel: String) {
         viewModelScope.launch {
             val response = ownerRepository.checkForCompletedImport(channel)
@@ -156,11 +158,17 @@ class PhraseImportViewModel @Inject constructor(
                     when (val importState = it.importState) {
                         is ImportState.Completed -> {
                             val masterPublicKey =
-                                (state.userResponse.data as OwnerState.Ready).vault.publicMasterEncryptionKey
+                                (state.userResponse.data as? OwnerState.Ready)?.vault?.publicMasterEncryptionKey
+
+                            if (masterPublicKey == null) {
+                                state = state.copy(userResponse = Resource.Error())
+                                return@launch
+                            }
 
                             val base64UrlEncodedData =
                                 Base64.getUrlEncoder().encodeToString(
-                                    Base64.getDecoder().decode(importState.encryptedData.base64Encoded)
+                                    Base64.getDecoder()
+                                        .decode(importState.encryptedData.base64Encoded)
                                 )
 
                             val route = Screen.EnterPhraseRoute.buildNavRoute(
@@ -186,10 +194,6 @@ class PhraseImportViewModel @Inject constructor(
 
             state = state.copy(getEncryptedResponse = response)
         }
-    }
-
-    fun resetGetEncryptedResponse() {
-        state = state.copy(getEncryptedResponse = Resource.Uninitialized)
     }
 
     fun exitFlow() {
