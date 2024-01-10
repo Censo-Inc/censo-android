@@ -1,12 +1,12 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
-import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -20,11 +20,11 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
-import co.censo.censo.util.confirmed
-import co.censo.censo.util.externalApprovers
+import co.censo.censo.util.TestUtil
+import co.censo.censo.util.alternateApprover
 import co.censo.censo.util.getEntropyFromImplicitOwnerApprover
-import co.censo.censo.util.notConfirmed
 import co.censo.censo.util.ownerApprover
+import co.censo.censo.util.primaryApprover
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
@@ -33,7 +33,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -79,6 +79,7 @@ class ReplacePolicyViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
+    private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
     var state by mutableStateOf(ReplacePolicyState())
         private set
@@ -164,25 +165,9 @@ class ReplacePolicyViewModel @Inject constructor(
 
         // figure out owner/primary/alternate approvers
         val approverSetup = ownerState.policySetup?.approvers ?: emptyList()
-        val externalApprovers = approverSetup.externalApprovers()
         val ownerApprover: Approver.ProspectApprover? = approverSetup.ownerApprover()
-        val primaryApprover: Approver.ProspectApprover? = when {
-            externalApprovers.isEmpty() -> null
-            externalApprovers.size == 1 -> externalApprovers.first()
-            else -> externalApprovers.confirmed().minBy { (it.status as ApproverStatus.Confirmed).confirmedAt }
-        }
-        val alternateApprover: Approver.ProspectApprover? = when {
-            externalApprovers.isEmpty() -> null
-            externalApprovers.size == 1 -> null
-            else -> {
-                val notConfirmed = externalApprovers.notConfirmed()
-                when {
-                    notConfirmed.isEmpty() -> externalApprovers.confirmed().maxByOrNull { (it.status as ApproverStatus.Confirmed).confirmedAt }!!
-                    else -> notConfirmed.first()
-                }
-
-            }
-        }
+        val primaryApprover: Approver.ProspectApprover? = approverSetup.primaryApprover()
+        val alternateApprover: Approver.ProspectApprover? = approverSetup.alternateApprover()
 
         state = state.copy(
             // approver names are needed on the last screen. Prevent resetting to 'null' after policy is replaced
@@ -272,7 +257,7 @@ class ReplacePolicyViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             //Check that the user has a key in local state or in the cloud before moving forward
             val loadedKey =
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
@@ -346,7 +331,7 @@ class ReplacePolicyViewModel @Inject constructor(
                 verifyKeyConfirmationSignature = Resource.Uninitialized
             )
 
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(ioDispatcher) {
 
                 val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
                 val entropy = approverSetup.ownerApprover()?.getEntropyFromImplicitOwnerApprover()
@@ -531,6 +516,14 @@ class ReplacePolicyViewModel @Inject constructor(
 
     fun resetRetrieveAccessShardsResponse() {
         state = state.copy(retrieveAccessShardsResponse = Resource.Uninitialized)
+    }
+    //endregion
+
+    //region UnitTest Helpers
+    fun setUIState(uiState: ReplacePolicyUIState) {
+        if (System.getProperty(TestUtil.TEST_MODE) == TestUtil.TEST_MODE_TRUE) {
+            state = state.copy(replacePolicyUIState = uiState)
+        }
     }
     //endregion
 }

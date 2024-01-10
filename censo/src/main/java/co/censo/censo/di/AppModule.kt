@@ -33,6 +33,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Singleton
 
@@ -171,4 +173,7 @@ object AppModule {
         // debug/release implementation is provided based on sourcesSet configuration
         return BillingClientWrapperImpl(context)
     }
+
+    @Provides
+    fun provideIODispatcher() : CoroutineDispatcher = Dispatchers.IO
 }

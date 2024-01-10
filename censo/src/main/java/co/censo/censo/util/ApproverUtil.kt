@@ -25,6 +25,37 @@ fun List<Approver.ProspectApprover>.notConfirmed(): List<Approver.ProspectApprov
     }
 }
 
+fun List<Approver.ProspectApprover>.primaryApprover(): Approver.ProspectApprover? {
+    val externalApprovers = this.externalApprovers()
+
+    return when {
+        externalApprovers.isEmpty() -> null
+        externalApprovers.size == 1 -> externalApprovers.first()
+        else -> externalApprovers.confirmed().minBy {
+            (it.status as ApproverStatus.Confirmed).confirmedAt
+        }
+    }
+}
+
+fun List<Approver.ProspectApprover>.alternateApprover(): Approver.ProspectApprover? {
+    val externalApprovers = this.externalApprovers()
+
+    return when {
+        externalApprovers.isEmpty() -> null
+        externalApprovers.size == 1 -> null
+        else -> {
+            val notConfirmed = externalApprovers.notConfirmed()
+            when {
+                notConfirmed.isEmpty() -> externalApprovers.confirmed()
+                    .maxByOrNull { (it.status as ApproverStatus.Confirmed).confirmedAt }!!
+
+                else -> notConfirmed.first()
+            }
+
+        }
+    }
+}
+
 fun Approver.ProspectApprover.asExternalApprover(): Approver.SetupApprover.ExternalApprover {
     return Approver.SetupApprover.ExternalApprover(
         label = this.label,
