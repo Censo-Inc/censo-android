@@ -17,6 +17,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
+import co.censo.censo.util.TestUtil
 import co.censo.censo.util.asExternalApprover
 import co.censo.censo.util.asOwnerAsApprover
 import co.censo.censo.util.confirmed
@@ -26,6 +27,7 @@ import co.censo.censo.util.ownerApprover
 import co.censo.shared.util.NavigationData
 import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -101,6 +103,7 @@ class PolicySetupViewModel @Inject constructor(
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
     private val pollingVerificationTimer: VaultCountDownTimer,
+    private val totpGenerator: TotpGenerator,
 ) : ViewModel() {
     var state by mutableStateOf(PolicySetupState())
         private set
@@ -307,7 +310,7 @@ class PolicySetupViewModel @Inject constructor(
     //region Internal Methods
     private fun nextTotpTimerTick() {
         val now = Clock.System.now()
-        val updatedCounter = now.epochSeconds.div(TotpGenerator.CODE_EXPIRATION)
+        val updatedCounter = now.epochSeconds.div(TotpGenerator.Companion.CODE_EXPIRATION)
         val secondsLeft = now.epochSeconds - (updatedCounter.times(TotpGenerator.CODE_EXPIRATION))
 
         state = if (state.counter != updatedCounter) {
@@ -458,7 +461,7 @@ class PolicySetupViewModel @Inject constructor(
 
     private fun createExternalApprover(nickname: String): Approver.SetupApprover.ExternalApprover {
         val participantId = ParticipantId.generate()
-        val totpSecret = TotpGenerator.generateSecret()
+        val totpSecret = totpGenerator.generateSecret()
         val encryptedTotpSecret = keyRepository.encryptWithDeviceKey(totpSecret.toByteArray()).base64Encoded()
 
         return Approver.SetupApprover.ExternalApprover(
@@ -475,7 +478,7 @@ class PolicySetupViewModel @Inject constructor(
                 approver is Approver.ProspectApprover && approver.status.resolveDeviceEncryptedTotpSecret() != null -> {
                     val encryptedTotpSecret = approver.status.resolveDeviceEncryptedTotpSecret()!!
 
-                    val code = TotpGenerator.generateCode(
+                    val code = totpGenerator.generateCode(
                         secret = String(keyRepository.decryptWithDeviceKey(encryptedTotpSecret.bytes)),
                         counter = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION )
                     )
@@ -549,6 +552,14 @@ class PolicySetupViewModel @Inject constructor(
 
     fun resetUserResponse() {
         state = state.copy(userResponse = Resource.Uninitialized)
+    }
+    //endregion
+
+    //region UnitTest Helpers
+    fun setUIState(uiState: PolicySetupUIState) {
+        if (System.getProperty(TestUtil.TEST_MODE) == TestUtil.TEST_MODE_TRUE) {
+            state = state.copy(policySetupUIState = uiState)
+        }
     }
     //endregion
 }

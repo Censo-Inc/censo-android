@@ -25,7 +25,7 @@ val prospectOwnerApprover = Approver.ProspectApprover(
 )
 
 @OptIn(ExperimentalTime::class)
-val prospectPrimaryApprover = Approver.ProspectApprover(
+val confirmedProspectPrimaryApprover = Approver.ProspectApprover(
     label = "Primary",
     participantId = genericParticipantId,
     invitationId = InvitationId("primary_invite_id"),status = ApproverStatus.Confirmed(
@@ -43,7 +43,7 @@ val prospectPrimaryApprover = Approver.ProspectApprover(
 )
 
 @OptIn(ExperimentalTime::class)
-val prospectAlternateApprover = Approver.ProspectApprover(
+val confirmedProspectAlternateApprover = Approver.ProspectApprover(
     label = "Alternate",
     participantId = genericParticipantId,
     invitationId = InvitationId("alt_invite_id"),status = ApproverStatus.Confirmed(
@@ -57,6 +57,25 @@ val prospectAlternateApprover = Approver.ProspectApprover(
                 targetUnit = DurationUnit.MINUTES
             ).toDuration(DurationUnit.MINUTES)
         )
+    ),
+)
+
+
+val initialProspectPrimaryApprover = Approver.ProspectApprover(
+    label = "Primary",
+    participantId = genericParticipantId,
+    invitationId = InvitationId("primary_invite_id"),
+    status = ApproverStatus.Initial(
+        deviceEncryptedTotpSecret = Base64EncodedData(base64Encoded = "AA")
+    ),
+)
+
+val initialProspectAlternateApprover = Approver.ProspectApprover(
+    label = "Alternate",
+    participantId = genericParticipantId,
+    invitationId = InvitationId("alt_invite_id"),
+    status = ApproverStatus.Initial(
+        deviceEncryptedTotpSecret = Base64EncodedData(base64Encoded = "AA")
     ),
 )
 //endregion
@@ -104,4 +123,6 @@ val trustedAlternateApprover = Approver.TrustedApprover(
 
 val mockTrustedApprovers : List<Approver.TrustedApprover> = listOf(trustedOwnerApprover, trustedPrimaryApprover, trustedAlternateApprover)
 
-val mockProspectApprovers : List<Approver.ProspectApprover> = listOf(prospectOwnerApprover, prospectPrimaryApprover, prospectAlternateApprover)
+val mockConfirmedProspectApprovers : List<Approver.ProspectApprover> = listOf(prospectOwnerApprover, confirmedProspectPrimaryApprover, confirmedProspectAlternateApprover)
+
+val mockInitialProspectApprovers : List<Approver.ProspectApprover> = listOf(prospectOwnerApprover, initialProspectPrimaryApprover, initialProspectAlternateApprover)

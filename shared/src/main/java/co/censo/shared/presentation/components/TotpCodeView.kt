@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.shared.data.cryptography.TotpGenerator.CODE_EXPIRATION
-import co.censo.shared.data.cryptography.TotpGenerator.CODE_LENGTH
+import co.censo.shared.data.cryptography.TotpGenerator.Companion.CODE_EXPIRATION
+import co.censo.shared.data.cryptography.TotpGenerator.Companion.CODE_LENGTH
 import co.censo.shared.presentation.SharedColors
 
 @Composable

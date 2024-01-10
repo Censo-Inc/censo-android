@@ -247,6 +247,7 @@ class OwnerRepositoryImpl(
     private val authUtil: AuthUtil,
     private val keyRepository: KeyRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>? = null,
+    private val totpGenerator: TotpGenerator
 ) : OwnerRepository, BaseRepository() {
     override suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse> {
         return retrieveApiResource { apiService.ownerUser() }
@@ -496,7 +497,7 @@ class OwnerRepositoryImpl(
                 timeSeconds - TotpGenerator.CODE_EXPIRATION,
                 timeSeconds + TotpGenerator.CODE_EXPIRATION
             ).any { ts ->
-                val code = TotpGenerator.generateCode(
+                val code = totpGenerator.generateCode(
                     secret = secret,
                     counter = ts.div(TotpGenerator.CODE_EXPIRATION)
                 )

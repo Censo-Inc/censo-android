@@ -39,7 +39,7 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
 
 val mockReadyOwnerStateWithPolicySetup = mockReadyOwnerStateWithNullPolicySetup.copy(
     policySetup = PolicySetup(
-        approvers = mockProspectApprovers, threshold = 2U
+        approvers = mockConfirmedProspectApprovers, threshold = 2U
     )
 )
 

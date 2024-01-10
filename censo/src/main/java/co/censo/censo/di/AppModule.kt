@@ -25,6 +25,8 @@ import co.censo.censo.billing.BillingClientWrapper
 import co.censo.censo.billing.BillingClientWrapperImpl
 import co.censo.censo.data.repository.FacetecRepository
 import co.censo.censo.data.repository.FacetecRepositoryImpl
+import co.censo.shared.data.cryptography.TotpGenerator
+import co.censo.shared.data.cryptography.TotpGeneratorImpl
 import co.censo.shared.data.repository.PlayIntegrityRepository
 import co.censo.shared.data.repository.PlayIntegrityRepositoryImpl
 import dagger.Module
@@ -88,14 +90,16 @@ object AppModule {
         secureStorage: SecurePreferences,
         authUtil: AuthUtil,
         keyRepository: KeyRepository,
-        ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
+        ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
+        totpGenerator: TotpGenerator
     ): OwnerRepository {
         return OwnerRepositoryImpl(
             apiService = apiService,
             secureStorage = secureStorage,
             authUtil = authUtil,
             keyRepository = keyRepository,
-            ownerStateFlow = ownerStateFlow
+            ownerStateFlow = ownerStateFlow,
+            totpGenerator = totpGenerator
         )
     }
 
@@ -114,13 +118,15 @@ object AppModule {
         apiService: ApiService,
         authUtil: AuthUtil,
         storage: SecurePreferences,
-        keyRepository: KeyRepository
+        keyRepository: KeyRepository,
+        totpGenerator: TotpGenerator
     ): ApproverRepository {
         return ApproverRepositoryImpl(
             secureStorage = storage,
             apiService = apiService,
             keyRepository = keyRepository,
-            authUtil = authUtil
+            authUtil = authUtil,
+            totpGenerator = totpGenerator
         )
     }
 
@@ -176,4 +182,10 @@ object AppModule {
 
     @Provides
     fun provideIODispatcher() : CoroutineDispatcher = Dispatchers.IO
+
+    @Singleton
+    @Provides
+    fun provideTotpGenerator() : TotpGenerator {
+        return TotpGeneratorImpl
+    }
 }

@@ -87,7 +87,8 @@ class ApproverRepositoryImpl(
     private val apiService: ApiService,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
-    private val keyRepository: KeyRepository
+    private val keyRepository: KeyRepository,
+    private val totpGenerator: TotpGenerator
 ) : ApproverRepository, BaseRepository() {
 
     override suspend fun retrieveUser(): Resource<GetApproverUserApiResponse> {
@@ -196,7 +197,7 @@ class ApproverRepositoryImpl(
                 timeSeconds - TotpGenerator.CODE_EXPIRATION,
                 timeSeconds + TotpGenerator.CODE_EXPIRATION
             ).any { ts ->
-                val code = TotpGenerator.generateCode(
+                val code = totpGenerator.generateCode(
                     secret = secret,
                     counter = ts.div(TotpGenerator.CODE_EXPIRATION)
                 )
