@@ -1,6 +1,5 @@
 package co.censo.shared.presentation.cloud_storage
 
-import Base58EncodedPrivateKey
 import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,13 +12,14 @@ import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CloudStorageHandlerViewModel @Inject constructor(
-    private val keyRepository: KeyRepository
+    private val keyRepository: KeyRepository,
+    private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     var state by mutableStateOf(CloudStorageHandlerState())
@@ -91,7 +91,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             state = try {
                 val uploadResource = keyRepository.saveKeyInCloud(
                     key = privateKey,
@@ -127,7 +127,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             state = try {
                 val downloadResource = keyRepository.retrieveKeyFromCloud(
                     participantId = participantId,
