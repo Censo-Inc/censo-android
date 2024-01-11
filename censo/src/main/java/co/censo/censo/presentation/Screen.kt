@@ -43,12 +43,20 @@ sealed class Screen(val route: String) {
     object EnterPhraseRoute : Screen("enter_phrase_screen") {
         const val MASTER_PUBLIC_KEY_NAME_ARG = "master_public_key"
         const val WELCOME_FLOW_ARG = "welcome_flow_key"
+        const val IMPORTING_PHRASE_ARG = "importing_phrase_arg"
+        const val ENCRYPTED_PHRASE_ARG = "encrypted_phrase_arg"
+
+        private const val NO_PHRASE = "empty"
 
         fun buildNavRoute(
             masterPublicKey: Base58EncodedMasterPublicKey,
-            welcomeFlow: Boolean
+            welcomeFlow: Boolean,
+            importingPhrase: Boolean = false,
+            encryptedPhraseData: String = ""
         ): String {
-            return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}"
+            val phraseData = encryptedPhraseData.ifEmpty { NO_PHRASE }
+
+            return "${EnterPhraseRoute.route}/${masterPublicKey.value}/${welcomeFlow}/${importingPhrase}/${phraseData}"
         }
     }
 
@@ -86,5 +94,13 @@ sealed class Screen(val route: String) {
             popSelfFromBackStack = true,
             popUpToTop = false
         )
+    }
+
+    companion object {
+        const val CENSO_IMPORT_DEEPLINK = "censoImportDeepLink"
+        const val IMPORT_KEY_KEY = "import_key_key"
+        const val TIMESTAMP_KEY = "timestamp_key"
+        const val SIGNATURE_KEY = "signature_key"
+        const val NAME_KEY = "name_key"
     }
 }

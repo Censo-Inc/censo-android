@@ -32,6 +32,22 @@ interface Base58EncodedPublicKey {
 
     val ecPublicKey: ECPublicKey
         get() = ECPublicKeyDecoder.fromBase58EncodedString(this.value)
+
+    fun getBytes(): ByteArray {
+        return Base58.base58Decode(this.value)
+    }
+}
+
+@Serializable
+@JvmInline
+value class SimpleBase58PublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(this.value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid public key format")
+        }
+    }
 }
 
 @Serializable
@@ -43,10 +59,6 @@ value class Base58EncodedApproverPublicKey(override val value: String) : Base58E
         }.onFailure {
             throw IllegalArgumentException("Invalid approver public key format")
         }
-    }
-
-    fun getBytes(): ByteArray {
-        return Base58.base58Decode(this.value)
     }
 }
 

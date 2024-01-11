@@ -79,7 +79,7 @@ android {
             isMinifyEnabled = false
             isDebuggable = false
             manifestPlaceholders["SENTRY_ID"] = sentryProdId
-            manifestPlaceholders["OWNER_URL_SCHEME"] = "censo-reset"
+            manifestPlaceholders["OWNER_URL_SCHEME"] = "censo-main"
             buildConfigField("String", "BASE_URL", "\"https://api.censo.co/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("boolean", "FACETEC_ENABLED", "true")
@@ -96,7 +96,7 @@ android {
         create("staging") {
             resValue("string", "app_name", "Staging Censo")
             manifestPlaceholders["SENTRY_ID"] = sentryDevId
-            manifestPlaceholders["OWNER_URL_SCHEME"] = "censo-reset-staging"
+            manifestPlaceholders["OWNER_URL_SCHEME"] = "censo-main-staging"
             buildConfigField("String", "BASE_URL", "\"https://staging.censo.dev/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("boolean", "FACETEC_ENABLED", "true")
@@ -106,7 +106,7 @@ android {
         create("integration") {
             resValue("string", "app_name", "Integration Censo")
             manifestPlaceholders["SENTRY_ID"] = sentryDevId
-            manifestPlaceholders["OWNER_URL_SCHEME"] = "censo-reset-integration"
+            manifestPlaceholders["OWNER_URL_SCHEME"] = "censo-main-integration"
             buildConfigField("String", "BASE_URL", "\"https://integration.censo.dev/\"")
             buildConfigField("boolean", "STRONGBOX_ENABLED", "true")
             buildConfigField("boolean", "FACETEC_ENABLED", "false")

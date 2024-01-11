@@ -27,11 +27,13 @@ import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
+import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
 import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
@@ -62,6 +64,7 @@ import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.DEVICE_TYPE_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.IS_API
 import co.censo.shared.data.networking.ApiService.Companion.OS_VERSION_HEADER
+import co.censo.shared.data.networking.IgnoreKeysJson.baseKotlinXJson
 import co.censo.shared.data.repository.PlayIntegrityRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
@@ -94,6 +97,12 @@ import java.time.Duration
 import java.util.Base64
 import retrofit2.Response as RetrofitResponse
 
+object IgnoreKeysJson {
+    val baseKotlinXJson = Json {
+        ignoreUnknownKeys = true
+    }
+}
+
 interface ApiService {
 
     companion object {
@@ -101,6 +110,7 @@ interface ApiService {
         const val INVITATION_ID = "invitationId"
         const val INTERMEDIATE_KEY = "intermediateKey"
         const val PARTICIPANT_ID = "participantId"
+        const val CHANNEL = "channel"
         const val APPROVAL_ID = "approvalId"
         const val SEED_PHRASE_ID = "seedPhraseId"
 
@@ -147,7 +157,7 @@ interface ApiService {
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(client.build())
                 .addConverterFactory(
-                    Json { ignoreUnknownKeys = true }.asConverterFactory(
+                    baseKotlinXJson.asConverterFactory(
                         contentType
                     )
                 )
@@ -344,6 +354,19 @@ interface ApiService {
         @Body apiRequest: LabelOwnerByApproverApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<GetApproverUserApiResponse>
+
+    @POST("v1/import/{$CHANNEL}/accept")
+    suspend fun acceptImport(
+        @Path(value = CHANNEL) channel: String,
+        @Body ownerProof: OwnerProof,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<Unit>
+
+    @GET("v1/import/{$CHANNEL}/encrypted")
+    suspend fun importedEncryptedData(
+        @Path(value = CHANNEL) channel: String,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<GetImportEncryptedDataApiResponse>
 }
 
 class AnalyticsInterceptor(

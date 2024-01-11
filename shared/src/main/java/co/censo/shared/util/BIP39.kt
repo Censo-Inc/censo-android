@@ -6,7 +6,14 @@ import co.censo.shared.data.cryptography.toBinaryString
 import co.censo.shared.data.cryptography.toByteArrayNoSign
 import co.censo.shared.util.BIP39.MAX_LENGTH
 import co.censo.shared.util.BIP39.MIN_LENGTH
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.math.BigInteger
@@ -76,17 +83,18 @@ object BIP39 {
         )
     }
 
-    enum class WordListLanguage {
-        English,
-        Spanish,
-        French,
-        Italian,
-        Portugese,
-        Czech,
-        Japanese,
-        Korean,
-        ChineseTraditional,
-        ChineseSimplified;
+    @Serializable(with = WordListLanguageSerializer::class)
+    enum class WordListLanguage(val value: Byte) {
+        English(1),
+        Spanish(2),
+        French(3),
+        Italian(4),
+        Portugese(5),
+        Czech(6),
+        Japanese(7),
+        Korean(8),
+        ChineseTraditional(9),
+        ChineseSimplified(10);
 
         companion object {
             fun fromWordListId(id: Byte): WordListLanguage {
@@ -104,21 +112,6 @@ object BIP39 {
 
                     else -> throw Exception("Unknown wordlist language id $id")
                 }
-            }
-        }
-
-        fun toId(): Byte {
-            return when (this) {
-                English -> 1
-                Spanish -> 2
-                French -> 3
-                Italian -> 4
-                Portugese -> 5
-                Czech -> 6
-                Japanese -> 7
-                Korean -> 8
-                ChineseTraditional -> 9
-                ChineseSimplified -> 10
             }
         }
 
@@ -268,15 +261,19 @@ object BIP39 {
             throw Exception("Checksums did not match when encoding phrase")
         }
 
-        return byteArrayOf(language.toId()) + entropy.toByteArrayNoSign(checksumBits * 4)
+        return byteArrayOf(language.value) + entropy.toByteArrayNoSign(checksumBits * 4)
     }
 
     fun wordLists(language: WordListLanguage): List<String>? {
         return wordlists[language]
     }
 
-    fun binaryDataToWords(binaryData: ByteArray, language: WordListLanguage? = null): List<String> {
-        val entropy = binaryData.slice(indices = 1 until binaryData.size).toByteArray()
+    fun binaryDataToWords(binaryData: ByteArray, language: WordListLanguage? = null, hasLanguageByte: Boolean = false): List<String> {
+        val entropy = if (hasLanguageByte) {
+            binaryData.slice(indices = binaryData.indices).toByteArray()
+        } else {
+            binaryData.slice(indices = 1 until binaryData.size).toByteArray()
+        }
         val checksumBits = entropy.size / BITS_PER_CHECKSUM_BIT
         val checksum = computeChecksum(BigInteger(1, entropy), checksumBits)
         val binaryPhrase = entropy.toBinaryString(entropy.size * 8) + checksum.toString(2).padStart(checksumBits, '0')
@@ -301,6 +298,29 @@ object BIP39 {
         val entropy = ByteArray(entropyBitsCount / 8)
         val secureRandom = SecureRandom()
         secureRandom.nextBytes(entropy)
-        return binaryDataToWords(byteArrayOf(language.toId()) + entropy)
+        return binaryDataToWords(byteArrayOf(language.value) + entropy)
     }
 }
+
+open class EnumAsByteSerializer<T:Enum<*>>(
+    serialName: String,
+    val serialize: (v: T) -> Byte,
+    val deserialize: (v: Byte) -> T
+) : KSerializer<T> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(serialName, PrimitiveKind.BYTE)
+
+    override fun serialize(encoder: Encoder, value: T) {
+        encoder.encodeByte(serialize(value))
+    }
+
+    override fun deserialize(decoder: Decoder): T {
+        val v = decoder.decodeByte()
+        return deserialize(v)
+    }
+}
+
+private class WordListLanguageSerializer: EnumAsByteSerializer<BIP39.WordListLanguage>(
+    "WordListLanguage",
+    { it.value },
+    { v -> BIP39.WordListLanguage.values().first { it.value == v } }
+)

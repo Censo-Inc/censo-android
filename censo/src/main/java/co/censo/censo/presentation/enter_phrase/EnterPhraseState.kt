@@ -24,7 +24,6 @@ data class EnterPhraseState(
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
 
     val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,
-    val seedPhraseWasGenerated: Boolean = false,
 
     //Async
     val submitResource: Resource<Unit> = Resource.Uninitialized,
@@ -85,5 +84,5 @@ enum class BackIconType {
 }
 
 enum class EntryType {
-    MANUAL, PASTE, GENERATE
+    MANUAL, PASTE, GENERATE, IMPORT
 }

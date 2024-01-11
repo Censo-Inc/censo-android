@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.util.projectLog
 import kotlinx.datetime.Clock
 
 @Composable
@@ -112,9 +111,8 @@ fun ProspectApproverInfoBoxLongNamePreview() {
                 timeMillis = 0,
                 confirmedAt = Clock.System.now()
             ),
-            onEdit = {
-                projectLog(message = "Tapped")
-            })
+            onEdit = {}
+        )
     }
 }
 
@@ -131,8 +129,7 @@ fun ProspectApproverInfoBoxRegularPreview() {
             approverPublicKey = Base58EncodedApproverPublicKey(value = "AA"),
             timeMillis = 0,
             confirmedAt = Clock.System.now()
-        ), onEdit = {
-            projectLog(message = "Tapped")
-        })
+        ), onEdit = {}
+        )
     }
 }

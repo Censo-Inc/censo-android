@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,12 +10,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.decryptWithEntropy
+import co.censo.shared.data.cryptography.hexStringToByteArray
 import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.networking.IgnoreKeysJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.BIP39
@@ -27,6 +30,7 @@ import kotlinx.coroutines.launch
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
 import java.lang.Integer.min
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,14 +45,56 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun onStart(
         welcomeFlow: Boolean,
-        masterPublicKey: Base58EncodedMasterPublicKey
+        importingPhrase: Boolean,
+        masterPublicKey: Base58EncodedMasterPublicKey,
+        encryptedPhrase: String = ""
     ) {
-        state = state.copy(
-            welcomeFlow = welcomeFlow,
-            masterPublicKey = masterPublicKey
-        )
+        if (importingPhrase) {
+            importingPhrase(
+                encryptedPhraseData = encryptedPhrase,
+                masterPublicKey = masterPublicKey
+            )
+        } else {
+            state = state.copy(
+                welcomeFlow = welcomeFlow,
+                masterPublicKey = masterPublicKey
+            )
+        }
 
         retrieveOwnerState()
+    }
+
+    private fun importingPhrase(encryptedPhraseData: String, masterPublicKey: Base58EncodedMasterPublicKey) {
+        try {
+            val deviceKey = keyRepository.retrieveInternalDeviceKey()
+            val decryptedData =
+                deviceKey.decrypt(Base64.getUrlDecoder().decode(encryptedPhraseData))
+
+            val importedPhrase: ImportedPhrase =
+                IgnoreKeysJson.baseKotlinXJson.decodeFromString(decryptedData.toString(Charsets.UTF_8))
+
+            val words = BIP39.binaryDataToWords(
+                binaryData = importedPhrase.binaryPhrase.value.hexStringToByteArray(),
+                language = importedPhrase.language,
+                hasLanguageByte = true
+            )
+
+            val editedWordIndex = if (words.size > 1) words.size - 1 else 0
+
+            state = state.copy(
+                welcomeFlow = false,
+                masterPublicKey = masterPublicKey,
+                enteredWords = words,
+                editedWordIndex = editedWordIndex,
+                editedWord = words[editedWordIndex],
+                currentLanguage = BIP39.determineLanguage(words)
+            )
+
+            submitFullPhrase()
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImportPhrase)
+            state = state.copy(exitFlow = true)
+        }
     }
 
     //Only retrieving owner state to determine if this is the first seed phrase they are saving
@@ -318,6 +364,7 @@ class EnterPhraseViewModel @Inject constructor(
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT, currentLanguage = language)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
             EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE, currentLanguage = language)
+            EntryType.IMPORT -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW, currentLanguage = language)
         }
     }
 
@@ -441,6 +488,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(
             enteredWords = BIP39.generate(state.desiredGeneratedPhraseLength, state.currentLanguage),
         )
+
         submitFullPhrase()
     }
 

@@ -54,6 +54,8 @@ fun EnterPhraseScreen(
     masterPublicKey: Base58EncodedMasterPublicKey,
     welcomeFlow: Boolean,
     navController: NavController,
+    importingPhrase: Boolean = false,
+    encryptedPhrase: String,
     viewModel: EnterPhraseViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
@@ -80,8 +82,10 @@ fun EnterPhraseScreen(
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart(
+            importingPhrase = importingPhrase,
             welcomeFlow = welcomeFlow,
-            masterPublicKey = masterPublicKey
+            masterPublicKey = masterPublicKey,
+            encryptedPhrase = encryptedPhrase
         )
         onDispose {}
     }

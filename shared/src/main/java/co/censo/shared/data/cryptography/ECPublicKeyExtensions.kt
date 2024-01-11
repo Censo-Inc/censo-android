@@ -1,6 +1,8 @@
 package co.censo.shared.data.cryptography
 
 import android.os.Build
+import co.censo.shared.data.cryptography.ECHelper.EC
+import co.censo.shared.data.cryptography.key.KeystoreHelper.Companion.SECP_256_R1
 import io.github.novacrypto.base58.Base58
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.DERBitString
@@ -28,15 +30,16 @@ import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import java.security.spec.EllipticCurve
 import java.util.HexFormat
+import java.nio.ByteBuffer
+import java.security.PublicKey
 
 private val bcProvider = BouncyCastleProvider()
-private const val curveName = "secp256r1"
 
 object ECHelper {
 
     private const val SECP_256_R1 = "secp256r1"
     const val ECDH = "ECDH"
-    private const val EC = "EC"
+    const val EC = "EC"
 
     val keyFactory = KeyFactory.getInstance(EC, BouncyCastleProvider())
     val keyPairGenerator = KeyPairGenerator.getInstance(EC, BouncyCastleProvider())
@@ -58,6 +61,34 @@ object ECHelper {
 
     fun createECKeyPair(): KeyPair {
         return keyPairGenerator.generateKeyPair()
+    }
+
+    fun convertRawSignatureToDerFormat(signature: ByteArray): ByteArray {
+        fun isNegative(input: ByteArray) = input[0].toUByte() > 0x7f.toUByte()
+
+        fun makePositive(input: ByteArray): ByteArray {
+            return if (isNegative(input)) {
+                byteArrayOf(0x00) + input
+            } else {
+                input
+            }
+        }
+
+        val r = makePositive(signature.copyOfRange(0, 32))
+        val s = makePositive(signature.copyOfRange(32, 64))
+
+        val derSignature = ByteBuffer.allocate(2 + r.size + 2 + s.size + 2).apply {
+            put(0x30)
+            put((r.size + s.size + 4).toByte())
+            put(0x02)
+            put(r.size.toByte())
+            put(r)
+            put(0x02)
+            put(s.size.toByte())
+            put(s)
+        }
+
+        return derSignature.array()
     }
 }
 
@@ -112,7 +143,7 @@ object ECPublicKeyDecoder {
     }
 
 
-    fun fromHexEncodedString(hexKey: String): ECPublicKey {
+    private fun fromHexEncodedString(hexKey: String): ECPublicKey {
         // create a public key using the provided hex string
         val bytes = Hex.decode(hexKey)
         val keyLength = 64
@@ -121,14 +152,14 @@ object ECPublicKeyDecoder {
         val y = bytes.slice(IntRange(startingOffset + 32, 63 + startingOffset)).toByteArray()
 
         val pubPoint = ECPoint(BigInteger(1, x), BigInteger(1, y))
-        val params = AlgorithmParameters.getInstance("EC", bcProvider).apply {
-            init(ECGenParameterSpec(curveName))
+        val params = AlgorithmParameters.getInstance(EC, bcProvider).apply {
+            init(ECGenParameterSpec(SECP_256_R1))
         }
         val pubECSpec = ECPublicKeySpec(
             pubPoint,
             params.getParameterSpec(ECParameterSpec::class.java),
         )
-        return KeyFactory.getInstance("EC", bcProvider)
+        return KeyFactory.getInstance(EC, bcProvider)
             .generatePublic(pubECSpec) as ECPublicKey
     }
 
@@ -139,7 +170,7 @@ object ECPublicKeyDecoder {
             return if (keyBytes.size == 33 || keyBytes.size == 32) {
                 // compressed bytes case
                 val hexKey = hexFormatter.formatHex(keyBytes)
-                val spec = ECNamedCurveTable.getParameterSpec(curveName)
+                val spec = ECNamedCurveTable.getParameterSpec(SECP_256_R1)
                 val pubPoint = spec.curve.decodePoint(Hex.decode(hexKey))
                 fromHexEncodedString(hexFormatter.formatHex(pubPoint.getEncoded(false)))
             } else {
@@ -149,5 +180,23 @@ object ECPublicKeyDecoder {
             val keyBytes = Base58.base58Decode(base58Key)
             return getPublicKeyFromBytes(keyBytes)
         }
+    }
+
+    fun recreateECPublicKey(rawBytes: ByteArray): PublicKey {
+        val xAndYCoordinatesOnly = rawBytes.copyOfRange(1, rawBytes.size)
+        val coordinateLength = xAndYCoordinatesOnly.size / 2
+        val x = xAndYCoordinatesOnly.copyOfRange(0, coordinateLength)
+        val y = xAndYCoordinatesOnly.copyOfRange(coordinateLength, xAndYCoordinatesOnly.size)
+
+        val ecPoint = ECPoint(BigInteger(1, x), BigInteger(1, y))
+
+        val parameterSpec = ECNamedCurveTable.getParameterSpec(SECP_256_R1)
+        val params =
+            ECNamedCurveSpec(SECP_256_R1, parameterSpec.curve, parameterSpec.g, parameterSpec.n)
+
+        val publicKeySpec = ECPublicKeySpec(ecPoint, params)
+
+        val keyFactory = KeyFactory.getInstance(EC)
+        return keyFactory.generatePublic(publicKeySpec)
     }
 }
