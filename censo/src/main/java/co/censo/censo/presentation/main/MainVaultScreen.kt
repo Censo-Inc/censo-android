@@ -328,14 +328,17 @@ fun MainVaultScreen(
                     }
 
                     if (state.triggerEditPhraseDialog is Resource.Success) {
+                        val confirmationText = stringResource(R.string.delete_phrase_confirmation_text, state.triggerEditPhraseDialog.data!!.label)
 
                         val message = buildAnnotatedString {
                             append(stringResource(R.string.you_are_about_to_delete_phrase))
+                            append(confirmationText)
                         }
 
                         ConfirmationDialog(
                             title = stringResource(id = R.string.delete_phrase),
                             message = message,
+                            confirmationText = confirmationText,
                             onCancel = viewModel::onCancelDeletePhrase,
                             onDelete = viewModel::deleteSeedPhrase,
                         )

@@ -189,6 +189,7 @@
         <item quantity="one">Delete my 1 seed phrase</item>
         <item quantity="other">Delete my %d seed phrases</item>
     </plurals>
+    <string name="delete_phrase_confirmation_text">Delete %1$s</string>
     <string name="step_1">Step 1</string>
     <string name="scan_your_face">Anonymously scan your face</string>
     <string name="begin_face_scan">Begin face scan</string>
@@ -288,7 +289,7 @@
     <string name="delete_user_description">This will securely delete all of your information stored in the Censo app.  After completing this, you will no longer have access to any seed phrases you have entered.  This operation cannot be undone.</string>
     <string name="sign_out">Sign Out</string>
     <string name="sign_out_description">Sign out from your Google login.</string>
-    <string name="you_are_about_to_delete_phrase">You are about to delete this phrase</string>
+    <string name="you_are_about_to_delete_phrase">You are about to delete this phrase. If you are sure, please type:\n\n</string>
     <string name="delete_phrase">Delete Phrase</string>
     <string name="input_string_is_too_long">Can\'t be longer than %1$s characters</string>
     <string name="enter_your_seed_phrase">Enter your seed phrase</string>
