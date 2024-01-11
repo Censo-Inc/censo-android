@@ -53,7 +53,7 @@ class FacetecAuthViewModel @Inject constructor(
         }
     }
 
-    fun initFacetecSession() {
+    private fun initFacetecSession() {
         viewModelScope.launch {
             state = state.copy(initFacetecData = Resource.Loading())
             val facetecDataResource = facetecRepository.startFacetecBiometry()
