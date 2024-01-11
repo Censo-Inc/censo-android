@@ -86,7 +86,7 @@ class BIP39ValidationTest {
             assertNull(BIP39.validateSeedPhrase(words))
 
             val binaryData = BIP39.wordsToBinaryData(words)
-            assertEquals(binaryData[0], language.toId())
+            assertEquals(binaryData[0], language.value)
             assertEquals(words, BIP39.binaryDataToWords(binaryData))
 
             enumValues<BIP39.WordListLanguage>().forEach { otherLanguage ->

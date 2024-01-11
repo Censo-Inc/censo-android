@@ -106,6 +106,7 @@ class PhraseImportViewModel @Inject constructor(
 
                 state = state.copy(acceptImportResource = acceptImportResponse)
             } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.ImportPhrase)
                 state = state.copy(acceptImportResource = Resource.Error(exception = e))
             }
         }

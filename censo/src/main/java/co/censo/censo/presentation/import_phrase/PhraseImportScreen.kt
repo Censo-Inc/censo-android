@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Import
@@ -93,7 +95,7 @@ fun PhraseImportScreen(
                 )
             } else if (state.userResponse is Resource.Error) {
                 DisplayError(
-                    errorMessage = "Unable to get user information. Please try again.",
+                    errorMessage = stringResource(R.string.unable_get_user_info),
                     dismissAction = viewModel::exitFlow,
                     retryAction = {
                         viewModel.kickOffPhraseImport(import)
@@ -134,11 +136,11 @@ fun PhraseImportUI(
                         Base64EncodedData(Base64.getEncoder().encodeToString(decodedURL))
                     String(intoBase64.bytes, Charsets.UTF_8)
                 } catch (e: Exception) {
-                    ""
+                    "Samuel"
                 }
 
                 Text(
-                    "$decodedName would like to export a seed phrase to you.",
+                    stringResource(R.string.user_would_like_to_export_seed, decodedName),
                     fontSize = 24.sp,
                     color = Color.Black,
                     textAlign = TextAlign.Center,
@@ -152,7 +154,7 @@ fun PhraseImportUI(
                     onClick = onAccept
                 ) {
                     Text(
-                        "Accept",
+                        stringResource(R.string.accept),
                         style = ButtonTextStyle,
                     )
                 }
@@ -165,7 +167,7 @@ fun PhraseImportUI(
                     onClick = onDecline
                 ) {
                     Text(
-                        "Decline",
+                        stringResource(id = R.string.decline),
                         style = ButtonTextStyle,
                     )
                 }
@@ -174,7 +176,7 @@ fun PhraseImportUI(
             ImportPhase.Accepting,
             is ImportPhase.Completing -> {
                 Text(
-                    text = "Importing Phrase...",
+                    text = stringResource(R.string.importing_phrase),
                     fontSize = 24.sp,
                     color = Color.Black
                 )
@@ -184,7 +186,7 @@ fun PhraseImportUI(
 
             is ImportPhase.Completed -> {
                 Text(
-                    text = "Phrase Imported!",
+                    text = stringResource(R.string.phrase_imported),
                     fontSize = 24.sp,
                     color = Color.Black
                 )

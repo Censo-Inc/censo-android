@@ -422,4 +422,9 @@
     <string name="invalid_link">This link is invalid, please get a new one.</string>
     <string name="link_expired">This link has expired, please get a new one.</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="unable_get_user_info">Unable to get user information. Please try again.</string>
+    <string name="user_would_like_to_export_seed">%1$s would like to export a seed phrase to you.</string>
+    <string name="accept">Accept</string>
+    <string name="importing_phrase">Importing Phrase…</string>
+    <string name="phrase_imported">Phrase Imported!</string>
 </resources>

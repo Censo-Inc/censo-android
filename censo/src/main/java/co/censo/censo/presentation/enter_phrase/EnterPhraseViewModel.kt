@@ -65,30 +65,36 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     private fun importingPhrase(encryptedPhraseData: String, masterPublicKey: Base58EncodedMasterPublicKey) {
-        val deviceKey = keyRepository.retrieveInternalDeviceKey()
-        val decryptedData = deviceKey.decrypt(Base64.getUrlDecoder().decode(encryptedPhraseData))
+        try {
+            val deviceKey = keyRepository.retrieveInternalDeviceKey()
+            val decryptedData =
+                deviceKey.decrypt(Base64.getUrlDecoder().decode(encryptedPhraseData))
 
-        val importedPhrase: ImportedPhrase =
-            IgnoreKeysJson.baseKotlinXJson.decodeFromString(decryptedData.toString(Charsets.UTF_8))
+            val importedPhrase: ImportedPhrase =
+                IgnoreKeysJson.baseKotlinXJson.decodeFromString(decryptedData.toString(Charsets.UTF_8))
 
-        val words = BIP39.binaryDataToWords(
-            binaryData = importedPhrase.binaryPhrase.value.hexStringToByteArray(),
-            language = importedPhrase.language,
-            hasLanguageByte = true
-        )
+            val words = BIP39.binaryDataToWords(
+                binaryData = importedPhrase.binaryPhrase.value.hexStringToByteArray(),
+                language = importedPhrase.language,
+                hasLanguageByte = true
+            )
 
-        val editedWordIndex = if (words.size > 1) words.size - 1 else 0
+            val editedWordIndex = if (words.size > 1) words.size - 1 else 0
 
-        state = state.copy(
-            welcomeFlow = false,
-            masterPublicKey = masterPublicKey,
-            enteredWords = words,
-            editedWordIndex = editedWordIndex,
-            editedWord = words[editedWordIndex],
-            currentLanguage = BIP39.determineLanguage(words)
-        )
+            state = state.copy(
+                welcomeFlow = false,
+                masterPublicKey = masterPublicKey,
+                enteredWords = words,
+                editedWordIndex = editedWordIndex,
+                editedWord = words[editedWordIndex],
+                currentLanguage = BIP39.determineLanguage(words)
+            )
 
-        submitFullPhrase()
+            submitFullPhrase()
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImportPhrase)
+            state = state.copy(exitFlow = true)
+        }
     }
 
     //Only retrieving owner state to determine if this is the first seed phrase they are saving
