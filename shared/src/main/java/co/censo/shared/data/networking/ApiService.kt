@@ -190,7 +190,8 @@ interface ApiService {
 
     @POST("v1/login-id-reset-token/{$PARTICIPANT_ID}")
     suspend fun createLoginIdResetToken(
-        @Path(value = PARTICIPANT_ID) participantId: String
+        @Path(value = PARTICIPANT_ID) participantId: String,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<GetApproverUserApiResponse>
 
     @GET("/v1/user")
@@ -213,7 +214,9 @@ interface ApiService {
     ): RetrofitResponse<CreatePolicySetupApiResponse>
 
     @DELETE("/v1/policy-setup")
-    suspend fun deletePolicySetup(): RetrofitResponse<DeletePolicySetupApiResponse>
+    suspend fun deletePolicySetup(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<DeletePolicySetupApiResponse>
 
     @POST("/v1/policy")
     suspend fun createPolicy(
