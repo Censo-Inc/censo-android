@@ -213,7 +213,11 @@ fun AccessApprovalScreen(
 
                             LaunchedEffect(Unit) {
                                 delay(3000)
-                                viewModel.navigateIntentAware()
+                                if (viewModel.state.isTimelocked) {
+                                    viewModel.setNavigateBackToHome()
+                                } else {
+                                    viewModel.navigateIntentAware()
+                                }
                             }
                         }
                     }

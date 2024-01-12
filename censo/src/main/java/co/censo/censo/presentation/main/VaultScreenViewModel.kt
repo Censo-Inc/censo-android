@@ -8,24 +8,38 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.Access
+import co.censo.shared.data.model.AccessStatus
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SubscriptionStatus
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
+import co.censo.shared.util.VaultCountDownTimer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+
+
+enum class AccessButtonLabelEnum {
+    BeginAccess,
+    RequestAccess,
+    CancelAccess,
+    ShowSeedPhrases
+}
 
 @HiltViewModel
 class VaultScreenViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
-    private val pushRepository: PushRepository
+    private val pushRepository: PushRepository,
+    private val timer: VaultCountDownTimer
 ) : ViewModel() {
 
     var state by mutableStateOf(VaultScreenState())
@@ -33,19 +47,34 @@ class VaultScreenViewModel @Inject constructor(
 
     fun onStart() {
         retrieveOwnerState()
+
+        timer.start(interval = 5.seconds.inWholeMilliseconds) {
+            (accessTimelockExpiration() ?: state.ownerState?.timelockSetting?.disabledAt)?.let { expiresAt ->
+                if (expiresAt < Clock.System.now()) {
+                    retrieveOwnerState(silently = true)
+                }
+            }
+        }
+    }
+
+    fun onStop() {
+        timer.stop()
     }
 
     fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
 
-    fun retrieveOwnerState() {
-        state = state.copy(userResponse = Resource.Loading())
+    fun retrieveOwnerState(silently: Boolean = false) {
+        if (!silently) {
+            state = state.copy(userResponse = Resource.Loading())
+        }
 
         viewModelScope.launch {
             val response = ownerRepository.retrieveUser()
-
-            state = state.copy(
-                userResponse = response
-            )
+            if (!silently) {
+                state = state.copy(
+                    userResponse = response
+                )
+            }
 
             if (response is Resource.Success) {
                 onOwnerState(response.data!!.ownerState)
@@ -129,6 +158,97 @@ class VaultScreenViewModel @Inject constructor(
         state = state.copy(showPushNotificationsUI = Resource.Uninitialized)
     }
 
+    fun determineAccessButtonLabel(): AccessButtonLabelEnum {
+        return state.ownerState?.let {
+            val beginOrRequest = if (it.policy.approvers.count() > 1) {
+                AccessButtonLabelEnum.RequestAccess
+            } else {
+                AccessButtonLabelEnum.BeginAccess
+            }
+            if (it.access != null && it.access is Access.ThisDevice) {
+                when ((it.access as Access.ThisDevice).status) {
+                    AccessStatus.Available -> AccessButtonLabelEnum.ShowSeedPhrases
+                    AccessStatus.Timelocked -> AccessButtonLabelEnum.CancelAccess
+                    else -> beginOrRequest
+                }
+            } else {
+                beginOrRequest
+            }
+        } ?: AccessButtonLabelEnum.BeginAccess
+    }
+
+    fun enableTimelock() {
+        state = state.copy(
+            enableTimelockResource = Resource.Loading()
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.enableTimelock()
+
+            state = state.copy(
+                enableTimelockResource = response
+            )
+
+            if (response is Resource.Success) {
+                onOwnerState(response.data!!.ownerState)
+            }
+        }
+    }
+
+    fun disableTimelock() {
+        state = state.copy(
+            disableTimelockResource = Resource.Loading()
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.disableTimelock()
+
+            state = state.copy(
+                disableTimelockResource = response
+            )
+
+            if (response is Resource.Success) {
+                onOwnerState(response.data!!.ownerState)
+            }
+        }
+    }
+
+    fun cancelDisableTimelock() {
+        state = state.copy(
+            cancelDisableTimelockResource = Resource.Loading(),
+            triggerCancelDisableTimelockDialog = Resource.Uninitialized
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.cancelDisableTimelock()
+
+            state = state.copy(
+                cancelDisableTimelockResource = response
+            )
+
+            if (response is Resource.Success) {
+                retrieveOwnerState()
+            }
+        }
+    }
+
+    fun cancelAccess() {
+        state = state.copy(
+            cancelAccessResource = Resource.Loading(),
+            triggerCancelAccessDialog = Resource.Uninitialized
+        )
+
+        viewModelScope.launch {
+            val response = ownerRepository.cancelAccess()
+
+            if (response is Resource.Success) {
+                onOwnerState(response.data!!.ownerState)
+            }
+
+            state = state.copy(cancelAccessResource = response)
+        }
+    }
+
     private fun onOwnerState(ownerState: OwnerState) {
         state = when (ownerState) {
             is OwnerState.Ready -> {
@@ -145,8 +265,21 @@ class VaultScreenViewModel @Inject constructor(
         ownerStateFlow.tryEmit(Resource.Success(ownerState))
     }
 
+    fun accessTimelockExpiration(): Instant? {
+        return when (val access = state.ownerState?.access) {
+            is Access.ThisDevice -> if (access.status == AccessStatus.Timelocked) {
+                access.unlocksAt
+            } else null
+            else -> null
+        }
+    }
+
     fun showAddApproverUI() {
-        state = state.copy(showAddApproversUI = Resource.Success(Unit))
+        state = if (state.ownerState?.hasBlockingPhraseAccessRequest() == true) {
+            state.copy(showAddApproversUI = Resource.Error(exception = Exception("Cannot setup approvers while an access is in progress")))
+        } else {
+            state.copy(showAddApproversUI = Resource.Success(Unit))
+        }
     }
 
     fun resetDeleteUserResource() {
@@ -175,6 +308,41 @@ class VaultScreenViewModel @Inject constructor(
 
     fun onCancelResetUser() {
         state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+    }
+
+    fun onCancelDisableTimelock() {
+        state = state.copy(triggerCancelDisableTimelockDialog = Resource.Success(Unit))
+    }
+
+    fun resetCancelDisableTimelockDialog() {
+        state = state.copy(triggerCancelDisableTimelockDialog = Resource.Uninitialized)
+    }
+
+    fun onCancelAccess() {
+        state = state.copy(triggerCancelAccessDialog = Resource.Success(Unit))
+    }
+
+    fun resetCancelAccess() {
+        state = state.copy(triggerCancelAccessDialog = Resource.Uninitialized)
+    }
+
+    fun resetEnableTimelockResource() {
+        state = state.copy(enableTimelockResource = Resource.Uninitialized)
+    }
+
+    fun resetDisableTimelockResource() {
+        state = state.copy(disableTimelockResource = Resource.Uninitialized)
+    }
+
+    fun resetCancelDisableTimelockResource() {
+        state = state.copy(cancelDisableTimelockResource = Resource.Uninitialized)
+    }
+
+    fun setRemoveApproversError() {
+        state = state.copy(removeApprovers = Resource.Error(exception = Exception("Cannot remove approvers")))
+    }
+    fun resetRemoveApprovers() {
+        state = state.copy(removeApprovers = Resource.Uninitialized)
     }
 
     fun reset() {

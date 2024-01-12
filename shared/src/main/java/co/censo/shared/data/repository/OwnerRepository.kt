@@ -71,6 +71,7 @@ import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.SeedPhrase
+import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
@@ -246,6 +247,12 @@ interface OwnerRepository {
     suspend fun acceptImport(channel: String, ownerProof: OwnerProof) : Resource<Unit>
 
     suspend fun checkForCompletedImport(channel: String) : Resource<GetImportEncryptedDataApiResponse>
+
+    suspend fun enableTimelock(): Resource<TimelockApiResponse>
+
+    suspend fun disableTimelock(): Resource<TimelockApiResponse>
+
+    suspend fun cancelDisableTimelock(): Resource<Unit>
 }
 
 class OwnerRepositoryImpl(
@@ -622,6 +629,18 @@ class OwnerRepositoryImpl(
 
     override suspend fun lock(): Resource<LockApiResponse> {
         return retrieveApiResource { apiService.lock() }
+    }
+
+    override suspend fun enableTimelock(): Resource<TimelockApiResponse> {
+        return retrieveApiResource { apiService.enableTimelock() }
+    }
+
+    override suspend fun disableTimelock(): Resource<TimelockApiResponse> {
+        return retrieveApiResource { apiService.disableTimelock() }
+    }
+
+    override  suspend fun cancelDisableTimelock(): Resource<Unit> {
+        return retrieveApiResource { apiService.cancelDisableTimelock() }
     }
 
     override suspend fun encryptSeedPhrase(

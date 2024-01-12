@@ -112,13 +112,27 @@ class AccessApprovalViewModel @Inject constructor(
                 )
 
                 if (access.status == AccessStatus.Available) {
-                    if (ownerState.policy.approvers.all { it.isOwner }) {
-                        // owner is single approver, skip to view seed phrases
+                    if (ownerState.policy.approvers.all { it.isOwner } ||
+                        (access.intent == AccessIntent.AccessPhrases && ownerState.timelockSetting.currentTimelockInSeconds != null)) {
+                        // owner is single approver or we were previously timelocked, skip to view seed phrases
                         navigateIntentAware()
                     } else {
                         state = state.copy(accessApprovalUIState = AccessApprovalUIState.Approved)
                     }
                     pollingVerificationTimer.stop()
+                } else if (access.status == AccessStatus.Timelocked) {
+                    state = if (ownerState.policy.approvers.all { it.isOwner }) {
+                        state.copy(
+                            navigationResource = Screen.OwnerVaultScreen
+                                .navToAndPopCurrentDestination()
+                                .asResource()
+                        )
+                    } else {
+                        state.copy(
+                            accessApprovalUIState = AccessApprovalUIState.Approved,
+                            isTimelocked = true
+                        )
+                    }
                 } else if (state.accessApprovalUIState == AccessApprovalUIState.ApproveAccess && state.approvals.isApprovedFor(state.selectedApprover))  {
                     state = state.copy(
                         selectedApprover = null,
@@ -134,6 +148,15 @@ class AccessApprovalViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setNavigateBackToHome() {
+        state = state.copy(
+            isTimelocked = false,
+            navigationResource = Screen.OwnerVaultScreen
+                .navToAndPopCurrentDestination()
+                .asResource()
+        )
     }
 
     private fun checkForRejections(access: Access.ThisDevice) {

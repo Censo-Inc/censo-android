@@ -37,6 +37,7 @@ data class AccessSeedPhrasesState(
     // navigation
     val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
 ) {
+    val hasExternalApprovers = (ownerState.data as? OwnerState.Ready)?.policy?.approvers?.any { !it.isOwner } ?: false
 
     val loading = retrieveShardsResponse is Resource.Loading
                 || ownerState is Resource.Loading

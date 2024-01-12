@@ -246,7 +246,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         val approverSize =
             (state.ownerState.data as? OwnerState.Ready)?.policy?.approvers?.size ?: MULTI_APPROVER_POLICY
 
-        if (approverSize > 1) {
+        val timelockInEffect =
+            (state.ownerState.data as? OwnerState.Ready)?.timelockSetting?.currentTimelockInSeconds != null
+
+        if (approverSize > 1 || timelockInEffect) {
             state = state.copy(showCancelConfirmationDialog = true)
         } else {
             cancelAccess()

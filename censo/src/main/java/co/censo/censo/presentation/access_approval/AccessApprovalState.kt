@@ -39,6 +39,7 @@ data class AccessApprovalState(
 
     // navigation
     val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
+    val isTimelocked: Boolean = false
 ) {
 
     val loading = userResponse is Resource.Loading
