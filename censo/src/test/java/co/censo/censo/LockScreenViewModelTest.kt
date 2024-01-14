@@ -2,8 +2,11 @@ package co.censo.censo
 
 import co.censo.censo.presentation.lock_screen.LockScreenState
 import co.censo.censo.presentation.lock_screen.LockScreenViewModel
+import co.censo.censo.test_helper.mockReadyOwnerStateWithNullPolicySetup
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.GetOwnerUserApiResponse
+import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
@@ -28,6 +31,7 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LockScreenViewModelTest : BaseViewModelTest() {
@@ -120,6 +124,37 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         testScheduler.advanceUntilIdle()
 
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.None)
+    }
+
+    @Test
+    fun `call onStop then VM should stop timer`() {
+        assertDefaultVMState()
+
+        lockScreenViewModel.onStop()
+
+        Mockito.verify(timer, atLeastOnce()).stop()
+    }
+
+    @Test
+    fun `call onUnlockExpired then VM should set locked state and retrieve owner state`() = runTest {
+        assertDefaultVMState()
+
+        whenever(ownerRepository.retrieveUser()).thenAnswer {
+            Resource.Success(
+                GetOwnerUserApiResponse(
+                    identityToken = IdentityToken("AA"),
+                    ownerState = mockReadyOwnerStateWithPolicySetup
+                )
+            )
+        }
+
+        lockScreenViewModel.onUnlockExpired()
+
+        testScheduler.advanceUntilIdle()
+
+        Mockito.verify(ownerRepository, atLeastOnce()).retrieveUser()
+
+        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Locked)
     }
     //endregion
 
