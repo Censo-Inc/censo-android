@@ -156,9 +156,16 @@ class LockScreenViewModelTest : BaseViewModelTest() {
 
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Locked)
     }
-    //endregion
 
-    //region Flow Tests
+    @Test
+    fun `call initUnlock then VM should set unlock in progress to state`() {
+        assertDefaultVMState()
+
+        lockScreenViewModel.initUnlock()
+
+        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.UnlockInProgress)
+    }
+
     //endregion
 
     //region Custom asserts
