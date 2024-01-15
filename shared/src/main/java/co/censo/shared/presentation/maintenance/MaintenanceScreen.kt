@@ -1,6 +1,6 @@
 package co.censo.shared.presentation.maintenance
 
-import MessageText
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -19,10 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -109,23 +115,52 @@ class MaintenanceViewModel @Inject constructor(
 
 @Composable
 fun MaintenanceModeUI() {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
     Column(
         Modifier
             .fillMaxSize()
             .background(color = SharedColors.MaintenanceBackground)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        MessageText(
-            message = stringResource(R.string.under_maintenance)
+        Spacer(
+            modifier = Modifier.weight(0.1f)
         )
+        Image(
+            modifier = Modifier.weight(0.4f),
+            painter = painterResource(id = R.drawable.dog_with_circle),
+            contentDescription = null,
+        )
+        Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+        Text(
+            text = stringResource(id = R.string.under_maintenance),
+            color = SharedColors.MainColorText,
+            fontSize = 24.sp,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.W500,
+            lineHeight =  34.sp
+        )
+        Spacer(modifier = Modifier.weight(0.2f))
     }
 }
 
 
 @Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
-fun MaintenanceModeUIPreview() {
+fun SmallMaintenanceModeUIPreview() {
+    MaintenanceModeUI()
+}
+
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun MediumMaintenanceModeUIPreview() {
+    MaintenanceModeUI()
+}
+
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
+@Composable
+fun LargeMaintenanceModeUIPreview() {
     MaintenanceModeUI()
 }
