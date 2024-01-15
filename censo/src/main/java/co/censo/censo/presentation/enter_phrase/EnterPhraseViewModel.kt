@@ -330,12 +330,10 @@ class EnterPhraseViewModel @Inject constructor(
                 state.encryptedSeedPhrase!!
             )
 
-            state = state.copy(
-                submitResource = response.map { },
-                enterWordUIState = EnterPhraseUIState.DONE
-            )
+            state = state.copy(submitResource = response.map { })
 
             if (response is Resource.Success) {
+                state = state.copy(enterWordUIState = EnterPhraseUIState.DONE)
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
         }
@@ -369,11 +367,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun resetSubmitResourceErrorState() {
-        state = state.copy(
-            submitResource = Resource.Uninitialized,
-            editedWordIndex = 0,
-            enterWordUIState = EnterPhraseUIState.VIEW
-        )
+        state = state.copy(submitResource = Resource.Uninitialized)
     }
 
     fun resetUserResourceAndRetryGetUserApiCall() {

@@ -162,7 +162,7 @@ fun EnterPhraseScreen(
                         DisplayError(
                             errorMessage = stringResource(R.string.failed_save_seed),
                             dismissAction = viewModel::resetSubmitResourceErrorState,
-                            retryAction = viewModel::resetSubmitResourceErrorState
+                            retryAction = viewModel::saveSeedPhrase
                         )
                     } else if (state.userResource is Resource.Error) {
                         DisplayError(
