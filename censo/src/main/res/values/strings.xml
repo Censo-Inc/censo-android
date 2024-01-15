@@ -303,9 +303,8 @@
     <string name="only_span">only</string>
     <string name="an_approval_from_one_of_your_approvers">an approval from one of your approvers, in addition to yours</string>
     <string name="require">require</string>
-    <string name="adding_approvers_makes_you_more_secure_span">Adding two trusted approvers increases your security by eliminating any single point of compromise while providing extra backup should you or your approvers lose your credentials.</string>
-    <string name="adding_approvers_ensures_span">Choose approvers who you think are reliable and you can trust.\n\nWhile they can never access your seed phrase (only you can), you will need at least one of the two you choose to help you access it.</string>
-    <string name="you_can_increase_your_security">Increase your security</string>
+    <string name="add_approvers_security_title">Add Approvers, increase your security</string>
+    <string name="adding_approvers_makes_you_more_secure_span">If you use approvers, you will need to add a total of two.\n\nOnce you add them, whenever you want to access your seed phrases, you will need to request the help of one of your two approvers.\n\nApprovers can be removed by you after you add them.</string>
     <string name="paste_seed_phrase">Paste seed phrase</string>
     <string name="input_seed_phrase">Input seed phrase</string>
     <string name="generate_seed_phrase">Generate phrase</string>
@@ -449,4 +448,6 @@
     <string name="cannot_add_approvers">Cannot setup approvers while an access is in progress</string>
     <string name="cannot_remove_approvers">Cannot remove approvers while an access is in progress</string>
     <string name="cancel_access_dialog_confirmation">If you cancel access you will need to wait for the timelock period to access your phrases again. Are you sure?</string>
+    <string name="trusted_approvers_learn_more_title"><![CDATA[Trusted Approvers & Safety in Number]]></string>
+    <string name="face_scan_learn_more_title"><![CDATA[Face Scan & Privacy]]></string>
 </resources>
