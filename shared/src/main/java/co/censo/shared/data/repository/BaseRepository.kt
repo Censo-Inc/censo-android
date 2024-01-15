@@ -17,10 +17,12 @@ abstract class BaseRepository {
                 val response: Response<T> = apiToBeCalled()
 
                 if (response.isSuccessful) {
-                    when (val responseBody = response.body()) {
-                        null -> Resource.Error(exception = Exception("Unexpected empty response"))
-                        else -> Resource.Success(data = responseBody)
-                    }
+                    // 'null' body is possible in following cases:
+                    // a) response.isSuccessful is false
+                    // b) request method does not support response body (e.g. DELETE).
+                    // c) retrofit was instructed to return Void type
+                    // Relevant are only b) and c). Both imply that response won't be read or used.
+                    Resource.Success(data = response.body() ?: Unit as T)
                 } else {
                     Resource.Error(
                         errorResponse = getErrorInfoFromResponse(response),
