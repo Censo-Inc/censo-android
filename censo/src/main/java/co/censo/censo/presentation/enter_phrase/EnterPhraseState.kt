@@ -45,6 +45,10 @@ data class EnterPhraseState(
     val ownerApproverParticipantId: ParticipantId? = null,
 
     val keyData: InitialKeyData? = null,
+
+    val userHasOwnPhrase: Boolean = false,
+    val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
+    val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 ) {
 
     companion object {
@@ -56,6 +60,7 @@ data class EnterPhraseState(
             || userResource is Resource.Loading
             || phraseEncryptionInProgress
             || loadKeyInProgress is Resource.Loading
+            || deleteUserResource is Resource.Loading
 
     val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH
     val labelValid = label.isNotEmpty() && !labelIsTooLong

@@ -282,6 +282,11 @@ sealed class OwnerState {
     }
     fun hasActiveSubscription(): Boolean = subscriptionStatus() == SubscriptionStatus.Active
 
+    fun onboarding(): Boolean = when (this) {
+        is Initial -> true
+        is Ready -> vault.seedPhrases.isEmpty()
+    }
+
 }
 
 fun ULong?.calculateLocksAt(): Instant? {

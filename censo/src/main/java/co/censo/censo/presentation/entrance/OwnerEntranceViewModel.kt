@@ -70,6 +70,40 @@ class OwnerEntranceViewModel @Inject constructor(
         state = state.copy(acceptedTermsOfUseVersion = version, showAcceptTermsOfUse = false)
     }
 
+    fun deleteUser() {
+        state = state.copy(
+            deleteUserResource = Resource.Loading,
+            triggerDeleteUserDialog = Resource.Uninitialized
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.deleteUser(null)
+
+            state = state.copy(
+                deleteUserResource = response
+            )
+
+            if (response is Resource.Success) {
+                state = state.copy(
+                    showAcceptTermsOfUse = false,
+                    userFinishedSetup = false,
+                )
+            }
+        }
+    }
+
+    fun showDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+    }
+
+    fun onCancelResetUser() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+    }
+
+    fun resetDeleteUserResource() {
+        state = state.copy(deleteUserResource = Resource.Uninitialized)
+    }
+
     private fun checkUserHasValidToken() {
         viewModelScope.launch {
             val jwtToken = ownerRepository.retrieveJWT()
@@ -201,7 +235,8 @@ class OwnerEntranceViewModel @Inject constructor(
             state = if (signInUserResponse is Resource.Success) {
                 userAuthenticated()
                 state.copy(
-                    signInUserResource = signInUserResponse
+                    signInUserResource = signInUserResponse,
+                    userIsOnboarding = retrieveUserOnboarding()
                 )
             } else {
                 state.copy(signInUserResource = signInUserResponse)
@@ -268,6 +303,15 @@ class OwnerEntranceViewModel @Inject constructor(
                 state.copy(userResponse = userResponse, signInUserResource = Resource.Uninitialized)
             }
         }
+    }
+
+    private suspend fun retrieveUserOnboarding(): Boolean {
+        val userResponse = ownerRepository.retrieveUser()
+        if (userResponse is Resource.Success) {
+            val ownerState = userResponse.data!!.ownerState
+            return ownerState.onboarding()
+        }
+        return false
     }
 
     private suspend fun approverKeyValidation(ownerState: OwnerState) {

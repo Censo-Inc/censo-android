@@ -31,6 +31,9 @@ data class PaywallState(
 
     // navigation
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
+
+    val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
+    val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 ) {
 
     val loading = billingClientReadyResource is Resource.Loading

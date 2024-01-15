@@ -11,9 +11,12 @@ data class OwnerEntranceState(
     val acceptedTermsOfUseVersion: String? = null,
     val showAcceptTermsOfUse: Boolean = false,
     val userFinishedSetup: Boolean = false,
+    val userIsOnboarding: Boolean = false,
 
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
+    val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
+    val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
 ) {
     val isLoading = signInUserResource is Resource.Loading
             || userResponse is Resource.Loading

@@ -230,7 +230,8 @@ class InitialPlanSetupViewModel @Inject constructor(
             createPolicyParamsResponse = Resource.Uninitialized,
             createPolicyResponse = Resource.Uninitialized,
             saveKeyToCloudResource = Resource.Uninitialized,
-            loadKeyFromCloudResource = Resource.Uninitialized
+            loadKeyFromCloudResource = Resource.Uninitialized,
+            deleteUserResource = Resource.Uninitialized
         )
     }
 
@@ -300,5 +301,34 @@ class InitialPlanSetupViewModel @Inject constructor(
             loadKeyFromCloudResource = Resource.Uninitialized,
         )
         createApproverKey()
+    }
+
+    fun showDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+    }
+
+    fun resetDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+    }
+
+    fun deleteUser() {
+        state = state.copy(
+            deleteUserResource = Resource.Loading,
+            triggerDeleteUserDialog = Resource.Uninitialized
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.deleteUser(null)
+
+            state = state.copy(
+                deleteUserResource = response
+            )
+
+            if (response is Resource.Success) {
+                state = state.copy(
+                    kickUserOut = Resource.Success(Unit),
+                )
+            }
+        }
     }
 }

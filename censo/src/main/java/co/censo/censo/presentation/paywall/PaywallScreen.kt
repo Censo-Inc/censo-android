@@ -10,15 +10,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.paywall.components.NoSubscriptionUI
 import co.censo.censo.presentation.paywall.components.PausedSubscriptionUI
 import co.censo.censo.presentation.paywall.components.PendingPaymentUI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.SubscriptionStatus
+import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.popUpToTop
@@ -96,7 +99,9 @@ fun PaywallScreen(
                                         productId
                                     )
                                 },
-                                onRestorePurchase = viewModel::restorePurchase
+                                onRestorePurchase = viewModel::restorePurchase,
+                                onboarding = viewModel.isOnboarding(),
+                                onCancel = viewModel::showDeleteUserDialog
                             )
                         }
                     }
@@ -126,6 +131,15 @@ fun PaywallScreen(
                     }
                 }
             }
+        }
+
+        if (state.triggerDeleteUserDialog is Resource.Success) {
+            ConfirmationDialog(
+                title = stringResource(id = R.string.exit_setup),
+                message = stringResource(R.string.exit_setup_details),
+                onCancel = viewModel::resetDeleteUserDialog,
+                onDelete = viewModel::deleteUser,
+            )
         }
     }
 }

@@ -13,6 +13,8 @@ import co.censo.shared.data.repository.OwnerRepository
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -152,5 +154,33 @@ class PaywallViewModel @Inject constructor(
             billingClient.terminateBillingConnection()
         }
         state = PaywallState()
+    }
+
+    fun isOnboarding(): Boolean = ownerRepository.getOwnerStateValue().success()?.data?.onboarding() ?: false
+
+    fun showDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+    }
+    fun resetDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+    }
+
+    fun deleteUser() {
+        state = state.copy(
+            deleteUserResource = Resource.Loading,
+            triggerDeleteUserDialog = Resource.Uninitialized
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.deleteUser(null)
+
+            state = state.copy(
+                deleteUserResource = response
+            )
+
+            if (response is Resource.Success) {
+                state = state.copy(kickUserOut = Resource.Success(Unit))
+            }
+        }
     }
 }
