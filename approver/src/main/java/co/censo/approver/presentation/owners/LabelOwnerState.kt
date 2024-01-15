@@ -6,7 +6,7 @@ import co.censo.shared.data.model.GetApproverUserApiResponse
 
 data class LabelOwnerState(
     val participantId: ParticipantId = ParticipantId.generate(),
-    val labelResource: Resource<String> = Resource.Loading(),
+    val labelResource: Resource<String> = Resource.Loading,
     val labelIsTooLong: Boolean = false,
     val saveEnabled: Boolean = false,
     val saveResource: Resource<GetApproverUserApiResponse> = Resource.Uninitialized

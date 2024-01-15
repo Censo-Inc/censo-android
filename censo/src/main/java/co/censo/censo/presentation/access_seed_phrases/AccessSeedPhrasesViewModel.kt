@@ -87,7 +87,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     }
 
     fun retrieveOwnerState() {
-        state = state.copy(ownerState = Resource.Loading())
+        state = state.copy(ownerState = Resource.Loading)
 
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
@@ -100,7 +100,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         biometry: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        state = state.copy(retrieveShardsResponse = Resource.Loading())
+        state = state.copy(retrieveShardsResponse = Resource.Loading)
 
         return viewModelScope.async {
             val response = ownerRepository.retrieveAccessShards(verificationId, biometry)
@@ -111,7 +111,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 viewModelScope.launch(Dispatchers.IO) {
-                    recoverSeedPhrases(response.data!!)
+                    recoverSeedPhrases(response.data)
                 }
                 ownerStateFlow.tryEmit(response.map { it.ownerState })
             }
@@ -130,7 +130,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
                 when {
                     access is Access.ThisDevice && access.status == AccessStatus.Available -> {
-                        state = state.copy(recoveredPhrases = Resource.Loading())
+                        state = state.copy(recoveredPhrases = Resource.Loading)
 
                         runCatching {
                             val requestedSeedPhrase = state.selectedPhrase
@@ -219,7 +219,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
     fun cancelAccess() {
         state = state.copy(
             showCancelConfirmationDialog = false,
-            cancelAccessResource = Resource.Loading()
+            cancelAccessResource = Resource.Loading
         )
 
         viewModelScope.launch {
@@ -244,10 +244,10 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun showCancelConfirmationDialog() {
         val approverSize =
-            (state.ownerState.data as? OwnerState.Ready)?.policy?.approvers?.size ?: MULTI_APPROVER_POLICY
+            (state.ownerState.success()?.data as? OwnerState.Ready)?.policy?.approvers?.size ?: MULTI_APPROVER_POLICY
 
         val timelockInEffect =
-            (state.ownerState.data as? OwnerState.Ready)?.timelockSetting?.currentTimelockInSeconds != null
+            (state.ownerState.success()?.data as? OwnerState.Ready)?.timelockSetting?.currentTimelockInSeconds != null
 
         if (approverSize > 1 || timelockInEffect) {
             state = state.copy(showCancelConfirmationDialog = true)

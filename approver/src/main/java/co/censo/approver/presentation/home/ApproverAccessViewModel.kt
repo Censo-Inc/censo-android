@@ -64,7 +64,7 @@ class ApproverAccessViewModel @Inject constructor(
 
     fun retrieveApproverState(silently: Boolean) {
         if (!silently) {
-            state = state.copy(userResponse = Resource.Loading())
+            state = state.copy(userResponse = Resource.Loading)
         }
 
         viewModelScope.launch {
@@ -73,7 +73,7 @@ class ApproverAccessViewModel @Inject constructor(
             state = state.copy(userResponse = userResponse)
 
             if (userResponse is Resource.Success) {
-                val approverStates = userResponse.data!!.approverStates
+                val approverStates = userResponse.data.approverStates
                 checkApproverHasParticipantData(approverStates)
             }
         }
@@ -154,7 +154,7 @@ class ApproverAccessViewModel @Inject constructor(
                 triggerAction = true, action = CloudStorageActions.DOWNLOAD
             ),
             accessConfirmationPhase = accessPhase,
-            loadKeyFromCloudResource = Resource.Loading()
+            loadKeyFromCloudResource = Resource.Loading
         )
     }
 
@@ -175,7 +175,7 @@ class ApproverAccessViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             if (totpIsCorrect) {
-                state = state.copy(approveAccessResource = Resource.Loading())
+                state = state.copy(approveAccessResource = Resource.Loading)
 
                 val approverKey = state.approverEncryptionKey
                 val entropy = accessConfirmation.approverEntropy
@@ -216,26 +216,26 @@ class ApproverAccessViewModel @Inject constructor(
                 if (response is Resource.Success) {
                     approverRepository.clearApprovalId()
                     approverRepository.clearParticipantId()
-                    determineApproverAccessUIState(response.data?.approverStates?.forParticipant(state.participantId)!!)
+                    determineApproverAccessUIState(response.data.approverStates.forParticipant(state.participantId)!!)
                 }
 
                 stopAccessTotpGeneration()
                 userStatePollingTimer.stop()
             } else {
-                state = state.copy(rejectAccessResource = Resource.Loading())
+                state = state.copy(rejectAccessResource = Resource.Loading)
                 val response = approverRepository.rejectAccess(state.approvalId)
                 state = state.copy(rejectAccessResource = response, ownerEnteredWrongCode = true)
                 if (response is Resource.Success) {
                     approverRepository.clearApprovalId()
                     approverRepository.clearParticipantId()
-                    determineApproverAccessUIState(response.data?.approverStates?.forParticipant(state.participantId)!!)
+                    determineApproverAccessUIState(response.data.approverStates.forParticipant(state.participantId)!!)
                 }
             }
         }
     }
 
     fun storeAccessTotpSecret() {
-        state = state.copy(storeAccessTotpSecretResource = Resource.Loading())
+        state = state.copy(storeAccessTotpSecretResource = Resource.Loading)
 
         viewModelScope.launch {
             val secret = totpGenerator.generateSecret()
@@ -250,7 +250,7 @@ class ApproverAccessViewModel @Inject constructor(
 
             if (submitAccessTotpSecretResource is Resource.Success) {
                 determineApproverAccessUIState(
-                    submitAccessTotpSecretResource.data?.approverStates?.forParticipant(
+                    submitAccessTotpSecretResource.data.approverStates.forParticipant(
                         state.participantId
                     )!!
                 )

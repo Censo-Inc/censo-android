@@ -32,7 +32,7 @@ class BillingClientWrapperImpl @Inject constructor(val context: Context) : Billi
                 } else if (flags.all { it is Resource.Uninitialized }) {
                     Resource.Uninitialized
                 } else {
-                    Resource.Loading()
+                    Resource.Loading
                 }
         }
 
@@ -47,7 +47,7 @@ class BillingClientWrapperImpl @Inject constructor(val context: Context) : Billi
         .build()
 
     override fun startBillingConnection() {
-        _connectionReady.value = Resource.Loading()
+        _connectionReady.value = Resource.Loading
 
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
@@ -72,7 +72,7 @@ class BillingClientWrapperImpl @Inject constructor(val context: Context) : Billi
     }
 
     private fun queryPurchases() {
-        _purchasesReady.value = Resource.Loading()
+        _purchasesReady.value = Resource.Loading
 
         billingClient.queryPurchasesAsync(
             QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
@@ -90,7 +90,7 @@ class BillingClientWrapperImpl @Inject constructor(val context: Context) : Billi
     }
 
     private fun queryProductDetails() {
-        _productsReady.value = Resource.Loading()
+        _productsReady.value = Resource.Loading
 
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(

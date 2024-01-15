@@ -34,7 +34,7 @@ fun OwnerKeyRecoveryScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let {
+            state.navigationResource.data.let {
                 navController.navigate(it)
                 viewModel.resetNavigationResource()
             }

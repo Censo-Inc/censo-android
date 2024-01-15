@@ -38,7 +38,7 @@ class LockScreenViewModel @Inject constructor(
     fun onCreate() {
         viewModelScope.launch {
             ownerStateFlow.collect { resource: Resource<OwnerState> ->
-                onOwnerState(resource.data)
+                resource.onSuccess { onOwnerState(it) }
             }
         }
     }
@@ -86,12 +86,8 @@ class LockScreenViewModel @Inject constructor(
         retrieveOwnerState()
     }
 
-    private fun onOwnerState(ownerState: OwnerState?) {
-        state = if (ownerState == null) {
-            state.copy(lockStatus = LockScreenState.LockStatus.None)
-        } else {
-            state.copy(lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState))
-        }
+    private fun onOwnerState(ownerState: OwnerState) {
+        state = state.copy(lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState))
     }
 
     fun initUnlock() {
@@ -108,7 +104,7 @@ class LockScreenViewModel @Inject constructor(
     ): Resource<BiometryScanResultBlob> {
         state = state.copy(
             lockStatus = LockScreenState.LockStatus.UnlockInProgress(
-                apiCall = Resource.Loading()
+                apiCall = Resource.Loading
             )
         )
 
@@ -124,7 +120,7 @@ class LockScreenViewModel @Inject constructor(
 
             if (unlockVaultResponse is Resource.Success) {
                 ownerStateFlow.value = unlockVaultResponse.map { it.ownerState }
-                ownerStateFlow.value.data?.let { onOwnerState(it) }
+                ownerStateFlow.value.onSuccess { onOwnerState(it) }
             }
 
             unlockVaultResponse.map { it.scanResultBlob }
@@ -132,7 +128,7 @@ class LockScreenViewModel @Inject constructor(
     }
 
     private fun prolongUnlock() {
-        state = state.copy(prolongUnlockResource = Resource.Loading())
+        state = state.copy(prolongUnlockResource = Resource.Loading)
 
         viewModelScope.launch {
             val response: Resource<ProlongUnlockApiResponse> = ownerRepository.prolongUnlock()

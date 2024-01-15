@@ -91,7 +91,7 @@ fun LoginIdResetScreen(
         }
 
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { destination ->
+            state.navigationResource.data.let { destination ->
                 navController.navigate(destination) {
                     popUpTo(destination) {
                         inclusive = true

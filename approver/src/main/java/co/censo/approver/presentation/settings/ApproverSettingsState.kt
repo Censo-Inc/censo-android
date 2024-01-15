@@ -5,7 +5,7 @@ import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.util.NavigationData
 
 data class ApproverSettingsState(
-    val userResponse: Resource<GetApproverUserApiResponse> = Resource.Loading(),
+    val userResponse: Resource<GetApproverUserApiResponse> = Resource.Loading,
     val showDeleteUserConfirmDialog: Boolean = false,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val navigationResource: Resource<NavigationData> = Resource.Uninitialized,

@@ -112,9 +112,7 @@ class ApproverEntranceViewModel @Inject constructor(
                 val retrieveUser = approverRepository.retrieveUser()
 
                 if (retrieveUser is Resource.Success) {
-                    retrieveUser.data
-                        ?.let { it.approverStates.any { approverState -> approverState.phase.isActiveApprover() } }
-                        ?: false
+                    retrieveUser.data.approverStates.any { approverState -> approverState.phase.isActiveApprover() }
                 } else {
                     false
                 }
@@ -244,7 +242,7 @@ class ApproverEntranceViewModel @Inject constructor(
                 keyRepository.setSavedDeviceId(idToken)
             }
 
-            state = state.copy(signInUserResource = Resource.Loading())
+            state = state.copy(signInUserResource = Resource.Loading)
 
             val signInUserResponse = ownerRepository.signInUser(
                 idToken = idToken
@@ -271,9 +269,7 @@ class ApproverEntranceViewModel @Inject constructor(
                     val retrieveUser = approverRepository.retrieveUser()
 
                     if (retrieveUser is Resource.Success) {
-                        val isActiveApprover = retrieveUser.data
-                            ?.let { it.approverStates.any { approverState -> approverState.phase.isActiveApprover() } }
-                            ?: false
+                        val isActiveApprover = retrieveUser.data.approverStates.any { approverState -> approverState.phase.isActiveApprover() }
 
                         state = state.copy(
                             uiState = ApproverEntranceUIState.LoggedInPasteLink(isActiveApprover)

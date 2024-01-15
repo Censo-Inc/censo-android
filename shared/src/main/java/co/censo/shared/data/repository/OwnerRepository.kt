@@ -82,7 +82,6 @@ import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.Clock
-import okhttp3.ResponseBody
 import java.math.BigInteger
 import java.security.KeyPair
 import java.security.PrivateKey
@@ -108,8 +107,8 @@ data class EncryptedSeedPhrase(
 interface OwnerRepository {
 
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
-    suspend fun signInUser(idToken: String): Resource<ResponseBody>
-    suspend fun createDevice(): Resource<ResponseBody>
+    suspend fun signInUser(idToken: String): Resource<Unit>
+    suspend fun createDevice(): Resource<Unit>
     suspend fun resetLoginId(
         idToken: String,
         resetTokens: List<ResetToken>,
@@ -276,7 +275,7 @@ class OwnerRepositoryImpl(
             )
         }
 
-    override suspend fun createDevice(): Resource<ResponseBody> {
+    override suspend fun createDevice(): Resource<Unit> {
         return retrieveApiResource {
             apiService.createDevice()
         }
@@ -826,7 +825,7 @@ class OwnerRepositoryImpl(
                     if (ownerApproverKeyResource is Resource.Error) {
                         throw ownerApproverKeyResource.exception!!
                     } else {
-                        val encryptedKey = ownerApproverKeyResource.data!!
+                        val encryptedKey = ownerApproverKeyResource.asSuccess().data
                         val base58EncodedPrivateKey =
                             encryptedKey.decryptWithEntropy(
                                 deviceKeyId = keyRepository.retrieveSavedDeviceId(),

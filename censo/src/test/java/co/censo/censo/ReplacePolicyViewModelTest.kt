@@ -242,7 +242,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
 
         //Assert expected state
         assertTrue(replacePolicyViewModel.state.userResponse is Resource.Success)
-        assertEquals(readyOwnerStateData, replacePolicyViewModel.state.userResponse.data)
+        assertEquals(readyOwnerStateData, replacePolicyViewModel.state.userResponse.success()?.data)
     }
 
     @Test
@@ -257,7 +257,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
 
         //Assert navigation is set to state
         assertTrue(replacePolicyViewModel.state.navigationResource is Resource.Success)
-        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.data)
+        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.success()?.data)
 
         //Reset navigation state and assert
         replacePolicyViewModel.resetNavigationResource()
@@ -284,7 +284,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
 
         //Assert navigation is set to state
         assertTrue(replacePolicyViewModel.state.navigationResource is Resource.Success)
-        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.data)
+        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.success()?.data)
 
         //Reset navigation state and assert
         replacePolicyViewModel.resetNavigationResource()
@@ -413,10 +413,10 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         //And initiateAccess state is set
         assertTrue(replacePolicyViewModel.state.completeApprovershipResponse is Resource.Success)
         //Assert data
-        assertEquals(completeOwnerApprovershipMockResponse, replacePolicyViewModel.state.completeApprovershipResponse.data)
+        assertEquals(completeOwnerApprovershipMockResponse, replacePolicyViewModel.state.completeApprovershipResponse.success()?.data)
         assertTrue(replacePolicyViewModel.state.initiateAccessResponse is Resource.Success)
         //assert data
-        assertEquals(initiateAccessMockResponse, replacePolicyViewModel.state.initiateAccessResponse.data)
+        assertEquals(initiateAccessMockResponse, replacePolicyViewModel.state.initiateAccessResponse.success()?.data)
         assertTrue(replacePolicyViewModel.state.replacePolicyUIState == ReplacePolicyUIState.AccessInProgress_2)
 
         //region Set mocks for retrieveAccessShards, replacePolicy, and verifyKeyConfirmationSignature repo methods
@@ -456,12 +456,12 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
 
         Mockito.verify(ownerRepository, atLeastOnce()).cancelAccess()
         assertTrue(replacePolicyViewModel.state.retrieveAccessShardsResponse is Resource.Success)
-        assertEquals(retrieveShardsMockResponse, replacePolicyViewModel.state.retrieveAccessShardsResponse.data)
+        assertEquals(retrieveShardsMockResponse, replacePolicyViewModel.state.retrieveAccessShardsResponse.success()?.data)
 
         //Assert for replace policy response being success
         // Assert for replace policy ui state being Completed
         assertTrue(replacePolicyViewModel.state.replacePolicyResponse is Resource.Success)
-        assertEquals(readyOwnerStateData, replacePolicyViewModel.state.replacePolicyResponse.data?.ownerState)
+        assertEquals(readyOwnerStateData, replacePolicyViewModel.state.replacePolicyResponse.success()?.data?.ownerState)
 
         assertTrue(replacePolicyViewModel.state.replacePolicyUIState == ReplacePolicyUIState.Completed_3)
 
@@ -471,7 +471,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
 
         //Assert that navigation state is set
         assertTrue(replacePolicyViewModel.state.navigationResource is Resource.Success)
-        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.data)
+        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.success()?.data)
     }
 
     //region Helper methods

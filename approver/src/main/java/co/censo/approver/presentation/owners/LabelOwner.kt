@@ -161,7 +161,7 @@ fun LabelOwner(
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
-                            value = state.labelResource.data ?: "",
+                            value = state.labelResource.success()?.data ?: "",
                             onValueChange = viewModel::onLabelChanged,
                             shape = CircleShape,
                             placeholder = {

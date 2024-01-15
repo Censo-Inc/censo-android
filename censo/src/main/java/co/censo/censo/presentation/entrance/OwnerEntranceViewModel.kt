@@ -193,7 +193,7 @@ class OwnerEntranceViewModel @Inject constructor(
                 keyRepository.setSavedDeviceId(idToken)
             }
 
-            state = state.copy(signInUserResource = Resource.Loading())
+            state = state.copy(signInUserResource = Resource.Loading)
 
             val signInUserResponse = ownerRepository.signInUser(
                 idToken = idToken
@@ -247,7 +247,7 @@ class OwnerEntranceViewModel @Inject constructor(
     }
 
     fun retrieveOwnerStateAndNavigate() {
-        state = state.copy(userResponse = Resource.Loading())
+        state = state.copy(userResponse = Resource.Loading)
 
         viewModelScope.launch {
             val userResponse = ownerRepository.retrieveUser()
@@ -256,7 +256,7 @@ class OwnerEntranceViewModel @Inject constructor(
                 // update global state
                 ownerStateFlow.value = userResponse.map { it.ownerState }
 
-                val ownerState = userResponse.data!!.ownerState
+                val ownerState = userResponse.data.ownerState
                 loggedInRouting(ownerState)
                 approverKeyValidation(ownerState)
 

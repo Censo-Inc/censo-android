@@ -3,11 +3,10 @@ package co.censo.censo.presentation.entrance
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.util.NavigationData
-import okhttp3.ResponseBody
 
 data class OwnerEntranceState(
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
-    val signInUserResource: Resource<ResponseBody> = Resource.Loading(),
+    val signInUserResource: Resource<Unit> = Resource.Loading,
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
     val acceptedTermsOfUseVersion: String? = null,
     val showAcceptTermsOfUse: Boolean = false,

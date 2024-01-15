@@ -69,7 +69,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
     }
 
     private fun retrieveOwnerState() {
-        ownerStateFlow.value.data?.let { updateOwnerState(it) }
+        ownerStateFlow.value.onSuccess { updateOwnerState(it) }
     }
 
     private fun updateOwnerState(ownerState: OwnerState) {
@@ -91,14 +91,14 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         biometry: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        state = state.copy(retrieveAccessShardsResponse = Resource.Loading())
+        state = state.copy(retrieveAccessShardsResponse = Resource.Loading)
 
         return viewModelScope.async {
             val retrieveShardsResponse = ownerRepository.retrieveAccessShards(verificationId, biometry)
             state = state.copy(retrieveAccessShardsResponse = retrieveShardsResponse)
 
             if (retrieveShardsResponse is Resource.Success) {
-                validateApproverKeysSignatureAndUploadNewKey(retrieveShardsResponse.data!!)
+                validateApproverKeysSignatureAndUploadNewKey(retrieveShardsResponse.data)
             }
 
             retrieveShardsResponse.map { it.scanResultBlob }
@@ -106,7 +106,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
     }
 
     private fun validateApproverKeysSignatureAndUploadNewKey(shardsResponse: RetrieveAccessShardsApiResponse) {
-        state = state.copy(verifyApproverKeysSignature = Resource.Loading())
+        state = state.copy(verifyApproverKeysSignature = Resource.Loading)
 
         viewModelScope.launch(Dispatchers.IO) {
             val approverKeysSignatureByIntermediateKey = (shardsResponse.ownerState as? OwnerState.Ready)?.policy?.approverKeysSignatureByIntermediateKey
@@ -132,13 +132,13 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
 
         replaceShards(
             // remove owner shard since owner can't access current key
-            state.retrieveAccessShardsResponse.data!!.encryptedShards.filter { !it.isOwnerShard }
+            state.retrieveAccessShardsResponse.asSuccess().data.encryptedShards.filter { !it.isOwnerShard }
         )
     }
 
     private fun replaceShards(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
         try {
-            state = state.copy(replaceShardsResponse = Resource.Loading())
+            state = state.copy(replaceShardsResponse = Resource.Loading)
 
             viewModelScope.launch(Dispatchers.IO) {
                 ownerRepository.cancelAccess()
@@ -183,7 +183,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
 
     private fun saveKeyWithEntropy(ownerEntropy: Base64EncodedData) {
         try {
-            state = state.copy(saveKeyToCloud = Resource.Loading())
+            state = state.copy(saveKeyToCloud = Resource.Loading)
             val approverEncryptionKey = keyRepository.createApproverKey()
 
             val idToken = keyRepository.retrieveSavedDeviceId()

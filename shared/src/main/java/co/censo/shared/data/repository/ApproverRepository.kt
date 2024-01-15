@@ -26,7 +26,6 @@ import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import kotlinx.datetime.Clock
-import okhttp3.ResponseBody
 import java.util.Base64
 
 interface ApproverRepository {
@@ -37,7 +36,7 @@ interface ApproverRepository {
 
     suspend fun declineApprovership(
         invitationId: InvitationId,
-    ): Resource<ResponseBody>
+    ): Resource<Unit>
 
     fun saveInvitationId(invitationId: String)
     fun retrieveInvitationId(): String
@@ -127,7 +126,7 @@ class ApproverRepositoryImpl(
     //TODO: DEead
     override suspend fun declineApprovership(
         invitationId: InvitationId,
-    ): Resource<ResponseBody> {
+    ): Resource<Unit> {
         return retrieveApiResource {
             apiService.declineApprovership(
                 invitationId = invitationId.value,

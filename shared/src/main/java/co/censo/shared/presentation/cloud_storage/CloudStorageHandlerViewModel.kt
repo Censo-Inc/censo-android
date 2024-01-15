@@ -92,7 +92,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
         }
 
         viewModelScope.launch(ioDispatcher) {
-            state = try {
+            try {
                 val uploadResource = keyRepository.saveKeyInCloud(
                     key = privateKey,
                     participantId = participantId,
@@ -100,14 +100,14 @@ class CloudStorageHandlerViewModel @Inject constructor(
                 )
 
                 if (uploadResource is Resource.Success) {
-                    state.copy(cloudStorageActionResource = Resource.Success(privateKey))
-                } else {
+                    state = state.copy(cloudStorageActionResource = Resource.Success(privateKey))
+                } else if (uploadResource is Resource.Error)  {
                     uploadResource.exception?.sendError(CrashReportingUtil.CloudUpload)
-                    state.copy(cloudStorageActionResource = Resource.Error(exception = uploadResource.exception))
+                    state = state.copy(cloudStorageActionResource = Resource.Error(exception = uploadResource.exception))
                 }
             } catch (e: CloudStoragePermissionNotGrantedException) {
                 e.sendError(CrashReportingUtil.CloudUpload)
-                state.copy(shouldEnforceCloudStorageAccess = true)
+                state = state.copy(shouldEnforceCloudStorageAccess = true)
             }
         }
     }
@@ -128,7 +128,7 @@ class CloudStorageHandlerViewModel @Inject constructor(
         }
 
         viewModelScope.launch(ioDispatcher) {
-            state = try {
+            try {
                 val downloadResource = keyRepository.retrieveKeyFromCloud(
                     participantId = participantId,
                     bypassScopeCheck = bypassScopeCheckForCloudStorage
@@ -147,14 +147,14 @@ class CloudStorageHandlerViewModel @Inject constructor(
                         return@launch
                     }
 
-                    state.copy(cloudStorageActionResource = Resource.Success(key))
-                } else {
+                    state = state.copy(cloudStorageActionResource = Resource.Success(key))
+                } else if (downloadResource is Resource.Error) {
                     downloadResource.exception?.sendError(CrashReportingUtil.CloudDownload)
-                    state.copy(cloudStorageActionResource = Resource.Error(exception = downloadResource.exception))
+                    state = state.copy(cloudStorageActionResource = Resource.Error(exception = downloadResource.exception))
                 }
             } catch (e: CloudStoragePermissionNotGrantedException) {
                 e.sendError(CrashReportingUtil.CloudDownload)
-                state.copy(shouldEnforceCloudStorageAccess = true)
+                state = state.copy(shouldEnforceCloudStorageAccess = true)
             }
         }
     }

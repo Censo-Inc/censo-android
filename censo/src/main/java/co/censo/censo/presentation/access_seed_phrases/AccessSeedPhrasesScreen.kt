@@ -61,7 +61,7 @@ fun AccessSeedPhrasesScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { navigationData ->
+            state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route) {
                     launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
                     if (navigationData.popSelfFromBackStack) {
@@ -164,7 +164,7 @@ fun AccessSeedPhrasesScreen(
                     when (state.accessPhrasesUIState) {
                         AccessPhrasesUIState.SelectPhrase -> {
                             SelectPhraseUI(
-                                seedPhrases = (state.ownerState.data as? OwnerState.Ready)?.vault?.seedPhrases ?: listOf(),
+                                seedPhrases = (state.ownerState.success()?.data as? OwnerState.Ready)?.vault?.seedPhrases ?: listOf(),
                                 viewedIds = state.viewedPhraseIds,
                                 onPhraseSelected = viewModel::onPhraseSelected,
                                 onFinish = viewModel::showCancelConfirmationDialog
@@ -187,7 +187,7 @@ fun AccessSeedPhrasesScreen(
                         }
 
                         AccessPhrasesUIState.ViewPhrase -> {
-                            state.recoveredPhrases.data?.first()?.let {
+                            state.recoveredPhrases.success()?.data?.first()?.let {
                                 ViewAccessPhraseUI(
                                     phraseWords = it.phraseWords,
                                     onDone = viewModel::reset,

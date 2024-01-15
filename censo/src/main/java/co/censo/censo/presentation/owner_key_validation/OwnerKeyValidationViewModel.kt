@@ -37,7 +37,7 @@ class OwnerKeyValidationViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val hasKeySavedInCloud = runCatching {
                 val downloadResult = keyRepository.retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
-                downloadResult is Resource.Success && downloadResult.data?.isNotEmpty() == true
+                downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
             }.getOrElse { true } // Defaults to true in case of any trouble
 
             state = if (hasKeySavedInCloud) {

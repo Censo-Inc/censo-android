@@ -153,7 +153,7 @@ class PolicySetupViewModel @Inject constructor(
         viewModelScope.launch {
             val ownerState = ownerStateFlow.value
             if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data!!, overwriteUIState = true)
+                updateOwnerState(ownerState.data, overwriteUIState = true)
             }
 
             pollingVerificationTimer.startWithDelay(
@@ -260,7 +260,7 @@ class PolicySetupViewModel @Inject constructor(
     }
 
     private fun updateApproverNicknameAndSubmitPolicy() {
-        state = state.copy(createPolicySetupResponse = Resource.Loading())
+        state = state.copy(createPolicySetupResponse = Resource.Loading)
 
         val ownerApprover = state.ownerApprover?.asOwnerAsApprover()
         val primaryApprover = state.primaryApprover?.asExternalApprover()
@@ -328,12 +328,12 @@ class PolicySetupViewModel @Inject constructor(
 
     private fun retrieveOwnerState(silent: Boolean = false, overwriteUIState: Boolean = false) {
         if (!silent) {
-            state = state.copy(userResponse = Resource.Loading())
+            state = state.copy(userResponse = Resource.Loading)
         }
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            ownerStateResource.data?.let {
+            ownerStateResource.onSuccess {
                 updateOwnerState(it, overwriteUIState)
             }
 
@@ -439,7 +439,7 @@ class PolicySetupViewModel @Inject constructor(
 
     //This needs to happen before we save any key information
     private fun submitPolicySetup(threshold: UInt, policySetupApprovers: List<Approver.SetupApprover>, nextAction: () -> Unit) {
-        state = state.copy(createPolicySetupResponse = Resource.Loading())
+        state = state.copy(createPolicySetupResponse = Resource.Loading)
 
         viewModelScope.launch {
             val response = ownerRepository.createPolicySetup(
@@ -448,7 +448,7 @@ class PolicySetupViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                updateOwnerState(response.data!!.ownerState)
+                updateOwnerState(response.data.ownerState)
 
                 nextAction()
             }
@@ -520,14 +520,14 @@ class PolicySetupViewModel @Inject constructor(
                     keyConfirmationTimeMillis = keyConfirmationTimeMillis
                 )
 
-                if (confirmApprovershipResponse is Resource.Success) {
-                    updateOwnerState(confirmApprovershipResponse.data!!.ownerState)
+                confirmApprovershipResponse.onSuccess {
+                    updateOwnerState(it.ownerState)
                 }
             } else {
                 val rejectVerificationResponse = ownerRepository.rejectVerification(participantId)
 
-                if (rejectVerificationResponse is Resource.Success) {
-                    updateOwnerState(rejectVerificationResponse.data!!.ownerState)
+                rejectVerificationResponse.onSuccess {
+                    updateOwnerState(it.ownerState)
                 }
             }
         }

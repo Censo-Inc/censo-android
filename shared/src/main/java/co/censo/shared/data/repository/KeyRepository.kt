@@ -31,7 +31,7 @@ interface KeyRepository {
     suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false
-    ): Resource<ByteArray?>
+    ): Resource<ByteArray>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
     suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
     suspend fun deleteDeviceKeyIfPresent(keyId: String)
@@ -104,7 +104,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean
-    ): Resource<ByteArray?> {
+    ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
                 throw CloudStoragePermissionNotGrantedException()
@@ -117,7 +117,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             if (resource is Resource.Success) {
                 return Resource.Success(Hex.decode(resource.data))
             } else {
-                return Resource.Error(exception = resource.exception)
+                return Resource.Error(exception = resource.error()?.exception)
             }
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.CloudDownload)
@@ -132,7 +132,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
         val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
         return if (downloadResource is Resource.Success) {
-            downloadResource.data?.isNotEmpty() ?: false
+            downloadResource.data.isNotEmpty()
         } else {
             false
         }

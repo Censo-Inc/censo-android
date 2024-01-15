@@ -79,7 +79,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            state = state.copy(saveKeyToCloudResource = Resource.Loading())
+            state = state.copy(saveKeyToCloudResource = Resource.Loading)
             try {
                 val approverEncryptionKey = keyRepository.createApproverKey()
 
@@ -174,7 +174,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                 return@launch
             }
 
-            state = state.copy(createPolicyParamsResponse = Resource.Loading())
+            state = state.copy(createPolicyParamsResponse = Resource.Loading)
 
             val entropy = retrieveEntropy()
             if (entropy == null) {
@@ -217,7 +217,7 @@ class InitialPlanSetupViewModel @Inject constructor(
     }
 
     private fun retrieveEntropy(): Base64EncodedData? =
-        (ownerStateFlow.value.data as? OwnerState.Initial)?.entropy
+        (ownerStateFlow.value.asSuccess().data as? OwnerState.Initial)?.entropy
 
     private fun startFacetec() {
         state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)

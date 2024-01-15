@@ -163,11 +163,11 @@ class PhraseImportViewModel @Inject constructor(
             val response = ownerRepository.checkForCompletedImport(channel)
 
             if (response is Resource.Success) {
-                response.data?.let {
+                response.data.let {
                     when (val importState = it.importState) {
                         is ImportState.Completed -> {
                             val masterPublicKey =
-                                (state.userResponse.data as? OwnerState.Ready)?.vault?.publicMasterEncryptionKey
+                                (state.userResponse.success()?.data as? OwnerState.Ready)?.vault?.publicMasterEncryptionKey
 
                             if (masterPublicKey == null) {
                                 state = state.copy(userResponse = Resource.Error())

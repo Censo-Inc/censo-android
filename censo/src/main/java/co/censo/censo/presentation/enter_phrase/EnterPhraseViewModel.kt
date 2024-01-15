@@ -99,14 +99,14 @@ class EnterPhraseViewModel @Inject constructor(
 
     //Only retrieving owner state to determine if this is the first seed phrase they are saving
     fun retrieveOwnerState() {
-        state = state.copy(userResource = Resource.Loading())
+        state = state.copy(userResource = Resource.Loading)
         viewModelScope.launch {
             val response = ownerRepository.retrieveUser()
 
             state = state.copy(userResource = response)
 
             if (response is Resource.Success) {
-                val ownerState = response.data!!.ownerState
+                val ownerState = response.data.ownerState
                 ownerStateFlow.emit(Resource.Success(ownerState))
                 if (ownerState is OwnerState.Ready) {
                     state = state.copy(
@@ -270,13 +270,13 @@ class EnterPhraseViewModel @Inject constructor(
             cloudStorageAction = CloudStorageActionData(
                 triggerAction = true, action = CloudStorageActions.DOWNLOAD,
             ),
-            loadKeyInProgress = Resource.Loading()
+            loadKeyInProgress = Resource.Loading
         )
     }
 
     private fun verifyMasterKeySignature(): Boolean {
         try {
-            val ownerPolicy = (ownerStateFlow.value.data as OwnerState.Ready).policy
+            val ownerPolicy = (ownerStateFlow.value.asSuccess().data as OwnerState.Ready).policy
 
             val masterPublicKey = state.masterPublicKey
             val masterKeySignature = state.masterKeySignature
@@ -312,7 +312,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     private fun storeSeedPhrase(shouldVerifyMasterKeySignature: Boolean) {
-        state = state.copy(submitResource = Resource.Loading())
+        state = state.copy(submitResource = Resource.Loading)
 
         viewModelScope.launch {
 
@@ -512,7 +512,7 @@ class EnterPhraseViewModel @Inject constructor(
         resetCloudStorageActionState()
 
         try {
-            val entropy = (ownerStateFlow.value.data as OwnerState.Ready).policy.ownerEntropy
+            val entropy = (ownerStateFlow.value.asSuccess().data as OwnerState.Ready).policy.ownerEntropy
 
             if (entropy == null) {
                 val exception = Exception("Missing data to access key")

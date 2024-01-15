@@ -65,7 +65,7 @@ class VaultScreenViewModel @Inject constructor(
 
     fun retrieveOwnerState(silently: Boolean = false) {
         if (!silently) {
-            state = state.copy(userResponse = Resource.Loading())
+            state = state.copy(userResponse = Resource.Loading)
         }
 
         viewModelScope.launch {
@@ -77,35 +77,35 @@ class VaultScreenViewModel @Inject constructor(
             }
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
+                onOwnerState(response.data.ownerState)
             }
         }
     }
 
     fun deleteSeedPhrase() {
-        if (state.triggerEditPhraseDialog !is Resource.Success && state.triggerEditPhraseDialog.data == null) {
+        if (state.triggerEditPhraseDialog !is Resource.Success) {
             state = state.copy(
                 deleteSeedPhraseResource = Resource.Error()
             )
             return
         }
 
-        val seedPhrase = state.triggerEditPhraseDialog.data
+        val seedPhrase = state.triggerEditPhraseDialog.asSuccess().data
 
         state = state.copy(
             triggerEditPhraseDialog = Resource.Uninitialized,
-            deleteSeedPhraseResource = Resource.Loading()
+            deleteSeedPhraseResource = Resource.Loading
         )
 
         viewModelScope.launch {
-            val response = ownerRepository.deleteSeedPhrase(seedPhrase!!.guid)
+            val response = ownerRepository.deleteSeedPhrase(seedPhrase.guid)
 
             state = state.copy(
                 deleteSeedPhraseResource = response
             )
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
+                onOwnerState(response.data.ownerState)
             }
         }
     }
@@ -124,7 +124,7 @@ class VaultScreenViewModel @Inject constructor(
 
     fun deleteUser() {
         state = state.copy(
-            deleteUserResource = Resource.Loading()
+            deleteUserResource = Resource.Loading
         )
 
         val participantId =
@@ -179,7 +179,7 @@ class VaultScreenViewModel @Inject constructor(
 
     fun enableTimelock() {
         state = state.copy(
-            enableTimelockResource = Resource.Loading()
+            enableTimelockResource = Resource.Loading
         )
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -190,14 +190,14 @@ class VaultScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
+                onOwnerState(response.data.ownerState)
             }
         }
     }
 
     fun disableTimelock() {
         state = state.copy(
-            disableTimelockResource = Resource.Loading()
+            disableTimelockResource = Resource.Loading
         )
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -208,14 +208,14 @@ class VaultScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
+                onOwnerState(response.data.ownerState)
             }
         }
     }
 
     fun cancelDisableTimelock() {
         state = state.copy(
-            cancelDisableTimelockResource = Resource.Loading(),
+            cancelDisableTimelockResource = Resource.Loading,
             triggerCancelDisableTimelockDialog = Resource.Uninitialized
         )
 
@@ -234,7 +234,7 @@ class VaultScreenViewModel @Inject constructor(
 
     fun cancelAccess() {
         state = state.copy(
-            cancelAccessResource = Resource.Loading(),
+            cancelAccessResource = Resource.Loading,
             triggerCancelAccessDialog = Resource.Uninitialized
         )
 
@@ -350,23 +350,17 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun lock() {
-        state = state.copy(lockResponse = Resource.Loading())
+        state = state.copy(lockResponse = Resource.Loading)
         viewModelScope.launch {
-            val lockResponse = ownerRepository.lock().map { it.ownerState }
+            val lockResponse = ownerRepository.lock()
 
             if (lockResponse is Resource.Success) {
-                lockResponse.data?.let { onOwnerState(it) }
+                onOwnerState(lockResponse.data.ownerState)
                 resetLockResource()
             }
 
             if (lockResponse is Resource.Error) {
-                state =
-                    state.copy(
-                        lockResponse = Resource.Error(
-                            exception = lockResponse.exception,
-                            errorCode = lockResponse.errorCode
-                        )
-                    )
+                state = state.copy(lockResponse = lockResponse)
             }
         }
     }
@@ -404,14 +398,14 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun deletePolicySetupConfirmed() {
-        state = state.copy(deletePolicySetup = Resource.Loading())
+        state = state.copy(deletePolicySetup = Resource.Loading)
         hideDeletePolicySetupConfirmationDialog()
 
         viewModelScope.launch {
             val response = ownerRepository.deletePolicySetup()
 
             if (response is Resource.Success) {
-                response.data?.let { onOwnerState(it.ownerState) }
+                response.data.let { onOwnerState(it.ownerState) }
             }
 
             state = state.copy(deletePolicySetup = response)

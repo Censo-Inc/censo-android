@@ -89,10 +89,9 @@ fun ApproverOnboardingScreen(
                 OnboardingMessage.LinkPastedSuccessfully -> context.getString(R.string.found_invite_clipboard)
                 OnboardingMessage.LinkAccepted -> context.getString(R.string.accepted_as_an_approver)
                 OnboardingMessage.CodeAccepted -> context.getString(R.string.owner_accepted_code)
-                null -> null
             }
 
-            message?.let {
+            message.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
             viewModel.resetMessage()
@@ -101,7 +100,7 @@ fun ApproverOnboardingScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { navigationData ->
+            state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route)
             }
             viewModel.resetNavigationResource()

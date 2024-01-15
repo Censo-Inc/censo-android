@@ -65,7 +65,7 @@ fun AccessApprovalScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { navigationData ->
+            state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route) {
                     launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
                     if (navigationData.popSelfFromBackStack) {

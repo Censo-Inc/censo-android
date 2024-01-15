@@ -7,9 +7,7 @@ import co.censo.shared.data.networking.NoConnectivityException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import retrofit2.Response
-import kotlinx.serialization.decodeFromString
 
 abstract class BaseRepository {
 
@@ -19,7 +17,10 @@ abstract class BaseRepository {
                 val response: Response<T> = apiToBeCalled()
 
                 if (response.isSuccessful) {
-                    Resource.Success(data = response.body())
+                    when (val responseBody = response.body()) {
+                        null -> Resource.Error(exception = Exception("Unexpected empty response"))
+                        else -> Resource.Success(data = responseBody)
+                    }
                 } else {
                     Resource.Error(
                         errorResponse = getErrorInfoFromResponse(response),

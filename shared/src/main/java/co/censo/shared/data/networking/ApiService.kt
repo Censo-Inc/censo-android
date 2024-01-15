@@ -82,7 +82,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import retrofit2.Retrofit
@@ -176,12 +175,12 @@ interface ApiService {
     suspend fun signIn(
         @Body signInApiRequest: SignInApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<Unit>
 
     @POST("/v1/device")
     suspend fun createDevice(
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<Unit>
 
     @PUT("/v1/login-id")
     suspend fun resetLoginId(
@@ -245,7 +244,7 @@ interface ApiService {
     @POST("/v1/approvership-invitations/{$INVITATION_ID}/decline")
     suspend fun declineApprovership(
         @Path(value = INVITATION_ID) invitationId: String,
-    ): RetrofitResponse<ResponseBody>
+    ): RetrofitResponse<Unit>
 
     @POST("v1/approvership-invitations/{$INVITATION_ID}/verification")
     suspend fun submitApproverVerification(

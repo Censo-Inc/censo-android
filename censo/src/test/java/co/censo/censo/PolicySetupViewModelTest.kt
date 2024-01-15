@@ -226,7 +226,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
 
         //Assert that navigationResource was set to state and route is OwnerVaultScreen
         assertTrue(policySetupViewModel.state.navigationResource is Resource.Success)
-        assertEquals(Screen.OwnerVaultScreen.navToAndPopCurrentDestination().route, policySetupViewModel.state.navigationResource.data?.route)
+        assertEquals(Screen.OwnerVaultScreen.navToAndPopCurrentDestination().route, policySetupViewModel.state.navigationResource.success()?.data?.route)
     }
 
     @Test
@@ -376,7 +376,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
 
         //Assert createPolicySetupResponse is success and has data
         assertTrue(policySetupViewModel.state.createPolicySetupResponse is Resource.Success)
-        assertEquals(readyOwnerStateDataWithOwnerAndInitialPrimaryApprover, policySetupViewModel.state.createPolicySetupResponse.data?.ownerState)
+        assertEquals(readyOwnerStateDataWithOwnerAndInitialPrimaryApprover, policySetupViewModel.state.createPolicySetupResponse.success()?.data?.ownerState)
 
         //Assert replacePolicy is success and UIState is set to uninitialized
         assertTrue(policySetupViewModel.state.replacePolicy is Resource.Success)

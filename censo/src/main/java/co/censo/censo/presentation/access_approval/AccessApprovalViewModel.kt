@@ -44,7 +44,7 @@ class AccessApprovalViewModel @Inject constructor(
         viewModelScope.launch {
             val ownerState = ownerStateFlow.value
             if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data!!)
+                updateOwnerState(ownerState.data)
             }
 
             // setup polling timer to reload approvals state
@@ -65,13 +65,13 @@ class AccessApprovalViewModel @Inject constructor(
 
     fun retrieveOwnerState(silent: Boolean = false) {
         if (!silent) {
-            state = state.copy(userResponse = Resource.Loading())
+            state = state.copy(userResponse = Resource.Loading)
         }
 
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            ownerStateResource.data?.let { updateOwnerState(it) }
+            ownerStateResource.onSuccess { updateOwnerState(it) }
 
             state = state.copy(userResponse = ownerStateResource)
         }
@@ -173,13 +173,13 @@ class AccessApprovalViewModel @Inject constructor(
 
     fun initiateAccess() {
         if (state.initiateAccessResource !is Resource.Loading) {
-            state = state.copy(initiateAccessResource = Resource.Loading())
+            state = state.copy(initiateAccessResource = Resource.Loading)
 
             viewModelScope.launch {
                 val response = ownerRepository.initiateAccess(state.accessIntent)
 
                 if (response is Resource.Success) {
-                    updateOwnerState(response.data!!.ownerState)
+                    updateOwnerState(response.data.ownerState)
                 }
 
                 state = state.copy(
@@ -193,7 +193,7 @@ class AccessApprovalViewModel @Inject constructor(
     fun cancelAccess() {
         state = state.copy(
             showCancelConfirmationDialog = false,
-            cancelAccessResource = Resource.Loading()
+            cancelAccessResource = Resource.Loading
         )
 
         viewModelScope.launch {
@@ -230,7 +230,7 @@ class AccessApprovalViewModel @Inject constructor(
 
     private fun submitVerificationCode(participantId: ParticipantId, verificationCode: String) {
         state = state.copy(
-            submitTotpVerificationResource = Resource.Loading(),
+            submitTotpVerificationResource = Resource.Loading,
             waitingForApproval = true
         )
 
@@ -240,8 +240,8 @@ class AccessApprovalViewModel @Inject constructor(
                 verificationCode = verificationCode
             )
 
-            if (submitVerificationResource is Resource.Success) {
-                updateOwnerState(submitVerificationResource.map { it.ownerState }.data!!)
+            submitVerificationResource.onSuccess {
+                updateOwnerState(it.ownerState)
             }
 
             state = state.copy(submitTotpVerificationResource = submitVerificationResource)

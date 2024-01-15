@@ -7,20 +7,19 @@ import co.censo.shared.data.repository.ErrorResponse
 import com.google.android.gms.common.api.ApiException
 import java.lang.Exception
 
-sealed class Resource<out T>(
-    val data: T? = null,
-    val exception: Exception? = null,
-    val errorResponse: ErrorResponse? = null,
-    val errorCode: Int? = null
-) {
+sealed class Resource<out T> {
+
     object Uninitialized : Resource<Nothing>()
-    class Success<out T>(data: T?) : Resource<T>(data)
+
+    object Loading : Resource<Nothing>()
+
+    class Success<out T>(val data: T) : Resource<T>()
+
     class Error<out T>(
-        data: T? = null,
-        exception: Exception? = null,
-        errorResponse: ErrorResponse? = null,
-        errorCode: Int? = null
-    ) : Resource<T>(data, exception = exception, errorResponse = errorResponse, errorCode = errorCode) {
+        val exception: Exception? = null,
+        val errorResponse: ErrorResponse? = null,
+        val errorCode: Int? = null
+    ) : Resource<T>() {
         fun getErrorMessage(context: Context): String {
             if (exception is NoConnectivityException) {
                 return "Network NA"
@@ -41,17 +40,35 @@ sealed class Resource<out T>(
                 else -> "${context.getString(R.string.unexpected_error)} ${errorCode?.let { "($it)"} ?: exception?.message}"
             }
         }
-
     }
-
-    class Loading<out T>(data: T? = null) : Resource<T>(data)
 
     fun <K> map(f: (T) -> K): Resource<K> {
         return when (this) {
-            is Success -> Success(this.data?.let { f(it) })
-            is Error -> Error(this.data?.let { f(it) }, this.exception, this.errorResponse, this.errorCode)
             is Uninitialized -> Uninitialized
-            is Loading -> Loading(this.data?.let { f(it) })
+            is Loading -> Loading
+            is Success -> Success(f(this.data))
+            is Error -> Error(this.exception, this.errorResponse, this.errorCode)
         }
+    }
+    fun onSuccess(success: (T) -> Unit) {
+        if (this is Success) {
+            success(this.data)
+        }
+    }
+
+    fun success(): Success<T>? {
+        return this as? Success<T>
+    }
+
+    fun asSuccess(): Success<T> {
+        return this as Success<T>
+    }
+
+    fun error(): Error<T>? {
+        return this as? Error<T>
+    }
+
+    fun asError(): Error<T> {
+        return this as Error<T>
     }
 }

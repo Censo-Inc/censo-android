@@ -197,10 +197,8 @@ fun EnterPhraseScreen(
                     }
 
                     if (state.showInvalidPhraseDialog is Resource.Success) {
-                        val invalidPhraseTitle =
-                            state.showInvalidPhraseDialog.data?.errorTitle() ?: stringResource(id = R.string.error)
-                        val invalidPhraseMessage =
-                            state.showInvalidPhraseDialog.data?.errorMessage() ?: stringResource(id = R.string.default_invalid_phrase_message)
+                        val invalidPhraseTitle = state.showInvalidPhraseDialog.data.errorTitle()
+                        val invalidPhraseMessage = state.showInvalidPhraseDialog.data.errorMessage()
 
                         SimpleAlertDialog(
                             title = invalidPhraseTitle,

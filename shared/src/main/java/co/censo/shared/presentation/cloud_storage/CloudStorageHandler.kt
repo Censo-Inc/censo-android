@@ -103,7 +103,7 @@ fun CloudStorageHandler(
 
     LaunchedEffect(key1 = state) {
         if (state.cloudStorageActionResource is Resource.Success) {
-            onActionSuccess(state.cloudStorageActionResource.data!!)
+            onActionSuccess(state.cloudStorageActionResource.data)
         }
 
         if (state.cloudStorageActionResource is Resource.Error) {

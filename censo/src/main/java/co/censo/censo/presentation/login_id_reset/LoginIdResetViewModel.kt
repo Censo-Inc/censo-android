@@ -222,7 +222,7 @@ class LoginIdResetViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         biometry: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        state = state.copy(resetLoginIdResponse = Resource.Loading())
+        state = state.copy(resetLoginIdResponse = Resource.Loading)
 
         return viewModelScope.async {
             val response = ownerRepository.resetLoginId(

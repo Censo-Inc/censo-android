@@ -55,7 +55,7 @@ class FacetecAuthViewModel @Inject constructor(
 
     private fun initFacetecSession() {
         viewModelScope.launch {
-            state = state.copy(initFacetecData = Resource.Loading())
+            state = state.copy(initFacetecData = Resource.Loading)
             val facetecDataResource = facetecRepository.startFacetecBiometry()
 
             if (facetecDataResource is Resource.Success) {
@@ -74,7 +74,7 @@ class FacetecAuthViewModel @Inject constructor(
     fun facetecSDKInitialized() {
         state = state.copy(
             startAuth = Resource.Success(Unit),
-            submitResultResponse = Resource.Loading()
+            submitResultResponse = Resource.Loading
         )
     }
 
@@ -119,7 +119,7 @@ class FacetecAuthViewModel @Inject constructor(
             return
         }
 
-        state = state.copy(submitResultResponse = Resource.Loading())
+        state = state.copy(submitResultResponse = Resource.Loading)
 
         viewModelScope.launch {
             val submitResultResponse = onFaceScanReady(
@@ -132,7 +132,7 @@ class FacetecAuthViewModel @Inject constructor(
                 )
 
             if (submitResultResponse is Resource.Success) {
-                submitResultResponse.data?.value?.let {
+                submitResultResponse.data.value?.let {
                     scanResultCallback?.proceedToNextStep(it)
                 } ?: scanResultCallback?.succeed()
 
@@ -152,7 +152,7 @@ class FacetecAuthViewModel @Inject constructor(
     }
 
     fun simulateFacetecScanSuccess() {
-        state = state.copy(submitResultResponse = Resource.Loading())
+        state = state.copy(submitResultResponse = Resource.Loading)
 
         viewModelScope.launch {
             val submitResultResponse = onFaceScanReady(
@@ -191,7 +191,7 @@ class FacetecAuthViewModel @Inject constructor(
 
         customization.feedbackCustomization.textColor = Color.White.toArgb()
         customization.feedbackCustomization.backgroundColors = SharedColors.FacetecPrimaryColor.toArgb()
-        customization.feedbackCustomization.cornerRadius = 20;
+        customization.feedbackCustomization.cornerRadius = 20
 
         // guidance screen
         customization.guidanceCustomization.buttonTextNormalColor = Color.White.toArgb()

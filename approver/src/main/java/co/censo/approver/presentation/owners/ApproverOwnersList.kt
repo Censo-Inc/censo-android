@@ -61,7 +61,7 @@ fun ApproverOwnersList(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { navigationData ->
+            state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route)
             }
             viewModel.resetNavigationResource()
@@ -127,7 +127,7 @@ fun ApproverOwnersList(
                         )
 
                         Spacer(modifier = Modifier.height(48.dp))
-                        (state.userResponse.data?.approverStates ?: emptyList()).forEach { approverState ->
+                        (state.userResponse.success()?.data?.approverStates ?: emptyList()).forEach { approverState ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

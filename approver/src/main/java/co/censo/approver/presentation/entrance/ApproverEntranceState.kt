@@ -1,10 +1,8 @@
 package co.censo.approver.presentation.entrance
 
 import android.net.Uri
-import androidx.navigation.NavOptionsBuilder
 import co.censo.shared.data.Resource
 import co.censo.shared.util.NavigationData
-import okhttp3.ResponseBody
 
 data class ApproverEntranceState(
     val uiState: ApproverEntranceUIState = ApproverEntranceUIState.Initial,
@@ -12,7 +10,7 @@ data class ApproverEntranceState(
     val loggedIn: Boolean = false,
 
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
-    val signInUserResource: Resource<ResponseBody> = Resource.Uninitialized,
+    val signInUserResource: Resource<Unit> = Resource.Uninitialized,
     val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
 
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,

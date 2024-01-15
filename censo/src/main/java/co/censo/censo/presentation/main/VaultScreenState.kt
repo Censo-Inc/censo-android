@@ -5,6 +5,7 @@ import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
+import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.model.TimelockApiResponse
@@ -27,7 +28,7 @@ data class VaultScreenState(
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSeedPhraseApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
-    val lockResponse : Resource<Unit> = Resource.Uninitialized,
+    val lockResponse : Resource<LockApiResponse> = Resource.Uninitialized,
     val resyncCloudAccessRequest : Boolean = false,
     val deletePolicySetup: Resource<DeletePolicySetupApiResponse> = Resource.Uninitialized,
     val enableTimelockResource : Resource<TimelockApiResponse> = Resource.Uninitialized,

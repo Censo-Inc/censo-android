@@ -26,13 +26,13 @@ class ResetLinksViewModel @Inject constructor(
     }
 
     fun retrieveApproverState() {
-        state = state.copy(userResponse = Resource.Loading())
+        state = state.copy(userResponse = Resource.Loading)
 
         viewModelScope.launch {
             val userResponse = approverRepository.retrieveUser()
 
             if (userResponse is Resource.Success) {
-                userResponse.data?.let { onApproverStates(it.approverStates) }
+                onApproverStates(userResponse.data.approverStates)
             }
 
             state = state.copy(userResponse = userResponse)
@@ -70,13 +70,13 @@ class ResetLinksViewModel @Inject constructor(
     }
 
     fun onGettingLive(participantId: ParticipantId) {
-        state = state.copy(createResetTokenResponse = Resource.Loading())
+        state = state.copy(createResetTokenResponse = Resource.Loading)
 
         viewModelScope.launch {
             val response = approverRepository.createLoginIdResetToken(participantId.value)
 
             if (response is Resource.Success) {
-                val resetToken = response.data!!.approverStates.first { it.participantId == participantId }.ownerLoginIdResetToken!!
+                val resetToken = response.data.approverStates.first { it.participantId == participantId }.ownerLoginIdResetToken!!
 
                 state = state.copy(
                     uiState = ResetLinksState.ResetLinkUIState.ShareLink(resetToken)

@@ -45,10 +45,10 @@ class LabelOwnerViewModel @Inject constructor(
     }
 
     fun save() {
-        state = state.copy(saveResource = Resource.Loading())
+        state = state.copy(saveResource = Resource.Loading)
         viewModelScope.launch {
             if (state.labelResource is Resource.Success) {
-                val response = approverRepository.labelOwner(state.participantId.value, state.labelResource.data!!)
+                val response = approverRepository.labelOwner(state.participantId.value, state.labelResource.asSuccess().data)
                 state = state.copy(saveResource = response)
             }
         }

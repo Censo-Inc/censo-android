@@ -32,7 +32,7 @@ class PaywallViewModel @Inject constructor(
         viewModelScope.launch {
             ownerStateFlow.collect { resource: Resource<OwnerState> ->
                 if (resource is Resource.Success) {
-                    onOwnerState(resource.data!!)
+                    onOwnerState(resource.data)
                 }
             }
         }
@@ -110,12 +110,12 @@ class PaywallViewModel @Inject constructor(
         state = state.copy(purchases = purchases)
 
         purchases.map { purchase ->
-            state = state.copy(submitPurchaseResource = Resource.Loading())
+            state = state.copy(submitPurchaseResource = Resource.Loading)
 
             val response = ownerRepository.submitPurchase(purchase.purchaseToken)
 
             if (response is Resource.Success) {
-                onOwnerState(response.map { it.ownerState }.data!!)
+                onOwnerState(response.data.ownerState)
             }
 
             state = state.copy(submitPurchaseResource = response)

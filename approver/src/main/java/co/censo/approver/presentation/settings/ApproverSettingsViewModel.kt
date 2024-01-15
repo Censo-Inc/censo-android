@@ -26,7 +26,7 @@ class ApproverSettingsViewModel @Inject constructor(
     }
 
     fun retrieveApproverState() {
-        state = state.copy(userResponse = Resource.Loading())
+        state = state.copy(userResponse = Resource.Loading)
 
         viewModelScope.launch {
             val userResponse = approverRepository.retrieveUser()
@@ -40,7 +40,7 @@ class ApproverSettingsViewModel @Inject constructor(
     }
 
     fun deleteUser() {
-        state = state.copy(deleteUserResource = Resource.Loading())
+        state = state.copy(deleteUserResource = Resource.Loading)
         resetShowDeleteUserConfirmDialog()
 
         viewModelScope.launch {

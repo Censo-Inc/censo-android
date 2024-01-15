@@ -138,7 +138,7 @@ fun OwnerEntranceScreen(
         }
 
         if (state.navigationResource is Resource.Success) {
-            state.navigationResource.data?.let { navigationData ->
+            state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route) {
                     if (navigationData.popSelfFromBackStack) {
                         popCurrentDestinationFromBackStack(navController)

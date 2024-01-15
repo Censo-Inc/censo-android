@@ -91,7 +91,7 @@ class ReplacePolicyViewModel @Inject constructor(
         viewModelScope.launch {
             val ownerState = ownerStateFlow.value
             if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data!!, nextAction = {
+                updateOwnerState(ownerState.data, nextAction = {
                     checkUserHasSavedKeyAndSubmittedPolicy()
                 })
             } else {
@@ -144,14 +144,12 @@ class ReplacePolicyViewModel @Inject constructor(
 
     private fun retrieveOwnerState(silent: Boolean = false, nextAction: (() -> Unit)? = null) {
         if (!silent) {
-            state = state.copy(userResponse = Resource.Loading())
+            state = state.copy(userResponse = Resource.Loading)
         }
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            ownerStateResource.data?.let {
-                updateOwnerState(it, nextAction)
-            }
+            ownerStateResource.onSuccess { updateOwnerState(it, nextAction) }
 
             state = state.copy(userResponse = ownerStateResource)
         }
@@ -182,7 +180,7 @@ class ReplacePolicyViewModel @Inject constructor(
 
     private fun saveKeyWithEntropy() {
         try {
-            state = state.copy(saveKeyToCloud = Resource.Loading())
+            state = state.copy(saveKeyToCloud = Resource.Loading)
             val approverEncryptionKey = keyRepository.createApproverKey()
 
             val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
@@ -219,7 +217,7 @@ class ReplacePolicyViewModel @Inject constructor(
 
 
     private fun completeApproverOwnership() {
-        state = state.copy(completeApprovershipResponse = Resource.Loading())
+        state = state.copy(completeApprovershipResponse = Resource.Loading)
 
         viewModelScope.launch {
 
@@ -239,7 +237,7 @@ class ReplacePolicyViewModel @Inject constructor(
             )
 
             if (completeApprovershipResponse is Resource.Success) {
-                updateOwnerState(completeApprovershipResponse.data!!.ownerState)
+                updateOwnerState(completeApprovershipResponse.data.ownerState)
                 initiateAccess()
             }
 
@@ -288,7 +286,7 @@ class ReplacePolicyViewModel @Inject constructor(
     private fun initiateAccess() {
         viewModelScope.launch {
             if (state.policySetupAction == PolicySetupAction.AddApprovers) {
-                state = state.copy(initiateAccessResponse = Resource.Loading())
+                state = state.copy(initiateAccessResponse = Resource.Loading)
 
                 // cancel previous access if exists
                 state.ownerState?.access?.let {
@@ -304,7 +302,7 @@ class ReplacePolicyViewModel @Inject constructor(
                     // navigate to the facetec view
                     state = state.copy(replacePolicyUIState = ReplacePolicyUIState.AccessInProgress_2)
 
-                    updateOwnerState(initiateAccessResponse.data!!.ownerState)
+                    updateOwnerState(initiateAccessResponse.data.ownerState)
                 }
 
                 state = state.copy(initiateAccessResponse = initiateAccessResponse)
@@ -315,7 +313,7 @@ class ReplacePolicyViewModel @Inject constructor(
     }
 
     private fun replacePolicy(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>) {
-        state = state.copy(verifyKeyConfirmationSignature = Resource.Loading())
+        state = state.copy(verifyKeyConfirmationSignature = Resource.Loading)
 
         try {
 
@@ -327,7 +325,7 @@ class ReplacePolicyViewModel @Inject constructor(
             }
 
             state = state.copy(
-                replacePolicyResponse = Resource.Loading(),
+                replacePolicyResponse = Resource.Loading,
                 verifyKeyConfirmationSignature = Resource.Uninitialized
             )
 
@@ -370,7 +368,7 @@ class ReplacePolicyViewModel @Inject constructor(
                 state = state.copy(replacePolicyResponse = response)
 
                 if (response is Resource.Success) {
-                    updateOwnerState(response.data!!.ownerState)
+                    updateOwnerState(response.data.ownerState)
                     state = state.copy(replacePolicyUIState = ReplacePolicyUIState.Completed_3)
                 }
             }
@@ -390,7 +388,7 @@ class ReplacePolicyViewModel @Inject constructor(
         verificationId: BiometryVerificationId,
         biometry: FacetecBiometry
     ): Resource<BiometryScanResultBlob> {
-        state = state.copy(retrieveAccessShardsResponse = Resource.Loading())
+        state = state.copy(retrieveAccessShardsResponse = Resource.Loading)
 
         return viewModelScope.async {
             val retrieveShardsResponse = ownerRepository.retrieveAccessShards(verificationId, biometry)
@@ -398,7 +396,7 @@ class ReplacePolicyViewModel @Inject constructor(
             if (retrieveShardsResponse is Resource.Success) {
                 ownerRepository.cancelAccess()
 
-                replacePolicy(retrieveShardsResponse.data!!.encryptedShards)
+                replacePolicy(retrieveShardsResponse.data.encryptedShards)
             }
 
             state = state.copy(retrieveAccessShardsResponse = retrieveShardsResponse)

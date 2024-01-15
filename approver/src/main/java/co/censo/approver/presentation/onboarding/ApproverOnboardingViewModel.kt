@@ -189,7 +189,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             state = state.copy(userResponse = userResponse)
 
             if (userResponse is Resource.Success) {
-                checkApproverHasInvitationCode(userResponse.data!!.approverStates)
+                checkApproverHasInvitationCode(userResponse.data.approverStates)
             }
         }
     }
@@ -264,9 +264,9 @@ class ApproverOnboardingViewModel @Inject constructor(
                 is ApproverPhase.Complete -> {
                     userStatePollingTimer.stop()
                     // we require to label the owner unless it is the first owner for this approver
-                    if (
-                        state.userResponse is Resource.Success &&
-                        (state.userResponse.data?.approverStates?.count { it.participantId.value != state.participantId } ?: 0) > 0 &&
+                    val userResponse = state.userResponse
+                    if (userResponse is Resource.Success &&
+                        userResponse.data.approverStates.count { it.participantId.value != state.participantId } > 0 &&
                         state.approverState?.ownerLabel == null
                     ) {
                         state.copy(
@@ -301,8 +301,8 @@ class ApproverOnboardingViewModel @Inject constructor(
                 state = state.copy(
                     onboardingMessage = Resource.Success(OnboardingMessage.LinkAccepted)
                 )
-                assignParticipantId(acceptResource.data?.approverState)
-                assignEntropy(acceptResource.data?.approverState)
+                assignParticipantId(acceptResource.data.approverState)
+                assignEntropy(acceptResource.data.approverState)
                 createKeyAndTriggerCloudSave()
             }
         }
@@ -367,7 +367,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             )
 
             state = if (submitVerificationResource is Resource.Success) {
-                determineApproverUIState(submitVerificationResource.data?.approverState)
+                determineApproverUIState(submitVerificationResource.data.approverState)
                 state.copy(submitVerificationResource = submitVerificationResource)
             } else {
                 state.copy(

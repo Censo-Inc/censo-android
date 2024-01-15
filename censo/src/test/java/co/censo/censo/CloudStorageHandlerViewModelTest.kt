@@ -139,7 +139,7 @@ class CloudStorageHandlerViewModelTest : BaseViewModelTest() {
 
         //Assert key data was loaded
         assertTrue(cloudStorageHandlerViewModel.state.cloudStorageActionResource is Resource.Success)
-        assertEquals(mockEncryptedPrivateKey, cloudStorageHandlerViewModel.state.cloudStorageActionResource.data)
+        assertEquals(mockEncryptedPrivateKey, cloudStorageHandlerViewModel.state.cloudStorageActionResource.success()?.data)
     }
 
     @Test
@@ -168,7 +168,7 @@ class CloudStorageHandlerViewModelTest : BaseViewModelTest() {
 
         //Assert key data was saved
         assertTrue(cloudStorageHandlerViewModel.state.cloudStorageActionResource is Resource.Success)
-        assertEquals(mockEncryptedPrivateKey, cloudStorageHandlerViewModel.state.cloudStorageActionResource.data)
+        assertEquals(mockEncryptedPrivateKey, cloudStorageHandlerViewModel.state.cloudStorageActionResource.success()?.data)
     }
 
     @Test

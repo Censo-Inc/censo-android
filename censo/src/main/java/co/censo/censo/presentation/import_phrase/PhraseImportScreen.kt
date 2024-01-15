@@ -67,7 +67,7 @@ fun PhraseImportScreen(
 
         if (state.sendToSeedVerification is Resource.Success) {
             navController.navigate(
-                route = state.sendToSeedVerification.data ?: Screen.EntranceRoute.route
+                route = state.sendToSeedVerification.data
             )
             viewModel.resetSendVerification()
         }
