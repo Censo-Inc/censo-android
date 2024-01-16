@@ -4,6 +4,7 @@ import StandardButton
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,6 +30,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,11 +57,15 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.censo.presentation.main.BottomNavItem
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.presentation.components.LearnMoreScreen
+import co.censo.shared.presentation.components.LearnMoreUI
+import co.censo.shared.presentation.components.LearnMoreUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +74,7 @@ fun InitialPlanSetupScreen(
     viewModel: InitialPlanSetupViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
@@ -95,9 +105,13 @@ fun InitialPlanSetupScreen(
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.NavbarColor),
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.navigate(Screen.EntranceRoute.route) {
-                            launchSingleTop = true
-                            popCurrentDestinationFromBackStack(navController)
+                        if (showInfoView.value) {
+                            showInfoView.value = false
+                        } else {
+                            navController.navigate(Screen.EntranceRoute.route) {
+                                launchSingleTop = true
+                                popCurrentDestinationFromBackStack(navController)
+                            }
                         }
                     }) {
                         Icon(
@@ -151,9 +165,13 @@ fun InitialPlanSetupScreen(
                         InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
 
                         is InitialPlanSetupStep.Initial ->
-                            InitialPlanSetupStandardUI {
-                                viewModel.determineUIStatus()
-                            }
+                            InitialPlanSetupStandardUI(
+                                startPlanSetup = viewModel::determineUIStatus,
+                                isInfoViewVisible = showInfoView.value,
+                                showInfoView = {
+                                    showInfoView.value = true
+                                }
+                            )
 
 
                         is InitialPlanSetupStep.Facetec ->
@@ -197,9 +215,9 @@ fun InitialPlanSetupScreen(
 @Composable
 fun InitialPlanSetupStandardUI(
     startPlanSetup: () -> Unit,
+    isInfoViewVisible: Boolean,
+    showInfoView: () -> Unit
 ) {
-
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     Column(
@@ -264,26 +282,49 @@ fun InitialPlanSetupStandardUI(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
+            LearnMoreUI {
+                showInfoView()
+            }
 
-            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
+            Spacer(modifier = Modifier.height(screenHeight * 0.025f))
         }
+    }
+
+    if (isInfoViewVisible) {
+        LearnMoreScreen(
+            title = stringResource(R.string.face_scan_learn_more_title),
+            annotatedString = LearnMoreUtil.faceScanMessage(),
+        )
     }
 }
 
 @Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)
 @Composable
 fun LargeInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI {}
+    InitialPlanSetupStandardUI(
+        isInfoViewVisible = false,
+        startPlanSetup = {},
+        showInfoView = {}
+    )
 }
 
 @Preview(device = Devices.PIXEL_4, showBackground = true, showSystemUi = true)
 @Composable
 fun MediumInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI {}
+    InitialPlanSetupStandardUI(
+        isInfoViewVisible = false,
+        startPlanSetup = {},
+        showInfoView = {}
+    )
 }
 
 @Preview(device = Devices.NEXUS_5, showBackground = true, showSystemUi = true)
 @Composable
 fun SmallInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI {}
+    InitialPlanSetupStandardUI(
+        isInfoViewVisible = false,
+        startPlanSetup = {},
+        showInfoView = {}
+    )
 }

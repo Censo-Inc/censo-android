@@ -53,4 +53,5 @@ object SharedColors {
     val LightColorLine = SkyBlue
     val DarkColorLine = DarkBlue
     val ButtonIconColor = SkyBlue
+    val BrightDividerColor = SkyBlue
 }
