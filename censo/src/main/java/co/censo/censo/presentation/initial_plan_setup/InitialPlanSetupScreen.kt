@@ -74,6 +74,7 @@ fun InitialPlanSetupScreen(
     viewModel: InitialPlanSetupViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = state) {
         if (state.complete) {
@@ -104,9 +105,13 @@ fun InitialPlanSetupScreen(
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.NavbarColor),
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.navigate(Screen.EntranceRoute.route) {
-                            launchSingleTop = true
-                            popCurrentDestinationFromBackStack(navController)
+                        if (showInfoView.value) {
+                            showInfoView.value = false
+                        } else {
+                            navController.navigate(Screen.EntranceRoute.route) {
+                                launchSingleTop = true
+                                popCurrentDestinationFromBackStack(navController)
+                            }
                         }
                     }) {
                         Icon(
@@ -160,9 +165,13 @@ fun InitialPlanSetupScreen(
                         InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
 
                         is InitialPlanSetupStep.Initial ->
-                            InitialPlanSetupStandardUI {
-                                viewModel.determineUIStatus()
-                            }
+                            InitialPlanSetupStandardUI(
+                                startPlanSetup = viewModel::determineUIStatus,
+                                isInfoViewVisible = showInfoView.value,
+                                showInfoView = {
+                                    showInfoView.value = true
+                                }
+                            )
 
 
                         is InitialPlanSetupStep.Facetec ->
@@ -206,10 +215,10 @@ fun InitialPlanSetupScreen(
 @Composable
 fun InitialPlanSetupStandardUI(
     startPlanSetup: () -> Unit,
+    isInfoViewVisible: Boolean,
+    showInfoView: () -> Unit
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
-    val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -275,37 +284,47 @@ fun InitialPlanSetupStandardUI(
             }
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             LearnMoreUI {
-                showInfoView.value = true
+                showInfoView()
             }
 
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
         }
     }
 
-    if (showInfoView.value) {
+    if (isInfoViewVisible) {
         LearnMoreScreen(
             title = stringResource(R.string.face_scan_learn_more_title),
-            annotatedString = LearnMoreUtil.faceScanMessage()
-        ) {
-            showInfoView.value = false
-        }
+            annotatedString = LearnMoreUtil.faceScanMessage(),
+        )
     }
 }
 
 @Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)
 @Composable
 fun LargeInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI {}
+    InitialPlanSetupStandardUI(
+        isInfoViewVisible = false,
+        startPlanSetup = {},
+        showInfoView = {}
+    )
 }
 
 @Preview(device = Devices.PIXEL_4, showBackground = true, showSystemUi = true)
 @Composable
 fun MediumInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI {}
+    InitialPlanSetupStandardUI(
+        isInfoViewVisible = false,
+        startPlanSetup = {},
+        showInfoView = {}
+    )
 }
 
 @Preview(device = Devices.NEXUS_5, showBackground = true, showSystemUi = true)
 @Composable
 fun SmallInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI {}
+    InitialPlanSetupStandardUI(
+        isInfoViewVisible = false,
+        startPlanSetup = {},
+        showInfoView = {}
+    )
 }

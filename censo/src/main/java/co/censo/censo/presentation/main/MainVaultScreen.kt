@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +39,8 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.presentation.components.LearnMoreScreen
+import co.censo.shared.presentation.components.LearnMoreUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.popUpToTop
@@ -53,6 +57,8 @@ fun MainVaultScreen(
 ) {
     val state = viewModel.state
     val context = LocalContext.current
+
+    val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -152,7 +158,13 @@ fun MainVaultScreen(
             VaultTopBar(
                 bottomNavItem = selectedBottomNavItem.value,
                 showCloseApprover = state.showAddApproversUI is Resource.Success,
-                onDismissApprover = viewModel::resetShowApproversUI
+                onDismissApprover = {
+                    if (showInfoView.value) {
+                        showInfoView.value = false
+                    } else {
+                        viewModel.resetShowApproversUI()
+                    }
+                }
             )
         },
         bottomBar = {
@@ -291,12 +303,16 @@ fun MainVaultScreen(
                             if (state.showAddApproversUI is Resource.Success) {
                                 SetupApproversScreen(
                                     approverSetupExists = state.ownerState?.policySetup != null,
+                                    isInfoViewVisible = showInfoView.value,
                                     onInviteApproversSelected = {
                                         viewModel.resetShowApproversUI()
                                         navController.navigate(viewModel.determinePolicyModificationRoute())
                                     },
                                     onCancelApproverOnboarding = {
                                         viewModel.showDeletePolicySetupConfirmationDialog()
+                                    },
+                                    onShowInfoView = {
+                                        showInfoView.value = true
                                     }
                                 )
 

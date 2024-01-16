@@ -11,16 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -57,7 +54,11 @@ fun LearnMoreUI(
             tint = SharedColors.MainIconColor
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = stringResource(id = R.string.learn_more))
+        Text(
+            text = stringResource(id = R.string.learn_more),
+            color = SharedColors.MainColorText,
+            fontSize = 18.sp
+        )
     }
 }
 
@@ -65,56 +66,38 @@ fun LearnMoreUI(
 fun LearnMoreScreen(
     title: String,
     annotatedString: AnnotatedString,
-    onDismiss: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     
     Column(
-        modifier = Modifier.background(color = Color.White),
+        modifier = Modifier.background(color = Color.White).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            IconButton(
-                onClick = onDismiss,
-                modifier = Modifier.padding(top = screenHeight * 0.025f)
-            ) {
-                Icon(
-                    modifier = Modifier.size(64.dp),
-                    imageVector = Icons.Default.Close,
-                    tint = SharedColors.MainIconColor,
-                    contentDescription = stringResource(R.string.exit_screen),
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(screenHeight * .025f))
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             text = title,
             color = SharedColors.MainColorText,
             textAlign = TextAlign.Center,
             fontSize = 36.sp,
             fontWeight = FontWeight.W400,
+            lineHeight = 36.sp
         )
-        Spacer(modifier = Modifier.height(screenHeight * .025f))
+        Spacer(modifier = Modifier.height(screenHeight * .010f))
         Divider(
             modifier = Modifier
                 .height(5.dp)
                 .width(screenWidth * .15f),
-            thickness = 12.dp,
             color = SharedColors.BrightDividerColor
         )
-        Spacer(modifier = Modifier.height(screenHeight * .025f))
+        Spacer(modifier = Modifier.height(screenHeight * .010f))
         Text(
             text = annotatedString,
             color = SharedColors.MainColorText,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
                 .verticalScroll(rememberScrollState())
         )
     }
@@ -210,9 +193,7 @@ fun PreviewLearnMoreTrustedApproversUI() {
     LearnMoreScreen(
         title = "Trusted Approvers & Safety in Number",
         annotatedString = LearnMoreUtil.trustedApproversMessage()
-    ) {
-
-    }
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -221,7 +202,5 @@ fun PreviewLearnMoreFaceScanUI() {
     LearnMoreScreen(
         title = "Face Scan & Privacy",
         annotatedString = LearnMoreUtil.faceScanMessage()
-    ) {
-
-    }
+    )
 }

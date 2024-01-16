@@ -48,13 +48,13 @@ import co.censo.shared.presentation.components.LearnMoreUtil
 @Composable
 fun SetupApproversScreen(
     approverSetupExists: Boolean,
+    isInfoViewVisible: Boolean,
     onInviteApproversSelected: () -> Unit,
     onCancelApproverOnboarding: () -> Unit,
+    onShowInfoView: () -> Unit
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val verticalSpacingHeight = screenHeight * 0.025f
-
-    val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -128,19 +128,17 @@ fun SetupApproversScreen(
         Spacer(modifier = Modifier.height(verticalSpacingHeight * 2.0f))
 
         LearnMoreUI {
-            showInfoView.value = true
+            onShowInfoView()
         }
 
         Spacer(modifier = Modifier.height(verticalSpacingHeight))
     }
 
-    if (showInfoView.value) {
+    if (isInfoViewVisible) {
         LearnMoreScreen(
             title = stringResource(R.string.trusted_approvers_learn_more_title),
-            annotatedString = LearnMoreUtil.trustedApproversMessage()
-        ) {
-            showInfoView.value = false
-        }
+            annotatedString = LearnMoreUtil.trustedApproversMessage(),
+        )
     }
 }
 
@@ -149,8 +147,10 @@ fun SetupApproversScreen(
 fun PreviewSetupExistsApproversHome() {
     SetupApproversScreen(
         approverSetupExists = true,
+        isInfoViewVisible = false,
         onInviteApproversSelected = {},
         onCancelApproverOnboarding = {},
+        onShowInfoView = {}
     )
 }
 
@@ -159,7 +159,9 @@ fun PreviewSetupExistsApproversHome() {
 fun PreviewNoSetupExistsApproverHome() {
     SetupApproversScreen(
         approverSetupExists = false,
+        isInfoViewVisible = false,
         onInviteApproversSelected = {},
         onCancelApproverOnboarding = {},
+        onShowInfoView = {}
     )
 }
