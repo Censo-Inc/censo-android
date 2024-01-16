@@ -49,7 +49,7 @@ object SharedColors {
     val WordBoxBackground = Color.White
 
     val LockScreenBackground = GreyBackground
-    val MaintenanceBackground = GreyBackground
+    val MaintenanceBackground = Color.White
     val LightColorLine = SkyBlue
     val DarkColorLine = DarkBlue
     val ButtonIconColor = SkyBlue
