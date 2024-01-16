@@ -302,7 +302,6 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.DONE -> {
                             SeedPhraseAdded(
-                                isSavingFirstSeedPhrase = state.isSavingFirstSeedPhrase,
                                 onClick = viewModel::finishPhraseEntry
                             )
                         }
