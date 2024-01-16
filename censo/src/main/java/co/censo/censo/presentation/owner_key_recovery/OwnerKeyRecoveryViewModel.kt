@@ -26,7 +26,6 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,7 +33,6 @@ import javax.inject.Inject
 class OwnerKeyRecoveryViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(OwnerKeyRecoveryState())
@@ -69,7 +67,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
     }
 
     private fun retrieveOwnerState() {
-        ownerStateFlow.value.onSuccess { updateOwnerState(it) }
+        ownerRepository.getOwnerStateValue().onSuccess { updateOwnerState(it) }
     }
 
     private fun updateOwnerState(ownerState: OwnerState) {

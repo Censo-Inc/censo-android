@@ -49,7 +49,6 @@ import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
-import co.censo.shared.data.model.Import
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
@@ -80,6 +79,7 @@ import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.Clock
 import java.math.BigInteger
@@ -104,7 +104,19 @@ data class EncryptedSeedPhrase(
     val encrypted: Base64EncodedData
 )
 
+enum class AuthState {
+    LOGGED_IN,
+    LOGGED_OUT
+}
+
 interface OwnerRepository {
+
+    //region OwnerState flow
+    fun updateAuthState(authState: AuthState)
+    fun getOwnerStateValue(): Resource<OwnerState>
+    fun updateOwnerState(ownerState: Resource<OwnerState>)
+    suspend fun collectOwnerState(collector: FlowCollector<Resource<OwnerState>>)
+    //endregion
 
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
     suspend fun signInUser(idToken: String): Resource<Unit>
@@ -259,9 +271,26 @@ class OwnerRepositoryImpl(
     private val secureStorage: SecurePreferences,
     private val authUtil: AuthUtil,
     private val keyRepository: KeyRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>? = null,
     private val totpGenerator: TotpGenerator
 ) : OwnerRepository, BaseRepository() {
+
+    //region OwnerState flow
+    private val ownerStateFlow = MutableStateFlow<Resource<OwnerState>>(Resource.Uninitialized)
+    private val authStateFlow = MutableStateFlow(AuthState.LOGGED_OUT)
+    override fun updateAuthState(authState: AuthState) {
+        authStateFlow.value = authState
+    }
+    override fun getOwnerStateValue(): Resource<OwnerState> = ownerStateFlow.value
+    override suspend fun collectOwnerState(collector: FlowCollector<Resource<OwnerState>>) {
+        ownerStateFlow.collect(collector)
+    }
+    override fun updateOwnerState(ownerState: Resource<OwnerState>) {
+        if (authStateFlow.value == AuthState.LOGGED_IN) {
+            ownerStateFlow.value = ownerState
+        }
+    }
+    //endregion
+
     override suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse> {
         return retrieveApiResource { apiService.ownerUser() }
     }
@@ -273,6 +302,8 @@ class OwnerRepositoryImpl(
                     identityToken = IdentityToken(idToken.sha256()),
                 )
             )
+        }.map {
+            updateAuthState(AuthState.LOGGED_IN)
         }
 
     override suspend fun createDevice(): Resource<Unit> {
@@ -706,9 +737,8 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun signUserOut() {
-        ownerStateFlow?.let {
-            it.value = Resource.Uninitialized
-        }
+        updateOwnerState(Resource.Uninitialized)
+        updateAuthState(AuthState.LOGGED_OUT)
         secureStorage.clearJWT()
         authUtil.signOut()
     }

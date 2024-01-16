@@ -15,11 +15,9 @@ import co.censo.censo.util.ownerApprover
 import co.censo.censo.util.primaryApprover
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.IdentityToken
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.PolicySetup
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -32,7 +30,6 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -53,9 +50,6 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var keyRepository: KeyRepository
-
-    @Mock
-    lateinit var ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 
     @Mock
     lateinit var verificationCodeTimer: VaultCountDownTimer
@@ -101,7 +95,6 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
         policySetupViewModel = PolicySetupViewModel(
             ownerRepository = ownerRepository,
             keyRepository = keyRepository,
-            ownerStateFlow = ownerStateFlow,
             verificationCodeTimer = verificationCodeTimer,
             pollingVerificationTimer = pollingVerificationTimer,
             totpGenerator = totpGenerator,
@@ -265,7 +258,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         //region Mocks
-        whenever(ownerStateFlow.value).thenAnswer {
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
             Resource.Success(readyOwnerStateDataWithAllApproversConfirmed)
         }
 
@@ -301,7 +294,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         //region Mock ownerStateFlow.value, keyRepository.decryptWithDeviceKey, and totpGenerator.generateCode
-        whenever(ownerStateFlow.value).thenAnswer {
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
             Resource.Success(readyOwnerStateDataWithOwnerAndInitialPrimaryApprover)
         }
 
@@ -372,7 +365,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
         testScheduler.advanceUntilIdle()
 
         //Verify that ownerStateFlow.tryEmit was called
-        Mockito.verify(ownerStateFlow, atLeastOnce()).tryEmit(any())
+        Mockito.verify(ownerRepository, atLeastOnce()).updateOwnerState(any())
 
         //Assert createPolicySetupResponse is success and has data
         assertTrue(policySetupViewModel.state.createPolicySetupResponse is Resource.Success)
@@ -404,7 +397,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
     //TODO: Call this method in other areas where the code is duplicated
     private fun setMockApproverDataToViewModelState() {
         //region Mock ownerStateFlow.value, keyRepository.decryptWithDeviceKey, and totpGenerator.generateCode
-        whenever(ownerStateFlow.value).thenAnswer {
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
             Resource.Success(readyOwnerStateDataWithOwnerAndInitialPrimaryApprover)
         }
 

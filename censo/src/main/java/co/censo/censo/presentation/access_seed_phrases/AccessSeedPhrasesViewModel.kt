@@ -22,13 +22,11 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
-import co.censo.shared.util.NavigationData
 import co.censo.shared.util.asResource
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -38,7 +36,6 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class AccessSeedPhrasesViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val timer: VaultCountDownTimer,
 ) : ViewModel() {
 
@@ -51,7 +48,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            ownerStateFlow.collect { resource: Resource<OwnerState> ->
+            ownerRepository.collectOwnerState { resource: Resource<OwnerState> ->
                 if (resource is Resource.Success) {
                     state = state.copy(ownerState = resource)
                 }
@@ -113,7 +110,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     recoverSeedPhrases(response.data)
                 }
-                ownerStateFlow.tryEmit(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.map { it.ownerState })
             }
 
             response.map { it.scanResultBlob }
@@ -231,7 +228,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                         .navToAndPopCurrentDestination()
                         .asResource()
                 )
-                ownerStateFlow.tryEmit(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.map { it.ownerState })
             }
 
             state = state.copy(cancelAccessResource = response)

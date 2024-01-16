@@ -39,7 +39,7 @@ fun LockedScreen(
                 viewModel.onCreate()
             }
 
-            Lifecycle.Event.ON_START -> {
+            Lifecycle.Event.ON_RESUME -> {
                 viewModel.onStart()
             }
 

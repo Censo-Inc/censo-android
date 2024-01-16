@@ -90,7 +90,6 @@ object AppModule {
         secureStorage: SecurePreferences,
         authUtil: AuthUtil,
         keyRepository: KeyRepository,
-        ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
         totpGenerator: TotpGenerator
     ): OwnerRepository {
         return OwnerRepositoryImpl(
@@ -98,7 +97,6 @@ object AppModule {
             secureStorage = secureStorage,
             authUtil = authUtil,
             keyRepository = keyRepository,
-            ownerStateFlow = ownerStateFlow,
             totpGenerator = totpGenerator
         )
     }
@@ -159,12 +157,6 @@ object AppModule {
     @Provides
     fun provideCountdownTimer(): VaultCountDownTimer {
         return CountDownTimerImpl()
-    }
-
-    @Singleton
-    @Provides
-    fun providesOwnerStateFlow(): MutableStateFlow<Resource<OwnerState>> {
-        return MutableStateFlow(Resource.Uninitialized)
     }
 
     @Singleton

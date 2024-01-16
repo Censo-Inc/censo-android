@@ -28,7 +28,6 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -37,7 +36,6 @@ import javax.inject.Inject
 class InitialPlanSetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(InitialPlanSetupScreenState())
@@ -217,7 +215,7 @@ class InitialPlanSetupViewModel @Inject constructor(
     }
 
     private fun retrieveEntropy(): Base64EncodedData? =
-        (ownerStateFlow.value.asSuccess().data as? OwnerState.Initial)?.entropy
+        (ownerRepository.getOwnerStateValue().asSuccess().data as? OwnerState.Initial)?.entropy
 
     private fun startFacetec() {
         state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
@@ -258,7 +256,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
 
             if (createPolicyResponse is Resource.Success) {
-                ownerStateFlow.tryEmit(createPolicyResponse.map { it.ownerState })
+                ownerRepository.updateOwnerState(createPolicyResponse.map { it.ownerState })
             }
 
             createPolicyResponse.map { it.scanResultBlob }

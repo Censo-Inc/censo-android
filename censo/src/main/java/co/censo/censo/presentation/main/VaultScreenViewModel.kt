@@ -19,7 +19,6 @@ import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.util.VaultCountDownTimer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -37,7 +36,6 @@ enum class AccessButtonLabelEnum {
 @HiltViewModel
 class VaultScreenViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val pushRepository: PushRepository,
     private val timer: VaultCountDownTimer
 ) : ViewModel() {
@@ -262,7 +260,7 @@ class VaultScreenViewModel @Inject constructor(
             }
         }
 
-        ownerStateFlow.tryEmit(Resource.Success(ownerState))
+        ownerRepository.updateOwnerState(Resource.Success(ownerState))
     }
 
     fun accessTimelockExpiration(): Instant? {

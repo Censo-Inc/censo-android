@@ -66,9 +66,6 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var keyRepository: KeyRepository
 
-    @Mock
-    lateinit var ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
-
     private lateinit var replacePolicyViewModel: ReplacePolicyViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -141,7 +138,6 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         replacePolicyViewModel = ReplacePolicyViewModel(
             ownerRepository = ownerRepository,
             keyRepository = keyRepository,
-            ownerStateFlow = ownerStateFlow,
             ioDispatcher = testDispatcher
         )
     }
@@ -174,13 +170,13 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         //Set initial owner state user data for responses
-        whenever(ownerStateFlow.value).thenAnswer { Resource.Success(initialOwnerStateData) }
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { Resource.Success(initialOwnerStateData) }
         whenever(ownerRepository.retrieveUser()).thenAnswer { Resource.Success(initialStateOwnerUserMockResponse) }
 
         replacePolicyViewModel.onCreate(addApproversPolicySetupAction)
 
         //Verify ownerStateFlow was not emitted to
-        Mockito.verify(ownerStateFlow, times(0)).value
+        Mockito.verify(ownerRepository, times(0)).updateOwnerState(any())
 
         assertNull(replacePolicyViewModel.state.ownerApprover)
         assertNull(replacePolicyViewModel.state.primaryApprover)
@@ -303,7 +299,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         whenever(keyRepository.retrieveSavedDeviceId()).thenAnswer { savedDeviceId }
 
         //Set mocked global owner state data
-        whenever(ownerStateFlow.value).thenAnswer { Resource.Success(readyOwnerStateData) }
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { Resource.Success(readyOwnerStateData) }
 
         //Trigger VM
         replacePolicyViewModel.onCreate(addApproversPolicySetupAction)
@@ -311,7 +307,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         testScheduler.advanceUntilIdle()
 
         //Verify that global ownerStateFlow was emitted to
-        Mockito.verify(ownerStateFlow, atLeastOnce()).tryEmit(any())
+        Mockito.verify(ownerRepository, atLeastOnce()).updateOwnerState(any())
 
         //Assert that approver data was set to state
         assertConfirmedProspectApproverDataSetToState()
@@ -364,7 +360,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         whenever(keyRepository.retrieveSavedDeviceId()).thenAnswer { savedDeviceId }
 
         //Set mocked global owner state data
-        whenever(ownerStateFlow.value).thenAnswer { Resource.Success(readyOwnerStateData) }
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { Resource.Success(readyOwnerStateData) }
         //endregion
 
         //Trigger VM
@@ -373,7 +369,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         testScheduler.advanceUntilIdle()
 
         //Verify that global ownerStateFlow was emitted to
-        Mockito.verify(ownerStateFlow, atLeastOnce()).tryEmit(any())
+        Mockito.verify(ownerRepository, atLeastOnce()).updateOwnerState(any())
 
         //Assert that approver data was set to state
         assertConfirmedProspectApproverDataSetToState()
@@ -533,7 +529,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
      */
     private suspend fun assertExpectedStatesDuringUserStart() {
         //Verify that global ownerStateFlow was emitted to
-        Mockito.verify(ownerStateFlow, atLeastOnce()).tryEmit(any())
+        Mockito.verify(ownerRepository, atLeastOnce()).updateOwnerState(any())
 
         //Assert that approver data was set to state
         assertConfirmedProspectApproverDataSetToState()

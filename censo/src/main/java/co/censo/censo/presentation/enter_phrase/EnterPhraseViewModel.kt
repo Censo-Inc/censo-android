@@ -25,7 +25,6 @@ import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
@@ -37,7 +36,6 @@ import javax.inject.Inject
 class EnterPhraseViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     ) : ViewModel() {
 
     var state by mutableStateOf(EnterPhraseState())
@@ -107,7 +105,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 val ownerState = response.data.ownerState
-                ownerStateFlow.emit(Resource.Success(ownerState))
+                ownerRepository.updateOwnerState(Resource.Success(ownerState))
                 if (ownerState is OwnerState.Ready) {
                     state = state.copy(
                         isSavingFirstSeedPhrase = ownerState.vault.seedPhrases.isEmpty(),
@@ -276,7 +274,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     private fun verifyMasterKeySignature(): Boolean {
         try {
-            val ownerPolicy = (ownerStateFlow.value.asSuccess().data as OwnerState.Ready).policy
+            val ownerPolicy = (ownerRepository.getOwnerStateValue().asSuccess().data as OwnerState.Ready).policy
 
             val masterPublicKey = state.masterPublicKey
             val masterKeySignature = state.masterKeySignature
@@ -334,7 +332,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 state = state.copy(enterWordUIState = EnterPhraseUIState.DONE)
-                ownerStateFlow.tryEmit(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.map { it.ownerState })
             }
         }
     }
@@ -512,7 +510,7 @@ class EnterPhraseViewModel @Inject constructor(
         resetCloudStorageActionState()
 
         try {
-            val entropy = (ownerStateFlow.value.asSuccess().data as OwnerState.Ready).policy.ownerEntropy
+            val entropy = (ownerRepository.getOwnerStateValue().asSuccess().data as OwnerState.Ready).policy.ownerEntropy
 
             if (entropy == null) {
                 val exception = Exception("Missing data to access key")

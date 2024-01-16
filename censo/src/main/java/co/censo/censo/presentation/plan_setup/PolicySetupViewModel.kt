@@ -24,11 +24,8 @@ import co.censo.censo.util.confirmed
 import co.censo.censo.util.externalApprovers
 import co.censo.censo.util.notConfirmed
 import co.censo.censo.util.ownerApprover
-import co.censo.shared.util.NavigationData
 import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -100,7 +97,6 @@ import javax.inject.Inject
 class PolicySetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val verificationCodeTimer: VaultCountDownTimer,
     private val pollingVerificationTimer: VaultCountDownTimer,
     private val totpGenerator: TotpGenerator,
@@ -151,7 +147,7 @@ class PolicySetupViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val ownerState = ownerStateFlow.value
+            val ownerState = ownerRepository.getOwnerStateValue()
             if (ownerState is Resource.Success) {
                 updateOwnerState(ownerState.data, overwriteUIState = true)
             }
@@ -345,7 +341,7 @@ class PolicySetupViewModel @Inject constructor(
         if (ownerState !is OwnerState.Ready) return
 
         // update global state
-        ownerStateFlow.tryEmit(Resource.Success(ownerState))
+        ownerRepository.updateOwnerState(Resource.Success(ownerState))
 
         // figure out owner/primary/alternate approvers
         val approverSetup = ownerState.policySetup?.approvers ?: emptyList()

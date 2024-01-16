@@ -12,6 +12,7 @@ import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
+import co.censo.shared.data.repository.AuthState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
@@ -26,7 +27,6 @@ import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -47,7 +47,6 @@ class OwnerEntranceViewModel @Inject constructor(
     private val keyRepository: KeyRepository,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val keyValidationTrigger: MutableSharedFlow<String>,
 ) : ViewModel() {
 
@@ -215,6 +214,7 @@ class OwnerEntranceViewModel @Inject constructor(
             userFinishedSetup = true,
             showAcceptTermsOfUse = state.acceptedTermsOfUseVersion != touVersion
         )
+        ownerRepository.updateAuthState(AuthState.LOGGED_IN)
     }
 
     fun googleAuthFailure(googleAuthError: GoogleAuthError) {
@@ -254,7 +254,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
             state = if (userResponse is Resource.Success) {
                 // update global state
-                ownerStateFlow.value = userResponse.map { it.ownerState }
+                ownerRepository.updateOwnerState(userResponse.map { it.ownerState })
 
                 val ownerState = userResponse.data.ownerState
                 loggedInRouting(ownerState)

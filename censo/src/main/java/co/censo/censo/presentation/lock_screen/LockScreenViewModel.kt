@@ -16,7 +16,6 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -29,7 +28,6 @@ private val prolongationThreshold = 10.minutes
 class LockScreenViewModel @Inject constructor(
     private val timer: VaultCountDownTimer,
     private val ownerRepository: OwnerRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>
 ) : ViewModel() {
 
     var state by mutableStateOf(LockScreenState())
@@ -37,8 +35,8 @@ class LockScreenViewModel @Inject constructor(
 
     fun onCreate() {
         viewModelScope.launch {
-            ownerStateFlow.collect { resource: Resource<OwnerState> ->
-                resource.onSuccess { onOwnerState(it) }
+            ownerRepository.collectOwnerState { resource: Resource<OwnerState> ->
+                onOwnerState(resource)
             }
         }
     }
@@ -70,7 +68,7 @@ class LockScreenViewModel @Inject constructor(
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
             if (ownerStateResource is Resource.Success) {
-                ownerStateFlow.value = ownerStateResource
+                ownerRepository.updateOwnerState(ownerStateResource)
             }
         }
     }
@@ -86,8 +84,11 @@ class LockScreenViewModel @Inject constructor(
         retrieveOwnerState()
     }
 
-    private fun onOwnerState(ownerState: OwnerState) {
-        state = state.copy(lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState))
+    private fun onOwnerState(ownerState: Resource<OwnerState>) {
+        state = when (ownerState) {
+            is Resource.Success -> state.copy(lockStatus = LockScreenState.LockStatus.fromOwnerState(ownerState.data))
+            else -> state.copy(lockStatus = LockScreenState.LockStatus.None)
+        }
     }
 
     fun initUnlock() {
@@ -119,8 +120,7 @@ class LockScreenViewModel @Inject constructor(
             )
 
             if (unlockVaultResponse is Resource.Success) {
-                ownerStateFlow.value = unlockVaultResponse.map { it.ownerState }
-                ownerStateFlow.value.onSuccess { onOwnerState(it) }
+                ownerRepository.updateOwnerState(unlockVaultResponse.map { it.ownerState })
             }
 
             unlockVaultResponse.map { it.scanResultBlob }
@@ -134,7 +134,7 @@ class LockScreenViewModel @Inject constructor(
             val response: Resource<ProlongUnlockApiResponse> = ownerRepository.prolongUnlock()
 
             if (response is Resource.Success) {
-                ownerStateFlow.tryEmit(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.map { it.ownerState })
             }
 
             state = state.copy(prolongUnlockResource = response)

@@ -13,7 +13,6 @@ import co.censo.shared.data.repository.OwnerRepository
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +20,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PaywallViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val billingClient: BillingClientWrapper
 ) : ViewModel() {
 
@@ -30,7 +28,7 @@ class PaywallViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            ownerStateFlow.collect { resource: Resource<OwnerState> ->
+            ownerRepository.collectOwnerState { resource: Resource<OwnerState> ->
                 if (resource is Resource.Success) {
                     onOwnerState(resource.data)
                 }

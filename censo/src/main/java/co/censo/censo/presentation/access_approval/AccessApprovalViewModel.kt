@@ -21,17 +21,14 @@ import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.model.Approval
-import co.censo.shared.util.NavigationData
 import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AccessApprovalViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val ownerStateFlow: MutableStateFlow<Resource<OwnerState>>,
     private val pollingVerificationTimer: VaultCountDownTimer
 ) : ViewModel() {
 
@@ -42,7 +39,7 @@ class AccessApprovalViewModel @Inject constructor(
         state = state.copy(accessIntent = accessIntent)
 
         viewModelScope.launch {
-            val ownerState = ownerStateFlow.value
+            val ownerState = ownerRepository.getOwnerStateValue()
             if (ownerState is Resource.Success) {
                 updateOwnerState(ownerState.data)
             }
@@ -90,7 +87,7 @@ class AccessApprovalViewModel @Inject constructor(
         }
 
         // update global state
-        ownerStateFlow.tryEmit(Resource.Success(ownerState))
+        ownerRepository.updateOwnerState(Resource.Success(ownerState))
 
         // restore state
         when (val access = ownerState.access) {
