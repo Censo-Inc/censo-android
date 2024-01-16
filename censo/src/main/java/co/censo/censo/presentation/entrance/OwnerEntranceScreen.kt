@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -64,6 +63,7 @@ import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.censo.R
+import co.censo.censo.presentation.onboarding.OnboardingTopBar
 import co.censo.shared.data.Resource
 import co.censo.shared.R as SharedR
 import co.censo.censo.R as CensoR
@@ -74,6 +74,7 @@ import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.CrashReportingUtil
@@ -157,8 +158,27 @@ fun OwnerEntranceScreen(
 
         when {
             state.showAcceptTermsOfUse -> {
-                TermsOfUse {
-                    viewModel.setAcceptedTermsOfUseVersion(touVersion)
+                if (state.deleteUserResource is Resource.Error) {
+                    DisplayError(
+                        errorMessage = state.deleteUserResource.getErrorMessage(context),
+                        dismissAction = viewModel::resetDeleteUserResource,
+                    ) { viewModel.deleteUser() }
+                } else {
+                    TermsOfUse(
+                        onAccept = {
+                            viewModel.setAcceptedTermsOfUseVersion(touVersion)
+                        },
+                        onCancel = viewModel::showDeleteUserDialog,
+                        viewModel.state.userIsOnboarding
+                    )
+                    if (state.triggerDeleteUserDialog is Resource.Success) {
+                        ConfirmationDialog(
+                            title = stringResource(id = R.string.exit_setup),
+                            message = stringResource(R.string.exit_setup_details),
+                            onCancel = viewModel::onCancelResetUser,
+                            onDelete = viewModel::deleteUser,
+                        )
+                    }
                 }
             }
 
@@ -214,8 +234,6 @@ fun OwnerEntranceStandardUI(
     recover: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val resetTag = "reset"
 
     Column(
@@ -228,7 +246,7 @@ fun OwnerEntranceStandardUI(
         Spacer(modifier = Modifier.weight(1.0f))
         Image(
             modifier = Modifier.height(120.dp),
-            painter = painterResource(id = co.censo.censo.R.drawable.censo_logo_dark_blue_stacked),
+            painter = painterResource(id = R.drawable.censo_logo_dark_blue_stacked),
             contentDescription = null,
         )
         Spacer(modifier = Modifier.weight(0.25f))
@@ -341,7 +359,7 @@ fun OwnerEntranceStandardUI(
                     .weight(0.7f)
             ) {
                 Image(
-                    painter = painterResource(id = co.censo.censo.R.drawable.safe_icon),
+                    painter = painterResource(id = R.drawable.safe_icon),
                     contentDescription = null,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -388,12 +406,18 @@ fun OwnerEntranceStandardUI(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun TermsOfUse(
-    onAccept: () -> Unit
+    onAccept: () -> Unit,
+    onCancel: () -> Unit,
+    onboarding: Boolean
 ) {
 
     var isReview by remember { mutableStateOf(false) }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        topBar = {
+            OnboardingTopBar(onCancel = onCancel, title="Terms of Use", onboarding = onboarding)
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(horizontal = 28.dp)
@@ -480,9 +504,17 @@ fun HtmlText(html: String, modifier: Modifier = Modifier, @ColorInt color: Int =
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun TermsOfUsePreview() {
-    TermsOfUse {
+    TermsOfUse(onAccept =  {
         print("Accepted!")
-    }
+    }, onCancel = {}, true)
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun TermsOfUsePreviewNotOnboarding() {
+    TermsOfUse(onAccept =  {
+        print("Accepted!")
+    }, onCancel = {}, false)
 }
 
 @Preview(showSystemUi = true, showBackground = true)

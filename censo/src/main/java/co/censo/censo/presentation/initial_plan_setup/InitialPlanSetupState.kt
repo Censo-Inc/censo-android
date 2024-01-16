@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.initial_plan_setup
 
-import Base58EncodedPublicKey
 import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generatePartitionId
@@ -20,11 +19,15 @@ data class InitialPlanSetupScreenState(
     val complete: Boolean = false,
     val keyData: InitialKeyData? = null,
     val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
+    val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
+    val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
+    val kickUserOut: Resource<Unit> = Resource.Uninitialized,
 ) {
     val apiError = createPolicyParamsResponse is Resource.Error
         || createPolicyResponse is Resource.Error
         || saveKeyToCloudResource is Resource.Error
         || loadKeyFromCloudResource is Resource.Error
+        || deleteUserResource is Resource.Error
 }
 
 sealed class InitialPlanSetupStep {

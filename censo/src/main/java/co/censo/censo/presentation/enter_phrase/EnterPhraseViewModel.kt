@@ -2,7 +2,6 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
-import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -375,9 +374,14 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
+            EnterPhraseUIState.SELECT_ENTRY_TYPE ->
+                if (state.userHasOwnPhrase) {
+                    state.copy(userHasOwnPhrase = false)
+                } else {
+                    state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                }
             EnterPhraseUIState.DONE,
-            EnterPhraseUIState.NOTIFICATIONS,
-            EnterPhraseUIState.SELECT_ENTRY_TYPE -> state.copy(exitFlow = true)
+            EnterPhraseUIState.NOTIFICATIONS -> state.copy(exitFlow = true)
             EnterPhraseUIState.PASTE_ENTRY, EnterPhraseUIState.GENERATE -> {
                 state.copy(
                     enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
@@ -443,6 +447,10 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun resetPhraseEntryComplete() {
         state = state.copy(phraseEntryComplete = Resource.Uninitialized)
+    }
+
+    fun setUserHasOwnPhrase() {
+        state = state.copy(userHasOwnPhrase = true)
     }
 
     fun onPhrasePasted(pastedPhrase: String) {
@@ -558,5 +566,34 @@ class EnterPhraseViewModel @Inject constructor(
         )
     }
     //endregion
+
+    // region delete data
+    fun onCancelResetUser() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+    }
+
+    fun deleteUser() {
+        state = state.copy(
+            deleteUserResource = Resource.Loading,
+            triggerDeleteUserDialog = Resource.Uninitialized
+        )
+
+        val participantId =
+            (ownerRepository.getOwnerStateValue().success()?.data as? OwnerState.Ready)?.policy?.approvers?.first { it.isOwner }?.participantId
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.deleteUser(participantId)
+
+            state = state.copy(
+                deleteUserResource = response
+            )
+
+            if (response is Resource.Success) {
+                exitFlow()
+            }
+        }
+    }
+    //endregion
+
 
 }

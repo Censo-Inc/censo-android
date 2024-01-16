@@ -43,6 +43,7 @@ import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
@@ -125,7 +126,7 @@ fun EnterPhraseScreen(
     }
 
     Scaffold(topBar = {
-        if (state.enterWordUIState != EnterPhraseUIState.SELECT_ENTRY_TYPE) {
+        if (state.enterWordUIState != EnterPhraseUIState.SELECT_ENTRY_TYPE || state.welcomeFlow) {
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(onClick = {
@@ -169,6 +170,12 @@ fun EnterPhraseScreen(
                             errorMessage = stringResource(R.string.error_occurred_trying_to_get_user_data_please_try_again),
                             dismissAction = viewModel::resetUserResourceAndRetryGetUserApiCall,
                             retryAction = viewModel::resetUserResourceAndRetryGetUserApiCall
+                        )
+                    } else if (state.deleteUserResource is Resource.Error) {
+                        DisplayError(
+                            errorMessage = stringResource(R.string.reset_user_data_error),
+                            dismissAction = viewModel::onCancelResetUser,
+                            retryAction = viewModel::deleteUser
                         )
                     }
 
@@ -214,8 +221,18 @@ fun EnterPhraseScreen(
                                 currentLanguage = state.currentLanguage,
                                 onManualEntrySelected = { language -> viewModel.entrySelected(EntryType.MANUAL, language) },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
-                                onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) }
+                                onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) },
+                                userHasOwnPhrase = state.userHasOwnPhrase,
+                                onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() }
                             )
+                            if (state.triggerDeleteUserDialog is Resource.Success) {
+                                ConfirmationDialog(
+                                    title = stringResource(id = R.string.exit_setup),
+                                    message = stringResource(R.string.exit_setup_details),
+                                    onCancel = viewModel::onCancelResetUser,
+                                    onDelete = viewModel::deleteUser,
+                                )
+                            }
                         }
 
                         EnterPhraseUIState.PASTE_ENTRY -> {

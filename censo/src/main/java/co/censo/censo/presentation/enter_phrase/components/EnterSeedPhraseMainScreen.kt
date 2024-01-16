@@ -6,7 +6,6 @@ import MessageText
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,14 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,10 +52,11 @@ fun SelectSeedPhraseEntryType(
     currentLanguage: BIP39.WordListLanguage,
     onManualEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
     onPasteEntrySelected: () -> Unit,
-    onGenerateEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit
+    onGenerateEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
+    userHasOwnPhrase: Boolean,
+    onUserHasOwnPhrase: () -> Unit,
 ) {
     var selectedLanguage by remember { mutableStateOf(currentLanguage) }
-    var userHasOwnPhrase by remember { mutableStateOf(false) }
 
     val title = when {
         welcomeFlow && userHasOwnPhrase -> R.string.add_first_seed_phrase
@@ -86,24 +82,6 @@ fun SelectSeedPhraseEntryType(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-
-        if (userHasOwnPhrase) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                IconButton(
-                    modifier = Modifier.size(44.dp),
-                    onClick = { userHasOwnPhrase = false }
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = stringResource(R.string.back),
-                        tint = SharedColors.MainIconColor
-                    )
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.weight(0.3f))
 
@@ -191,9 +169,7 @@ fun SelectSeedPhraseEntryType(
                         verticalSpacingHeight = verticalSpacingHeight,
                         screenWidth = screenWidth,
                         onGenerateEntrySelected = { onGenerateEntrySelected(selectedLanguage) },
-                        onUserHasOwnPhrase = {
-                            userHasOwnPhrase = true
-                        }
+                        onUserHasOwnPhrase = onUserHasOwnPhrase
                     )
                 } else {
                     UserHasOwnPhrase(
@@ -422,6 +398,8 @@ fun LargePreviewEnterPhraseMainScreen() {
         onGenerateEntrySelected = {},
         welcomeFlow = true,
         currentLanguage = BIP39.WordListLanguage.English,
+        userHasOwnPhrase = false,
+        onUserHasOwnPhrase = {}
     )
 }
 
@@ -434,6 +412,8 @@ fun LargePreviewInitialPhraseScreen() {
         onGenerateEntrySelected = {},
         welcomeFlow = true,
         currentLanguage = BIP39.WordListLanguage.English,
+        userHasOwnPhrase = false,
+        onUserHasOwnPhrase = {}
     )
 }
 
@@ -445,7 +425,9 @@ fun NormalPreviewEnterPhraseMainScreen() {
         onPasteEntrySelected = {},
         onGenerateEntrySelected = {},
         welcomeFlow = false,
-        currentLanguage = BIP39.WordListLanguage.English
+        currentLanguage = BIP39.WordListLanguage.English,
+        userHasOwnPhrase = false,
+        onUserHasOwnPhrase = {}
     )
 }
 
@@ -457,6 +439,8 @@ fun SmallSeedPhraseAddedPreview() {
         onPasteEntrySelected = {},
         onGenerateEntrySelected = {},
         welcomeFlow = false,
-        currentLanguage = BIP39.WordListLanguage.English
+        currentLanguage = BIP39.WordListLanguage.English,
+        userHasOwnPhrase = false,
+        onUserHasOwnPhrase = {}
     )
 }

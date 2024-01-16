@@ -4,7 +4,6 @@ import StandardButton
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,16 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -55,17 +47,18 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.VaultColors
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
-import co.censo.censo.presentation.main.BottomNavItem
+import co.censo.censo.presentation.onboarding.OnboardingTopBar
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.LearnMoreScreen
 import co.censo.shared.presentation.components.LearnMoreUI
 import co.censo.shared.presentation.components.LearnMoreUtil
+import co.censo.shared.util.popUpToTop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +70,14 @@ fun InitialPlanSetupScreen(
     val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = state) {
+        if (state.kickUserOut is Resource.Success) {
+            navController.navigate(Screen.EntranceRoute.route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+            viewModel.reset()
+        }
+
         if (state.complete) {
 
             val publicKey =
@@ -101,28 +102,18 @@ fun InitialPlanSetupScreen(
     Scaffold(
         containerColor = Color.White,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.NavbarColor),
-                navigationIcon = {
-                    IconButton(onClick = {
+            if (state.initialPlanSetupStep == InitialPlanSetupStep.Initial) {
+                OnboardingTopBar(
+                    onCancel = {
                         if (showInfoView.value) {
                             showInfoView.value = false
                         } else {
-                            navController.navigate(Screen.EntranceRoute.route) {
-                                launchSingleTop = true
-                                popCurrentDestinationFromBackStack(navController)
-                            }
+                            viewModel.showDeleteUserDialog()
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Close,
-                            stringResource(R.string.back),
-                            tint = SharedColors.MainIconColor
-                        )
-                    }
-                },
-                title = {},
-            )
+                    },
+                    onboarding = true
+                )
+            }
         },
 
         ) { paddingValues ->
@@ -139,6 +130,8 @@ fun InitialPlanSetupScreen(
                             "Error occurred while trying to save data to Google Drive. Please try again."
                         } else if (state.loadKeyFromCloudResource is Resource.Error) {
                             "Error occurred while trying to load data from Google Drive. Please try again."
+                        } else if (state.deleteUserResource is Resource.Error) {
+                            "Error occurred while trying to reset user data"
                         } else if (state.createPolicyParamsResponse is Resource.Error
                             || state.createPolicyResponse is Resource.Error
                         ) {
@@ -164,7 +157,7 @@ fun InitialPlanSetupScreen(
                         InitialPlanSetupStep.CreatePolicyParams,
                         InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
 
-                        is InitialPlanSetupStep.Initial ->
+                        is InitialPlanSetupStep.Initial -> {
                             InitialPlanSetupStandardUI(
                                 startPlanSetup = viewModel::determineUIStatus,
                                 isInfoViewVisible = showInfoView.value,
@@ -172,6 +165,16 @@ fun InitialPlanSetupScreen(
                                     showInfoView.value = true
                                 }
                             )
+
+                            if (state.triggerDeleteUserDialog is Resource.Success) {
+                                ConfirmationDialog(
+                                    title = stringResource(id = R.string.exit_setup),
+                                    message = stringResource(R.string.exit_setup_details),
+                                    onCancel = viewModel::resetDeleteUserDialog,
+                                    onDelete = viewModel::deleteUser,
+                                )
+                            }
+                        }
 
 
                         is InitialPlanSetupStep.Facetec ->

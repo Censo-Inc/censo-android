@@ -450,4 +450,7 @@
     <string name="cancel_access_dialog_confirmation">If you cancel access you will need to wait for the timelock period to access your phrases again. Are you sure?</string>
     <string name="trusted_approvers_learn_more_title"><![CDATA[Trusted Approvers & Safety in Number]]></string>
     <string name="face_scan_learn_more_title"><![CDATA[Face Scan & Privacy]]></string>
+    <string name="exit_setup">Exit Setup</string>
+    <string name="exit_setup_details">This will exit the setup process and delete ALL of your data. You will be required to start over again.</string>
+    <string name="reset_user_data_error">Error occurred while trying to reset user data.  Please try again.</string>
 </resources>
