@@ -35,7 +35,6 @@ import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun SeedPhraseAdded(
-    isSavingFirstSeedPhrase: Boolean,
     onClick: () -> Unit,
 ) {
 
@@ -98,7 +97,7 @@ fun LargeSeedPhraseAddedPreview() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        SeedPhraseAdded(true) {}
+        SeedPhraseAdded {}
     }
 }
 
@@ -110,7 +109,7 @@ fun NormalSeedPhraseAddedPreview() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        SeedPhraseAdded(true) {}
+        SeedPhraseAdded {}
     }
 }
 
@@ -122,6 +121,6 @@ fun SmallSeedPhraseAddedPreview() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        SeedPhraseAdded(true) {}
+        SeedPhraseAdded {}
     }
 }

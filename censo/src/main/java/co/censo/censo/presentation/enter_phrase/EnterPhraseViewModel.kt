@@ -107,7 +107,6 @@ class EnterPhraseViewModel @Inject constructor(
                 ownerRepository.updateOwnerState(Resource.Success(ownerState))
                 if (ownerState is OwnerState.Ready) {
                     state = state.copy(
-                        isSavingFirstSeedPhrase = ownerState.vault.seedPhrases.isEmpty(),
                         ownerApproverParticipantId = ownerState.policy.owner?.participantId,
                         masterKeySignature = ownerState.policy.masterKeySignature
                     )
@@ -426,7 +425,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun finishPhraseEntry() {
-        state = if (state.isSavingFirstSeedPhrase) {
+        state = if (state.welcomeFlow) {
             state.copy(enterWordUIState = EnterPhraseUIState.NOTIFICATIONS)
         } else {
             state.copy(phraseEntryComplete = Resource.Success(Unit))

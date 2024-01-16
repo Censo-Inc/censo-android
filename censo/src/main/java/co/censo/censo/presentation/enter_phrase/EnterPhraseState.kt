@@ -36,7 +36,6 @@ data class EnterPhraseState(
     val cancelInputSeedPhraseConfirmationDialog: Boolean = false,
     val exitConfirmationDialog: Boolean = false,
     val exitFlow: Boolean = false,
-    val isSavingFirstSeedPhrase: Boolean = false,
     val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized,
 
     // Cloud Storage
