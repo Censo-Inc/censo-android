@@ -5,9 +5,13 @@ import co.censo.censo.presentation.lock_screen.LockScreenViewModel
 import co.censo.censo.test_helper.mockReadyOwnerStateWithNullPolicySetup
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.BiometryScanResultBlob
+import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import com.nhaarman.mockitokotlin2.any
@@ -165,8 +169,55 @@ class LockScreenViewModelTest : BaseViewModelTest() {
 
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.UnlockInProgress)
     }
-
     //endregion
+
+    @Test
+    fun `test unlock flow`() = runTest {
+        assertDefaultVMState()
+
+        //region Mock out facetec data and ownerRepository.unlock method
+        val mockVerificationId = BiometryVerificationId(value = "AA")
+        val mockFacetecBiometry = FacetecBiometry(
+            faceScan = "AA",
+            auditTrailImage = "AA",
+            lowQualityAuditTrailImage = "AA",
+            verificationId = mockVerificationId
+        )
+
+        whenever(ownerRepository.unlock(
+            biometryVerificationId = mockVerificationId, biometryData = mockFacetecBiometry
+        )).thenAnswer {
+            Resource.Success(
+                UnlockApiResponse(
+                    ownerState = mockReadyOwnerStateWithPolicySetup,
+                    scanResultBlob = BiometryScanResultBlob(value = "BB")
+                )
+            )
+        }
+        //endregion
+
+        //Set locked state
+        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+
+        lockScreenViewModel.onCreate()
+
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Locked)
+
+        //Init unlock
+        lockScreenViewModel.initUnlock()
+
+        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.UnlockInProgress)
+
+        //Call onFaceScanReady to mock user completing face scan
+        lockScreenViewModel.onFaceScanReady(
+            verificationId = mockVerificationId, facetecData = mockFacetecBiometry
+        )
+
+        //Assert that app is unlocked
+        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Unlocked)
+    }
 
     //region Custom asserts
     private fun assertDefaultVMState() {
