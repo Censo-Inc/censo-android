@@ -293,35 +293,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
     fun `start VM with AddApprover action then VM should set state and start polling timers`() = runTest {
         assertDefaultVMState()
 
-        //region Mock ownerStateFlow.value, keyRepository.decryptWithDeviceKey, and totpGenerator.generateCode
-        whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
-            Resource.Success(readyOwnerStateDataWithOwnerAndInitialPrimaryApprover)
-        }
-
-        whenever(keyRepository.decryptWithDeviceKey(any())).thenAnswer {
-            byteArrayOf(Byte.MAX_VALUE)
-        }
-
-        whenever(totpGenerator.generateCode(any(), any())).thenAnswer {
-            genericTotpCode
-        }
-        //endregion
-
-        //Call onCreate then onResume to simulate flow
-        policySetupViewModel.onCreate(addApproversPolicySetupAction)
-        policySetupViewModel.onResume()
-
-        //Assert for policySetupAction being set to state
-        //Assert that policySetupUIState is set to ApproverNickname_2
-        assertEquals(
-            addApproversPolicySetupAction,
-            policySetupViewModel.state.policySetupAction
-        )
-
-        assertEquals(
-            PolicySetupUIState.ApproverNickname_2,
-            policySetupViewModel.state.policySetupUIState
-        )
+        setMockApproverDataToViewModelState()
 
         testScheduler.advanceUntilIdle()
 

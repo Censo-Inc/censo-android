@@ -4,6 +4,7 @@ import co.censo.censo.presentation.lock_screen.LockScreenState
 import co.censo.censo.presentation.lock_screen.LockScreenViewModel
 import co.censo.censo.test_helper.mockReadyOwnerStateWithNullPolicySetup
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
+import co.censo.censo.view_model_tests.BaseViewModelTest
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.Approver
