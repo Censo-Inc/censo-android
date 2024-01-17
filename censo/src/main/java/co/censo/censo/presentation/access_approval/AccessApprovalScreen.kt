@@ -32,6 +32,7 @@ import co.censo.censo.presentation.access_approval.components.AnotherDeviceAcces
 import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
 import co.censo.censo.presentation.access_approval.components.SelectApprover
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.util.external
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.model.AccessIntent

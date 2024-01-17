@@ -4,24 +4,25 @@ import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
+import co.censo.censo.util.TestUtil
+import co.censo.censo.util.isApprovedFor
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.ApprovalStatus
-import co.censo.shared.data.model.Approver
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.AccessStatus
+import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
-import co.censo.shared.data.model.Approval
 import co.censo.shared.util.asResource
+import co.censo.shared.util.isDigitsOnly
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -297,30 +298,10 @@ class AccessApprovalViewModel @Inject constructor(
     fun hideCloseConfirmationDialog() {
         state = state.copy(showCancelConfirmationDialog = false)
     }
-}
 
-internal fun List<Approval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
-    return any { it.participantId == approver?.participantId && it.status == ApprovalStatus.Approved }
-}
-
-internal fun List<Approver.TrustedApprover>.external(): List<Approver.TrustedApprover> {
-    return filter { !it.isOwner }
-}
-
-internal fun List<Approver.TrustedApprover>.primaryApprover(): Approver.TrustedApprover? {
-    return external().minByOrNull { it.attributes.onboardedAt }
-}
-
-internal fun List<Approver.TrustedApprover>.backupApprover(): Approver.TrustedApprover? {
-    val externalApprovers = external()
-
-    return when {
-        externalApprovers.isEmpty() -> null
-        externalApprovers.size == 1 -> null
-        else -> externalApprovers.maxBy { it.attributes.onboardedAt }
+    fun setUIState(uiState: AccessApprovalUIState) {
+        if (System.getProperty(TestUtil.TEST_MODE) == TestUtil.TEST_MODE_TRUE) {
+            state = state.copy(accessApprovalUIState = uiState)
+        }
     }
-}
-
-internal fun Approver.TrustedApprover?.isDefined(): Boolean {
-    return this != null
 }
