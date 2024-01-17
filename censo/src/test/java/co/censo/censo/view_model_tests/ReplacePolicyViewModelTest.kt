@@ -1,4 +1,4 @@
-package co.censo.censo
+package co.censo.censo.view_model_tests
 
 import Base64EncodedData
 import co.censo.censo.presentation.Screen
@@ -30,7 +30,6 @@ import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.InitiateAccessApiResponse
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.repository.KeyRepository
@@ -46,7 +45,6 @@ import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest

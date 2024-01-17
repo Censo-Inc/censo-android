@@ -1,4 +1,4 @@
-package co.censo.censo
+package co.censo.censo.view_model_tests
 
 import org.junit.Before
 import org.mockito.MockitoAnnotations

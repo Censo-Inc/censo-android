@@ -1,4 +1,4 @@
-package co.censo.censo
+package co.censo.censo.view_model_tests
 
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
