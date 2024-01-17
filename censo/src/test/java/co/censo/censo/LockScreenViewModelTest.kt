@@ -155,10 +155,20 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `call onCreate with locked access global owner state then VM should set lock status to unlocked`() = runTest {
+    fun `call onCreate with locked access global owner state then VM should set lock status to locked`() = runTest {
         assertDefaultVMState()
 
-//        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+        //Setup collector to be able to emit updates
+        lateinit var collector: FlowCollector<Resource<OwnerState>>
+
+        //Mock the collectOwnerState method and assign the FlowCollector to the local reference
+        whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
+            collector = invocation.getArgument(0)
+            launch {
+                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+            }
+            return@thenAnswer null
+        }
 
         lockScreenViewModel.onCreate()
 
@@ -166,8 +176,8 @@ class LockScreenViewModelTest : BaseViewModelTest() {
 
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Locked)
 
-        //Emit null owner state data and assert lock status is none
-//        ownerStateFlow.tryEmit(Resource.Success(null))
+        //Emit error and assert lock status is none
+        collector.emit(Resource.Error())
 
         testScheduler.advanceUntilIdle()
 
@@ -228,9 +238,28 @@ class LockScreenViewModelTest : BaseViewModelTest() {
             verificationId = mockVerificationId
         )
 
+        //Setup collector to be able to emit updates
+        lateinit var collector: FlowCollector<Resource<OwnerState>>
+
+        //Mock the collectOwnerState method and assign the FlowCollector to the local reference
+        whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
+            collector = invocation.getArgument(0)
+            launch {
+                //Initially we want locked state
+                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+            }
+            return@thenAnswer null
+        }
+
         whenever(ownerRepository.unlock(
             biometryVerificationId = mockVerificationId, biometryData = mockFacetecBiometry
         )).thenAnswer {
+
+            //When unlock is called, we want to emit the updated state as well return the UnlockApiResponse data
+            launch {
+                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+            }
+
             Resource.Success(
                 UnlockApiResponse(
                     ownerState = mockReadyOwnerStateWithPolicySetup,
@@ -240,9 +269,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         }
         //endregion
 
-        //Set locked state
-//        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
-
+        //Trigger onCreate
         lockScreenViewModel.onCreate()
 
         testScheduler.advanceUntilIdle()
@@ -267,8 +294,5 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     private fun assertDefaultVMState() {
         assertEquals(LockScreenState(), lockScreenViewModel.state)
     }
-    //endregion
-
-    //region Helper methods
     //endregion
 }
