@@ -191,7 +191,7 @@ fun LearnMoreLabelPreview() {
 @Composable
 fun PreviewLearnMoreTrustedApproversUI() {
     LearnMoreScreen(
-        title = "Trusted Approvers & Safety in Number",
+        title = "Trusted Approvers & Safety in Numbers",
         annotatedString = LearnMoreUtil.trustedApproversMessage()
     )
 }

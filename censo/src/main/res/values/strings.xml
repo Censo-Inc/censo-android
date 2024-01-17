@@ -448,7 +448,7 @@
     <string name="cannot_add_approvers">Cannot setup approvers while an access is in progress</string>
     <string name="cannot_remove_approvers">Cannot remove approvers while an access is in progress</string>
     <string name="cancel_access_dialog_confirmation">If you cancel access you will need to wait for the timelock period to access your phrases again. Are you sure?</string>
-    <string name="trusted_approvers_learn_more_title"><![CDATA[Trusted Approvers & Safety in Number]]></string>
+    <string name="trusted_approvers_learn_more_title"><![CDATA[Trusted Approvers & Safety in Numbers]]></string>
     <string name="face_scan_learn_more_title"><![CDATA[Face Scan & Privacy]]></string>
     <string name="exit_setup">Exit Setup</string>
     <string name="exit_setup_details">This will exit the setup process and delete ALL of your data. You will be required to start over again.</string>
