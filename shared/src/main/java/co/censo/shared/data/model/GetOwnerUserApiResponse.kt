@@ -142,11 +142,6 @@ fun Approver.ProspectApprover.deeplink(): String {
     return "${DeepLinkURI.APPROVER_INVITE_URI}${this.invitationId?.value}"
 }
 
-//TODO: NEw Direction for data mapping
-// - Split out the data classes into their own areas to make the diagram cleaner to follow
-// - Map out the Policy data class
-// - Review data models to map out any missing pieces
-
 @Serializable
 data class Policy(
     val createdAt: Instant,
@@ -247,7 +242,7 @@ sealed class OwnerState {
     @SerialName("Ready")
     data class Ready(
         val subscriptionStatus: SubscriptionStatus,
-        val policy: Policy,//TODO: Map out
+        val policy: Policy,
         val vault: Vault,
         val unlockedForSeconds: ULong? = null,
         val access: Access?,
