@@ -12,7 +12,6 @@ import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.shared.util.asResource
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeastOnce
 import com.nhaarman.mockitokotlin2.whenever
@@ -75,7 +74,6 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     //endregion
 
     //region Focused Tests
-
     @Test
     fun `call onStart with access intent then VM should set state, get owner state, and start timer`() = runTest {
         assertDefaultVMState()
@@ -232,6 +230,11 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         var mockVerificationCode = "String"
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertTrue(accessApprovalViewModel.state.verificationCode.isEmpty())
+
+        mockVerificationCode = "123Digi"
 
         accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
         assertTrue(accessApprovalViewModel.state.verificationCode.isEmpty())

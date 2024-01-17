@@ -21,6 +21,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.asResource
+import co.censo.shared.util.isDigitsOnly
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -222,16 +223,6 @@ class AccessApprovalViewModel @Inject constructor(
                 submitVerificationCode(state.selectedApprover!!.participantId, code)
             }
         }
-    }
-
-    //TODO: Move this to utils and then spread it's usage
-    private fun String.isDigitsOnly(): Boolean {
-        for (char in this) {
-            if (!char.isDigit()) {
-                return false
-            }
-        }
-        return true
     }
 
     private fun submitVerificationCode(participantId: ParticipantId, verificationCode: String) {
