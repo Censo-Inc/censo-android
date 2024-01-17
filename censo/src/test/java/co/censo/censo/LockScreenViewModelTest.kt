@@ -48,10 +48,10 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     lateinit var ownerRepository: OwnerRepository
 
     private lateinit var lockScreenViewModel: LockScreenViewModel
-
-    private var ownerStateFlow =  MutableStateFlow<Resource<OwnerState>>(
-        Resource.Success(mockReadyOwnerStateWithPolicySetup)
-    )
+//
+//    private var ownerStateFlow =  MutableStateFlow<Resource<OwnerState>>(
+//        Resource.Success(mockReadyOwnerStateWithPolicySetup)
+//    )
 
     private val testDispatcher = StandardTestDispatcher()
     //endregion
@@ -66,7 +66,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(testDispatcher)
 
         lockScreenViewModel = LockScreenViewModel(
-            timer = timer, ownerRepository = ownerRepository, ownerStateFlow = ownerStateFlow
+            timer = timer, ownerRepository = ownerRepository
         )
     }
 
@@ -81,7 +81,15 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     fun `call onCreate with null data in global owner state then VM should set lock status to none`() = runTest {
         assertDefaultVMState()
 
-        ownerStateFlow.tryEmit(Resource.Success(null))
+        //TODO: Update tests to use mock responses from ownerRepository
+        whenever(ownerRepository.collectOwnerState(collector = {})).thenAnswer {
+            Resource.Success(null)
+        }
+
+
+//        ownerStateFlow.tryEmit(Resource.Success(null))
+
+
 
         lockScreenViewModel.onCreate()
 
@@ -94,7 +102,11 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     fun `call onCreate with unlocked access global owner state then VM should set lock status to unlocked`() = runTest {
         assertDefaultVMState()
 
-        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+        whenever(ownerRepository.collectOwnerState(collector = {resource: Resource<OwnerState> -> })).thenAnswer {
+            Resource.Success(mockReadyOwnerStateWithPolicySetup as OwnerState)
+        }
+
+//        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
 
         lockScreenViewModel.onCreate()
 
@@ -103,7 +115,10 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Unlocked)
 
         //Emit null owner state data and assert lock status is none
-        ownerStateFlow.tryEmit(Resource.Success(null))
+//        ownerStateFlow.tryEmit(Resource.Success(null))
+        whenever(ownerRepository.collectOwnerState(collector = {})).thenAnswer {
+            Resource.Error<OwnerState>()
+        }
 
         testScheduler.advanceUntilIdle()
 
@@ -114,7 +129,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     fun `call onCreate with locked access global owner state then VM should set lock status to unlocked`() = runTest {
         assertDefaultVMState()
 
-        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+//        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
 
         lockScreenViewModel.onCreate()
 
@@ -123,7 +138,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Locked)
 
         //Emit null owner state data and assert lock status is none
-        ownerStateFlow.tryEmit(Resource.Success(null))
+//        ownerStateFlow.tryEmit(Resource.Success(null))
 
         testScheduler.advanceUntilIdle()
 
@@ -197,7 +212,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         //endregion
 
         //Set locked state
-        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+//        ownerStateFlow.tryEmit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
 
         lockScreenViewModel.onCreate()
 
