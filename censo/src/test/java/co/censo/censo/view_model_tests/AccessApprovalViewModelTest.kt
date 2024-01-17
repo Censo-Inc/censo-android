@@ -2,9 +2,12 @@ package co.censo.censo.view_model_tests
 
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_approval.AccessApprovalState
+import co.censo.censo.presentation.access_approval.AccessApprovalUIState
 import co.censo.censo.presentation.access_approval.AccessApprovalViewModel
+import co.censo.censo.presentation.access_approval.backupApprover
 import co.censo.censo.presentation.access_approval.primaryApprover
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
+import co.censo.censo.util.TestUtil
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.DeleteAccessApiResponse
@@ -57,8 +60,7 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        //TODO: Add set test mode property if applicable
-
+        System.setProperty(TestUtil.TEST_MODE, TestUtil.TEST_MODE_TRUE)
         Dispatchers.setMain(testDispatcher)
 
         accessApprovalViewModel = AccessApprovalViewModel(
@@ -68,7 +70,7 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
 
     @After
     fun tearDown() {
-        //TODO: Add clear test mode property if applicable
+        System.clearProperty(TestUtil.TEST_MODE)
         Dispatchers.resetMain()
     }
     //endregion
@@ -241,23 +243,95 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `foo7`() {
-        //TODO: onContinue
+    fun `call onContinue then VM should set UI state to ApproveAccess`() {
+        assertDefaultVMState()
+
+        accessApprovalViewModel.onContinue()
+
+        assertTrue(accessApprovalViewModel.state.accessApprovalUIState == AccessApprovalUIState.ApproveAccess)
     }
 
     @Test
-    fun `foo8`() {
-        //TODO: onApproverSelected
+    fun `call onApproverSelected then VM should set approver to state`() {
+        assertDefaultVMState()
+
+        val primaryApprover = mockReadyOwnerStateWithPolicySetup.policy.approvers.primaryApprover()!!
+        val backupApprover = mockReadyOwnerStateWithPolicySetup.policy.approvers.backupApprover()!!
+
+        //Select primary approver and assert
+        accessApprovalViewModel.onApproverSelected(primaryApprover)
+        assertEquals(primaryApprover, accessApprovalViewModel.state.selectedApprover)
+
+        //Selecting the same approver as the one in state, should set the state property to null
+        accessApprovalViewModel.onApproverSelected(primaryApprover)
+        assertNull(accessApprovalViewModel.state.selectedApprover)
+
+        //Select backup approver and assert
+        accessApprovalViewModel.onApproverSelected(backupApprover)
+        assertEquals(backupApprover, accessApprovalViewModel.state.selectedApprover)
     }
 
     @Test
-    fun `foo9`() {
-        //TODO: onBackClick
+    fun `call onBackClicked then VM should react accordingly based on UI state`() {
+        assertDefaultVMState()
+
+        //Set UI state to SelectApprover
+        accessApprovalViewModel.setUIState(AccessApprovalUIState.SelectApprover)
+
+        accessApprovalViewModel.onBackClicked()
+
+        assertTrue(accessApprovalViewModel.state.showCancelConfirmationDialog)
+
+        //Call hideCloseConfirmationDialog to clear state property
+        accessApprovalViewModel.hideCloseConfirmationDialog()
+        assertFalse(accessApprovalViewModel.state.showCancelConfirmationDialog)
+
+        //Set UI state to ApproveAccess
+        accessApprovalViewModel.setUIState(AccessApprovalUIState.ApproveAccess)
+
+        accessApprovalViewModel.onBackClicked()
+
+        assertTrue(accessApprovalViewModel.state.accessApprovalUIState == AccessApprovalUIState.SelectApprover)
+
+        //Set UI state to Approved
+        accessApprovalViewModel.setUIState(AccessApprovalUIState.Approved)
+
+        accessApprovalViewModel.onBackClicked()
+
+        assertTrue(accessApprovalViewModel.state.accessApprovalUIState == AccessApprovalUIState.ApproveAccess)
+
     }
 
     @Test
-    fun `foo10`() {
-        //TODO: navIntentAware
+    fun `call navigateIntentAware then VM should set navigation state accordingly based on access intent`() {
+        assertDefaultVMState()
+
+        //Set acccess phrase intent
+        accessApprovalViewModel.onStart(accessPhraseIntent)
+
+        accessApprovalViewModel.navigateIntentAware()
+
+        assertEquals(Screen.AccessSeedPhrases.route, accessApprovalViewModel.state.navigationResource.asSuccess().data.route)
+
+        //Reset navigation resource
+        accessApprovalViewModel.resetNavigationResource()
+
+        //Set replace policy intent
+        accessApprovalViewModel.onStart(replacePolicyIntent)
+
+        accessApprovalViewModel.navigateIntentAware()
+
+        assertEquals(Screen.PolicySetupRoute.removeApproversRoute(), accessApprovalViewModel.state.navigationResource.asSuccess().data.route)
+
+        //Reset navigation resource
+        accessApprovalViewModel.resetNavigationResource()
+
+        //Set recover owner key intent
+        accessApprovalViewModel.onStart(recoverOwnerKeyIntent)
+
+        accessApprovalViewModel.navigateIntentAware()
+
+        assertEquals(Screen.OwnerKeyRecoveryRoute.route, accessApprovalViewModel.state.navigationResource.asSuccess().data.route)
     }
     //endregion
 

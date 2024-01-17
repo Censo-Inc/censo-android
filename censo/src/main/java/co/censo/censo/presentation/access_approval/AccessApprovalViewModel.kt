@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
+import co.censo.censo.presentation.plan_setup.PolicySetupUIState
+import co.censo.censo.util.TestUtil
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Access
@@ -297,6 +299,12 @@ class AccessApprovalViewModel @Inject constructor(
     fun hideCloseConfirmationDialog() {
         state = state.copy(showCancelConfirmationDialog = false)
     }
+
+    fun setUIState(uiState: AccessApprovalUIState) {
+        if (System.getProperty(TestUtil.TEST_MODE) == TestUtil.TEST_MODE_TRUE) {
+            state = state.copy(accessApprovalUIState = uiState)
+        }
+    }
 }
 
 internal fun List<Approval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
@@ -307,6 +315,7 @@ internal fun List<Approver.TrustedApprover>.external(): List<Approver.TrustedApp
     return filter { !it.isOwner }
 }
 
+//TODO: consider moving these to the ApproverUtils
 internal fun List<Approver.TrustedApprover>.primaryApprover(): Approver.TrustedApprover? {
     return external().minByOrNull { it.attributes.onboardedAt }
 }
@@ -319,8 +328,4 @@ internal fun List<Approver.TrustedApprover>.backupApprover(): Approver.TrustedAp
         externalApprovers.size == 1 -> null
         else -> externalApprovers.maxBy { it.attributes.onboardedAt }
     }
-}
-
-internal fun Approver.TrustedApprover?.isDefined(): Boolean {
-    return this != null
 }
