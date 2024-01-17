@@ -5,22 +5,58 @@ import co.censo.censo.presentation.lock_screen.LockScreenViewModel
 import co.censo.censo.test_helper.mockReadyOwnerStateWithNullPolicySetup
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
+import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
+import co.censo.shared.data.model.ConfirmApprovershipApiResponse
+import co.censo.shared.data.model.CreatePolicyApiResponse
+import co.censo.shared.data.model.CreatePolicySetupApiResponse
+import co.censo.shared.data.model.DeleteAccessApiResponse
+import co.censo.shared.data.model.DeletePolicySetupApiResponse
+import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
+import co.censo.shared.data.model.EncryptedShard
 import co.censo.shared.data.model.FacetecBiometry
+import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.IdentityToken
+import co.censo.shared.data.model.InitiateAccessApiResponse
+import co.censo.shared.data.model.LockApiResponse
+import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.ProlongUnlockApiResponse
+import co.censo.shared.data.model.RecoveredSeedPhrase
+import co.censo.shared.data.model.RejectApproverVerificationApiResponse
+import co.censo.shared.data.model.ReplacePolicyApiResponse
+import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
+import co.censo.shared.data.model.ResetLoginIdApiResponse
+import co.censo.shared.data.model.ResetToken
+import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
+import co.censo.shared.data.model.SeedPhrase
+import co.censo.shared.data.model.StoreSeedPhraseApiResponse
+import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
+import co.censo.shared.data.model.SubmitPurchaseApiResponse
+import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UnlockApiResponse
+import co.censo.shared.data.repository.AuthState
+import co.censo.shared.data.repository.CreatePolicyParams
+import co.censo.shared.data.repository.EncryptedSeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.util.BIP39
 import co.censo.shared.util.VaultCountDownTimer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeastOnce
+import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -30,6 +66,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.invocation.InvocationOnMock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LockScreenViewModelTest : BaseViewModelTest() {
@@ -71,8 +108,12 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     fun `call onCreate with null data in global owner state then VM should set lock status to none`() = runTest {
         assertDefaultVMState()
 
-        whenever(ownerRepository.collectOwnerState(any())).thenAnswer {
-            Resource.Success(null)
+        whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
+            val collector: FlowCollector<Resource<OwnerState>> = invocation.getArgument(0)
+            launch {
+                collector.emit(Resource.Error())
+            }
+            return@thenAnswer null
         }
 
         lockScreenViewModel.onCreate()
@@ -86,32 +127,31 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     fun `call onCreate with unlocked access global owner state then VM should set lock status to unlocked`() = runTest {
         assertDefaultVMState()
 
-        //TODO: Revisit testing the lambda callback and getting these tests working
-//        doAnswer { invocationOnMock: InvocationOnMock ->
-//            val lambda: (Resource<OwnerState>) -> Unit = invocationOnMock.getArgument(0)
-//            lambda(Resource.Success(mockReadyOwnerStateWithPolicySetup))
-//            null
-//        }.whenever(ownerRepository).collectOwnerState { any() }
+        //Setup collector to be able to emit updates
+        lateinit var collector: FlowCollector<Resource<OwnerState>>
 
-        whenever(ownerRepository.collectOwnerState { }).thenAnswer { invocation ->
-            val lambda: (Resource<OwnerState>) -> Unit = invocation.getArgument(0)
-            lambda(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+        //Mock the collectOwnerState method and assign the FlowCollector to the local reference
+        whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
+            collector = invocation.getArgument(0)
+            launch {
+                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+            }
+            return@thenAnswer null
         }
 
+        //Trigger onCreate
         lockScreenViewModel.onCreate()
 
         testScheduler.advanceUntilIdle()
 
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Unlocked)
 
-        //Emit null owner state data and assert lock status is none
-        whenever(ownerRepository.collectOwnerState(any())).thenAnswer {
-            Resource.Error<OwnerState>()
-        }
+        //Use the reference to collector to emit a new value
+        collector.emit(Resource.Error())
 
-//        testScheduler.advanceUntilIdle()
-//
-//        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.None)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.None)
     }
 
     @Test
