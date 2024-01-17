@@ -8,14 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
-import co.censo.censo.presentation.plan_setup.PolicySetupUIState
 import co.censo.censo.util.TestUtil
+import co.censo.censo.util.isApprovedFor
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.AccessStatus
-import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.OwnerState
@@ -304,28 +303,5 @@ class AccessApprovalViewModel @Inject constructor(
         if (System.getProperty(TestUtil.TEST_MODE) == TestUtil.TEST_MODE_TRUE) {
             state = state.copy(accessApprovalUIState = uiState)
         }
-    }
-}
-
-internal fun List<Approval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
-    return any { it.participantId == approver?.participantId && it.status == ApprovalStatus.Approved }
-}
-
-internal fun List<Approver.TrustedApprover>.external(): List<Approver.TrustedApprover> {
-    return filter { !it.isOwner }
-}
-
-//TODO: consider moving these to the ApproverUtils
-internal fun List<Approver.TrustedApprover>.primaryApprover(): Approver.TrustedApprover? {
-    return external().minByOrNull { it.attributes.onboardedAt }
-}
-
-internal fun List<Approver.TrustedApprover>.backupApprover(): Approver.TrustedApprover? {
-    val externalApprovers = external()
-
-    return when {
-        externalApprovers.isEmpty() -> null
-        externalApprovers.size == 1 -> null
-        else -> externalApprovers.maxBy { it.attributes.onboardedAt }
     }
 }

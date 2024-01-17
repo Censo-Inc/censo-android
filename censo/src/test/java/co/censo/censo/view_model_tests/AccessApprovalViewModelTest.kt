@@ -4,10 +4,10 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_approval.AccessApprovalState
 import co.censo.censo.presentation.access_approval.AccessApprovalUIState
 import co.censo.censo.presentation.access_approval.AccessApprovalViewModel
-import co.censo.censo.presentation.access_approval.backupApprover
-import co.censo.censo.presentation.access_approval.primaryApprover
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
 import co.censo.censo.util.TestUtil
+import co.censo.censo.util.backupApprover
+import co.censo.censo.util.primaryApprover
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.DeleteAccessApiResponse
@@ -335,15 +335,9 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     }
     //endregion
 
-    //region Flow Tests
-    //endregion
-
     //region Custom asserts
     private fun assertDefaultVMState() {
         assertEquals(AccessApprovalState(), accessApprovalViewModel.state)
     }
-    //endregion
-
-    //region Helper methods
     //endregion
 }
