@@ -45,7 +45,6 @@ data class EnterPhraseState(
 
     val keyData: InitialKeyData? = null,
 
-    val userHasOwnPhrase: Boolean = false,
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 ) {
@@ -65,14 +64,15 @@ data class EnterPhraseState(
     val labelValid = label.isNotEmpty() && !labelIsTooLong
 
     val backArrowType = when (enterWordUIState) {
+        EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
         EnterPhraseUIState.EDIT,
         EnterPhraseUIState.LABEL,
         EnterPhraseUIState.SELECTED,
+        EnterPhraseUIState.GENERATE,
+        EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.REVIEW -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
-        EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.DONE,
         EnterPhraseUIState.NOTIFICATIONS -> BackIconType.CLOSE
@@ -80,7 +80,7 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE, NOTIFICATIONS
+    SELECT_ENTRY_TYPE, SELECT_ENTRY_TYPE_OWN, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE, NOTIFICATIONS
 }
 
 enum class BackIconType {

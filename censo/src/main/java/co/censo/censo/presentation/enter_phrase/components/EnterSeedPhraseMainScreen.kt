@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import MessageText
 import TitleText
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,6 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -59,8 +62,8 @@ fun SelectSeedPhraseEntryType(
     var selectedLanguage by remember { mutableStateOf(currentLanguage) }
 
     val title = when {
-        welcomeFlow && userHasOwnPhrase -> R.string.add_first_seed_phrase
-        welcomeFlow && !userHasOwnPhrase -> R.string.time_to_add_your_first_seed_phrase
+        userHasOwnPhrase -> R.string.how_to_provide
+        welcomeFlow -> R.string.time_to_add_your_first_seed_phrase
         else -> R.string.add_another_seed_phrase
     }
 
@@ -102,83 +105,66 @@ fun SelectSeedPhraseEntryType(
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-            if (!userHasOwnPhrase && welcomeFlow) {
-                MessageText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 36.dp),
-                    message = R.string.generate_or_add_own_message,
-                    textAlign = TextAlign.Start
-                )
-            } else {
-                val basicStyle = SpanStyle(
-                    color = SharedColors.MainColorText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
-                )
-
-                val languageSelectionText = buildAnnotatedString {
-                    withStyle(basicStyle) {
-                        if (welcomeFlow && userHasOwnPhrase) {
-                            append(
-                                stringResource(
-                                    R.string.current_language_own_phrase,
-                                    selectedLanguage.displayName()
-                                )
-                            )
+            val basicStyle = SpanStyle(
+                color = SharedColors.MainColorText,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal
+            )
+            val languageSelectionText = buildAnnotatedString {
+                withStyle(basicStyle) {
+                    if (!userHasOwnPhrase) {
+                        if (welcomeFlow) {
+                            append(stringResource(R.string.generate_or_add_own_message))
                         } else {
-                            append(
-                                stringResource(
-                                    R.string.current_language,
-                                    selectedLanguage.displayName()
-                                )
-                            )
+                            append(stringResource(R.string.add_another_phrase))
                         }
-                    }
-                    withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
-                        append(stringResource(R.string.here))
+                        append(
+                            stringResource(
+                                R.string.current_language,
+                                selectedLanguage.displayName()
+                            )
+                        )
+                    } else {
+                        append(
+                            stringResource(
+                                R.string.current_language_own_phrase,
+                                selectedLanguage.displayName()
+                            )
+                        )
                     }
                 }
-
-                LanguageSelectionMenu(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 36.dp),
-                    text = languageSelectionText,
-                    currentLanguage = selectedLanguage,
-                    action = {
-                        selectedLanguage = it
-                    }
-                )
+                withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                    append(stringResource(R.string.here))
+                }
             }
+
+            LanguageSelectionMenu(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 36.dp),
+                text = languageSelectionText,
+                currentLanguage = selectedLanguage,
+                action = {
+                    selectedLanguage = it
+                }
+            )
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight * 2))
 
-            if (!welcomeFlow) {
-                NotInitialPhrase(
+            if (!userHasOwnPhrase) {
+                SelectPhraseCreation(
+                    verticalSpacingHeight = verticalSpacingHeight,
+                    screenWidth = screenWidth,
+                    onGenerateEntrySelected = { onGenerateEntrySelected(selectedLanguage) },
+                    onUserHasOwnPhrase = onUserHasOwnPhrase
+                )
+            } else {
+                UserHasOwnPhrase(
                     verticalSpacingHeight = verticalSpacingHeight,
                     screenWidth = screenWidth,
                     onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
-                    onPasteEntrySelected = onPasteEntrySelected,
-                    onGenerateEntrySelected = { onGenerateEntrySelected(selectedLanguage) },
+                    onPasteEntrySelected = onPasteEntrySelected
                 )
-            } else {
-
-                if (!userHasOwnPhrase) {
-                    SelectPhraseCreation(
-                        verticalSpacingHeight = verticalSpacingHeight,
-                        screenWidth = screenWidth,
-                        onGenerateEntrySelected = { onGenerateEntrySelected(selectedLanguage) },
-                        onUserHasOwnPhrase = onUserHasOwnPhrase
-                    )
-                } else {
-                    UserHasOwnPhrase(
-                        verticalSpacingHeight = verticalSpacingHeight,
-                        screenWidth = screenWidth,
-                        onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
-                        onPasteEntrySelected = onPasteEntrySelected
-                    )
-                }
             }
         }
     }
@@ -250,52 +236,54 @@ fun UserHasOwnPhrase(
 ) {
     Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-    StandardButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        onClick = {
-            onManualEntrySelected()
-        },
-        contentPadding = PaddingValues(vertical = 12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 painter = painterResource(id = R.drawable.manual_entry_icon),
                 contentDescription = null,
-                tint = SharedColors.ButtonTextBlue
+                tint = SharedColors.ButtonTextBlue,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .drawBehind {
+                        drawCircle(
+                            color = SharedColors.ButtonBackgroundBlue,
+                            radius = this.size.maxDimension
+                        )
+                    }
+                    .clickable {
+                        onManualEntrySelected()
+                    }
             )
-            Spacer(modifier = Modifier.width(screenWidth * 0.010f))
             Text(
-                text = stringResource(R.string.input_seed_phrase),
-                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+                text = stringResource(R.string.input),
+                color = SharedColors.MainColorText,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(8.dp)
             )
         }
-    }
 
-    Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-    StandardButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        onClick = onPasteEntrySelected,
-        contentPadding = PaddingValues(vertical = 12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
                 contentDescription = null,
-                tint = SharedColors.ButtonTextBlue
+                tint = SharedColors.ButtonTextBlue,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .drawBehind {
+                        drawCircle(
+                            color = SharedColors.ButtonBackgroundBlue,
+                            radius = this.size.maxDimension
+                        )
+                    }
+                    .clickable {
+                        onPasteEntrySelected()
+                    }
             )
-            Spacer(modifier = Modifier.width(screenWidth * 0.010f))
             Text(
-                text = stringResource(R.string.paste_seed_phrase),
-                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+                text = stringResource(R.string.paste),
+                color = SharedColors.MainColorText,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(8.dp)
             )
         }
     }
@@ -426,7 +414,7 @@ fun NormalPreviewEnterPhraseMainScreen() {
         onGenerateEntrySelected = {},
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English,
-        userHasOwnPhrase = false,
+        userHasOwnPhrase = true,
         onUserHasOwnPhrase = {}
     )
 }
