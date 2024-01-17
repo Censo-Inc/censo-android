@@ -221,7 +221,6 @@ enum class ApprovalStatus {
 @Serializable
 data class SeedPhrase(
     val guid: SeedPhraseId,
-    val encryptedSeedPhrase: Base64EncodedData,
     val seedPhraseHash: HashedValue,
     val label: String,
     val createdAt: Instant,

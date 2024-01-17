@@ -29,6 +29,7 @@ import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
+import co.censo.shared.data.model.GetSeedPhraseApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
 import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
@@ -295,6 +296,11 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<DeleteSeedPhraseApiResponse>
 
+    @GET("/v1/vault/seed-phrases/{$SEED_PHRASE_ID}")
+    suspend fun getSeedPhrase(
+        @Path(value = SEED_PHRASE_ID) seedPhraseId: SeedPhraseId,
+    ): RetrofitResponse<GetSeedPhraseApiResponse>
+
     @POST("/v1/access")
     suspend fun requestAccess(
         @Body apiRequest: InitiateAccessApiRequest,
@@ -381,7 +387,6 @@ interface ApiService {
     @GET("v1/import/{$CHANNEL}/encrypted")
     suspend fun importedEncryptedData(
         @Path(value = CHANNEL) channel: String,
-        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<GetImportEncryptedDataApiResponse>
 }
 

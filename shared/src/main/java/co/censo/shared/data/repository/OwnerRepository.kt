@@ -49,6 +49,7 @@ import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
+import co.censo.shared.data.model.GetSeedPhraseApiResponse
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
@@ -792,14 +793,25 @@ class OwnerRepositoryImpl(
         val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
 
         return encryptedSeedPhrases.map {
-            RecoveredSeedPhrase(
-                guid = it.guid,
-                label = it.label,
-                phraseWords = BIP39.binaryDataToWords(
-                    masterEncryptionKey.decrypt(it.encryptedSeedPhrase.bytes), language
-                ),
-                createdAt = it.createdAt
-            )
+            val response = retrieveSeedPhrase(it.guid)
+            if (response is Resource.Success) {
+                RecoveredSeedPhrase(
+                    guid = it.guid,
+                    label = it.label,
+                    phraseWords = BIP39.binaryDataToWords(
+                        masterEncryptionKey.decrypt(response.data.encryptedSeedPhrase.bytes), language
+                    ),
+                    createdAt = it.createdAt
+                )
+            } else {
+                throw  (response as? Resource.Error)?.exception ?: Exception("Unknown failure")
+            }
+        }
+    }
+
+    private suspend fun retrieveSeedPhrase(seedPhraseId: SeedPhraseId): Resource<GetSeedPhraseApiResponse> {
+        return retrieveApiResource {
+            apiService.getSeedPhrase(seedPhraseId)
         }
     }
 

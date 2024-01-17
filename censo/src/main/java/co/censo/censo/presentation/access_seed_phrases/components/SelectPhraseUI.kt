@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.access_seed_phrases.components
 
-import Base64EncodedData
 import StandardButton
 import TitleText
 import SeedPhraseId
@@ -93,14 +92,12 @@ fun PreviewSelectPhraseUI() {
         seedPhrases = listOf(
             SeedPhrase(
                 guid = SeedPhraseId("1"),
-                encryptedSeedPhrase = Base64EncodedData(""),
                 seedPhraseHash = HashedValue(""),
                 label = "Yankee Hotel Foxtrot",
                 createdAt = Clock.System.now(),
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
-                encryptedSeedPhrase = Base64EncodedData(""),
                 seedPhraseHash = HashedValue(""),
                 label = "Robin Hood",
                 createdAt = Clock.System.now(),
@@ -109,7 +106,6 @@ fun PreviewSelectPhraseUI() {
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
-                encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
         ),
