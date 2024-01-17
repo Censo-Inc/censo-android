@@ -4,23 +4,22 @@ import ParticipantId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.ApprovalStatus
-import co.censo.shared.data.model.Approver
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.AccessStatus
+import co.censo.shared.data.model.Approval
+import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.Approver
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
-import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
-import co.censo.shared.data.model.Approval
 import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -223,6 +222,16 @@ class AccessApprovalViewModel @Inject constructor(
                 submitVerificationCode(state.selectedApprover!!.participantId, code)
             }
         }
+    }
+
+    //TODO: Move this to utils and then spread it's usage
+    private fun String.isDigitsOnly(): Boolean {
+        for (char in this) {
+            if (!char.isDigit()) {
+                return false
+            }
+        }
+        return true
     }
 
     private fun submitVerificationCode(participantId: ParticipantId, verificationCode: String) {

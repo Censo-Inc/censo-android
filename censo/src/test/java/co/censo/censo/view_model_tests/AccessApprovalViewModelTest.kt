@@ -1,15 +1,24 @@
 package co.censo.censo.view_model_tests
 
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_approval.AccessApprovalState
 import co.censo.censo.presentation.access_approval.AccessApprovalViewModel
+import co.censo.censo.presentation.access_approval.primaryApprover
+import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
+import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.DeleteAccessApiResponse
+import co.censo.shared.data.model.InitiateAccessApiResponse
+import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandlerViewModel
-import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.asResource
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeastOnce
+import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,7 +59,6 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     override fun setUp() {
         super.setUp()
         //TODO: Add set test mode property if applicable
-        //TODO: List out test cases and PROGRESS
 
         Dispatchers.setMain(testDispatcher)
 
@@ -94,28 +102,139 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `foo2`() {
-        //TODO: onStop calls pollingTimer onStop
+    fun `call onStop then VM should stop polling timer`() {
+        assertDefaultVMState()
+
+        accessApprovalViewModel.onStop()
+
+        Mockito.verify(pollingVerificationTimer, atLeastOnce()).stopWithDelay(any())
     }
 
     @Test
-    fun `foo3`() {
-        //TODO: set navigateback home sets state + resetNavigationResource
+    fun `call setNavigateBackToHome then VM should set state for navigating and clear timelock`() {
+        assertDefaultVMState()
+
+        accessApprovalViewModel.setNavigateBackToHome()
+
+        assertFalse(accessApprovalViewModel.state.isTimelocked)
+        assertTrue(accessApprovalViewModel.state.navigationResource is Resource.Success)
+
+        //assert that nav destination is OwnerVaultScreen
+        assertEquals(
+            Screen.OwnerVaultScreen.route,
+            accessApprovalViewModel.state.navigationResource.asSuccess().data.route
+        )
     }
 
     @Test
-    fun `foo4`() {
-        //TODO: initiate access
+    fun `call initiateAccess then VM should hit initiate access endpoint`() = runTest {
+        assertDefaultVMState()
+
+        whenever(ownerRepository.initiateAccess(accessPhraseIntent)).thenAnswer {
+            Resource.Success(InitiateAccessApiResponse(mockReadyOwnerStateWithPolicySetup))
+        }
+
+        //Trigger onStart to set access intent to state
+        accessApprovalViewModel.onStart(accessPhraseIntent)
+
+        testScheduler.advanceUntilIdle()
+
+        //Trigger initiate access
+        accessApprovalViewModel.initiateAccess()
+
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(accessPhraseIntent, accessApprovalViewModel.state.accessIntent)
+        assertTrue(accessApprovalViewModel.state.initiateAccessResource is Resource.Success)
+        assertFalse(accessApprovalViewModel.state.initiateNewAccess)
     }
 
     @Test
-    fun `foo5`() {
-        //TODO: cancel access
+    fun `call cancelAccess then VM should hit cancel access endpoint`() = runTest {
+        assertDefaultVMState()
+
+        whenever(ownerRepository.cancelAccess()).thenAnswer {
+            Resource.Success(DeleteAccessApiResponse(mockReadyOwnerStateWithPolicySetup))
+        }
+
+        accessApprovalViewModel.cancelAccess()
+        //Assert that the cancel confirmation dialog is no longer displayed
+        assertFalse(accessApprovalViewModel.state.showCancelConfirmationDialog)
+
+        testScheduler.advanceUntilIdle()
+
+        assertNull(accessApprovalViewModel.state.access)
+        assertTrue(accessApprovalViewModel.state.navigationResource is Resource.Success)
+        assertTrue(accessApprovalViewModel.state.cancelAccessResource is Resource.Success)
+
+        //assert that nav destination is OwnerVaultScreen
+        assertEquals(
+            Screen.OwnerVaultScreen.route,
+            accessApprovalViewModel.state.navigationResource.asSuccess().data.route
+        )
+
     }
 
     @Test
-    fun `foo6`() {
-        //TODO: update verification code
+    fun `call updateVerificationCode with 6 digit code then VM should update the verification code in state and call submit code endpoint `() = runTest {
+        assertDefaultVMState()
+
+        val primaryApprover = mockReadyOwnerStateWithPolicySetup.policy.approvers.primaryApprover()!!
+
+        whenever(ownerRepository.submitAccessTotpVerification(primaryApprover.participantId, "123456")).thenAnswer {
+            Resource.Success(SubmitAccessTotpVerificationApiResponse(
+                mockReadyOwnerStateWithPolicySetup))
+        }
+
+        //Select approver to get participantId in state
+        accessApprovalViewModel.onApproverSelected(primaryApprover)
+
+        //Update verification with 1 digit at a time until 6 digits is reached
+        var mockVerificationCode = 1.toString()
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertEquals(mockVerificationCode, accessApprovalViewModel.state.verificationCode)
+
+        mockVerificationCode = 12.toString()
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertEquals(mockVerificationCode, accessApprovalViewModel.state.verificationCode)
+
+        mockVerificationCode = 123.toString()
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertEquals(mockVerificationCode, accessApprovalViewModel.state.verificationCode)
+
+        mockVerificationCode = 1234.toString()
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertEquals(mockVerificationCode, accessApprovalViewModel.state.verificationCode)
+
+        mockVerificationCode = 12345.toString()
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertEquals(mockVerificationCode, accessApprovalViewModel.state.verificationCode)
+
+        mockVerificationCode = 123456.toString()
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertEquals(mockVerificationCode, accessApprovalViewModel.state.verificationCode)
+
+        testScheduler.advanceUntilIdle()
+
+        Mockito.verify(ownerRepository, atLeastOnce()).submitAccessTotpVerification(primaryApprover.participantId, "123456")
+        assertTrue(accessApprovalViewModel.state.submitTotpVerificationResource is Resource.Success)
+        assertTrue(accessApprovalViewModel.state.waitingForApproval)
+    }
+
+    @Test
+    fun `call updateVerificationCode with non digit string then VM should not set state`() {
+        assertDefaultVMState()
+
+        var mockVerificationCode = "String"
+
+        accessApprovalViewModel.updateVerificationCode(mockVerificationCode)
+        assertTrue(accessApprovalViewModel.state.verificationCode.isEmpty())
     }
 
     @Test
