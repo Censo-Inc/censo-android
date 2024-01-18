@@ -366,7 +366,6 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
     //endregion
 
     //region Helper methods
-    //TODO: Call this method in other areas where the code is duplicated
     private fun setMockApproverDataToViewModelState() {
         //region Mock ownerStateFlow.value, keyRepository.decryptWithDeviceKey, and totpGenerator.generateCode
         whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
