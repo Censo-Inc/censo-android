@@ -6,8 +6,11 @@ import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesState
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesViewModel
 import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
 import co.censo.censo.test_helper.mockSeedPhrase
+import co.censo.censo.util.TestUtil
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteAccessApiResponse
+import co.censo.shared.data.model.GetOwnerUserApiResponse
+import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.BIP39
@@ -54,7 +57,7 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        //TODO: Add set test mode property if applicable
+        System.setProperty(TestUtil.TEST_MODE, TestUtil.TEST_MODE_TRUE)
 
         Dispatchers.setMain(testDispatcher)
 
@@ -65,30 +68,12 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
 
     @After
     fun tearDown() {
-        //TODO: Add clear test mode property if applicable
+        System.clearProperty(TestUtil.TEST_MODE)
         Dispatchers.resetMain()
     }
     //endregion
 
     //region Focused Tests
-
-    //TODO: List out test cases
-    // onStart --------
-    // onStop -------
-    // reset --------
-    // retrieveOwnerState? (maybe as a flow test)
-    // cancelAccess -----
-    // onBackClicked (will need to set UI state for these)
-    // startFacetec ------
-    // onPhraseSelected ------
-    // onFaceScanReady
-
-    //Flow test for
-    // recoverSeedPhrases
-    // cancelAccess
-    // resetNavResource
-
-
     @Test
     fun `call onStart then VM should collect owner state and start timer`() = runTest {
         assertDefaultVMState()
@@ -188,14 +173,60 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
         Mockito.verify(ownerRepository, atLeastOnce()).updateOwnerState(any())
     }
 
+    @Test
+    fun `call onBackClicked then VM should react accordingly based on UI state`() {
+        assertDefaultVMState()
+
+        //Default UI state is SelectPhrase, assert no change in ui state
+        accessSeedPhrasesViewModel.onBackClicked()
+
+        assertTrue(accessSeedPhrasesViewModel.state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase)
+
+        //Set ViewPhrase, assert select phrase after back click
+        accessSeedPhrasesViewModel.setUIState(AccessPhrasesUIState.ViewPhrase)
+
+        accessSeedPhrasesViewModel.onBackClicked()
+
+        assertTrue(accessSeedPhrasesViewModel.state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase)
+
+        //Set ReadyToStart, assert select phrase after back click
+        accessSeedPhrasesViewModel.setUIState(AccessPhrasesUIState.ReadyToStart)
+
+        accessSeedPhrasesViewModel.onBackClicked()
+
+        assertTrue(accessSeedPhrasesViewModel.state.accessPhrasesUIState == AccessPhrasesUIState.SelectPhrase)
 
 
-    //endregion
+        //Set UI State to Facetec, assert no change in ui state
+        accessSeedPhrasesViewModel.setUIState(AccessPhrasesUIState.Facetec)
 
-    //region Flow Tests
-    //endregion
+        accessSeedPhrasesViewModel.onBackClicked()
 
-    //region Custom asserts
+        assertTrue(accessSeedPhrasesViewModel.state.accessPhrasesUIState == AccessPhrasesUIState.Facetec)
+
+    }
+
+    @Test
+    fun `call retrieveOwnerState then VM should retrieve user data and set state`() = runTest {
+        assertDefaultVMState()
+
+        whenever(ownerRepository.retrieveUser()).thenAnswer {
+            Resource.Success(
+                GetOwnerUserApiResponse(
+                    identityToken = IdentityToken("AA"),
+                    ownerState = mockReadyOwnerStateWithPolicySetup
+                )
+            )
+        }
+
+        accessSeedPhrasesViewModel.retrieveOwnerState()
+
+        testScheduler.advanceUntilIdle()
+
+        Mockito.verify(ownerRepository, atLeastOnce()).retrieveUser()
+        assertTrue(accessSeedPhrasesViewModel.state.ownerState is Resource.Success)
+    }
+
     //endregion
 
     //region Helper methods
