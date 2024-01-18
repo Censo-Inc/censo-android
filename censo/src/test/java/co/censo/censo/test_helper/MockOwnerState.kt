@@ -29,7 +29,6 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
         seedPhrases = listOf(
             SeedPhrase(
                 guid = SeedPhraseId(value = "12345"),
-                encryptedSeedPhrase = Base64EncodedData(base64Encoded = "AA"),
                 seedPhraseHash = HashedValue(value = ""),
                 label = "Dummy Phrase",
                 createdAt = Clock.System.now()
