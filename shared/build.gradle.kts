@@ -2,17 +2,13 @@ import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.version)
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
-    id("com.adarshr.test-logger")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    id(libs.plugins.test.logger.get().pluginId)
+    alias(libs.plugins.kotlin.serialization)
 }
-
-val versionNameMajor = 1
-val versionNameMinor = 8
-val versionNamePatch = 0
 
 fun createBuildConfigStringArray(strings: List<String>) : String {
     val builder = StringBuilder()
@@ -41,7 +37,7 @@ android {
     defaultConfig {
         minSdk = 33
 
-        val versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
+        val versionName = "${libs.versions.versionNameMajor.get()}.${libs.versions.versionNameMinor.get()}.${libs.versions.versionNamePatch.get()}"
         val versionCode = 1
 
         buildConfigField("String", "VERSION_NAME", "\"$versionName\"")
@@ -107,14 +103,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = libs.versions.jvm.get()
         freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     buildFeatures {
         buildConfig = true
@@ -128,81 +124,81 @@ android {
 
 dependencies {
 
-    api("androidx.core:core-ktx:1.12.0")
-    api("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    api("androidx.activity:activity-compose:1.8.0")
+    api(libs.androidx.ktx)
+    api(libs.androidx.lifecycle.runtime.ktx)
+    api(libs.androidx.activity.compose)
     api(platform("androidx.compose:compose-bom:2023.03.00"))
     api("androidx.compose.ui:ui")
     api("androidx.compose.ui:ui-graphics")
     api("androidx.compose.ui:ui-tooling-preview")
     api("androidx.compose.ui:ui-tooling")
     api("androidx.compose.material3:material3")
-    api("androidx.navigation:navigation-compose:2.7.5")
-    api("androidx.compose.material:material-icons-extended:1.5.4")
+    api(libs.androidx.navigation.compose)
+    api(libs.androidx.material.icons.extended)
 
     //KotlinX Serialization
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-    api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    api(libs.kotlinx.serialization.json)
+    api(libs.kotlinx.datetime)
 
     // Retrofit
-    api("com.squareup.retrofit2:retrofit:2.9.0")
-    api("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    api(libs.retrofit)
+    api(libs.retrofit2.kotlinx.serialization.converter)
 
     //noinspection GradleDependency
-    api("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
+    api(libs.okhttp)
     //noinspection GradleDependency
-    api("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
+    api(libs.logging.interceptor)
 
     //Google API Java Client
-    implementation("com.google.api-client:google-api-client:2.2.0")
+    implementation(libs.google.api.client)
 
     //Google Auth
-    api("com.google.android.gms:play-services-auth:20.7.0")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.1")
+    api(libs.play.services.auth)
+    api(libs.kotlinx.coroutines.play.services)
 
     //GoogleAuth (utilizes the One Tap dependency above)
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.20.0")
-    implementation("com.google.api-client:google-api-client-android:2.0.0")
+    implementation(libs.google.auth.library.oauth2.http)
+    implementation(libs.google.api.client.android)
 
     //Biometrics
-    api("androidx.biometric:biometric:1.1.0")
+    api(libs.androidx.biometric)
 
     //Push Notifications
     api(platform("com.google.firebase:firebase-bom:32.2.3"))
     api("com.google.firebase:firebase-messaging-ktx")
 
     //GoogleDrive
-    api("com.google.android.gms:play-services-drive:17.0.0")
+    api(libs.play.services.drive)
     api("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
         exclude("org.apache.httpcomponents")
         exclude(module = "guava-jdk5")
     }
 
     //auth0 JWT
-    implementation("com.auth0.android:jwtdecode:2.0.1")
+    implementation(libs.jwtdecode)
 
     //Encrypted Preferences
-    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
+    implementation(libs.androidx.security.crypto.ktx)
 
     //Sentry
-    implementation("io.sentry:sentry-android:6.33.0")
+    implementation(libs.sentry.android)
 
     //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.50")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    kapt(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Play integrity
-    implementation("com.google.android.play:integrity:1.3.0")
+    implementation(libs.integrity)
 
     // Base58
-    api("org.bouncycastle:bcprov-jdk15to18:1.70")
-    api("io.github.novacrypto:Base58:2022.01.17")
+    api(libs.bcprov.jdk15to18)
+    api(libs.base58)
 
     // Tests
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
-    testImplementation("org.mockito:mockito-inline:4.8.1")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
