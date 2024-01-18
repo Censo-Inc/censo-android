@@ -84,9 +84,6 @@ class LockScreenViewModelTest : BaseViewModelTest() {
     private val testDispatcher = StandardTestDispatcher()
     //endregion
 
-    //region Testing data
-    //endregion
-
     //region Setup/Teardown
     @Before
     override fun setUp() {
