@@ -19,3 +19,8 @@ data class StoreSeedPhraseApiResponse(
 data class DeleteSeedPhraseApiResponse(
     val ownerState: OwnerState,
 )
+
+@Serializable
+data class GetSeedPhraseApiResponse(
+    val encryptedSeedPhrase: Base64EncodedData,
+)

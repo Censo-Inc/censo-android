@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.main
 
-import Base64EncodedData
 import StandardButton
 import SeedPhraseId
 import androidx.compose.foundation.background
@@ -294,21 +293,18 @@ fun PreviewPhraseHomeScreen() {
                 guid = SeedPhraseId("1"),
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
-                encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
-                encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
-                encryptedSeedPhrase = Base64EncodedData(""),
                 createdAt = Clock.System.now()
             ),
         ),
