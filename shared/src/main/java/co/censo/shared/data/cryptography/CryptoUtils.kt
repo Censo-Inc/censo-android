@@ -22,24 +22,6 @@ fun generatePartitionId() : BigInteger {
     return BigInteger(generateRandom(64), 16)
 }
 
-fun generateBase32() : String {
-    return Base32().encodeAsString(
-        generateRandom(
-            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            length = 10
-        ).toByteArray(Charsets.UTF_8)
-    )
-}
-
-fun generateBase64() : String {
-    return Base64.toBase64String(
-        generateRandom(
-            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            length = 10
-        ).toByteArray(Charsets.UTF_8)
-    )
-}
-
 fun generateRandom(length: Int, letters: String = "ABCDEF0123456789",) : String {
     val len = letters.count()
     var partitionId = ""
@@ -49,15 +31,6 @@ fun generateRandom(length: Int, letters: String = "ABCDEF0123456789",) : String 
         partitionId += randomCharacter
     }
     return partitionId
-}
-
-fun generateHexString(length: Int = 64): String {
-    val alphaChars = ('0'..'9').toList().toTypedArray() + ('a'..'f').toList().toTypedArray() + ('A'..'F').toList().toTypedArray()
-    return (1..length).map { alphaChars.random().toChar() }.toMutableList().joinToString("")
-}
-
-fun BigInteger.toHexString(): String {
-    return this.toByteArrayNoSign().toHexString().lowercase()
 }
 
 fun ByteArray.toPaddedHexString(length: Int) = joinToString("") { "%02X".format(it) }.padStart(length, '0')

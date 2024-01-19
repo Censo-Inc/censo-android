@@ -3,6 +3,7 @@ package co.censo.shared.data.cryptography
 import co.censo.shared.data.cryptography.TotpGenerator.Companion.CODE_LENGTH
 import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
+import java.security.SecureRandom
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.and
@@ -19,10 +20,12 @@ interface TotpGenerator {
 }
 
 object TotpGeneratorImpl : TotpGenerator {
+    private val random = SecureRandom()
+
     override fun generateSecret(): String {
-        val alphaChars = ('0'..'9').toList().toTypedArray() + ('a'..'z').toList().toTypedArray() + ('A'..'Z').toList().toTypedArray()
-        return Base32()
-            .encodeAsString((1..10).map { alphaChars.random().toChar() }.toMutableList().joinToString("").toByteArray())
+        val secretBytes = ByteArray(10)
+        random.nextBytes(secretBytes)
+        return Base32().encodeAsString(secretBytes)
     }
 
     override fun generateCode(secret: String, counter: Long): String {
