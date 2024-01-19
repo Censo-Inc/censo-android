@@ -9,6 +9,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
+import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
@@ -329,11 +330,11 @@ class OwnerEntranceViewModel @Inject constructor(
         val destination = when (ownerState) {
             is OwnerState.Ready -> {
                 if (ownerState.vault.seedPhrases.isNotEmpty()) {
-                    when (val access = ownerState.access) {
-                        is Access.ThisDevice -> Screen.AccessApproval.withIntent(intent = access.intent)
-                            .navToAndPopCurrentDestination().asResource()
-
-                        else -> Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource()
+                    val access = ownerState.access
+                    if (access != null && access is Access.ThisDevice && access.intent != AccessIntent.RecoverOwnerKey) {
+                        Screen.AccessApproval.withIntent(intent = access.intent).navToAndPopCurrentDestination().asResource()
+                    } else {
+                        Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource()
                     }
                 } else {
                     Screen.EnterPhraseRoute.buildNavRoute(
