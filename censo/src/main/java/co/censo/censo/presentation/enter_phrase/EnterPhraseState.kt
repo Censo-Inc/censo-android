@@ -90,5 +90,5 @@ enum class BackIconType {
 }
 
 enum class EntryType {
-    MANUAL, PASTE, GENERATE, IMPORT
+    MANUAL, PASTE, GENERATE, IMPORT, PICTURE
 }

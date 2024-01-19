@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -181,7 +184,8 @@ fun SelectSeedPhraseEntryType(
                     verticalSpacingHeight = verticalSpacingHeight,
                     screenWidth = screenWidth,
                     onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
-                    onPasteEntrySelected = onPasteEntrySelected
+                    onPasteEntrySelected = onPasteEntrySelected,
+                    onPictureSelected = {}//TODO: Setup callback
                 )
             }
         }
@@ -250,7 +254,9 @@ fun ColumnScope.SelectPhraseCreation(
 @Composable
 fun UserHasOwnPhrase(
     verticalSpacingHeight: Dp, screenWidth: Dp,
-    onManualEntrySelected: () -> Unit, onPasteEntrySelected: () -> Unit
+    onManualEntrySelected: () -> Unit,
+    onPasteEntrySelected: () -> Unit,
+    onPictureSelected: () -> Unit
 ) {
     Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
@@ -274,6 +280,35 @@ fun UserHasOwnPhrase(
             )
             Text(
                 text = stringResource(R.string.input),
+                color = SharedColors.MainColorText,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            //TODO: Need to fix this so that the size matches the other icons in the row
+            // Easiest route is to get a drawable of the icon and use painter resource
+
+            val cameraIcon = Icons.Outlined.CameraAlt
+            Icon(
+                imageVector = cameraIcon,
+                contentDescription = "Camera",
+                tint = SharedColors.ButtonTextBlue,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .drawBehind {
+                        drawCircle(
+                            color = SharedColors.ButtonBackgroundBlue,
+                            radius = this.size.maxDimension
+                        )
+                    }
+                    .clickable {
+                        onPictureSelected()
+                    }
+            )
+            Text(
+                text = "Picture",
                 color = SharedColors.MainColorText,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(8.dp)
