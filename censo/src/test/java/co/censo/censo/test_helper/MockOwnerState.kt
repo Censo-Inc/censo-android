@@ -14,6 +14,13 @@ import co.censo.shared.data.model.TimelockSetting
 import co.censo.shared.data.model.Vault
 import kotlinx.datetime.Clock
 
+val mockSeedPhrase = SeedPhrase(
+    guid = SeedPhraseId(value = "12345"),
+    seedPhraseHash = HashedValue(value = ""),
+    label = "Dummy Phrase",
+    createdAt = Clock.System.now()
+)
+
 val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
     subscriptionStatus = SubscriptionStatus.Active, policy = Policy(
         createdAt = Clock.System.now(),
@@ -27,12 +34,7 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
         owner = trustedOwnerApprover
     ), vault = Vault(
         seedPhrases = listOf(
-            SeedPhrase(
-                guid = SeedPhraseId(value = "12345"),
-                seedPhraseHash = HashedValue(value = ""),
-                label = "Dummy Phrase",
-                createdAt = Clock.System.now()
-            )
+            mockSeedPhrase
         ), publicMasterEncryptionKey = Base58EncodedMasterPublicKey(value = "AA")
     ), unlockedForSeconds = null, access = null, policySetup = null,
     timelockSetting = TimelockSetting(defaultTimelockInSeconds = 7200L, currentTimelockInSeconds = null, disabledAt = null)
@@ -48,3 +50,4 @@ val mockInitialOwnerStateData = OwnerState.Initial(
     entropy = generateEntropy(),
     subscriptionStatus = SubscriptionStatus.Active,
 )
+

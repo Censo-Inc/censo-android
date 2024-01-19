@@ -19,6 +19,8 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
+import co.censo.censo.presentation.plan_setup.PolicySetupUIState
+import co.censo.censo.util.TestUtil
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
@@ -252,4 +254,13 @@ class AccessSeedPhrasesViewModel @Inject constructor(
             cancelAccess()
         }
     }
+
+
+    //region UnitTest Helpers
+    fun setUIState(uiState: AccessPhrasesUIState) {
+        if (System.getProperty(TestUtil.TEST_MODE) == TestUtil.TEST_MODE_TRUE) {
+            state = state.copy(accessPhrasesUIState = uiState)
+        }
+    }
+    //endregion
 }
