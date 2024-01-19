@@ -374,16 +374,26 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE ->
-                if (state.userHasOwnPhrase) {
-                    state.copy(userHasOwnPhrase = false)
-                } else {
+                if (state.welcomeFlow) {
                     state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                } else {
+                    state.copy(exitFlow = true)
                 }
+            EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN ->
+                state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE)
             EnterPhraseUIState.DONE,
             EnterPhraseUIState.NOTIFICATIONS -> state.copy(exitFlow = true)
-            EnterPhraseUIState.PASTE_ENTRY, EnterPhraseUIState.GENERATE -> {
+            EnterPhraseUIState.GENERATE -> {
                 state.copy(
                     enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                    editedWord = "",
+                    editedWordIndex = 0,
+                    enteredWords = emptyList(),
+                )
+            }
+            EnterPhraseUIState.PASTE_ENTRY -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
                     editedWord = "",
                     editedWordIndex = 0,
                     enteredWords = emptyList(),
@@ -393,7 +403,7 @@ class EnterPhraseViewModel @Inject constructor(
             EnterPhraseUIState.EDIT -> {
                 if (state.editedWordIndex == 0 && state.enteredWords.isEmpty()) {
                     state.copy(
-                        enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE,
+                        enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
                         editedWord = ""
                     )
                 } else {
@@ -449,7 +459,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun setUserHasOwnPhrase() {
-        state = state.copy(userHasOwnPhrase = true)
+        state = state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN)
     }
 
     fun onPhrasePasted(pastedPhrase: String) {

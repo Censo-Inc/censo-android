@@ -66,6 +66,7 @@ fun EnterPhraseScreen(
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
+        EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
         EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.NOTIFICATIONS -> ""
@@ -126,28 +127,26 @@ fun EnterPhraseScreen(
     }
 
     Scaffold(topBar = {
-        if (state.enterWordUIState != EnterPhraseUIState.SELECT_ENTRY_TYPE || state.welcomeFlow) {
-            CenterAlignedTopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = {
-                        viewModel.onBackClicked()
-                    }) {
-                        Icon(
-                            imageVector = iconPair.first,
-                            contentDescription = stringResource(id = iconPair.second),
-                        )
-                    }
-                },
-                title = {
-                    if (title.isNotEmpty()) {
-                        Text(
-                            text = title,
-                            color = SharedColors.MainColorText
-                        )
-                    }
-                },
-            )
-        }
+        CenterAlignedTopAppBar(
+            navigationIcon = {
+                IconButton(onClick = {
+                    viewModel.onBackClicked()
+                }) {
+                    Icon(
+                        imageVector = iconPair.first,
+                        contentDescription = stringResource(id = iconPair.second),
+                    )
+                }
+            },
+            title = {
+                if (title.isNotEmpty()) {
+                    Text(
+                        text = title,
+                        color = SharedColors.MainColorText
+                    )
+                }
+            },
+        )
     }) { paddingValues ->
         Box(
             modifier = Modifier
@@ -215,14 +214,14 @@ fun EnterPhraseScreen(
                     }
 
                     when (state.enterWordUIState) {
-                        EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
+                        EnterPhraseUIState.SELECT_ENTRY_TYPE, EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN -> {
                             SelectSeedPhraseEntryType(
                                 welcomeFlow = state.welcomeFlow,
                                 currentLanguage = state.currentLanguage,
                                 onManualEntrySelected = { language -> viewModel.entrySelected(EntryType.MANUAL, language) },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
                                 onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) },
-                                userHasOwnPhrase = state.userHasOwnPhrase,
+                                userHasOwnPhrase = state.enterWordUIState == EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
                                 onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() }
                             )
                             if (state.triggerDeleteUserDialog is Resource.Success) {
