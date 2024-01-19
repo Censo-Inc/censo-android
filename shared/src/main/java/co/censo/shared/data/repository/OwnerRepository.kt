@@ -131,6 +131,7 @@ interface OwnerRepository {
 
     suspend fun getCreatePolicyParams(
         ownerApprover: Approver.ProspectApprover,
+        ownerApproverKey: Base58EncodedApproverPublicKey,
         ownerApproverEncryptedPrivateKey: ByteArray,
         entropy: Base64EncodedData,
         deviceKeyId: String
@@ -155,6 +156,7 @@ interface OwnerRepository {
         threshold: UInt,
         approvers: List<Approver.ProspectApprover>,
         ownerApproverEncryptedPrivateKey: ByteArray,
+        ownerApproverKey: Base58EncodedApproverPublicKey,
         entropy: Base64EncodedData,
         deviceKeyId: String
     ): Resource<ReplacePolicyApiResponse>
@@ -353,6 +355,7 @@ class OwnerRepositoryImpl(
 
     override suspend fun getCreatePolicyParams(
         ownerApprover: Approver.ProspectApprover,
+        ownerApproverKey: Base58EncodedApproverPublicKey,
         ownerApproverEncryptedPrivateKey: ByteArray,
         entropy: Base64EncodedData,
         deviceKeyId: String
@@ -363,13 +366,14 @@ class OwnerRepositoryImpl(
                 threshold = 1U,
                 approvers = listOf(ownerApprover),
                 ownerApproverEncryptedPrivateKey = ownerApproverEncryptedPrivateKey,
+                ownerApproverKey = ownerApproverKey,
                 entropy = entropy,
                 deviceKeyId = deviceKeyId
             ). let {
 
                 Resource.Success(
                     CreatePolicyParams(
-                        approverPublicKey = (ownerApprover.status as ApproverStatus.ImplicitlyOwner).approverPublicKey,
+                        approverPublicKey = ownerApproverKey,
                         intermediatePublicKey = it.intermediatePublicKey,
                         approverPublicKeySignatureByIntermediateKey = it.approverKeysSignatureByIntermediateKey,
                         masterEncryptionPublicKey = it.masterEncryptionPublicKey,
@@ -415,6 +419,7 @@ class OwnerRepositoryImpl(
         threshold: UInt,
         approvers: List<Approver.ProspectApprover>,
         ownerApproverEncryptedPrivateKey: ByteArray,
+        ownerApproverKey: Base58EncodedApproverPublicKey,
         entropy: Base64EncodedData,
         deviceKeyId: String
     ): Resource<ReplacePolicyApiResponse> {
@@ -428,6 +433,7 @@ class OwnerRepositoryImpl(
                 masterEncryptionKey = masterEncryptionKey,
                 previousIntermediateKey = intermediateEncryptionKey,
                 ownerApproverEncryptedPrivateKey = ownerApproverEncryptedPrivateKey,
+                ownerApproverKey = ownerApproverKey,
                 entropy = entropy,
                 deviceKeyId = deviceKeyId
             )
@@ -606,7 +612,7 @@ class OwnerRepositoryImpl(
                         status.approverKeySignature.bytes
                     )
                 }
-                is ApproverStatus.ImplicitlyOwner, is ApproverStatus.OwnerAsApprover -> true
+                is ApproverStatus.OwnerAsApprover -> true
                 else -> false
             }
         } catch (e: Exception) {

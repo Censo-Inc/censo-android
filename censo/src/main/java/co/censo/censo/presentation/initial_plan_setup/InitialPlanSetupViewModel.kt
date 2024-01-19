@@ -189,13 +189,13 @@ class InitialPlanSetupViewModel @Inject constructor(
                     invitationId = InvitationId(""),
                     label = "Me",
                     participantId = state.participantId,
-                    status = ApproverStatus.ImplicitlyOwner(
+                    status = ApproverStatus.OwnerAsApprover(
                         entropy,
-                        Base58EncodedApproverPublicKey(publicKey.value),
                         Clock.System.now()
                     )
                 ),
                 ownerApproverEncryptedPrivateKey = keyData.encryptedPrivateKey,
+                ownerApproverKey = Base58EncodedApproverPublicKey(publicKey.value),
                 deviceKeyId = deviceKeyId,
                 entropy = entropy
             )

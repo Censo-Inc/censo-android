@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.censo.censo.BuildConfig
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -22,7 +21,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.util.TestUtil
 import co.censo.censo.util.alternateApprover
-import co.censo.censo.util.getEntropyFromImplicitOwnerApprover
+import co.censo.censo.util.getEntropyFromOwnerApprover
 import co.censo.censo.util.ownerApprover
 import co.censo.censo.util.primaryApprover
 import co.censo.shared.data.cryptography.decryptWithEntropy
@@ -272,7 +271,7 @@ class ReplacePolicyViewModel @Inject constructor(
                 return@launch
             }
 
-            if (owner.status is ApproverStatus.ImplicitlyOwner) {
+            if (owner.status is ApproverStatus.OwnerAsApprover) {
                 initiateAccess()
                 return@launch
             }
@@ -330,7 +329,7 @@ class ReplacePolicyViewModel @Inject constructor(
             viewModelScope.launch(ioDispatcher) {
 
                 val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
-                val entropy = approverSetup.ownerApprover()?.getEntropyFromImplicitOwnerApprover()
+                val entropy = approverSetup.ownerApprover()?.getEntropyFromOwnerApprover()
 
                 val ownerApproverKeyData = state.keyData
                 val deviceKeyId = keyRepository.retrieveSavedDeviceId()
@@ -354,6 +353,7 @@ class ReplacePolicyViewModel @Inject constructor(
                             state.alternateApprover
                         ),
                         ownerApproverEncryptedPrivateKey = ownerApproverKeyData.encryptedPrivateKey,
+                        ownerApproverKey = ownerApproverKeyData.publicKey,
                         entropy = entropy,
                         deviceKeyId = deviceKeyId,
                     )
@@ -415,7 +415,7 @@ class ReplacePolicyViewModel @Inject constructor(
 
         try {
             val approverSetup = state.ownerState?.policySetup?.approvers ?: emptyList()
-            val entropy = approverSetup.ownerApprover()?.getEntropyFromImplicitOwnerApprover()
+            val entropy = approverSetup.ownerApprover()?.getEntropyFromOwnerApprover()
             if (entropy == null) {
                 val exception = Exception("Missing entropy when decrypting key")
                 exception.sendError(CrashReportingUtil.ReplacePolicy)
