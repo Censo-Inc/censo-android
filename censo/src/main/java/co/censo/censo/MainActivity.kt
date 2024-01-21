@@ -266,14 +266,3 @@ class MainActivity : FragmentActivity() {
         )
     }
 }
-
-@Composable
-private fun SelectionView(
-    onTakePhoto: () -> Unit
-) {
-    Column {
-        Button(onClick = onTakePhoto) {
-            Text(text = "Take photo")
-        }
-    }
-}
