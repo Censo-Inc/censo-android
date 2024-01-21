@@ -5,10 +5,12 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.InitialKeyData
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.CreatePolicyParams
 import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 data class InitialPlanSetupScreenState(
+    val welcomeStep: WelcomeStep = WelcomeStep.Authenticated,
     val initialPlanSetupStep: InitialPlanSetupStep = InitialPlanSetupStep.Initial,
     val participantId: ParticipantId = ParticipantId(generatePartitionId()),
     val saveKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
@@ -40,4 +42,8 @@ sealed class InitialPlanSetupStep {
     object Facetec : InitialPlanSetupStep()
     //Policy creation always kicked off by facetec completion
     object PolicyCreation : InitialPlanSetupStep()
+}
+
+enum class WelcomeStep(val order: Int) {
+    Authenticated(1), ScanningFace(2)
 }

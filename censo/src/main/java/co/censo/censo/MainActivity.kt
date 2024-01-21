@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,7 @@ import co.censo.censo.presentation.main.MainVaultScreen
 import co.censo.censo.presentation.owner_key_recovery.OwnerKeyRecoveryScreen
 import co.censo.censo.presentation.owner_key_validation.ValidateApproverKeyScreen
 import co.censo.censo.presentation.paywall.PaywallScreen
+import co.censo.censo.presentation.paywall.PaywallViewModel
 import co.censo.censo.presentation.plan_finalization.ReplacePolicyScreen
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.censo.presentation.plan_setup.PolicySetupScreen
@@ -63,6 +65,8 @@ class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var storage: SecurePreferences
+
+    val paywallViewModel: PaywallViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,7 +95,10 @@ class MainActivity : FragmentActivity() {
 
                         LockedScreen()
 
-                        PaywallScreen(navController = navController)
+                        PaywallScreen(
+                            navController = navController,
+                            viewModel = paywallViewModel
+                        )
 
                         MaintenanceScreen()
                     }
@@ -140,6 +147,7 @@ class MainActivity : FragmentActivity() {
 
                 EnterPhraseScreen(
                     navController = navController,
+                    paywallViewModel = paywallViewModel,
                     masterPublicKey = Base58EncodedMasterPublicKey(
                         backStackEntry.arguments?.getString(
                             Screen.EnterPhraseRoute.MASTER_PUBLIC_KEY_NAME_ARG
