@@ -2,11 +2,13 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import androidx.camera.core.ImageProxy
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.components.rotateBitmap
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.hexStringToByteArray
@@ -148,7 +150,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = phraseInvalidReason?.let {
             state.copy(showInvalidPhraseDialog = Resource.Success(it))
         } ?: state.copy(
-            enterWordUIState = EnterPhraseUIState.REVIEW
+            enterWordUIState = EnterPhraseUIState.REVIEW_WORDS
         )
     }
 
@@ -382,8 +384,8 @@ class EnterPhraseViewModel @Inject constructor(
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT, currentLanguage = language)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
             EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE, currentLanguage = language)
-            EntryType.IMPORT -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW, currentLanguage = language)
-            EntryType.PICTURE -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW, currentLanguage = language)
+            EntryType.IMPORT -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW_WORDS, currentLanguage = language)
+            EntryType.IMAGE -> state.copy(enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE, currentLanguage = language)
         }
     }
 
@@ -447,10 +449,24 @@ class EnterPhraseViewModel @Inject constructor(
                     )
                 }
             }
+
+            EnterPhraseUIState.CAPTURE_IMAGE -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+                )
+            }
+
+            EnterPhraseUIState.REVIEW_IMAGE -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE,
+                    imageBitmap = null
+                )
+            }
+
             EnterPhraseUIState.VIEW ->
                 state.copy(cancelInputSeedPhraseConfirmationDialog = true)
 
-            EnterPhraseUIState.REVIEW ->
+            EnterPhraseUIState.REVIEW_WORDS ->
                  state.copy(
                     editedWord = "",
                     enterWordUIState = EnterPhraseUIState.VIEW,
@@ -631,6 +647,20 @@ class EnterPhraseViewModel @Inject constructor(
                 exitFlow()
             }
         }
+    }
+    //endregion
+
+    //region SeedPhrase Image
+    fun handleImageCapture(image: ImageProxy) {
+        val rotationDegrees = image.imageInfo.rotationDegrees
+        val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
+
+        state = state.copy(
+            imageBitmap = rotatedBitmap,
+            enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
+        )
+
+        image.close()
     }
     //endregion
 

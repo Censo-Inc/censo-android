@@ -3,6 +3,7 @@ package co.censo.censo.presentation.enter_phrase
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import ParticipantId
+import android.graphics.Bitmap
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitialKeyData
@@ -24,6 +25,9 @@ data class EnterPhraseState(
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val existingPhraseCount: Int = 0,
     val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,
+
+    //Image
+    val imageBitmap: Bitmap? = null,
 
     //Async
     val submitResource: Resource<Unit> = Resource.Uninitialized,
@@ -72,7 +76,9 @@ data class EnterPhraseState(
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.REVIEW -> BackIconType.BACK
+        EnterPhraseUIState.CAPTURE_IMAGE,
+        EnterPhraseUIState.REVIEW_IMAGE,
+        EnterPhraseUIState.REVIEW_WORDS -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.VIEW,
@@ -82,7 +88,19 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, SELECT_ENTRY_TYPE_OWN, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE, NOTIFICATIONS
+    SELECT_ENTRY_TYPE,
+    SELECT_ENTRY_TYPE_OWN,
+    CAPTURE_IMAGE,
+    PASTE_ENTRY,
+    EDIT,
+    GENERATE,
+    SELECTED,
+    VIEW,
+    REVIEW_WORDS,
+    REVIEW_IMAGE,
+    LABEL,
+    DONE,
+    NOTIFICATIONS,
 }
 
 enum class BackIconType {
@@ -90,5 +108,5 @@ enum class BackIconType {
 }
 
 enum class EntryType {
-    MANUAL, PASTE, GENERATE, IMPORT, PICTURE
+    MANUAL, PASTE, GENERATE, IMPORT, IMAGE
 }
