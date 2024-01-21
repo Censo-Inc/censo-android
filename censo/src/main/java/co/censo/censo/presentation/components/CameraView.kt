@@ -2,12 +2,7 @@ package co.censo.censo.presentation.components
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ImageFormat
 import android.graphics.Matrix
-import android.graphics.Rect
-import android.graphics.YuvImage
-import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -15,9 +10,14 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -26,11 +26,22 @@ import androidx.compose.material.icons.sharp.Lens
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.FloatState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -39,13 +50,11 @@ import androidx.core.content.ContextCompat
 import co.censo.censo.MainActivity
 import co.censo.censo.MainActivity.Companion.prototypeTag
 import co.censo.shared.util.projectLog
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun CameraView(
@@ -88,7 +97,7 @@ fun CameraView(
         modifier = Modifier.fillMaxSize()
     ) {
         AndroidView({ previewView}, modifier = Modifier.fillMaxSize())
-        
+
         IconButton(
             modifier = Modifier.padding(bottom = 20.dp) ,
             onClick = {
@@ -134,34 +143,6 @@ private fun takePhotoAndReturnImageData(
     })
 }
 
-private fun takePhotoAndSaveToFileStorage(
-    filenameFormat: String,
-    imageCapture: ImageCapture,
-    outputDirectory: File,
-    executor: Executor,
-    onImageCaptured: (Uri) -> Unit,
-    onError: (ImageCaptureException) -> Unit
-) {
-    val photoFile = File(
-        outputDirectory,
-        SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
-    )
-
-    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-    imageCapture.takePicture(outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
-        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-            val savedUri = Uri.fromFile(photoFile)
-            onImageCaptured(savedUri)
-        }
-
-        override fun onError(exception: ImageCaptureException) {
-            projectLog(tag = prototypeTag, message = "Take photo error: $exception")
-            onError(exception)
-        }
-    })
-}
-
 private suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { continuation ->
     ProcessCameraProvider.getInstance(this).also { cameraProvider ->
         cameraProvider.addListener({
@@ -170,7 +151,7 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspend
     }
 }
 
-//Camera utils
+//region Camera utils
 fun imageProxyToByteArray(image: ImageProxy) : ByteArray {
     val buffer = image.planes[0].buffer
     val bytes = ByteArray(buffer.remaining())
@@ -183,3 +164,69 @@ fun rotateBitmap(source: Bitmap, angle: Float) : Bitmap {
     matrix.postRotate(angle)
     return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
 }
+//endregion
+
+@Composable
+fun ImagePreview(
+    imageBitmap: ImageBitmap,
+    imageContainerSizeFraction: Float = 0.75f
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+
+        val containerSize = LocalConfiguration.current.screenWidthDp.dp * imageContainerSizeFraction
+        Box(
+            modifier = Modifier
+                .size(containerSize)
+                .clipToBounds()
+                .align(Alignment.Center)
+        ) {
+            ZoomableImage(
+                imageBitmap = imageBitmap,
+                modifier = Modifier
+
+            )
+        }
+    }
+}
+
+@Composable
+fun ZoomableImage(
+    imageBitmap: ImageBitmap,
+    modifier: Modifier
+) {
+
+    //TODO: Need to re-introduce the offset parameter here to move the image around once zoomed
+
+    val defaultScale = 1f
+    val zoomedScale = 1.5f
+    var scale by remember { mutableFloatStateOf(defaultScale) }
+
+    val transformGestureModifier = Modifier.pointerInput(Unit) {
+        detectTransformGestures { _, pan, zoom, _ ->
+            scale *= zoom
+        }
+    }
+
+    val doubleTapGestureModifier = Modifier.pointerInput(Unit) {
+        detectTapGestures(onDoubleTap = {
+            scale = if (scale > defaultScale) defaultScale else zoomedScale
+        })
+    }
+    Image(
+        bitmap = imageBitmap,
+        contentDescription = null,
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .fillMaxSize()
+            .then(transformGestureModifier)
+            .then(doubleTapGestureModifier)
+    )
+}
+
+

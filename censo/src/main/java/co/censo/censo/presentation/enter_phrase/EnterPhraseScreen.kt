@@ -2,13 +2,10 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,7 +25,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -48,6 +44,7 @@ import co.censo.censo.presentation.components.CameraView
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.presentation.components.ImagePreview
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -70,7 +67,6 @@ import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
 import co.censo.shared.util.projectLog
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -319,15 +315,10 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.REVIEW_IMAGE -> {
                             //TODO: ImageReviewUI
-                            // Refine this
                             // Save image
                             // Cancel image (and take another)
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Green)) {
-                                state.imageBitmap?.let {
-                                    Image(bitmap = it.asImageBitmap(), contentDescription = null)
-                                }
+                            state.imageBitmap?.let {
+                                ImagePreview(imageBitmap = it.asImageBitmap())
                             }
                         }
 
