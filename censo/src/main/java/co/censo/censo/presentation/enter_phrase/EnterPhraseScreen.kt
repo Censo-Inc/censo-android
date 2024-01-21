@@ -1,7 +1,14 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,17 +25,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import co.censo.censo.MainActivity
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.components.CameraView
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
@@ -43,6 +59,7 @@ import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.paywall.PaywallViewModel
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -52,6 +69,9 @@ import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
+import co.censo.shared.util.projectLog
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -69,15 +89,19 @@ fun EnterPhraseScreen(
 
     val state = viewModel.state
 
+    val cameraExecutor = Executors.newSingleThreadExecutor()
+
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
+        EnterPhraseUIState.CAPTURE_IMAGE,
         EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.NOTIFICATIONS -> ""
 
-        EnterPhraseUIState.REVIEW,
+        EnterPhraseUIState.REVIEW_WORDS,
+        EnterPhraseUIState.REVIEW_IMAGE,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.LABEL,
         EnterPhraseUIState.GENERATE,
@@ -250,7 +274,8 @@ fun EnterPhraseScreen(
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
                                 onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) },
                                 userHasOwnPhrase = state.enterWordUIState == EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
-                                onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() }
+                                onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() },
+                                onPictureEntrySelected = { viewModel.entrySelected(EntryType.IMAGE) }
                             )
                             if (state.triggerDeleteUserDialog is Resource.Success) {
                                 ConfirmationDialog(
@@ -290,6 +315,22 @@ fun EnterPhraseScreen(
                             )
                         }
 
+                        EnterPhraseUIState.CAPTURE_IMAGE -> {}
+
+                        EnterPhraseUIState.REVIEW_IMAGE -> {
+                            //TODO: ImageReviewUI
+                            // Refine this
+                            // Save image
+                            // Cancel image (and take another)
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Green)) {
+                                state.imageBitmap?.let {
+                                    Image(bitmap = it.asImageBitmap(), contentDescription = null)
+                                }
+                            }
+                        }
+
                         EnterPhraseUIState.VIEW -> {
                             ViewPhraseWordUI(
                                 editedWordIndex = state.editedWordIndex,
@@ -309,7 +350,7 @@ fun EnterPhraseScreen(
                             )
                         }
 
-                        EnterPhraseUIState.REVIEW -> {
+                        EnterPhraseUIState.REVIEW_WORDS -> {
                             ReviewSeedPhraseUI(
                                 phraseWords = state.enteredWords,
                                 saveSeedPhrase = viewModel::moveToLabel,
