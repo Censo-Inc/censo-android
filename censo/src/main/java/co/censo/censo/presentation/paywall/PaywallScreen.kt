@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
@@ -31,11 +30,10 @@ import kotlinx.coroutines.delay
 @Composable
 fun PaywallScreen(
     navController: NavController,
-    viewModel: PaywallViewModel = hiltViewModel()
+    viewModel: PaywallViewModel
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
-
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
@@ -62,11 +60,12 @@ fun PaywallScreen(
     ) {
         when {
 
-            state.loading || state.kickUserOut is Resource.Success ->
+            state.loading || state.kickUserOut is Resource.Success -> {
                 LargeLoading(
                     fullscreen = true,
                     fullscreenBackgroundColor = Color.White
                 )
+            }
 
             state.asyncError -> {
                 if (state.billingClientReadyResource is Resource.Error) {
@@ -84,10 +83,12 @@ fun PaywallScreen(
                 }
             }
 
+            !state.subscriptionRequired && !state.ignoreSubscriptionRequired -> {}
+
             else -> {
                 when (state.subscriptionStatus) {
 
-                    SubscriptionStatus.Active -> { }
+                    SubscriptionStatus.Active -> {}
 
                     SubscriptionStatus.None -> {
                         state.subscriptionOffer?.let {
@@ -99,9 +100,7 @@ fun PaywallScreen(
                                         productId
                                     )
                                 },
-                                onRestorePurchase = viewModel::restorePurchase,
-                                onboarding = viewModel.isOnboarding(),
-                                onCancel = viewModel::showDeleteUserDialog
+                                onCancel = state.cancelPurchaseCallback ?: viewModel::showDeleteUserDialog,
                             )
                         }
                     }
@@ -110,7 +109,7 @@ fun PaywallScreen(
                         state.subscriptionOffer?.let {
                             PendingPaymentUI(
                                 offer = it,
-                                onRestorePurchase = viewModel::restorePurchase
+                                onCancel = state.cancelPurchaseCallback,
                             )
                         }
                     }
@@ -119,13 +118,13 @@ fun PaywallScreen(
                         state.subscriptionOffer?.let {
                             PausedSubscriptionUI(
                                 offer = state.subscriptionOffer,
-                                onRestorePurchase = viewModel::restorePurchase,
                                 onContinue = { productId ->
                                     viewModel.startPurchaseFlow(
                                         context,
                                         productId
                                     )
-                                }
+                                },
+                                onCancel = state.cancelPurchaseCallback,
                             )
                         }
                     }

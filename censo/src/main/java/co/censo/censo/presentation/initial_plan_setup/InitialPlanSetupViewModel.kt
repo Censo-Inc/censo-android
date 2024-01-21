@@ -134,6 +134,10 @@ class InitialPlanSetupViewModel @Inject constructor(
         )
     }
 
+    fun changeWelcomeStep(welcomeStep: WelcomeStep) {
+        state = state.copy(welcomeStep = welcomeStep)
+    }
+
     private fun loadPrivateKeyFromCloud() {
         state = state.copy(
             cloudStorageAction = CloudStorageActionData(

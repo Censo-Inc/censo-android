@@ -40,7 +40,8 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
     timelockSetting = TimelockSetting(defaultTimelockInSeconds = 7200L, currentTimelockInSeconds = null, disabledAt = null),
     onboarded = true,
     canRequestAuthenticationReset = false,
-    authenticationReset = null
+    authenticationReset = null,
+    subscriptionRequired = true,
 )
 
 val mockReadyOwnerStateWithPolicySetup = mockReadyOwnerStateWithNullPolicySetup.copy(
@@ -52,5 +53,5 @@ val mockReadyOwnerStateWithPolicySetup = mockReadyOwnerStateWithNullPolicySetup.
 val mockInitialOwnerStateData = OwnerState.Initial(
     entropy = generateEntropy(),
     subscriptionStatus = SubscriptionStatus.Active,
+    subscriptionRequired = false,
 )
-

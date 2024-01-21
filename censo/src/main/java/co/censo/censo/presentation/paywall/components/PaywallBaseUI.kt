@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,9 +45,7 @@ import java.time.Period
 @Composable
 fun PaywallBaseUI(
     userPriceText: String,
-    onRestorePurchase: () -> Unit,
-    onboarding: Boolean = false,
-    onCancel: () -> Unit = {},
+    onCancel: (() -> Unit)? = null,
     statusSpecificContent: @Composable () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -54,9 +57,10 @@ fun PaywallBaseUI(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (onboarding) {
+        onCancel?.let {
             OnboardingTopBar(onCancel = onCancel, onboarding = true)
         }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,7 +103,7 @@ fun PaywallBaseUI(
                         end = 32.dp,
                     )
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -109,28 +113,17 @@ fun PaywallBaseUI(
                     fontSize = 16.sp,
                     color = SharedColors.MainColorText
                 )
+                Spacer(modifier = Modifier.width(8.dp))
                 Spacer(
                     modifier = Modifier
                         .width(2.dp)
                         .height(14.dp)
                         .background(color = SharedColors.DarkColorLine)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(SharedR.string.privacy),
                     modifier = Modifier.clickable { uriHandler.openUri(LinksUtil.PRIVACY_URL) },
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    color = SharedColors.MainColorText
-                )
-                Spacer(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .height(14.dp)
-                        .background(color = SharedColors.DarkColorLine)
-                )
-                Text(
-                    text = stringResource(co.censo.censo.R.string.restore_purchases),
-                    modifier = Modifier.clickable { onRestorePurchase() },
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
                     color = SharedColors.MainColorText
@@ -160,8 +153,6 @@ fun SubscriptionOffer.priceAndPeriodToUserText(context: Context): String {
 fun PreviewPaywallBaseUI() {
     PaywallBaseUI(
         userPriceText = "3.99 / month",
-        onRestorePurchase = {},
-        onboarding = true,
         onCancel = {}
     ) {
         Text(text = "GENERIC CONTENT HERE")

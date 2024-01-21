@@ -173,7 +173,7 @@ class VaultScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(OwnerState.Initial(Base64EncodedData(""), subscriptionStatus = SubscriptionStatus.Active))
+                onOwnerState(OwnerState.Initial(Base64EncodedData(""), subscriptionStatus = SubscriptionStatus.Active, subscriptionRequired = false))
             }
         }
     }

@@ -26,10 +26,8 @@ import java.time.Period
 @Composable
 fun NoSubscriptionUI(
     offer: SubscriptionOffer,
-    onRestorePurchase: () -> Unit,
     onContinue: (SubscriptionOffer) -> Unit,
-    onboarding: Boolean = false,
-    onCancel: () -> Unit = {},
+    onCancel: (() -> Unit)?,
 ) {
     val priceText = offer.priceAndPeriodToUserText(LocalContext.current)
 
@@ -40,8 +38,6 @@ fun NoSubscriptionUI(
 
     PaywallBaseUI(
         userPriceText = priceText,
-        onRestorePurchase = onRestorePurchase,
-        onboarding = onboarding,
         onCancel = onCancel,
         statusSpecificContent = {
         Spacer(modifier = Modifier.height(24.dp))
@@ -83,9 +79,8 @@ fun PreviewNoSubscriptionTrialUI() {
             billingPeriodISO8601 = "P1M",
             feeTrialPeriodISO8601 = "P7D",
         ),
-        onRestorePurchase = {},
         onContinue = {},
-    )
+    ) {}
 }
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -99,7 +94,6 @@ fun PreviewNoSubscriptionUINoTrialUI() {
             billingPeriodISO8601 = "P1M",
             feeTrialPeriodISO8601 = null,
         ),
-        onRestorePurchase = {},
         onContinue = {},
-    )
+    ) {}
 }

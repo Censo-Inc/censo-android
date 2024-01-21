@@ -155,15 +155,15 @@
     <string name="of_2_048_potential_words">%1$s of 2,048 potential words</string>
     <string name="sorry">"Sorry, "</string>
     <string name="is_not_a_valid_seed_phrase_word">" is not a valid seed phrase word."</string>
-    <string name="welcome_to_censo">Welcome to Censo</string>
+    <string name="welcome_to_censo">Welcome\nto Censo</string>
     <string name="welcome_blurb">Censo is a breakthrough in seed phrase security. Here\'s how you get started:</string>
     <string name="get_started">Get started</string>
-    <string name="authenticate_privately">Authenticate anonymously</string>
+    <string name="authenticate_privately">Authenticate privately</string>
     <string name="authenticate_privately_blurb">No personal info collected, ever, from Google or any other source.</string>
     <string name="authenticated">Authenticated</string>
     <string name="scanned">Scanned</string>
-    <string name="scan_your_face_blurb">Anonymous biometrics ensure that only you can access your seed phrase.</string>
-    <string name="enter_your_phrase">Enter your phrase</string>
+    <string name="scan_your_face_blurb">Important operations are secured by anonymous biometrics.</string>
+    <string name="enter_your_phrase">Enter your seed phrase</string>
     <string name="enter_your_phrase_blurb">Now your seed phrase is encrypted and entirely in your control.</string>
     <string name="invite_approvers">Invite approvers</string>
     <string name="info">Learn more</string>
@@ -196,9 +196,9 @@
     <string name="step_1">Step 1</string>
     <string name="step_2">Step 2</string>
     <string name="step_3">Step 3</string>
-    <string name="scan_your_face">Anonymously scan your face</string>
     <string name="update_scan_your_face">Update Your Face Scan</string>
     <string name="update_scan_your_face_blurb">Your face scan will be updated and immediately available for accessing your seed phrases. The previous face scan will be permanently removed from our storage.</string>
+    <string name="scan_your_face">Scan your face</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
@@ -410,7 +410,6 @@
     <string name="resume_adding_approvers">Resume adding approvers</string>
     <string name="approvers_activation_progress_made_so_far_will_be_lost">Approver verification progress made so far will be lost.</string>
     <string name="secure_all_your_seed_phrases_for_only_1_99_month">Secure all your seed\nphrases for\n%1$s\n\nTry for free,\ncancel anytime</string>
-    <string name="restore_purchases">Restore Purchases</string>
     <string name="your_subscription_was_paused">Don\'t worry, we won\'t delete any of your data as long as you are still subscribed.</string>
     <string name="add_another_seed_phrase">Add another seed phrase</string>
     <string name="allow_push_notifications">Allow Push Notifications</string>
@@ -471,4 +470,5 @@
     <string name="exit_setup">Exit Setup</string>
     <string name="exit_setup_details">This will exit the setup process and delete ALL of your data. You will be required to start over again.</string>
     <string name="reset_user_data_error">Error occurred while trying to reset user data.  Please try again.</string>
+    <string name="storing_one_phrase_free">Storing one seed phrase with Censo is free, but to store more than one you’ll need a subscription. Go ahead and enter your seed phrase now, we’ll ask you to subscribe when you’re ready to save it.</string>
 </resources>

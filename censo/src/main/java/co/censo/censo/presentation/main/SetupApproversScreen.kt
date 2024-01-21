@@ -69,7 +69,7 @@ fun SetupApproversScreen(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = stringResource(R.string.it_is_stored_securely_and_accessible_span),
+            title = stringResource(R.string.add_approvers_security_title),
             textAlign = TextAlign.Start
         )
 
