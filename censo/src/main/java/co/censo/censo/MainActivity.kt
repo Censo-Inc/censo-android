@@ -1,41 +1,23 @@
 package co.censo.censo
 
 import Base58EncodedMasterPublicKey
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.ImageProxy
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -52,8 +34,6 @@ import co.censo.censo.presentation.Screen.Companion.TIMESTAMP_KEY
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.biometry_reset.BiometryResetScreen
-import co.censo.censo.presentation.components.CameraView
-import co.censo.censo.presentation.components.rotateBitmap
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.import_phrase.PhraseImportScreen
@@ -78,12 +58,7 @@ import co.censo.shared.data.model.Import
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.presentation.maintenance.MaintenanceScreen
 import co.censo.shared.util.StrongboxUI
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import java.util.concurrent.Executor
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @AndroidEntryPoint
