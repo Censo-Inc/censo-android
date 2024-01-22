@@ -22,6 +22,7 @@ data class EnterPhraseState(
     val currentLanguage: BIP39.WordListLanguage = BIP39.WordListLanguage.English,
     val label: String = "",
     val labelTooLong: String? = null,
+    val seedPhraseType: SeedPhraseType = SeedPhraseType.TEXT,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val existingPhraseCount: Int = 0,
     val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,

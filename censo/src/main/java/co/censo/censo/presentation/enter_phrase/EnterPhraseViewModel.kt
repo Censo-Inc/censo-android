@@ -217,6 +217,8 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun moveToLabel(seedPhraseType: SeedPhraseType) {
+        state = state.copy(seedPhraseType = seedPhraseType)
+
         if (!state.phraseEncryptionInProgress) {
             state = state.copy(phraseEncryptionInProgress = true)
 

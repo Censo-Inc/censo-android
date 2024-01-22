@@ -35,7 +35,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import co.censo.censo.MainActivity
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
@@ -198,8 +197,12 @@ fun EnterPhraseScreen(
 
                 state.error -> {
                     if (state.submitResource is Resource.Error) {
+                        val errorStringResId = if (state.seedPhraseType == SeedPhraseType.TEXT)
+                                R.string.failed_save_seed_text
+                            else
+                                R.string.failed_save_seed_image
                         DisplayError(
-                            errorMessage = stringResource(R.string.failed_save_seed),
+                            errorMessage = stringResource(errorStringResId),
                             dismissAction = viewModel::resetSubmitResourceErrorState,
                             retryAction = viewModel::saveSeedPhrase
                         )
