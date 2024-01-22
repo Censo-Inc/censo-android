@@ -216,7 +216,7 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun moveToLabel() {
+    fun moveToLabel(seedPhraseType: SeedPhraseType) {
         if (!state.phraseEncryptionInProgress) {
             state = state.copy(phraseEncryptionInProgress = true)
 
@@ -230,11 +230,18 @@ class EnterPhraseViewModel @Inject constructor(
 
             viewModelScope.launch(Dispatchers.IO) {
                 runCatching {
-                    // encrypt seed phrase and drop single words
-                    val encryptedSeedPhrase = ownerRepository.encryptSeedPhrase(
-                        state.masterPublicKey!!,
-                        state.enteredWords
-                    )
+
+                   val encryptedSeedPhrase = when (seedPhraseType) {
+                       // encrypt seed phrase and drop single words
+                        SeedPhraseType.TEXT ->  ownerRepository.encryptSeedPhrase(
+                            state.masterPublicKey!!,
+                            state.enteredWords
+                        )
+                        SeedPhraseType.IMAGE -> ownerRepository.encryptSeedPhraseImage(
+                            state.masterPublicKey!!,
+                            state.imageBitmap!!
+                        )
+                    }
 
                     state = state.copy(
                         enterWordUIState = EnterPhraseUIState.LABEL,
@@ -661,6 +668,17 @@ class EnterPhraseViewModel @Inject constructor(
         )
 
         image.close()
+    }
+
+    fun onSaveImage() {
+        moveToLabel(seedPhraseType = SeedPhraseType.IMAGE)
+    }
+
+    fun onCancelImageSave() {
+        state = state.copy(
+            imageBitmap = null,
+            enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE
+        )
     }
     //endregion
 
