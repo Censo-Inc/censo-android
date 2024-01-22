@@ -57,7 +57,8 @@ fun PhraseHomeScreen(
     onEditPhraseClick: (SeedPhrase) -> Unit,
     onCancelAccessClick: () -> Unit,
     accessButtonLabel: AccessButtonLabelEnum,
-    timelockExpiration: Instant?
+    timelockExpiration: Instant?,
+    accessButtonEnabled: Boolean
 ) {
     val context = LocalContext.current
     Column(
@@ -159,7 +160,8 @@ fun PhraseHomeScreen(
                         } else {
                             onAccessClick()
                         }
-                    }
+                    },
+                    enabled = accessButtonEnabled
                 ) {
                     Text(
                         text = stringResource(when (accessButtonLabel) {
@@ -313,6 +315,7 @@ fun PreviewPhraseHomeScreen() {
         },
         onCancelAccessClick = {},
         accessButtonLabel = AccessButtonLabelEnum.RequestAccess,
-        timelockExpiration = Clock.System.now() + 5.minutes
+        timelockExpiration = Clock.System.now() + 5.minutes,
+        accessButtonEnabled = true
     )
 }

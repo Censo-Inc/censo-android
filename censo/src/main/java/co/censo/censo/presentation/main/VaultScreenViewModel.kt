@@ -175,6 +175,12 @@ class VaultScreenViewModel @Inject constructor(
         } ?: AccessButtonLabelEnum.BeginAccess
     }
 
+    fun accessButtonEnabled(): Boolean {
+        return state.ownerState?.let {
+          it.vault.seedPhrases.isNotEmpty()
+        } ?: false
+    }
+
     fun enableTimelock() {
         state = state.copy(
             enableTimelockResource = Resource.Loading
