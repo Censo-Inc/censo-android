@@ -264,6 +264,7 @@ sealed class OwnerState {
         val access: Access?,
         val policySetup: PolicySetup?,
         val timelockSetting: TimelockSetting,
+        val onboarded: Boolean
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
 
@@ -283,7 +284,7 @@ sealed class OwnerState {
 
     fun onboarding(): Boolean = when (this) {
         is Initial -> true
-        is Ready -> vault.seedPhrases.isEmpty()
+        is Ready -> !onboarded
     }
 
 }

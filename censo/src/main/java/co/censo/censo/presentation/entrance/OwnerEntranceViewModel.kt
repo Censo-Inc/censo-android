@@ -329,7 +329,7 @@ class OwnerEntranceViewModel @Inject constructor(
     private fun loggedInRouting(ownerState: OwnerState) {
         val destination = when (ownerState) {
             is OwnerState.Ready -> {
-                if (ownerState.vault.seedPhrases.isNotEmpty()) {
+                if (ownerState.onboarded) {
                     val access = ownerState.access
                     if (access != null && access is Access.ThisDevice && access.intent != AccessIntent.RecoverOwnerKey) {
                         Screen.AccessApproval.withIntent(intent = access.intent).navToAndPopCurrentDestination().asResource()

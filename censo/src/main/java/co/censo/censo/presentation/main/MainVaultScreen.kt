@@ -347,7 +347,8 @@ fun MainVaultScreen(
                                 },
                                 onCancelAccessClick = viewModel::onCancelAccess,
                                 accessButtonLabel = viewModel.determineAccessButtonLabel(),
-                                timelockExpiration = viewModel.accessTimelockExpiration()
+                                timelockExpiration = viewModel.accessTimelockExpiration(),
+                                accessButtonEnabled = viewModel.accessButtonEnabled()
                             )
 
                         BottomNavItem.Settings ->

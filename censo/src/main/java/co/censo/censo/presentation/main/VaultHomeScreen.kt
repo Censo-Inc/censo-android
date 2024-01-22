@@ -98,7 +98,7 @@ fun VaultHomeScreen(
             modifier = Modifier.fillMaxWidth(),
             text = buildAddSeedPhraseDisclaimer(
                 context = context,
-                multiplePhrases = seedPhrasesSaved > 1
+                multiplePhrases = seedPhrasesSaved != 1
             ),
             fontSize = 20.sp,
             textAlign = TextAlign.Center,
