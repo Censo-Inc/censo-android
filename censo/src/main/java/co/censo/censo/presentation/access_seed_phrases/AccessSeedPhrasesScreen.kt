@@ -187,6 +187,7 @@ fun AccessSeedPhrasesScreen(
                         }
 
                         AccessPhrasesUIState.ViewPhrase -> {
+                            //TODO: Setup switch for viewing words vs image
                             state.recoveredPhrases.success()?.data?.first()?.let {
                                 ViewAccessPhraseUI(
                                     phraseWords = it.phraseWords,
