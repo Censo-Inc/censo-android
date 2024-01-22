@@ -15,6 +15,7 @@ import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.networking.IgnoreKeysJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -22,6 +23,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.bitmapToByteArray
 import co.censo.shared.util.rotateBitmap
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -232,23 +234,22 @@ class EnterPhraseViewModel @Inject constructor(
 
             viewModelScope.launch(Dispatchers.IO) {
                 runCatching {
-
-                   val encryptedSeedPhrase = when (seedPhraseType) {
-                       // encrypt seed phrase and drop single words
-                        SeedPhraseType.TEXT ->  ownerRepository.encryptSeedPhrase(
-                            state.masterPublicKey!!,
-                            state.enteredWords
-                        )
-                        SeedPhraseType.IMAGE -> ownerRepository.encryptSeedPhraseImage(
-                            state.masterPublicKey!!,
-                            state.imageBitmap!!
-                        )
+                    val seedPhraseData = when (state.seedPhraseType) {
+                        SeedPhraseType.TEXT -> SeedPhraseData.Bip39(state.enteredWords)
+                        SeedPhraseType.IMAGE -> SeedPhraseData.Image(state.imageBitmap!!.bitmapToByteArray())
                     }
+
+                    // encrypt seed phrase and drop single words
+                    val encryptedSeedPhrase = ownerRepository.encryptSeedPhrase(
+                        masterPublicKey = state.masterPublicKey!!,
+                        seedPhraseData = seedPhraseData
+                    )
 
                     state = state.copy(
                         enterWordUIState = EnterPhraseUIState.LABEL,
                         encryptedSeedPhrase = encryptedSeedPhrase,
                         enteredWords = listOf(),
+                        imageBitmap = null,
                         phraseEncryptionInProgress = false
                     )
                 }.onFailure { _ ->

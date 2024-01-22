@@ -94,7 +94,7 @@ data class AttestationChallengeResponse(
 data class RecoveredSeedPhrase(
     val guid: SeedPhraseId,
     val label: String,
-    val phraseWords: List<String>,
+    val seedPhrase: SeedPhraseData,
     val createdAt: Instant
 )
 

@@ -7,7 +7,6 @@ import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import ParticipantId
 import SeedPhraseId
-import android.graphics.Bitmap
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.ECIESManager
@@ -77,15 +76,17 @@ import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.SeedPhrase
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UpdateSeedPhraseApiRequest
 import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
+import co.censo.shared.data.model.toByteArray
+import co.censo.shared.data.model.toSeedPhraseData
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.bitmapToByteArray
 import co.censo.shared.util.sendError
 import com.auth0.android.jwt.JWT
 import io.github.novacrypto.base58.Base58
@@ -227,12 +228,7 @@ interface OwnerRepository {
 
     suspend fun encryptSeedPhrase(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        seedWords: List<String>
-    ): EncryptedSeedPhrase
-
-    suspend fun encryptSeedPhraseImage(
-        masterPublicKey: Base58EncodedMasterPublicKey,
-        seedPhrase: Bitmap
+        seedPhraseData: SeedPhraseData
     ): EncryptedSeedPhrase
 
     suspend fun storeSeedPhrase(
@@ -719,25 +715,9 @@ class OwnerRepositoryImpl(
 
     override suspend fun encryptSeedPhrase(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        seedWords: List<String>
+        seedPhraseData: SeedPhraseData
     ): EncryptedSeedPhrase {
-        val encodedData = BIP39.wordsToBinaryData(seedWords)
-        val encryptedSeedPhrase = ECIESManager.encryptMessage(
-            dataToEncrypt = encodedData,
-            publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
-        )
-
-        return EncryptedSeedPhrase(
-            hash = encodedData.sha256(),
-            encrypted = encryptedSeedPhrase.base64Encoded()
-        )
-    }
-
-    override suspend fun encryptSeedPhraseImage(
-        masterPublicKey: Base58EncodedMasterPublicKey,
-        seedPhrase: Bitmap
-    ): EncryptedSeedPhrase {
-        val encodedData = seedPhrase.bitmapToByteArray()
+        val encodedData = seedPhraseData.toByteArray()
         val encryptedSeedPhrase = ECIESManager.encryptMessage(
             dataToEncrypt = encodedData,
             publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
@@ -861,9 +841,9 @@ class OwnerRepositoryImpl(
                 RecoveredSeedPhrase(
                     guid = it.guid,
                     label = it.label,
-                    phraseWords = BIP39.binaryDataToWords(
-                        masterEncryptionKey.decrypt(response.data.encryptedSeedPhrase.bytes), language
-                    ),
+                    seedPhrase = masterEncryptionKey
+                        .decrypt(response.data.encryptedSeedPhrase.bytes)
+                        .toSeedPhraseData(language = language),
                     createdAt = it.createdAt
                 )
             } else {

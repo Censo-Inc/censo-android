@@ -3,6 +3,7 @@ package co.censo.shared.data.model
 import co.censo.shared.data.model.SeedPhraseData.Companion.imageTypeCode
 import co.censo.shared.data.model.SeedPhraseData.Companion.phraseHeaderByte
 import co.censo.shared.util.BIP39
+
 sealed class SeedPhraseData {
     companion object {
         const val phraseHeaderByte: UInt = 255u
@@ -14,7 +15,7 @@ sealed class SeedPhraseData {
     data class Bip39(val words: List<String>) : SeedPhraseData()
 }
 
-fun SeedPhraseData.toData() : ByteArray {
+fun SeedPhraseData.toByteArray() : ByteArray {
     return when (this) {
         is SeedPhraseData.Image -> (byteArrayOf(
             phraseHeaderByte.toByte(),
@@ -25,16 +26,16 @@ fun SeedPhraseData.toData() : ByteArray {
     }
 }
 
-fun SeedPhraseData.fromData(data: ByteArray, language: BIP39.WordListLanguage? = null) : SeedPhraseData {
-    if (data.count() < 2) {
+fun ByteArray.toSeedPhraseData(language: BIP39.WordListLanguage? = null) : SeedPhraseData {
+    if (this.count() < 2) {
         throw Exception("Invalid phrase data")
     }
 
-    when (data[0]) {
+    when (this[0]) {
         phraseHeaderByte.toByte() -> {
-            when (data[1]) {
+            when (this[1]) {
                 imageTypeCode.toByte() -> {
-                    return SeedPhraseData.Image(imageData = data.drop(2).toByteArray())
+                    return SeedPhraseData.Image(imageData = this.drop(2).toByteArray())
                 }
 
                 else -> {
@@ -44,7 +45,7 @@ fun SeedPhraseData.fromData(data: ByteArray, language: BIP39.WordListLanguage? =
         }
 
         else -> {
-            return SeedPhraseData.Bip39(words = BIP39.binaryDataToWords(binaryData = data, language = language))
+            return SeedPhraseData.Bip39(words = BIP39.binaryDataToWords(binaryData = this, language = language))
         }
     }
 }
