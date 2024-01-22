@@ -196,6 +196,10 @@ dependencies {
     api(libs.bcprov.jdk15to18)
     api(libs.base58)
 
+    //ImageProxy
+    val cameraxVersion = "1.3.1"
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.mockito.kotlin)

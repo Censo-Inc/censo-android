@@ -14,19 +14,22 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Lens
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.FloatState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -50,11 +53,10 @@ import androidx.core.content.ContextCompat
 import co.censo.censo.MainActivity
 import co.censo.censo.MainActivity.Companion.prototypeTag
 import co.censo.shared.util.projectLog
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.math.max
-import kotlin.math.min
 
 @Composable
 fun CameraView(
@@ -151,43 +153,42 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspend
     }
 }
 
-//region Camera utils
-fun imageProxyToByteArray(image: ImageProxy) : ByteArray {
-    val buffer = image.planes[0].buffer
-    val bytes = ByteArray(buffer.remaining())
-    buffer.get(bytes)
-    return bytes
-}
 
-fun rotateBitmap(source: Bitmap, angle: Float) : Bitmap {
-    val matrix = Matrix()
-    matrix.postRotate(angle)
-    return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
-}
-//endregion
 
 @Composable
-fun ImagePreview(
+fun ImageReview(
     imageBitmap: ImageBitmap,
-    imageContainerSizeFraction: Float = 0.75f
+    imageContainerSizeFraction: Float = 0.75f,
+    onSaveImage: () -> Unit,
+    onCancelImageSave: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
 
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         val containerSize = LocalConfiguration.current.screenWidthDp.dp * imageContainerSizeFraction
         Box(
             modifier = Modifier
                 .size(containerSize)
                 .clipToBounds()
-                .align(Alignment.Center)
         ) {
             ZoomableImage(
                 imageBitmap = imageBitmap,
                 modifier = Modifier
-
             )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Button(onClick = onSaveImage) {
+                Text(text = "Save")
+            }
+
+            Button(onClick = onCancelImageSave) {
+                Text(text = "Cancel")
+            }
         }
     }
 }
@@ -198,15 +199,16 @@ fun ZoomableImage(
     modifier: Modifier
 ) {
 
-    //TODO: Need to re-introduce the offset parameter here to move the image around once zoomed
-
     val defaultScale = 1f
     val zoomedScale = 1.5f
     var scale by remember { mutableFloatStateOf(defaultScale) }
+    //TODO: Offset should just affect the scrolling of the image
+    var offset by remember { mutableStateOf(Offset.Zero) }
 
     val transformGestureModifier = Modifier.pointerInput(Unit) {
         detectTransformGestures { _, pan, zoom, _ ->
             scale *= zoom
+            offset += pan
         }
     }
 
@@ -222,6 +224,8 @@ fun ZoomableImage(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                translationX = offset.x
+                translationY = offset.y
             }
             .fillMaxSize()
             .then(transformGestureModifier)

@@ -110,3 +110,7 @@ enum class BackIconType {
 enum class EntryType {
     MANUAL, PASTE, GENERATE, IMPORT, IMAGE
 }
+
+enum class SeedPhraseType {
+    TEXT, IMAGE
+}

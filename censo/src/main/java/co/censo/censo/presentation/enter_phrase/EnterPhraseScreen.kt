@@ -44,7 +44,7 @@ import co.censo.censo.presentation.components.CameraView
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
-import co.censo.censo.presentation.components.ImagePreview
+import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -314,11 +314,14 @@ fun EnterPhraseScreen(
                         EnterPhraseUIState.CAPTURE_IMAGE -> {}
 
                         EnterPhraseUIState.REVIEW_IMAGE -> {
-                            //TODO: ImageReviewUI
-                            // Save image
-                            // Cancel image (and take another)
                             state.imageBitmap?.let {
-                                ImagePreview(imageBitmap = it.asImageBitmap())
+                                ImageReview(
+                                    imageBitmap = it.asImageBitmap(),
+                                    onSaveImage = viewModel::onSaveImage,
+                                    onCancelImageSave = viewModel::onCancelImageSave
+                                )
+                            } ?: {
+                                //TODO: Display error
                             }
                         }
 
@@ -344,7 +347,7 @@ fun EnterPhraseScreen(
                         EnterPhraseUIState.REVIEW_WORDS -> {
                             ReviewSeedPhraseUI(
                                 phraseWords = state.enteredWords,
-                                saveSeedPhrase = viewModel::moveToLabel,
+                                saveSeedPhrase = { viewModel.moveToLabel(seedPhraseType = SeedPhraseType.TEXT)},
                                 editSeedPhrase = viewModel::editEntirePhrase
                             )
                         }
