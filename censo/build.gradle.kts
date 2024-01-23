@@ -102,6 +102,9 @@ android {
             buildConfigField("boolean", "FACETEC_ENABLED", "true")
             applicationIdSuffix = ".staging"
             isDebuggable = false
+            firebaseAppDistribution {
+                testers = "censoqa@gmail.com, strikepqa@gmail.com"
+            }
         }
         create("integration") {
             resValue("string", "app_name", "Integration Censo")
