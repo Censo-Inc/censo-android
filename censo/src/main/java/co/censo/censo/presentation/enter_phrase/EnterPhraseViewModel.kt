@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -630,6 +631,10 @@ class EnterPhraseViewModel @Inject constructor(
             loadKeyInProgress = Resource.Uninitialized
         )
     }
+
+    fun resetImageCaptureResource() {
+        state = state.copy(imageCaptureResource = Resource.Uninitialized)
+    }
     //endregion
 
     // region delete data
@@ -671,6 +676,13 @@ class EnterPhraseViewModel @Inject constructor(
         )
 
         image.close()
+    }
+
+    fun handleImageCaptureError(exception: ImageCaptureException) {
+        state = state.copy(
+            imageCaptureResource = Resource.Error(exception = exception),
+            enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+        )
     }
 
     fun onSaveImage() {

@@ -2,7 +2,12 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.ContactsContract
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,6 +70,7 @@ import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
+import co.censo.shared.util.getImageCaptureErrorDisplayMessage
 import co.censo.shared.util.projectLog
 import java.util.concurrent.Executors
 
@@ -218,6 +224,14 @@ fun EnterPhraseScreen(
                             dismissAction = viewModel::onCancelResetUser,
                             retryAction = viewModel::deleteUser
                         )
+                    } else if (state.imageCaptureResource is Resource.Error) {
+                        //TODO: Test this as part of the testing of the work
+                        // Scrutinize the retry action experience
+                        DisplayError(
+                            errorMessage = getImageCaptureErrorDisplayMessage(state.imageCaptureResource.exception),
+                            dismissAction = viewModel::resetImageCaptureResource,
+                            retryAction = { viewModel.entrySelected(EntryType.IMAGE) }
+                        )
                     }
 
                 }
@@ -321,10 +335,12 @@ fun EnterPhraseScreen(
                                 ImageReview(
                                     imageBitmap = it.asImageBitmap(),
                                     onSaveImage = viewModel::onSaveImage,
-                                    onCancelImageSave = viewModel::onCancelImageSave
+                                    onCancelImageSave = viewModel::onCancelImageSave,
+                                    onDoneViewing = null
                                 )
                             } ?: {
-                                //TODO: Display error
+                                //TODO: Setup better error handling here
+                                viewModel.onCancelImageSave()
                             }
                         }
 

@@ -36,6 +36,7 @@ data class EnterPhraseState(
     val userResource: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val phraseEncryptionInProgress: Boolean = false,
     val triggerPaywallUI: Resource<Unit> = Resource.Uninitialized,
+    val imageCaptureResource: Resource<Unit> = Resource.Uninitialized,
 
     //Flags
     val welcomeFlow: Boolean = false,

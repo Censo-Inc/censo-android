@@ -7,17 +7,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import co.censo.censo.MainActivity.Companion.prototypeTag
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.OnLifecycleEvent
@@ -28,11 +31,15 @@ import co.censo.censo.presentation.access_seed_phrases.components.AccessPhrasesT
 import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
+import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.util.byteArrayToBitmap
+import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -187,13 +194,30 @@ fun AccessSeedPhrasesScreen(
                         }
 
                         AccessPhrasesUIState.ViewPhrase -> {
-                            //TODO: Setup switch for viewing words vs image
                             state.recoveredPhrases.success()?.data?.first()?.let {
-                                ViewAccessPhraseUI(
-                                    phraseWords = it.phraseWords,
-                                    onDone = viewModel::reset,
-                                    timeLeft = state.timeRemaining
-                                )
+                                when (it.seedPhrase) {
+                                    is SeedPhraseData.Image -> {
+                                        //TODO: Setup properly
+                                        // Refine the UI
+                                        (it.seedPhrase as SeedPhraseData.Image).imageData.byteArrayToBitmap()
+                                            ?.asImageBitmap()?.let {imageBitmap ->
+                                            ImageReview(
+                                                imageBitmap = imageBitmap,
+                                                onSaveImage = null,
+                                                onCancelImageSave = null,
+                                                onDoneViewing = viewModel::reset
+                                            )
+                                        }
+                                    }
+                                    
+                                    is SeedPhraseData.Bip39 -> {
+                                        ViewAccessPhraseUI(
+                                            phraseWords = (it.seedPhrase as SeedPhraseData.Bip39).words,
+                                            onDone = viewModel::reset,
+                                            timeLeft = state.timeRemaining
+                                        )        
+                                    }
+                                }
                             }
                         }
                     }
