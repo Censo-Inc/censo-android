@@ -200,7 +200,7 @@ fun AccessSeedPhrasesScreen(
                                         //TODO: Setup properly
                                         // Refine the UI
                                         (it.seedPhrase as SeedPhraseData.Image).imageData.byteArrayToBitmap()
-                                            ?.asImageBitmap()?.let {imageBitmap ->
+                                            ?.asImageBitmap()?.let { imageBitmap ->
                                             ImageReview(
                                                 imageBitmap = imageBitmap,
                                                 onSaveImage = null,

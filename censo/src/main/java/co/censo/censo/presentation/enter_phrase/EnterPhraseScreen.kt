@@ -390,9 +390,6 @@ fun EnterPhraseScreen(
                                     onCancelImageSave = viewModel::onCancelImageSave,
                                     onDoneViewing = null
                                 )
-                            } ?: {
-                                //TODO: Setup better error handling here
-                                viewModel.onCancelImageSave()
                             }
                         }
 
