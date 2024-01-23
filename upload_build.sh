@@ -2,11 +2,15 @@
 
 set -e
 
+publishFlag=false
+
 while [ $# -gt 0 ]; do
     if [[ $1 == "--"* ]]; then
         v="${1/--/}"
         declare "$v"="$2"
         shift
+    elif [[ $1 == "-p" ]]; then
+        publishFlag=true
     fi
     shift
 done
@@ -38,8 +42,13 @@ echo Running "${appType}:"lint"${environment}"
 echo Running "${appType}:"test"${environment}"UnitTest
 ./gradlew "${appType}:"test"${environment}"UnitTest
 
-export FIREBASE_TOKEN="$token"
-echo "$FIREBASE_TOKEN"
+# Check if -p was passed
+if [ "$publishFlag" = true ]; then
+    echo "publishing build..."
 
-echo Running "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
-./gradlew "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
+    export FIREBASE_TOKEN="$token"
+    echo "$FIREBASE_TOKEN"
+
+    echo Running "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
+    ./gradlew "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
+fi
