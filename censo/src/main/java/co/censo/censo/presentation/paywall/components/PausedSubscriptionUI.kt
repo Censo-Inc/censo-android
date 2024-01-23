@@ -35,10 +35,6 @@ fun PausedSubscriptionUI(
     val priceText =
         offer.priceAndPeriodToUserText(LocalContext.current)
 
-    val trialText = offer.feeTrialPeriodISO8601
-        ?.let { "${Period.parse(it).days} ${stringResource(R.string.days_free_then)} " }
-        ?: ""
-
     PaywallBaseUI(
         priceText,
         onCancel = onCancel,
@@ -79,13 +75,6 @@ fun PausedSubscriptionUI(
                         text = stringResource(R.string.continue_text),
                         style = ButtonTextStyle.copy(
                             fontSize = 28.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                    )
-                    Text(
-                        text = "$trialText$priceText",
-                        style = ButtonTextStyle.copy(
-                            fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         ),
                     )
