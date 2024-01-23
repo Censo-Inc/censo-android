@@ -402,7 +402,9 @@ class EnterPhraseViewModel @Inject constructor(
                 if (state.userHasOwnPhrase) {
                     state.copy(userHasOwnPhrase = false)
                 } else {
-                    state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                    if (state.welcomeFlow) {
+                        state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                    } else state.copy(exitFlow = true)
                 }
             EnterPhraseUIState.DONE,
             EnterPhraseUIState.NOTIFICATIONS -> state.copy(exitFlow = true)
