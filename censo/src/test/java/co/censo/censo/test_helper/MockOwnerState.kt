@@ -36,7 +36,8 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
             )
         ), publicMasterEncryptionKey = Base58EncodedMasterPublicKey(value = "AA")
     ), unlockedForSeconds = null, access = null, policySetup = null,
-    timelockSetting = TimelockSetting(defaultTimelockInSeconds = 7200L, currentTimelockInSeconds = null, disabledAt = null)
+    timelockSetting = TimelockSetting(defaultTimelockInSeconds = 7200L, currentTimelockInSeconds = null, disabledAt = null),
+    subscriptionRequired = true,
 )
 
 val mockReadyOwnerStateWithPolicySetup = mockReadyOwnerStateWithNullPolicySetup.copy(
@@ -48,4 +49,5 @@ val mockReadyOwnerStateWithPolicySetup = mockReadyOwnerStateWithNullPolicySetup.
 val mockInitialOwnerStateData = OwnerState.Initial(
     entropy = generateEntropy(),
     subscriptionStatus = SubscriptionStatus.Active,
+    subscriptionRequired = false,
 )

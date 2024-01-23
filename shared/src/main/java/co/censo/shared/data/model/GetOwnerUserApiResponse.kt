@@ -252,7 +252,8 @@ sealed class OwnerState {
     @SerialName("Initial")
     data class Initial(
         val entropy: Base64EncodedData?,
-        val subscriptionStatus: SubscriptionStatus
+        val subscriptionStatus: SubscriptionStatus,
+        val subscriptionRequired: Boolean
     ) : OwnerState()
 
     @Serializable
@@ -265,6 +266,7 @@ sealed class OwnerState {
         val access: Access?,
         val policySetup: PolicySetup?,
         val timelockSetting: TimelockSetting,
+        val subscriptionRequired: Boolean,
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
 
@@ -279,6 +281,12 @@ sealed class OwnerState {
     fun subscriptionStatus(): SubscriptionStatus = when (this) {
         is Initial -> subscriptionStatus
         is Ready -> subscriptionStatus
+    }
+
+
+    fun subscriptionRequired(): Boolean = when (this) {
+        is Initial -> subscriptionRequired
+        is Ready -> subscriptionRequired
     }
     fun hasActiveSubscription(): Boolean = subscriptionStatus() == SubscriptionStatus.Active
 

@@ -17,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,7 +40,9 @@ import co.censo.censo.presentation.enter_phrase.components.GeneratePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.PastePhraseUI
 import co.censo.censo.presentation.enter_phrase.components.SelectSeedPhraseEntryType
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
+import co.censo.censo.presentation.paywall.PaywallViewModel
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
@@ -49,7 +53,7 @@ import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun EnterPhraseScreen(
     masterPublicKey: Base58EncodedMasterPublicKey,
@@ -57,9 +61,11 @@ fun EnterPhraseScreen(
     navController: NavController,
     importingPhrase: Boolean = false,
     encryptedPhrase: String,
+    paywallViewModel: PaywallViewModel,
     viewModel: EnterPhraseViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current as FragmentActivity
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val state = viewModel.state
 
@@ -117,6 +123,19 @@ fun EnterPhraseScreen(
             }
 
             viewModel.resetExitFlow()
+        }
+
+        if (state.triggerPaywallUI is Resource.Success) {
+            paywallViewModel.setPaywallVisibility(
+                ignoreSubscriptionRequired = true,
+                onSuccessfulPurchase = {
+                    viewModel.subscriptionCompleted()
+                },
+                onCancelPurchase = {
+                    paywallViewModel.resetVisibility()
+                }
+            )
+            viewModel.resetPaywallTrigger()
         }
     }
 
@@ -216,10 +235,20 @@ fun EnterPhraseScreen(
 
                     when (state.enterWordUIState) {
                         EnterPhraseUIState.SELECT_ENTRY_TYPE -> {
+                            val savedPhrases =
+                                ((state.userResource.success()?.data?.ownerState) as? OwnerState.Ready)?.vault?.seedPhrases?.count()
+                                    ?: 0
+
                             SelectSeedPhraseEntryType(
                                 welcomeFlow = state.welcomeFlow,
+                                savedPhrases = savedPhrases,
                                 currentLanguage = state.currentLanguage,
-                                onManualEntrySelected = { language -> viewModel.entrySelected(EntryType.MANUAL, language) },
+                                onManualEntrySelected = { language ->
+                                    viewModel.entrySelected(
+                                        EntryType.MANUAL,
+                                        language
+                                    )
+                                },
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
                                 onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) },
                                 userHasOwnPhrase = state.userHasOwnPhrase,
@@ -296,7 +325,10 @@ fun EnterPhraseScreen(
                                 enabled = state.labelValid,
                                 labelIsTooLong = state.labelIsTooLong,
                                 onLabelChanged = viewModel::updateLabel,
-                                onSavePhrase = viewModel::saveSeedPhrase
+                                onSavePhrase = {
+                                    keyboardController?.hide()
+                                    viewModel.saveSeedPhrase()
+                                }
                             )
                         }
 
@@ -308,9 +340,10 @@ fun EnterPhraseScreen(
                         }
 
                         EnterPhraseUIState.NOTIFICATIONS -> {
-                            PushNotificationScreen(onFinished = viewModel::finishPushNotificationScreen )
+                            PushNotificationScreen(onFinished = viewModel::finishPushNotificationScreen)
                         }
                     }
+
                 }
             }
         }
