@@ -479,4 +479,8 @@
     <string name="photo_capture_step_2_preceding_text">When you hit the</string>
     <string name="photo_capture_step_2_remaining_text">button, we will present a camera to allow you to take a photo of your seed phrase. This photo is not saved to your photo library and will only be visible to you via this app.\n\nYou will be able to review the photo before saving it.</string>
     <string name="step_2_spanned_text">Start</string>
+    <string name="open_settings_app">Open Settings App</string>
+    <string name="grant_censo_access_to_your_camera_in_order_to_take_your_photo">Grant Censo access to your camera in order to take your photo.</string>
+    <string name="unable_to_access_camera">Unable to Access Camera</string>
+    <string name="settings_app_direction"><![CDATA[In your Settings App, go to Privacy > Permission Manager > Camera and verify that the Censo app is allowed to access the camera]]></string>
 </resources>

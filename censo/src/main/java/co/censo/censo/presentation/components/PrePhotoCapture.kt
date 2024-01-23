@@ -80,18 +80,38 @@ fun CaptureSeedPhraseImage(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Missing camera permission",
-                            color = TextBlack,
-                            fontSize = 18.sp,
+                            text = stringResource(R.string.unable_to_access_camera),
+                            color = SharedColors.MainColorText,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.W600,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(32.dp))
+
+                        Text(
+                            text = stringResource(R.string.grant_censo_access_to_your_camera_in_order_to_take_your_photo),
+                            color = SharedColors.MainColorText,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        Text(
+                            text = stringResource(R.string.settings_app_direction),
+                            color = SharedColors.MainColorText,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
                         StandardButton(
                             onClick = { context.sendUserToPermissions() },
                             contentPadding = PaddingValues(horizontal = 28.dp, vertical = 12.dp)
                         ) {
                             Text(
-                                text = "Open settings",
+                                text = stringResource(R.string.open_settings_app),
                                 style = ButtonTextStyle
                             )
                         }
