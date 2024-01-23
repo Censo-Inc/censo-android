@@ -86,6 +86,7 @@
     <string name="approvers_colon">approvers:</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="rename">Rename</string>
     <string name="establish_your_identity">Establish Your Identity</string>
     <string name="establish_identity_explainer">Access to your seed phrases always requires your approval which is obtained using an encrypted 3d face scan to confirm your identity.\n\nThis scan is not associated with any personally identifiable information and it provides a reliable way to securely control access to your seed phrases.</string>
     <string name="you_must_add_at_least_one_approver">You must add at least one approver</string>
@@ -147,6 +148,7 @@
     <string name="submit_again">Submit again</string>
     <string name="more_information">more information</string>
     <string name="save_seed_phrase">Save seed phrase</string>
+    <string name="rename_seed_phrase">Rename seed phrase</string>
     <string name="enter_word">Enter word</string>
     <string name="clear_word_entry">clear word entry</string>
     <string name="valid_word">valid word</string>
@@ -175,7 +177,9 @@
     <string name="exit_accessing_phrase">Exit accessing phrases</string>
     <string name="submit_word">Submit word</string>
     <string name="label_your_seed_phrase">Label your seed phrase</string>
+    <string name="rename_your_seed_phrase">Rename your seed phrase</string>
     <string name="seed_phrase_label_message">Give your seed phrase a unique label so you can easily identify it.</string>
+    <string name="rename_seed_phrase_label_message">Give your seed phrase a different label</string>
     <string name="enter_a_nickname">Enter a nickname…</string>
     <string name="enter_a_label">Enter a label…</string>
     <string name="add_seed_phrases">Add seed phrases</string>

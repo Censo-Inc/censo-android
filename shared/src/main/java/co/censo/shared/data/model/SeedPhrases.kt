@@ -24,3 +24,13 @@ data class DeleteSeedPhraseApiResponse(
 data class GetSeedPhraseApiResponse(
     val encryptedSeedPhrase: Base64EncodedData,
 )
+
+@Serializable
+data class UpdateSeedPhraseApiRequest(
+    val label: String,
+)
+
+@Serializable
+data class UpdateSeedPhraseApiResponse(
+    val ownerState: OwnerState,
+)

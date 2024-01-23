@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,15 +17,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +62,8 @@ fun PhraseHomeScreen(
     seedPhrases: List<SeedPhrase>,
     onAddClick: () -> Unit,
     onAccessClick: () -> Unit,
-    onEditPhraseClick: (SeedPhrase) -> Unit,
+    onRenamePhraseClick: (SeedPhrase) -> Unit,
+    onDeletePhraseClick: (SeedPhrase) -> Unit,
     onCancelAccessClick: () -> Unit,
     accessButtonLabel: AccessButtonLabelEnum,
     timelockExpiration: Instant?,
@@ -78,9 +87,12 @@ fun PhraseHomeScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 SeedPhraseItem(
                     seedPhrase = seedPhrase,
-                    isDeletable = true,
-                    onClick = {
-                        onEditPhraseClick(seedPhrase)
+                    isEditable = true,
+                    onRename = {
+                        onRenamePhraseClick(seedPhrase)
+                    },
+                    onDelete = {
+                        onDeletePhraseClick(seedPhrase)
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -198,15 +210,18 @@ fun PhraseHomeScreen(
 @Composable
 fun SeedPhraseItem(
     seedPhrase: SeedPhrase,
-    isDeletable: Boolean = false,
+    isEditable: Boolean = false,
     isSelected: Boolean = false,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onRename: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null
 ) {
     val modifier = onClick?.let {
-        if (!isDeletable) {
+        if (!isEditable) {
             Modifier.clickable { it() }
         } else Modifier
     } ?: Modifier
+    var expanded by remember { mutableStateOf(false) }
 
     Row(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -230,7 +245,7 @@ fun SeedPhraseItem(
                         top = 18.dp,
                         bottom = 18.dp,
                         start = 18.dp,
-                        end = if (isDeletable) 0.dp else 18.dp
+                        end = if (isEditable) 0.dp else 18.dp
                     )
                     .weight(1f),
                 text = seedPhrase.label,
@@ -242,21 +257,48 @@ fun SeedPhraseItem(
                 color = if (isSelected) SharedColors.SuccessGreen else SharedColors.MainColorText
             )
 
-            if (isDeletable) {
-                Icon(
-                    painterResource(id = co.censo.shared.R.drawable.edit_icon),
+            if (isEditable) {
+                Box(
                     modifier = Modifier
-                        .clickable { onClick?.invoke() }
-                        .size(36.dp)
+                        .background(color = Color.White)
                         .padding(end = 6.dp)
-                        .weight(0.25f),
-                    contentDescription = stringResource(R.string.edit_phrase),
-                    tint = SharedColors.MainIconColor
-                )
+                        .weight(0.25f)
+                        .wrapContentSize(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        painterResource(id = co.censo.shared.R.drawable.edit_icon),
+                        modifier = Modifier
+                            .clickable { expanded = true }
+                            .size(36.dp),
+                        contentDescription = stringResource(R.string.edit_phrase),
+                        tint = SharedColors.MainIconColor
+                    )
+                    DropdownMenu(
+                        modifier = Modifier.background(color = Color.White),
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false}) {
+                        DropdownMenuItem(
+                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                            text = { Text(stringResource(id = R.string.rename), fontSize = 20.sp, color = Color.Black) },
+                            onClick = {
+                                onRename?.let { it() }
+                                expanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                            text = { Text(stringResource(id = R.string.delete), fontSize = 20.sp, color = Color.Red) },
+                            onClick = {
+                                onDelete?.let { it() }
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
         }
 
-        if (!isDeletable && !isSelected) {
+        if (!isEditable && !isSelected) {
             Icon(
                 modifier = Modifier
                     .clickable { onClick?.invoke() }
@@ -310,9 +352,8 @@ fun PreviewPhraseHomeScreen() {
                 createdAt = Clock.System.now()
             ),
         ),
-        onEditPhraseClick = {
-
-        },
+        onRenamePhraseClick = {},
+        onDeletePhraseClick = {},
         onCancelAccessClick = {},
         accessButtonLabel = AccessButtonLabelEnum.RequestAccess,
         timelockExpiration = Clock.System.now() + 5.minutes,

@@ -72,6 +72,8 @@ import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.model.TimelockApiResponse
+import co.censo.shared.data.model.UpdateSeedPhraseApiRequest
+import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
@@ -227,6 +229,9 @@ interface OwnerRepository {
     ): Resource<StoreSeedPhraseApiResponse>
 
     suspend fun deleteSeedPhrase(guid: SeedPhraseId): Resource<DeleteSeedPhraseApiResponse>
+
+    suspend fun updateSeedPhrase(guid: SeedPhraseId, label: String): Resource<UpdateSeedPhraseApiResponse>
+
     suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit>
 
     suspend fun initiateAccess(intent: AccessIntent): Resource<InitiateAccessApiResponse>
@@ -714,6 +719,10 @@ class OwnerRepositoryImpl(
 
     override suspend fun deleteSeedPhrase(guid: SeedPhraseId): Resource<DeleteSeedPhraseApiResponse> {
         return retrieveApiResource { apiService.deleteSeedPhrase(guid) }
+    }
+
+    override suspend fun updateSeedPhrase(guid: SeedPhraseId, label: String): Resource<UpdateSeedPhraseApiResponse> {
+        return retrieveApiResource { apiService.updateSeedPhrase(guid, UpdateSeedPhraseApiRequest(label)) }
     }
 
     override suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit> {

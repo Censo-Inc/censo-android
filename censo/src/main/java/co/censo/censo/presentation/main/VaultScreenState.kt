@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.main
 
+import co.censo.censo.presentation.enter_phrase.EnterPhraseState
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
@@ -9,13 +10,15 @@ import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.model.TimelockApiResponse
+import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
 
 data class VaultScreenState(
     // owner state
     val ownerState: OwnerState.Ready? = null,
 
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
-    val triggerEditPhraseDialog: Resource<SeedPhrase> = Resource.Uninitialized,
+    val triggerDeletePhraseDialog: Resource<SeedPhrase> = Resource.Uninitialized,
+    val showRenamePhrase: Resource<SeedPhrase> = Resource.Uninitialized,
 
     // toast
     val syncCloudAccessMessage: Resource<SyncCloudAccessMessage> = Resource.Uninitialized,
@@ -27,6 +30,7 @@ data class VaultScreenState(
     // api requests
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSeedPhraseApiResponse> = Resource.Uninitialized,
+    val updateSeedPhraseResource: Resource<UpdateSeedPhraseApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val lockResponse : Resource<LockApiResponse> = Resource.Uninitialized,
     val resyncCloudAccessRequest : Boolean = false,
@@ -44,13 +48,17 @@ data class VaultScreenState(
 
     //UI
     val showPushNotificationsUI: Resource<Unit> = Resource.Uninitialized,
+
+    // rename seed phrase
+    val label: String = "",
+    val labelTooLong: String? = null,
 ) {
 
-    val externalApprovers = (ownerState?.policy?.approvers?.size?.minus(1)) ?: 0
     val seedPhrasesSize = ownerState?.vault?.seedPhrases?.size ?: 0
 
     val loading = userResponse is Resource.Loading ||
             deleteSeedPhraseResource is Resource.Loading ||
+            updateSeedPhraseResource is Resource.Loading ||
             deleteUserResource is Resource.Loading ||
             lockResponse is Resource.Loading ||
             deletePolicySetup is Resource.Loading ||
@@ -60,6 +68,7 @@ data class VaultScreenState(
 
     val asyncError = userResponse is Resource.Error ||
                 deleteSeedPhraseResource is Resource.Error ||
+                updateSeedPhraseResource is Resource.Error ||
                 deleteUserResource is Resource.Error ||
                 lockResponse is Resource.Error ||
                 deletePolicySetup is Resource.Error ||
@@ -69,6 +78,11 @@ data class VaultScreenState(
                 cancelAccessResource is Resource.Error ||
                 showAddApproversUI is Resource.Error ||
                 removeApprovers is Resource.Error
+
+    val labelIsTooLong = label.length > EnterPhraseState.PHRASE_LABEL_MAX_LENGTH
+    val labelValid = label.isNotEmpty() && !labelIsTooLong
+
+    val showClose = showAddApproversUI is Resource.Success || showRenamePhrase is Resource.Success
 }
 
 enum class SyncCloudAccessMessage {

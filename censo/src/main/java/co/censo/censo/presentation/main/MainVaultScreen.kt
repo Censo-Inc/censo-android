@@ -31,6 +31,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
@@ -39,8 +40,6 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.LearnMoreScreen
-import co.censo.shared.presentation.components.LearnMoreUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.GoogleAuth
 import co.censo.shared.util.popUpToTop
@@ -157,8 +156,11 @@ fun MainVaultScreen(
         topBar = {
             VaultTopBar(
                 bottomNavItem = selectedBottomNavItem.value,
-                showCloseApprover = state.showAddApproversUI is Resource.Success,
-                onDismissApprover = {
+                showClose = state.showClose,
+                onDismiss = {
+                    if (state.showRenamePhrase is Resource.Success) {
+                        viewModel.resetShowRenamePhase()
+                    }
                     if (showInfoView.value) {
                         showInfoView.value = false
                     } else {
@@ -204,7 +206,15 @@ fun MainVaultScreen(
                                 retryAction = null,
                             )
                         }
-
+                        state.updateSeedPhraseResource is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.updateSeedPhraseResource.getErrorMessage(
+                                    context
+                                ),
+                                dismissAction = viewModel::resetUpdateSeedPhraseResponse,
+                                retryAction = null,
+                            )
+                        }
                         state.deleteUserResource is Resource.Error -> {
                             DisplayError(
                                 errorMessage = state.deleteUserResource.getErrorMessage(context),
@@ -328,28 +338,47 @@ fun MainVaultScreen(
                         }
 
                         BottomNavItem.Phrases ->
-                            PhraseHomeScreen(
-                                seedPhrases = state.ownerState?.vault?.seedPhrases ?: emptyList(),
-                                onAddClick = {
-                                    state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
-                                        val route = Screen.EnterPhraseRoute.buildNavRoute(
-                                            masterPublicKey = masterPublicKey,
-                                            welcomeFlow = false
+                            if (state.showRenamePhrase is Resource.Success) {
+                                AddPhraseLabelUI(
+                                    label = state.label,
+                                    enabled = state.labelValid,
+                                    labelIsTooLong = state.labelIsTooLong,
+                                    onLabelChanged = viewModel::updateLabel,
+                                    onSavePhrase = viewModel::renameSeedPhrase,
+                                    isRename = true
+                                )
+                            } else {
+                                PhraseHomeScreen(
+                                    seedPhrases = state.ownerState?.vault?.seedPhrases
+                                        ?: emptyList(),
+                                    onAddClick = {
+                                        state.ownerState?.vault?.publicMasterEncryptionKey?.let { masterPublicKey ->
+                                            val route = Screen.EnterPhraseRoute.buildNavRoute(
+                                                masterPublicKey = masterPublicKey,
+                                                welcomeFlow = false
+                                            )
+                                            navController.navigate(route)
+                                        }
+                                    },
+                                    onAccessClick = {
+                                        navController.navigate(
+                                            Screen.AccessApproval.withIntent(
+                                                intent = AccessIntent.AccessPhrases
+                                            )
                                         )
-                                        navController.navigate(route)
-                                    }
-                                },
-                                onAccessClick = {
-                                    navController.navigate(Screen.AccessApproval.withIntent(intent = AccessIntent.AccessPhrases))
-                                },
-                                onEditPhraseClick = { seedPhrase ->
-                                    viewModel.showEditPhraseDialog(seedPhrase)
-                                },
-                                onCancelAccessClick = viewModel::onCancelAccess,
-                                accessButtonLabel = viewModel.determineAccessButtonLabel(),
-                                timelockExpiration = viewModel.accessTimelockExpiration(),
-                                accessButtonEnabled = viewModel.accessButtonEnabled()
-                            )
+                                    },
+                                    onRenamePhraseClick = { seedPhrase ->
+                                        viewModel.showRenamePhrase(seedPhrase)
+                                    },
+                                    onDeletePhraseClick = { seedPhrase ->
+                                        viewModel.showDeletePhraseDialog(seedPhrase)
+                                    },
+                                    onCancelAccessClick = viewModel::onCancelAccess,
+                                    accessButtonLabel = viewModel.determineAccessButtonLabel(),
+                                    timelockExpiration = viewModel.accessTimelockExpiration(),
+                                    accessButtonEnabled = viewModel.accessButtonEnabled()
+                                )
+                            }
 
                         BottomNavItem.Settings ->
                             if (state.showPushNotificationsUI is Resource.Success) {
@@ -413,8 +442,8 @@ fun MainVaultScreen(
                         )
                     }
 
-                    if (state.triggerEditPhraseDialog is Resource.Success) {
-                        val confirmationText = stringResource(R.string.delete_phrase_confirmation_text, state.triggerEditPhraseDialog.data.label)
+                    if (state.triggerDeletePhraseDialog is Resource.Success) {
+                        val confirmationText = stringResource(R.string.delete_phrase_confirmation_text, state.triggerDeletePhraseDialog.data.label)
 
                         val message = buildAnnotatedString {
                             append(stringResource(R.string.you_are_about_to_delete_phrase))

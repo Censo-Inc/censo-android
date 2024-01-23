@@ -81,17 +81,17 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun deleteSeedPhrase() {
-        if (state.triggerEditPhraseDialog !is Resource.Success) {
+        if (state.triggerDeletePhraseDialog !is Resource.Success) {
             state = state.copy(
                 deleteSeedPhraseResource = Resource.Error()
             )
             return
         }
 
-        val seedPhrase = state.triggerEditPhraseDialog.asSuccess().data
+        val seedPhrase = state.triggerDeletePhraseDialog.asSuccess().data
 
         state = state.copy(
-            triggerEditPhraseDialog = Resource.Uninitialized,
+            triggerDeletePhraseDialog = Resource.Uninitialized,
             deleteSeedPhraseResource = Resource.Loading
         )
 
@@ -106,6 +106,43 @@ class VaultScreenViewModel @Inject constructor(
                 onOwnerState(response.data.ownerState)
             }
         }
+    }
+
+    fun renameSeedPhrase() {
+        if (state.showRenamePhrase !is Resource.Success) {
+            state = state.copy(
+                updateSeedPhraseResource = Resource.Error()
+            )
+            return
+        }
+
+        val seedPhrase = state.showRenamePhrase.asSuccess().data
+
+        state = state.copy(
+            showRenamePhrase = Resource.Uninitialized,
+            updateSeedPhraseResource = Resource.Loading
+        )
+
+        viewModelScope.launch {
+            val response = ownerRepository.updateSeedPhrase(seedPhrase.guid, state.label)
+
+            state = state.copy(
+                updateSeedPhraseResource = response
+            )
+
+            if (response is Resource.Success) {
+                onOwnerState(response.data.ownerState)
+                state = state.copy(label = "")
+            }
+        }
+    }
+
+    fun resetUpdateSeedPhraseResponse() {
+        state = state.copy(updateSeedPhraseResource = Resource.Uninitialized)
+    }
+
+    fun resetShowRenamePhase() {
+        state = state.copy(showRenamePhrase = Resource.Uninitialized)
     }
 
     fun determinePolicyModificationRoute(): String {
@@ -176,9 +213,7 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun accessButtonEnabled(): Boolean {
-        return state.ownerState?.let {
-          it.vault.seedPhrases.isNotEmpty()
-        } ?: false
+        return state.ownerState?.vault?.seedPhrases?.isNotEmpty() ?: false
     }
 
     fun enableTimelock() {
@@ -246,7 +281,7 @@ class VaultScreenViewModel @Inject constructor(
             val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
-                onOwnerState(response.data!!.ownerState)
+                onOwnerState(response.data.ownerState)
             }
 
             state = state.copy(cancelAccessResource = response)
@@ -302,12 +337,27 @@ class VaultScreenViewModel @Inject constructor(
         state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
     }
 
-    fun showEditPhraseDialog(seedPhrase: SeedPhrase) {
-        state = state.copy(triggerEditPhraseDialog = Resource.Success(seedPhrase))
+    fun showDeletePhraseDialog(seedPhrase: SeedPhrase) {
+        state = state.copy(
+            triggerDeletePhraseDialog = Resource.Success(seedPhrase)
+        )
+    }
+
+    fun showRenamePhrase(seedPhrase: SeedPhrase) {
+        state = state.copy(
+            label = seedPhrase.label,
+            showRenamePhrase = Resource.Success(seedPhrase),
+        )
+    }
+
+    fun updateLabel(updatedLabel: String) {
+        state = state.copy(
+            label = updatedLabel
+        )
     }
 
     fun onCancelDeletePhrase() {
-        state = state.copy(triggerEditPhraseDialog = Resource.Uninitialized)
+        state = state.copy(triggerDeletePhraseDialog = Resource.Uninitialized)
     }
 
     fun onCancelResetUser() {
