@@ -3,11 +3,15 @@ package co.censo.censo.presentation.components
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
+import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
@@ -71,7 +75,19 @@ fun CameraView(
 
     val preview = Preview.Builder().build()
     val previewView  = remember { PreviewView(context) }
-    val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
+    val imageCapture: ImageCapture = remember {
+        ImageCapture.Builder()
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setResolutionStrategy(
+                        ResolutionStrategy(
+                            Size(1280, 720),
+                            FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+                        )
+                    )
+                    .build()
+            )
+        .build() }
     val cameraSelector = CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
@@ -155,12 +171,14 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspend
 
 
 
+//TODO: Add a wrapper level composable for the view actions
 @Composable
 fun ImageReview(
     imageBitmap: ImageBitmap,
     imageContainerSizeFraction: Float = 0.75f,
-    onSaveImage: () -> Unit,
-    onCancelImageSave: () -> Unit,
+    onSaveImage: (() -> Unit)?,
+    onCancelImageSave: (() -> Unit)?,
+    onDoneViewing: (() -> Unit)?
 ) {
 
     Column(
@@ -179,15 +197,28 @@ fun ImageReview(
             )
         }
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = onSaveImage) {
-                Text(text = "Save")
-            }
 
-            Button(onClick = onCancelImageSave) {
-                Text(text = "Cancel")
+        if (onSaveImage != null && onCancelImageSave != null) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = onSaveImage) {
+                    Text(text = "Save")
+                }
+
+                Button(onClick = onCancelImageSave) {
+                    Text(text = "Cancel")
+                }
+            }
+        }
+
+        if (onDoneViewing != null) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = onDoneViewing) {
+                    Text(text = "Done")
+                }
             }
         }
     }

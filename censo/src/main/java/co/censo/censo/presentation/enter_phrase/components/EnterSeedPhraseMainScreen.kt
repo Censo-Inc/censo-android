@@ -304,7 +304,7 @@ fun UserHasOwnPhrase(
                     }
             )
             Text(
-                text = "Picture",
+                text = stringResource(R.string.photo),
                 color = SharedColors.MainColorText,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(8.dp)
