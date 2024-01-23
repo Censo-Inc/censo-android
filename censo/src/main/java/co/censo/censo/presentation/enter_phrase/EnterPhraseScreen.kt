@@ -2,28 +2,29 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
 import StandardButton
+import TitleText
 import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.provider.ContactsContract
-import android.provider.Settings
-import android.text.style.TabStopSpan.Standard
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,15 +39,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -56,10 +61,12 @@ import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.components.CameraView
+import co.censo.censo.presentation.components.CaptureSeedPhraseImage
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.components.ImageReview
+import co.censo.censo.presentation.components.PreCaptureImageStep
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -86,7 +93,6 @@ import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
 import co.censo.shared.util.getImageCaptureErrorDisplayMessage
-import co.censo.shared.util.projectLog
 import java.util.concurrent.Executors
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
@@ -112,13 +118,15 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
-        EnterPhraseUIState.CAPTURE_IMAGE,
         EnterPhraseUIState.PASTE_ENTRY,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.NOTIFICATIONS -> ""
 
+        EnterPhraseUIState.CAPTURE_IMAGE -> "Seed Phrase Photo"
+
+        EnterPhraseUIState.REVIEW_IMAGE -> "Seed Phrase Photo Verification"
+
         EnterPhraseUIState.REVIEW_WORDS,
-        EnterPhraseUIState.REVIEW_IMAGE,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.LABEL,
         EnterPhraseUIState.GENERATE,
@@ -345,41 +353,11 @@ fun EnterPhraseScreen(
                         }
 
                         EnterPhraseUIState.CAPTURE_IMAGE -> {
-                            Permission(
-                                permission = Manifest.permission.CAMERA,
-                                rationale = "Camera is used to capture a photo of your seed phrase",
-                                permissionNotAvailableContent = {
-                                    Column(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(horizontal = 24.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(
-                                            "Missing camera permission",
-                                            color = TextBlack,
-                                            fontSize = 18.sp,
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Spacer(modifier = Modifier.height(32.dp))
-                                        StandardButton(
-                                            onClick = { context.sendUserToPermissions() },
-                                            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 12.dp)
-                                        ) {
-                                            Text(
-                                                text = "Open settings",
-                                                style = ButtonTextStyle
-                                            )
-                                        }
-                                    }
-                                }) {
-                                CameraView(
-                                    executor = cameraExecutor,
-                                    onImageCaptured = viewModel::handleImageCapture,
-                                    onError = viewModel::handleImageCaptureError
-                                )
-                            }
+                            CaptureSeedPhraseImage(
+                                executor = cameraExecutor,
+                                onImageCaptured = viewModel::handleImageCapture,
+                                onError = viewModel::handleImageCaptureError
+                            )
                         }
 
                         EnterPhraseUIState.REVIEW_IMAGE -> {

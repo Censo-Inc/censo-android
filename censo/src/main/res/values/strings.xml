@@ -471,4 +471,12 @@
     <string name="reset_user_data_error">Error occurred while trying to reset user data.  Please try again.</string>
     <string name="storing_one_phrase_free">Storing one seed phrase with Censo is free, but to store more than one you’ll need a subscription. Go ahead and enter your seed phrase now, we’ll ask you to subscribe when you’re ready to save it.</string>
     <string name="photo">Photo</string>
+    <string name="_1_prepare">1. Prepare</string>
+    <string name="_2_take_a_photo_of_it">2. Take a photo of it</string>
+    <string name="seed_phrase_photo_step_1_content">Make sure you are alone and no one else can see the paper containing your seed phrase or the screen on your phone.</string>
+    <string name="take_a_photo">Take a photo</string>
+    <string name="start">Start</string>
+    <string name="photo_capture_step_2_preceding_text">When you hit the</string>
+    <string name="photo_capture_step_2_remaining_text">button, we will present a camera to allow you to take a photo of your seed phrase. This photo is not saved to your photo library and will only be visible to you via this app.\n\nYou will be able to review the photo before saving it.</string>
+    <string name="step_2_spanned_text">Start</string>
 </resources>
