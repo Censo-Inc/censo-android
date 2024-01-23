@@ -196,9 +196,12 @@ dependencies {
     api(libs.bcprov.jdk15to18)
     api(libs.base58)
 
-    //ImageProxy
+    //CameraX
     val cameraxVersion = "1.3.1"
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
+
+    //Compose Accompanist
+    implementation("com.google.accompanist:accompanist-permissions:0.18.0")
 
     // Tests
     testImplementation(libs.junit)

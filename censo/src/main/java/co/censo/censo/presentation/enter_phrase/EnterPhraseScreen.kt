@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
+import StandardButton
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -8,11 +9,17 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Settings
+import android.text.style.TabStopSpan.Standard
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -29,11 +36,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -60,6 +71,8 @@ import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.paywall.PaywallViewModel
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.model.OwnerState
+import co.censo.censo.ui.theme.TextBlack
+import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
@@ -67,14 +80,17 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.presentation.components.Permission
+import co.censo.shared.presentation.components.sendUserToPermissions
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
 import co.censo.shared.util.getImageCaptureErrorDisplayMessage
 import co.censo.shared.util.projectLog
 import java.util.concurrent.Executors
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun EnterPhraseScreen(
     masterPublicKey: Base58EncodedMasterPublicKey,
@@ -328,7 +344,43 @@ fun EnterPhraseScreen(
                             )
                         }
 
-                        EnterPhraseUIState.CAPTURE_IMAGE -> {}
+                        EnterPhraseUIState.CAPTURE_IMAGE -> {
+                            Permission(
+                                permission = Manifest.permission.CAMERA,
+                                rationale = "Camera is used to capture a photo of your seed phrase",
+                                permissionNotAvailableContent = {
+                                    Column(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 24.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            "Missing camera permission",
+                                            color = TextBlack,
+                                            fontSize = 18.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(32.dp))
+                                        StandardButton(
+                                            onClick = { context.sendUserToPermissions() },
+                                            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = "Open settings",
+                                                style = ButtonTextStyle
+                                            )
+                                        }
+                                    }
+                                }) {
+                                CameraView(
+                                    executor = cameraExecutor,
+                                    onImageCaptured = viewModel::handleImageCapture,
+                                    onError = viewModel::handleImageCaptureError
+                                )
+                            }
+                        }
 
                         EnterPhraseUIState.REVIEW_IMAGE -> {
                             state.imageBitmap?.let {

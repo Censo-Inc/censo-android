@@ -183,6 +183,9 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
 
+    //Compose Accompanist
+    implementation("com.google.accompanist:accompanist-permissions:0.18.0")
+
     //Google Play Billing
     implementation(libs.billing)
     implementation(libs.billing.ktx)

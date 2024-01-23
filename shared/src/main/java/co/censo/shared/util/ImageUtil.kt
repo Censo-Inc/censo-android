@@ -40,7 +40,7 @@ fun getImageCaptureErrorDisplayMessage(exception: Exception?) : String {
 }
 
 fun getImageCaptureErrorMessage(exception: ImageCaptureException): String {
-    return when (exception.imageCaptureError) {
+    return when (exception.imageCaptureError ) {
 
         ERROR_INVALID_CAMERA -> {
             "Invalid camera"
@@ -55,7 +55,10 @@ fun getImageCaptureErrorMessage(exception: ImageCaptureException): String {
         }
 
         ERROR_FILE_IO,
-        ERROR_UNKNOWN,
+        ERROR_UNKNOWN, -> {
+            "Unable to capture photo"
+        }
+
         else -> {
             "Unable to capture photo"
         }
