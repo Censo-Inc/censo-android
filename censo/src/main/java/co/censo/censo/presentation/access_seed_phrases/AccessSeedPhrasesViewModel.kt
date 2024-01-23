@@ -22,6 +22,7 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.censo.presentation.plan_setup.PolicySetupUIState
 import co.censo.censo.util.TestUtil
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
 import co.censo.shared.util.asResource
@@ -146,7 +147,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
                             state = state.copy(
                                 recoveredPhrases = Resource.Success(recoveredSeedPhrases),
-                                viewedPhrase = recoveredSeedPhrases.firstOrNull()?.phraseWords ?: listOf(""),
+                                viewedPhrase = recoveredSeedPhrases.firstOrNull()?.let { listOf(it.seedPhrase) } ?: emptyList(),
                                 accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
                                 viewedPhraseIds = recoveredSeedPhrases.firstOrNull()?.let { state.viewedPhraseIds + it.guid } ?: state.viewedPhraseIds,
                                 locksAt = Clock.System.now().plus(15.minutes)
