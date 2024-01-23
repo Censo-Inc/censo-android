@@ -103,13 +103,12 @@ fun InitialPlanSetupScreen(
         containerColor = Color.White,
         topBar = {
             if (state.initialPlanSetupStep == InitialPlanSetupStep.Initial) {
-                //todo: Add logic here to pop back to welcome screen...
                 OnboardingTopBar(
                     onCancel = {
-                        if (state.welcomeStep == WelcomeStep.ScanningFace) {
-                          viewModel.changeWelcomeStep(WelcomeStep.Authenticated)
-                        } else if (showInfoView.value) {
+                        if (showInfoView.value) {
                             showInfoView.value = false
+                        } else if (state.welcomeStep == WelcomeStep.ScanningFace) {
+                          viewModel.changeWelcomeStep(WelcomeStep.Authenticated)
                         } else {
                             viewModel.showDeleteUserDialog()
                         }
