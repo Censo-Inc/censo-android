@@ -46,6 +46,7 @@ data class EnterPhraseState(
 
     val keyData: InitialKeyData? = null,
 
+    val userHasOwnPhrase: Boolean = false,
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 ) {

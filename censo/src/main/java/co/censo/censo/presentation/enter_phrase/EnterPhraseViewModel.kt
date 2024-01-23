@@ -398,10 +398,12 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE ->
-                if (state.welcomeFlow) {
-                    state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                if (state.userHasOwnPhrase) {
+                    state.copy(userHasOwnPhrase = false)
                 } else {
-                    state.copy(exitFlow = true)
+                    if (state.welcomeFlow) {
+                        state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                    } else state.copy(exitFlow = true)
                 }
             EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN ->
                 state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE)
