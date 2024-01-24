@@ -34,7 +34,7 @@ sealed class ApproverPhase {
     @Serializable
     @SerialName("WaitingForCode")
     data class WaitingForCode(
-        val entropy: Base64EncodedData?,
+        val entropy: Base64EncodedData,
     ) : ApproverPhase()
 
     @Serializable
@@ -44,7 +44,7 @@ sealed class ApproverPhase {
     @Serializable
     @SerialName("VerificationRejected")
     data class VerificationRejected(
-        val entropy: Base64EncodedData?,
+        val entropy: Base64EncodedData,
     ) : ApproverPhase()
 
     @Serializable
@@ -76,7 +76,7 @@ sealed class ApproverPhase {
         val ownerKeySignatureTimeMillis: Long,
         val ownerPublicKey: Base58EncodedDevicePublicKey,
         val approverEncryptedShard: Base64EncodedData,
-        val approverEntropy: Base64EncodedData?,
+        val approverEntropy: Base64EncodedData,
     ) : ApproverPhase()
 }
 
