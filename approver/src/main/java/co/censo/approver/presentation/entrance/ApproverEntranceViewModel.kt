@@ -19,7 +19,6 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.parseLink
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.NavigationData
 import co.censo.shared.util.asResource
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -49,13 +48,17 @@ class ApproverEntranceViewModel @Inject constructor(
     fun onStart(invitationId: String?, accessParticipantId: String?, approvalId: String?, appLinkUri: Uri?) {
         if (invitationId != null) {
             approverRepository.saveInvitationId(invitationId)
+            approverRepository.clearParticipantId()
+            approverRepository.clearApprovalId()
         }
         if (accessParticipantId != null) {
             approverRepository.saveParticipantId(accessParticipantId)
+            approverRepository.clearInvitationId()
         }
 
         if (approvalId != null) {
             approverRepository.saveApprovalId(approvalId)
+            approverRepository.clearInvitationId()
         }
 
         state = state.copy(appLinkUri = appLinkUri)
@@ -132,10 +135,19 @@ class ApproverEntranceViewModel @Inject constructor(
                     }
                 } else null
             } ?: run {
-                state = state.copy(
-                    uiState = ApproverEntranceUIState.Landing(isActiveApprover),
-                    loggedIn = loggedIn
-                )
+                val participantId = approverRepository.retrieveParticipantId()
+                val invitationId = approverRepository.retrieveInvitationId()
+                if (participantId.isEmpty() && invitationId.isEmpty()) {
+                    state = state.copy(
+                        uiState = ApproverEntranceUIState.Landing(isActiveApprover),
+                        loggedIn = loggedIn
+                    )
+                } else {
+                    state = state.copy(
+                        loggedIn = loggedIn
+                    )
+                    onLandingContinue()
+                }
             }
         }
     }
