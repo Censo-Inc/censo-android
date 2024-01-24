@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,11 +44,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -206,8 +207,6 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
         }
     }
 
-
-//TODO: Add a wrapper level composable for the view actions
 @Composable
 fun ImageReview(
     imageBitmap: ImageBitmap,
@@ -314,36 +313,55 @@ fun ZoomableImage(
 ) {
 
     val defaultScale = 1f
-    val zoomedScale = 1.5f
+    val zoomedScale = 2f
     var scale by remember { mutableFloatStateOf(defaultScale) }
-    //TODO: Offset should just affect the scrolling of the image
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var imageSize by remember { mutableStateOf(IntSize.Zero) }
 
     val transformGestureModifier = Modifier.pointerInput(Unit) {
         detectTransformGestures { _, pan, zoom, _ ->
+            val oldScale = scale
             scale *= zoom
-            offset += pan
+            scale = scale.coerceIn(defaultScale, zoomedScale)
+
+            //Adjust offset
+            val newOffsetX = (offset.x + pan.x) * (scale / oldScale)
+            val newOffsetY = (offset.y + pan.y) * (scale / oldScale)
+
+            //Calculate boundaries
+            val maxX = (imageSize.width * scale - imageSize.width) / 2f
+            val maxY = (imageSize.height * scale - imageSize.height) / 2f
+
+            offset = Offset(
+                x = newOffsetX.coerceIn(-maxX, maxX),
+                y = newOffsetY.coerceIn(-maxY, maxY)
+            )
         }
     }
 
     val doubleTapGestureModifier = Modifier.pointerInput(Unit) {
         detectTapGestures(onDoubleTap = {
             scale = if (scale > defaultScale) defaultScale else zoomedScale
+            offset = Offset.Zero
         })
     }
     Image(
         bitmap = imageBitmap,
         contentDescription = null,
         modifier = modifier
+            .onSizeChanged {
+                imageSize = it
+            }
+            .then(transformGestureModifier)
+            .then(doubleTapGestureModifier)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 translationX = offset.x
                 translationY = offset.y
             }
-            .fillMaxSize()
-            .then(transformGestureModifier)
-            .then(doubleTapGestureModifier)
+            .fillMaxSize(),
+        contentScale = ContentScale.Fit
     )
 }
 
