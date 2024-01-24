@@ -8,11 +8,11 @@ import co.censo.shared.data.model.ApproverStatus
 
 //region Extension Functions Mapping Approver.ProspectApprover Types
 fun List<Approver.ProspectApprover>.ownerApprover(): Approver.ProspectApprover? {
-    return find { it.status is ApproverStatus.OwnerAsApprover || it.status is ApproverStatus.ImplicitlyOwner }
+    return find { it.status is ApproverStatus.OwnerAsApprover }
 }
 
 fun List<Approver.ProspectApprover>.externalApprovers(): List<Approver.ProspectApprover> {
-    return filter { it.status !is ApproverStatus.OwnerAsApprover && it.status !is ApproverStatus.ImplicitlyOwner }
+    return filter { it.status !is ApproverStatus.OwnerAsApprover }
 }
 
 fun List<Approver.ProspectApprover>.confirmed(): List<Approver.ProspectApprover> {
@@ -99,10 +99,9 @@ fun List<Approver.TrustedApprover>.backupApprover(): Approver.TrustedApprover? {
 }
 //endregion
 
-fun Approver.ProspectApprover.getEntropyFromImplicitOwnerApprover(): Base64EncodedData? {
+fun Approver.ProspectApprover.getEntropyFromOwnerApprover(): Base64EncodedData? {
     return try {
-        val implicitOwner = this.status as? ApproverStatus.ImplicitlyOwner
-        return implicitOwner?.entropy ?: (this.status as? ApproverStatus.OwnerAsApprover)?.entropy
+        return (this.status as? ApproverStatus.OwnerAsApprover)?.entropy
     } catch (e: Exception) {
         null
     }

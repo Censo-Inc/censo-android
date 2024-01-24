@@ -15,7 +15,7 @@ import co.censo.censo.test_helper.mockReadyOwnerStateWithPolicySetup
 import co.censo.censo.util.TestUtil.TEST_MODE
 import co.censo.censo.util.TestUtil.TEST_MODE_TRUE
 import co.censo.censo.util.alternateApprover
-import co.censo.censo.util.getEntropyFromImplicitOwnerApprover
+import co.censo.censo.util.getEntropyFromOwnerApprover
 import co.censo.censo.util.ownerApprover
 import co.censo.censo.util.primaryApprover
 import co.censo.shared.data.Resource
@@ -429,7 +429,8 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
                     replacePolicyViewModel.state.alternateApprover
                 ),
                 ownerApproverEncryptedPrivateKey = replacePolicyViewModel.state.keyData!!.encryptedPrivateKey,
-                entropy = readyOwnerStateData.policySetup?.approvers!!.ownerApprover()!!.getEntropyFromImplicitOwnerApprover()!!,
+                ownerApproverKey = replacePolicyViewModel.state.keyData!!.publicKey,
+                entropy = readyOwnerStateData.policySetup?.approvers!!.ownerApprover()!!.getEntropyFromOwnerApprover()!!,
                 deviceKeyId = savedDeviceId
             )
         ).thenAnswer {

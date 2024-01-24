@@ -86,14 +86,6 @@ sealed class ApproverStatus {
     ) : ApproverStatus()
 
     @Serializable
-    @SerialName("ImplicitlyOwner")
-    data class ImplicitlyOwner(
-        val entropy: Base64EncodedData?,
-        val approverPublicKey: Base58EncodedApproverPublicKey,
-        val confirmedAt: Instant,
-    ) : ApproverStatus()
-
-    @Serializable
     @SerialName("Onboarded")
     data class Onboarded(
         val onboardedAt: Instant,
@@ -116,14 +108,6 @@ sealed class Approver {
         data class OwnerAsApprover(
             override val label: String,
             override val participantId: ParticipantId,
-        ) : SetupApprover()
-
-        @Serializable
-        @SerialName("ImplicitlyOwner")
-        data class ImplicitlyOwner(
-            override val label: String,
-            override val participantId: ParticipantId,
-            val approverPublicKey: Base58EncodedApproverPublicKey,
         ) : SetupApprover()
 
         @Serializable

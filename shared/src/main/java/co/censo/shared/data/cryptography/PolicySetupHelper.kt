@@ -36,6 +36,7 @@ class PolicySetupHelper(
             masterEncryptionKey: EncryptionKey,
             previousIntermediateKey: PrivateKey? = null,
             ownerApproverEncryptedPrivateKey: ByteArray,
+            ownerApproverKey: Base58EncodedApproverPublicKey,
             entropy: Base64EncodedData,
             deviceKeyId: String,
         ): PolicySetupHelper {
@@ -44,7 +45,7 @@ class PolicySetupHelper(
                 approverPublicKeys = approvers.associate { approver ->
                     approver.participantId to when (val approverStatus = approver.status) {
                         is ApproverStatus.Confirmed -> approverStatus.approverPublicKey
-                        is ApproverStatus.ImplicitlyOwner -> approverStatus.approverPublicKey
+                        is ApproverStatus.OwnerAsApprover -> ownerApproverKey
                         else -> throw Exception("Invalid status for policy setup")
                     }
                 },
