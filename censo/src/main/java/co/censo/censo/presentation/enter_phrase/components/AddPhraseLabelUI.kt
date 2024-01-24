@@ -22,7 +22,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +43,8 @@ fun AddPhraseLabelUI(
     enabled: Boolean,
     labelIsTooLong: Boolean = false,
     onLabelChanged: (String) -> Unit,
-    onSavePhrase: () -> Unit
+    onSavePhrase: () -> Unit,
+    isRename: Boolean = false
 ) {
 
     val verticalSpacingHeight = 24.dp
@@ -60,7 +60,7 @@ fun AddPhraseLabelUI(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = R.string.label_your_seed_phrase,
+            title = if (isRename) R.string.rename_your_seed_phrase else R.string.label_your_seed_phrase,
             textAlign = TextAlign.Start
         )
 
@@ -68,7 +68,7 @@ fun AddPhraseLabelUI(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = R.string.seed_phrase_label_message,
+            message = if (isRename) R.string.rename_seed_phrase_label_message else R.string.seed_phrase_label_message,
             textAlign = TextAlign.Start
         )
 
@@ -124,7 +124,7 @@ fun AddPhraseLabelUI(
             val saveButtonTextStyle = if (enabled) ButtonTextStyle else DisabledButtonTextStyle
 
             Text(
-                text = stringResource(id = R.string.save_seed_phrase),
+                text = stringResource(id = if (isRename) R.string.rename_seed_phrase else R.string.save_seed_phrase),
                 style = saveButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
@@ -141,6 +141,18 @@ fun PreviewEnabledLabel() {
         enabled = true,
         onLabelChanged = {},
         onSavePhrase = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RenameSeedPhrase() {
+    AddPhraseLabelUI(
+        label = "Yankee Hotel Foxtrot",
+        enabled = true,
+        onLabelChanged = {},
+        onSavePhrase = {},
+        isRename = true,
     )
 }
 

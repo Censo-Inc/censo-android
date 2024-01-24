@@ -60,6 +60,8 @@ import co.censo.shared.data.model.SubmitPurchaseApiResponse
 import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
+import co.censo.shared.data.model.UpdateSeedPhraseApiRequest
+import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
 import co.censo.shared.data.networking.ApiService.Companion.APP_PLATFORM_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
@@ -90,6 +92,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HeaderMap
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -300,6 +303,12 @@ interface ApiService {
     suspend fun getSeedPhrase(
         @Path(value = SEED_PHRASE_ID) seedPhraseId: SeedPhraseId,
     ): RetrofitResponse<GetSeedPhraseApiResponse>
+
+    @PATCH("/v1/vault/seed-phrases/{$SEED_PHRASE_ID}")
+    suspend fun updateSeedPhrase(
+        @Path(value = SEED_PHRASE_ID) seedPhraseId: SeedPhraseId,
+        @Body apiRequest: UpdateSeedPhraseApiRequest
+    ): RetrofitResponse<UpdateSeedPhraseApiResponse>
 
     @POST("/v1/access")
     suspend fun requestAccess(

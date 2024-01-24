@@ -180,7 +180,7 @@ private fun buildSeedPhraseCount(count: Int, context: Context): AnnotatedString 
             append(count.toString())
         }
         withStyle(textSpanStyle) {
-            if (count > 1) {
+            if (count != 1) {
                 append(context.getString(R.string.seed_phrases_span))
             } else {
                 append(context.getString(R.string.seed_phrase_span))

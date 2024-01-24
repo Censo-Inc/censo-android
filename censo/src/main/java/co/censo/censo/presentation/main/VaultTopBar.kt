@@ -1,7 +1,5 @@
 package co.censo.censo.presentation.main
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -12,7 +10,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,8 +23,8 @@ import co.censo.shared.presentation.SharedColors
 @Composable
 fun VaultTopBar(
     bottomNavItem: BottomNavItem,
-    showCloseApprover: Boolean,
-    onDismissApprover: () -> Unit
+    showClose: Boolean,
+    onDismiss: () -> Unit
 ) {
 
     val title = when (bottomNavItem) {
@@ -52,8 +49,8 @@ fun VaultTopBar(
             }
         },
         navigationIcon = {
-            if (showCloseApprover) {
-                IconButton(onClick = onDismissApprover) {
+            if (showClose) {
+                IconButton(onClick = onDismiss) {
                     Icon(
                         modifier = Modifier.size(72.dp),
                         imageVector = Icons.Rounded.Close,
@@ -70,8 +67,8 @@ fun VaultTopBar(
 fun TopBarPreview() {
     VaultTopBar(
         bottomNavItem = BottomNavItem.Phrases,
-        showCloseApprover = false,
-        onDismissApprover = {}
+        showClose = false,
+        onDismiss = {}
     )
 }
 
@@ -80,8 +77,8 @@ fun TopBarPreview() {
 fun EmptyTopBarPreview() {
     VaultTopBar(
         bottomNavItem = BottomNavItem.Settings,
-        showCloseApprover = false,
-        onDismissApprover = {}
+        showClose = false,
+        onDismiss = {}
     )
 }
 
@@ -90,7 +87,7 @@ fun EmptyTopBarPreview() {
 fun CloseApproversScreenBarPreview() {
     VaultTopBar(
         bottomNavItem = BottomNavItem.Home,
-        showCloseApprover = true,
-        onDismissApprover = { }
+        showClose = true,
+        onDismiss = { }
     )
 }

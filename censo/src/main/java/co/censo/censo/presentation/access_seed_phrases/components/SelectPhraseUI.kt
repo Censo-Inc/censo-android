@@ -58,10 +58,11 @@ fun SelectPhraseUI(
             Spacer(modifier = Modifier.height(12.dp))
             SeedPhraseItem(
                 seedPhrase = seedPhrase,
-                isSelected = viewedIds.any { it == seedPhrase.guid}
-            ) {
-                onPhraseSelected(seedPhrase)
-            }
+                isSelected = viewedIds.any { it == seedPhrase.guid},
+                onClick = {
+                    onPhraseSelected(seedPhrase)
+                }
+            )
             Spacer(modifier = Modifier.height(12.dp))
         }
 
