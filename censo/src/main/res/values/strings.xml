@@ -483,4 +483,5 @@
     <string name="grant_censo_access_to_your_camera_in_order_to_take_your_photo">Grant Censo access to your camera in order to take your photo.</string>
     <string name="unable_to_access_camera">Unable to Access Camera</string>
     <string name="settings_app_direction"><![CDATA[In your Settings App, go to Privacy > Permission Manager > Camera and verify that the Censo app is allowed to access the camera]]></string>
+    <string name="let_s_take_a_photo_of_your_seed_phrase">Let\'s take a photo of your seed phrase</string>
 </resources>

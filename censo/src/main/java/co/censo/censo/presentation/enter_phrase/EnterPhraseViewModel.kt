@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import android.graphics.Bitmap
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.compose.runtime.getValue
@@ -667,15 +668,31 @@ class EnterPhraseViewModel @Inject constructor(
 
     //region SeedPhrase Image
     fun handleImageCapture(image: ImageProxy) {
+        //Rotate image
         val rotationDegrees = image.imageInfo.rotationDegrees
         val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
 
+        //Crop image
+        val croppedBitmap = cropToSquare(rotatedBitmap)
+
         state = state.copy(
-            imageBitmap = rotatedBitmap,
+            imageBitmap = croppedBitmap,
             enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
         )
 
         image.close()
+    }
+
+    private fun cropToSquare(image: Bitmap) : Bitmap {
+        //TODO: Suspend fun intensive process and try catch for defense
+        val width = image.width
+        val height = image.height
+        val newDimension = minOf(width, height)
+
+        val cropX = (width - newDimension) / 2
+        val cropY = (height - newDimension) / 2
+
+        return Bitmap.createBitmap(image, cropX, cropY, newDimension, newDimension)
     }
 
     fun handleImageCaptureError(exception: ImageCaptureException) {

@@ -1,8 +1,8 @@
 package co.censo.censo.presentation.components
 
+import StandardButton
+import TitleText
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -15,23 +15,22 @@ import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.sharp.Lens
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,20 +43,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import co.censo.censo.MainActivity
-import co.censo.censo.MainActivity.Companion.prototypeTag
+import co.censo.censo.R
+import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.projectLog
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -74,7 +76,7 @@ fun CameraView(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val preview = Preview.Builder().build()
-    val previewView  = remember { PreviewView(context) }
+    val previewView = remember { PreviewView(context) }
     val imageCapture: ImageCapture = remember {
         ImageCapture.Builder()
             .setResolutionSelector(
@@ -87,7 +89,8 @@ fun CameraView(
                     )
                     .build()
             )
-        .build() }
+            .build()
+    }
     val cameraSelector = CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
@@ -110,32 +113,64 @@ fun CameraView(
     //endregion
 
     //region 3. Camera UI
-    Box(
-        contentAlignment = Alignment.BottomCenter,
-        modifier = Modifier.fillMaxSize()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        AndroidView({ previewView}, modifier = Modifier.fillMaxSize())
+        //Title
+        TitleText(
+            title = stringResource(R.string.let_s_take_a_photo_of_your_seed_phrase),
+            fontWeight = FontWeight.Normal,
+            fontSize = 20.sp
+        )
+        
+        Spacer(modifier = Modifier.height(36.dp))
 
-        IconButton(
-            modifier = Modifier.padding(bottom = 20.dp) ,
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        Box(modifier = Modifier
+            .width(screenWidth)
+            .height(screenWidth)
+            .clipToBounds())
+        {
+            //Actual camera view here
+            AndroidView({ previewView }, modifier = Modifier.matchParentSize())
+        }
+
+        Spacer(modifier = Modifier.height(36.dp))
+
+        //Divider
+        Divider(
+            modifier = Modifier
+                .height(1.5.dp)
+                .fillMaxWidth(),
+            color = SharedColors.DividerGray
+        )
+
+        //Button
+        StandardButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 36.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
             onClick = {
-                projectLog(tag = prototypeTag, message = "ON IMAGE CAPTURE")
-                takePhotoAndReturnImageData(imageCapture, executor, onImageCaptured, onError)
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Sharp.Lens,
-                contentDescription = "Take picture",
-                tint = Color.White,
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(1.dp)
-                    .border(1.dp, Color.White, CircleShape)
+                takePhotoAndReturnImageData(
+                    imageCapture,
+                    executor,
+                    onImageCaptured,
+                    onError
+                )
+            }) {
+            Text(
+                text = stringResource(id = R.string.take_a_photo),
+                style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
             )
         }
     }
-    //endregion
 
+    //endregion
 }
 
 private fun takePhotoAndReturnImageData(
@@ -161,14 +196,14 @@ private fun takePhotoAndReturnImageData(
     })
 }
 
-private suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { continuation ->
-    ProcessCameraProvider.getInstance(this).also { cameraProvider ->
-        cameraProvider.addListener({
-            continuation.resume(cameraProvider.get())
-        }, ContextCompat.getMainExecutor(this))
+private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
+    suspendCoroutine { continuation ->
+        ProcessCameraProvider.getInstance(this).also { cameraProvider ->
+            cameraProvider.addListener({
+                continuation.resume(cameraProvider.get())
+            }, ContextCompat.getMainExecutor(this))
+        }
     }
-}
-
 
 
 //TODO: Add a wrapper level composable for the view actions
