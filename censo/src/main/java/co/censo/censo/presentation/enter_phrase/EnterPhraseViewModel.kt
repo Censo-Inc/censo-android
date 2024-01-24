@@ -270,7 +270,7 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun saveSeedPhrase() {
-        if (state.existingPhraseCount == 1) {
+        if (state.existingPhraseCount == 1 && !userHasActiveSubscription()) {
             showPaywall()
             return
         }
@@ -487,6 +487,9 @@ class EnterPhraseViewModel @Inject constructor(
     fun setUserHasOwnPhrase() {
         state = state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN)
     }
+
+    private fun userHasActiveSubscription() =
+        state.userResource.success()?.data?.ownerState?.hasActiveSubscription() == true
 
     fun onPhrasePasted(pastedPhrase: String) {
         val words =
