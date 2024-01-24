@@ -96,7 +96,6 @@ fun CameraView(
         .build()
     //endregion
 
-
     //region 2. LaunchedEffect to get camera provider and bind to lifecycle
     LaunchedEffect(key1 = lensFacing) {
         val cameraProvider = context.getCameraProvider()
@@ -144,7 +143,7 @@ fun CameraView(
         //Divider
         Divider(
             modifier = Modifier
-                .height(1.5.dp)
+                .height(1.dp)
                 .fillMaxWidth(),
             color = SharedColors.DividerGray
         )
@@ -168,6 +167,8 @@ fun CameraView(
                 style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 
     //endregion
@@ -210,16 +211,29 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
 @Composable
 fun ImageReview(
     imageBitmap: ImageBitmap,
-    imageContainerSizeFraction: Float = 0.75f,
+    imageContainerSizeFraction: Float = 0.85f,
     onSaveImage: (() -> Unit)?,
     onCancelImageSave: (() -> Unit)?,
     onDoneViewing: (() -> Unit)?
 ) {
 
+
     Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
+        TitleText(
+            title = "Zoom in to review the words",
+            fontWeight = FontWeight.Normal,
+            fontSize = 20.sp
+        )
+
+        Spacer(modifier = Modifier.height(36.dp))
+
+        //Image Preview here
         val containerSize = LocalConfiguration.current.screenWidthDp.dp * imageContainerSizeFraction
         Box(
             modifier = Modifier
@@ -232,30 +246,64 @@ fun ImageReview(
             )
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Divider(
+            modifier = Modifier
+                .height(1.dp)
+                .fillMaxWidth(),
+            color = SharedColors.DividerGray
+        )
 
         if (onSaveImage != null && onCancelImageSave != null) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = onSaveImage) {
-                    Text(text = "Save")
-                }
+            StandardButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 36.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                onClick = {
+                    onSaveImage()
+                }) {
+                Text(
+                    text = "Use Photo",
+                    style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
+                )
+            }
 
-                Button(onClick = onCancelImageSave) {
-                    Text(text = "Cancel")
-                }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            StandardButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 36.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                onClick = {
+                    onCancelImageSave()
+                }) {
+                Text(
+                    text = "Retake",
+                    style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
+                )
             }
         }
 
         if (onDoneViewing != null) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = onDoneViewing) {
-                    Text(text = "Done")
-                }
+            StandardButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 36.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                onClick = {
+                    onDoneViewing()
+                }) {
+                Text(
+                    text = "Done",
+                    style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
+                )
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
