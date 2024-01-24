@@ -215,8 +215,6 @@ fun ImageReview(
     onCancelImageSave: (() -> Unit)?,
     onDoneViewing: (() -> Unit)?
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -225,7 +223,7 @@ fun ImageReview(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         TitleText(
-            title = "Zoom in to review the words",
+            title = stringResource(R.string.zoom_in_to_review_the_words),
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp
         )
@@ -264,7 +262,7 @@ fun ImageReview(
                     onSaveImage()
                 }) {
                 Text(
-                    text = "Use Photo",
+                    text = stringResource(R.string.use_photo),
                     style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
                 )
             }
@@ -280,7 +278,7 @@ fun ImageReview(
                     onCancelImageSave()
                 }) {
                 Text(
-                    text = "Retake",
+                    text = stringResource(R.string.retake),
                     style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
                 )
             }
@@ -296,7 +294,7 @@ fun ImageReview(
                     onDoneViewing()
                 }) {
                 Text(
-                    text = "Done",
+                    text = stringResource(R.string.done),
                     style = ButtonTextStyle.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal)
                 )
             }
@@ -313,7 +311,7 @@ fun ZoomableImage(
 ) {
 
     val defaultScale = 1f
-    val zoomedScale = 2f
+    val zoomedScale = 3f
     var scale by remember { mutableFloatStateOf(defaultScale) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var imageSize by remember { mutableStateOf(IntSize.Zero) }

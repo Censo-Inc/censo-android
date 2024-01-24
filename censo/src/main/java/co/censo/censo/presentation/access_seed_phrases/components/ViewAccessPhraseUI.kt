@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.access_seed_phrases.components
 
 import StandardButton
+import android.animation.TimeAnimator.TimeListener
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -67,41 +68,7 @@ fun ViewAccessPhraseUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = SharedColors.BackgroundGrey)
-                .padding(vertical = 24.dp, horizontal = 24.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painterResource(id = R.drawable.time_left_icon),
-                contentDescription = "",
-                tint = SharedColors.MainIconColor
-            )
-            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-
-            val accessTextStyle = SpanStyle(
-                fontSize = 16.sp,
-                color = SharedColors.MainColorText
-            )
-
-            val timeLeftText = buildAnnotatedString {
-                withStyle(accessTextStyle) {
-                    append(stringResource(co.censo.censo.R.string.access_ends_in))
-                }
-                withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
-                    append(formatPhraseAccessDuration(timeLeft, context))
-                }
-            }
-
-            Text(
-                text = timeLeftText,
-                color = SharedColors.MainColorText
-            )
-        }
+//        TimeleftForAccess()
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -177,6 +144,44 @@ fun ViewAccessPhraseUI(
         }
     }
 }
+
+//@Composable
+//fun TimeleftForAccess() {
+//    Row(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .background(color = SharedColors.BackgroundGrey)
+//            .padding(vertical = 24.dp, horizontal = 24.dp),
+//        horizontalArrangement = Arrangement.Center,
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        Icon(
+//            painterResource(id = R.drawable.time_left_icon),
+//            contentDescription = "",
+//            tint = SharedColors.MainIconColor
+//        )
+//        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+//
+//        val accessTextStyle = SpanStyle(
+//            fontSize = 16.sp,
+//            color = SharedColors.MainColorText
+//        )
+//
+//        val timeLeftText = buildAnnotatedString {
+//            withStyle(accessTextStyle) {
+//                append(stringResource(co.censo.censo.R.string.access_ends_in))
+//            }
+//            withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
+//                append(formatPhraseAccessDuration(timeLeft, context))
+//            }
+//        }
+//
+//        Text(
+//            text = timeLeftText,
+//            color = SharedColors.MainColorText
+//        )
+//    }
+//}
 
 fun formatPhraseAccessDuration(duration: Duration, context: Context) =
     if (duration.toInt(DurationUnit.MINUTES) in 1..14) {
