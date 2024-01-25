@@ -197,11 +197,10 @@ dependencies {
     api(libs.base58)
 
     //CameraX
-    val cameraxVersion = "1.3.1"
-    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation(libs.cameraX)
 
     //Compose Accompanist
-    implementation("com.google.accompanist:accompanist-permissions:0.18.0")
+    implementation(libs.accompanist)
 
     // Tests
     testImplementation(libs.junit)

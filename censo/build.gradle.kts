@@ -178,13 +178,12 @@ dependencies {
     implementation("com.facetec:facetec-sdk:9.6.58@aar")
 
     //CameraX
-    val cameraxVersion = "1.3.1"
-    implementation("androidx.camera:camera-camera2:$cameraxVersion")
-    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-    implementation("androidx.camera:camera-view:$cameraxVersion")
+    implementation(libs.cameraX)
+    implementation(libs.cameraX.lifecycle)
+    implementation(libs.cameraX.view)
 
     //Compose Accompanist
-    implementation("com.google.accompanist:accompanist-permissions:0.18.0")
+    implementation(libs.accompanist)
 
     //Google Play Billing
     implementation(libs.billing)

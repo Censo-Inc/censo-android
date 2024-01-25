@@ -20,23 +20,6 @@ import java.io.ByteArrayOutputStream
 import kotlin.Exception
 
 //region Camera utils
-
-fun buildImageCapture(): ImageCapture {
-    val resolutionStrategy =
-        ResolutionStrategy(
-            Size(1280, 720),
-            ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
-        )
-
-    return ImageCapture.Builder()
-        .setResolutionSelector(
-            ResolutionSelector.Builder()
-                .setResolutionStrategy(resolutionStrategy)
-                .build()
-        )
-        .build()
-}
-
 fun buildCameraSelector(lensFacing: Int) : CameraSelector {
     return CameraSelector.Builder()
         .requireLensFacing(lensFacing)
