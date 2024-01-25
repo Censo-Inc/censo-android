@@ -123,7 +123,7 @@ fun CameraView(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         //Title
         TitleText(
@@ -131,8 +131,8 @@ fun CameraView(
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp
         )
-        
-        Spacer(modifier = Modifier.height(36.dp))
+
+        Spacer(modifier = Modifier.weight(1f))
 
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         Box(modifier = Modifier
@@ -144,7 +144,7 @@ fun CameraView(
             AndroidView({ previewView }, modifier = Modifier.matchParentSize())
         }
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         //Divider
         Divider(
@@ -153,6 +153,8 @@ fun CameraView(
                 .fillMaxWidth(),
             color = SharedColors.DividerGray
         )
+
+        Spacer(modifier = Modifier.weight(1f))
 
         //Button
         StandardButton(
@@ -174,7 +176,7 @@ fun CameraView(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(1f))
     }
 
     //endregion
