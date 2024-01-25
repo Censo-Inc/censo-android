@@ -7,26 +7,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import co.censo.censo.MainActivity.Companion.prototypeTag
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
-import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_seed_phrases.components.AccessPhrasesTopBar
 import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
@@ -36,10 +32,9 @@ import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.shared.data.model.SeedPhraseData
+import co.censo.shared.data.model.getImageBitmap
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.byteArrayToBitmap
-import co.censo.shared.util.projectLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -197,19 +192,16 @@ fun AccessSeedPhrasesScreen(
                             state.recoveredPhrases.success()?.data?.first()?.let {
                                 when (it.seedPhrase) {
                                     is SeedPhraseData.Image -> {
-                                        //TODO: Setup properly
-                                        // Refine the UI
-                                        (it.seedPhrase as SeedPhraseData.Image).imageData.byteArrayToBitmap()
-                                            ?.asImageBitmap()?.let { imageBitmap ->
-                                            ImageReview(
-                                                imageBitmap = imageBitmap,
-                                                onSaveImage = null,
-                                                onCancelImageSave = null,
-                                                onDoneViewing = viewModel::reset,
-                                                timeLeft = state.timeRemaining,
-                                                isAccessReview = true
-                                            )
-                                        }
+                                        (it.seedPhrase as SeedPhraseData.Image).getImageBitmap()?.let { imageBitmap ->
+                                                ImageReview(
+                                                    imageBitmap = imageBitmap,
+                                                    onSaveImage = null,
+                                                    onCancelImageSave = null,
+                                                    onDoneViewing = viewModel::reset,
+                                                    timeLeft = state.timeRemaining,
+                                                    isAccessReview = true
+                                                )
+                                            } //TODO: Error UI for unable to render image
                                     }
                                     
                                     is SeedPhraseData.Bip39 -> {
