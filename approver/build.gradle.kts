@@ -104,6 +104,9 @@ android {
             manifestPlaceholders["L1NK_HOST"] = "l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev"
             buildConfigField("String", "LINK_HOST", "\"link-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
             buildConfigField("String", "L1NK_HOST", "\"l1nk-${manifestPlaceholders["ENVIRONMENT"]}.censo.dev\"")
+            firebaseAppDistribution {
+                testers = "censoqa@gmail.com, strikepqa@gmail.com"
+            }
         }
         create("integration") {
             resValue("string", "app_name", "Integration Approver")
