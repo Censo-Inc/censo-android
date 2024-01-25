@@ -1,5 +1,6 @@
 package co.censo.shared.util
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -14,6 +15,7 @@ import androidx.camera.core.ImageCapture.ERROR_UNKNOWN
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
+import co.censo.shared.R
 import java.io.ByteArrayOutputStream
 import kotlin.Exception
 
@@ -69,36 +71,37 @@ fun rotateBitmap(source: Bitmap, angle: Float) : Bitmap {
     return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
 }
 
-fun getImageCaptureErrorDisplayMessage(exception: Exception?) : String {
+fun getImageCaptureErrorDisplayMessage(exception: Exception?, context: Context) : String {
     if (exception == null || exception !is ImageCaptureException) {
-        return "Unable to capture photo"
+        return context.getString(R.string.unable_to_capture_photo_error)
     }
 
-    return getImageCaptureErrorMessage(exception)
+    return getImageCaptureErrorMessage(exception, context)
 }
 
-fun getImageCaptureErrorMessage(exception: ImageCaptureException): String {
+fun getImageCaptureErrorMessage(exception: ImageCaptureException, context: Context): String {
     return when (exception.imageCaptureError ) {
 
         ERROR_INVALID_CAMERA -> {
-            "Invalid camera"
+            context.getString(R.string.invalid_camera_error)
         }
 
         ERROR_CAMERA_CLOSED -> {
-            "Camera closed"
+            context.getString(R.string.camera_closed_error)
         }
 
         ERROR_CAPTURE_FAILED -> {
-            "Failed to capture photo"
+            context.getString(R.string.failed_to_capture_photo_error)
         }
 
         ERROR_FILE_IO,
-        ERROR_UNKNOWN, -> {
-            "Unable to capture photo"
+        ERROR_UNKNOWN,
+        -> {
+            context.getString(R.string.unable_to_capture_photo_error)
         }
 
         else -> {
-            "Unable to capture photo"
+            context.getString(R.string.unable_to_capture_photo_error)
         }
     }
 }

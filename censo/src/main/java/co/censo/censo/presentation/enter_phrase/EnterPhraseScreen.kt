@@ -217,7 +217,10 @@ fun EnterPhraseScreen(
                         )
                     } else if (state.imageCaptureResource is Resource.Error) {
                         DisplayError(
-                            errorMessage = getImageCaptureErrorDisplayMessage(state.imageCaptureResource.exception),
+                            errorMessage = getImageCaptureErrorDisplayMessage(
+                                state.imageCaptureResource.exception,
+                                context
+                            ),
                             dismissAction = viewModel::resetImageCaptureResource,
                             retryAction = { viewModel.entrySelected(EntryType.IMAGE) }
                         )
