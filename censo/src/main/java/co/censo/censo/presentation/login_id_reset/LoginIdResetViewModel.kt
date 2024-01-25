@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.entrance.ForceUserToGrantCloudStorageAccess
 import co.censo.shared.CensoLink.Companion.RESET_TYPE
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
@@ -14,6 +15,8 @@ import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.ResetToken
+import co.censo.shared.data.model.touVersion
+import co.censo.shared.data.repository.AuthState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
@@ -22,7 +25,9 @@ import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
+import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -35,6 +40,8 @@ import javax.inject.Inject
  *   Step 1: Collect reset links
  *   Step 2: Pre-login user with new Primary Auth (Google Sign In)
  *   Step 3: Biometry verification
+ *   Step 3a: Terms of use
+ *   Step 3b: Paywall
  *   Step 4: Approver key recovery
  */
 
@@ -56,13 +63,31 @@ class LoginIdResetViewModel @Inject constructor(
             is LoginIdResetAction.PasteLink -> onPasteLinkClicked(action.clipboardContent)
             is LoginIdResetAction.TokenReceived -> onTokenReceived(action.token)
             LoginIdResetAction.SelectGoogleId -> launchGoogleSignInFlow()
+            LoginIdResetAction.CloudStoragePermissionsGranted -> handleCloudStorageAccessGranted()
             LoginIdResetAction.Facescan -> launchFaceScan()
+            is LoginIdResetAction.TermsOfUseAccepted -> acceptTermsOfUse(action.version)
+            LoginIdResetAction.RetrieveUser -> retrieveUser()
             LoginIdResetAction.KeyRecovery -> navigateToKeyRecovery()
             LoginIdResetAction.DetermineResetStep -> onDetermineResetStep()
 
             LoginIdResetAction.Exit -> onExit()
-
             LoginIdResetAction.Retry -> onRetry()
+        }
+    }
+
+    private fun retrieveUser() {
+        state = state.copy(userResponse = Resource.Loading)
+
+        viewModelScope.launch {
+            val response = ownerRepository.retrieveUser()
+
+            state = state.copy(userResponse = response)
+
+            if (response is Resource.Success) {
+                // updating global owner state will trigger a paywall if needed, and owner state is expected by the key recovery screen
+                ownerRepository.updateOwnerState(response.map { it.ownerState })
+                receiveAction(LoginIdResetAction.DetermineResetStep)
+            }
         }
     }
 
@@ -112,10 +137,17 @@ class LoginIdResetViewModel @Inject constructor(
 
     private fun onDetermineResetStep() {
         when {
-            state.resetLoginIdResponse is Resource.Success -> {
+            state.userResponse is Resource.Success -> {
                 state = state.copy(resetStep = LoginIdResetStep.KeyRecovery)
             }
-            state.idToken.isNotBlank() -> {
+            state.resetLoginIdResponse is Resource.Success -> {
+                if (secureStorage.acceptedTermsOfUseVersion() != touVersion) {
+                    state = state.copy(resetStep = LoginIdResetStep.TermsOfUse)
+                } else {
+                    receiveAction(LoginIdResetAction.RetrieveUser)
+                }
+            }
+            state.forceUserToGrantCloudStorageAccess.jwt?.isNotBlank() == true -> {
                 state = state.copy(resetStep = LoginIdResetStep.Facetec)
             }
             state.requiredTokens <= state.collectedTokens -> {
@@ -135,11 +167,19 @@ class LoginIdResetViewModel @Inject constructor(
                 resetResetLoginIdResponse()
                 receiveAction(LoginIdResetAction.Facescan)
             }
+            state.userResponse is Resource.Error -> {
+                receiveAction(LoginIdResetAction.RetrieveUser)
+            }
         }
     }
 
     private fun launchFaceScan() {
         state = state.copy(launchFacetec = true)
+    }
+
+    private fun acceptTermsOfUse(version: String) {
+        secureStorage.setAcceptedTermsOfUseVersion(version)
+        receiveAction(LoginIdResetAction.DetermineResetStep)
     }
 
     private fun navigateToKeyRecovery() {
@@ -167,11 +207,27 @@ class LoginIdResetViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val account = completedTask.await()
-                preSignInUser(account.idToken)
+
+                if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
+                    state = state.copy(
+                        forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(
+                            requestAccess = true,
+                            jwt = account.idToken
+                        )
+                    )
+                } else {
+                    preSignInUser(account.idToken)
+                }
+
             } catch (e: Exception) {
                 googleAuthFailure(GoogleAuthError.ErrorParsingIntent(e))
             }
         }
+    }
+
+    private fun handleCloudStorageAccessGranted() {
+        preSignInUser(state.forceUserToGrantCloudStorageAccess.jwt)
+        resetForceUserToGrantCloudStorageAccess()
     }
 
     private fun preSignInUser(jwt: String?) {
@@ -212,7 +268,7 @@ class LoginIdResetViewModel @Inject constructor(
             state = state.copy(createDeviceResponse = createDeviceResponse)
 
             if (createDeviceResponse is Resource.Success) {
-                state = state.copy(idToken = idToken)
+                state = state.copy(forceUserToGrantCloudStorageAccess = state.forceUserToGrantCloudStorageAccess.copy(jwt = idToken))
                 receiveAction(LoginIdResetAction.DetermineResetStep)
             }
         }
@@ -226,11 +282,12 @@ class LoginIdResetViewModel @Inject constructor(
 
         return viewModelScope.async {
             val response = ownerRepository.resetLoginId(
-                idToken = state.idToken,
+                idToken = state.forceUserToGrantCloudStorageAccess.jwt!!,
                 resetTokens = secureStorage.retrieveResetTokens().map { ResetToken(it) },
                 biometryVerificationId = verificationId,
                 biometryData = biometry
             )
+            response.onSuccess { ownerRepository.updateAuthState(authState = AuthState.LOGGED_IN) }
 
             state = state.copy(
                 resetLoginIdResponse = response,
@@ -270,5 +327,9 @@ class LoginIdResetViewModel @Inject constructor(
 
     fun resetResetLoginIdResponse() {
         state = state.copy(resetLoginIdResponse = Resource.Uninitialized)
+    }
+
+    private fun resetForceUserToGrantCloudStorageAccess() {
+        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.censo.presentation.components.TermsOfUse
 import co.censo.censo.presentation.login_id_reset.LoginIdResetStep
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
@@ -47,6 +48,8 @@ fun LoginIdResetUI(
     onSelectGoogleId: () -> Unit,
     onFaceScan: () -> Unit,
     onKeyRecovery: () -> Unit,
+    onTouAccepted: () -> Unit,
+    onTouDismissed: () -> Unit,
 ) {
 
     val enabledButtonStyle = ButtonTextStyle.copy(fontWeight = null)
@@ -176,6 +179,14 @@ fun LoginIdResetUI(
         }
         Spacer(modifier = Modifier.height(24.dp))
     }
+
+    if (resetStep == LoginIdResetStep.TermsOfUse) {
+        TermsOfUse(
+            onAccept = onTouAccepted,
+            onCancel = onTouDismissed,
+            onboarding = false
+        )
+    }
 }
 
 
@@ -195,6 +206,8 @@ fun ResetTokensUIPreview() {
             onSelectGoogleId = {},
             onFaceScan = {},
             onKeyRecovery = {},
+            onTouAccepted = {},
+            onTouDismissed = {},
         )
     }
 }
