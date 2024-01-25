@@ -87,8 +87,7 @@ fun ImageReview(
                 .clipToBounds()
         ) {
             ZoomableImage(
-                imageBitmap = imageBitmap,
-                modifier = Modifier
+                imageBitmap = imageBitmap
             )
         }
 
@@ -158,8 +157,7 @@ fun ImageReview(
 
 @Composable
 fun ZoomableImage(
-    imageBitmap: ImageBitmap,
-    modifier: Modifier
+    imageBitmap: ImageBitmap
 ) {
 
     val defaultScale = 1f
@@ -168,6 +166,7 @@ fun ZoomableImage(
     var offset by remember { mutableStateOf(Offset.Zero) }
     var imageSize by remember { mutableStateOf(IntSize.Zero) }
 
+    //Handles the panning and zooming of the image
     val transformGestureModifier = Modifier.pointerInput(Unit) {
         detectTransformGestures { _, pan, zoom, _ ->
             val oldScale = scale
@@ -189,6 +188,7 @@ fun ZoomableImage(
         }
     }
 
+    //Allows user to double tap to zoom out/in
     val doubleTapGestureModifier = Modifier.pointerInput(Unit) {
         detectTapGestures(onDoubleTap = {
             scale = if (scale > defaultScale) defaultScale else zoomedScale
@@ -198,7 +198,7 @@ fun ZoomableImage(
     Image(
         bitmap = imageBitmap,
         contentDescription = null,
-        modifier = modifier
+        modifier = Modifier
             .onSizeChanged {
                 imageSize = it
             }

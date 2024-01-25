@@ -40,23 +40,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.Permission
 import co.censo.shared.presentation.components.sendUserToPermissions
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CaptureSeedPhraseImage(
-    executor: Executor,
     onImageCaptured: (ImageProxy) -> Unit,
     onError: (ImageCaptureException) -> Unit
 ) {
     val context = LocalContext.current
+
+    val executor = Executors.newSingleThreadExecutor()
+
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_DESTROY -> {
+                executor.shutdown()
+            }
+
+            else -> Unit
+        }
+    }
+
 
     val showCamera = remember { mutableStateOf(false) }
     when (showCamera.value) {

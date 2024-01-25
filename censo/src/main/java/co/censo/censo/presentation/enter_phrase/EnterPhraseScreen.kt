@@ -80,8 +80,6 @@ fun EnterPhraseScreen(
 
     val state = viewModel.state
 
-    val cameraExecutor = Executors.newSingleThreadExecutor()
-
     val title = when (state.enterWordUIState) {
         EnterPhraseUIState.EDIT -> state.editedWordIndex.indexToWordText(context)
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
@@ -321,7 +319,6 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.CAPTURE_IMAGE -> {
                             CaptureSeedPhraseImage(
-                                executor = cameraExecutor,
                                 onImageCaptured = viewModel::handleImageCapture,
                                 onError = viewModel::handleImageCaptureError
                             )
