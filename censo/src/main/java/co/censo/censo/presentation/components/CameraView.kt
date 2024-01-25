@@ -3,15 +3,11 @@ package co.censo.censo.presentation.components
 import StandardButton
 import TitleText
 import android.content.Context
-import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +40,8 @@ import androidx.core.content.ContextCompat
 import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.util.buildCameraSelector
+import co.censo.shared.util.buildImageCapture
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -61,23 +59,8 @@ fun CameraView(
 
     val preview = Preview.Builder().build()
     val previewView = remember { PreviewView(context) }
-    val imageCapture: ImageCapture = remember {
-        ImageCapture.Builder()
-            .setResolutionSelector(
-                ResolutionSelector.Builder()
-                    .setResolutionStrategy(
-                        ResolutionStrategy(
-                            Size(1280, 720),
-                            FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
-                        )
-                    )
-                    .build()
-            )
-            .build()
-    }
-    val cameraSelector = CameraSelector.Builder()
-        .requireLensFacing(lensFacing)
-        .build()
+    val imageCapture: ImageCapture = remember { buildImageCapture() }
+    val cameraSelector = buildCameraSelector(lensFacing)
     //endregion
 
     //region 2. LaunchedEffect to get camera provider and bind to lifecycle
@@ -159,7 +142,6 @@ fun CameraView(
 
         Spacer(modifier = Modifier.weight(1f))
     }
-
     //endregion
 }
 

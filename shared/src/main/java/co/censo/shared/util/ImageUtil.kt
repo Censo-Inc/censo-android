@@ -3,16 +3,44 @@ package co.censo.shared.util
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.util.Size
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.ERROR_CAMERA_CLOSED
 import androidx.camera.core.ImageCapture.ERROR_CAPTURE_FAILED
 import androidx.camera.core.ImageCapture.ERROR_FILE_IO
 import androidx.camera.core.ImageCapture.ERROR_INVALID_CAMERA
 import androidx.camera.core.ImageCapture.ERROR_UNKNOWN
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import java.io.ByteArrayOutputStream
 import kotlin.Exception
 
 //region Camera utils
+
+fun buildImageCapture(): ImageCapture {
+    val resolutionStrategy =
+        ResolutionStrategy(
+            Size(1280, 720),
+            ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+        )
+
+    return ImageCapture.Builder()
+        .setResolutionSelector(
+            ResolutionSelector.Builder()
+                .setResolutionStrategy(resolutionStrategy)
+                .build()
+        )
+        .build()
+}
+
+fun buildCameraSelector(lensFacing: Int) : CameraSelector {
+    return CameraSelector.Builder()
+        .requireLensFacing(lensFacing)
+        .build()
+}
+
 fun Bitmap?.bitmapToByteArray() : ByteArray? {
     if (this == null) {
         return null
