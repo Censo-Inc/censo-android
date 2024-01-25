@@ -250,8 +250,6 @@ fun EnterPhraseScreen(
                             retryAction = viewModel::deleteUser
                         )
                     } else if (state.imageCaptureResource is Resource.Error) {
-                        //TODO: Test this as part of the testing of the work
-                        // Scrutinize the retry action experience
                         DisplayError(
                             errorMessage = getImageCaptureErrorDisplayMessage(state.imageCaptureResource.exception),
                             dismissAction = viewModel::resetImageCaptureResource,

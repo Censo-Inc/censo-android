@@ -398,7 +398,14 @@ class EnterPhraseViewModel @Inject constructor(
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
             EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE, currentLanguage = language)
             EntryType.IMPORT -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW_WORDS, currentLanguage = language)
-            EntryType.IMAGE -> state.copy(enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE, currentLanguage = language)
+            EntryType.IMAGE -> {
+                resetImageCaptureResource()
+
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE,
+                    currentLanguage = language
+                )
+            }
         }
     }
 

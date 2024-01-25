@@ -61,12 +61,16 @@ data class EnterPhraseState(
         const val PHRASE_LABEL_MAX_LENGTH = 50
     }
 
-    val error = submitResource is Resource.Error || userResource is Resource.Error
+    val error = submitResource is Resource.Error
+            || userResource is Resource.Error
+            || imageCaptureResource is Resource.Error
+
     val loading = submitResource is Resource.Loading
             || userResource is Resource.Loading
             || phraseEncryptionInProgress
             || loadKeyInProgress is Resource.Loading
             || deleteUserResource is Resource.Loading
+
 
     val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH
     val labelValid = label.isNotEmpty() && !labelIsTooLong
