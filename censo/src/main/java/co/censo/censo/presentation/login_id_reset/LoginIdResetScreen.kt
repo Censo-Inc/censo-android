@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.login_id_reset
 
+import ParticipantId
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
@@ -31,7 +32,10 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.login_id_reset.components.LoginIdResetUI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
+import co.censo.shared.data.model.touVersion
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
@@ -106,12 +110,14 @@ fun LoginIdResetScreen(
         TopAppBar(
             colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.NavbarColor),
             navigationIcon = {
-                IconButton(onClick = { viewModel.receiveAction(LoginIdResetAction.Exit) }) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        stringResource(R.string.exit),
-                        tint = SharedColors.MainIconColor
-                    )
+                if (state.resetStep != LoginIdResetStep.TermsOfUse) {
+                    IconButton(onClick = { viewModel.receiveAction(LoginIdResetAction.Exit) }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            stringResource(R.string.exit),
+                            tint = SharedColors.MainIconColor
+                        )
+                    }
                 }
             },
             title = {},
@@ -149,6 +155,12 @@ fun LoginIdResetScreen(
                             dismissAction = viewModel::resetResetLoginIdResponse,
                             retryAction = { viewModel.receiveAction(LoginIdResetAction.Retry) },
                         )
+                    } else if (state.userResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = state.userResponse.getErrorMessage(context),
+                            dismissAction = null,
+                            retryAction = { viewModel.receiveAction(LoginIdResetAction.Retry) },
+                        )
                     }
                 }
 
@@ -179,7 +191,24 @@ fun LoginIdResetScreen(
                         onSelectGoogleId = { viewModel.receiveAction(LoginIdResetAction.SelectGoogleId) },
                         onFaceScan = { viewModel.receiveAction(LoginIdResetAction.Facescan) },
                         onKeyRecovery = { viewModel.receiveAction(LoginIdResetAction.KeyRecovery) },
+                        onTouAccepted = { viewModel.receiveAction(LoginIdResetAction.TermsOfUseAccepted(touVersion)) },
+                        onTouDismissed = { viewModel.receiveAction(LoginIdResetAction.Exit) }
                     )
+
+                    if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
+                        CloudStorageHandler(
+                            actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
+                            participantId = ParticipantId(""),
+                            encryptedPrivateKey = null,
+                            onActionSuccess = {},
+                            onActionFailed = {},
+                            onCloudStorageAccessGranted = {
+                                viewModel.receiveAction(
+                                    LoginIdResetAction.CloudStoragePermissionsGranted
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -196,4 +225,3 @@ fun LoginIdResetScreen(
         }
     }
 }
-

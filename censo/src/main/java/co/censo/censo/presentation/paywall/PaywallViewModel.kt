@@ -115,7 +115,7 @@ class PaywallViewModel @Inject constructor(
             val response = ownerRepository.submitPurchase(purchase.purchaseToken)
 
             if (response is Resource.Success) {
-                onOwnerState(response.data.ownerState)
+                ownerRepository.updateOwnerState(response.map { it.ownerState })
             }
 
             state = state.copy(submitPurchaseResource = response)
