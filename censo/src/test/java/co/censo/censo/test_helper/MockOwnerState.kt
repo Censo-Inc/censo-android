@@ -36,7 +36,7 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
         seedPhrases = listOf(
             mockSeedPhrase
         ), publicMasterEncryptionKey = Base58EncodedMasterPublicKey(value = "AA")
-    ), unlockedForSeconds = null, access = null, policySetup = null,
+    ), unlockedForSeconds = 600UL, access = null, policySetup = null,
     timelockSetting = TimelockSetting(defaultTimelockInSeconds = 7200L, currentTimelockInSeconds = null, disabledAt = null),
     onboarded = true
 )
