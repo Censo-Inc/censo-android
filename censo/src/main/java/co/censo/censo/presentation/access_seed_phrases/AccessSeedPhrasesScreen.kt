@@ -29,6 +29,7 @@ import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
 import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
 import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.presentation.enter_phrase.EntryType
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.shared.data.model.SeedPhraseData
@@ -192,16 +193,27 @@ fun AccessSeedPhrasesScreen(
                             state.recoveredPhrases.success()?.data?.first()?.let {
                                 when (it.seedPhrase) {
                                     is SeedPhraseData.Image -> {
-                                        (it.seedPhrase as SeedPhraseData.Image).getImageBitmap()?.let { imageBitmap ->
+                                        when (val recoveredImage =
+                                            (it.seedPhrase as SeedPhraseData.Image).getImageBitmap()) {
+                                            null -> {
+                                                DisplayError(
+                                                    errorMessage = stringResource(R.string.unable_to_render_image_for_review),
+                                                    dismissAction = viewModel::reset,
+                                                    retryAction = viewModel::reset
+                                                )
+                                            }
+
+                                            else -> {
                                                 ImageReview(
-                                                    imageBitmap = imageBitmap,
+                                                    imageBitmap = recoveredImage,
                                                     onSaveImage = null,
                                                     onCancelImageSave = null,
                                                     onDoneViewing = viewModel::reset,
                                                     timeLeft = state.timeRemaining,
                                                     isAccessReview = true
                                                 )
-                                            } //TODO: Error UI for unable to render image
+                                            }
+                                        }
                                     }
                                     
                                     is SeedPhraseData.Bip39 -> {
