@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -39,7 +38,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ViewAccessPhraseUI(
+fun Bip39Review(
     phraseWords: List<String>,
     onDone: () -> Unit,
     timeLeft: Duration
@@ -136,7 +135,7 @@ fun ViewAccessPhraseUI(
 @Composable
 fun PreviewV15MinuteViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
-        ViewAccessPhraseUI(
+        Bip39Review(
             phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 899.seconds
@@ -148,7 +147,7 @@ fun PreviewV15MinuteViewPhraseWordUI() {
 @Composable
 fun PreviewLess15ViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
-        ViewAccessPhraseUI(
+        Bip39Review(
             phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 480.seconds
@@ -160,7 +159,7 @@ fun PreviewLess15ViewPhraseWordUI() {
 @Composable
 fun PreviewLess1ViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
-        ViewAccessPhraseUI(
+        Bip39Review(
             phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 55.seconds

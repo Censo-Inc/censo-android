@@ -26,12 +26,11 @@ import co.censo.censo.R
 import co.censo.censo.presentation.access_seed_phrases.components.AccessPhrasesTopBar
 import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
-import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
+import co.censo.censo.presentation.access_seed_phrases.components.Bip39Review
 import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
-import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.model.getImageBitmap
 import co.censo.shared.util.popCurrentDestinationFromBackStack
@@ -238,7 +237,7 @@ fun ViewPhrase(
         }
 
         is SeedPhraseData.Bip39 -> {
-            ViewAccessPhraseUI(
+            Bip39Review(
                 phraseWords = seedPhrase.words,
                 onDone = onReset,
                 timeLeft = timeRemaining
