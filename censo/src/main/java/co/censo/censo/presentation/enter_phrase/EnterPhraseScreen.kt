@@ -342,7 +342,6 @@ fun EnterPhraseScreen(
                                         imageBitmap = state.imageBitmap.asImageBitmap(),
                                         onSaveImage = viewModel::onSaveImage,
                                         onCancelImageSave = viewModel::onCancelImageSave,
-                                        onDoneViewing = null,
                                         isAccessReview = false
                                     )
                                 }

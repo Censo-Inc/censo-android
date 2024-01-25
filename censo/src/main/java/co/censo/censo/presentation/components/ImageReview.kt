@@ -50,9 +50,9 @@ fun ImageReview(
     imageContainerSizeFraction: Float = 0.85f,
     timeLeft: Duration? = null,
     isAccessReview: Boolean,
-    onSaveImage: (() -> Unit)?,
-    onCancelImageSave: (() -> Unit)?,
-    onDoneViewing: (() -> Unit)?
+    onSaveImage: (() -> Unit)? = null,
+    onCancelImageSave: (() -> Unit)? = null,
+    onDoneViewing: (() -> Unit)? = null
 ) {
     val componentPadding = PaddingValues(horizontal = 16.dp)
 

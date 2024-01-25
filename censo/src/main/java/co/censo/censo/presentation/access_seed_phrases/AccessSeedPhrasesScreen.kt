@@ -226,8 +226,6 @@ fun ViewPhrase(
                 else -> {
                     ImageReview(
                         imageBitmap = recoveredImage,
-                        onSaveImage = null,
-                        onCancelImageSave = null,
                         onDoneViewing = onReset,
                         timeLeft = timeRemaining,
                         isAccessReview = true
