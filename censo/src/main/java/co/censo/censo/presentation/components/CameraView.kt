@@ -120,6 +120,9 @@ fun CameraView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         //Title
         TitleText(
             title = stringResource(R.string.let_s_take_a_photo_of_your_seed_phrase),
@@ -222,6 +225,9 @@ fun ImageReview(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         TitleText(
             title = stringResource(R.string.zoom_in_to_review_the_words),
             fontWeight = FontWeight.Normal,

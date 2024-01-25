@@ -210,7 +210,8 @@ fun EnterPhraseScreen(
                 if (title.isNotEmpty()) {
                     Text(
                         text = title,
-                        color = SharedColors.MainColorText
+                        color = SharedColors.MainColorText,
+                        textAlign = TextAlign.Center
                     )
                 }
             },
