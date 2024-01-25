@@ -489,4 +489,5 @@
     <string name="use_photo">Use Photo</string>
     <string name="retake">Retake</string>
     <string name="done">Done viewing phrase</string>
+    <string name="unable_to_render_image_for_review">Unable to render image for review.</string>
 </resources>

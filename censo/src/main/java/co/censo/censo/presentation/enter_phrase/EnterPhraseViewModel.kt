@@ -644,6 +644,10 @@ class EnterPhraseViewModel @Inject constructor(
     fun resetImageCaptureResource() {
         state = state.copy(imageCaptureResource = Resource.Uninitialized)
     }
+
+    fun resetImageCaptureUIState() {
+        state = state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN)
+    }
     //endregion
 
     // region delete data

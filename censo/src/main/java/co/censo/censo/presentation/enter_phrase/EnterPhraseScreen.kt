@@ -360,14 +360,24 @@ fun EnterPhraseScreen(
                         }
 
                         EnterPhraseUIState.REVIEW_IMAGE -> {
-                            state.imageBitmap?.let {
-                                ImageReview(
-                                    imageBitmap = it.asImageBitmap(),
-                                    onSaveImage = viewModel::onSaveImage,
-                                    onCancelImageSave = viewModel::onCancelImageSave,
-                                    onDoneViewing = null,
-                                    isAccessReview = false
-                                )
+                            when (state.imageBitmap) {
+                                null -> {
+                                    DisplayError(
+                                        errorMessage = stringResource(R.string.unable_to_render_image_for_review),
+                                        dismissAction = { viewModel.resetImageCaptureUIState() },
+                                        retryAction = { viewModel.entrySelected(EntryType.IMAGE) }
+                                    )
+                                }
+
+                                else -> {
+                                    ImageReview(
+                                        imageBitmap = state.imageBitmap.asImageBitmap(),
+                                        onSaveImage = viewModel::onSaveImage,
+                                        onCancelImageSave = viewModel::onCancelImageSave,
+                                        onDoneViewing = null,
+                                        isAccessReview = false
+                                    )
+                                }
                             }
                         }
 
