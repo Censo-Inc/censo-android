@@ -691,29 +691,37 @@ class EnterPhraseViewModel @Inject constructor(
 
     //region SeedPhrase Image
     fun handleImageCapture(image: ImageProxy) {
-        //Rotate image
-        val rotationDegrees = image.imageInfo.rotationDegrees
-        val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
+        try {
+            //Rotate image
+            val rotationDegrees = image.imageInfo.rotationDegrees
+            val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
 
-        image.close()
+            image.close()
 
-        //Launch coroutine to process the image on the background thread
-        var croppedBitmap: Bitmap?
-        viewModelScope.launch(Dispatchers.IO) {
-            //Crop image
-            croppedBitmap = cropToSquare(rotatedBitmap)
+            //Launch coroutine to process the image on the background thread
+            var croppedBitmap: Bitmap?
+            viewModelScope.launch(Dispatchers.IO) {
+                //Crop image
+                croppedBitmap = cropToSquare(rotatedBitmap)
 
-            state = if (croppedBitmap == null) {
-                state.copy(
-                    imageCaptureResource = Resource.Error(exception = Exception("Unable to render captured image")),
-                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
-                )
-            } else {
-                state.copy(
-                    imageBitmap = croppedBitmap,
-                    enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
-                )
+                state = if (croppedBitmap == null) {
+                    state.copy(
+                        imageCaptureResource = Resource.Error(exception = Exception("Unable to render captured image")),
+                        enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+                    )
+                } else {
+                    state.copy(
+                        imageBitmap = croppedBitmap,
+                        enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
+                    )
+                }
             }
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImageCapture)
+            state = state.copy(
+                imageCaptureResource = Resource.Error(exception = Exception("Unable to process captured image")),
+                enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+            )
         }
     }
 
