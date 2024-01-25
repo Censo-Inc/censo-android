@@ -184,12 +184,12 @@ fun PreCaptureImageStep(
 
             Box(
                 modifier = Modifier
-                    .size(66.dp)
+                    .size(50.dp)
                     .background(color = boxBackgroundGrey, shape = boxRoundedBackgroundShape),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(30.dp),
                     imageVector = Icons.Filled.Notes,
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
@@ -207,12 +207,12 @@ fun PreCaptureImageStep(
         ) {
             Box(
                 modifier = Modifier
-                    .size(66.dp)
+                    .size(50.dp)
                     .background(color = boxBackgroundGrey, shape = boxRoundedBackgroundShape),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(30.dp),
                     imageVector = Icons.Filled.CameraAlt,
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
