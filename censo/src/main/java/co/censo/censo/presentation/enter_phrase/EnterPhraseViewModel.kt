@@ -696,6 +696,7 @@ class EnterPhraseViewModel @Inject constructor(
             val rotationDegrees = image.imageInfo.rotationDegrees
             val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
 
+            //Close image when done accessing it
             image.close()
 
             //Launch coroutine to process the image on the background thread
@@ -706,7 +707,7 @@ class EnterPhraseViewModel @Inject constructor(
 
                 state = if (croppedBitmap == null) {
                     state.copy(
-                        imageCaptureResource = Resource.Error(exception = Exception("Unable to render captured image")),
+                        imageCaptureResource = Resource.Error(exception = Exception("Unable to process captured image")),
                         enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
                     )
                 } else {
