@@ -31,6 +31,7 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -672,30 +673,47 @@ class EnterPhraseViewModel @Inject constructor(
         val rotationDegrees = image.imageInfo.rotationDegrees
         val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
 
-        //Crop image
-        val croppedBitmap = cropToSquare(rotatedBitmap)
-
-        state = state.copy(
-            imageBitmap = croppedBitmap,
-            enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
-        )
-
         image.close()
+
+        //Launch coroutine to process the image on the background thread
+        var croppedBitmap: Bitmap?
+        viewModelScope.launch(Dispatchers.IO) {
+            //Crop image
+            croppedBitmap = cropToSquare(rotatedBitmap)
+
+            state = if (croppedBitmap == null) {
+                state.copy(
+                    imageCaptureResource = Resource.Error(exception = Exception("Unable to render captured image")),
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+                )
+            } else {
+                state.copy(
+                    imageBitmap = croppedBitmap,
+                    enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
+                )
+            }
+        }
     }
 
-    private fun cropToSquare(image: Bitmap) : Bitmap {
-        //TODO: Suspend fun intensive process and try catch for defense
-        val width = image.width
-        val height = image.height
-        val newDimension = minOf(width, height)
+    private suspend fun cropToSquare(image: Bitmap): Bitmap? = withContext(Dispatchers.IO) {
+        try {
+            val width = image.width
+            val height = image.height
+            val newDimension = minOf(width, height)
 
-        val cropX = (width - newDimension) / 2
-        val cropY = (height - newDimension) / 2
+            val cropX = (width - newDimension) / 2
+            val cropY = (height - newDimension) / 2
 
-        return Bitmap.createBitmap(image, cropX, cropY, newDimension, newDimension)
+            Bitmap.createBitmap(image, cropX, cropY, newDimension, newDimension)
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImageCapture)
+            null
+        }
     }
 
     fun handleImageCaptureError(exception: ImageCaptureException) {
+        exception.sendError(CrashReportingUtil.ImageCapture)
+
         state = state.copy(
             imageCaptureResource = Resource.Error(exception = exception),
             enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
