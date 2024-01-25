@@ -114,7 +114,7 @@ android {
             resValue("string", "app_name", "Debug Censo")
             manifestPlaceholders["STRONGBOX_ENABLED"] = false
             buildConfigField("boolean", "STRONGBOX_ENABLED", "false")
-            buildConfigField("boolean", "FACETEC_ENABLED", "true")
+            buildConfigField("boolean", "FACETEC_ENABLED", "false")
             applicationIdSuffix = ".debug"
             isDebuggable = true
         }
