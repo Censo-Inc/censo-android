@@ -2,19 +2,15 @@ import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.version)
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.appdistribution")
-    id("com.adarshr.test-logger")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.app.distribution)
+    id(libs.plugins.test.logger.get().pluginId)
+    alias(libs.plugins.kotlin.serialization)
 }
-
-val versionNameMajor = 1
-val versionNameMinor = 8
-val versionNamePatch = 0
 
 android {
     namespace = "co.censo.censo"
@@ -50,7 +46,7 @@ android {
         minSdk = 33
         targetSdk = 33
         versionCode = 50
-        versionName = "$versionNameMajor.$versionNameMinor.$versionNamePatch"
+        versionName = "${libs.versions.versionNameMajor.get()}.${libs.versions.versionNameMinor.get()}.${libs.versions.versionNamePatch.get()}"
 
         signingConfig = if (signBuild) {
             signingConfigs.getByName("release")
@@ -146,14 +142,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = libs.versions.jvm.get()
+
         freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     testOptions {
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
@@ -172,44 +169,43 @@ dependencies {
     implementation(project(":shared"))
 
     //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.50")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    kapt(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     //Facetec
     implementation("com.facetec:facetec-sdk:9.6.58@aar")
 
     //Google Play Billing
-    implementation("com.android.billingclient:billing:6.1.0")
-    implementation("com.android.billingclient:billing-ktx:6.1.0")
+    implementation(libs.billing)
+    implementation(libs.billing.ktx)
 
     // Play Integrity
-    implementation("com.google.android.play:integrity:1.3.0")
+    implementation(libs.integrity)
 
     // Tests
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
-    testImplementation("org.mockito:mockito-inline:4.8.1")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.kotlinx.coroutines.test)
 
-    testImplementation("org.robolectric:robolectric:4.9")
+    testImplementation(libs.robolectric)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     //UI testing
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    val kaspressoVersion = "1.5.2"
-    testImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
-    testImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
-    androidTestImplementation("com.kaspersky.android-components:kaspresso:$kaspressoVersion")
-    androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestUtil("androidx.test:orchestrator:1.4.2")
+    testImplementation(libs.kaspresso)
+    testImplementation(libs.kaspresso.compose.support)
+    androidTestImplementation(libs.kaspresso)
+    androidTestImplementation(libs.kaspresso.compose.support)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestUtil(libs.androidx.orchestrator)
 }
