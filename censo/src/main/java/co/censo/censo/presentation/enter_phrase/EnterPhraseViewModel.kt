@@ -239,7 +239,18 @@ class EnterPhraseViewModel @Inject constructor(
                 runCatching {
                     val seedPhraseData = when (state.seedPhraseType) {
                         SeedPhraseType.TEXT -> SeedPhraseData.Bip39(state.enteredWords)
-                        SeedPhraseType.IMAGE -> SeedPhraseData.Image(state.imageBitmap!!.bitmapToByteArray())
+                        SeedPhraseType.IMAGE -> {
+                            val imageByteArray = state.imageBitmap.bitmapToByteArray()
+                            if (imageByteArray == null) {
+                                state = state.copy(
+                                    submitResource = Resource.Error(exception = Exception("Unable to encrypt seed phrase")),
+                                    phraseEncryptionInProgress = false
+                                )
+                                return@launch
+                            } else {
+                                SeedPhraseData.Image(imageData = imageByteArray)
+                            }
+                        }
                     }
 
                     // encrypt seed phrase and drop single words

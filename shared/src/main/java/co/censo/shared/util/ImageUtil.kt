@@ -8,20 +8,30 @@ import androidx.camera.core.ImageCapture.ERROR_CAPTURE_FAILED
 import androidx.camera.core.ImageCapture.ERROR_FILE_IO
 import androidx.camera.core.ImageCapture.ERROR_INVALID_CAMERA
 import androidx.camera.core.ImageCapture.ERROR_UNKNOWN
-import androidx.camera.core.ImageCapture.ImageCaptureError
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
 import java.io.ByteArrayOutputStream
-import java.lang.Exception
+import kotlin.Exception
 
 //region Camera utils
-fun Bitmap.bitmapToByteArray() : ByteArray {
-    val stream = ByteArrayOutputStream()
-    compress(Bitmap.CompressFormat.JPEG, 80, stream)
-    return stream.toByteArray()
+fun Bitmap?.bitmapToByteArray() : ByteArray? {
+    if (this == null) {
+        return null
+    }
+
+    return try {
+        val stream = ByteArrayOutputStream()
+        compress(Bitmap.CompressFormat.JPEG, 80, stream)
+        stream.toByteArray()
+    } catch (e: Exception) {
+        e.sendError(CrashReportingUtil.ImageCapture)
+        null
+    }
 }
 
 fun ByteArray.byteArrayToBitmap() : Bitmap? {
+
+
+
     return BitmapFactory.decodeByteArray(this, 0, this.size)
 }
 
