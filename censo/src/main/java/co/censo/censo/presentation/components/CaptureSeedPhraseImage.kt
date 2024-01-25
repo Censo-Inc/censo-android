@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverStep
-import co.censo.censo.ui.theme.TextBlack
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.Permission
