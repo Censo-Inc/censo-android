@@ -69,7 +69,7 @@ fun CaptureSeedPhraseImage(
         true -> {
             Permission(
                 permission = Manifest.permission.CAMERA,
-                rationale = "Camera is used to capture a photo of your seed phrase",
+                rationale = stringResource(R.string.capture_image_permission_rationale),
                 permissionNotAvailableContent = {
                     Column(
                         Modifier

@@ -1,30 +1,13 @@
 package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedMasterPublicKey
-import StandardButton
-import TitleText
-import android.Manifest
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,19 +22,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -60,13 +35,11 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.components.CameraView
 import co.censo.censo.presentation.components.CaptureSeedPhraseImage
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.components.ImageReview
-import co.censo.censo.presentation.components.PreCaptureImageStep
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -78,17 +51,12 @@ import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWordUI
 import co.censo.censo.presentation.paywall.PaywallViewModel
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.model.OwnerState
-import co.censo.censo.ui.theme.TextBlack
-import co.censo.shared.presentation.ButtonTextStyle
-import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.presentation.components.Permission
-import co.censo.shared.presentation.components.sendUserToPermissions
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
@@ -122,9 +90,9 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.NOTIFICATIONS -> ""
 
-        EnterPhraseUIState.CAPTURE_IMAGE -> "Seed Phrase Photo"
+        EnterPhraseUIState.CAPTURE_IMAGE -> stringResource(R.string.seed_phrase_photo)
 
-        EnterPhraseUIState.REVIEW_IMAGE -> "Seed Phrase Photo Verification"
+        EnterPhraseUIState.REVIEW_IMAGE -> stringResource(R.string.seed_phrase_photo_verification)
 
         EnterPhraseUIState.REVIEW_WORDS,
         EnterPhraseUIState.VIEW,

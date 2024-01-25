@@ -490,4 +490,7 @@
     <string name="retake">Retake</string>
     <string name="done">Done viewing phrase</string>
     <string name="unable_to_render_image_for_review">Unable to render image for review.</string>
+    <string name="seed_phrase_photo">Seed Phrase Photo</string>
+    <string name="seed_phrase_photo_verification">Seed Phrase Photo Verification</string>
+    <string name="capture_image_permission_rationale">Censo uses the camera to capture a photo of your seed phrase. The captured image is not saved anywhere on the device.</string>
 </resources>
