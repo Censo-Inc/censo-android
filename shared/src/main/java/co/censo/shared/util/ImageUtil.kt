@@ -20,11 +20,11 @@ import java.io.ByteArrayOutputStream
 import kotlin.Exception
 
 //region Camera utils
-fun buildCameraSelector(lensFacing: Int) : CameraSelector {
-    return CameraSelector.Builder()
+fun buildCameraSelector(lensFacing: Int) =
+    CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
-}
+
 
 fun Bitmap?.bitmapToByteArray() : ByteArray? {
     if (this == null) {
@@ -41,12 +41,8 @@ fun Bitmap?.bitmapToByteArray() : ByteArray? {
     }
 }
 
-fun ByteArray.byteArrayToBitmap() : Bitmap? {
-
-
-
-    return BitmapFactory.decodeByteArray(this, 0, this.size)
-}
+fun ByteArray.byteArrayToBitmap() : Bitmap? =
+    BitmapFactory.decodeByteArray(this, 0, this.size)
 
 fun rotateBitmap(source: Bitmap, angle: Float) : Bitmap {
     val matrix = Matrix()
