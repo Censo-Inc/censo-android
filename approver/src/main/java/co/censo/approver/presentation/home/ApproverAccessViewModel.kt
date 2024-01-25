@@ -186,14 +186,6 @@ class ApproverAccessViewModel @Inject constructor(
                     return@launch
                 }
 
-                if (entropy == null) {
-                    state =
-                        state.copy(approveAccessResource = Resource.Error(
-                            exception = Exception("Unable to approve this access request, missing information"))
-                        )
-                    return@launch
-                }
-
                 val key = approverKey.key.decryptWithEntropy(
                     deviceKeyId = keyRepository.retrieveSavedDeviceId(),
                     entropy = entropy

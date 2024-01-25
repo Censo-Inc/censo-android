@@ -81,7 +81,7 @@ sealed class ApproverStatus {
     @Serializable
     @SerialName("OwnerAsApprover")
     data class OwnerAsApprover(
-        val entropy: Base64EncodedData?,
+        val entropy: Base64EncodedData,
         val confirmedAt: Instant,
     ) : ApproverStatus()
 
@@ -234,7 +234,7 @@ sealed class OwnerState {
     @Serializable
     @SerialName("Initial")
     data class Initial(
-        val entropy: Base64EncodedData?,
+        val entropy: Base64EncodedData,
         val subscriptionStatus: SubscriptionStatus
     ) : OwnerState()
 
