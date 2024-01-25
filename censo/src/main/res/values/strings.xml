@@ -484,7 +484,7 @@
     <string name="unable_to_access_camera">Unable to Access Camera</string>
     <string name="settings_app_direction"><![CDATA[In your Settings App, go to Privacy > Permission Manager > Camera and verify that the Censo app is allowed to access the camera]]></string>
     <string name="let_s_take_a_photo_of_your_seed_phrase">Let\'s take a photo of your seed phrase</string>
-    <string name="zoom_in_to_review_the_words">Zoom in to review the words</string>
+    <string name="zoom_in_to_review_the_words">Zoom in to see the words</string>
     <string name="use_photo">Use Photo</string>
     <string name="retake">Retake</string>
     <string name="done">Done viewing phrase</string>

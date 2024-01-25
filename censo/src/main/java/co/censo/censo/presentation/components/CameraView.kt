@@ -58,12 +58,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import co.censo.censo.MainActivity
 import co.censo.censo.R
+import co.censo.censo.presentation.access_seed_phrases.components.TimeLeftForAccess
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.projectLog
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Duration
 
 @Composable
 fun CameraView(
@@ -214,19 +216,24 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
 fun ImageReview(
     imageBitmap: ImageBitmap,
     imageContainerSizeFraction: Float = 0.85f,
+    timeLeft: Duration? = null,
     onSaveImage: (() -> Unit)?,
     onCancelImageSave: (() -> Unit)?,
     onDoneViewing: (() -> Unit)?
 ) {
+    val componentPadding = PaddingValues(horizontal = 16.dp)
+
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
-        Spacer(modifier = Modifier.height(24.dp))
+        timeLeft?.let {
+            TimeLeftForAccess(timeLeft = timeLeft)
+        }
+
+        Spacer(modifier = Modifier.weight(0.5f))
 
         TitleText(
             title = stringResource(R.string.zoom_in_to_review_the_words),
@@ -234,13 +241,14 @@ fun ImageReview(
             fontSize = 20.sp
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.weight(0.35f))
 
         //Image Preview here
         val containerSize = LocalConfiguration.current.screenWidthDp.dp * imageContainerSizeFraction
         Box(
             modifier = Modifier
                 .size(containerSize)
+                .padding(componentPadding)
                 .clipToBounds()
         ) {
             ZoomableImage(
@@ -249,20 +257,23 @@ fun ImageReview(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         Divider(
             modifier = Modifier
                 .height(1.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(componentPadding),
             color = SharedColors.DividerGray
         )
+
+        Spacer(modifier = Modifier.weight(1f))
 
         if (onSaveImage != null && onCancelImageSave != null) {
             StandardButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 36.dp),
+                    .padding(horizontal = 48.dp),
                 contentPadding = PaddingValues(vertical = 16.dp),
                 onClick = {
                     onSaveImage()
@@ -278,7 +289,7 @@ fun ImageReview(
             StandardButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 36.dp),
+                    .padding(horizontal = 48.dp),
                 contentPadding = PaddingValues(vertical = 16.dp),
                 onClick = {
                     onCancelImageSave()
@@ -294,7 +305,7 @@ fun ImageReview(
             StandardButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 36.dp),
+                    .padding(horizontal = 48.dp),
                 contentPadding = PaddingValues(vertical = 16.dp),
                 onClick = {
                     onDoneViewing()
@@ -306,7 +317,7 @@ fun ImageReview(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
