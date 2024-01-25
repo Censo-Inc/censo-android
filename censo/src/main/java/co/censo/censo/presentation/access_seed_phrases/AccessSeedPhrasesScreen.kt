@@ -206,7 +206,8 @@ fun AccessSeedPhrasesScreen(
                                                 onSaveImage = null,
                                                 onCancelImageSave = null,
                                                 onDoneViewing = viewModel::reset,
-                                                timeLeft = state.timeRemaining
+                                                timeLeft = state.timeRemaining,
+                                                isAccessReview = true
                                             )
                                         }
                                     }

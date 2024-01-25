@@ -217,6 +217,7 @@ fun ImageReview(
     imageBitmap: ImageBitmap,
     imageContainerSizeFraction: Float = 0.85f,
     timeLeft: Duration? = null,
+    isAccessReview: Boolean,
     onSaveImage: (() -> Unit)?,
     onCancelImageSave: (() -> Unit)?,
     onDoneViewing: (() -> Unit)?
@@ -235,8 +236,9 @@ fun ImageReview(
 
         Spacer(modifier = Modifier.weight(0.5f))
 
+        val titleMessage = if (isAccessReview) stringResource(R.string.zoom_in_to_see_the_words) else  stringResource(R.string.zoom_in_to_review_the_words)
         TitleText(
-            title = stringResource(R.string.zoom_in_to_review_the_words),
+            title = titleMessage,
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp
         )
@@ -284,7 +286,7 @@ fun ImageReview(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             StandardButton(
                 modifier = Modifier
