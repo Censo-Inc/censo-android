@@ -1,7 +1,7 @@
 package co.censo.shared.presentation.cloud_storage
 
-import Base58EncodedPrivateKey
 import ParticipantId
+import StandardButton
 import android.app.Activity
 import android.content.IntentSender
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,9 +13,11 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.R
 import co.censo.shared.data.Resource
@@ -125,29 +129,54 @@ fun CloudStorageHandler(
     }
 
     if (state.shouldEnforceCloudStorageAccess) {
-        val interactionSource = remember { MutableInteractionSource()}
+        GoogleDrivePermissionUI(interactionSource = remember { MutableInteractionSource() }) {
+            triggerAuthRequest = true
+        }
+    }
+}
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = SharedColors.DisabledGrey)
-                .clickable(indication = null, interactionSource = interactionSource, onClick = {}),
-            contentAlignment = Alignment.Center
+@Composable
+fun GoogleDrivePermissionUI(
+    interactionSource: MutableInteractionSource,
+    onGrantPermission: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = SharedColors.DisabledGrey)
+            .clickable(indication = null, interactionSource = interactionSource, onClick = {}),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(R.string.google_drive_access_required),
+                textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText,
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            StandardButton(
+                onClick = onGrantPermission,
+                contentPadding = PaddingValues(horizontal = 36.dp, vertical = 16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.google_drive_access_required),
-                    textAlign = TextAlign.Center
+                    text = stringResource(R.string.grant_permission),
+                    color = SharedColors.ButtonTextBlue,
+                    fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { triggerAuthRequest = true }) {
-                    Text(text = stringResource(R.string.grant_permission))
-                }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun GoogleDrivePermissionPreview() {
+    GoogleDrivePermissionUI(interactionSource = remember { MutableInteractionSource() }) {
     }
 }
