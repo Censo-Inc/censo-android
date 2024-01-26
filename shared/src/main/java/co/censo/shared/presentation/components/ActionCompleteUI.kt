@@ -97,7 +97,7 @@ fun MediumActionCompleteUIPreview() {
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
 fun LargeActionCompleteUIPreview() {
-    ActionCompleteUI("Approved!")
+    ActionCompleteUI("You are all set!")
 }
 
 @Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)

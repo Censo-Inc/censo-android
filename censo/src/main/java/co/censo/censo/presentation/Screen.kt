@@ -64,6 +64,8 @@ sealed class Screen(val route: String) {
         const val DL_RESET_TOKEN_KEY = "reset_token_key"
     }
 
+    data object BiometryResetRoute : Screen("biometry_reset_route")
+
     fun navTo() : NavigationData {
         return NavigationData(
             route = this.route,

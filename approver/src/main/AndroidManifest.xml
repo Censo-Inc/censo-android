@@ -43,6 +43,7 @@
                 <data android:scheme="${APPROVER_URL_SCHEME}"/>
                 <data android:host="invite"/>
                 <data android:host="access"/>
+                <data android:host="auth-reset"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />

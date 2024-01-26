@@ -12,9 +12,12 @@ import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.maintenance.GlobalMaintenanceState
 import co.censo.shared.data.model.AcceptApprovershipApiResponse
+import co.censo.shared.data.model.AcceptAuthenticationResetRequestApiResponse
 import co.censo.shared.data.model.ApproveAccessApiRequest
 import co.censo.shared.data.model.ApproveAccessApiResponse
 import co.censo.shared.data.model.AttestationChallengeResponse
+import co.censo.shared.data.model.AuthenticationResetApprovalId
+import co.censo.shared.data.model.CancelAuthenticationResetApiResponse
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.ConfirmApprovershipApiRequest
@@ -32,12 +35,16 @@ import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.GetSeedPhraseApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
 import co.censo.shared.data.model.InitiateAccessApiResponse
+import co.censo.shared.data.model.InitiateAuthenticationResetApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
+import co.censo.shared.data.model.RejectAuthenticationResetRequestApiResponse
+import co.censo.shared.data.model.ReplaceAuthenticationApiRequest
+import co.censo.shared.data.model.ReplaceAuthenticationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
@@ -55,6 +62,8 @@ import co.censo.shared.data.model.SubmitAccessTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
+import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiResponse
 import co.censo.shared.data.model.SubmitPurchaseApiRequest
 import co.censo.shared.data.model.SubmitPurchaseApiResponse
 import co.censo.shared.data.model.TimelockApiResponse
@@ -116,6 +125,7 @@ interface ApiService {
         const val PARTICIPANT_ID = "participantId"
         const val CHANNEL = "channel"
         const val APPROVAL_ID = "approvalId"
+        const val AUTH_RESET_APPROVAL_ID = "resetApprovalId"
         const val SEED_PHRASE_ID = "seedPhraseId"
 
         const val IS_API = "X-IsApi"
@@ -397,6 +407,42 @@ interface ApiService {
     suspend fun importedEncryptedData(
         @Path(value = CHANNEL) channel: String,
     ): RetrofitResponse<GetImportEncryptedDataApiResponse>
+
+    @POST("/v1/authentication-reset")
+    suspend fun requestAuthenticationReset(
+         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<InitiateAuthenticationResetApiResponse>
+
+    @DELETE("/v1/authentication-reset")
+    suspend fun cancelAuthenticationReset(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<CancelAuthenticationResetApiResponse>
+
+    @POST("/v1/authentication-reset/{$AUTH_RESET_APPROVAL_ID}/acceptance")
+    suspend fun acceptAuthenticationResetRequest(
+        @Path(value = AUTH_RESET_APPROVAL_ID) authResetApprovalId: AuthenticationResetApprovalId,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<AcceptAuthenticationResetRequestApiResponse>
+
+    @POST("/v1/authentication-reset/{$AUTH_RESET_APPROVAL_ID}/rejection")
+    suspend fun rejectAuthenticationResetRequest(
+        @Path(value = AUTH_RESET_APPROVAL_ID) authResetApprovalId: AuthenticationResetApprovalId,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<RejectAuthenticationResetRequestApiResponse>
+
+    @POST("/v1/authentication-reset/{$AUTH_RESET_APPROVAL_ID}/totp-verification")
+    suspend fun submitAuthenticationResetTotpVerification(
+        @Path(value = AUTH_RESET_APPROVAL_ID) authResetApprovalId: AuthenticationResetApprovalId,
+        @Body apiRequest: SubmitAuthenticationResetTotpVerificationApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<SubmitAuthenticationResetTotpVerificationApiResponse>
+
+    @PUT("/v1/authentication")
+    suspend fun replaceAuthentication(
+        @Body apiRequest: ReplaceAuthenticationApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<ReplaceAuthenticationApiResponse>
+
 }
 
 class AnalyticsInterceptor(

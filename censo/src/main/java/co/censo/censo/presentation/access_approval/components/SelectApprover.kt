@@ -96,7 +96,7 @@ fun SelectApprover(
                         AccessIntent.ReplacePolicy -> R.string.policy_replace_request_access_message
                         AccessIntent.RecoverOwnerKey -> R.string.recover_key_request_access_message
                     },
-                    buildApproverNamesText(intent, approvers, context)
+                    buildApproverNamesText(approvers, context)
                 ),
                 textAlign = TextAlign.Start
             )
@@ -155,7 +155,6 @@ fun SelectApprover(
 }
 
 fun buildApproverNamesText(
-    intent: AccessIntent,
     approvers: List<Approver.TrustedApprover>,
     context: Context,
 ): String {

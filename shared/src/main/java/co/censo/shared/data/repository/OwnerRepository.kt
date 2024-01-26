@@ -46,12 +46,17 @@ import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.Authentication
+import co.censo.shared.data.model.CancelAuthenticationResetApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetSeedPhraseApiResponse
+import co.censo.shared.data.model.InitiateAuthenticationResetApiResponse
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
+import co.censo.shared.data.model.ReplaceAuthenticationApiRequest
+import co.censo.shared.data.model.ReplaceAuthenticationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
@@ -272,6 +277,10 @@ interface OwnerRepository {
     suspend fun disableTimelock(): Resource<TimelockApiResponse>
 
     suspend fun cancelDisableTimelock(): Resource<Unit>
+
+    suspend fun requestAuthenticationReset(): Resource<InitiateAuthenticationResetApiResponse>
+    suspend fun cancelAuthenticationReset(): Resource<CancelAuthenticationResetApiResponse>
+    suspend fun replaceAuthentication(authentication: Authentication): Resource<ReplaceAuthenticationApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -683,6 +692,22 @@ class OwnerRepositoryImpl(
 
     override  suspend fun cancelDisableTimelock(): Resource<Unit> {
         return retrieveApiResource { apiService.cancelDisableTimelock() }
+    }
+
+    override suspend fun requestAuthenticationReset(): Resource<InitiateAuthenticationResetApiResponse> {
+        return retrieveApiResource { apiService.requestAuthenticationReset() }
+    }
+
+    override suspend fun cancelAuthenticationReset(): Resource<CancelAuthenticationResetApiResponse> {
+        return retrieveApiResource { apiService.cancelAuthenticationReset() }
+    }
+
+    override suspend fun replaceAuthentication(authentication: Authentication): Resource<ReplaceAuthenticationApiResponse> {
+        return retrieveApiResource {
+            apiService.replaceAuthentication(
+                ReplaceAuthenticationApiRequest(authentication)
+            )
+        }
     }
 
     override suspend fun encryptSeedPhrase(

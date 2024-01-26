@@ -43,7 +43,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 fun ApproverEntranceScreen(
     navController: NavController,
     invitationId: String? = null,
-    accessParticipantId: String? = null,
+    participantId: String? = null,
     approvalId: String? = null,
     viewModel: ApproverEntranceViewModel = hiltViewModel(),
     appLinkUri: Uri? = null
@@ -75,7 +75,7 @@ fun ApproverEntranceScreen(
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart(
             invitationId = invitationId,
-            accessParticipantId = accessParticipantId,
+            participantId = participantId,
             approvalId = approvalId,
             appLinkUri = appLinkUri
         )

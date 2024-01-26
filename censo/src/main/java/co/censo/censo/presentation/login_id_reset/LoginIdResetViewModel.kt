@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.entrance.ForceUserToGrantCloudStorageAccess
-import co.censo.shared.CensoLink.Companion.RESET_TYPE
+import co.censo.shared.CensoLink.Companion.ID_RESET_TYPE
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.BiometryScanResultBlob
@@ -108,7 +108,7 @@ class LoginIdResetViewModel @Inject constructor(
     private fun onPasteLinkClicked(clipboardContent: String?) {
         try {
             clipboardContent?.parseLink()?.let { parsedLink ->
-                if (parsedLink.type == RESET_TYPE) {
+                if (parsedLink.type == ID_RESET_TYPE) {
                     receiveAction(LoginIdResetAction.TokenReceived(parsedLink.identifiers.mainId))
                 } else {
                     state = state.copy(linkError = true)

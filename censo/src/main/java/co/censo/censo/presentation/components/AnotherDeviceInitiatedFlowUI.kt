@@ -1,4 +1,4 @@
-package co.censo.censo.presentation.access_approval.components
+package co.censo.censo.presentation.components
 
 import MessageText
 import StandardButton
@@ -15,18 +15,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
 
+
+enum class AnotherDeviceInitiatedFlow {
+    Access, BiometryReset
+}
+
 @Composable
-fun AnotherDeviceAccessScreen(
+fun AnotherDeviceInitiatedFlowUI(
+    flow: AnotherDeviceInitiatedFlow,
     onCancel: () -> Unit
 ) {
 
@@ -41,7 +44,10 @@ fun AnotherDeviceAccessScreen(
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
-            title = stringResource(R.string.access_was_requested_using_another_phone),
+            title = when (flow) {
+                AnotherDeviceInitiatedFlow.Access -> stringResource(R.string.access_was_requested_using_another_phone)
+                AnotherDeviceInitiatedFlow.BiometryReset -> stringResource(R.string.biometry_reset_was_requested_using_another_phone)
+            },
             textAlign = TextAlign.Start,
         )
 
@@ -49,7 +55,10 @@ fun AnotherDeviceAccessScreen(
 
         MessageText(
             modifier = Modifier.fillMaxWidth(),
-            message = stringResource(R.string.access_was_requested_using_another_phone_blurb),
+            message = when (flow) {
+                AnotherDeviceInitiatedFlow.Access -> stringResource(R.string.access_was_requested_using_another_phone_blurb)
+                AnotherDeviceInitiatedFlow.BiometryReset -> stringResource(R.string.biometry_reset_was_requested_using_another_phone_blurb)
+            },
             textAlign = TextAlign.Start,
         )
 
@@ -61,7 +70,10 @@ fun AnotherDeviceAccessScreen(
             onClick = onCancel
         ) {
             Text(
-                text = stringResource(R.string.cancel_access),
+                text = when (flow) {
+                    AnotherDeviceInitiatedFlow.Access -> stringResource(R.string.cancel_access)
+                    AnotherDeviceInitiatedFlow.BiometryReset -> stringResource(R.string.cancel_biometry_reset)
+                },
                 style = ButtonTextStyle
             )
         }
@@ -74,8 +86,17 @@ fun AnotherDeviceAccessScreen(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun AnotherDeviceAccessScreenPreview() {
-    AnotherDeviceAccessScreen(
+fun AnotherDeviceInitiatedAccessUIPreview() {
+    AnotherDeviceInitiatedFlowUI(
+        flow = AnotherDeviceInitiatedFlow.Access,
+        onCancel = {}
+    )
+}
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun AnotherDeviceInitiatedBiometryResetUIPreview() {
+    AnotherDeviceInitiatedFlowUI(
+        flow = AnotherDeviceInitiatedFlow.BiometryReset,
         onCancel = {}
     )
 }

@@ -23,11 +23,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,7 +33,7 @@ import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
-import co.censo.censo.presentation.plan_setup.components.ApproverStep
+import co.censo.censo.presentation.components.ApproverStep
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.KeepScreenOn
 import co.censo.shared.presentation.components.Loading
@@ -92,7 +88,10 @@ fun ApproveAccessUI(
         Spacer(modifier = Modifier.height(24.dp))
 
         ApproverStep(
-            heading = stringResource(id = R.string.share_this_link_title),
+            heading = listOf(
+                stringResource(id = R.string.step_1),
+                stringResource(id = R.string.share_this_link_title),
+            ),
             content = stringResource(R.string.share_link_access_message, approverName),
             onClick = { shareLink(deeplink) }
         ) {
@@ -106,7 +105,10 @@ fun ApproveAccessUI(
         Spacer(modifier = Modifier.height(12.dp))
 
         ApproverStep(
-            heading = stringResource(id = R.string.enter_the_code_title),
+            heading = listOf(
+                stringResource(id = R.string.step_2),
+                stringResource(id = R.string.enter_the_code_title),
+            ),
             content = stringResource(
                 R.string.enter_code_access_message,
                 approverName,

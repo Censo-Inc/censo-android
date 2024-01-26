@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
@@ -14,6 +15,7 @@ import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -49,7 +51,7 @@ class LockScreenViewModel @Inject constructor(
             if (lockStatus is LockScreenState.LockStatus.Unlocked) {
                 val now = Clock.System.now()
                 if (now >= lockStatus.locksAt) {
-                    onUnlockExpired()
+                    resetToLocked()
                 } else if (lockStatus.locksAt - now < prolongationThreshold) {
                     if (state.prolongUnlockResource !is Resource.Loading) {
                         prolongUnlock()
@@ -74,13 +76,7 @@ class LockScreenViewModel @Inject constructor(
     }
 
     fun resetToLocked() {
-        state = state.copy(
-            lockStatus = LockScreenState.LockStatus.Locked
-        )
-    }
-
-    fun onUnlockExpired() {
-        resetToLocked()
+        state = state.copy(lockStatus = LockScreenState.LockStatus.Locked(canRequestBiometryReset = false))
         retrieveOwnerState()
     }
 
@@ -139,5 +135,19 @@ class LockScreenViewModel @Inject constructor(
 
             state = state.copy(prolongUnlockResource = response)
         }
+    }
+
+    fun navigateToResetBiometry(lockStatus: LockScreenState.LockStatus.Locked) {
+        state = state.copy(
+            // lock screen is placed on top of CensoNavHost. Need to keep loading indicator until
+            // biometry reset is initiated after navigation is complete. Lock screen will be
+            // released on incoming owner state update
+            lockStatus = lockStatus.copy(biometryResetRequested = true),
+            navigationResource = Screen.BiometryResetRoute.navToAndPopCurrentDestination().asResource()
+        )
+    }
+
+    fun resetNavigationResource() {
+        state = state.copy(navigationResource = Resource.Uninitialized)
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,9 +24,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -37,8 +41,12 @@ import co.censo.shared.presentation.SharedColors
 
 @Composable
 fun LockEngagedUI(
-    initUnlock: () -> Unit
+    initUnlock: () -> Unit,
+    canRequestBiometryReset: Boolean,
+    initResetBiometry: () -> Unit,
 ) {
+
+    val resetBiometryTag = "resetBiometry"
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
@@ -121,6 +129,37 @@ fun LockEngagedUI(
                 style = ButtonTextStyle.copy(fontSize = 20.sp)
             )
         }
+
+        if (canRequestBiometryReset) {
+            Spacer(modifier = Modifier.height(mediumSpacer))
+
+            val basicStyle = SpanStyle(
+                color = SharedColors.MainColorText,
+            )
+            val recoveryText = buildAnnotatedString {
+                withStyle(basicStyle) {
+                    append(stringResource(id = R.string.need_to_reset_biometry))
+                }
+                pushStringAnnotation(tag = resetBiometryTag, annotation = "Reset Biometry")
+                withStyle(basicStyle.copy(fontWeight = FontWeight.W600)) {
+                    append(stringResource(R.string.here))
+                }
+                pop()
+                withStyle(basicStyle) {
+                    append(".")
+                }
+            }
+            ClickableText(
+                text = recoveryText,
+                style = TextStyle(textAlign = TextAlign.Center, fontSize = 13.sp),
+                onClick = { offset ->
+                    recoveryText.getStringAnnotations(tag = resetBiometryTag, start = offset, end = offset)
+                        .firstOrNull()?.let {
+                            initResetBiometry()
+                        }
+                },
+            )
+        }
     }
 }
 
@@ -137,23 +176,60 @@ fun Line(length: Dp, height: Dp) {
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
 fun LargePreviewLockScreen() {
-    LockEngagedUI {
+    LockEngagedUI(
+        initUnlock = {},
+        canRequestBiometryReset = false,
+        initResetBiometry = {},
+    )
+}
 
-    }
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
+@Composable
+fun LargePreviewBioResetLockScreen() {
+    LockEngagedUI(
+        initUnlock = {},
+        canRequestBiometryReset = true,
+        initResetBiometry = {},
+    )
 }
 
 @Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
 @Composable
 fun NormalPreviewLockScreen() {
-    LockEngagedUI {
+    LockEngagedUI(
+        initUnlock = {},
+        canRequestBiometryReset = false,
+        initResetBiometry = {},
+    )
+}
 
-    }
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun NormalPreviewBioResetLockScreen() {
+    LockEngagedUI(
+        initUnlock = {},
+        canRequestBiometryReset = true,
+        initResetBiometry = {},
+    )
 }
 
 @Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
 fun SmallPreviewLockScreen() {
-    LockEngagedUI {
-
-    }
+    LockEngagedUI(
+        initUnlock = {},
+        canRequestBiometryReset = false,
+        initResetBiometry = {},
+    )
 }
+
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
+@Composable
+fun SmallPreviewBioResetLockScreen() {
+    LockEngagedUI(
+        initUnlock = {},
+        canRequestBiometryReset = true,
+        initResetBiometry = {},
+    )
+}
+

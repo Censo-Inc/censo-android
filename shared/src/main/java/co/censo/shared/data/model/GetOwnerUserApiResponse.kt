@@ -230,12 +230,59 @@ data class TimelockSetting(
 )
 
 @Serializable
+sealed class AuthenticationReset {
+    abstract val guid: AuthenticationResetId
+
+    @Serializable
+    @SerialName("ThisDevice")
+    data class ThisDevice(
+        override val guid: AuthenticationResetId,
+        val status: AuthenticationResetStatus,
+        val createdAt: Instant,
+        val expiresAt: Instant,
+        val approvals: List<AuthenticationResetApproval>,
+    ) : AuthenticationReset()
+
+    @Serializable
+    @SerialName("AnotherDevice")
+    data class AnotherDevice(
+        override val guid: AuthenticationResetId,
+    ) : AuthenticationReset()
+}
+
+@Serializable
+enum class AuthenticationResetStatus {
+    Requested, Approved, Completed, Expired
+}
+
+@Serializable
+data class AuthenticationResetApproval(
+    val guid: AuthenticationResetApprovalId,
+    val participantId: ParticipantId,
+    val totpSecret: AuthResetTotpSecret,
+    val status: AuthenticationResetApprovalStatus,
+) {
+    fun v2Deeplink(): String = "${DeepLinkURI.APPROVER_AUTH_REST_V2_URI}${participantId.value}/${guid.value}"
+}
+
+@Serializable
+enum class AuthenticationResetApprovalStatus {
+    Initial, // owner initiated auth reset
+    WaitingForTotp, // approver has opened the link and is waiting for totp from owner
+    WaitingForVerification, // approver has submitted totp signature and backend is verifying it
+    Approved, // approver has submitted totp signature and backend verified it successfully
+    TotpVerificationFailed, // approver has submitted an invalid totp signature
+    Rejected, // approver has rejected auth reset
+}
+
+
+@Serializable
 sealed class OwnerState {
     @Serializable
     @SerialName("Initial")
     data class Initial(
         val entropy: Base64EncodedData,
-        val subscriptionStatus: SubscriptionStatus
+        val subscriptionStatus: SubscriptionStatus,
     ) : OwnerState()
 
     @Serializable
@@ -248,7 +295,9 @@ sealed class OwnerState {
         val access: Access?,
         val policySetup: PolicySetup?,
         val timelockSetting: TimelockSetting,
-        val onboarded: Boolean
+        val onboarded: Boolean,
+        val canRequestAuthenticationReset: Boolean,
+        val authenticationReset: AuthenticationReset?,
     ) : OwnerState() {
         val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
 
@@ -282,6 +331,18 @@ fun ULong?.calculateLocksAt(): Instant? {
 @Serializable
 @JvmInline
 value class AccessId(val value: String)
+
+@Serializable
+@JvmInline
+value class AuthenticationResetId(val value: String)
+
+@Serializable
+@JvmInline
+value class AuthenticationResetApprovalId(val value: String)
+
+@Serializable
+@JvmInline
+value class AuthResetTotpSecret(val value: String)
 
 @Serializable
 @JvmInline

@@ -31,14 +31,16 @@ import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
 import android.content.Intent
 import android.net.Uri
-import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import co.censo.approver.presentation.Screen.Companion.APPROVER_DEEPLINK_AUTH_RESET
 import co.censo.approver.presentation.Screen.Companion.APPROVER_UNIVERSAL_DEEPLINK
+import co.censo.approver.presentation.auth_reset.ApproverAuthResetScreen
 import co.censo.approver.presentation.settings.ApproverSettingsScreen
 import co.censo.approver.presentation.owners.ApproverOwnersList
 import co.censo.approver.presentation.owners.LabelOwner
 import co.censo.approver.presentation.reset_links.ResetLinksScreen
+import co.censo.shared.DeepLinkURI.APPROVER_AUTH_REST_V2_URI
 import co.censo.shared.presentation.maintenance.MaintenanceScreen
 import co.censo.approver.BuildConfig as ApproverBuildConfig
 
@@ -77,6 +79,11 @@ class MainActivity : FragmentActivity() {
                 Screen.ApproverAccessScreen.route
             ) {
                 ApproverAccessScreen(navController = navController)
+            }
+            composable(
+                Screen.ApproverAuthResetScreen.route
+            ) {
+                ApproverAuthResetScreen(navController = navController)
             }
             composable(
                 route = Screen.ApproverOnboardingScreen.route
@@ -126,7 +133,7 @@ class MainActivity : FragmentActivity() {
                 val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
                 ApproverEntranceScreen(
                     navController = navController,
-                    accessParticipantId = participantId
+                    participantId = participantId
                 )
             }
             composable(
@@ -141,7 +148,23 @@ class MainActivity : FragmentActivity() {
                 val approvalId = backStackEntry.arguments?.getString(DL_APPROVAL_ID_KEY) ?: ""
                 ApproverEntranceScreen(
                     navController = navController,
-                    accessParticipantId = participantId,
+                    participantId = participantId,
+                    approvalId = approvalId,
+                )
+            }
+            composable(
+                "$APPROVER_DEEPLINK_AUTH_RESET?$DL_PARTICIPANT_ID_KEY={$DL_PARTICIPANT_ID_KEY}?$DL_APPROVAL_ID_KEY={$DL_APPROVAL_ID_KEY}",
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "$APPROVER_AUTH_REST_V2_URI{$DL_PARTICIPANT_ID_KEY}/{$DL_APPROVAL_ID_KEY}"
+                    }
+                )
+            ) { backStackEntry ->
+                val participantId = backStackEntry.arguments?.getString(DL_PARTICIPANT_ID_KEY) ?: ""
+                val approvalId = backStackEntry.arguments?.getString(DL_APPROVAL_ID_KEY) ?: ""
+                ApproverEntranceScreen(
+                    navController = navController,
+                    participantId = participantId,
                     approvalId = approvalId,
                 )
             }

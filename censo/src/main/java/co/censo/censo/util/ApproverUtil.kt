@@ -5,6 +5,8 @@ import co.censo.shared.data.model.Approval
 import co.censo.shared.data.model.ApprovalStatus
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverStatus
+import co.censo.shared.data.model.AuthenticationResetApproval
+import co.censo.shared.data.model.AuthenticationResetApprovalStatus
 
 //region Extension Functions Mapping Approver.ProspectApprover Types
 fun List<Approver.ProspectApprover>.ownerApprover(): Approver.ProspectApprover? {
@@ -78,6 +80,10 @@ fun Approver.ProspectApprover.asOwnerAsApprover(): Approver.SetupApprover.OwnerA
 //region Extension Functions Mapping Approver.TrustedApprover types
 fun List<Approval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
     return any { it.participantId == approver?.participantId && it.status == ApprovalStatus.Approved }
+}
+
+fun List<AuthenticationResetApproval>.isAuthResetApprovedFor(approver: Approver.TrustedApprover?): Boolean {
+    return any { it.participantId == approver?.participantId && it.status == AuthenticationResetApprovalStatus.Approved }
 }
 
 fun List<Approver.TrustedApprover>.external(): List<Approver.TrustedApprover> {

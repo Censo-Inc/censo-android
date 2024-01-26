@@ -4,22 +4,26 @@ import Base58EncodedApproverPublicKey
 import Base58EncodedPublicKey
 import Base64EncodedData
 import InvitationId
-import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.generateVerificationCodeSignData
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.ExternalEncryptionKey
 import co.censo.shared.data.model.AcceptApprovershipApiResponse
+import co.censo.shared.data.model.AcceptAuthenticationResetRequestApiResponse
 import co.censo.shared.data.model.ApproveAccessApiRequest
 import co.censo.shared.data.model.ApproveAccessApiResponse
+import co.censo.shared.data.model.AuthenticationResetApprovalId
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.RejectAccessApiResponse
+import co.censo.shared.data.model.RejectAuthenticationResetRequestApiResponse
 import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
+import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiResponse
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
@@ -80,6 +84,13 @@ interface ApproverRepository {
     suspend fun signUserOut()
     suspend fun labelOwner(participantId: String, label: String) : Resource<GetApproverUserApiResponse>
     suspend fun createLoginIdResetToken(participantId: String) : Resource<GetApproverUserApiResponse>
+    suspend fun acceptAuthenticationResetRequest(approvalId: AuthenticationResetApprovalId): Resource<AcceptAuthenticationResetRequestApiResponse>
+    suspend fun rejectAuthenticationResetRequest(approvalId: AuthenticationResetApprovalId): Resource<RejectAuthenticationResetRequestApiResponse>
+    suspend fun submitAuthenticationResetTotpVerification(
+        approvalId: AuthenticationResetApprovalId,
+        signature: Base64EncodedData,
+        timeMillis: Long
+    ): Resource<SubmitAuthenticationResetTotpVerificationApiResponse>
 }
 
 class ApproverRepositoryImpl(
@@ -260,6 +271,34 @@ class ApproverRepositoryImpl(
     override suspend fun createLoginIdResetToken(participantId: String): Resource<GetApproverUserApiResponse> {
         return retrieveApiResource {
             apiService.createLoginIdResetToken(participantId)
+        }
+    }
+
+    override suspend fun acceptAuthenticationResetRequest(approvalId: AuthenticationResetApprovalId): Resource<AcceptAuthenticationResetRequestApiResponse> {
+        return retrieveApiResource {
+            apiService.acceptAuthenticationResetRequest(approvalId)
+        }
+    }
+
+    override suspend fun rejectAuthenticationResetRequest(approvalId: AuthenticationResetApprovalId): Resource<RejectAuthenticationResetRequestApiResponse> {
+        return retrieveApiResource {
+            apiService.rejectAuthenticationResetRequest(approvalId)
+        }
+    }
+
+    override suspend fun submitAuthenticationResetTotpVerification(
+        approvalId: AuthenticationResetApprovalId,
+        signature: Base64EncodedData,
+        timeMillis: Long
+    ): Resource<SubmitAuthenticationResetTotpVerificationApiResponse> {
+        return retrieveApiResource {
+            apiService.submitAuthenticationResetTotpVerification(
+                authResetApprovalId = approvalId,
+                apiRequest = SubmitAuthenticationResetTotpVerificationApiRequest(
+                    signature = signature,
+                    timeMillis = timeMillis
+                )
+            )
         }
     }
 }

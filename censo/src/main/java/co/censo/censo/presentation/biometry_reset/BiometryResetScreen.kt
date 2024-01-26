@@ -1,4 +1,4 @@
-package co.censo.censo.presentation.access_approval
+package co.censo.censo.presentation.biometry_reset
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
@@ -27,25 +27,25 @@ import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ActionCompleteUI
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
-import co.censo.censo.presentation.access_approval.components.ApproveAccessUI
-import co.censo.censo.presentation.access_approval.components.SelectApprover
+import co.censo.censo.presentation.biometry_reset.components.BiometryResetApprovalUI
+import co.censo.censo.presentation.biometry_reset.components.ReEnrollBiometryUI
+import co.censo.censo.presentation.biometry_reset.components.SelectBiometryResetApproverUI
 import co.censo.censo.presentation.components.AnotherDeviceInitiatedFlow
 import co.censo.censo.presentation.components.AnotherDeviceInitiatedFlowUI
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.external
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
 import co.censo.shared.util.popCurrentDestinationFromBackStack
-import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.components.LargeLoading
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AccessApprovalScreen(
+fun BiometryResetScreen(
     navController: NavController,
-    accessIntent: AccessIntent,
-    viewModel: AccessApprovalViewModel = hiltViewModel()
+    viewModel: BiometryResetViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
@@ -53,11 +53,11 @@ fun AccessApprovalScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart(accessIntent)
+                viewModel.onResume()
             }
 
             Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onStop()
+                viewModel.onPause()
             }
 
             else -> Unit
@@ -76,23 +76,18 @@ fun AccessApprovalScreen(
             }
             viewModel.resetNavigationResource()
         }
-
-        if (state.initiateNewAccess) {
-            viewModel.initiateAccess()
-        }
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 navigationIcon = {
-                    when (state.accessApprovalUIState) {
-                        AccessApprovalUIState.Approved,
-                        AccessApprovalUIState.AnotherDevice -> {
-                        }
+                    when (state.uiState) {
+                        UIState.Completed,
+                        UIState.AnotherDevice -> {}
 
                         else -> {
-                            IconButton(onClick = viewModel::onBackClicked) {
+                            IconButton(onClick = { viewModel.receiveAction(BiometryResetAction.BackClicked) }) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBack,
                                     contentDescription = stringResource(id = R.string.back),
@@ -103,13 +98,9 @@ fun AccessApprovalScreen(
                 },
                 title = {
                     Text(
-                        text = when (state.accessApprovalUIState) {
-                            AccessApprovalUIState.Approved -> ""
-                            else -> when (accessIntent) {
-                                AccessIntent.AccessPhrases -> stringResource(id = R.string.access)
-                                AccessIntent.ReplacePolicy -> stringResource(id = R.string.remove_approvers)
-                                AccessIntent.RecoverOwnerKey -> stringResource(id = R.string.recover_key)
-                            }
+                        text = when (state.uiState) {
+                            UIState.Completed -> ""
+                            else -> "Biometry reset"
                         },
                         textAlign = TextAlign.Center
                     )
@@ -119,10 +110,10 @@ fun AccessApprovalScreen(
 
         if (state.showCancelConfirmationDialog) {
             YesNoDialog(
-                title = stringResource(R.string.cancel_access),
-                message = stringResource(R.string.cancel_access_dialog),
-                onDismiss = viewModel::hideCloseConfirmationDialog,
-                onConfirm = viewModel::cancelAccess
+                title = stringResource(R.string.are_you_sure),
+                message = stringResource(R.string.cancel_biometry_reset_dialog),
+                onDismiss = { viewModel.receiveAction(BiometryResetAction.CancelBiometryResetCancelled) },
+                onConfirm = { viewModel.receiveAction(BiometryResetAction.CancelBiometryReset) }
             )
         }
 
@@ -143,83 +134,104 @@ fun AccessApprovalScreen(
                             DisplayError(
                                 errorMessage = state.userResponse.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.retrieveOwnerState() }
+                                retryAction = {
+                                    viewModel.resetUserResponse()
+                                    viewModel.receiveAction(BiometryResetAction.Retry)
+                                }
                             )
                         }
 
-                        state.initiateAccessResource is Resource.Error -> {
+                        state.initiateBiometryResetResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.initiateAccessResource.getErrorMessage(context),
+                                errorMessage = state.initiateBiometryResetResource.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.initiateAccess() }
+                                retryAction = {
+                                    viewModel.resetInitiateBiometryResetResource()
+                                    viewModel.receiveAction(BiometryResetAction.Retry)
+                                }
                             )
                         }
 
-                        state.cancelAccessResource is Resource.Error -> {
+                        state.cancelBiometryResetResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.cancelAccessResource.getErrorMessage(context),
+                                errorMessage = state.cancelBiometryResetResource.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.cancelAccess() }
+                                retryAction = {
+                                    viewModel.resetCancelBiometryResetResource()
+                                    viewModel.receiveAction(BiometryResetAction.Retry)
+                                }
                             )
                         }
 
-                        state.submitTotpVerificationResource is Resource.Error -> {
+                        state.replaceBiometryResource is Resource.Error -> {
                             DisplayError(
-                                errorMessage = state.submitTotpVerificationResource.getErrorMessage(context),
+                                errorMessage = state.replaceBiometryResource.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.updateVerificationCode(state.verificationCode) }
+                                retryAction = {
+                                    viewModel.resetReplaceBiometryResource()
+                                    viewModel.receiveAction(BiometryResetAction.Retry)
+                                }
                             )
                         }
                     }
                 }
 
                 else -> {
-                    when (state.accessApprovalUIState) {
+                    when (state.uiState) {
 
-                        AccessApprovalUIState.Initial -> {
-                            LargeLoading(fullscreen = true)
-                        }
+                        UIState.Initial -> {}
 
-                        AccessApprovalUIState.AnotherDevice -> {
+                        UIState.AnotherDevice -> {
                             AnotherDeviceInitiatedFlowUI(
-                                flow = AnotherDeviceInitiatedFlow.Access,
-                                onCancel = viewModel::cancelAccess
+                                flow = AnotherDeviceInitiatedFlow.BiometryReset,
+                                onCancel = { viewModel.receiveAction(BiometryResetAction.CancelBiometryReset) }
                             )
                         }
 
-                        AccessApprovalUIState.SelectApprover -> {
-                            SelectApprover(
-                                intent = accessIntent,
+                        UIState.SelectApprover -> {
+                            SelectBiometryResetApproverUI(
                                 approvals = state.approvals,
                                 approvers = state.approvers.external(),
                                 selectedApprover = state.selectedApprover,
-                                onApproverSelected = viewModel::onApproverSelected,
-                                onContinue = viewModel::onContinue
+                                onApproverSelected = { viewModel.receiveAction(BiometryResetAction.ApproverSelectionChanged(it) )},
+                                onContinue = { viewModel.receiveAction(BiometryResetAction.ContinueWithSelectedApprover )}
                             )
                         }
 
-                        AccessApprovalUIState.ApproveAccess -> {
-                            ApproveAccessUI(
-                                intent = accessIntent,
-                                approverName = state.selectedApprover?.label ?: stringResource(R.string.your_approver_backup_label),
+                        UIState.ApproveBiometryReset -> {
+                            BiometryResetApprovalUI(
+                                nickname = state.selectedApprover?.label ?: stringResource(R.string.your_approver_backup_label),
+                                secondsLeft = state.secondsLeft,
+                                verificationCode = state.approverCodes[state.selectedApprover?.participantId] ?: "",
                                 approval = state.approvals.find { it.participantId == state.selectedApprover?.participantId }!!,
-                                verificationCode = state.verificationCode,
-                                onVerificationCodeChanged = viewModel::updateVerificationCode,
                             )
                         }
 
-                        AccessApprovalUIState.Approved -> {
+                        UIState.EnrollNewBiometry -> {
+                            ReEnrollBiometryUI(
+                                onEnrollBiometry = { viewModel.receiveAction(BiometryResetAction.EnrollNewBiometry) }
+                            )
+                        }
+
+                        UIState.Facetec -> {
+                            FacetecAuth(
+                                onFaceScanReady = { verificationId, biometry ->
+                                    viewModel.onFaceScanReady(verificationId, biometry)
+                                },
+                                onCancelled = {
+                                    viewModel.receiveAction(BiometryResetAction.FacetecCancelled)
+                                }
+                            )
+                        }
+
+                        UIState.Completed -> {
                             ActionCompleteUI(
-                                title = stringResource(id = R.string.approved)
+                                title = stringResource(id = R.string.you_are_all_set)
                             )
 
                             LaunchedEffect(Unit) {
-                                delay(3000)
-                                if (viewModel.state.isTimelocked) {
-                                    viewModel.setNavigateBackToHome()
-                                } else {
-                                    viewModel.navigateIntentAware()
-                                }
+                                delay(6000)
+                                viewModel.navigateToEntrance()
                             }
                         }
                     }

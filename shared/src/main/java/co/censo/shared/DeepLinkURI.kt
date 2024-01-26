@@ -17,6 +17,7 @@ object DeepLinkURI {
     const val APPROVER_INVITE_URI = "${BuildConfig.APPROVER_URL_SCHEME}://invite/"
     const val APPROVER_ACCESS_URI = "${BuildConfig.APPROVER_URL_SCHEME}://access/"
     const val APPROVER_ACCESS_V2_URI = "${BuildConfig.APPROVER_URL_SCHEME}://access/v2/"
+    const val APPROVER_AUTH_REST_V2_URI = "${BuildConfig.APPROVER_URL_SCHEME}://auth-reset/v2/"
     const val OWNER_LOGIN_ID_RESET_URI = "${BuildConfig.OWNER_URL_SCHEME}://reset/"
     const val CENSO_IMPORT_URI = "${BuildConfig.OWNER_URL_SCHEME}://import/v1/"
 }
@@ -67,9 +68,10 @@ data class CensoLink(
         const val LINK_TYPE_INDEX = 0
         const val ACCESS_TYPE = "access"
         const val INVITE_TYPE = "invite"
-        const val RESET_TYPE = "reset"
+        const val ID_RESET_TYPE = "reset"
+        const val AUTH_RESET_TYPE = "auth-reset"
         const val CENSO_HOST = "censo"
-        val TYPES = setOf(ACCESS_TYPE, INVITE_TYPE, RESET_TYPE)
+        val TYPES = setOf(ACCESS_TYPE, INVITE_TYPE, ID_RESET_TYPE, AUTH_RESET_TYPE)
 
         //V1
         const val V1_PART_ID_INDEX = 1

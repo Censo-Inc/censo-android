@@ -32,6 +32,7 @@
     <string name="link_you_have_opened_does_not_appear_to_be_correct_please_contact_seed_phrase_owner">Link you have opened does not appear to be correct. Please contact seed phrase owner</string>
     <string name="access_approved">Access approved!</string>
     <string name="access_not_in_progress">Access not in progress!</string>
+    <string name="auth_reset_not_in_progress">Authentication reset not in progress!</string>
     <string name="this_application_can_only_be_used_by_invitation_please_click_the_invite_link_you_received_from_the_seed_phrase_owner">This application can only be used by invitation. Please click the invite link you received from the seed phrase owner.</string>
     <string name="you_have_been_invited_to_become_an_approver">You have been invited to become an approver!</string>
     <string name="accept_invitation">Accept Invitation</string>

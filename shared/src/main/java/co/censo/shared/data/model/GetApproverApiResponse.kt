@@ -31,6 +31,10 @@ sealed class ApproverPhase {
     fun isActiveApprover() =
         this is Complete || this.isAccessPhase()
 
+    fun isAuthResetPhase() = this is AuthenticationResetRequested ||
+            this is AuthenticationResetWaitingForCode ||
+            this is AuthenticationResetVerificationRejected
+
     @Serializable
     @SerialName("WaitingForCode")
     data class WaitingForCode(
@@ -78,12 +82,22 @@ sealed class ApproverPhase {
         val approverEncryptedShard: Base64EncodedData,
         val approverEntropy: Base64EncodedData,
     ) : ApproverPhase()
-}
 
-@Serializable
-enum class VerificationStatus {
-    NotSubmitted,
-    WaitingForVerification,
-    Verified,
-    Rejected,
+    @Serializable
+    @SerialName("AuthenticationResetRequested")
+    data class AuthenticationResetRequested(
+        val createdAt: Instant,
+    ) : ApproverPhase()
+
+    @Serializable
+    @SerialName("AuthenticationResetWaitingForCode")
+    data class AuthenticationResetWaitingForCode(
+        val entropy: Base64EncodedData,
+    ) : ApproverPhase()
+
+    @Serializable
+    @SerialName("AuthenticationResetVerificationRejected")
+    data class AuthenticationResetVerificationRejected(
+        val entropy: Base64EncodedData,
+    ) : ApproverPhase()
 }

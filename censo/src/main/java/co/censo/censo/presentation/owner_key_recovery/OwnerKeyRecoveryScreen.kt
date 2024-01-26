@@ -22,7 +22,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import kotlinx.coroutines.delay
-import co.censo.censo.presentation.owner_key_recovery.components.Recovered
+import co.censo.shared.presentation.components.ActionCompleteUI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,7 +140,9 @@ fun OwnerKeyRecoveryScreen(
                         }
 
                         OwnerKeyRecoveryUIState.Completed -> {
-                            Recovered()
+                            ActionCompleteUI(
+                                title = stringResource(id = R.string.you_are_all_set)
+                            )
                             LaunchedEffect(Unit) {
                                 delay(6000)
                                 viewModel.receiveAction(KeyRecoveryAction.Completed)

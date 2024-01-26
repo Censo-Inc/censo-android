@@ -9,6 +9,7 @@ object CrashReportingUtil {
 
     //Values
     const val AccessConfirmation = "AccessConfirmation"
+    const val AuthRestConfirmation = "AuthConfirmation"
     const val CloudUpload = "CloudUpload"
     const val CloudDownload = "CloudDownload"
     const val SubmitVerification = "SubmitVerification"

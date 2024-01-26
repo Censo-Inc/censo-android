@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import co.censo.approver.presentation.Screen
 import co.censo.approver.BuildConfig
 import co.censo.shared.CensoLink.Companion.ACCESS_TYPE
+import co.censo.shared.CensoLink.Companion.AUTH_RESET_TYPE
 import co.censo.shared.CensoLink.Companion.INVITE_TYPE
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
@@ -45,14 +46,14 @@ class ApproverEntranceViewModel @Inject constructor(
 
 
     //region Lifecycle Methods
-    fun onStart(invitationId: String?, accessParticipantId: String?, approvalId: String?, appLinkUri: Uri?) {
+    fun onStart(invitationId: String?, participantId: String?, approvalId: String?, appLinkUri: Uri?) {
         if (invitationId != null) {
             approverRepository.saveInvitationId(invitationId)
             approverRepository.clearParticipantId()
             approverRepository.clearApprovalId()
         }
-        if (accessParticipantId != null) {
-            approverRepository.saveParticipantId(accessParticipantId)
+        if (participantId != null) {
+            approverRepository.saveParticipantId(participantId)
             approverRepository.clearInvitationId()
         }
 
@@ -290,7 +291,15 @@ class ApproverEntranceViewModel @Inject constructor(
                         retrySignIn()
                     }
                 }
-                participantId.isNotEmpty() -> triggerNavigation(RoutingDestination.ACCESS)
+                participantId.isNotEmpty() -> {
+                    val approverStates = approverRepository.retrieveUser().map { it.approverStates }.success()?.data ?: listOf()
+                    if (approverStates.any { approverState -> approverState.participantId.value == participantId && approverState.phase.isAuthResetPhase() }) {
+                        triggerNavigation(RoutingDestination.AUTH_RESET)
+                    } else {
+                        triggerNavigation(RoutingDestination.ACCESS)
+                    }
+                }
+
                 invitationId.isNotEmpty() -> triggerNavigation(RoutingDestination.ONBOARDING)
             }
         }
@@ -333,15 +342,11 @@ class ApproverEntranceViewModel @Inject constructor(
                         routing()
                     }
 
-                    ACCESS_TYPE -> {
-                        if (censoLink.identifiers.approvalId == null) {
-                            approverRepository.clearInvitationId()
-                            approverRepository.saveParticipantId(censoLink.identifiers.mainId)
-                        } else {
-                            approverRepository.clearInvitationId()
-                            approverRepository.saveParticipantId(censoLink.identifiers.mainId)
-                            approverRepository.saveApprovalId(censoLink.identifiers.approvalId!!)
-                        }
+                    ACCESS_TYPE,
+                    AUTH_RESET_TYPE -> {
+                        approverRepository.clearInvitationId()
+                        approverRepository.saveParticipantId(censoLink.identifiers.mainId)
+                        censoLink.identifiers.approvalId?.let { approverRepository.saveApprovalId(it) }
                         routing()
                     }
 
@@ -372,6 +377,12 @@ class ApproverEntranceViewModel @Inject constructor(
             RoutingDestination.ONBOARDING ->
                 state.copy(
                     navigationResource = Screen.ApproverOnboardingScreen.navTo().copy(popUpToTop = true).asResource(),
+                    uiState = ApproverEntranceUIState.Initial
+                )
+
+            RoutingDestination.AUTH_RESET ->
+                state.copy(
+                    navigationResource = Screen.ApproverAuthResetScreen.navTo().copy(popUpToTop = true).asResource(),
                     uiState = ApproverEntranceUIState.Initial
                 )
         }

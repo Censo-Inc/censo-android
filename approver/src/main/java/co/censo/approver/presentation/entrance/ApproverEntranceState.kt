@@ -29,7 +29,7 @@ data class ForceUserToGrantCloudStorageAccess(
 )
 
 enum class RoutingDestination {
-    ONBOARDING, ACCESS
+    ONBOARDING, ACCESS, AUTH_RESET
 }
 
 sealed class ApproverEntranceUIState {

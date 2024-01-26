@@ -185,7 +185,6 @@
     <string name="add_seed_phrases">Add seed phrases</string>
     <string name="how_to_provide">How do you want to provide your seed phrase?</string>
     <string name="add_seed_phrase_message">Your seed phrase will be encrypted so only you can access it.</string>
-    <string name="step_2">Step 2</string>
     <string name="about_to_delete_user_first_half">You are about to delete</string>
     <string name="all">ALL</string>
     <string name="about_to_delete_user_second_half">of your data.\n\nSeed phrases you have added will no longer be accessible. This action cannot be reversed.\n\nIf you are sure, please type:\n\n</string>
@@ -195,7 +194,11 @@
     </plurals>
     <string name="delete_phrase_confirmation_text">Delete %1$s</string>
     <string name="step_1">Step 1</string>
+    <string name="step_2">Step 2</string>
+    <string name="step_3">Step 3</string>
     <string name="scan_your_face">Anonymously scan your face</string>
+    <string name="update_scan_your_face">Update Your Face Scan</string>
+    <string name="update_scan_your_face_blurb">Your face scan will be updated and immediately available for accessing your seed phrases. The previous face scan will be permanently removed from our storage.</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
     <string name="label">Label</string>
@@ -208,11 +211,11 @@
     <string name="activate_approver">Activate</string>
     <string name="activate_your_approver_message">Activating %1$s as an approver will take about 2 minutes. This activation should preferably take place while you\'re on the phone or in-person to ensure that you are activating the proper approver.</string>
     <string name="you_must_do_two_things">You must do two things:</string>
-    <string name="share_the_app_title">Step 1:\nShare Approver App</string>
-    <string name="share_the_link_title">Step 2:\nShare Invite Link</string>
-    <string name="read_the_code_title">Step 3:\nRead Code</string>
-    <string name="share_this_link_title">Step 1:\nShare this link</string>
-    <string name="enter_the_code_title">Step 2:\nEnter the Code</string>
+    <string name="share_the_app_title">Share Approver App</string>
+    <string name="share_the_link_title">Share Invite Link</string>
+    <string name="read_the_code_title">Read Code</string>
+    <string name="share_this_link_title">Share this link</string>
+    <string name="enter_the_code_title">Enter the Code</string>
     <string name="dowloand_the_app_message">They must download Censo Approver app from the Apple App Store or Google Play Store.</string>
     <string name="share_the_link_message">After they have installed Censo Approver app, send them this unique, secret link.</string>
     <string name="share_the_code_message">Read aloud this code and have %1$s enter it into the Censo Approver app to authenticate you.</string>
@@ -236,6 +239,7 @@
     <string name="skip_for_now">Skip for now</string>
     <string name="saved_sharded"><![CDATA[Saved & sharded]]></string>
     <string name="approver_is_activated">%1$s is now activated!</string>
+    <string name="approver_has_approver_your_request">%1$s has approved your request</string>
     <string name="once_they_have_accepted_the_invite_a_unique_confirmation_code_will_be_displayed">Once they have accepted the invite, a unique confirmation code will be displayed.</string>
     <string name="paste_your_phrase">Paste seed phrase</string>
     <string name="select_phrase_length">How long should the seed phrase be?</string>
@@ -286,6 +290,10 @@
     <string name="access_was_requested_using_another_phone">Access was requested using another phone</string>
     <string name="access_was_requested_using_another_phone_blurb">For security reasons we allow access only from same device</string>
     <string name="cancel_access">Cancel access</string>
+    <string name="biometry_reset_was_requested_using_another_phone">Biometry reset was requested using another phone</string>
+    <string name="biometry_reset_was_requested_using_another_phone_blurb">For security reasons we allow biometry reset only from same device</string>
+    <string name="cancel_biometry_reset">Cancel biometry reset</string>
+    <string name="cancel_biometry_reset_dialog">Biometry reset will be cancelled and your progress will be lost.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="delete_user">Delete My Data</string>
@@ -360,7 +368,9 @@
     <string name="your_approver_backup_label">your approver</string>
     <string name="waiting_for_to_open_the_link">Waiting for %1$s to open the link</string>
     <string name="waiting_for_to_verify_the_code">Waiting for %1$s to verify the code</string>
+    <string name="approver_rejected_biometry_reset">%1$s has rejected your request</string>
     <string name="recover_key">"Recover Key"</string>
+    <string name="biometry_reset_message">Biometry reset requires assistance from both of your approvers.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect an approver to start with when you are speaking with them:</string>
     <string name="recover_key_request_access_message">Key recovery requires assistance from both of your approvers.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect an approver to start with when you are speaking with them:</string>
     <string name="seed_phrase_request_access_message">Seed phrase access requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect your approver below when you are speaking with them:</string>
     <string name="policy_replace_request_access_message">This will make you the sole approver when complete, and allow you to optionally add new approvers.\n\nRemoving approvers requires the assistance of %1$s.\n\nThis should preferably take place either on the phone or in-person to allow the approver to verify your identity.\n\nSelect your approver below when you are speaking with them:</string>
@@ -416,8 +426,9 @@
     <string name="censo_was_not_able_to_access_your_key">Censo was not able to access your key</string>
     <string name="collect_approvals_key_recovery_message">Collect approvals from both of your approvers in order to restore access to your seed phrases</string>
     <string name="recover_my_key">Recover my key</string>
-    <string name="need_to_reset_login_id">"Need to reset your Login ID? Click "</string>
+    <string name="need_to_reset_login_id">"Need to reset your Login ID? Tap "</string>
     <string name="reset_login_id">Reset Login ID</string>
+    <string name="need_to_reset_biometry">"Having trouble with face verification? Tap "</string>
     <string name="step_1_collect_reset_links">1. Collect Reset Links</string>
     <string name="step_1_collect_reset_links_message">Request reset links from your approvers. Once received, tap each link to proceed, or copy and paste them using the \"Paste From Clipboard\" button.</string>
     <string name="collected_reset_links">Collected %1$s from %2$s links</string>

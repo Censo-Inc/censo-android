@@ -38,7 +38,9 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
         ), publicMasterEncryptionKey = Base58EncodedMasterPublicKey(value = "AA")
     ), unlockedForSeconds = 600UL, access = null, policySetup = null,
     timelockSetting = TimelockSetting(defaultTimelockInSeconds = 7200L, currentTimelockInSeconds = null, disabledAt = null),
-    onboarded = true
+    onboarded = true,
+    canRequestAuthenticationReset = false,
+    authenticationReset = null
 )
 
 val mockReadyOwnerStateWithPolicySetup = mockReadyOwnerStateWithNullPolicySetup.copy(

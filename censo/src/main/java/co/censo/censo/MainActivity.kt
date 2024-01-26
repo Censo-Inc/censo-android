@@ -32,6 +32,7 @@ import co.censo.censo.presentation.Screen.Companion.SIGNATURE_KEY
 import co.censo.censo.presentation.Screen.Companion.TIMESTAMP_KEY
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
+import co.censo.censo.presentation.biometry_reset.BiometryResetScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.import_phrase.PhraseImportScreen
@@ -89,7 +90,7 @@ class MainActivity : FragmentActivity() {
 
                         ValidateApproverKeyScreen(navController = navController)
 
-                        LockedScreen()
+                        LockedScreen(navController = navController)
 
                         PaywallScreen(navController = navController)
 
@@ -189,6 +190,9 @@ class MainActivity : FragmentActivity() {
             ) {backStackEntry ->
                 val resetToken = backStackEntry.arguments?.getString(DL_RESET_TOKEN_KEY)
                 LoginIdResetScreen(resetToken, navController = navController)
+            }
+            composable(route = Screen.BiometryResetRoute.route) {
+                BiometryResetScreen(navController = navController)
             }
             composable(
                 "$CENSO_IMPORT_DEEPLINK?$IMPORT_KEY_KEY={$IMPORT_KEY_KEY}?$TIMESTAMP_KEY={$TIMESTAMP_KEY}?$SIGNATURE_KEY={$SIGNATURE_KEY}?$NAME_KEY={$NAME_KEY}",
