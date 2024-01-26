@@ -204,7 +204,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
             )
         }
 
-        lockScreenViewModel.onUnlockExpired()
+        lockScreenViewModel.resetToLocked()
 
         testScheduler.advanceUntilIdle()
 
