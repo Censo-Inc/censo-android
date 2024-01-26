@@ -921,7 +921,7 @@ class OwnerRepositoryImpl(
             }
             Point(
                 it.participantId.bigInt(),
-                BigInteger(encryptionKey.decrypt(it.encryptedShard.bytes))
+                BigInteger(1, encryptionKey.decrypt(it.encryptedShard.bytes))
             )
         }
 
@@ -935,6 +935,7 @@ class OwnerRepositoryImpl(
         intermediateKey: PrivateKey
     ) = EncryptionKey.generateFromPrivateKeyRaw(
         BigInteger(
+            1,
             ECIESManager.decryptMessage(
                 cipherData = encryptedMasterKey.bytes,
                 privateKey = intermediateKey
