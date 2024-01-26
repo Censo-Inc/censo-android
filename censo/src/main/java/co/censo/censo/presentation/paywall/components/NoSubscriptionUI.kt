@@ -26,22 +26,13 @@ import java.time.Period
 @Composable
 fun NoSubscriptionUI(
     offer: SubscriptionOffer,
-    onRestorePurchase: () -> Unit,
     onContinue: (SubscriptionOffer) -> Unit,
-    onboarding: Boolean = false,
-    onCancel: () -> Unit = {},
+    onCancel: (() -> Unit)?,
 ) {
     val priceText = offer.priceAndPeriodToUserText(LocalContext.current)
 
-    val trialText = offer.feeTrialPeriodISO8601
-        ?.let { "${Period.parse(it).days} ${stringResource(R.string.days_free_then)} " }
-        ?: ""
-
-
     PaywallBaseUI(
         userPriceText = priceText,
-        onRestorePurchase = onRestorePurchase,
-        onboarding = onboarding,
         onCancel = onCancel,
         statusSpecificContent = {
         Spacer(modifier = Modifier.height(24.dp))
@@ -63,10 +54,6 @@ fun NoSubscriptionUI(
                     text = stringResource(R.string.continue_text),
                     style = ButtonTextStyle.copy(fontSize = 24.sp, fontWeight = FontWeight.Medium),
                 )
-                Text(
-                    text = "$trialText$priceText",
-                    style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
-                )
             }
         }
     })
@@ -83,9 +70,8 @@ fun PreviewNoSubscriptionTrialUI() {
             billingPeriodISO8601 = "P1M",
             feeTrialPeriodISO8601 = "P7D",
         ),
-        onRestorePurchase = {},
         onContinue = {},
-    )
+    ) {}
 }
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -99,7 +85,6 @@ fun PreviewNoSubscriptionUINoTrialUI() {
             billingPeriodISO8601 = "P1M",
             feeTrialPeriodISO8601 = null,
         ),
-        onRestorePurchase = {},
         onContinue = {},
-    )
+    ) {}
 }

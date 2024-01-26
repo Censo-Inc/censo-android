@@ -107,6 +107,8 @@ fun InitialPlanSetupScreen(
                     onCancel = {
                         if (showInfoView.value) {
                             showInfoView.value = false
+                        } else if (state.welcomeStep == WelcomeStep.ScanningFace) {
+                          viewModel.changeWelcomeStep(WelcomeStep.Authenticated)
                         } else {
                             viewModel.showDeleteUserDialog()
                         }
@@ -158,13 +160,19 @@ fun InitialPlanSetupScreen(
                         InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
 
                         is InitialPlanSetupStep.Initial -> {
-                            InitialPlanSetupStandardUI(
-                                startPlanSetup = viewModel::determineUIStatus,
-                                isInfoViewVisible = showInfoView.value,
-                                showInfoView = {
-                                    showInfoView.value = true
+                            if (state.welcomeStep == WelcomeStep.Authenticated) {
+                                WelcomeScreenUI {
+                                    viewModel.changeWelcomeStep(WelcomeStep.ScanningFace)
                                 }
-                            )
+                            } else {
+                                ScanFaceInformationUI(
+                                    startPlanSetup = viewModel::determineUIStatus,
+                                    isInfoViewVisible = showInfoView.value,
+                                    showInfoView = {
+                                        showInfoView.value = true
+                                    }
+                                )
+                            }
 
                             if (state.triggerDeleteUserDialog is Resource.Success) {
                                 ConfirmationDialog(
@@ -216,7 +224,7 @@ fun InitialPlanSetupScreen(
 }
 
 @Composable
-fun InitialPlanSetupStandardUI(
+fun ScanFaceInformationUI(
     startPlanSetup: () -> Unit,
     isInfoViewVisible: Boolean,
     showInfoView: () -> Unit
@@ -305,7 +313,7 @@ fun InitialPlanSetupStandardUI(
 @Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)
 @Composable
 fun LargeInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI(
+    ScanFaceInformationUI(
         isInfoViewVisible = false,
         startPlanSetup = {},
         showInfoView = {}
@@ -315,7 +323,7 @@ fun LargeInitialPlanSetupStandardUIPreview() {
 @Preview(device = Devices.PIXEL_4, showBackground = true, showSystemUi = true)
 @Composable
 fun MediumInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI(
+    ScanFaceInformationUI(
         isInfoViewVisible = false,
         startPlanSetup = {},
         showInfoView = {}
@@ -325,7 +333,7 @@ fun MediumInitialPlanSetupStandardUIPreview() {
 @Preview(device = Devices.NEXUS_5, showBackground = true, showSystemUi = true)
 @Composable
 fun SmallInitialPlanSetupStandardUIPreview() {
-    InitialPlanSetupStandardUI(
+    ScanFaceInformationUI(
         isInfoViewVisible = false,
         startPlanSetup = {},
         showInfoView = {}

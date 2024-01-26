@@ -44,17 +44,17 @@ class EnterPhraseViewModel @Inject constructor(
         welcomeFlow: Boolean,
         importingPhrase: Boolean,
         masterPublicKey: Base58EncodedMasterPublicKey,
-        encryptedPhrase: String = ""
+        encryptedPhrase: String = "",
     ) {
         if (importingPhrase) {
             importingPhrase(
                 encryptedPhraseData = encryptedPhrase,
-                masterPublicKey = masterPublicKey
+                masterPublicKey = masterPublicKey,
             )
         } else {
             state = state.copy(
                 welcomeFlow = welcomeFlow,
-                masterPublicKey = masterPublicKey
+                masterPublicKey = masterPublicKey,
             )
         }
 
@@ -108,7 +108,8 @@ class EnterPhraseViewModel @Inject constructor(
                 if (ownerState is OwnerState.Ready) {
                     state = state.copy(
                         ownerApproverParticipantId = ownerState.policy.owner?.participantId,
-                        masterKeySignature = ownerState.policy.masterKeySignature
+                        masterKeySignature = ownerState.policy.masterKeySignature,
+                        existingPhraseCount = ownerState.vault.seedPhrases.size,
                     )
                 }
             }
@@ -249,7 +250,15 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun saveSeedPhrase() {
+    private fun showPaywall() {
+        state = state.copy(triggerPaywallUI = Resource.Success(Unit))
+    }
+
+    fun resetPaywallTrigger() {
+        state = state.copy(triggerPaywallUI = Resource.Uninitialized)
+    }
+
+    fun subscriptionCompleted() {
         //We only need to verify master key sig if there is one
         val masterKeySignature = state.masterKeySignature
         if (masterKeySignature != null) {
@@ -258,7 +267,22 @@ class EnterPhraseViewModel @Inject constructor(
         } else {
             storeSeedPhrase(shouldVerifyMasterKeySignature = false)
         }
+    }
 
+    fun saveSeedPhrase() {
+        if (state.existingPhraseCount == 1 && !userHasActiveSubscription()) {
+            showPaywall()
+            return
+        }
+
+        //We only need to verify master key sig if there is one
+        val masterKeySignature = state.masterKeySignature
+        if (masterKeySignature != null) {
+            //Load the key from the cloud
+            triggerKeyDownload()
+        } else {
+            storeSeedPhrase(shouldVerifyMasterKeySignature = false)
+        }
     }
 
     private fun triggerKeyDownload() {
@@ -374,10 +398,12 @@ class EnterPhraseViewModel @Inject constructor(
     fun onBackClicked() {
         state = when (state.enterWordUIState) {
             EnterPhraseUIState.SELECT_ENTRY_TYPE ->
-                if (state.welcomeFlow) {
-                    state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                if (state.userHasOwnPhrase) {
+                    state.copy(userHasOwnPhrase = false)
                 } else {
-                    state.copy(exitFlow = true)
+                    if (state.welcomeFlow) {
+                        state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
+                    } else state.copy(exitFlow = true)
                 }
             EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN ->
                 state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE)
@@ -461,6 +487,9 @@ class EnterPhraseViewModel @Inject constructor(
     fun setUserHasOwnPhrase() {
         state = state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN)
     }
+
+    private fun userHasActiveSubscription() =
+        state.userResource.success()?.data?.ownerState?.hasActiveSubscription() == true
 
     fun onPhrasePasted(pastedPhrase: String) {
         val words =

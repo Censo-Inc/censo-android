@@ -14,7 +14,6 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,13 +31,19 @@ class PaywallViewModel @Inject constructor(
         viewModelScope.launch {
             ownerRepository.collectOwnerState { resource: Resource<OwnerState> ->
                 if (resource is Resource.Success) {
-                    onOwnerState(resource.data)
+                    onOwnerState(
+                        resource.data,
+                    )
                 }
             }
         }
 
         viewModelScope.launch {
-            billingClient.purchasesList.collectLatest { onPurchasesUpdated(it) }
+            billingClient.purchasesList.collectLatest {
+                onPurchasesUpdated(
+                    purchases = it,
+                )
+            }
         }
 
         viewModelScope.launch {
@@ -52,15 +57,32 @@ class PaywallViewModel @Inject constructor(
         }
     }
 
+    fun setPaywallVisibility(
+        ignoreSubscriptionRequired: Boolean,
+        onSuccessfulPurchase: (() -> Unit)?,
+        onCancelPurchase: (() -> Unit)?
+        ) {
+        state = state.copy(
+            ignoreSubscriptionRequired = ignoreSubscriptionRequired,
+            successfulPurchaseCallback = onSuccessfulPurchase,
+            cancelPurchaseCallback = onCancelPurchase
+        )
+
+        onStart()
+    }
+
     private fun onOwnerState(ownerState: OwnerState) {
-        state = state.copy(subscriptionStatus = ownerState.subscriptionStatus())
+        state = state.copy(
+            subscriptionStatus = ownerState.subscriptionStatus(),
+            subscriptionRequired = ownerState.subscriptionRequired(),
+        )
 
         if (ownerState.hasActiveSubscription()) {
             // make sure billing client is stopped
             if (state.billingClientReadyResource !is Resource.Uninitialized) {
                 billingClient.terminateBillingConnection()
             }
-        } else {
+        } else if (ownerState.subscriptionRequired() || state.ignoreSubscriptionRequired) {
             startBillingConnection()
         }
     }
@@ -116,6 +138,11 @@ class PaywallViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 ownerRepository.updateOwnerState(response.map { it.ownerState })
+
+                state.successfulPurchaseCallback?.let {
+                    it()
+                    resetVisibility()
+                }
             }
 
             state = state.copy(submitPurchaseResource = response)
@@ -136,10 +163,6 @@ class PaywallViewModel @Inject constructor(
             subscriptionOffer.productId,
             subscriptionOffer.offerToken
         )
-    }
-
-    fun restorePurchase() {
-        onStart()
     }
 
     fun logout() {
@@ -182,5 +205,13 @@ class PaywallViewModel @Inject constructor(
                 state = state.copy(kickUserOut = Resource.Success(Unit))
             }
         }
+    }
+
+    fun resetVisibility() {
+        state = state.copy(
+            ignoreSubscriptionRequired = false,
+            successfulPurchaseCallback = null,
+            cancelPurchaseCallback = null
+        )
     }
 }

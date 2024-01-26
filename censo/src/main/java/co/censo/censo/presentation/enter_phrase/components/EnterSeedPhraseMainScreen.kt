@@ -52,6 +52,7 @@ import co.censo.shared.presentation.SharedColors
 @Composable
 fun SelectSeedPhraseEntryType(
     welcomeFlow: Boolean,
+    savedPhrases: Int,
     currentLanguage: BIP39.WordListLanguage,
     onManualEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
     onPasteEntrySelected: () -> Unit,
@@ -71,11 +72,11 @@ fun SelectSeedPhraseEntryType(
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val verticalSpacingHeight = screenHeight * 0.020f
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
         Image(
             modifier = Modifier
-                .padding(start = screenWidth * 0.15f, top = screenHeight * 0.05f)
-                .weight(0.65f),
+                .padding(start = screenWidth * 0.10f, top = screenHeight * 0.05f)
+                .weight(0.40f),
             painter = painterResource(id = R.drawable.add_your_seed_phrase),
             contentDescription = null,
             contentScale = ContentScale.Fit
@@ -110,6 +111,23 @@ fun SelectSeedPhraseEntryType(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal
             )
+
+            if (savedPhrases == 1) {
+                val freePhrase = buildAnnotatedString {
+                    withStyle(basicStyle) {
+                        append(stringResource(R.string.storing_one_phrase_free))
+                    }
+                }
+
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 36.dp),
+                    text = freePhrase
+                )
+                Spacer(modifier = Modifier.height(verticalSpacingHeight))
+            }
+
             val languageSelectionText = buildAnnotatedString {
                 withStyle(basicStyle) {
                     if (!userHasOwnPhrase) {
@@ -385,6 +403,7 @@ fun LargePreviewEnterPhraseMainScreen() {
         onPasteEntrySelected = {},
         onGenerateEntrySelected = {},
         welcomeFlow = true,
+        savedPhrases = 0,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
         onUserHasOwnPhrase = {}
@@ -399,6 +418,7 @@ fun LargePreviewInitialPhraseScreen() {
         onPasteEntrySelected = {},
         onGenerateEntrySelected = {},
         welcomeFlow = true,
+        savedPhrases = 1,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
         onUserHasOwnPhrase = {}
@@ -411,6 +431,7 @@ fun NormalPreviewEnterPhraseMainScreen() {
     SelectSeedPhraseEntryType(
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
+        savedPhrases = 2,
         onGenerateEntrySelected = {},
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English,
@@ -426,6 +447,7 @@ fun SmallSeedPhraseAddedPreview() {
         onManualEntrySelected = {},
         onPasteEntrySelected = {},
         onGenerateEntrySelected = {},
+        savedPhrases = 2,
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,

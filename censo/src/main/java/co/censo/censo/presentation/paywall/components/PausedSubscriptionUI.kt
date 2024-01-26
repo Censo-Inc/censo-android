@@ -28,20 +28,16 @@ import java.time.Period
 @Composable
 fun PausedSubscriptionUI(
     offer: SubscriptionOffer,
-    onRestorePurchase: () -> Unit,
     onContinue: (SubscriptionOffer) -> Unit,
+    onCancel: (() -> Unit)?
 ) {
 
     val priceText =
         offer.priceAndPeriodToUserText(LocalContext.current)
 
-    val trialText = offer.feeTrialPeriodISO8601
-        ?.let { "${Period.parse(it).days} ${stringResource(R.string.days_free_then)} " }
-        ?: ""
-
     PaywallBaseUI(
         priceText,
-        onRestorePurchase,
+        onCancel = onCancel,
         statusSpecificContent = {
             Text(
                 modifier = Modifier.padding(horizontal = 12.dp),
@@ -82,13 +78,6 @@ fun PausedSubscriptionUI(
                             fontWeight = FontWeight.Medium
                         ),
                     )
-                    Text(
-                        text = "$trialText$priceText",
-                        style = ButtonTextStyle.copy(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                    )
                 }
             }
         })
@@ -106,6 +95,5 @@ fun PreviewPausedSubscriptionUI() {
             feeTrialPeriodISO8601 = null,
         ),
         onContinue = {},
-        onRestorePurchase = {},
-    )
+    ) {}
 }

@@ -24,13 +24,19 @@ data class PaywallState(
 
     // data
     val subscriptionStatus: SubscriptionStatus = SubscriptionStatus.Active,
+    val subscriptionRequired: Boolean = false,
+    val ignoreSubscriptionRequired: Boolean = false,
     val subscriptionOffer: SubscriptionOffer? = null,
 
     // api requests
     val submitPurchaseResource: Resource<SubmitPurchaseApiResponse> = Resource.Uninitialized,
 
+    val successfulPurchaseCallback: (() -> Unit)? = null,
+    val cancelPurchaseCallback: (() -> Unit)? = null,
+
     // navigation
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
+    val completedSubscription: Resource<Unit> = Resource.Loading,
 
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,

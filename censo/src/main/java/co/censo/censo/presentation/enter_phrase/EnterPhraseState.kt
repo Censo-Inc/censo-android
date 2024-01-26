@@ -22,7 +22,7 @@ data class EnterPhraseState(
     val label: String = "",
     val labelTooLong: String? = null,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
-
+    val existingPhraseCount: Int = 0,
     val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,
 
     //Async
@@ -30,6 +30,7 @@ data class EnterPhraseState(
     val phraseEntryComplete: Resource<Unit> = Resource.Uninitialized,
     val userResource: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val phraseEncryptionInProgress: Boolean = false,
+    val triggerPaywallUI: Resource<Unit> = Resource.Uninitialized,
 
     //Flags
     val welcomeFlow: Boolean = false,
@@ -45,6 +46,7 @@ data class EnterPhraseState(
 
     val keyData: InitialKeyData? = null,
 
+    val userHasOwnPhrase: Boolean = false,
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
 ) {
