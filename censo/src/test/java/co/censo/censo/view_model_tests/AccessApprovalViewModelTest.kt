@@ -24,6 +24,7 @@ import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -43,6 +44,9 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var pollingVerificationTimer: VaultCountDownTimer
+
+    @Mock
+    lateinit var keyValidationTrigger: MutableSharedFlow<String>
 
     private lateinit var accessApprovalViewModel: AccessApprovalViewModel
 
@@ -64,7 +68,8 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(testDispatcher)
 
         accessApprovalViewModel = AccessApprovalViewModel(
-            ownerRepository = ownerRepository, pollingVerificationTimer = pollingVerificationTimer
+            ownerRepository = ownerRepository, pollingVerificationTimer = pollingVerificationTimer,
+            keyValidationTrigger = keyValidationTrigger
         )
     }
 

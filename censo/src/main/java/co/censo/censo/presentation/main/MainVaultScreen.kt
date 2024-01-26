@@ -20,17 +20,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.components.DeleteUserConfirmationUI
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.Resource
@@ -290,8 +287,6 @@ fun MainVaultScreen(
                 }
 
                 else -> {
-
-
                     when (selectedBottomNavItem.value) {
                         BottomNavItem.Home -> {
                             VaultHomeScreen(
@@ -413,30 +408,9 @@ fun MainVaultScreen(
 
 
                     if (state.triggerDeleteUserDialog is Resource.Success) {
-                        val seedCount = state.ownerState?.vault?.seedPhrases?.size ?: 0
-
-                        val annotatedString = buildAnnotatedString {
-                            append(stringResource(id = R.string.about_to_delete_user_first_half))
-                            append(" ")
-
-                            withStyle(SpanStyle(fontWeight = FontWeight.W500)) {
-                                append(stringResource(id = R.string.all))
-                            }
-
-                            append(" ")
-
-                            append(stringResource(id = R.string.about_to_delete_user_second_half))
-                            append(pluralStringResource(
-                                id = R.plurals.delete_my_data_confirmation_text,
-                                count = seedCount,
-                                seedCount
-                            ))
-                        }
-
-                        ConfirmationDialog(
+                        DeleteUserConfirmationUI(
                             title = stringResource(id = R.string.delete_user),
-                            message = annotatedString,
-                            confirmationText = pluralStringResource(id = R.plurals.delete_my_data_confirmation_text, count = seedCount, seedCount),
+                            seedCount = state.ownerState?.vault?.seedPhrases?.size ?: 0,
                             onCancel = viewModel::onCancelResetUser,
                             onDelete = viewModel::deleteUser,
                         )

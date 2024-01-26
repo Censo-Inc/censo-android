@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,72 +29,85 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.censo.presentation.onboarding.OnboardingTopBar
 import co.censo.shared.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvalidOwnerKeyUI(
     onInitiateRecovery: () -> Unit,
+    onDelete: () -> Unit,
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-
-        val horizontalSpacingBetweenItems = 24.dp
-
-        Image(
-            modifier = Modifier.size(150.dp),
-            painter = painterResource(id = R.drawable.erase_text),
-            contentDescription = stringResource(co.censo.censo.R.string.failed_to_validate_key),
-            colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
-        )
-
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
-
-        TitleText(
-            modifier = Modifier.fillMaxWidth(),
-            title = stringResource(co.censo.censo.R.string.censo_was_not_able_to_access_your_key),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
-
-        MessageText(
-            modifier = Modifier.fillMaxWidth(),
-            message = stringResource(co.censo.censo.R.string.collect_approvals_key_recovery_message),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
-            onClick = onInitiateRecovery,
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            OnboardingTopBar(
+                onCancel = onDelete
+            )
+        }) { paddingValues ->
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .background(color = Color.White)
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = stringResource(id = co.censo.censo.R.string.recover_my_key),
-                    style = ButtonTextStyle.copy(fontSize = 20.sp)
+
+                val horizontalSpacingBetweenItems = 24.dp
+
+                Image(
+                    modifier = Modifier.size(150.dp),
+                    painter = painterResource(id = R.drawable.erase_text),
+                    contentDescription = stringResource(co.censo.censo.R.string.failed_to_validate_key),
+                    colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
                 )
+
+                Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
+
+                TitleText(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(co.censo.censo.R.string.censo_was_not_able_to_access_your_key),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
+
+                MessageText(
+                    modifier = Modifier.fillMaxWidth(),
+                    message = stringResource(co.censo.censo.R.string.collect_approvals_key_recovery_message),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(horizontalSpacingBetweenItems))
+
+                StandardButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 12.dp, horizontal = 32.dp),
+                    onClick = onInitiateRecovery,
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(id = co.censo.censo.R.string.recover_my_key),
+                            style = ButtonTextStyle.copy(fontSize = 20.sp)
+                        )
+                    }
+                }
             }
         }
-    }
 }
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewInvalidApproverKeyUI() {
     InvalidOwnerKeyUI(
-        onInitiateRecovery = {}
+        onInitiateRecovery = {},
+        onDelete = {}
     )
 }

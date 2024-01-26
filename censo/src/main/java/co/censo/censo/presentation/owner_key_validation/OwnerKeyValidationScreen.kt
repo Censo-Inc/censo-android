@@ -3,21 +3,19 @@ package co.censo.censo.presentation.owner_key_validation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import co.censo.censo.R
+import co.censo.censo.presentation.components.DeleteUserConfirmationUI
 import co.censo.censo.presentation.owner_key_validation.components.InvalidOwnerKeyUI
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 
 @Composable
 fun ValidateApproverKeyScreen(
@@ -51,7 +49,19 @@ fun ValidateApproverKeyScreen(
     ) {
         when (state.ownerKeyUIState) {
             OwnerKeyValidationState.OwnerKeyValidationUIState.FileNotFound -> {
-                InvalidOwnerKeyUI(onInitiateRecovery = viewModel::navigateToKeyRecovery)
+                InvalidOwnerKeyUI(
+                    onInitiateRecovery = viewModel::navigateToKeyRecovery,
+                    onDelete = viewModel::triggerDeleteUserDialog
+                )
+
+                if (state.triggerDeleteUserDialog is Resource.Success) {
+                    DeleteUserConfirmationUI(
+                        title = stringResource(id = R.string.cancel_key_recovery),
+                        seedCount = state.ownerState?.vault?.seedPhrases?.size ?: 0,
+                        onCancel = viewModel::onCancelDeleteUserDialog,
+                        onDelete = viewModel::deleteUser,
+                    )
+                }
             }
 
             else -> { }
