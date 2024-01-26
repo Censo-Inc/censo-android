@@ -100,7 +100,7 @@ fun PaywallScreen(
                                         productId
                                     )
                                 },
-                                onCancel = state.cancelPurchaseCallback ?: viewModel::showDeleteUserDialog,
+                                onCancel = state.cancelPurchaseCallback,
                             )
                         }
                     }
