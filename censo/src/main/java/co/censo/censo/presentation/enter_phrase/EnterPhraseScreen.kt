@@ -29,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
@@ -61,10 +60,8 @@ import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
 import co.censo.shared.util.getImageCaptureErrorDisplayMessage
-import java.util.concurrent.Executors
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun EnterPhraseScreen(
     masterPublicKey: Base58EncodedMasterPublicKey,
@@ -280,7 +277,7 @@ fun EnterPhraseScreen(
                                 onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) },
                                 userHasOwnPhrase = state.enterWordUIState == EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
                                 onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() },
-                                onPictureEntrySelected = { viewModel.entrySelected(EntryType.IMAGE) }
+                                onPhotoEntrySelected = { viewModel.entrySelected(EntryType.IMAGE) }
                             )
                             if (state.triggerDeleteUserDialog is Resource.Success) {
                                 ConfirmationDialog(

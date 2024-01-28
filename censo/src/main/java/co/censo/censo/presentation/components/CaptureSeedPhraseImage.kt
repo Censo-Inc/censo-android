@@ -49,7 +49,6 @@ import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.Permission
 import co.censo.shared.presentation.components.sendUserToPermissions
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -103,7 +102,7 @@ fun CaptureSeedPhraseImage(
                         Spacer(modifier = Modifier.height(32.dp))
 
                         Text(
-                            text = stringResource(R.string.grant_censo_access_to_your_camera_in_order_to_take_your_photo),
+                            text = stringResource(R.string.grant_censo_access_to_your_camera_in_order_to_take_photo),
                             color = SharedColors.MainColorText,
                             fontSize = 20.sp,
                             textAlign = TextAlign.Center

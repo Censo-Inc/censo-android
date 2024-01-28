@@ -2,12 +2,10 @@ package co.censo.censo.presentation.enter_phrase.components
 
 import StandardButton
 import androidx.compose.foundation.layout.Column
-import MessageText
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,12 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -60,7 +54,7 @@ fun SelectSeedPhraseEntryType(
     onManualEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
     onPasteEntrySelected: () -> Unit,
     onGenerateEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
-    onPictureEntrySelected: () -> Unit,
+    onPhotoEntrySelected: () -> Unit,
     userHasOwnPhrase: Boolean,
     onUserHasOwnPhrase: () -> Unit,
 ) {
@@ -185,7 +179,7 @@ fun SelectSeedPhraseEntryType(
                     verticalSpacingHeight = verticalSpacingHeight,
                     onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
                     onPasteEntrySelected = onPasteEntrySelected,
-                    onPictureSelected = onPictureEntrySelected
+                    onPhotoSelected = onPhotoEntrySelected
                 )
             }
         }
@@ -256,7 +250,7 @@ fun UserHasOwnPhrase(
     verticalSpacingHeight: Dp,
     onManualEntrySelected: () -> Unit,
     onPasteEntrySelected: () -> Unit,
-    onPictureSelected: () -> Unit
+    onPhotoSelected: () -> Unit
 ) {
     Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
@@ -300,7 +294,7 @@ fun UserHasOwnPhrase(
                         )
                     }
                     .clickable {
-                        onPictureSelected()
+                        onPhotoSelected()
                     }
             )
             Text(
@@ -352,7 +346,7 @@ fun LargePreviewEnterPhraseMainScreen() {
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
         onUserHasOwnPhrase = {},
-        onPictureEntrySelected = {}
+        onPhotoEntrySelected = {}
     )
 }
 
@@ -368,7 +362,7 @@ fun LargePreviewInitialPhraseScreen() {
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
         onUserHasOwnPhrase = {},
-        onPictureEntrySelected = {}
+        onPhotoEntrySelected = {}
     )
 }
 
@@ -384,7 +378,7 @@ fun NormalPreviewEnterPhraseMainScreen() {
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = true,
         onUserHasOwnPhrase = {},
-        onPictureEntrySelected = {}
+        onPhotoEntrySelected = {}
     )
 }
 
@@ -400,6 +394,6 @@ fun SmallSeedPhraseAddedPreview() {
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
         onUserHasOwnPhrase = {},
-        onPictureEntrySelected = {}
+        onPhotoEntrySelected = {}
     )
 }
