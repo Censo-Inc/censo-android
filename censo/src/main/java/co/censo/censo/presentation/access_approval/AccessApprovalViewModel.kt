@@ -15,7 +15,7 @@ import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.AccessStatus
-import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.AccessApprovalStatus
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.OwnerRepository
@@ -160,7 +160,7 @@ class AccessApprovalViewModel @Inject constructor(
     private fun checkForRejections(access: Access.ThisDevice) {
         access.approvals.find { it.participantId == state.selectedApprover?.participantId }
             ?.let {
-                if (state.waitingForApproval && it.status == ApprovalStatus.Rejected) {
+                if (state.waitingForApproval && it.status == AccessApprovalStatus.Rejected) {
                     state = state.copy(
                         waitingForApproval = false,
                         verificationCode = ""

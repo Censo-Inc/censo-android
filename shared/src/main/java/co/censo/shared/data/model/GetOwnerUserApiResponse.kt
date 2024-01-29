@@ -176,7 +176,7 @@ sealed class Access {
         val createdAt: Instant,
         val unlocksAt: Instant,
         val expiresAt: Instant,
-        val approvals: List<Approval>,
+        val approvals: List<AccessApproval>,
         val intent: AccessIntent,
     ) : Access()
 }
@@ -187,10 +187,10 @@ enum class AccessStatus {
 }
 
 @Serializable
-data class Approval(
+data class AccessApproval(
     val approvalId: ApprovalId,
     val participantId: ParticipantId,
-    val status: ApprovalStatus,
+    val status: AccessApprovalStatus,
 ) {
     fun deepLink(): String ="${DeepLinkURI.APPROVER_ACCESS_URI}${participantId.value}"
 
@@ -198,7 +198,7 @@ data class Approval(
 }
 
 @Serializable
-enum class ApprovalStatus {
+enum class AccessApprovalStatus {
     Initial, WaitingForVerification, WaitingForApproval, Approved, Rejected,
 }
 

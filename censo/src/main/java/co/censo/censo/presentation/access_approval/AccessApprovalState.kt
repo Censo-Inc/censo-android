@@ -1,7 +1,7 @@
 package co.censo.censo.presentation.access_approval
 
 import co.censo.shared.data.Resource
-import co.censo.shared.data.model.Approval
+import co.censo.shared.data.model.AccessApproval
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.Approver
@@ -25,7 +25,7 @@ data class AccessApprovalState(
     val ownerState: OwnerState.Ready? = null,
     val access: Access.ThisDevice? = null,
     val approvers: List<Approver.TrustedApprover> = listOf(),
-    val approvals: List<Approval> = listOf(),
+    val approvals: List<AccessApproval> = listOf(),
 
     // access control
     val initiateNewAccess: Boolean = false,

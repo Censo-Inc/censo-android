@@ -28,8 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.data.cryptography.TotpGenerator
-import co.censo.shared.data.model.Approval
-import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.AccessApproval
+import co.censo.shared.data.model.AccessApprovalStatus
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.CodeEntry
 import co.censo.censo.R
@@ -43,12 +43,12 @@ import co.censo.shared.presentation.components.SmallLoading
 fun ApproveAccessUI(
     intent: AccessIntent,
     approverName: String,
-    approval: Approval,
+    approval: AccessApproval,
     verificationCode: String,
     onVerificationCodeChanged: (String) -> Unit,
 ) {
     val deeplink = approval.v2Deeplink()
-    val codeEditable = approval.status in listOf(ApprovalStatus.WaitingForVerification, ApprovalStatus.Rejected)
+    val codeEditable = approval.status in listOf(AccessApprovalStatus.WaitingForVerification, AccessApprovalStatus.Rejected)
 
     val context = LocalContext.current
 
@@ -123,7 +123,7 @@ fun ApproveAccessUI(
             )
         }
 
-        if (approval.status == ApprovalStatus.Initial) {
+        if (approval.status == AccessApprovalStatus.Initial) {
             Spacer(modifier = Modifier.height(24.dp))
             Loading(
                 strokeWidth = 3.5.dp,
@@ -136,7 +136,7 @@ fun ApproveAccessUI(
                 color = SharedColors.GreyText
             )
         } else {
-            if (approval.status == ApprovalStatus.Rejected) {
+            if (approval.status == AccessApprovalStatus.Rejected) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     text = stringResource(R.string.the_code_you_entered_is_not_correct),
@@ -147,7 +147,7 @@ fun ApproveAccessUI(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            if (approval.status == ApprovalStatus.WaitingForVerification) {
+            if (approval.status == AccessApprovalStatus.WaitingForVerification) {
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
@@ -164,7 +164,7 @@ fun ApproveAccessUI(
                 )
             }
 
-            if (approval.status == ApprovalStatus.WaitingForApproval) {
+            if (approval.status == AccessApprovalStatus.WaitingForApproval) {
                 Spacer(modifier = Modifier.height(6.dp))
                 SmallLoading(
                     fullscreen = false,
@@ -187,9 +187,9 @@ fun ApproveAccessInitialPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        approval = Approval(
+        approval = AccessApproval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Initial,
+            status = AccessApprovalStatus.Initial,
             approvalId = ApprovalId("")
         ),
         verificationCode = "",
@@ -203,9 +203,9 @@ fun ApproveAccessWaitingForVerificationPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        approval = Approval(
+        approval = AccessApproval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.WaitingForVerification,
+            status = AccessApprovalStatus.WaitingForVerification,
             approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
@@ -219,9 +219,9 @@ fun ApproveAccessWaitingForApprovalPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        approval = Approval(
+        approval = AccessApproval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.WaitingForApproval,
+            status = AccessApprovalStatus.WaitingForApproval,
             approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
@@ -235,9 +235,9 @@ fun ApproveAccessRejectedPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        approval = Approval(
+        approval = AccessApproval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Rejected,
+            status = AccessApprovalStatus.Rejected,
             approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
@@ -251,9 +251,9 @@ fun ApproveAccessApprovedPreview() {
     ApproveAccessUI(
         intent = AccessIntent.AccessPhrases,
         approverName = "Buddy",
-        approval = Approval(
+        approval = AccessApproval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Approved,
+            status = AccessApprovalStatus.Approved,
             approvalId = ApprovalId("")
         ),
         verificationCode = "345819",
@@ -267,9 +267,9 @@ fun ApproveRequestInitialPreview() {
     ApproveAccessUI(
         intent = AccessIntent.ReplacePolicy,
         approverName = "Buddy",
-        approval = Approval(
+        approval = AccessApproval(
             participantId = ParticipantId.generate(),
-            status = ApprovalStatus.Initial,
+            status = AccessApprovalStatus.Initial,
             approvalId = ApprovalId("")
         ),
         verificationCode = "",

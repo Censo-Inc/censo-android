@@ -1,8 +1,8 @@
 package co.censo.censo.util
 
 import Base64EncodedData
-import co.censo.shared.data.model.Approval
-import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.AccessApproval
+import co.censo.shared.data.model.AccessApprovalStatus
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.AuthenticationResetApproval
@@ -78,8 +78,8 @@ fun Approver.ProspectApprover.asOwnerAsApprover(): Approver.SetupApprover.OwnerA
 //endregion
 
 //region Extension Functions Mapping Approver.TrustedApprover types
-fun List<Approval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
-    return any { it.participantId == approver?.participantId && it.status == ApprovalStatus.Approved }
+fun List<AccessApproval>.isApprovedFor(approver: Approver.TrustedApprover?): Boolean {
+    return any { it.participantId == approver?.participantId && it.status == AccessApprovalStatus.Approved }
 }
 
 fun List<AuthenticationResetApproval>.isAuthResetApprovedFor(approver: Approver.TrustedApprover?): Boolean {
