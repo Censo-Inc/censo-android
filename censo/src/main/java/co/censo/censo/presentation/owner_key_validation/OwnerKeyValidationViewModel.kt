@@ -9,7 +9,9 @@ import androidx.lifecycle.viewModelScope
 import co.censo.censo.presentation.Screen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
+import co.censo.shared.data.repository.OwnerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OwnerKeyValidationViewModel @Inject constructor(
+    private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val keyValidationTrigger: MutableSharedFlow<String>,
     ) : ViewModel() {
@@ -44,6 +47,33 @@ class OwnerKeyValidationViewModel @Inject constructor(
                 state.copy(ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.None)
             } else {
                 state.copy(ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.FileNotFound)
+            }
+        }
+    }
+
+    fun onCancelDeleteUserDialog() {
+        state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+    }
+
+    fun triggerDeleteUserDialog() {
+        state = state.copy(
+            ownerState = (ownerRepository.getOwnerStateValue() as? Resource.Success)?.data as? OwnerState.Ready,
+            triggerDeleteUserDialog = Resource.Success(Unit)
+        )
+    }
+
+    fun deleteUser() {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = ownerRepository.deleteUser(
+                state.ownerState?.policy?.approvers?.first { it.isOwner }?.participantId
+            )
+
+            state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
+            if (response is Resource.Success) {
+                state = state.copy(
+                    navigationResource = Resource.Success(Screen.EntranceRoute.route)
+                )
             }
         }
     }

@@ -24,13 +24,15 @@ import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.asResource
 import co.censo.shared.util.isDigitsOnly
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AccessApprovalViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
-    private val pollingVerificationTimer: VaultCountDownTimer
+    private val pollingVerificationTimer: VaultCountDownTimer,
+    private val keyValidationTrigger: MutableSharedFlow<String>,
 ) : ViewModel() {
 
     var state by mutableStateOf(AccessApprovalState())
@@ -198,6 +200,9 @@ class AccessApprovalViewModel @Inject constructor(
             val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
+
+                approverKeyValidation(response.data.ownerState)
+
                 state = state.copy(
                     access = null,
                     navigationResource = Screen.OwnerVaultScreen
@@ -207,6 +212,16 @@ class AccessApprovalViewModel @Inject constructor(
             }
 
             state = state.copy(cancelAccessResource = response)
+        }
+    }
+
+    private suspend fun approverKeyValidation(ownerState: OwnerState) {
+        if (state.accessIntent == AccessIntent.RecoverOwnerKey) {
+            (ownerState as? OwnerState.Ready)?.let { readyState ->
+                readyState.policy.approvers.firstOrNull { it.isOwner }?.participantId?.let {
+                    keyValidationTrigger.emit(it.value)
+                }
+            }
         }
     }
 

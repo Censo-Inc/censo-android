@@ -119,8 +119,8 @@ fun AccessApprovalScreen(
 
         if (state.showCancelConfirmationDialog) {
             YesNoDialog(
-                title = stringResource(R.string.cancel_access),
-                message = stringResource(R.string.cancel_access_dialog),
+                title = stringResource(if (state.accessIntent == AccessIntent.RecoverOwnerKey) R.string.cancel_key_recovery else R.string.cancel_access),
+                message = stringResource(if (state.accessIntent == AccessIntent.RecoverOwnerKey) R.string.cancel_key_recovery_dialog else R.string.cancel_access_dialog),
                 onDismiss = viewModel::hideCloseConfirmationDialog,
                 onConfirm = viewModel::cancelAccess
             )
