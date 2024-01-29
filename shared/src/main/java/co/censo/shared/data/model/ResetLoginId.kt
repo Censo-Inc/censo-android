@@ -8,6 +8,7 @@ data class ResetLoginIdApiRequest(
     val resetTokens: List<ResetToken>,
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,
+    val password: Authentication.Password? = null,
 )
 
 @Serializable
@@ -18,3 +19,20 @@ data class ResetLoginIdApiResponse(
 @JvmInline
 @Serializable
 value class ResetToken(val value: String)
+
+@Serializable
+data class RetrieveAuthTypeApiRequest(
+    val resetTokens: List<ResetToken>,
+)
+
+@Serializable
+data class RetrieveAuthTypeApiResponse(
+    val authType: AuthType,
+)
+
+enum class AuthType {
+    None,
+    FaceTec,
+    Password,
+}
+

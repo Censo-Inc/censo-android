@@ -51,6 +51,8 @@ import co.censo.shared.data.model.ReplacePolicyShardsApiRequest
 import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
 import co.censo.shared.data.model.ResetLoginIdApiRequest
 import co.censo.shared.data.model.ResetLoginIdApiResponse
+import co.censo.shared.data.model.RetrieveAuthTypeApiRequest
+import co.censo.shared.data.model.RetrieveAuthTypeApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SignInApiRequest
@@ -196,9 +198,15 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<Unit>
 
+    @POST("/v1/auth-type")
+    suspend fun retrieveAuthType(
+        @Body apiRequest: RetrieveAuthTypeApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<RetrieveAuthTypeApiResponse>
+
     @PUT("/v1/login-id")
     suspend fun resetLoginId(
-        @Body resetLoginIdApiRequest: ResetLoginIdApiRequest,
+        @Body apiRequest: ResetLoginIdApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ResetLoginIdApiResponse>
 

@@ -1,17 +1,13 @@
 package co.censo.shared.data.cryptography
 
 import Base64EncodedData
-import io.github.novacrypto.base58.Base58
-import org.apache.commons.codec.binary.Base32
-import org.bouncycastle.util.encoders.Base64
+import org.bouncycastle.crypto.PBEParametersGenerator
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
+import org.bouncycastle.crypto.params.KeyParameter
+import org.bouncycastle.crypto.util.DigestFactory
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
-import java.nio.ByteBuffer
 import java.security.MessageDigest
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
-import kotlin.experimental.and
-import kotlin.math.pow
 import kotlin.random.Random
 
 fun String.generateVerificationCodeSignData(timeMillis: Long) =
@@ -75,3 +71,10 @@ fun ByteArray.base64Encoded(): Base64EncodedData =
     Base64EncodedData(java.util.Base64.getEncoder().encodeToString(this))
 
 fun ByteArray.toBinaryString(length: Int): String = BigInteger(1, this).toString(2).padStart(length, '0')
+
+fun String.pbkdf2WithHmacSHA224(salt: ByteArray? = null, iterationCount: Int = 120_000, keyLength: Int = 32): ByteArray {
+    val generator = PKCS5S2ParametersGenerator(DigestFactory.createSHA224())
+    generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(this.toCharArray()), salt, iterationCount)
+    val keyParams = generator.generateDerivedMacParameters(keyLength * 8) as KeyParameter
+    return keyParams.key
+}

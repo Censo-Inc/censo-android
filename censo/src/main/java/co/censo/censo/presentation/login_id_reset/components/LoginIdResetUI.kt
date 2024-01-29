@@ -31,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
-import co.censo.censo.presentation.components.TermsOfUse
 import co.censo.censo.presentation.login_id_reset.LoginIdResetStep
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
@@ -46,12 +45,9 @@ fun LoginIdResetUI(
     linksRequired: Int,
     onPasteLink: () -> Unit,
     onSelectGoogleId: () -> Unit,
-    onFaceScan: () -> Unit,
-    onKeyRecovery: () -> Unit,
-    onTouAccepted: () -> Unit,
-    onTouDismissed: () -> Unit,
+    onContinueToBiometry: () -> Unit,
+    onKeyRecovery: () -> Unit
 ) {
-
     val enabledButtonStyle = ButtonTextStyle.copy(fontWeight = null)
     val disabledButtonStyle = DisabledButtonTextStyle.copy(fontWeight = null)
 
@@ -82,7 +78,11 @@ fun LoginIdResetUI(
         ) {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = stringResource(R.string.collected_reset_links, linksCollected, linksRequired),
+                text = stringResource(
+                    R.string.collected_reset_links,
+                    linksCollected,
+                    linksRequired
+                ),
                 fontSize = 14.sp,
                 color = SharedColors.MainColorText
             )
@@ -95,7 +95,7 @@ fun LoginIdResetUI(
                 enabled = pasteButtonEnabled
             ) {
                 Text(
-                    text = stringResource(co.censo.censo.R.string.paste_from_clipboard),
+                    text = stringResource(R.string.paste_from_clipboard),
                     style = if (pasteButtonEnabled) enabledButtonStyle else disabledButtonStyle
                 )
             }
@@ -148,7 +148,7 @@ fun LoginIdResetUI(
                     .fillMaxWidth(fraction = 0.85f)
                     .padding(vertical = 8.dp),
                 contentPadding = PaddingValues(vertical = 4.dp, horizontal = 18.dp),
-                onClick = onFaceScan,
+                onClick = onContinueToBiometry,
                 enabled = verificationButtonEnabled,
             ) {
                 Text(
@@ -172,20 +172,12 @@ fun LoginIdResetUI(
                 enabled = keyRecoveryButtonEnabled,
             ) {
                 Text(
-                    text =stringResource(R.string.recover_my_key),
+                    text = stringResource(R.string.recover_my_key),
                     style = if (keyRecoveryButtonEnabled) enabledButtonStyle else disabledButtonStyle
                 )
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
-    }
-
-    if (resetStep == LoginIdResetStep.TermsOfUse) {
-        TermsOfUse(
-            onAccept = onTouAccepted,
-            onCancel = onTouDismissed,
-            onboarding = false
-        )
     }
 }
 
@@ -204,10 +196,8 @@ fun ResetTokensUIPreview() {
             linksRequired = 2,
             onPasteLink = {},
             onSelectGoogleId = {},
-            onFaceScan = {},
+            onContinueToBiometry = {},
             onKeyRecovery = {},
-            onTouAccepted = {},
-            onTouDismissed = {},
         )
     }
 }

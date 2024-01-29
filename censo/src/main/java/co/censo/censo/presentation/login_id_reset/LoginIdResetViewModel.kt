@@ -9,7 +9,11 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.entrance.ForceUserToGrantCloudStorageAccess
 import co.censo.shared.CensoLink.Companion.ID_RESET_TYPE
 import co.censo.shared.data.Resource
+import co.censo.shared.data.cryptography.base64Encoded
+import co.censo.shared.data.cryptography.pbkdf2WithHmacSHA224
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.AuthType
+import co.censo.shared.data.model.Authentication
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
@@ -64,7 +68,10 @@ class LoginIdResetViewModel @Inject constructor(
             is LoginIdResetAction.TokenReceived -> onTokenReceived(action.token)
             LoginIdResetAction.SelectGoogleId -> launchGoogleSignInFlow()
             LoginIdResetAction.CloudStoragePermissionsGranted -> handleCloudStorageAccessGranted()
-            LoginIdResetAction.Facescan -> launchFaceScan()
+            LoginIdResetAction.RetrieveAuthType -> onRetrieveAuthType()
+            LoginIdResetAction.StartPasswordInput -> onStartPasswordInput()
+            is LoginIdResetAction.PasswordInputFinished -> onPasswordInputFinished(action.password)
+            LoginIdResetAction.StartFacescan -> launchFacetec()
             is LoginIdResetAction.TermsOfUseAccepted -> acceptTermsOfUse(action.version)
             LoginIdResetAction.RetrieveUser -> retrieveUser()
             LoginIdResetAction.KeyRecovery -> navigateToKeyRecovery()
@@ -72,6 +79,38 @@ class LoginIdResetViewModel @Inject constructor(
 
             LoginIdResetAction.Exit -> onExit()
             LoginIdResetAction.Retry -> onRetry()
+        }
+    }
+
+    private fun onPasswordInputFinished(password: String) {
+        state = state.copy(
+            password = password,
+            resetStep = LoginIdResetStep.FacetecBiometryConsent
+        )
+    }
+
+    private fun onStartPasswordInput() {
+        state = state.copy(resetStep = LoginIdResetStep.Password)
+    }
+
+    private fun onRetrieveAuthType() {
+        state = state.copy(authTypeResponse = Resource.Loading)
+
+        viewModelScope.launch {
+            val resetTokens = secureStorage.retrieveResetTokens().map { ResetToken(it) }
+            val response = ownerRepository.retrieveAuthType(resetTokens)
+
+            state = state.copy(authTypeResponse = response)
+
+            response.onSuccess {
+                when (it.authType) {
+                    AuthType.FaceTec -> receiveAction(LoginIdResetAction.StartFacescan)
+                    AuthType.Password -> receiveAction(LoginIdResetAction.StartPasswordInput)
+                    else -> {
+                        state = state.copy(authTypeResponse = Resource.Error(exception = Exception("Login ID reset is not supported")))
+                    }
+                }
+            }
         }
     }
 
@@ -85,6 +124,7 @@ class LoginIdResetViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 // updating global owner state will trigger a paywall if needed, and owner state is expected by the key recovery screen
+                ownerRepository.updateAuthState(authState = AuthState.LOGGED_IN)
                 ownerRepository.updateOwnerState(response.map { it.ownerState })
                 receiveAction(LoginIdResetAction.DetermineResetStep)
             }
@@ -165,7 +205,7 @@ class LoginIdResetViewModel @Inject constructor(
             }
             state.resetLoginIdResponse is Resource.Error -> {
                 resetResetLoginIdResponse()
-                receiveAction(LoginIdResetAction.Facescan)
+                receiveAction(LoginIdResetAction.RetrieveAuthType)
             }
             state.userResponse is Resource.Error -> {
                 receiveAction(LoginIdResetAction.RetrieveUser)
@@ -173,7 +213,7 @@ class LoginIdResetViewModel @Inject constructor(
         }
     }
 
-    private fun launchFaceScan() {
+    private fun launchFacetec() {
         state = state.copy(launchFacetec = true)
     }
 
@@ -285,9 +325,9 @@ class LoginIdResetViewModel @Inject constructor(
                 idToken = state.forceUserToGrantCloudStorageAccess.jwt!!,
                 resetTokens = secureStorage.retrieveResetTokens().map { ResetToken(it) },
                 biometryVerificationId = verificationId,
-                biometryData = biometry
+                biometryData = biometry,
+                password = state.password?.let { Authentication.Password(it.pbkdf2WithHmacSHA224().base64Encoded()) }
             )
-            response.onSuccess { ownerRepository.updateAuthState(authState = AuthState.LOGGED_IN) }
 
             state = state.copy(
                 resetLoginIdResponse = response,
@@ -323,6 +363,10 @@ class LoginIdResetViewModel @Inject constructor(
 
     fun resetCreateDeviceResponse() {
         state = state.copy(createDeviceResponse = Resource.Uninitialized)
+    }
+
+    fun resetAuthTypeResponse() {
+        state = state.copy(authTypeResponse = Resource.Uninitialized)
     }
 
     fun resetResetLoginIdResponse() {

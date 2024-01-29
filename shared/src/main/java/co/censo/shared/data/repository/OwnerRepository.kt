@@ -66,6 +66,8 @@ import co.censo.shared.data.model.ResetLoginIdApiResponse
 import co.censo.shared.data.model.ResetToken
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
+import co.censo.shared.data.model.RetrieveAuthTypeApiRequest
+import co.censo.shared.data.model.RetrieveAuthTypeApiResponse
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreSeedPhraseApiRequest
 import co.censo.shared.data.model.StoreSeedPhraseApiResponse
@@ -132,11 +134,13 @@ interface OwnerRepository {
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
     suspend fun signInUser(idToken: String): Resource<Unit>
     suspend fun createDevice(): Resource<Unit>
+    suspend fun retrieveAuthType(resetTokens: List<ResetToken>): Resource<RetrieveAuthTypeApiResponse>
     suspend fun resetLoginId(
         idToken: String,
         resetTokens: List<ResetToken>,
         biometryVerificationId: BiometryVerificationId,
         biometryData: FacetecBiometry,
+        password: Authentication.Password?,
     ): Resource<ResetLoginIdApiResponse>
 
     suspend fun getCreatePolicyParams(
@@ -332,11 +336,22 @@ class OwnerRepositoryImpl(
         }
     }
 
+    override suspend fun retrieveAuthType(resetTokens: List<ResetToken>): Resource<RetrieveAuthTypeApiResponse> {
+        return retrieveApiResource {
+            apiService.retrieveAuthType(
+                RetrieveAuthTypeApiRequest(
+                    resetTokens = resetTokens
+                )
+            )
+        }
+    }
+
     override suspend fun resetLoginId(
         idToken: String,
         resetTokens: List<ResetToken>,
         biometryVerificationId: BiometryVerificationId,
-        biometryData: FacetecBiometry
+        biometryData: FacetecBiometry,
+        password: Authentication.Password?
     ): Resource<ResetLoginIdApiResponse> {
         return retrieveApiResource {
             apiService.resetLoginId(
@@ -344,7 +359,8 @@ class OwnerRepositoryImpl(
                     identityToken = IdentityToken(idToken.sha256()),
                     resetTokens = resetTokens,
                     biometryVerificationId = biometryVerificationId,
-                    biometryData = biometryData
+                    biometryData = biometryData,
+                    password = password,
                 )
             )
         }

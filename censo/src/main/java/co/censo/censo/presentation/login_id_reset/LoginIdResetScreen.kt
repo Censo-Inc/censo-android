@@ -20,6 +20,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,8 +31,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.VaultColors
+import co.censo.censo.presentation.components.TermsOfUse
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
+import co.censo.censo.presentation.initial_plan_setup.ScanFaceInformationUI
 import co.censo.censo.presentation.login_id_reset.components.LoginIdResetUI
+import co.censo.censo.presentation.login_id_reset.components.PasswordInputUI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.touVersion
@@ -54,6 +60,8 @@ fun LoginIdResetScreen(
     val context = LocalContext.current
 
     val state = viewModel.state
+
+    val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     val googleAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -111,7 +119,13 @@ fun LoginIdResetScreen(
             colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = VaultColors.NavbarColor),
             navigationIcon = {
                 if (state.resetStep != LoginIdResetStep.TermsOfUse) {
-                    IconButton(onClick = { viewModel.receiveAction(LoginIdResetAction.Exit) }) {
+                    IconButton(onClick = {
+                        if (showInfoView.value) {
+                            showInfoView.value = false
+                        } else {
+                            viewModel.receiveAction(LoginIdResetAction.Exit)
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.Close,
                             stringResource(R.string.exit),
@@ -161,6 +175,12 @@ fun LoginIdResetScreen(
                             dismissAction = null,
                             retryAction = { viewModel.receiveAction(LoginIdResetAction.Retry) },
                         )
+                    } else if (state.authTypeResponse is Resource.Error) {
+                        DisplayError(
+                            errorMessage = state.authTypeResponse.getErrorMessage(context),
+                            dismissAction = viewModel::resetAuthTypeResponse,
+                            retryAction = null,
+                        )
                     }
                 }
 
@@ -177,23 +197,49 @@ fun LoginIdResetScreen(
                 }
 
                 else -> {
-                    LoginIdResetUI(
-                        resetStep = state.resetStep,
-                        linksCollected = state.collectedTokens,
-                        linksRequired = state.requiredTokens,
-                        onPasteLink = {
-                            viewModel.receiveAction(
-                                LoginIdResetAction.PasteLink(
-                                    ClipboardHelper.getClipboardContent(context)
-                                )
+                    when (state.resetStep) {
+                        LoginIdResetStep.Password -> {
+                            PasswordInputUI(
+                                onPasswordInputFinished = { viewModel.receiveAction(LoginIdResetAction.PasswordInputFinished(it)) }
                             )
-                        },
-                        onSelectGoogleId = { viewModel.receiveAction(LoginIdResetAction.SelectGoogleId) },
-                        onFaceScan = { viewModel.receiveAction(LoginIdResetAction.Facescan) },
-                        onKeyRecovery = { viewModel.receiveAction(LoginIdResetAction.KeyRecovery) },
-                        onTouAccepted = { viewModel.receiveAction(LoginIdResetAction.TermsOfUseAccepted(touVersion)) },
-                        onTouDismissed = { viewModel.receiveAction(LoginIdResetAction.Exit) }
-                    )
+                        }
+
+                        LoginIdResetStep.FacetecBiometryConsent -> {
+                            ScanFaceInformationUI(
+                                startPlanSetup = { viewModel.receiveAction(LoginIdResetAction.StartFacescan) },
+                                isInfoViewVisible = showInfoView.value,
+                                showInfoView = {
+                                    showInfoView.value = true
+                                }
+                            )
+                        }
+
+                        LoginIdResetStep.TermsOfUse -> {
+                            TermsOfUse(
+                                onAccept = { viewModel.receiveAction(LoginIdResetAction.TermsOfUseAccepted(touVersion)) },
+                                onCancel = { viewModel.receiveAction(LoginIdResetAction.Exit) },
+                                onboarding = false
+                            )
+                        }
+
+                        else -> {
+                            LoginIdResetUI(
+                                resetStep = state.resetStep,
+                                linksCollected = state.collectedTokens,
+                                linksRequired = state.requiredTokens,
+                                onPasteLink = {
+                                    viewModel.receiveAction(
+                                        LoginIdResetAction.PasteLink(
+                                            ClipboardHelper.getClipboardContent(context)
+                                        )
+                                    )
+                                },
+                                onSelectGoogleId = { viewModel.receiveAction(LoginIdResetAction.SelectGoogleId) },
+                                onContinueToBiometry = { viewModel.receiveAction(LoginIdResetAction.RetrieveAuthType) },
+                                onKeyRecovery = { viewModel.receiveAction(LoginIdResetAction.KeyRecovery) }
+                            )
+                        }
+                    }
 
                     if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
                         CloudStorageHandler(

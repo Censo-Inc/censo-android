@@ -4,6 +4,7 @@ import co.censo.censo.presentation.entrance.ForceUserToGrantCloudStorageAccess
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.ResetLoginIdApiResponse
+import co.censo.shared.data.model.RetrieveAuthTypeApiResponse
 
 data class LoginIdResetState(
     val resetStep: LoginIdResetStep = LoginIdResetStep.PasteResetLinks,
@@ -19,6 +20,8 @@ data class LoginIdResetState(
     val createDeviceResponse: Resource<Unit> = Resource.Uninitialized,
 
     // step 3
+    val authTypeResponse: Resource<RetrieveAuthTypeApiResponse> = Resource.Uninitialized,
+    val password: String? = null,
     val launchFacetec: Boolean = false,
     val resetLoginIdResponse: Resource<ResetLoginIdApiResponse> = Resource.Uninitialized,
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
@@ -26,11 +29,13 @@ data class LoginIdResetState(
     // step 4
     val navigationResource: Resource<String> = Resource.Uninitialized,
 ) {
-    val isLoading = userResponse is Resource.Loading
+    val isLoading = authTypeResponse is Resource.Loading
+            || userResponse is Resource.Loading
             || resetLoginIdResponse is Resource.Loading
             || createDeviceResponse is Resource.Loading
 
-    val apiCallErrorOccurred = userResponse is Resource.Error
+    val apiCallErrorOccurred = authTypeResponse is Resource.Error
+            || userResponse is Resource.Error
             || resetLoginIdResponse is Resource.Error
             || triggerGoogleSignIn is Resource.Error
             || createDeviceResponse is Resource.Error
@@ -39,6 +44,8 @@ data class LoginIdResetState(
 enum class LoginIdResetStep {
     PasteResetLinks,
     SelectLoginId,
+    Password,
+    FacetecBiometryConsent,
     Facetec,
     TermsOfUse,
     KeyRecovery
@@ -49,7 +56,10 @@ sealed interface LoginIdResetAction {
     data class TokenReceived(val token: String) : LoginIdResetAction
     data object SelectGoogleId : LoginIdResetAction
     data object CloudStoragePermissionsGranted : LoginIdResetAction
-    data object Facescan : LoginIdResetAction
+    data object RetrieveAuthType : LoginIdResetAction
+    data object StartPasswordInput : LoginIdResetAction
+    data class PasswordInputFinished(val password: String) : LoginIdResetAction
+    data object StartFacescan : LoginIdResetAction
     data class TermsOfUseAccepted(val version: String) : LoginIdResetAction
     data object RetrieveUser : LoginIdResetAction
     data object KeyRecovery : LoginIdResetAction

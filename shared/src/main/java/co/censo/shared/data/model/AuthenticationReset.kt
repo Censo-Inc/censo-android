@@ -56,4 +56,10 @@ sealed class Authentication {
         val lowQualityAuditTrailImage: Base64EncodedData,
         val verificationId: BiometryVerificationId,
     ) : Authentication()
+
+    @Serializable
+    @SerialName("Password")
+    data class Password(
+        val cryptedPassword: Base64EncodedData,
+    ) : Authentication()
 }
