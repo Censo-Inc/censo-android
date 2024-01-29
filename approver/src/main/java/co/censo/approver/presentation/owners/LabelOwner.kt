@@ -73,7 +73,7 @@ fun LabelOwner(
 
     LaunchedEffect(key1 = state) {
         if (state.saveResource is Resource.Success) {
-            navController.popBackStack()
+            navController.previousBackStackEntry?.let { navController.popBackStack() }
         }
     }
 
@@ -83,7 +83,7 @@ fun LabelOwner(
                 TopAppBar(
                     navigationIcon = {
                         IconButton(onClick = {
-                            navController.popBackStack()
+                            navController.previousBackStackEntry?.let { navController.popBackStack() }
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,

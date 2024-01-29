@@ -73,7 +73,7 @@ fun ApproverOwnersList(
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.popBackStack()
+                        navController.previousBackStackEntry?.let { navController.popBackStack() }
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Clear,
