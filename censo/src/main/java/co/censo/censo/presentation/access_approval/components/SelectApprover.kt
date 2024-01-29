@@ -44,14 +44,14 @@ import co.censo.censo.R
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
-import co.censo.shared.data.model.Approval
-import co.censo.shared.data.model.ApprovalStatus
+import co.censo.shared.data.model.AccessApproval
+import co.censo.shared.data.model.AccessApprovalStatus
 import kotlinx.datetime.Clock
 
 @Composable
 fun SelectApprover(
     intent: AccessIntent,
-    approvals: List<Approval>,
+    approvals: List<AccessApproval>,
     approvers: List<Approver.TrustedApprover>,
     selectedApprover: Approver.TrustedApprover?,
     onApproverSelected: (Approver.TrustedApprover) -> Unit,
@@ -106,7 +106,7 @@ fun SelectApprover(
             approvers.sortedBy { it.attributes.onboardedAt }.forEachIndexed { _, approver ->
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val approved = approvals.any { it.participantId == approver.participantId && it.status == ApprovalStatus.Approved }
+                val approved = approvals.any { it.participantId == approver.participantId && it.status == AccessApprovalStatus.Approved }
                 val selected = approver == selectedApprover
                 SelectingApproverInfoBox(
                     nickName = approver.label,
@@ -333,10 +333,10 @@ fun SelectApproverForKeyRecoveryUIPreview() {
     SelectApprover(
         intent = AccessIntent.RecoverOwnerKey,
         approvals = listOf(
-            Approval(
+            AccessApproval(
                 approvalId = ApprovalId("1"),
                 participantId = primaryApprover.participantId,
-                status = ApprovalStatus.Approved
+                status = AccessApprovalStatus.Approved
             )
         ),
         approvers = listOf(
