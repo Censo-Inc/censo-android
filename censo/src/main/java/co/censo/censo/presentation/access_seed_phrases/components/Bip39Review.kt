@@ -1,9 +1,7 @@
 package co.censo.censo.presentation.access_seed_phrases.components
 
 import StandardButton
-import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -24,14 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,21 +32,17 @@ import co.censo.shared.R as SharedR
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.presentation.enter_phrase.components.ViewPhraseWord
 import co.censo.shared.presentation.ButtonTextStyle
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ViewAccessPhraseUI(
+fun Bip39Review(
     phraseWords: List<String>,
     onDone: () -> Unit,
     timeLeft: Duration
 ) {
-    val context = LocalContext.current
-
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { phraseWords.size }
@@ -67,41 +54,7 @@ fun ViewAccessPhraseUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = SharedColors.BackgroundGrey)
-                .padding(vertical = 24.dp, horizontal = 24.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painterResource(id = R.drawable.time_left_icon),
-                contentDescription = "",
-                tint = SharedColors.MainIconColor
-            )
-            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-
-            val accessTextStyle = SpanStyle(
-                fontSize = 16.sp,
-                color = SharedColors.MainColorText
-            )
-
-            val timeLeftText = buildAnnotatedString {
-                withStyle(accessTextStyle) {
-                    append(stringResource(co.censo.censo.R.string.access_ends_in))
-                }
-                withStyle(accessTextStyle.copy(fontWeight = FontWeight.W600)) {
-                    append(formatPhraseAccessDuration(timeLeft, context))
-                }
-            }
-
-            Text(
-                text = timeLeftText,
-                color = SharedColors.MainColorText
-            )
-        }
+        TimeLeftForAccess(timeLeft)
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -178,18 +131,11 @@ fun ViewAccessPhraseUI(
     }
 }
 
-fun formatPhraseAccessDuration(duration: Duration, context: Context) =
-    if (duration.toInt(DurationUnit.MINUTES) in 1..14) {
-        "${duration.toInt(DurationUnit.MINUTES) + 1} ${context.getString(co.censo.censo.R.string.min)}"
-    } else {
-        context.getString(co.censo.censo.R.string.less_than_1_minute)
-    }
-
 @Preview(name = "PIXEL", device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewV15MinuteViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
-        ViewAccessPhraseUI(
+        Bip39Review(
             phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 899.seconds
@@ -201,7 +147,7 @@ fun PreviewV15MinuteViewPhraseWordUI() {
 @Composable
 fun PreviewLess15ViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
-        ViewAccessPhraseUI(
+        Bip39Review(
             phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 480.seconds
@@ -213,7 +159,7 @@ fun PreviewLess15ViewPhraseWordUI() {
 @Composable
 fun PreviewLess1ViewPhraseWordUI() {
     Box(modifier = Modifier.fillMaxSize()) {
-        ViewAccessPhraseUI(
+        Bip39Review(
             phraseWords = listOf("lounge", "depart", "example"),
             onDone = {},
             timeLeft = 55.seconds

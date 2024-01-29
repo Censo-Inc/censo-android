@@ -196,6 +196,12 @@ dependencies {
     api(libs.bcprov.jdk15to18)
     api(libs.base58)
 
+    //CameraX
+    implementation(libs.cameraX)
+
+    //Compose Accompanist
+    implementation(libs.accompanist)
+
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.mockito.kotlin)

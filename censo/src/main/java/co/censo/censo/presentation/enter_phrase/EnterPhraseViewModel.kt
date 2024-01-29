@@ -2,6 +2,9 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import android.graphics.Bitmap
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +17,7 @@ import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.networking.IgnoreKeysJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
@@ -21,10 +25,13 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.bitmapToByteArray
+import co.censo.shared.util.rotateBitmap
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -148,7 +155,7 @@ class EnterPhraseViewModel @Inject constructor(
         state = phraseInvalidReason?.let {
             state.copy(showInvalidPhraseDialog = Resource.Success(it))
         } ?: state.copy(
-            enterWordUIState = EnterPhraseUIState.REVIEW
+            enterWordUIState = EnterPhraseUIState.REVIEW_WORDS
         )
     }
 
@@ -214,7 +221,9 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun moveToLabel() {
+    fun moveToLabel(seedPhraseType: SeedPhraseType) {
+        state = state.copy(seedPhraseType = seedPhraseType)
+
         if (!state.phraseEncryptionInProgress) {
             state = state.copy(phraseEncryptionInProgress = true)
 
@@ -228,16 +237,33 @@ class EnterPhraseViewModel @Inject constructor(
 
             viewModelScope.launch(Dispatchers.IO) {
                 runCatching {
+                    val seedPhraseData = when (state.seedPhraseType) {
+                        SeedPhraseType.TEXT -> SeedPhraseData.Bip39(state.enteredWords)
+                        SeedPhraseType.IMAGE -> {
+                            val imageByteArray = state.imageBitmap.bitmapToByteArray()
+                            if (imageByteArray == null) {
+                                state = state.copy(
+                                    submitResource = Resource.Error(exception = Exception("Unable to encrypt seed phrase")),
+                                    phraseEncryptionInProgress = false
+                                )
+                                return@launch
+                            } else {
+                                SeedPhraseData.Image(imageData = imageByteArray)
+                            }
+                        }
+                    }
+
                     // encrypt seed phrase and drop single words
                     val encryptedSeedPhrase = ownerRepository.encryptSeedPhrase(
-                        state.masterPublicKey!!,
-                        state.enteredWords
+                        masterPublicKey = state.masterPublicKey!!,
+                        seedPhraseData = seedPhraseData
                     )
 
                     state = state.copy(
                         enterWordUIState = EnterPhraseUIState.LABEL,
                         encryptedSeedPhrase = encryptedSeedPhrase,
                         enteredWords = listOf(),
+                        imageBitmap = null,
                         phraseEncryptionInProgress = false
                     )
                 }.onFailure { _ ->
@@ -382,7 +408,15 @@ class EnterPhraseViewModel @Inject constructor(
             EntryType.MANUAL -> state.copy(enterWordUIState = EnterPhraseUIState.EDIT, currentLanguage = language)
             EntryType.PASTE -> state.copy(enterWordUIState = EnterPhraseUIState.PASTE_ENTRY)
             EntryType.GENERATE -> state.copy(enterWordUIState = EnterPhraseUIState.GENERATE, currentLanguage = language)
-            EntryType.IMPORT -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW, currentLanguage = language)
+            EntryType.IMPORT -> state.copy(enterWordUIState = EnterPhraseUIState.REVIEW_WORDS, currentLanguage = language)
+            EntryType.IMAGE -> {
+                resetImageCaptureResource()
+
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE,
+                    currentLanguage = language
+                )
+            }
         }
     }
 
@@ -446,10 +480,24 @@ class EnterPhraseViewModel @Inject constructor(
                     )
                 }
             }
+
+            EnterPhraseUIState.CAPTURE_IMAGE -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+                )
+            }
+
+            EnterPhraseUIState.REVIEW_IMAGE -> {
+                state.copy(
+                    enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE,
+                    imageBitmap = null
+                )
+            }
+
             EnterPhraseUIState.VIEW ->
                 state.copy(cancelInputSeedPhraseConfirmationDialog = true)
 
-            EnterPhraseUIState.REVIEW ->
+            EnterPhraseUIState.REVIEW_WORDS ->
                  state.copy(
                     editedWord = "",
                     enterWordUIState = EnterPhraseUIState.VIEW,
@@ -603,6 +651,14 @@ class EnterPhraseViewModel @Inject constructor(
             loadKeyInProgress = Resource.Uninitialized
         )
     }
+
+    fun resetImageCaptureResource() {
+        state = state.copy(imageCaptureResource = Resource.Uninitialized)
+    }
+
+    fun resetImageCaptureUIState() {
+        state = state.copy(enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN)
+    }
     //endregion
 
     // region delete data
@@ -630,6 +686,80 @@ class EnterPhraseViewModel @Inject constructor(
                 exitFlow()
             }
         }
+    }
+    //endregion
+
+    //region SeedPhrase Image
+    fun handleImageCapture(image: ImageProxy) {
+        try {
+            //Rotate image
+            val rotationDegrees = image.imageInfo.rotationDegrees
+            val rotatedBitmap = rotateBitmap(image.toBitmap(), rotationDegrees.toFloat())
+
+            //Close image when done accessing it
+            image.close()
+
+            //Launch coroutine to process the image on the background thread
+            var croppedBitmap: Bitmap?
+            viewModelScope.launch(Dispatchers.IO) {
+                //Crop image
+                croppedBitmap = cropToSquare(rotatedBitmap)
+
+                state = if (croppedBitmap == null) {
+                    state.copy(
+                        imageCaptureResource = Resource.Error(exception = Exception("Unable to process captured image")),
+                        enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+                    )
+                } else {
+                    state.copy(
+                        imageBitmap = croppedBitmap,
+                        enterWordUIState = EnterPhraseUIState.REVIEW_IMAGE
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImageCapture)
+            state = state.copy(
+                imageCaptureResource = Resource.Error(exception = Exception("Unable to process captured image")),
+                enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+            )
+        }
+    }
+
+    private suspend fun cropToSquare(image: Bitmap): Bitmap? = withContext(Dispatchers.IO) {
+        try {
+            val width = image.width
+            val height = image.height
+            val newDimension = minOf(width, height)
+
+            val cropX = (width - newDimension) / 2
+            val cropY = (height - newDimension) / 2
+
+            Bitmap.createBitmap(image, cropX, cropY, newDimension, newDimension)
+        } catch (e: Exception) {
+            e.sendError(CrashReportingUtil.ImageCapture)
+            null
+        }
+    }
+
+    fun handleImageCaptureError(exception: ImageCaptureException) {
+        exception.sendError(CrashReportingUtil.ImageCapture)
+
+        state = state.copy(
+            imageCaptureResource = Resource.Error(exception = exception),
+            enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+        )
+    }
+
+    fun onSaveImage() {
+        moveToLabel(seedPhraseType = SeedPhraseType.IMAGE)
+    }
+
+    fun onCancelImageSave() {
+        state = state.copy(
+            imageBitmap = null,
+            enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE
+        )
     }
     //endregion
 

@@ -18,10 +18,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -29,9 +34,11 @@ import co.censo.shared.data.Resource
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.components.CaptureSeedPhraseImage
 import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
+import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -52,6 +59,7 @@ import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
 import co.censo.shared.util.errorMessage
 import co.censo.shared.util.errorTitle
+import co.censo.shared.util.getImageCaptureErrorDisplayMessage
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -77,7 +85,11 @@ fun EnterPhraseScreen(
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.NOTIFICATIONS -> ""
 
-        EnterPhraseUIState.REVIEW,
+        EnterPhraseUIState.CAPTURE_IMAGE -> stringResource(R.string.seed_phrase_photo)
+
+        EnterPhraseUIState.REVIEW_IMAGE -> stringResource(R.string.seed_phrase_photo_verification)
+
+        EnterPhraseUIState.REVIEW_WORDS,
         EnterPhraseUIState.VIEW,
         EnterPhraseUIState.LABEL,
         EnterPhraseUIState.GENERATE,
@@ -161,7 +173,8 @@ fun EnterPhraseScreen(
                 if (title.isNotEmpty()) {
                     Text(
                         text = title,
-                        color = SharedColors.MainColorText
+                        color = SharedColors.MainColorText,
+                        textAlign = TextAlign.Center
                     )
                 }
             },
@@ -178,8 +191,12 @@ fun EnterPhraseScreen(
 
                 state.error -> {
                     if (state.submitResource is Resource.Error) {
+                        val errorStringResId = if (state.seedPhraseType == SeedPhraseType.TEXT)
+                                R.string.failed_save_seed_text
+                            else
+                                R.string.failed_save_seed_image
                         DisplayError(
-                            errorMessage = stringResource(R.string.failed_save_seed),
+                            errorMessage = stringResource(errorStringResId),
                             dismissAction = viewModel::resetSubmitResourceErrorState,
                             retryAction = viewModel::saveSeedPhrase
                         )
@@ -194,6 +211,15 @@ fun EnterPhraseScreen(
                             errorMessage = stringResource(R.string.reset_user_data_error),
                             dismissAction = viewModel::onCancelResetUser,
                             retryAction = viewModel::deleteUser
+                        )
+                    } else if (state.imageCaptureResource is Resource.Error) {
+                        DisplayError(
+                            errorMessage = getImageCaptureErrorDisplayMessage(
+                                state.imageCaptureResource.exception,
+                                context
+                            ),
+                            dismissAction = viewModel::resetImageCaptureResource,
+                            retryAction = { viewModel.entrySelected(EntryType.IMAGE) }
                         )
                     }
 
@@ -250,7 +276,8 @@ fun EnterPhraseScreen(
                                 onPasteEntrySelected = { viewModel.entrySelected(EntryType.PASTE) },
                                 onGenerateEntrySelected = {  language -> viewModel.entrySelected(EntryType.GENERATE, language) },
                                 userHasOwnPhrase = state.enterWordUIState == EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
-                                onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() }
+                                onUserHasOwnPhrase = { viewModel.setUserHasOwnPhrase() },
+                                onPhotoEntrySelected = { viewModel.entrySelected(EntryType.IMAGE) }
                             )
                             if (state.triggerDeleteUserDialog is Resource.Success) {
                                 ConfirmationDialog(
@@ -290,6 +317,34 @@ fun EnterPhraseScreen(
                             )
                         }
 
+                        EnterPhraseUIState.CAPTURE_IMAGE -> {
+                            CaptureSeedPhraseImage(
+                                onImageCaptured = viewModel::handleImageCapture,
+                                onError = viewModel::handleImageCaptureError
+                            )
+                        }
+
+                        EnterPhraseUIState.REVIEW_IMAGE -> {
+                            when (state.imageBitmap) {
+                                null -> {
+                                    DisplayError(
+                                        errorMessage = stringResource(R.string.unable_to_render_image_for_review),
+                                        dismissAction = { viewModel.resetImageCaptureUIState() },
+                                        retryAction = { viewModel.entrySelected(EntryType.IMAGE) }
+                                    )
+                                }
+
+                                else -> {
+                                    ImageReview(
+                                        imageBitmap = state.imageBitmap.asImageBitmap(),
+                                        onSaveImage = viewModel::onSaveImage,
+                                        onCancelImageSave = viewModel::onCancelImageSave,
+                                        isAccessReview = false
+                                    )
+                                }
+                            }
+                        }
+
                         EnterPhraseUIState.VIEW -> {
                             ViewPhraseWordUI(
                                 editedWordIndex = state.editedWordIndex,
@@ -309,10 +364,10 @@ fun EnterPhraseScreen(
                             )
                         }
 
-                        EnterPhraseUIState.REVIEW -> {
+                        EnterPhraseUIState.REVIEW_WORDS -> {
                             ReviewSeedPhraseUI(
                                 phraseWords = state.enteredWords,
-                                saveSeedPhrase = viewModel::moveToLabel,
+                                saveSeedPhrase = { viewModel.moveToLabel(seedPhraseType = SeedPhraseType.TEXT)},
                                 editSeedPhrase = viewModel::editEntirePhrase
                             )
                         }

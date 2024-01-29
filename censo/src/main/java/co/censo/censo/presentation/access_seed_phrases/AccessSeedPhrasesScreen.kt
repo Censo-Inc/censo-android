@@ -23,16 +23,19 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
-import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.access_seed_phrases.components.AccessPhrasesTopBar
 import co.censo.censo.presentation.access_seed_phrases.components.ReadyToAccessPhrase
 import co.censo.censo.presentation.access_seed_phrases.components.SelectPhraseUI
-import co.censo.censo.presentation.access_seed_phrases.components.ViewAccessPhraseUI
+import co.censo.censo.presentation.access_seed_phrases.components.Bip39Review
+import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.util.launchSingleTopIfNavigatingToHomeScreen
+import co.censo.shared.data.model.SeedPhraseData
+import co.censo.shared.data.model.getImageBitmap
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.LargeLoading
+import kotlin.time.Duration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -188,16 +191,55 @@ fun AccessSeedPhrasesScreen(
 
                         AccessPhrasesUIState.ViewPhrase -> {
                             state.recoveredPhrases.success()?.data?.first()?.let {
-                                ViewAccessPhraseUI(
-                                    phraseWords = it.phraseWords,
-                                    onDone = viewModel::reset,
-                                    timeLeft = state.timeRemaining
+                                ViewPhrase(
+                                    seedPhrase = it.seedPhrase,
+                                    timeRemaining = state.timeRemaining,
+                                    onReset = viewModel::reset
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun ViewPhrase(
+    seedPhrase: SeedPhraseData,
+    timeRemaining: Duration,
+    onReset: () -> Unit,
+) {
+    when (seedPhrase) {
+        is SeedPhraseData.Image -> {
+            when (val recoveredImage = seedPhrase.getImageBitmap()) {
+                null -> {
+                    DisplayError(
+                        errorMessage = stringResource(R.string.unable_to_render_image_for_review),
+                        dismissAction = onReset,
+                        retryAction = onReset
+                    )
+                }
+
+                else -> {
+                    ImageReview(
+                        imageBitmap = recoveredImage,
+                        onDoneViewing = onReset,
+                        timeLeft = timeRemaining,
+                        isAccessReview = true
+                    )
+                }
+            }
+        }
+
+        is SeedPhraseData.Bip39 -> {
+            Bip39Review(
+                phraseWords = seedPhrase.words,
+                onDone = onReset,
+                timeLeft = timeRemaining
+            )
         }
     }
 }

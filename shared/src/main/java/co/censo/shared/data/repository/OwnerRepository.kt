@@ -76,9 +76,12 @@ import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.SeedPhrase
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UpdateSeedPhraseApiRequest
 import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
+import co.censo.shared.data.model.toByteArray
+import co.censo.shared.data.model.toSeedPhraseData
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
@@ -225,7 +228,7 @@ interface OwnerRepository {
 
     suspend fun encryptSeedPhrase(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        seedWords: List<String>
+        seedPhraseData: SeedPhraseData
     ): EncryptedSeedPhrase
 
     suspend fun storeSeedPhrase(
@@ -712,9 +715,9 @@ class OwnerRepositoryImpl(
 
     override suspend fun encryptSeedPhrase(
         masterPublicKey: Base58EncodedMasterPublicKey,
-        seedWords: List<String>
+        seedPhraseData: SeedPhraseData
     ): EncryptedSeedPhrase {
-        val encodedData = BIP39.wordsToBinaryData(seedWords)
+        val encodedData = seedPhraseData.toByteArray()
         val encryptedSeedPhrase = ECIESManager.encryptMessage(
             dataToEncrypt = encodedData,
             publicKeyBytes = Base58.base58Decode(masterPublicKey.value)
@@ -838,9 +841,9 @@ class OwnerRepositoryImpl(
                 RecoveredSeedPhrase(
                     guid = it.guid,
                     label = it.label,
-                    phraseWords = BIP39.binaryDataToWords(
-                        masterEncryptionKey.decrypt(response.data.encryptedSeedPhrase.bytes), language
-                    ),
+                    seedPhrase = masterEncryptionKey
+                        .decrypt(response.data.encryptedSeedPhrase.bytes)
+                        .toSeedPhraseData(language = language),
                     createdAt = it.createdAt
                 )
             } else {

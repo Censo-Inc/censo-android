@@ -1,12 +1,14 @@
 package co.censo.censo.presentation.access_seed_phrases
 
 import SeedPhraseId
+import co.censo.censo.presentation.enter_phrase.SeedPhraseType
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.model.SeedPhrase
+import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.NavigationData
 import kotlinx.datetime.Instant
@@ -20,7 +22,7 @@ data class AccessSeedPhrasesState(
     val accessPhrasesUIState: AccessPhrasesUIState = AccessPhrasesUIState.SelectPhrase,
     val timeRemaining: Duration = 0.seconds,
     val locksAt: Instant? = null,
-    val viewedPhrase: List<String> = emptyList(),
+    val viewedPhrase: List<SeedPhraseData> = emptyList(),
     val showCancelConfirmationDialog: Boolean = false,
     val viewedPhraseIds: List<SeedPhraseId> = emptyList(),
 

@@ -9,31 +9,44 @@ import TitleText
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.components.ApproverStep
 import co.censo.censo.presentation.components.ShareTheCodeUIData
@@ -44,7 +57,9 @@ import co.censo.shared.data.model.deeplink
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.DisabledButtonTextStyle
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.SharedColors.ButtonBackgroundBlue
 import co.censo.shared.presentation.components.KeepScreenOn
+import co.censo.shared.presentation.components.TotpCodeView
 import kotlinx.datetime.Clock
 
 @Composable
@@ -281,6 +296,189 @@ fun shareTheCodeStepUIData(
 
     else -> null
 }
+
+data class ShareTheCodeUIData(
+    val heading: String,
+    val content: String,
+    val verificationCodeUIData: VerificationCodeUIData? = null
+)
+
+@Composable
+fun ApproverStep(
+    heading: String,
+    content: String,
+    contentFontSize: TextUnit = 18.sp,
+    buttonText: String = stringResource(id = R.string.share),
+    verificationCodeUIData: VerificationCodeUIData? = null,
+    onClick: (() -> Unit)? = null,
+    includeLine: Boolean = true,
+    imageContent: @Composable() ((ColumnScope.() -> Unit))
+) {
+    Row(
+        modifier = Modifier.height(IntrinsicSize.Min),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            imageContent()
+            if (includeLine) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(3.dp)
+                        .background(color = ButtonBackgroundBlue)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            StepTitleText(heading = heading)
+            Spacer(modifier = Modifier.height(8.dp))
+            StepContentText(content = content, fontSize = contentFontSize)
+            Spacer(modifier = Modifier.height(8.dp))
+            onClick?.let {
+                StepButton(
+                    icon = painterResource(id = co.censo.shared.R.drawable.share_link),
+                    text = buttonText,
+                    onClick = it
+                )
+            }
+            verificationCodeUIData?.let {
+                Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                    TotpCodeView(
+                        code = it.code,
+                        secondsLeft = it.timeLeft,
+                        primaryColor = SharedColors.MainColorText
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ApproverStep(
+    heading: String,
+    content: AnnotatedString,
+    contentFontSize: TextUnit = 18.sp,
+    buttonText: String = stringResource(id = R.string.share),
+    verificationCodeUIData: VerificationCodeUIData? = null,
+    onClick: (() -> Unit)? = null,
+    includeLine: Boolean = true,
+    imageContent: @Composable() ((ColumnScope.() -> Unit))
+) {
+    Row(
+        modifier = Modifier.height(IntrinsicSize.Min),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            imageContent()
+            if (includeLine) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(3.dp)
+                        .background(color = ButtonBackgroundBlue)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            StepTitleText(heading = heading)
+            Spacer(modifier = Modifier.height(8.dp))
+            StepContentText(content = content, fontSize = contentFontSize)
+            Spacer(modifier = Modifier.height(8.dp))
+            onClick?.let {
+                StepButton(
+                    icon = painterResource(id = co.censo.shared.R.drawable.share_link),
+                    text = buttonText,
+                    onClick = it
+                )
+            }
+            verificationCodeUIData?.let {
+                Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                    TotpCodeView(
+                        code = it.code,
+                        secondsLeft = it.timeLeft,
+                        primaryColor = SharedColors.MainColorText
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StepButton(icon: Painter, text: String, onClick: () -> Unit) {
+    StandardButton(
+        onClick = onClick,
+        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 24.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = icon,
+                contentDescription = null,
+                tint = SharedColors.ButtonTextBlue
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = text,
+                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
+            )
+        }
+    }
+}
+
+@Composable
+fun StepTitleText(heading: String) {
+    Text(
+        text = heading,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = SharedColors.MainColorText
+    )
+}
+
+@Composable
+fun StepContentText(content: String, fontSize: TextUnit = 18.sp) {
+    Text(
+        text = content,
+        fontSize = fontSize,
+        color = SharedColors.MainColorText
+    )
+}
+
+@Composable
+fun StepContentText(content: AnnotatedString, fontSize: TextUnit = 18.sp) {
+    Text(
+        text = content,
+        fontSize = fontSize,
+        color = SharedColors.MainColorText
+    )
+}
+
+data class VerificationCodeUIData(
+    val code: String,
+    val timeLeft: Int
+)
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable

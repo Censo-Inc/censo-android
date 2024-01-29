@@ -2,12 +2,10 @@ package co.censo.censo.presentation.enter_phrase.components
 
 import StandardButton
 import androidx.compose.foundation.layout.Column
-import MessageText
 import TitleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -57,6 +54,7 @@ fun SelectSeedPhraseEntryType(
     onManualEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
     onPasteEntrySelected: () -> Unit,
     onGenerateEntrySelected: (selectedLanguage: BIP39.WordListLanguage) -> Unit,
+    onPhotoEntrySelected: () -> Unit,
     userHasOwnPhrase: Boolean,
     onUserHasOwnPhrase: () -> Unit,
 ) {
@@ -179,9 +177,9 @@ fun SelectSeedPhraseEntryType(
             } else {
                 UserHasOwnPhrase(
                     verticalSpacingHeight = verticalSpacingHeight,
-                    screenWidth = screenWidth,
                     onManualEntrySelected = { onManualEntrySelected(selectedLanguage) },
-                    onPasteEntrySelected = onPasteEntrySelected
+                    onPasteEntrySelected = onPasteEntrySelected,
+                    onPhotoSelected = onPhotoEntrySelected
                 )
             }
         }
@@ -189,7 +187,7 @@ fun SelectSeedPhraseEntryType(
 }
 
 @Composable
-fun ColumnScope.SelectPhraseCreation(
+fun SelectPhraseCreation(
     verticalSpacingHeight: Dp, screenWidth: Dp,
     onGenerateEntrySelected: () -> Unit, onUserHasOwnPhrase: () -> Unit
 ) {
@@ -249,8 +247,10 @@ fun ColumnScope.SelectPhraseCreation(
 
 @Composable
 fun UserHasOwnPhrase(
-    verticalSpacingHeight: Dp, screenWidth: Dp,
-    onManualEntrySelected: () -> Unit, onPasteEntrySelected: () -> Unit
+    verticalSpacingHeight: Dp,
+    onManualEntrySelected: () -> Unit,
+    onPasteEntrySelected: () -> Unit,
+    onPhotoSelected: () -> Unit
 ) {
     Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
@@ -274,6 +274,31 @@ fun UserHasOwnPhrase(
             )
             Text(
                 text = stringResource(R.string.input),
+                color = SharedColors.MainColorText,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_camera),
+                contentDescription = "Camera",
+                tint = SharedColors.ButtonTextBlue,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .drawBehind {
+                        drawCircle(
+                            color = SharedColors.ButtonBackgroundBlue,
+                            radius = this.size.maxDimension
+                        )
+                    }
+                    .clickable {
+                        onPhotoSelected()
+                    }
+            )
+            Text(
+                text = stringResource(R.string.photo),
                 color = SharedColors.MainColorText,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(8.dp)
@@ -309,92 +334,6 @@ fun UserHasOwnPhrase(
     Spacer(modifier = Modifier.height(verticalSpacingHeight))
 }
 
-@Composable
-fun NotInitialPhrase(
-    verticalSpacingHeight: Dp, screenWidth: Dp,
-    onManualEntrySelected: () -> Unit,
-    onPasteEntrySelected: () -> Unit,
-    onGenerateEntrySelected: () -> Unit
-) {
-    StandardButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        onClick = {
-            onManualEntrySelected()
-        },
-        contentPadding = PaddingValues(vertical = 12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.manual_entry_icon),
-                contentDescription = null,
-                tint = SharedColors.ButtonTextBlue
-            )
-            Spacer(modifier = Modifier.width(screenWidth * 0.010f))
-            Text(
-                text = stringResource(R.string.input_seed_phrase),
-                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
-            )
-        }
-    }
-
-    Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-    StandardButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        onClick = onPasteEntrySelected,
-        contentPadding = PaddingValues(vertical = 12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = co.censo.shared.R.drawable.paste_phrase_icon),
-                contentDescription = null,
-                tint = SharedColors.ButtonTextBlue
-            )
-            Spacer(modifier = Modifier.width(screenWidth * 0.010f))
-            Text(
-                text = stringResource(R.string.paste_seed_phrase),
-                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
-            )
-        }
-    }
-
-    Spacer(modifier = Modifier.height(verticalSpacingHeight))
-
-    StandardButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        onClick = onGenerateEntrySelected,
-        contentPadding = PaddingValues(vertical = 12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = co.censo.shared.R.drawable.wand_and_stars),
-                contentDescription = null,
-                tint = SharedColors.ButtonTextBlue
-            )
-            Spacer(modifier = Modifier.width(screenWidth * 0.020f))
-            Text(
-                text = stringResource(R.string.generate_seed_phrase),
-                style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = null)
-            )
-        }
-    }
-
-    Spacer(modifier = Modifier.height(verticalSpacingHeight))
-}
-
-
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
 fun LargePreviewEnterPhraseMainScreen() {
@@ -406,7 +345,8 @@ fun LargePreviewEnterPhraseMainScreen() {
         savedPhrases = 0,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
-        onUserHasOwnPhrase = {}
+        onUserHasOwnPhrase = {},
+        onPhotoEntrySelected = {}
     )
 }
 
@@ -421,7 +361,8 @@ fun LargePreviewInitialPhraseScreen() {
         savedPhrases = 1,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
-        onUserHasOwnPhrase = {}
+        onUserHasOwnPhrase = {},
+        onPhotoEntrySelected = {}
     )
 }
 
@@ -436,7 +377,8 @@ fun NormalPreviewEnterPhraseMainScreen() {
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = true,
-        onUserHasOwnPhrase = {}
+        onUserHasOwnPhrase = {},
+        onPhotoEntrySelected = {}
     )
 }
 
@@ -451,6 +393,7 @@ fun SmallSeedPhraseAddedPreview() {
         welcomeFlow = false,
         currentLanguage = BIP39.WordListLanguage.English,
         userHasOwnPhrase = false,
-        onUserHasOwnPhrase = {}
+        onUserHasOwnPhrase = {},
+        onPhotoEntrySelected = {}
     )
 }

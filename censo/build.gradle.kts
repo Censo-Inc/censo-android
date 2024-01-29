@@ -177,6 +177,14 @@ dependencies {
     //Facetec
     implementation("com.facetec:facetec-sdk:9.6.58@aar")
 
+    //CameraX
+    implementation(libs.cameraX)
+    implementation(libs.cameraX.lifecycle)
+    implementation(libs.cameraX.view)
+
+    //Compose Accompanist
+    implementation(libs.accompanist)
+
     //Google Play Billing
     implementation(libs.billing)
     implementation(libs.billing.ktx)

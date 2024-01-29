@@ -43,6 +43,8 @@ object CrashReportingUtil {
     const val VerifyKeyConfirmation = "VerifyKeyConfirmation"
     const val DecryptingKey = "DecryptingKey"
     const val ImportPhrase = "ImportPhrase"
+    const val ImageCapture = "PhotoCapture"
+    const val ImageReview = "ImageReview"
 }
 
 fun Exception.sendError(reason: String) {

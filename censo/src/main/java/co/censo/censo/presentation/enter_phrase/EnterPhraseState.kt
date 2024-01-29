@@ -3,6 +3,7 @@ package co.censo.censo.presentation.enter_phrase
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
 import ParticipantId
+import android.graphics.Bitmap
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitialKeyData
@@ -21,9 +22,13 @@ data class EnterPhraseState(
     val currentLanguage: BIP39.WordListLanguage = BIP39.WordListLanguage.English,
     val label: String = "",
     val labelTooLong: String? = null,
+    val seedPhraseType: SeedPhraseType = SeedPhraseType.TEXT,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
     val existingPhraseCount: Int = 0,
     val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,
+
+    //Image
+    val imageBitmap: Bitmap? = null,
 
     //Async
     val submitResource: Resource<Unit> = Resource.Uninitialized,
@@ -31,6 +36,7 @@ data class EnterPhraseState(
     val userResource: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val phraseEncryptionInProgress: Boolean = false,
     val triggerPaywallUI: Resource<Unit> = Resource.Uninitialized,
+    val imageCaptureResource: Resource<Unit> = Resource.Uninitialized,
 
     //Flags
     val welcomeFlow: Boolean = false,
@@ -55,12 +61,16 @@ data class EnterPhraseState(
         const val PHRASE_LABEL_MAX_LENGTH = 50
     }
 
-    val error = submitResource is Resource.Error || userResource is Resource.Error
+    val error = submitResource is Resource.Error
+            || userResource is Resource.Error
+            || imageCaptureResource is Resource.Error
+
     val loading = submitResource is Resource.Loading
             || userResource is Resource.Loading
             || phraseEncryptionInProgress
             || loadKeyInProgress is Resource.Loading
             || deleteUserResource is Resource.Loading
+
 
     val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH
     val labelValid = label.isNotEmpty() && !labelIsTooLong
@@ -72,7 +82,9 @@ data class EnterPhraseState(
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.PASTE_ENTRY,
-        EnterPhraseUIState.REVIEW -> BackIconType.BACK
+        EnterPhraseUIState.CAPTURE_IMAGE,
+        EnterPhraseUIState.REVIEW_IMAGE,
+        EnterPhraseUIState.REVIEW_WORDS -> BackIconType.BACK
 
         EnterPhraseUIState.SELECT_ENTRY_TYPE,
         EnterPhraseUIState.VIEW,
@@ -82,7 +94,19 @@ data class EnterPhraseState(
 }
 
 enum class EnterPhraseUIState {
-    SELECT_ENTRY_TYPE, SELECT_ENTRY_TYPE_OWN, PASTE_ENTRY, EDIT, GENERATE, SELECTED, VIEW, REVIEW, LABEL, DONE, NOTIFICATIONS
+    SELECT_ENTRY_TYPE,
+    SELECT_ENTRY_TYPE_OWN,
+    CAPTURE_IMAGE,
+    PASTE_ENTRY,
+    EDIT,
+    GENERATE,
+    SELECTED,
+    VIEW,
+    REVIEW_WORDS,
+    REVIEW_IMAGE,
+    LABEL,
+    DONE,
+    NOTIFICATIONS,
 }
 
 enum class BackIconType {
@@ -90,5 +114,9 @@ enum class BackIconType {
 }
 
 enum class EntryType {
-    MANUAL, PASTE, GENERATE, IMPORT
+    MANUAL, PASTE, GENERATE, IMPORT, IMAGE
+}
+
+enum class SeedPhraseType {
+    TEXT, IMAGE
 }

@@ -35,4 +35,11 @@
     <string name="confirm">Confirm</string>
     <string name="upgrade_required">App is out-of-date, you must upgrade to continue</string>
     <string name="exit_screen">Exit Screen</string>
+
+    <string name="camera_permission_request">Camera Permission Request</string>
+    <string name="ok">OK</string>
+    <string name="invalid_camera_error">Invalid camera</string>
+    <string name="camera_closed_error">Camera closed</string>
+    <string name="failed_to_capture_photo_error">Failed to capture photo</string>
+    <string name="unable_to_capture_photo_error">Unable to capture photo</string>
 </resources>
