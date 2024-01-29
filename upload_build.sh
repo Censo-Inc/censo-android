@@ -34,8 +34,6 @@ environment=$variant
 
 appType=$type
 
-
-
 ./gradlew --stop
 echo Running "${appType}:"lint"${environment}"
 ./gradlew "${appType}:"lint"${environment}"
@@ -51,4 +49,10 @@ if [ "$publishFlag" = true ]; then
 
     echo Running "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
     ./gradlew "${appType}:"assemble"${environment}" "${appType}:"appDistributionUpload"${environment}"
+
+    if [ "$variant" = Release ]; then
+      echo Running "${appType}:"publishReleaseBundle""
+      ./gradlew "${appType}:"publishReleaseBundle""
+    fi
+
 fi

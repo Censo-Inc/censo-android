@@ -10,6 +10,14 @@ plugins {
     alias(libs.plugins.app.distribution)
     id(libs.plugins.test.logger.get().pluginId)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.play.triplet)
+}
+
+play {
+    serviceAccountCredentials.set(file("${project.rootDir}/${BuildUtils.SERVICE_FILE_NAME}"))
+
+    defaultToAppBundles.set(true)
+    track.set("internal")
 }
 
 android {
@@ -45,7 +53,7 @@ android {
         applicationId = "co.censo.censo"
         minSdk = 33
         targetSdk = 33
-        versionCode = 50
+        versionCode = BuildUtils.gitCommitCount()
         versionName = "${libs.versions.versionNameMajor.get()}.${libs.versions.versionNameMinor.get()}.${libs.versions.versionNamePatch.get()}"
 
         signingConfig = if (signBuild) {
