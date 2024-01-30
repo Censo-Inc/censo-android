@@ -20,6 +20,7 @@ object DeepLinkURI {
     const val APPROVER_AUTH_REST_V2_URI = "${BuildConfig.APPROVER_URL_SCHEME}://auth-reset/v2/"
     const val OWNER_LOGIN_ID_RESET_URI = "${BuildConfig.OWNER_URL_SCHEME}://reset/"
     const val CENSO_IMPORT_URI = "${BuildConfig.OWNER_URL_SCHEME}://import/v1/"
+    const val CENSO_BENEFICIARY_URI = "${BuildConfig.OWNER_URL_SCHEME}://beneficiary/v1/"
 }
 
 fun String.parseLink(): CensoLink {

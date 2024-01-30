@@ -32,13 +32,21 @@ Need to pass three arguments:
 
 ## Testing Deep Link
 
-Onboarding case: 
+Onboarding case (Approver App):
 
 `adb shell am start -W -a android.intent.action.VIEW -d "censo-integration://invite/[INVITATION_ID]" co.censo.approver.[VARIANT_SUFFIX]`
 
-Access case:
+Access case (Approver App):
 
 `adb shell am start -W -a android.intent.action.VIEW -d "censo-integration://access/[PARTICIPANT_ID]" co.censo.approver.[VARIANT_SUFFIX]`
+
+Owner App Beneficiary Login (Owner App):
+
+`adb shell am start -W -a android.intent.action.VIEW -d censo-main-integration://beneficiary/v1/[INVITE_ID] co.censo.censo.[VARIANT_SUFFIX]`
+
+Owner App Import Phrase (Owner App)
+
+`adb -s 12191JECB10239 shell am start -W -a android.intent.action.VIEW -d censo-main-integration://import/v1/[IMPORT_KEY]/[TIMESTAMP_KEY]/[SIGNATURE_KEY]/[NAME_KEY] co.censo.censo.[VARIANT_SUFFIX]`
 
 ## UI Tests
 
