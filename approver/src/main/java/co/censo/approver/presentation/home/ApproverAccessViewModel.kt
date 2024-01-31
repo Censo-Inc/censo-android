@@ -218,8 +218,6 @@ class ApproverAccessViewModel @Inject constructor(
                 val response = approverRepository.rejectAccess(state.approvalId)
                 state = state.copy(rejectAccessResource = response, ownerEnteredWrongCode = true)
                 if (response is Resource.Success) {
-                    approverRepository.clearApprovalId()
-                    approverRepository.clearParticipantId()
                     determineApproverAccessUIState(response.data.approverStates.forParticipant(state.participantId)!!)
                 }
             }
