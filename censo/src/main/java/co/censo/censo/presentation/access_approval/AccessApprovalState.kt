@@ -27,12 +27,8 @@ data class AccessApprovalState(
     val approvers: List<Approver.TrustedApprover> = listOf(),
     val approvals: List<AccessApproval> = listOf(),
 
-    // access control
-    val initiateNewAccess: Boolean = false,
-
     // api requests
     val userResponse: Resource<OwnerState> = Resource.Uninitialized,
-    val approvalsResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val initiateAccessResource: Resource<InitiateAccessApiResponse> = Resource.Uninitialized,
     val cancelAccessResource: Resource<DeleteAccessApiResponse> = Resource.Uninitialized,
     val submitTotpVerificationResource: Resource<SubmitAccessTotpVerificationApiResponse> = Resource.Uninitialized,
@@ -46,6 +42,7 @@ data class AccessApprovalState(
             || initiateAccessResource is Resource.Loading
             || cancelAccessResource is Resource.Loading
             || submitTotpVerificationResource is Resource.Loading
+            || navigationResource is Resource.Success
 
     val asyncError = userResponse is Resource.Error
             || initiateAccessResource is Resource.Error

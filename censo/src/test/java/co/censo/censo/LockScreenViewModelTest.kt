@@ -107,9 +107,9 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
-            val collector: FlowCollector<Resource<OwnerState>> = invocation.getArgument(0)
+            val collector: FlowCollector<OwnerState> = invocation.getArgument(0)
             launch {
-                collector.emit(Resource.Error())
+                collector.emit(OwnerState.Empty)
             }
             return@thenAnswer null
         }
@@ -126,13 +126,13 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         //Setup collector to be able to emit updates
-        lateinit var collector: FlowCollector<Resource<OwnerState>>
+        lateinit var collector: FlowCollector<OwnerState>
 
         //Mock the collectOwnerState method and assign the FlowCollector to the local reference
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
             collector = invocation.getArgument(0)
             launch {
-                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+                collector.emit(mockReadyOwnerStateWithPolicySetup)
             }
             return@thenAnswer null
         }
@@ -145,7 +145,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Unlocked)
 
         //Use the reference to collector to emit a new value
-        collector.emit(Resource.Error())
+        collector.emit(OwnerState.Empty)
 
         testScheduler.advanceUntilIdle()
 
@@ -157,13 +157,13 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         //Setup collector to be able to emit updates
-        lateinit var collector: FlowCollector<Resource<OwnerState>>
+        lateinit var collector: FlowCollector<OwnerState>
 
         //Mock the collectOwnerState method and assign the FlowCollector to the local reference
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
             collector = invocation.getArgument(0)
             launch {
-                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+                collector.emit(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null))
             }
             return@thenAnswer null
         }
@@ -175,7 +175,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         assertTrue(lockScreenViewModel.state.lockStatus is LockScreenState.LockStatus.Locked)
 
         //Emit error and assert lock status is none
-        collector.emit(Resource.Error())
+        collector.emit(OwnerState.Empty)
 
         testScheduler.advanceUntilIdle()
 
@@ -237,14 +237,14 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         )
 
         //Setup collector to be able to emit updates
-        lateinit var collector: FlowCollector<Resource<OwnerState>>
+        lateinit var collector: FlowCollector<OwnerState>
 
         //Mock the collectOwnerState method and assign the FlowCollector to the local reference
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
             collector = invocation.getArgument(0)
             launch {
                 //Initially we want locked state
-                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null)))
+                collector.emit(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null))
             }
             return@thenAnswer null
         }
@@ -255,7 +255,7 @@ class LockScreenViewModelTest : BaseViewModelTest() {
 
             //When unlock is called, we want to emit the updated state as well return the UnlockApiResponse data
             launch {
-                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+                collector.emit(mockReadyOwnerStateWithPolicySetup)
             }
 
             Resource.Success(

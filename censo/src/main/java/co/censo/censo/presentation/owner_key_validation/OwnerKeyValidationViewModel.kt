@@ -57,7 +57,7 @@ class OwnerKeyValidationViewModel @Inject constructor(
 
     fun triggerDeleteUserDialog() {
         state = state.copy(
-            ownerState = (ownerRepository.getOwnerStateValue() as? Resource.Success)?.data as? OwnerState.Ready,
+            ownerState = ownerRepository.getOwnerStateValue() as? OwnerState.Ready,
             triggerDeleteUserDialog = Resource.Success(Unit)
         )
     }

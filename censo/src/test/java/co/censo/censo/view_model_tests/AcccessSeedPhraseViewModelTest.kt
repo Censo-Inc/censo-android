@@ -17,6 +17,7 @@ import co.censo.shared.util.BIP39
 import co.censo.shared.util.VaultCountDownTimer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeastOnce
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
@@ -75,13 +76,13 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
 
     //region Focused Tests
     @Test
-    fun `call onStart then VM should collect owner state and start timer`() = runTest {
+    fun `call onStart then VM should collect owner state`() = runTest {
         assertDefaultVMState()
 
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
-            val collector: FlowCollector<Resource<OwnerState>> = invocation.getArgument(0)
+            val collector: FlowCollector<OwnerState> = invocation.getArgument(0)
             launch {
-                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+                collector.emit(mockReadyOwnerStateWithPolicySetup)
             }
             return@thenAnswer null
         }
@@ -92,14 +93,24 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
 
         assertTrue(accessSeedPhrasesViewModel.state.ownerState is Resource.Success)
         Mockito.verify(ownerRepository, atLeastOnce()).collectOwnerState(any())
-        Mockito.verify(timer, atLeastOnce()).start(any(), any())
     }
 
     @Test
-    fun `call onStop then VM should stop timer`() {
+    fun `call onResume then VM should start timer`() = runTest {
         assertDefaultVMState()
 
-        accessSeedPhrasesViewModel.onStop()
+        accessSeedPhrasesViewModel.onResume()
+
+        testScheduler.advanceUntilIdle()
+
+        Mockito.verify(timer, atLeastOnce()).start(any(), skipFirstTick = eq(false), any())
+    }
+
+    @Test
+    fun `call onPause then VM should stop timer`() {
+        assertDefaultVMState()
+
+        accessSeedPhrasesViewModel.onPause()
 
         Mockito.verify(timer, atLeastOnce()).stop()
     }
@@ -109,9 +120,9 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
-            val collector: FlowCollector<Resource<OwnerState>> = invocation.getArgument(0)
+            val collector: FlowCollector<OwnerState> = invocation.getArgument(0)
             launch {
-                collector.emit(Resource.Success(mockReadyOwnerStateWithPolicySetup))
+                collector.emit(mockReadyOwnerStateWithPolicySetup)
             }
             return@thenAnswer null
         }

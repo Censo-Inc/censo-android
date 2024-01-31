@@ -67,7 +67,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
     }
 
     private fun retrieveOwnerState() {
-        ownerRepository.getOwnerStateValue().onSuccess { updateOwnerState(it) }
+        updateOwnerState(ownerRepository.getOwnerStateValue())
     }
 
     private fun updateOwnerState(ownerState: OwnerState) {

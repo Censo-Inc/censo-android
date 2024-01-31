@@ -49,15 +49,9 @@ fun AccessSeedPhrasesScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_RESUME
-            -> {
-                viewModel.onStart()
-            }
-
-            Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onStop()
-            }
-
+            Lifecycle.Event.ON_START -> viewModel.onStart()
+            Lifecycle.Event.ON_RESUME -> viewModel.onResume()
+            Lifecycle.Event.ON_PAUSE -> viewModel.onPause()
             else -> Unit
         }
     }
@@ -71,7 +65,7 @@ fun AccessSeedPhrasesScreen(
                         popCurrentDestinationFromBackStack(navController)
                     }
                 }
-                viewModel.resetNavigationResource()
+                viewModel.delayedResetNavigationResource()
             }
         }
     }
@@ -110,7 +104,7 @@ fun AccessSeedPhrasesScreen(
 
             when {
                 state.loading -> LargeLoading(
-                    color = Color.White,
+                    fullscreenBackgroundColor = Color.White,
                     fullscreen = true
                 )
 

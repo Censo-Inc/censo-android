@@ -13,6 +13,7 @@ data class OwnerEntranceState(
     val userFinishedSetup: Boolean = false,
     val userIsOnboarding: Boolean = false,
 
+    val preFetchedUserResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val navigationResource: Resource<NavigationData> = Resource.Uninitialized,

@@ -147,14 +147,11 @@ class PolicySetupViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val ownerState = ownerRepository.getOwnerStateValue()
-            if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data, overwriteUIState = true)
-            }
+            updateOwnerState(ownerRepository.getOwnerStateValue(), overwriteUIState = true)
 
-            pollingVerificationTimer.startWithDelay(
-                initialDelay = CountDownTimerImpl.Companion.INITIAL_DELAY,
-                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
+            pollingVerificationTimer.start(
+                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN,
+                skipFirstTick = true
             ) {
                 if (state.userResponse !is Resource.Loading) {
                     retrieveOwnerState(silent = true)
@@ -341,7 +338,7 @@ class PolicySetupViewModel @Inject constructor(
         if (ownerState !is OwnerState.Ready) return
 
         // update global state
-        ownerRepository.updateOwnerState(Resource.Success(ownerState))
+        ownerRepository.updateOwnerState(ownerState)
 
         // figure out owner/primary/alternate approvers
         val approverSetup = ownerState.policySetup?.approvers ?: emptyList()

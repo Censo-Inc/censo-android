@@ -30,6 +30,7 @@ import co.censo.shared.util.rotateBitmap
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
@@ -111,7 +112,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 val ownerState = response.data.ownerState
-                ownerRepository.updateOwnerState(Resource.Success(ownerState))
+                ownerRepository.updateOwnerState(ownerState)
                 if (ownerState is OwnerState.Ready) {
                     state = state.copy(
                         ownerApproverParticipantId = ownerState.policy.owner?.participantId,
@@ -322,7 +323,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     private fun verifyMasterKeySignature(): Boolean {
         try {
-            val ownerPolicy = (ownerRepository.getOwnerStateValue().asSuccess().data as OwnerState.Ready).policy
+            val ownerPolicy = (ownerRepository.getOwnerStateValue() as OwnerState.Ready).policy
 
             val masterPublicKey = state.masterPublicKey
             val masterKeySignature = state.masterKeySignature
@@ -380,7 +381,7 @@ class EnterPhraseViewModel @Inject constructor(
 
             if (response is Resource.Success) {
                 state = state.copy(enterWordUIState = EnterPhraseUIState.DONE)
-                ownerRepository.updateOwnerState(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.data.ownerState)
             }
         }
     }
@@ -526,8 +527,11 @@ class EnterPhraseViewModel @Inject constructor(
         state = state.copy(exitFlow = true)
     }
 
-    fun resetExitFlow() {
-        state = state.copy(exitFlow = false)
+    fun delayedResetExitFlow() {
+        viewModelScope.launch {
+            delay(1000)
+            state = state.copy(exitFlow = false)
+        }
     }
 
     fun resetPhraseEntryComplete() {
@@ -606,7 +610,7 @@ class EnterPhraseViewModel @Inject constructor(
         resetCloudStorageActionState()
 
         try {
-            val entropy = (ownerRepository.getOwnerStateValue().asSuccess().data as OwnerState.Ready).policy.ownerEntropy
+            val entropy = (ownerRepository.getOwnerStateValue() as OwnerState.Ready).policy.ownerEntropy
 
             if (entropy == null) {
                 val exception = Exception("Missing data to access key")
@@ -674,8 +678,7 @@ class EnterPhraseViewModel @Inject constructor(
             triggerDeleteUserDialog = Resource.Uninitialized
         )
 
-        val participantId =
-            (ownerRepository.getOwnerStateValue().success()?.data as? OwnerState.Ready)?.policy?.approvers?.first { it.isOwner }?.participantId
+        val participantId = (ownerRepository.getOwnerStateValue() as? OwnerState.Ready)?.policy?.approvers?.first { it.isOwner }?.participantId
 
         viewModelScope.launch(Dispatchers.IO) {
             val response = ownerRepository.deleteUser(participantId)

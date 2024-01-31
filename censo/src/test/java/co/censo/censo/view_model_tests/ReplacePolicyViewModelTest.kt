@@ -168,7 +168,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         assertDefaultVMState()
 
         //Set initial owner state user data for responses
-        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { Resource.Success(initialOwnerStateData) }
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { initialOwnerStateData }
         whenever(ownerRepository.retrieveUser()).thenAnswer { Resource.Success(initialStateOwnerUserMockResponse) }
 
         replacePolicyViewModel.onCreate(addApproversPolicySetupAction)
@@ -179,41 +179,6 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         assertNull(replacePolicyViewModel.state.ownerApprover)
         assertNull(replacePolicyViewModel.state.primaryApprover)
         assertNull(replacePolicyViewModel.state.alternateApprover)
-    }
-
-    /**
-     * Test case: call onCreate with no global owner state data then VM should retrieve owner state and check if user has a key saved in the cloud
-     *
-     * Prerequisites:
-     *
-     * - Set mock response for KeyRepository.userHasKeySavedInCloud, so that DOWNLOAD action is set to state
-     * - Mock retrieve user call with test data
-     *
-     * Expected outcome to assert for:
-     *
-     * - OwnerRepository.retrieveUser is called
-     * - KeyRepository.userHasKeySavedInCloud is called
-     * - Owner approver data from policySetup is set to state
-     * - OwnerState data is set to global ownerStateFlow
-     */
-    @Test
-    fun `call onCreate with no global owner state data then VM should retrieve owner state and check if user has a key saved in the cloud`() = runTest {
-        assertDefaultVMState()
-
-        setTrueResponseForKeyRepositoryMethodUserHasKeySavedInCloud()
-
-        whenever(ownerRepository.retrieveUser()).thenAnswer { Resource.Success(readyStateOwnerUserMockResponse) }
-
-        //Start VM
-        replacePolicyViewModel.onCreate(addApproversPolicySetupAction)
-
-        //Advance all async work to be done
-        testScheduler.advanceUntilIdle()
-
-        //Verify that retrieve user was called
-        Mockito.verify(ownerRepository, atLeastOnce()).retrieveUser()
-
-        assertExpectedStatesDuringUserStart()
     }
 
     @Test
@@ -297,7 +262,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         whenever(keyRepository.retrieveSavedDeviceId()).thenAnswer { savedDeviceId }
 
         //Set mocked global owner state data
-        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { Resource.Success(readyOwnerStateData) }
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { readyOwnerStateData }
 
         //Trigger VM
         replacePolicyViewModel.onCreate(addApproversPolicySetupAction)
@@ -358,7 +323,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         whenever(keyRepository.retrieveSavedDeviceId()).thenAnswer { savedDeviceId }
 
         //Set mocked global owner state data
-        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { Resource.Success(readyOwnerStateData) }
+        whenever(ownerRepository.getOwnerStateValue()).thenAnswer { readyOwnerStateData }
         //endregion
 
         //Trigger VM

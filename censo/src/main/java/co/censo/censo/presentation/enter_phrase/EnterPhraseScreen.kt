@@ -132,7 +132,7 @@ fun EnterPhraseScreen(
                 popCurrentDestinationFromBackStack(navController)
             }
 
-            viewModel.resetExitFlow()
+            viewModel.delayedResetExitFlow()
         }
 
         if (state.triggerPaywallUI is Resource.Success) {

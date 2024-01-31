@@ -85,18 +85,10 @@ class ReplacePolicyViewModel @Inject constructor(
     fun onCreate(policySetupAction: PolicySetupAction) {
         state = state.copy(policySetupAction = policySetupAction)
 
-        viewModelScope.launch {
-            val ownerState = ownerRepository.getOwnerStateValue()
-            if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data, nextAction = {
-                    checkUserHasSavedKeyAndSubmittedPolicy()
-                })
-            } else {
-                retrieveOwnerState(false, nextAction = {
-                    checkUserHasSavedKeyAndSubmittedPolicy()
-                })
-            }
-        }
+        val ownerState = ownerRepository.getOwnerStateValue()
+        updateOwnerState(ownerState, nextAction = {
+            checkUserHasSavedKeyAndSubmittedPolicy()
+        })
     }
 
     fun receivePlanAction(action: ReplacePolicyAction) {
@@ -156,7 +148,7 @@ class ReplacePolicyViewModel @Inject constructor(
         if (ownerState !is OwnerState.Ready) return
 
         // update global state
-        ownerRepository.updateOwnerState(Resource.Success(ownerState))
+        ownerRepository.updateOwnerState(ownerState)
 
         // figure out owner/primary/alternate approvers
         val approverSetup = ownerState.policySetup?.approvers ?: emptyList()

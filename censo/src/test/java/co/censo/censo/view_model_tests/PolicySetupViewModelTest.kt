@@ -24,6 +24,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeastOnce
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
@@ -259,7 +260,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
 
         //region Mocks
         whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
-            Resource.Success(readyOwnerStateDataWithAllApproversConfirmed)
+            readyOwnerStateDataWithAllApproversConfirmed
         }
 
         whenever(keyRepository.decryptWithDeviceKey(any())).thenAnswer {
@@ -298,10 +299,10 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
         testScheduler.advanceUntilIdle()
 
         //Verify both polling timers were started
-        Mockito.verify(pollingVerificationTimer, atLeastOnce()).startWithDelay(
-            initialDelay = any(), interval = any(), onTickCallback = any()
+        Mockito.verify(pollingVerificationTimer, atLeastOnce()).start(
+            interval = any(), skipFirstTick = eq(true), onTickCallback = any()
         )
-        Mockito.verify(verificationCodeTimer, atLeastOnce()).start(any(), any())
+        Mockito.verify(verificationCodeTimer, atLeastOnce()).start(any(), eq(false), any())
     }
 
     @Test
@@ -354,8 +355,10 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
         assertTrue(policySetupViewModel.state.replacePolicy is Resource.Uninitialized)
 
         //Verify that the polling timers did not start since this is the RemoveApprovers flow
-        Mockito.verify(pollingVerificationTimer, never()).startWithDelay(any(), any(), any())
-        Mockito.verify(verificationCodeTimer, never()).start(any(), any())
+        Mockito.verify(pollingVerificationTimer, never()).start(
+            interval = any(), skipFirstTick = any(), onTickCallback = any()
+        )
+        Mockito.verify(verificationCodeTimer, never()).start(any(), skipFirstTick = eq(true), any())
     }
     //endregion
 
@@ -369,7 +372,7 @@ class PolicySetupViewModelTest : BaseViewModelTest() {
     private fun setMockApproverDataToViewModelState() {
         //region Mock ownerStateFlow.value, keyRepository.decryptWithDeviceKey, and totpGenerator.generateCode
         whenever(ownerRepository.getOwnerStateValue()).thenAnswer {
-            Resource.Success(readyOwnerStateDataWithOwnerAndInitialPrimaryApprover)
+            readyOwnerStateDataWithOwnerAndInitialPrimaryApprover
         }
 
         whenever(keyRepository.decryptWithDeviceKey(any())).thenAnswer {

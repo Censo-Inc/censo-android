@@ -52,13 +52,9 @@ fun BiometryResetScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_RESUME -> {
-                viewModel.onResume()
-            }
-
-            Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onPause()
-            }
+            Lifecycle.Event.ON_START -> viewModel.onStart()
+            Lifecycle.Event.ON_RESUME -> viewModel.onResume()
+            Lifecycle.Event.ON_PAUSE -> viewModel.onPause()
 
             else -> Unit
         }
@@ -66,6 +62,7 @@ fun BiometryResetScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
+            viewModel.onNavigate()
             state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route) {
                     launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
@@ -74,7 +71,7 @@ fun BiometryResetScreen(
                     }
                 }
             }
-            viewModel.resetNavigationResource()
+            viewModel.delayedResetNavigationResource()
         }
     }
 

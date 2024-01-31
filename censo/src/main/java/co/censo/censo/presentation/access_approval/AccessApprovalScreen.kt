@@ -52,20 +52,16 @@ fun AccessApprovalScreen(
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_RESUME -> {
-                viewModel.onStart(accessIntent)
-            }
-
-            Lifecycle.Event.ON_PAUSE -> {
-                viewModel.onStop()
-            }
-
+            Lifecycle.Event.ON_START -> viewModel.onStart(accessIntent)
+            Lifecycle.Event.ON_RESUME -> viewModel.onResume()
+            Lifecycle.Event.ON_PAUSE -> viewModel.onPause()
             else -> Unit
         }
     }
 
     LaunchedEffect(key1 = state) {
         if (state.navigationResource is Resource.Success) {
+            viewModel.onNavigate()
             state.navigationResource.data.let { navigationData ->
                 navController.navigate(navigationData.route) {
                     launchSingleTopIfNavigatingToHomeScreen(navigationData.route)
@@ -74,11 +70,7 @@ fun AccessApprovalScreen(
                     }
                 }
             }
-            viewModel.resetNavigationResource()
-        }
-
-        if (state.initiateNewAccess) {
-            viewModel.initiateAccess()
+            viewModel.delayedResetNavigationResource()
         }
     }
 
@@ -87,9 +79,9 @@ fun AccessApprovalScreen(
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     when (state.accessApprovalUIState) {
+                        AccessApprovalUIState.Initial,
                         AccessApprovalUIState.Approved,
-                        AccessApprovalUIState.AnotherDevice -> {
-                        }
+                        AccessApprovalUIState.AnotherDevice -> {}
 
                         else -> {
                             IconButton(onClick = viewModel::onBackClicked) {
@@ -104,7 +96,9 @@ fun AccessApprovalScreen(
                 title = {
                     Text(
                         text = when (state.accessApprovalUIState) {
+                            AccessApprovalUIState.Initial,
                             AccessApprovalUIState.Approved -> ""
+
                             else -> when (accessIntent) {
                                 AccessIntent.AccessPhrases -> stringResource(id = R.string.access)
                                 AccessIntent.ReplacePolicy -> stringResource(id = R.string.remove_approvers)
@@ -176,9 +170,7 @@ fun AccessApprovalScreen(
                 else -> {
                     when (state.accessApprovalUIState) {
 
-                        AccessApprovalUIState.Initial -> {
-                            LargeLoading(fullscreen = true)
-                        }
+                        AccessApprovalUIState.Initial -> {}
 
                         AccessApprovalUIState.AnotherDevice -> {
                             AnotherDeviceInitiatedFlowUI(

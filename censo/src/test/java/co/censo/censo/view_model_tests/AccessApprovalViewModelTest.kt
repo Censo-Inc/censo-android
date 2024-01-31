@@ -17,6 +17,7 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.atLeastOnce
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
@@ -82,7 +83,7 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
 
     //region Focused Tests
     @Test
-    fun `call onStart with access intent then VM should set state, get owner state, and start timer`() = runTest {
+    fun `call onStart with access intent then VM should set state, get owner state`() = runTest {
         assertDefaultVMState()
 
         accessApprovalViewModel.onStart(accessPhraseIntent)
@@ -93,9 +94,6 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
         assertEquals(accessPhraseIntent, accessApprovalViewModel.state.accessIntent)
 
         Mockito.verify(ownerRepository, atLeastOnce()).getOwnerStateValue()
-        Mockito.verify(pollingVerificationTimer, atLeastOnce()).startWithDelay(
-            initialDelay = any(), interval = any(), onTickCallback = any()
-        )
 
         //Call on start with alternate AccessIntent params and assert
         accessApprovalViewModel.onStart(replacePolicyIntent)
@@ -107,10 +105,23 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `call onStop then VM should stop polling timer`() {
+    fun `call onResume should start timer`() = runTest {
         assertDefaultVMState()
 
-        accessApprovalViewModel.onStop()
+        accessApprovalViewModel.onResume()
+
+        testScheduler.advanceUntilIdle()
+
+        Mockito.verify(pollingVerificationTimer, atLeastOnce()).start(
+            interval = any(), skipFirstTick = eq(true), onTickCallback = any()
+        )
+    }
+
+    @Test
+    fun `call onPause then VM should stop polling timer`() {
+        assertDefaultVMState()
+
+        accessApprovalViewModel.onPause()
 
         Mockito.verify(pollingVerificationTimer, atLeastOnce()).stopWithDelay(any())
     }
@@ -151,7 +162,6 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
 
         assertEquals(accessPhraseIntent, accessApprovalViewModel.state.accessIntent)
         assertTrue(accessApprovalViewModel.state.initiateAccessResource is Resource.Success)
-        assertFalse(accessApprovalViewModel.state.initiateNewAccess)
     }
 
     @Test
@@ -186,6 +196,11 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
 
         val primaryApprover = mockReadyOwnerStateWithPolicySetup.policy.approvers.primaryApprover()!!
 
+        whenever(ownerRepository.initiateAccess(AccessIntent.AccessPhrases)).thenAnswer {
+            Resource.Success(InitiateAccessApiResponse(
+                ownerState = mockReadyOwnerStateWithPolicySetup
+            ))
+        }
         whenever(ownerRepository.submitAccessTotpVerification(primaryApprover.participantId, "123456")).thenAnswer {
             Resource.Success(SubmitAccessTotpVerificationApiResponse(
                 mockReadyOwnerStateWithPolicySetup))
@@ -319,7 +334,7 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
         assertEquals(Screen.AccessSeedPhrases.route, accessApprovalViewModel.state.navigationResource.asSuccess().data.route)
 
         //Reset navigation resource
-        accessApprovalViewModel.resetNavigationResource()
+        accessApprovalViewModel.delayedResetNavigationResource()
 
         //Set replace policy intent
         accessApprovalViewModel.onStart(replacePolicyIntent)
@@ -329,7 +344,7 @@ class AccessApprovalViewModelTest : BaseViewModelTest() {
         assertEquals(Screen.PolicySetupRoute.removeApproversRoute(), accessApprovalViewModel.state.navigationResource.asSuccess().data.route)
 
         //Reset navigation resource
-        accessApprovalViewModel.resetNavigationResource()
+        accessApprovalViewModel.delayedResetNavigationResource()
 
         //Set recover owner key intent
         accessApprovalViewModel.onStart(recoverOwnerKeyIntent)

@@ -24,6 +24,7 @@ import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.asResource
 import co.censo.shared.util.isDigitsOnly
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,26 +42,27 @@ class AccessApprovalViewModel @Inject constructor(
     fun onStart(accessIntent: AccessIntent) {
         state = state.copy(accessIntent = accessIntent)
 
-        viewModelScope.launch {
-            val ownerState = ownerRepository.getOwnerStateValue()
-            if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data)
-            }
+        updateOwnerState(ownerRepository.getOwnerStateValue(), updateSharedState = false)
+    }
 
-            // setup polling timer to reload approvals state
-            pollingVerificationTimer.startWithDelay(
-                initialDelay = CountDownTimerImpl.Companion.INITIAL_DELAY,
-                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
-            ) {
-                if (state.userResponse !is Resource.Loading) {
-                    retrieveOwnerState(silent = true)
-                }
+    fun onResume() {
+        // setup polling timer to reload approvals state
+        pollingVerificationTimer.start(
+            interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN,
+            skipFirstTick = true
+        ) {
+            if (state.userResponse !is Resource.Loading) {
+                retrieveOwnerState(silent = true)
             }
         }
     }
 
-    fun onStop() {
+    fun onPause() {
         pollingVerificationTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
+    }
+
+    fun onNavigate() {
+        pollingVerificationTimer.stop()
     }
 
     fun retrieveOwnerState(silent: Boolean = false) {
@@ -77,7 +79,7 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    private fun updateOwnerState(ownerState: OwnerState) {
+    private fun updateOwnerState(ownerState: OwnerState, updateSharedState: Boolean = true) {
         if (ownerState !is OwnerState.Ready) {
             // other owner states are not supported on this view
             // navigate back to start of the app so it can fix itself
@@ -90,13 +92,13 @@ class AccessApprovalViewModel @Inject constructor(
         }
 
         // update global state
-        ownerRepository.updateOwnerState(Resource.Success(ownerState))
+        if (updateSharedState) {
+            ownerRepository.updateOwnerState(ownerState)
+        }
 
         // restore state
         when (val access = ownerState.access) {
-            null -> {
-                state = state.copy(initiateNewAccess = true)
-            }
+            null -> initiateAccess()
 
             is Access.AnotherDevice -> {
                 state = state.copy(
@@ -172,7 +174,7 @@ class AccessApprovalViewModel @Inject constructor(
     }
 
     fun initiateAccess() {
-        if (state.initiateAccessResource !is Resource.Loading) {
+        if (state.initiateAccessResource !is Resource.Loading && state.cancelAccessResource is Resource.Uninitialized) {
             state = state.copy(initiateAccessResource = Resource.Loading)
 
             viewModelScope.launch {
@@ -182,10 +184,7 @@ class AccessApprovalViewModel @Inject constructor(
                     updateOwnerState(response.data.ownerState)
                 }
 
-                state = state.copy(
-                    initiateAccessResource = response,
-                    initiateNewAccess = false
-                )
+                state = state.copy(initiateAccessResource = response)
             }
         }
     }
@@ -200,18 +199,22 @@ class AccessApprovalViewModel @Inject constructor(
             val response = ownerRepository.cancelAccess()
 
             if (response is Resource.Success) {
-
+                ownerRepository.updateOwnerState(response.data.ownerState)
                 approverKeyValidation(response.data.ownerState)
-
                 state = state.copy(
                     access = null,
-                    navigationResource = Screen.OwnerVaultScreen
-                        .navToAndPopCurrentDestination()
-                        .asResource()
+                    navigationResource = Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource(),
+                    cancelAccessResource = response,
                 )
+            } else if (response is Resource.Error && response.errorCode == 404) {
+                state = state.copy(
+                    access = null,
+                    navigationResource = Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource(),
+                    cancelAccessResource = Resource.Uninitialized,
+                )
+            } else {
+                state = state.copy(cancelAccessResource = Resource.Uninitialized)
             }
-
-            state = state.copy(cancelAccessResource = response)
         }
     }
 
@@ -261,12 +264,12 @@ class AccessApprovalViewModel @Inject constructor(
         }
     }
 
-    fun resetNavigationResource() {
-        state = state.copy(
-            navigationResource = Resource.Uninitialized
-        )
+    fun delayedResetNavigationResource() {
+        viewModelScope.launch {
+            delay(1000)
+            state = state.copy(navigationResource = Resource.Uninitialized)
+        }
     }
-
 
     fun onApproverSelected(selectedApprover: Approver.TrustedApprover) {
         state = if (state.selectedApprover == selectedApprover) {

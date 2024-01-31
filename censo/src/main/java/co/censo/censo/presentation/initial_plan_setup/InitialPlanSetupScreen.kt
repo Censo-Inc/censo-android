@@ -65,7 +65,7 @@ fun InitialPlanSetupScreen(
                 launchSingleTop = true
                 popUpToTop()
             }
-            viewModel.reset()
+            viewModel.delayedReset()
         }
 
         if (state.complete) {
@@ -84,7 +84,7 @@ fun InitialPlanSetupScreen(
             navController.navigate(route) {
                 popCurrentDestinationFromBackStack(navController)
             }
-            viewModel.reset()
+            viewModel.delayedReset()
         }
     }
 
@@ -147,7 +147,8 @@ fun InitialPlanSetupScreen(
                     when (state.initialPlanSetupStep) {
                         InitialPlanSetupStep.CreateApproverKey,
                         InitialPlanSetupStep.CreatePolicyParams,
-                        InitialPlanSetupStep.PolicyCreation -> LargeLoading(fullscreen = true)
+                        InitialPlanSetupStep.PolicyCreation,
+                        InitialPlanSetupStep.DeleteUser -> LargeLoading(fullscreen = true)
 
                         is InitialPlanSetupStep.Initial -> {
                             if (state.welcomeStep == WelcomeStep.Authenticated) {
@@ -179,7 +180,7 @@ fun InitialPlanSetupScreen(
                             FacetecAuth(
                                 onFaceScanReady = viewModel::onPolicyCreationFaceScanReady,
                                 onCancelled = {
-                                    viewModel.reset()
+                                    viewModel.delayedReset()
                                 }
                             )
                     }

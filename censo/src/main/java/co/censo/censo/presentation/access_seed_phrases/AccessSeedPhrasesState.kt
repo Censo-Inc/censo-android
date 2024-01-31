@@ -45,6 +45,7 @@ data class AccessSeedPhrasesState(
                 || ownerState is Resource.Loading
                 || cancelAccessResource is Resource.Loading
                 || recoveredPhrases is Resource.Loading
+                || navigationResource is Resource.Success
 
     val asyncError = retrieveShardsResponse is Resource.Error
             || recoveredPhrases is Resource.Error

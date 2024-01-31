@@ -19,10 +19,8 @@ import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
-import co.censo.censo.presentation.plan_setup.PolicySetupUIState
 import co.censo.censo.util.TestUtil
 import co.censo.shared.data.model.AccessIntent
-import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
 import co.censo.shared.util.asResource
@@ -30,6 +28,7 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -51,15 +50,14 @@ class AccessSeedPhrasesViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            ownerRepository.collectOwnerState { resource: Resource<OwnerState> ->
-                if (resource is Resource.Success) {
-                    state = state.copy(ownerState = resource)
-                }
+            ownerRepository.collectOwnerState { ownerState: OwnerState ->
+                state = state.copy(ownerState = Resource.Success(ownerState))
             }
         }
+    }
 
+    fun onResume() {
         timer.start(interval = 1.seconds.inWholeMilliseconds) {
-
             state.locksAt?.let {
                 val now =  Clock.System.now()
                 if (now >= it) {
@@ -71,7 +69,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         }
     }
 
-    fun onStop() {
+    fun onPause() {
         timer.stop()
 
         if (state.viewedPhrase.isNotEmpty()) {
@@ -113,7 +111,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     recoverSeedPhrases(response.data)
                 }
-                ownerRepository.updateOwnerState(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.data.ownerState)
             }
 
             response.map { it.scanResultBlob }
@@ -183,10 +181,11 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         }
     }
 
-    fun resetNavigationResource() {
-        state = state.copy(
-            navigationResource = Resource.Uninitialized
-        )
+    fun delayedResetNavigationResource() {
+        viewModelScope.launch {
+            delay(1000)
+            state = state.copy(navigationResource = Resource.Uninitialized)
+        }
     }
 
     fun onPhraseSelected(seedPhrase: SeedPhrase) {
@@ -231,7 +230,7 @@ class AccessSeedPhrasesViewModel @Inject constructor(
                         .navToAndPopCurrentDestination()
                         .asResource()
                 )
-                ownerRepository.updateOwnerState(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.data.ownerState)
             }
 
             state = state.copy(cancelAccessResource = response)

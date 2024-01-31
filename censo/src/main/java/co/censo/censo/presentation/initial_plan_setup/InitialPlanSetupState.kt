@@ -35,13 +35,15 @@ data class InitialPlanSetupScreenState(
 sealed class InitialPlanSetupStep {
 
     //Entering the screen we will move to following 3 states
-    object Initial : InitialPlanSetupStep()
-    object CreateApproverKey : InitialPlanSetupStep()
-    object CreatePolicyParams : InitialPlanSetupStep()
+    data object Initial : InitialPlanSetupStep()
+    data object CreateApproverKey : InitialPlanSetupStep()
+    data object CreatePolicyParams : InitialPlanSetupStep()
     //After policy params are made then we will trigger facetec
-    object Facetec : InitialPlanSetupStep()
+    data object Facetec : InitialPlanSetupStep()
     //Policy creation always kicked off by facetec completion
-    object PolicyCreation : InitialPlanSetupStep()
+    data object PolicyCreation : InitialPlanSetupStep()
+    //User can drop out from the flow leading to deletion
+    data object DeleteUser : InitialPlanSetupStep()
 }
 
 enum class WelcomeStep(val order: Int) {

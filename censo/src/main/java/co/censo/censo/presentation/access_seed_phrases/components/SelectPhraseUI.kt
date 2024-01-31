@@ -5,6 +5,7 @@ import TitleText
 import SeedPhraseId
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +31,7 @@ import co.censo.shared.data.model.SeedPhrase
 import co.censo.censo.R
 import co.censo.censo.presentation.main.SeedPhraseItem
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
 
 @Composable
@@ -41,7 +44,6 @@ fun SelectPhraseUI(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(color = Color.White)
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -54,24 +56,37 @@ fun SelectPhraseUI(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        seedPhrases.forEach { seedPhrase ->
-            Spacer(modifier = Modifier.height(12.dp))
-            SeedPhraseItem(
-                seedPhrase = seedPhrase,
-                isSelected = viewedIds.any { it == seedPhrase.guid},
-                onClick = {
-                    onPhraseSelected(seedPhrase)
+        Box(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                seedPhrases.forEach { seedPhrase ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SeedPhraseItem(
+                        seedPhrase = seedPhrase,
+                        isSelected = viewedIds.any { it == seedPhrase.guid },
+                        onClick = { onPhraseSelected(seedPhrase) }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(12.dp))
+        Divider(
+            modifier = Modifier
+                .height(1.5.dp)
+                .fillMaxWidth(),
+            color = SharedColors.DividerGray
+        )
+        Spacer(modifier = Modifier.height(12.dp))
 
         StandardButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(vertical = 12.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
             onClick = onFinish,
         ) {

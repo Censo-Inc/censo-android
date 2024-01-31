@@ -125,7 +125,7 @@ class LoginIdResetViewModel @Inject constructor(
             if (response is Resource.Success) {
                 // updating global owner state will trigger a paywall if needed, and owner state is expected by the key recovery screen
                 ownerRepository.updateAuthState(authState = AuthState.LOGGED_IN)
-                ownerRepository.updateOwnerState(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.data.ownerState)
                 receiveAction(LoginIdResetAction.DetermineResetStep)
             }
         }

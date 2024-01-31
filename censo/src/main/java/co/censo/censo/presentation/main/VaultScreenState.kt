@@ -64,7 +64,8 @@ data class VaultScreenState(
             deletePolicySetup is Resource.Loading ||
             enableTimelockResource is Resource.Loading ||
             disableTimelockResource is Resource.Loading ||
-            cancelDisableTimelockResource is Resource.Loading
+            cancelDisableTimelockResource is Resource.Loading ||
+            kickUserOut is Resource.Success
 
     val asyncError = userResponse is Resource.Error ||
                 deleteSeedPhraseResource is Resource.Error ||

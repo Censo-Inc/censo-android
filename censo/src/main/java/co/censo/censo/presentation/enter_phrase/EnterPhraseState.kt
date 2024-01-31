@@ -71,6 +71,7 @@ data class EnterPhraseState(
             || phraseEncryptionInProgress
             || loadKeyInProgress is Resource.Loading
             || deleteUserResource is Resource.Loading
+            || exitFlow
 
 
     val labelIsTooLong = label.length > PHRASE_LABEL_MAX_LENGTH

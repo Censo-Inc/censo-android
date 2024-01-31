@@ -28,6 +28,7 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -218,15 +219,17 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEntropy(): Base64EncodedData? =
-        (ownerRepository.getOwnerStateValue().asSuccess().data as? OwnerState.Initial)?.entropy
+    private fun retrieveEntropy(): Base64EncodedData? = (ownerRepository.getOwnerStateValue() as? OwnerState.Initial)?.entropy
 
     private fun startFacetec() {
         state = state.copy(initialPlanSetupStep = InitialPlanSetupStep.Facetec)
     }
 
-    fun reset() {
-        state = InitialPlanSetupScreenState()
+    fun delayedReset() {
+        viewModelScope.launch {
+            delay(1000)
+            state = InitialPlanSetupScreenState()
+        }
     }
 
     fun resetError() {
@@ -261,7 +264,7 @@ class InitialPlanSetupViewModel @Inject constructor(
 
 
             if (createPolicyResponse is Resource.Success) {
-                ownerRepository.updateOwnerState(createPolicyResponse.map { it.ownerState })
+                ownerRepository.updateOwnerState(createPolicyResponse.data.ownerState)
             }
 
             createPolicyResponse.map { it.scanResultBlob }
@@ -318,7 +321,8 @@ class InitialPlanSetupViewModel @Inject constructor(
     fun deleteUser() {
         state = state.copy(
             deleteUserResource = Resource.Loading,
-            triggerDeleteUserDialog = Resource.Uninitialized
+            triggerDeleteUserDialog = Resource.Uninitialized,
+            initialPlanSetupStep = InitialPlanSetupStep.DeleteUser
         )
 
         viewModelScope.launch(Dispatchers.IO) {

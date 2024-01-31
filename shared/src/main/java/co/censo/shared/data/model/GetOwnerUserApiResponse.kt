@@ -279,6 +279,10 @@ enum class AuthenticationResetApprovalStatus {
 @Serializable
 sealed class OwnerState {
     @Serializable
+    @SerialName("Empty")
+    data object Empty: OwnerState()
+
+    @Serializable
     @SerialName("Initial")
     data class Initial(
         val entropy: Base64EncodedData,
@@ -312,18 +316,21 @@ sealed class OwnerState {
     }
 
     fun subscriptionStatus(): SubscriptionStatus = when (this) {
+        is Empty -> SubscriptionStatus.None
         is Initial -> subscriptionStatus
         is Ready -> subscriptionStatus
     }
 
 
     fun subscriptionRequired(): Boolean = when (this) {
+        is Empty -> false
         is Initial -> subscriptionRequired
         is Ready -> subscriptionRequired
     }
     fun hasActiveSubscription(): Boolean = subscriptionStatus() == SubscriptionStatus.Active
 
     fun onboarding(): Boolean = when (this) {
+        is Empty -> false
         is Initial -> true
         is Ready -> !onboarded
     }

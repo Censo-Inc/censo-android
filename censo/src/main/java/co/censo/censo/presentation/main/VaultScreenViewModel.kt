@@ -19,6 +19,7 @@ import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.util.VaultCountDownTimer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -44,8 +45,12 @@ class VaultScreenViewModel @Inject constructor(
         private set
 
     fun onStart() {
-        retrieveOwnerState()
+        viewModelScope.launch {
+            onOwnerState(ownerRepository.getOwnerStateValue(), updateGlobalState = false)
+        }
+    }
 
+    fun onResume() {
         timer.start(interval = 5.seconds.inWholeMilliseconds) {
             (accessTimelockExpiration() ?: state.ownerState?.timelockSetting?.disabledAt)?.let { expiresAt ->
                 if (expiresAt < Clock.System.now()) {
@@ -55,7 +60,7 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
-    fun onStop() {
+    fun onPause() {
         timer.stop()
     }
 
@@ -173,7 +178,9 @@ class VaultScreenViewModel @Inject constructor(
             )
 
             if (response is Resource.Success) {
-                onOwnerState(OwnerState.Initial(Base64EncodedData(""), subscriptionStatus = SubscriptionStatus.Active, subscriptionRequired = false))
+                onOwnerState(
+                    OwnerState.Empty
+                )
             }
         }
     }
@@ -288,7 +295,7 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
-    private fun onOwnerState(ownerState: OwnerState) {
+    private fun onOwnerState(ownerState: OwnerState, updateGlobalState: Boolean = true) {
         state = when (ownerState) {
             is OwnerState.Ready -> {
                 state.copy(ownerState = ownerState)
@@ -301,7 +308,9 @@ class VaultScreenViewModel @Inject constructor(
             }
         }
 
-        ownerRepository.updateOwnerState(Resource.Success(ownerState))
+        if (updateGlobalState) {
+            ownerRepository.updateOwnerState(ownerState)
+        }
     }
 
     fun accessTimelockExpiration(): Instant? {
@@ -309,6 +318,7 @@ class VaultScreenViewModel @Inject constructor(
             is Access.ThisDevice -> if (access.status == AccessStatus.Timelocked) {
                 access.unlocksAt
             } else null
+
             else -> null
         }
     }
@@ -393,14 +403,19 @@ class VaultScreenViewModel @Inject constructor(
     }
 
     fun setRemoveApproversError() {
-        state = state.copy(removeApprovers = Resource.Error(exception = Exception("Cannot remove approvers")))
+        state =
+            state.copy(removeApprovers = Resource.Error(exception = Exception("Cannot remove approvers")))
     }
+
     fun resetRemoveApprovers() {
         state = state.copy(removeApprovers = Resource.Uninitialized)
     }
 
-    fun reset() {
-        state = VaultScreenState()
+    fun delayedReset() {
+        viewModelScope.launch {
+            delay(1000)
+            state = VaultScreenState()
+        }
     }
 
     fun lock() {

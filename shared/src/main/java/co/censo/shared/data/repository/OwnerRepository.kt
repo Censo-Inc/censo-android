@@ -126,9 +126,9 @@ interface OwnerRepository {
 
     //region OwnerState flow
     fun updateAuthState(authState: AuthState)
-    fun getOwnerStateValue(): Resource<OwnerState>
-    fun updateOwnerState(ownerState: Resource<OwnerState>)
-    suspend fun collectOwnerState(collector: FlowCollector<Resource<OwnerState>>)
+    fun getOwnerStateValue(): OwnerState
+    fun updateOwnerState(ownerState: OwnerState)
+    suspend fun collectOwnerState(collector: FlowCollector<OwnerState>)
     //endregion
 
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
@@ -299,16 +299,16 @@ class OwnerRepositoryImpl(
 ) : OwnerRepository, BaseRepository() {
 
     //region OwnerState flow
-    private val ownerStateFlow = MutableStateFlow<Resource<OwnerState>>(Resource.Uninitialized)
+    private val ownerStateFlow = MutableStateFlow<OwnerState>(OwnerState.Empty)
     private val authStateFlow = MutableStateFlow(AuthState.LOGGED_OUT)
     override fun updateAuthState(authState: AuthState) {
         authStateFlow.value = authState
     }
-    override fun getOwnerStateValue(): Resource<OwnerState> = ownerStateFlow.value
-    override suspend fun collectOwnerState(collector: FlowCollector<Resource<OwnerState>>) {
+    override fun getOwnerStateValue(): OwnerState = ownerStateFlow.value
+    override suspend fun collectOwnerState(collector: FlowCollector<OwnerState>) {
         ownerStateFlow.collect(collector)
     }
-    override fun updateOwnerState(ownerState: Resource<OwnerState>) {
+    override fun updateOwnerState(ownerState: OwnerState) {
         if (authStateFlow.value == AuthState.LOGGED_IN) {
             ownerStateFlow.value = ownerState
         }
@@ -797,7 +797,7 @@ class OwnerRepositoryImpl(
     }
 
     override suspend fun signUserOut() {
-        updateOwnerState(Resource.Uninitialized)
+        updateOwnerState(OwnerState.Empty)
         updateAuthState(AuthState.LOGGED_OUT)
         secureStorage.clearJWT()
         authUtil.signOut()

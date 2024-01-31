@@ -29,12 +29,8 @@ class PaywallViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            ownerRepository.collectOwnerState { resource: Resource<OwnerState> ->
-                if (resource is Resource.Success) {
-                    onOwnerState(
-                        resource.data,
-                    )
-                }
+            ownerRepository.collectOwnerState {
+                onOwnerState(it)
             }
         }
 
@@ -137,7 +133,7 @@ class PaywallViewModel @Inject constructor(
             val response = ownerRepository.submitPurchase(purchase.purchaseToken)
 
             if (response is Resource.Success) {
-                ownerRepository.updateOwnerState(response.map { it.ownerState })
+                ownerRepository.updateOwnerState(response.data.ownerState)
 
                 state.successfulPurchaseCallback?.let {
                     it()
@@ -179,11 +175,6 @@ class PaywallViewModel @Inject constructor(
         state = PaywallState()
     }
 
-    fun isOnboarding(): Boolean = ownerRepository.getOwnerStateValue().success()?.data?.onboarding() ?: false
-
-    fun showDeleteUserDialog() {
-        state = state.copy(triggerDeleteUserDialog = Resource.Success(Unit))
-    }
     fun resetDeleteUserDialog() {
         state = state.copy(triggerDeleteUserDialog = Resource.Uninitialized)
     }

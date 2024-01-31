@@ -77,38 +77,39 @@ fun PhraseHomeScreen(
             .background(color = Color.White)
     ) {
         Spacer(modifier = Modifier.height(12.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.60f)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            seedPhrases.forEach { seedPhrase ->
-                Spacer(modifier = Modifier.height(12.dp))
-                SeedPhraseItem(
-                    seedPhrase = seedPhrase,
-                    isEditable = true,
-                    onRename = {
-                        onRenamePhraseClick(seedPhrase)
-                    },
-                    onDelete = {
-                        onDeletePhraseClick(seedPhrase)
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+
+        Box(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                seedPhrases.forEach { seedPhrase ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SeedPhraseItem(
+                        seedPhrase = seedPhrase,
+                        isEditable = true,
+                        onRename = {
+                            onRenamePhraseClick(seedPhrase)
+                        },
+                        onDelete = {
+                            onDeletePhraseClick(seedPhrase)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
         }
 
         Column(
             Modifier
                 .background(color = Color.White)
-                .padding(horizontal = 32.dp)
-                .fillMaxSize(),
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            Spacer(modifier = Modifier.height(3.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Divider(
                 modifier = Modifier
                     .height(1.5.dp)
@@ -116,14 +117,14 @@ fun PhraseHomeScreen(
                 color = SharedColors.DividerGray
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp, horizontal = 12.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (timelockExpiration != null) {
+            if (timelockExpiration != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 18.dp, horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         painterResource(id = R.drawable.time_left_icon),
                         contentDescription = "",
@@ -154,9 +155,9 @@ fun PhraseHomeScreen(
                         text = timeLeftText,
                         color = SharedColors.MainColorText
                     )
-                } else {
-                    Text(text = "", fontSize = 16.sp)
                 }
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             Row(
@@ -331,7 +332,7 @@ fun SeedPhraseItem(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewPhraseHomeScreen() {
+fun PreviewPhraseHomeScreenWithTimelock() {
     PhraseHomeScreen(
         onAccessClick = {},
         onAddClick = {},
@@ -360,6 +361,53 @@ fun PreviewPhraseHomeScreen() {
         onCancelAccessClick = {},
         accessButtonLabel = AccessButtonLabelEnum.RequestAccess,
         timelockExpiration = Clock.System.now() + 5.minutes,
+        accessButtonEnabled = true
+    )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewPhraseHomeScreenNoTimelock() {
+    PhraseHomeScreen(
+        onAccessClick = {},
+        onAddClick = {},
+        seedPhrases = listOf(
+            SeedPhrase(
+                guid = SeedPhraseId("1"),
+                label = "Yankee Hotel Foxtrot",
+                seedPhraseHash = HashedValue(""),
+                createdAt = Clock.System.now()
+            ),
+            SeedPhrase(
+                guid = SeedPhraseId("2"),
+                label = "Robin Hood",
+                seedPhraseHash = HashedValue(""),
+                createdAt = Clock.System.now()
+            ),
+            SeedPhrase(
+                guid = SeedPhraseId("3"),
+                label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
+                seedPhraseHash = HashedValue(""),
+                createdAt = Clock.System.now()
+            ),
+            SeedPhrase(
+                guid = SeedPhraseId("4"),
+                label = "yet another phrase",
+                seedPhraseHash = HashedValue(""),
+                createdAt = Clock.System.now()
+            ),
+            SeedPhrase(
+                guid = SeedPhraseId("5"),
+                label = "and another phrase",
+                seedPhraseHash = HashedValue(""),
+                createdAt = Clock.System.now()
+            ),
+        ),
+        onRenamePhraseClick = {},
+        onDeletePhraseClick = {},
+        onCancelAccessClick = {},
+        accessButtonLabel = AccessButtonLabelEnum.RequestAccess,
+        timelockExpiration = null,
         accessButtonEnabled = true
     )
 }

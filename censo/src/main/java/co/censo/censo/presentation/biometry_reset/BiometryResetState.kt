@@ -41,6 +41,7 @@ data class BiometryResetState(
             || initiateBiometryResetResource is Resource.Loading
             || cancelBiometryResetResource is Resource.Loading
             || replaceBiometryResource is Resource.Loading
+            || navigationResource is Resource.Success
 
     val asyncError = userResponse is Resource.Error
             || initiateBiometryResetResource is Resource.Error

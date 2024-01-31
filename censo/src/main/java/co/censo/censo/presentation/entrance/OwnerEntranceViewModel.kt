@@ -63,12 +63,17 @@ class OwnerEntranceViewModel @Inject constructor(
     }
 
     private fun initAcceptedTermsOfUseVersion() {
-        state = state.copy(acceptedTermsOfUseVersion = secureStorage.acceptedTermsOfUseVersion())
+        val acceptedTermsOfUseVersion = secureStorage.acceptedTermsOfUseVersion()
+        state = state.copy(acceptedTermsOfUseVersion = acceptedTermsOfUseVersion)
     }
 
     fun setAcceptedTermsOfUseVersion(version: String) {
         secureStorage.setAcceptedTermsOfUseVersion(version)
-        state = state.copy(acceptedTermsOfUseVersion = version, showAcceptTermsOfUse = false)
+        state = state.copy(
+            acceptedTermsOfUseVersion = version,
+            showAcceptTermsOfUse = false,
+            signInUserResource = Resource.Loading
+        )
     }
 
     fun deleteUser() {
@@ -233,14 +238,15 @@ class OwnerEntranceViewModel @Inject constructor(
                 idToken = idToken
             )
 
-            state = if (signInUserResponse is Resource.Success) {
+            if (signInUserResponse is Resource.Success) {
                 userAuthenticated()
-                state.copy(
-                    signInUserResource = signInUserResponse,
-                    userIsOnboarding = retrieveUserOnboarding()
+                retrieveOwnerStateSync()
+                state = state.copy(
+                    signInUserResource = if (state.showAcceptTermsOfUse) signInUserResponse else Resource.Loading,
+                    userIsOnboarding = state.preFetchedUserResponse.success()?.data?.ownerState?.onboarding() ?: false
                 )
             } else {
-                state.copy(signInUserResource = signInUserResponse)
+                state = state.copy(signInUserResource = signInUserResponse)
             }
         }
     }
@@ -282,15 +288,23 @@ class OwnerEntranceViewModel @Inject constructor(
         state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
     }
 
-    fun retrieveOwnerStateAndNavigate() {
-        state = state.copy(userResponse = Resource.Loading)
+    private suspend fun retrieveOwnerStateSync() {
+        val preFetchedUserResponse = ownerRepository.retrieveUser()
+        state = state.copy(preFetchedUserResponse = preFetchedUserResponse)
+    }
 
+    fun retrieveOwnerStateAndNavigate() {
         viewModelScope.launch {
-            val userResponse = ownerRepository.retrieveUser()
+            if (state.preFetchedUserResponse is Resource.Uninitialized) {
+                state = state.copy(userResponse = Resource.Loading)
+                retrieveOwnerStateSync()
+            }
+
+            val userResponse = state.preFetchedUserResponse
 
             state = if (userResponse is Resource.Success) {
                 // update global state
-                ownerRepository.updateOwnerState(userResponse.map { it.ownerState })
+                ownerRepository.updateOwnerState(userResponse.data.ownerState)
 
                 val ownerState = userResponse.data.ownerState
                 loggedInRouting(ownerState)
@@ -304,15 +318,6 @@ class OwnerEntranceViewModel @Inject constructor(
                 state.copy(userResponse = userResponse, signInUserResource = Resource.Uninitialized)
             }
         }
-    }
-
-    private suspend fun retrieveUserOnboarding(): Boolean {
-        val userResponse = ownerRepository.retrieveUser()
-        if (userResponse is Resource.Success) {
-            val ownerState = userResponse.data!!.ownerState
-            return ownerState.onboarding()
-        }
-        return false
     }
 
     private suspend fun approverKeyValidation(ownerState: OwnerState) {
@@ -348,6 +353,11 @@ class OwnerEntranceViewModel @Inject constructor(
 
             is OwnerState.Initial -> {
                 Screen.InitialPlanSetupRoute.navToAndPopCurrentDestination().asResource()
+            }
+
+            is OwnerState.Empty -> {
+                // can never happen
+                Screen.EntranceRoute.navToAndPopCurrentDestination().asResource()
             }
         }
 

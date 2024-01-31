@@ -26,6 +26,7 @@ import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.asResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import javax.inject.Inject
@@ -41,32 +42,32 @@ class BiometryResetViewModel @Inject constructor(
     var state by mutableStateOf(BiometryResetState())
         private set
 
+    fun onStart() {
+        updateOwnerState(ownerRepository.getOwnerStateValue())
+    }
+
     fun onResume() {
-        viewModelScope.launch {
-            val ownerState = ownerRepository.getOwnerStateValue()
-            if (ownerState is Resource.Success) {
-                updateOwnerState(ownerState.data)
+        // setup polling timer to reload biometry reset approvals state
+        pollingVerificationTimer.start(
+            interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN,
+        ) {
+            if (state.userResponse !is Resource.Loading) {
+                retrieveOwnerState(silent = true)
             }
+        }
 
-            // setup polling timer to reload biometry reset approvals state
-            pollingVerificationTimer.startWithDelay(
-                initialDelay = CountDownTimerImpl.Companion.INITIAL_DELAY,
-                interval = CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
-            ) {
-                if (state.userResponse !is Resource.Loading) {
-                    retrieveOwnerState(silent = true)
-                }
-            }
-
-            totpCodeTimer.start(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
-                nextTotpTimerTick()
-            }
+        totpCodeTimer.start(CountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
+            nextTotpTimerTick()
         }
     }
 
     fun onPause() {
         pollingVerificationTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
         totpCodeTimer.stop()
+    }
+
+    fun onNavigate() {
+        pollingVerificationTimer.stop()
     }
 
     //region Retrieve user and determine UI state
@@ -78,9 +79,9 @@ class BiometryResetViewModel @Inject constructor(
         viewModelScope.launch {
             val ownerStateResource = ownerRepository.retrieveUser().map { it.ownerState }
 
-            ownerStateResource.onSuccess {
-                updateOwnerState(it)
-                ownerRepository.updateOwnerState(Resource.Success(it))
+            ownerStateResource.onSuccess { ownerState ->
+                updateOwnerState(ownerState)
+                ownerRepository.updateOwnerState(ownerState)
             }
 
             state = state.copy(userResponse = ownerStateResource)
@@ -317,7 +318,7 @@ class BiometryResetViewModel @Inject constructor(
 
             if (replaceBiometryResponse is Resource.Success) {
                 updateOwnerState(replaceBiometryResponse.data.ownerState)
-                ownerRepository.updateOwnerState(replaceBiometryResponse.map { it.ownerState })
+                ownerRepository.updateOwnerState(replaceBiometryResponse.data.ownerState)
             }
 
             replaceBiometryResponse.map { it.scanResultBlob!! }
@@ -327,11 +328,14 @@ class BiometryResetViewModel @Inject constructor(
 
     //region Reset and exit
     fun navigateToEntrance() {
-        state = state.copy(navigationResource = Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource())
+        state = state.copy(navigationResource = Screen.EntranceRoute.navToAndPopCurrentDestination().asResource())
     }
 
-    fun resetNavigationResource() {
-        state = state.copy(navigationResource = Resource.Uninitialized)
+    fun delayedResetNavigationResource() {
+        viewModelScope.launch {
+            delay(1000)
+            state = state.copy(navigationResource = Resource.Uninitialized)
+        }
     }
 
     private fun hideCloseConfirmationDialog() {
