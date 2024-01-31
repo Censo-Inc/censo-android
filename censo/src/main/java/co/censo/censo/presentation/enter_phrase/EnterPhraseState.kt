@@ -29,6 +29,7 @@ data class EnterPhraseState(
 
     //Image
     val imageBitmap: Bitmap? = null,
+    val retakingImage: Boolean = false,
 
     //Async
     val submitResource: Resource<Unit> = Resource.Uninitialized,

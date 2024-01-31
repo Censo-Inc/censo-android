@@ -53,6 +53,7 @@ import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.DisabledButtonTextStyle
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -79,7 +80,7 @@ fun PhraseHomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.60f )
+                .fillMaxHeight(0.60f)
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
@@ -175,6 +176,8 @@ fun PhraseHomeScreen(
                     },
                     enabled = accessButtonEnabled
                 ) {
+                    val buttonTextStyle =
+                        if (accessButtonEnabled) ButtonTextStyle else DisabledButtonTextStyle
                     Text(
                         text = stringResource(when (accessButtonLabel) {
                             AccessButtonLabelEnum.BeginAccess -> R.string.begin_access
@@ -182,7 +185,7 @@ fun PhraseHomeScreen(
                             AccessButtonLabelEnum.CancelAccess -> R.string.cancel_access
                             AccessButtonLabelEnum.ShowSeedPhrases -> R.string.show_seed_phrases
                         }),
-                        style = ButtonTextStyle.copy(fontSize = 20.sp)
+                        style = buttonTextStyle.copy(fontSize = 20.sp)
                     )
                 }
             }
