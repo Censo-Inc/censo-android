@@ -18,9 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -319,6 +316,7 @@ fun EnterPhraseScreen(
 
                         EnterPhraseUIState.CAPTURE_IMAGE -> {
                             CaptureSeedPhraseImage(
+                                retakingImage = state.retakingImage,
                                 onImageCaptured = viewModel::handleImageCapture,
                                 onError = viewModel::handleImageCaptureError
                             )
@@ -338,7 +336,7 @@ fun EnterPhraseScreen(
                                     ImageReview(
                                         imageBitmap = state.imageBitmap.asImageBitmap(),
                                         onSaveImage = viewModel::onSaveImage,
-                                        onCancelImageSave = viewModel::onCancelImageSave,
+                                        onCancelImageSave = viewModel::onRetakeImage,
                                         isAccessReview = false
                                     )
                                 }

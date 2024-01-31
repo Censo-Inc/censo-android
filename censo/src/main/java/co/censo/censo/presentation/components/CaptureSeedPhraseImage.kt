@@ -19,6 +19,7 @@ import java.util.concurrent.Executors
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CaptureSeedPhraseImage(
+    retakingImage: Boolean,
     onImageCaptured: (ImageProxy) -> Unit,
     onError: (ImageCaptureException) -> Unit
 ) {
@@ -34,8 +35,8 @@ fun CaptureSeedPhraseImage(
         }
     }
 
-
-    val showCamera = remember { mutableStateOf(false) }
+    //If retaking image then show camera immediately
+    val showCamera = remember { mutableStateOf(retakingImage) }
     when (showCamera.value) {
         false -> {
             PreCaptureImageStep {

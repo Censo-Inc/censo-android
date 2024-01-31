@@ -483,14 +483,16 @@ class EnterPhraseViewModel @Inject constructor(
 
             EnterPhraseUIState.CAPTURE_IMAGE -> {
                 state.copy(
-                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN
+                    enterWordUIState = EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
+                    retakingImage = false
                 )
             }
 
             EnterPhraseUIState.REVIEW_IMAGE -> {
                 state.copy(
                     enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE,
-                    imageBitmap = null
+                    imageBitmap = null,
+                    retakingImage = true
                 )
             }
 
@@ -752,13 +754,15 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun onSaveImage() {
+        state = state.copy(retakingImage = false)
         moveToLabel(seedPhraseType = SeedPhraseType.IMAGE)
     }
 
-    fun onCancelImageSave() {
+    fun onRetakeImage() {
         state = state.copy(
             imageBitmap = null,
-            enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE
+            enterWordUIState = EnterPhraseUIState.CAPTURE_IMAGE,
+            retakingImage = true
         )
     }
     //endregion
