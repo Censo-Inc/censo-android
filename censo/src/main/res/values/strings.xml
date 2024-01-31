@@ -196,8 +196,8 @@
     <string name="step_1">Step 1</string>
     <string name="step_2">Step 2</string>
     <string name="step_3">Step 3</string>
-    <string name="update_scan_your_face">Update Your Face Scan</string>
-    <string name="update_scan_your_face_blurb">Your face scan will be updated and immediately available for accessing your seed phrases. The previous face scan will be permanently removed from our storage.</string>
+    <string name="replace_scan_your_face">Replace Your Face Scan</string>
+    <string name="replace_scan_your_face_blurb">Your face scan will be replaced and immediately available for accessing your seed phrases. The previous face scan will be permanently removed from our storage.</string>
     <string name="scan_your_face">Scan your face</string>
     <string name="begin_face_scan">Begin face scan</string>
     <string name="your_seed_phrases">Your Seed Phrases</string>
