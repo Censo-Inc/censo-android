@@ -47,9 +47,7 @@ import com.google.android.gms.auth.api.identity.Identity
 
 @Composable
 fun CloudStorageHandler(
-    actionToPerform: CloudStorageActions,
-    participantId: ParticipantId,
-    encryptedPrivateKey: ByteArray?,
+    actionToPerform: CloudStorageAction,
     onActionSuccess: (privateKey: ByteArray) -> Unit,
     onActionFailed: (exception: Exception?) -> Unit,
     onCloudStorageAccessGranted: (() -> Unit)? = null,
@@ -121,9 +119,7 @@ fun CloudStorageHandler(
 
     DisposableEffect(key1 =  viewModel) {
         viewModel.onStart(
-            actionToPerform = actionToPerform,
-            participantId = participantId,
-            privateKey = encryptedPrivateKey
+            actionToPerform = actionToPerform
         )
         onDispose { viewModel.onDispose() }
     }

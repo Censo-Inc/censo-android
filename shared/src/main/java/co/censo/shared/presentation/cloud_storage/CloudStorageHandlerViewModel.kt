@@ -26,16 +26,9 @@ class CloudStorageHandlerViewModel @Inject constructor(
         private set
 
     fun onStart(
-        actionToPerform: CloudStorageActions,
-        participantId: ParticipantId,
-        privateKey: ByteArray?
+        actionToPerform: CloudStorageAction
     ) {
-        state = state.copy(
-            cloudActionToPerform = actionToPerform,
-            cloudStorageHandlerArgs = CloudStorageHandlerArgs(
-                participantId = participantId, encryptedPrivateKey = privateKey
-            )
-        )
+        state = state.copy(cloudActionToPerform = actionToPerform)
 
         performAction()
     }
@@ -45,12 +38,21 @@ class CloudStorageHandlerViewModel @Inject constructor(
             state = state.copy(shouldEnforceCloudStorageAccess = false)
         }
 
-        when (state.cloudActionToPerform) {
-            CloudStorageActions.UNINITIALIZED -> {}
-            CloudStorageActions.UPLOAD -> savePrivateKeyToCloud(bypassScopeCheckForCloudStorage)
-            CloudStorageActions.DOWNLOAD -> loadPrivateKeyFromCloud(bypassScopeCheckForCloudStorage)
-            CloudStorageActions.ENFORCE_ACCESS -> enforceCloudStorageAccess(
+        when (val action = state.cloudActionToPerform) {
+            CloudStorageAction.Uninitialized -> {}
+
+            CloudStorageAction.EnforceAccess -> enforceCloudStorageAccess(
                 userGrantedCloudStorageAccess = bypassScopeCheckForCloudStorage
+            )
+
+            is CloudStorageAction.Download -> loadPrivateKeyFromCloud(
+                bypassScopeCheckForCloudStorage = bypassScopeCheckForCloudStorage,
+                participantId = action.participantId
+            )
+            is CloudStorageAction.Upload -> savePrivateKeyToCloud(
+                bypassScopeCheckForCloudStorage = bypassScopeCheckForCloudStorage,
+                participantId = action.participantId,
+                encryptedPrivateKey = action.encrpytedPrivateKey
             )
         }
     }
@@ -65,15 +67,14 @@ class CloudStorageHandlerViewModel @Inject constructor(
 
     private fun savePrivateKeyToCloud(
         bypassScopeCheckForCloudStorage: Boolean = false,
+        participantId: ParticipantId,
+        encryptedPrivateKey: ByteArray
     ) {
-        val privateKey = state.cloudStorageHandlerArgs.encryptedPrivateKey
-        val participantId = state.cloudStorageHandlerArgs.participantId
-
-        if (privateKey == null || privateKey.isEmpty()) {
+        if (encryptedPrivateKey.isEmpty()) {
             state = state.copy(
                 cloudStorageActionResource = Resource.Error(
                     exception = Exception(
-                        "Attempted to save private key but private key was null or empty"
+                        "Attempted to save private key but private key was empty"
                     )
                 )
             )
@@ -94,13 +95,15 @@ class CloudStorageHandlerViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             try {
                 val uploadResource = keyRepository.saveKeyInCloud(
-                    key = privateKey,
+                    key = encryptedPrivateKey,
                     participantId = participantId,
                     bypassScopeCheck = bypassScopeCheckForCloudStorage
                 )
 
                 if (uploadResource is Resource.Success) {
-                    state = state.copy(cloudStorageActionResource = Resource.Success(privateKey))
+                    state = state.copy(cloudStorageActionResource = Resource.Success(
+                        encryptedPrivateKey
+                    ))
                 } else if (uploadResource is Resource.Error)  {
                     uploadResource.exception?.sendError(CrashReportingUtil.CloudUpload)
                     state = state.copy(cloudStorageActionResource = Resource.Error(exception = uploadResource.exception))
@@ -114,8 +117,8 @@ class CloudStorageHandlerViewModel @Inject constructor(
 
     private fun loadPrivateKeyFromCloud(
         bypassScopeCheckForCloudStorage: Boolean = false,
+        participantId: ParticipantId
     ) {
-        val participantId = state.cloudStorageHandlerArgs.participantId
         if (participantId.value.isEmpty()) {
             val e = Exception("Attempted to load private key with empty participantID value")
             e.sendError(CrashReportingUtil.CloudDownload)
@@ -136,8 +139,8 @@ class CloudStorageHandlerViewModel @Inject constructor(
 
                 if (downloadResource is Resource.Success) {
                     val key = downloadResource.data
-                    if (key == null || key.isEmpty()) {
-                        val e = Exception("Retrieved private key was null or empty")
+                    if (key.isEmpty()) {
+                        val e = Exception("Retrieved private key was empty")
                         e.sendError(CrashReportingUtil.CloudDownload)
                         state = state.copy(
                             cloudStorageActionResource = Resource.Error(
