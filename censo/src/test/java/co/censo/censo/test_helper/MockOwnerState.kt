@@ -31,7 +31,9 @@ val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
         approverKeysSignatureByIntermediateKey = Base64EncodedData(base64Encoded = "AA"),
         masterKeySignature = null,
         ownerEntropy = generateEntropy(),
-        owner = trustedOwnerApprover
+        owner = trustedOwnerApprover,
+        downgradedAt = null,
+        beneficiary = null,
     ), vault = Vault(
         seedPhrases = listOf(
             mockSeedPhrase

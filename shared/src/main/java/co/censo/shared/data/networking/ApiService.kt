@@ -13,6 +13,9 @@ import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.maintenance.GlobalMaintenanceState
 import co.censo.shared.data.model.AcceptApprovershipApiResponse
 import co.censo.shared.data.model.AcceptAuthenticationResetRequestApiResponse
+import co.censo.shared.data.model.AcceptBeneficiaryInvitationApiResponse
+import co.censo.shared.data.model.ActivateBeneficiaryApiRequest
+import co.censo.shared.data.model.ActivateBeneficiaryApiResponse
 import co.censo.shared.data.model.ApproveAccessApiRequest
 import co.censo.shared.data.model.ApproveAccessApiResponse
 import co.censo.shared.data.model.AttestationChallengeResponse
@@ -36,6 +39,8 @@ import co.censo.shared.data.model.GetSeedPhraseApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
 import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.InitiateAuthenticationResetApiResponse
+import co.censo.shared.data.model.InviteBeneficiaryApiRequest
+import co.censo.shared.data.model.InviteBeneficiaryApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
 import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerProof
@@ -43,6 +48,7 @@ import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.RejectAuthenticationResetRequestApiResponse
+import co.censo.shared.data.model.RejectBeneficiaryVerificationApiResponse
 import co.censo.shared.data.model.ReplaceAuthenticationApiRequest
 import co.censo.shared.data.model.ReplaceAuthenticationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
@@ -66,6 +72,8 @@ import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
 import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiResponse
+import co.censo.shared.data.model.SubmitBeneficiaryVerificationApiRequest
+import co.censo.shared.data.model.SubmitBeneficiaryVerificationApiResponse
 import co.censo.shared.data.model.SubmitPurchaseApiRequest
 import co.censo.shared.data.model.SubmitPurchaseApiResponse
 import co.censo.shared.data.model.TimelockApiResponse
@@ -257,6 +265,12 @@ interface ApiService {
         @Body replacePolicyApiRequest: ReplacePolicyShardsApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplacePolicyShardsApiResponse>
+
+    @POST("v1/policy/beneficiary")
+    suspend fun inviteBeneficiary(
+        @Body apiRequest: InviteBeneficiaryApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<InviteBeneficiaryApiResponse>
 
     @POST("/v1/approvership-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptApprovership(
@@ -450,6 +464,31 @@ interface ApiService {
         @Body apiRequest: ReplaceAuthenticationApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplaceAuthenticationApiResponse>
+
+    @POST("beneficiary-invitations/${INVITATION_ID}/accept")
+    suspend fun acceptBeneficiaryInvitation(
+        @Path(value = INVITATION_ID) invitationId: String,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ): RetrofitResponse<AcceptBeneficiaryInvitationApiResponse>
+
+    @POST("policy/beneficiary/reject")
+    suspend fun rejectBeneficiaryVerification(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<RejectBeneficiaryVerificationApiResponse>
+
+    @POST("beneficiary-invitations/${INVITATION_ID}/verification")
+    suspend fun submitBeneficiaryVerification(
+        @Path(value = INVITATION_ID) invitationId: String,
+        @Body requestBody: SubmitBeneficiaryVerificationApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<SubmitBeneficiaryVerificationApiResponse>
+
+    @POST("policy/beneficiary/activate")
+    suspend fun activateBeneficiary(
+        @Body requestBody: ActivateBeneficiaryApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<ActivateBeneficiaryApiResponse>
+
 
 }
 

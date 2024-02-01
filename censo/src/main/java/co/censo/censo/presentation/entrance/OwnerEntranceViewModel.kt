@@ -10,6 +10,7 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.Beneficiary
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
@@ -366,6 +367,10 @@ class OwnerEntranceViewModel @Inject constructor(
                     is OwnerState.Empty -> {
                         // can never happen
                         Screen.EntranceRoute.route
+                    }
+
+                    is OwnerState.Beneficiary -> {
+                        Screen.BeneficiarySetup.buildNavRoute(state.beneficiaryInviteId ?: "")
                     }
                 }
             }

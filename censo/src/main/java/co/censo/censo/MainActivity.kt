@@ -182,7 +182,7 @@ class MainActivity : FragmentActivity() {
             ) { backStackEntry ->
                 val inviteId = backStackEntry.arguments?.getString(Screen.BeneficiarySetup.INVITE_ID_ARG) ?: ""
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Text(text = "Beneficiary Invited Id: $inviteId")
+                    Text(text = "")
                 }
             }
             composable(
