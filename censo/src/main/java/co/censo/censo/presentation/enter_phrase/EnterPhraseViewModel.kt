@@ -610,7 +610,7 @@ class EnterPhraseViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val downloadResponse = try {
                 keyRepository.retrieveKeyFromCloud(
-                    participantId = participantId,
+                    id = participantId.value,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {

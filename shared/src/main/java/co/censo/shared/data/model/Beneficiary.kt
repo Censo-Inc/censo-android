@@ -20,8 +20,15 @@ data class InviteBeneficiaryApiResponse(
 )
 
 @Serializable
+data class AcceptBeneficiaryInvitationApiRequest(
+    val biometryVerificationId: BiometryVerificationId,
+    val biometryData: FacetecBiometry,
+)
+
+@Serializable
 data class AcceptBeneficiaryInvitationApiResponse(
     val ownerState: OwnerState,
+    val scanResultBlob: BiometryScanResultBlob
 )
 
 @Serializable

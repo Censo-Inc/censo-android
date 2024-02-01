@@ -16,7 +16,6 @@ import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.asResource
-import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

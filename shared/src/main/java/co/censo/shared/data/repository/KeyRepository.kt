@@ -29,15 +29,15 @@ interface KeyRepository {
     fun decryptWithDeviceKey(data: ByteArray) : ByteArray
     suspend fun saveKeyInCloud(
         key: ByteArray,
-        participantId: ParticipantId,
+        id: String,
         bypassScopeCheck: Boolean = false,
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
-        participantId: ParticipantId,
-        bypassScopeCheck: Boolean = false,
-    ): Resource<ByteArray>
-    suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
-    suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
+        id: String,
+        bypassScopeCheck: Boolean = false
+    ) : Resource<ByteArray>
+    suspend fun userHasKeySavedInCloud(id: String): Boolean
+    suspend fun deleteSavedKeyFromCloud(id: String): Resource<Unit>
     suspend fun deleteDeviceKeyIfPresent(keyId: String)
 
     //region CloudAccess
@@ -97,8 +97,8 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      */
     override suspend fun saveKeyInCloud(
         key: ByteArray,
-        participantId: ParticipantId,
-        bypassScopeCheck: Boolean,
+        id: String,
+        bypassScopeCheck: Boolean
     ) : Resource<Unit> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
@@ -110,7 +110,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         val response = try {
             cloudStorage.uploadFile(
                 fileContent = key.toHexString(),
-                participantId = participantId,
+                id = id,
             )
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.CloudUpload)
@@ -130,8 +130,8 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      * the caller should wrap this method in a try catch
      */
     override suspend fun retrieveKeyFromCloud(
-        participantId: ParticipantId,
-        bypassScopeCheck: Boolean,
+        id: String,
+        bypassScopeCheck: Boolean
     ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
@@ -141,7 +141,8 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         }
 
         val response = try {
-            cloudStorage.retrieveFileContents(participantId)
+            cloudStorage.retrieveFileContents(id)
+
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.CloudDownload)
             Resource.Error(exception = e)
@@ -172,8 +173,8 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      * Bypass scope check by default,
      * if the user has not granted permission for GDrive access, there is no key to check for
      */
-    override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
-        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
+    override suspend fun userHasKeySavedInCloud(id: String): Boolean {
+        val downloadResource = retrieveKeyFromCloud(id, bypassScopeCheck = true)
         return if (downloadResource is Resource.Success) {
             downloadResource.data.isNotEmpty()
         } else {
@@ -181,8 +182,8 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         }
     }
 
-    override suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit> {
-        return cloudStorage.deleteFile(participantId)
+    override suspend fun deleteSavedKeyFromCloud(id: String): Resource<Unit> {
+        return cloudStorage.deleteFile(id)
     }
 
     override suspend fun deleteDeviceKeyIfPresent(keyId: String) {

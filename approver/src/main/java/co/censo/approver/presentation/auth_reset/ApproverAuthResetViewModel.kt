@@ -234,7 +234,7 @@ class ApproverAuthResetViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val downloadResponse = try {
                 keyRepository.retrieveKeyFromCloud(
-                    participantId = state.participantId,
+                    id = state.participantId.value,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {

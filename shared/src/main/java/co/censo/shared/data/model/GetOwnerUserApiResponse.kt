@@ -145,6 +145,21 @@ fun Approver.ProspectApprover.deeplink(): String {
 
 @Serializable
 sealed class BeneficiaryStatus {
+    fun resolveDeviceEncryptedTotpSecret() =
+        when (this) {
+            is Accepted -> deviceEncryptedTotpSecret
+            is Initial -> deviceEncryptedTotpSecret
+            is VerificationSubmitted -> deviceEncryptedTotpSecret
+            is Activated -> null
+        }
+
+    fun shouldGenerateBeneficiaryTotp() =
+        when (this) {
+            is VerificationSubmitted,
+            is Initial,
+            is Accepted -> true
+            is Activated -> false
+        }
     @Serializable
     @SerialName("Initial")
     data class Initial(
@@ -167,6 +182,7 @@ sealed class BeneficiaryStatus {
         val timeMillis: Long,
         val beneficiaryPublicKey: Base58EncodedBeneficiaryPublicKey,
         val submittedAt: Instant,
+        val approverPublicKeys: List<ApproverPublicKey>,
     ) : BeneficiaryStatus()
 
     @Serializable
@@ -175,6 +191,12 @@ sealed class BeneficiaryStatus {
         val confirmedAt: Instant,
     ) : BeneficiaryStatus()
 }
+
+@Serializable
+data class ApproverPublicKey(
+    val participantId: ParticipantId,
+    val publicKey: Base58EncodedApproverPublicKey,
+)
 
 @Serializable
 data class Beneficiary(
@@ -405,7 +427,7 @@ sealed class OwnerState {
         is Empty -> false
         is Initial -> true
         is Ready -> !onboarded
-        is Beneficiary -> true
+        is Beneficiary -> false
     }
 
 }

@@ -30,6 +30,7 @@ fun VaultTopBar(
     val title = when (bottomNavItem) {
         BottomNavItem.Phrases -> stringResource(R.string.seed_phrases_app_bar_title)
         BottomNavItem.Settings,
+        BottomNavItem.Beneficiary,
         BottomNavItem.Home -> ""
     }
 

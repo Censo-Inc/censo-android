@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.main
 
-import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,7 +11,6 @@ import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessStatus
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.data.model.SubscriptionStatus
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
@@ -38,7 +36,7 @@ enum class AccessButtonLabelEnum {
 class VaultScreenViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val pushRepository: PushRepository,
-    private val timer: VaultCountDownTimer
+    private val timer: VaultCountDownTimer,
 ) : ViewModel() {
 
     var state by mutableStateOf(VaultScreenState())
@@ -484,5 +482,4 @@ class VaultScreenViewModel @Inject constructor(
     fun resetDeletePolicySetupResource() {
         state = state.copy(deletePolicySetup = Resource.Uninitialized)
     }
-
 }

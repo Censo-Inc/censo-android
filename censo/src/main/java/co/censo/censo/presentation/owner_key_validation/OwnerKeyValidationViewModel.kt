@@ -42,9 +42,10 @@ class OwnerKeyValidationViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val hasKeySavedInCloud = try {
                 val downloadResult = keyRepository.retrieveKeyFromCloud(
-                    participantId,
+                    participantId.value,
                     bypassScopeCheck = true,
                     )
+
                 downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
                 observeCloudAccessStateForAccessGranted(

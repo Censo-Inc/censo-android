@@ -27,6 +27,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.beneficiary_owner.BeneficiaryHomeScreen
 import co.censo.censo.presentation.components.DeleteUserConfirmationUI
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
@@ -405,6 +406,8 @@ fun MainVaultScreen(
                                     timelockSetting = viewModel.state.ownerState?.timelockSetting ?: TimelockSetting(0L, null,  null)
                                 )
                             }
+
+                        BottomNavItem.Beneficiary -> BeneficiaryHomeScreen()
                     }
 
 

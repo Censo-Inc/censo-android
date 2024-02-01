@@ -148,6 +148,7 @@
     <string name="submit_again">Submit again</string>
     <string name="more_information">more information</string>
     <string name="save_seed_phrase">Save seed phrase</string>
+    <string name="create_beneficiary">Create Beneficiary</string>
     <string name="rename_seed_phrase">Rename seed phrase</string>
     <string name="enter_word">Enter word</string>
     <string name="clear_word_entry">clear word entry</string>
@@ -177,15 +178,18 @@
     <string name="exit_accessing_phrase">Exit accessing phrases</string>
     <string name="submit_word">Submit word</string>
     <string name="label_your_seed_phrase">Label your seed phrase</string>
+    <string name="label_your_beneficiary">Name your beneficiary</string>
     <string name="rename_your_seed_phrase">Rename your seed phrase</string>
     <string name="seed_phrase_label_message">Give your seed phrase a unique label so you can easily identify it.</string>
+    <string name="beneficiary_label_message">Give your beneficiary a nickname to identify them.</string>
     <string name="rename_seed_phrase_label_message">Give your seed phrase a different label</string>
-    <string name="enter_a_nickname">Enter a nickname…</string>
+    <string name="enter_a_nickname">Enter a nickname</string>
     <string name="enter_a_label">Enter a label…</string>
     <string name="add_seed_phrases">Add seed phrases</string>
     <string name="how_to_provide">How do you want to provide your seed phrase?</string>
     <string name="add_seed_phrase_message">Your seed phrase will be encrypted so only you can access it.</string>
     <string name="about_to_delete_user_first_half">You are about to delete</string>
+    <string name="about_to_delete_beneficiary_account">You are about to delete this account. You can restart with a different account if needed.\n\nIf you are sure, please type:\n\n</string>
     <string name="all">ALL</string>
     <string name="about_to_delete_user_second_half">of your data.\n\nSeed phrases you have added will no longer be accessible. This action cannot be reversed.\n\nIf you are sure, please type:\n\n</string>
     <plurals name="delete_my_data_confirmation_text">
@@ -211,8 +215,10 @@
     <string name="get_live_with_your_approver_message">For maximum security, it\'s best to be face-to-face with the person you\'re adding as an approver in a private location.\n\nThis ensures direct and private sharing of the necessary codes and information, reducing the risk of eavesdropping and interception.</string>
     <string name="activate_approver">Activate</string>
     <string name="activate_your_approver_message">Activating %1$s as an approver will take about 2 minutes. This activation should preferably take place while you\'re on the phone or in-person to ensure that you are activating the proper approver.</string>
+    <string name="activate_your_beneficiary_message">Verifying %1$s as a beneficiary will take about 2 minutes. This verification should preferably take place while you\'re on the phone or in-person to ensure that you are verifying the proper approver.</string>
     <string name="you_must_do_two_things">You must do two things:</string>
-    <string name="share_the_app_title">Share Approver App</string>
+    <string name="share_approver_app_title">Share Approver App</string>
+    <string name="share_censo_app_title">Share Censo App</string>
     <string name="share_the_link_title">Share Invite Link</string>
     <string name="read_the_code_title">Read Code</string>
     <string name="share_this_link_title">Share this link</string>
@@ -220,6 +226,7 @@
     <string name="dowloand_the_app_message">They must download Censo Approver app from the Apple App Store or Google Play Store.</string>
     <string name="share_the_link_message">After they have installed Censo Approver app, send them this unique, secret link.</string>
     <string name="share_the_code_message">Read aloud this code and have %1$s enter it into the Censo Approver app to authenticate you.</string>
+    <string name="share_the_beneficiary_code_message">Read aloud this code and have %1$s enter it into the Censo app to authenticate you.</string>
     <string name="rename_approver">Rename approver</string>
     <string name="edit_approver_name">edit approver name</string>
     <string name="select_approver">select_approver</string>
@@ -246,9 +253,8 @@
     <string name="select_phrase_length">How long should the seed phrase be?</string>
     <string name="seed_phrase_words_count">%1$s words</string>
     <string name="count_seed_phrases">%1$s seed phrases</string>
-
     <string name="app_content_is_locked_behind_facescan">app content is locked behind facescan</string>
-
+    <string name="key_failed_to_save_please_save_again">In order to use become a Beneficiary, we need to store data in your Google Drive. Please continue.</string>
     <string name="home_nav_title">Home</string>
     <string name="phrases_nav_title">My Phrases</string>
     <string name="settings_nav_title">Settings</string>
@@ -336,6 +342,7 @@
     <string name="click_past_button_message">When you tap the Paste From Clipboard button, your seed phrase will be pasted from the clipboard, and the clipboard will then be cleared.\n\nYou will then have the opportunity to review the seed phrase before saving it.</string>
     <string name="paste_from_clipboard">Paste From Clipboard</string>
     <string name="subsequent_seed_phrase_saved">Your seed phrase is securely stored.\n\nIt can be accessed only by you.</string>
+    <string name="beneficiary_activated_message">Thanks for helping someone keep their crypto safe.\n\nYou may now close the app.</string>
     <string name="error_occurred_trying_to_get_user_data_please_try_again">Error occurred trying to get user data. Please try again.</string>
     <string name="it_s_time_for_a_better_way">It’s time for a better way.</string>
     <string name="it_s_time_for_a_seed_phrase_manager">IT’S TIME FOR A\nSEED PHRASE\nMANAGER</string>
@@ -349,9 +356,12 @@
     <string name="affirmative_biometric_consent">By tapping Begin face scan, I consent to the collection and processing of a scan of my face for the purposes of authentication in connection with my use of the Censo App.</string>
     <string name="swipe_back_and_forth_to_review_words">swipe back and forth to review words</string>
     <string name="add_approver_title">Add Approver</string>
-    <string name="share_the_app_link_for_download">Share this link so %1$s can download the Censo Approver app</string>
+    <string name="share_the_approver_app_link_for_download">Share this link so %1$s can download the Censo Approver app</string>
+    <string name="share_the_censo_app_link_for_download">Share this link so %1$s can download the Censo app</string>
     <string name="share_invite_link_approver_onboarding">Share this link and have %1$s click it or paste into their Approver app</string>
+    <string name="share_invite_link_beneficiary_onboarding">Share this link and have %1$s tap on it to open the Censo app</string>
     <string name="onboarding_approver_read_auth_code">Read code that appears here and have %1$s enter it in their Approver app.</string>
+    <string name="onboarding_beneficiary_read_auth_code">Read code that appears here and have %1$s enter it in the Censo app.</string>
     <string name="share_link_access_message">Share this link and have %1$s click it or paste into their Approver app.</string>
     <string name="enter_code_access_message">Have %1$s read aloud the 6-digit code from their Approver app and enter it below. </string>
     <string name="activate_approver_name">Verify %1$s</string>
@@ -502,4 +512,13 @@
     <string name="unknown_promo_code">Unknown promo code</string>
     <string name="promo_code_accepted">Promo code accepted!</string>
     <string name="promo_code_accepted_message">You\'ll get rewarded more when points arrive</string>
+    <string name="beneficiary">Beneficiary</string>
+    <string name="beneficiary_explainer_text">Ensure your digital assets are protected for your loved ones by adding a beneficiary.\n\nA beneficiary will be able to securely access your seed phrases in case of unforeseen circumstances.</string>
+    <string name="verify_now">Verify now</string>
+    <string name="standard_beneficiary_message">You\'ve been chosen to be the beneficiary for someone using Censo to secure their seed phrases.\n\nThe setup process is simple, anonymous, secure, and will only take a few minutes of your time.</string>
+    <string name="becoming_a_beneficiary">Becoming a beneficiary?</string>
+    <string name="re_enter_beneficiary_message">If you’ve been chosen by someone using Censo to be their beneficiary, you’ve come to the right place!\n\nTo continue, they must send you a link.\n\nOnce you receive it, you can tap on it to continue.\n\nOr, simply copy the link to the clipboard and paste using the button below.</string>
+    <string name="secure_your_seed_phrases">Secure your seed phrases</string>
+    <string name="close">Exit screen</string>
+    <string name="delete_beneficiary_user">Delete Beneficiary User</string>
 </resources>

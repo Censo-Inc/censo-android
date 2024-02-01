@@ -60,17 +60,29 @@ sealed class Screen(val route: String) {
         }
     }
 
-    data object OnboardBeneficiaryRoute : Screen("onboard_beneficiary")
+    data object BeneficiarySignInRoute : Screen("beneficiary_sign_in") {
+        const val BENEFICIARY_INVITE_ID = "beneficiary_invite_id"
+        fun buildBeneficiaryNavRoute(beneficiaryInviteId: String) =
+            "${BeneficiarySignInRoute.route}/${beneficiaryInviteId}"
 
-    data object BeneficiarySetup: Screen("beneficiary_setup") {
+    }
+
+    data object AcceptBeneficiary : Screen("accept_beneficiary") {
         const val INVITE_ID_ARG = "invite_id_arg"
+        const val NO_INVITE_ID = "no_invite_id"
 
         fun buildNavRoute(
-            beneficiaryInviteId: String,
+            beneficiaryInviteId: String?,
         ): String {
-            return "${BeneficiarySetup.route}/${beneficiaryInviteId}"
+            return if (beneficiaryInviteId.isNullOrEmpty()) {
+                "${AcceptBeneficiary.route}/${NO_INVITE_ID}"
+            }else {
+                "${AcceptBeneficiary.route}/${beneficiaryInviteId}"
+            }
         }
     }
+
+    data object Beneficiary: Screen("beneficiary_setup")
 
     object LoginIdResetRoute : Screen("login_id_reset_route") {
         const val DL_RESET_TOKEN_KEY = "reset_token_key"
@@ -116,6 +128,5 @@ sealed class Screen(val route: String) {
         const val TIMESTAMP_KEY = "timestamp_key"
         const val SIGNATURE_KEY = "signature_key"
         const val NAME_KEY = "name_key"
-        const val BENEFICIARY_KEY = "beneficiary_key"
     }
 }

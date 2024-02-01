@@ -47,13 +47,8 @@
     <string name="get_unique_link">To continue, the person you are assisting must send you a link.</string>
     <string name="once_receive_it">Once you receive it, you can tap on it to continue.</string>
     <string name="or_simply_copy_link">Or, simply copy the link to the clipboard and paste using the button below.</string>
-    <string name="enter_the_code">Enter the code</string>
     <string name="read_code_message">Read aloud this 6-digit code only to the person you are assisting. Once they have successfully entered it, their identity will have been verified and the request approved.</string>
     <string name="read_code">Read code</string>
-    <string name="code_entered">Code Entered</string>
-    <string name="waiting_on_owner_to_approve_code">Waiting for the code to be verified…</string>
-    <string name="incorrect_code_entered_please_try_again">Incorrect code entered. Please try again.</string>
-    <string name="enter_the_6_digit_code_from_the_seed_phrase_owner">The person you are assisting will give you a 6-digit code. Enter it below.</string>
     <string name="failed_to_get_invite_clipboard">Failed to get invite from clipboard. Please try again.</string>
     <string name="found_invite_clipboard">Found invite from clipboard!</string>
     <string name="accepted_as_an_approver">Accepted as an approver. Let\'s get you verified.</string>
@@ -63,7 +58,6 @@
     <string name="active_approver">Active approver</string>
     <string name="settings">Settings</string>
     <string name="key_failed_to_save_please_save_again">In order to use the Approver app, we need to store access data in your Google Drive. Please continue</string>
-    <string name="save_key_to_cloud">Save Key</string>
     <string name="sensible_crypto_security">sensible crypto security</string>
     <string name="hello_approver">Hello Approver!</string>
     <string name="approver_you_have_been_chosen">You\'ve been chosen by someone to help keep their crypto safe. Please tap the continue button when you\'re ready to begin helping them.</string>

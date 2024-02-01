@@ -42,4 +42,12 @@
     <string name="camera_closed_error">Camera closed</string>
     <string name="failed_to_capture_photo_error">Failed to capture photo</string>
     <string name="unable_to_capture_photo_error">Unable to capture photo</string>
+
+    <string name="enter_the_code">Enter the code</string>
+    <string name="code_entered">Code Entered</string>
+    <string name="waiting_on_owner_to_approve_code">Waiting for the code to be verified…</string>
+    <string name="incorrect_code_entered_please_try_again">Incorrect code entered. Please try again.</string>
+    <string name="enter_the_6_digit_code_from_the_seed_phrase_owner">The person you are assisting will give you a 6-digit code. Enter it below.</string>
+    <string name="save_key_to_cloud">Save Key</string>
+
 </resources>

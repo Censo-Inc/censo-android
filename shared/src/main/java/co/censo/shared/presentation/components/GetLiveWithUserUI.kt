@@ -39,7 +39,7 @@ fun GetLiveWithUserUI(
     title: String,
     message: String,
     showSecondButton: Boolean = true,
-    activatingApprover: Boolean = false,
+    buttonText: String,
     onContinueLive: () -> Unit,
     onResumeLater: () -> Unit,
 ) {
@@ -92,10 +92,6 @@ fun GetLiveWithUserUI(
 
             Spacer(modifier = Modifier.height(verticalSpacingHeight))
 
-            val buttonText =
-                if (activatingApprover) stringResource(R.string.activate_now) else stringResource(
-                    R.string.continue_live
-                )
             StandardButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onContinueLive,
@@ -138,7 +134,7 @@ fun LargeGetLiveWithUserUIPreview() {
         GetLiveWithUserUI(
             title = "Activate Neo",
             message = "Activating New as an approver will take about 2 minutes. This activation should preferable take place while you're on the phone or in-person to ensure you are activating the proper approver.",
-            activatingApprover = true,
+            buttonText = "Activate Now",
             onContinueLive = {},
             onResumeLater = {},
         )
@@ -156,7 +152,7 @@ fun NormalGetLiveWithUserUIPreview() {
         GetLiveWithUserUI(
             title = "Activate Neo",
             message = "Activating New as an approver will take about 2 minutes. This activation should preferable take place while you're on the phone or in-person to ensure you are activating the proper approver.",
-            activatingApprover = true,
+            buttonText = "Verify Now",
             onContinueLive = {},
             onResumeLater = {},
         )
@@ -174,7 +170,7 @@ fun SmallGetLiveWithUserUIPreview() {
         GetLiveWithUserUI(
             title = "Activate Neo",
             message = "Activating New as an approver will take about 2 minutes. This activation should preferable take place while you're on the phone or in-person to ensure you are activating the proper approver.",
-            activatingApprover = true,
+            buttonText = "Verify Now",
             onContinueLive = {},
             onResumeLater = {},
         )

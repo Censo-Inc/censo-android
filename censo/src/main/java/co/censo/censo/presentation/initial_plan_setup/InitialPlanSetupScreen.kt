@@ -168,13 +168,20 @@ fun InitialPlanSetupScreen(
                                 WelcomeScreenUI(
                                     isPromoCodeEnabled = !state.promoCodeAccepted,
                                     showPromoCodeUI = viewModel::showPromoCodeUI,
-                                    navigateToPlanSetup = {
+                                    onMainButtonClick = {
                                         viewModel.changeWelcomeStep(WelcomeStep.ScanningFace)
+                                    },
+                                    onMinorButtonClick = {
+                                        navController.navigate(
+                                            Screen.AcceptBeneficiary.buildNavRoute(
+                                                null
+                                            )
+                                        )
                                     }
                                 )
                             } else {
                                 ScanFaceInformationUI(
-                                    startPlanSetup = viewModel::determineUIStatus,
+                                    beginFaceScan = viewModel::determineUIStatus,
                                     isInfoViewVisible = showInfoView.value,
                                     showInfoView = {
                                         showInfoView.value = true
@@ -241,7 +248,7 @@ fun InitialPlanSetupScreen(
 
 @Composable
 fun ScanFaceInformationUI(
-    startPlanSetup: () -> Unit,
+    beginFaceScan: () -> Unit,
     isInfoViewVisible: Boolean,
     showInfoView: () -> Unit
 ) {
@@ -278,7 +285,7 @@ fun ScanFaceInformationUI(
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             BeginFaceScanButton(
                 spacing = screenHeight * 0.025f,
-                onBeginFaceScan = startPlanSetup
+                onBeginFaceScan = beginFaceScan
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.025f))
             LearnMoreUI {
@@ -333,7 +340,7 @@ fun PromoCodeDialog(title: String, message: String, onDismiss: () -> Unit) {
 fun LargeInitialPlanSetupStandardUIPreview() {
     ScanFaceInformationUI(
         isInfoViewVisible = false,
-        startPlanSetup = {},
+        beginFaceScan = {},
         showInfoView = {}
     )
 }
@@ -343,7 +350,7 @@ fun LargeInitialPlanSetupStandardUIPreview() {
 fun MediumInitialPlanSetupStandardUIPreview() {
     ScanFaceInformationUI(
         isInfoViewVisible = false,
-        startPlanSetup = {},
+        beginFaceScan = {},
         showInfoView = {}
     )
 }
@@ -353,7 +360,7 @@ fun MediumInitialPlanSetupStandardUIPreview() {
 fun SmallInitialPlanSetupStandardUIPreview() {
     ScanFaceInformationUI(
         isInfoViewVisible = false,
-        startPlanSetup = {},
+        beginFaceScan = {},
         showInfoView = {}
     )
 }

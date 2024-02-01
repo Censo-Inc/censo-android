@@ -150,9 +150,7 @@ class ApproverAccessViewModel @Inject constructor(
         }
     }
 
-    private fun confirmOrRejectOwnerAccessRequest(
-        participantId: ParticipantId, accessConfirmation: ApproverPhase.AccessConfirmation
-    ) {
+    private fun confirmOrRejectOwnerAccessRequest(accessConfirmation: ApproverPhase.AccessConfirmation) {
         val accessTotp = generateAccessTotp(
             accessConfirmation.encryptedTotpSecret,
             Instant.fromEpochMilliseconds(accessConfirmation.ownerKeySignatureTimeMillis)
@@ -352,7 +350,7 @@ class ApproverAccessViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val downloadResponse = try {
                 keyRepository.retrieveKeyFromCloud(
-                    participantId = ParticipantId(state.participantId),
+                    id = state.participantId,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
@@ -385,7 +383,7 @@ class ApproverAccessViewModel @Inject constructor(
         //Grab the accessConfirmation data from state
         val accessConfirmation = state.accessConfirmationPhase
         if (accessConfirmation != null) {
-            confirmOrRejectOwnerAccessRequest(ParticipantId(state.participantId), accessConfirmation)
+            confirmOrRejectOwnerAccessRequest(accessConfirmation)
         } else {
             Exception().sendError(CrashReportingUtil.AccessConfirmation)
             state =

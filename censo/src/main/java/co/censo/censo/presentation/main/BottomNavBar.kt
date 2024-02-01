@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import co.censo.censo.BuildConfig
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 
@@ -40,6 +41,11 @@ val bottomNavItems = listOf(
     BottomNavItem.Home,
     BottomNavItem.Phrases,
     BottomNavItem.Settings,
+    *(if (BuildConfig.BENEFICIARY_ENABLED) {
+        arrayOf(BottomNavItem.Beneficiary)
+    } else {
+        arrayOf()
+    })
 )
 
 @Composable
@@ -87,5 +93,9 @@ enum class BottomNavItem(@StringRes val text: Int, @DrawableRes val icon: Int) {
     Settings(
         text = R.string.settings_nav_title,
         icon = R.drawable.settings_tab_icon,
+    ),
+    Beneficiary(
+        text = R.string.beneficiary,
+        icon = R.drawable.approvers_tab_icon
     )
 }

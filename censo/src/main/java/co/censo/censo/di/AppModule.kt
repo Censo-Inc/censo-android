@@ -27,6 +27,8 @@ import co.censo.censo.data.repository.FacetecRepository
 import co.censo.censo.data.repository.FacetecRepositoryImpl
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.data.cryptography.TotpGeneratorImpl
+import co.censo.shared.data.repository.BeneficiaryRepository
+import co.censo.shared.data.repository.BeneficiaryRepositoryImpl
 import co.censo.shared.data.repository.PlayIntegrityRepository
 import co.censo.shared.data.repository.PlayIntegrityRepositoryImpl
 import dagger.Module
@@ -98,6 +100,15 @@ object AppModule {
             authUtil = authUtil,
             keyRepository = keyRepository,
             totpGenerator = totpGenerator
+        )
+    }
+    @Singleton
+    @Provides
+    fun provideBeneficiaryRepository(
+        apiService: ApiService,
+    ): BeneficiaryRepository {
+        return BeneficiaryRepositoryImpl(
+            apiService = apiService,
         )
     }
 

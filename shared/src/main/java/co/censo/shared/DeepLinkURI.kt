@@ -21,6 +21,8 @@ object DeepLinkURI {
     const val OWNER_LOGIN_ID_RESET_URI = "${BuildConfig.OWNER_URL_SCHEME}://reset/"
     const val CENSO_IMPORT_URI = "${BuildConfig.OWNER_URL_SCHEME}://import/v1/"
     const val CENSO_BENEFICIARY_URI = "${BuildConfig.OWNER_URL_SCHEME}://beneficiary/v1/"
+
+    fun createBeneficiaryDeeplink(invitationId: String?) = invitationId?.let {  "${CENSO_BENEFICIARY_URI}${invitationId}" }
 }
 
 fun String.parseLink(): CensoLink {

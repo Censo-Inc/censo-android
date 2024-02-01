@@ -2,8 +2,10 @@ package co.censo.shared.data.repository
 
 import Base58EncodedDevicePublicKey
 import Base58EncodedApproverPublicKey
+import Base58EncodedBeneficiaryPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
+import Base58EncodedPublicKey
 import Base64EncodedData
 import ParticipantId
 import SeedPhraseId
@@ -46,15 +48,22 @@ import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.ProlongUnlockApiResponse
 import co.censo.shared.data.model.RecoveredSeedPhrase
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.ActivateBeneficiaryApiRequest
+import co.censo.shared.data.model.ActivateBeneficiaryApiResponse
+import co.censo.shared.data.model.ApproverPublicKey
 import co.censo.shared.data.model.Authentication
+import co.censo.shared.data.model.BeneficiaryEncryptedKey
 import co.censo.shared.data.model.CancelAuthenticationResetApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetSeedPhraseApiResponse
 import co.censo.shared.data.model.InitiateAuthenticationResetApiResponse
+import co.censo.shared.data.model.InviteBeneficiaryApiRequest
+import co.censo.shared.data.model.InviteBeneficiaryApiResponse
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
+import co.censo.shared.data.model.RejectBeneficiaryVerificationApiResponse
 import co.censo.shared.data.model.ReplaceAuthenticationApiRequest
 import co.censo.shared.data.model.ReplaceAuthenticationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
@@ -213,7 +222,7 @@ interface OwnerRepository {
 
     fun checkCodeMatches(
         encryptedTotpSecret: Base64EncodedData,
-        transportKey: Base58EncodedApproverPublicKey,
+        transportKey: Base58EncodedPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
     ): Boolean
@@ -244,7 +253,10 @@ interface OwnerRepository {
 
     suspend fun deleteSeedPhrase(guid: SeedPhraseId): Resource<DeleteSeedPhraseApiResponse>
 
-    suspend fun updateSeedPhrase(guid: SeedPhraseId, label: String): Resource<UpdateSeedPhraseApiResponse>
+    suspend fun updateSeedPhrase(
+        guid: SeedPhraseId,
+        label: String
+    ): Resource<UpdateSeedPhraseApiResponse>
 
     suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit>
 
@@ -275,11 +287,11 @@ interface OwnerRepository {
     suspend fun completeApproverOwnership(
         participantId: ParticipantId,
         completeOwnerApprovershipApiRequest: CompleteOwnerApprovershipApiRequest
-    ) : Resource<CompleteOwnerApprovershipApiResponse>
+    ): Resource<CompleteOwnerApprovershipApiResponse>
 
-    suspend fun acceptImport(channel: String, ownerProof: OwnerProof) : Resource<Unit>
+    suspend fun acceptImport(channel: String, ownerProof: OwnerProof): Resource<Unit>
 
-    suspend fun checkForCompletedImport(channel: String) : Resource<GetImportEncryptedDataApiResponse>
+    suspend fun checkForCompletedImport(channel: String): Resource<GetImportEncryptedDataApiResponse>
 
     suspend fun enableTimelock(): Resource<TimelockApiResponse>
 
@@ -291,6 +303,21 @@ interface OwnerRepository {
     suspend fun cancelAuthenticationReset(): Resource<CancelAuthenticationResetApiResponse>
     suspend fun replaceAuthentication(authentication: Authentication): Resource<ReplaceAuthenticationApiResponse>
     suspend fun setPromoCode(code: String) : Resource<Unit>
+    suspend fun inviteBeneficiary(
+        label: String,
+        deviceEncryptedTotpSecret: Base64EncodedData
+    ): Resource<InviteBeneficiaryApiResponse>
+
+    suspend fun activateBeneficiary(
+        ownerParticipantId: ParticipantId,
+        entropy: Base64EncodedData,
+        beneficiaryPublicKey: Base58EncodedBeneficiaryPublicKey,
+        approverPublicKeys: List<ApproverPublicKey>,
+        keyConfirmationSignature: ByteArray,
+        keyConfirmationTimeMillis: Long
+    ): Resource<ActivateBeneficiaryApiResponse>
+
+    suspend fun rejectBeneficiaryVerification(): Resource<RejectBeneficiaryVerificationApiResponse>
 }
 
 class OwnerRepositoryImpl(
@@ -307,10 +334,12 @@ class OwnerRepositoryImpl(
     override fun updateAuthState(authState: AuthState) {
         authStateFlow.value = authState
     }
+
     override fun getOwnerStateValue(): OwnerState = ownerStateFlow.value
     override suspend fun collectOwnerState(collector: FlowCollector<OwnerState>) {
         ownerStateFlow.collect(collector)
     }
+
     override fun updateOwnerState(ownerState: OwnerState) {
         if (authStateFlow.value == AuthState.LOGGED_IN) {
             ownerStateFlow.value = ownerState
@@ -409,7 +438,7 @@ class OwnerRepositoryImpl(
                 ownerApproverKey = ownerApproverKey,
                 entropy = entropy,
                 deviceKeyId = deviceKeyId
-            ). let {
+            ).let {
 
                 Resource.Success(
                     CreatePolicyParams(
@@ -467,8 +496,10 @@ class OwnerRepositoryImpl(
         entropy: Base64EncodedData,
         deviceKeyId: String
     ): Resource<ReplacePolicyApiResponse> {
-        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
-        val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
+        val intermediateEncryptionKey =
+            recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val masterEncryptionKey =
+            recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
 
         val setupHelper = try {
             PolicySetupHelper.create(
@@ -508,7 +539,8 @@ class OwnerRepositoryImpl(
         approverPublicKeys: List<Base58EncodedApproverPublicKey>,
         approverPublicKeysSignature: Base64EncodedData
     ): Boolean {
-        val intermediatePrivateKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val intermediatePrivateKey =
+            recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
 
         return runCatching {
             val encryptionKey = intermediatePrivateKey.let {
@@ -540,8 +572,10 @@ class OwnerRepositoryImpl(
         entropy: Base64EncodedData,
         deviceKeyId: String
     ): Resource<ReplacePolicyShardsApiResponse> {
-        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
-        val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
+        val intermediateEncryptionKey =
+            recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards)
+        val masterEncryptionKey =
+            recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
 
         val setupHelper = try {
             PolicySetupHelper.create(
@@ -585,7 +619,7 @@ class OwnerRepositoryImpl(
 
     override fun checkCodeMatches(
         encryptedTotpSecret: Base64EncodedData,
-        transportKey: Base58EncodedApproverPublicKey,
+        transportKey: Base58EncodedPublicKey,
         timeMillis: Long,
         signature: Base64EncodedData
     ): Boolean =
@@ -660,10 +694,12 @@ class OwnerRepositoryImpl(
                 is ApproverStatus.Confirmed -> {
                     val deviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
                     deviceKey.verify(
-                        status.approverPublicKey.getBytes() + approver.participantId.getBytes() + status.timeMillis.toString().toByteArray(),
+                        status.approverPublicKey.getBytes() + approver.participantId.getBytes() + status.timeMillis.toString()
+                            .toByteArray(),
                         status.approverKeySignature.bytes
                     )
                 }
+
                 is ApproverStatus.OwnerAsApprover -> true
                 else -> false
             }
@@ -728,7 +764,7 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.disableTimelock() }
     }
 
-    override  suspend fun cancelDisableTimelock(): Resource<Unit> {
+    override suspend fun cancelDisableTimelock(): Resource<Unit> {
         return retrieveApiResource { apiService.cancelDisableTimelock() }
     }
 
@@ -784,8 +820,16 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.deleteSeedPhrase(guid) }
     }
 
-    override suspend fun updateSeedPhrase(guid: SeedPhraseId, label: String): Resource<UpdateSeedPhraseApiResponse> {
-        return retrieveApiResource { apiService.updateSeedPhrase(guid, UpdateSeedPhraseApiRequest(label)) }
+    override suspend fun updateSeedPhrase(
+        guid: SeedPhraseId,
+        label: String
+    ): Resource<UpdateSeedPhraseApiResponse> {
+        return retrieveApiResource {
+            apiService.updateSeedPhrase(
+                guid,
+                UpdateSeedPhraseApiRequest(label)
+            )
+        }
     }
 
     override suspend fun deleteUser(participantId: ParticipantId?): Resource<Unit> {
@@ -795,7 +839,7 @@ class OwnerRepositoryImpl(
             try {
                 keyRepository.deleteDeviceKeyIfPresent(secureStorage.retrieveDeviceKeyId())
                 if (participantId != null) {
-                    keyRepository.deleteSavedKeyFromCloud(participantId)
+                    keyRepository.deleteSavedKeyFromCloud(participantId.value)
                 }
                 secureStorage.clearDeviceKeyId()
                 signUserOut()
@@ -871,8 +915,10 @@ class OwnerRepositoryImpl(
         encryptedMasterPrivateKey: Base64EncodedData,
         language: BIP39.WordListLanguage?
     ): List<RecoveredSeedPhrase> {
-        val intermediateEncryptionKey = recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards, true)
-        val masterEncryptionKey = recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
+        val intermediateEncryptionKey =
+            recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards, true)
+        val masterEncryptionKey =
+            recoverMasterEncryptionKey(encryptedMasterPrivateKey, intermediateEncryptionKey)
 
         return encryptedSeedPhrases.map {
             val response = retrieveSeedPhrase(it.guid)
@@ -886,7 +932,7 @@ class OwnerRepositoryImpl(
                     createdAt = it.createdAt
                 )
             } else {
-                throw  (response as? Resource.Error)?.exception ?: Exception("Unknown failure")
+                throw (response as? Resource.Error)?.exception ?: Exception("Unknown failure")
             }
         }
     }
@@ -942,15 +988,93 @@ class OwnerRepositoryImpl(
         }
     }
 
-    private suspend fun recoverIntermediateEncryptionKey(encryptedIntermediatePrivateKeyShards: List<EncryptedShard>, bypassScopeCheck: Boolean = false): PrivateKey {
+    override suspend fun inviteBeneficiary(
+        label: String,
+        deviceEncryptedTotpSecret: Base64EncodedData
+    ): Resource<InviteBeneficiaryApiResponse> {
+        return retrieveApiResource {
+            apiService.inviteBeneficiary(
+                InviteBeneficiaryApiRequest(
+                    label = label,
+                    deviceEncryptedTotpSecret = deviceEncryptedTotpSecret
+                )
+            )
+        }
+    }
+
+    override suspend fun activateBeneficiary(
+        ownerParticipantId: ParticipantId,
+        entropy: Base64EncodedData,
+        beneficiaryPublicKey: Base58EncodedBeneficiaryPublicKey,
+        approverPublicKeys: List<ApproverPublicKey>,
+        keyConfirmationSignature: ByteArray,
+        keyConfirmationTimeMillis: Long
+    ): Resource<ActivateBeneficiaryApiResponse> {
+
+        val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
+            id = ownerParticipantId.value,
+            bypassScopeCheck = true
+        )
+
+        val encryptedKey = ownerApproverKeyResource.asSuccess().data
+
+        val base58EncodedPrivateKey =
+            encryptedKey.decryptWithEntropy(
+                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                entropy = entropy
+            )
+
+        val beneficiaryKey = ExternalEncryptionKey.generateFromPublicKeyBase58(beneficiaryPublicKey)
+
+        val encryptedOwnerKey = beneficiaryKey.encrypt(
+            Base58.base58Decode(base58EncodedPrivateKey.value)
+        )
+
+        val beneficiaryKeys = approverPublicKeys.map {
+            BeneficiaryEncryptedKey(
+                participantId = it.participantId,
+                encryptedKey = Base64EncodedData(
+                    Base64.getEncoder().encodeToString(
+                        ExternalEncryptionKey.generateFromPublicKeyBase58(it.publicKey).encrypt(encryptedOwnerKey)
+                    )
+                )
+            )
+        }
+
+        val activateBeneficiaryRequest = ActivateBeneficiaryApiRequest(
+            keyConfirmationSignature =
+            Base64EncodedData(
+                org.apache.commons.codec.binary.Base64.encodeBase64String(
+                    keyConfirmationSignature
+                )
+            ),
+            keyConfirmationTimeMillis = keyConfirmationTimeMillis,
+            encryptedKeys = beneficiaryKeys
+        )
+
+        return retrieveApiResource {
+            apiService.activateBeneficiary(activateBeneficiaryRequest)
+        }
+    }
+
+    override suspend fun rejectBeneficiaryVerification(): Resource<RejectBeneficiaryVerificationApiResponse> {
+        return retrieveApiResource {
+            apiService.rejectBeneficiaryVerification()
+        }
+    }
+
+    private suspend fun recoverIntermediateEncryptionKey(
+        encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
+        bypassScopeCheck: Boolean = false
+    ): PrivateKey {
         val ownerDeviceKey = InternalDeviceKey(secureStorage.retrieveDeviceKeyId())
 
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
             val encryptionKey = when (it.isOwnerShard) {
                 true -> {
                     val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
-                        participantId = it.participantId,
-                        bypassScopeCheck = bypassScopeCheck,
+                        id = it.participantId.value,
+                        bypassScopeCheck = bypassScopeCheck
                     )
 
                     if (ownerApproverKeyResource is Resource.Error) {
@@ -966,6 +1090,7 @@ class OwnerRepositoryImpl(
                         EncryptionKey.generateFromPrivateKeyRaw(base58EncodedPrivateKey.bigInt())
                     }
                 }
+
                 false -> ownerDeviceKey
             }
             Point(
@@ -978,7 +1103,6 @@ class OwnerRepositoryImpl(
             SecretSharerUtils.recoverSecret(intermediateKeyShares, ORDER)
         )
     }
-
     private fun recoverMasterEncryptionKey(
         encryptedMasterKey: Base64EncodedData,
         intermediateKey: PrivateKey

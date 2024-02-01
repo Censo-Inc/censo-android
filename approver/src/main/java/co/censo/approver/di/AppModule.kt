@@ -7,6 +7,8 @@ import co.censo.shared.data.cryptography.TotpGeneratorImpl
 import co.censo.shared.data.networking.ApiService
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.ApproverRepositoryImpl
+import co.censo.shared.data.repository.BeneficiaryRepository
+import co.censo.shared.data.repository.BeneficiaryRepositoryImpl
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.KeyRepositoryImpl
 import co.censo.shared.data.repository.OwnerRepository
@@ -80,6 +82,14 @@ object AppModule {
         cloudStorage: CloudStorage
     ): KeyRepository {
         return KeyRepositoryImpl(secureStorage, cloudStorage)
+    }
+
+    @Singleton
+    @Provides
+    fun providesBeneficiaryRepository(
+        apiService: ApiService
+    ): BeneficiaryRepository {
+        return BeneficiaryRepositoryImpl(apiService)
     }
 
     @Singleton
