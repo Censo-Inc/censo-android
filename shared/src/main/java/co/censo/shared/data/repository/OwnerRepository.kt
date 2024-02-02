@@ -131,6 +131,7 @@ interface OwnerRepository {
     suspend fun collectOwnerState(collector: FlowCollector<OwnerState>)
     //endregion
 
+    suspend fun health(): Resource<Unit>
     suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse>
     suspend fun signInUser(idToken: String): Resource<Unit>
     suspend fun createDevice(): Resource<Unit>
@@ -314,6 +315,10 @@ class OwnerRepositoryImpl(
         }
     }
     //endregion
+
+    override suspend fun health(): Resource<Unit> {
+        return retrieveApiResource { apiService.health() }
+    }
 
     override suspend fun retrieveUser(): Resource<GetOwnerUserApiResponse> {
         return retrieveApiResource { apiService.ownerUser() }

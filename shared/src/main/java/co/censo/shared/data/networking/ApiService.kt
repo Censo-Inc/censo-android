@@ -465,6 +465,9 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplaceAuthenticationApiResponse>
 
+    @GET("/health")
+    suspend fun health(): RetrofitResponse<Unit>
+
     @POST("beneficiary-invitations/${INVITATION_ID}/accept")
     suspend fun acceptBeneficiaryInvitation(
         @Path(value = INVITATION_ID) invitationId: String,

@@ -41,6 +41,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.popCurrentDestinationFromBackStack
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +92,7 @@ fun ApproverAuthResetScreen(
                             DisplayError(
                                 errorMessage = state.userResponse.getErrorMessage(context),
                                 dismissAction = null,
-                                retryAction = { viewModel.retrieveApproverState(/*false*/) },
+                                retryAction = { viewModel.retrieveApproverState() },
                             )
                         }
 
@@ -126,7 +127,7 @@ fun ApproverAuthResetScreen(
                             DisplayError(
                                 errorMessage = stringResource(R.string.something_went_wrong),
                                 dismissAction = null,
-                                retryAction = { viewModel.retrieveApproverState(/*false*/) },
+                                retryAction = { viewModel.retrieveApproverState() },
                             )
                         }
 
@@ -166,6 +167,10 @@ fun ApproverAuthResetScreen(
 
                             ApproverAuthResetState.UIState.Complete -> {
                                 PostApproverAction()
+                                LaunchedEffect(state.uiState) {
+                                    delay(5000)
+                                    viewModel.onTopBarCloseConfirmed()
+                                }
                             }
                         }
 

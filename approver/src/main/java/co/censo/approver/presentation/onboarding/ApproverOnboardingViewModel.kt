@@ -160,13 +160,13 @@ class ApproverOnboardingViewModel @Inject constructor(
             ApproverOnboardingUIState.NeedsToSaveKey,
             ApproverOnboardingUIState.NeedsToEnterCode,
             ApproverOnboardingUIState.WaitingForConfirmation,
-            ApproverOnboardingUIState.CodeRejected -> {
+            ApproverOnboardingUIState.CodeRejected,
+            ApproverOnboardingUIState.Complete -> {
                 cancelOnboarding()
             }
 
-            //No UI for these states
-            ApproverOnboardingUIState.Loading,
-            ApproverOnboardingUIState.Complete -> {
+            //No UI for this state
+            ApproverOnboardingUIState.Loading -> {
             }
         }
     }

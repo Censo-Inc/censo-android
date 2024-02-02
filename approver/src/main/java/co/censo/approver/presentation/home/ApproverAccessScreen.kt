@@ -41,6 +41,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.popCurrentDestinationFromBackStack
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,6 +177,10 @@ fun ApproverAccessScreen(
 
                             ApproverAccessUIState.Complete -> {
                                 PostApproverAction()
+                                LaunchedEffect(state.approverAccessUIState) {
+                                    delay(5000)
+                                    viewModel.onTopBarCloseConfirmed()
+                                }
                             }
                         }
 

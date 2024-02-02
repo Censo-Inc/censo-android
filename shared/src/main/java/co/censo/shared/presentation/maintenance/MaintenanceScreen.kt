@@ -98,7 +98,7 @@ class MaintenanceViewModel @Inject constructor(
                 onTickCallback = {
                     viewModelScope.launch {
                         // http response code will be processed in ApiService updating GlobalMaintenanceState
-                        ownerRepository.retrieveUser()
+                        ownerRepository.health()
                     }
                 }
             )

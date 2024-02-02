@@ -25,11 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +46,16 @@ fun ApproverLoginUI(
     authenticate: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val aspectRatio = screenHeight / screenWidth
+
+    val additionalGraphicsPadding = when {
+        aspectRatio < 1.8f -> screenWidth * 0.25f
+        else -> 0.dp
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,14 +64,24 @@ fun ApproverLoginUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(12.dp))
-
+        Spacer(modifier = Modifier.weight(0.2f))
+        Image(
+            modifier = Modifier
+                .padding(horizontal = additionalGraphicsPadding)
+                .fillMaxWidth()
+                .weight(2f),
+            painter = painterResource(id = R.drawable.entrance_scene_4x),
+            contentDescription = null,
+            contentScale = ContentScale.Fit
+        )
+        Spacer(modifier = Modifier.weight(0.3f))
         Image(
             modifier = Modifier.padding(horizontal = 12.dp),
             painter = painterResource(id = R.drawable.censo_approver_logo),
             contentDescription = null,
             colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
         )
-
+        Spacer(modifier = Modifier.weight(0.5f))
         Column(
             modifier = Modifier.padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -143,9 +166,31 @@ fun ApproverLoginUI(
     }
 }
 
-@Preview()
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
-fun ApproverLoginUIPreview() {
+fun LargeApproverLoginUIPreview() {
+    Surface {
+        ApproverLoginUI(
+            authenticate = {}
+        )
+    }
+}
+
+
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun MediumApproverLoginUIPreview() {
+    Surface {
+        ApproverLoginUI(
+            authenticate = {}
+        )
+    }
+}
+
+
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
+@Composable
+fun SmallApproverLoginUIPreview() {
     Surface {
         ApproverLoginUI(
             authenticate = {}

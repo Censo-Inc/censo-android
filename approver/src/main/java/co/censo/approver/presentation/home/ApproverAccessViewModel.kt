@@ -314,16 +314,8 @@ class ApproverAccessViewModel @Inject constructor(
 
     fun onTopBarCloseConfirmed() {
         hideCloseConfirmationDialog()
-
-        when (state.approverAccessUIState) {
-            ApproverAccessUIState.AccessRequested,
-            ApproverAccessUIState.VerifyingToTPFromOwner,
-            ApproverAccessUIState.WaitingForToTPFromOwner -> cancelAccess()
-
-            ApproverAccessUIState.Complete -> {}
-        }
+        cancelAccess()
     }
-
 
     private fun cancelAccess() {
         approverRepository.clearParticipantId()

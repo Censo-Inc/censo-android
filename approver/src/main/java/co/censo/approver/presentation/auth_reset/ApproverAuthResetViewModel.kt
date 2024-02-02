@@ -302,14 +302,7 @@ class ApproverAuthResetViewModel @Inject constructor(
 
     fun onTopBarCloseConfirmed() {
         hideCloseConfirmationDialog()
-        when (state.uiState) {
-            ApproverAuthResetState.UIState.AuthenticationResetRequested,
-            ApproverAuthResetState.UIState.NeedsToEnterCode,
-            ApproverAuthResetState.UIState.WaitingForVerification,
-            ApproverAuthResetState.UIState.CodeRejected -> cancelAuthReset()
-
-            ApproverAuthResetState.UIState.Complete -> {}
-        }
+        cancelAuthReset()
     }
 
     private fun cancelAuthReset() {
