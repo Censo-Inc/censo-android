@@ -2,6 +2,7 @@ package co.censo.shared.data.model
 
 import ApprovalId
 import Base58EncodedApproverPublicKey
+import Base58EncodedBeneficiaryPublicKey
 import Base58EncodedIntermediatePublicKey
 import Base58EncodedMasterPublicKey
 import Base64EncodedData
@@ -143,6 +144,45 @@ fun Approver.ProspectApprover.deeplink(): String {
 }
 
 @Serializable
+sealed class BeneficiaryStatus {
+    @Serializable
+    @SerialName("Initial")
+    data class Initial(
+        val deviceEncryptedTotpSecret: Base64EncodedData,
+        val invitationId: BeneficiaryInvitationId,
+    ) : BeneficiaryStatus()
+
+    @Serializable
+    @SerialName("Accepted")
+    data class Accepted(
+        val deviceEncryptedTotpSecret: Base64EncodedData,
+        val acceptedAt: Instant,
+    ) : BeneficiaryStatus()
+
+    @Serializable
+    @SerialName("VerificationSubmitted")
+    data class VerificationSubmitted(
+        val deviceEncryptedTotpSecret: Base64EncodedData,
+        val signature: Base64EncodedData,
+        val timeMillis: Long,
+        val beneficiaryPublicKey: Base58EncodedBeneficiaryPublicKey,
+        val submittedAt: Instant,
+    ) : BeneficiaryStatus()
+
+    @Serializable
+    @SerialName("Activated")
+    data class Activated(
+        val confirmedAt: Instant,
+    ) : BeneficiaryStatus()
+}
+
+@Serializable
+data class Beneficiary(
+    val label: String,
+    val status: BeneficiaryStatus,
+)
+
+@Serializable
 data class Policy(
     val createdAt: Instant,
     val approvers: List<Approver.TrustedApprover>,
@@ -153,10 +193,12 @@ data class Policy(
 
     val masterKeySignature: Base64EncodedData?,
     val ownerEntropy: Base64EncodedData?,
+    val downgradedAt: Instant?,
+    val beneficiary: Beneficiary?,
 
     val owner: Approver.TrustedApprover? =
-        approvers.firstOrNull { it.isOwner }
-)
+        approvers.firstOrNull { it.isOwner },
+    )
 
 @Serializable
 sealed class Access {
@@ -230,6 +272,25 @@ data class TimelockSetting(
 )
 
 @Serializable
+sealed class BeneficiaryPhase {
+    @Serializable
+    @SerialName("Accepted")
+    data object Accepted : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("WaitingForVerification")
+    data object WaitingForVerification : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("VerificationRejected")
+    data object VerificationRejected : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("Activated")
+    data object Activated : BeneficiaryPhase()
+}
+
+@Serializable
 sealed class AuthenticationReset {
     abstract val guid: AuthenticationResetId
 
@@ -291,6 +352,15 @@ sealed class OwnerState {
     ) : OwnerState()
 
     @Serializable
+    @SerialName("Beneficiary")
+    data class Beneficiary(
+        val invitationId: BeneficiaryInvitationId,
+        val entropy: Base64EncodedData,
+        val authType: AuthType,
+        val phase: BeneficiaryPhase,
+    ) : OwnerState()
+
+    @Serializable
     @SerialName("Ready")
     data class Ready(
         val subscriptionStatus: SubscriptionStatus,
@@ -319,6 +389,7 @@ sealed class OwnerState {
         is Empty -> SubscriptionStatus.None
         is Initial -> subscriptionStatus
         is Ready -> subscriptionStatus
+        is Beneficiary -> SubscriptionStatus.None
     }
 
 
@@ -326,6 +397,7 @@ sealed class OwnerState {
         is Empty -> false
         is Initial -> subscriptionRequired
         is Ready -> subscriptionRequired
+        is Beneficiary -> false
     }
     fun hasActiveSubscription(): Boolean = subscriptionStatus() == SubscriptionStatus.Active
 
@@ -333,6 +405,7 @@ sealed class OwnerState {
         is Empty -> false
         is Initial -> true
         is Ready -> !onboarded
+        is Beneficiary -> true
     }
 
 }

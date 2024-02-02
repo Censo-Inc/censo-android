@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import co.censo.censo.presentation.Screen
+import co.censo.censo.presentation.Screen.Companion.BENEFICIARY_KEY
 import co.censo.censo.presentation.Screen.LoginIdResetRoute.DL_RESET_TOKEN_KEY
 import co.censo.censo.presentation.Screen.Companion.CENSO_IMPORT_DEEPLINK
 import co.censo.censo.presentation.Screen.Companion.IMPORT_KEY_KEY
@@ -159,6 +161,29 @@ class MainActivity : FragmentActivity() {
                     importingPhrase = importingPhrase,
                     encryptedPhrase = encryptedPhraseData
                 )
+            }
+            composable(
+                route = "${Screen.OnboardBeneficiaryRoute.route}?$BENEFICIARY_KEY={$BENEFICIARY_KEY}",
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern =
+                            "${DeepLinkURI.CENSO_BENEFICIARY_URI}{$BENEFICIARY_KEY}"
+                    }
+                )
+            ) { backStackEntry ->
+                val beneficiaryInviteId = backStackEntry.arguments?.getString(BENEFICIARY_KEY)
+                OwnerEntranceScreen(
+                    navController = navController,
+                    beneficiaryInviteId = beneficiaryInviteId,
+                )
+            }
+            composable(
+                route = "${Screen.BeneficiarySetup.route}/{${Screen.BeneficiarySetup.INVITE_ID_ARG}}"
+            ) { backStackEntry ->
+                val inviteId = backStackEntry.arguments?.getString(Screen.BeneficiarySetup.INVITE_ID_ARG) ?: ""
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(text = "")
+                }
             }
             composable(
                 route = "${Screen.PolicySetupRoute.route}/{${Screen.PolicySetupRoute.SETUP_ACTION_ARG}}"

@@ -73,6 +73,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun OwnerEntranceScreen(
     navController: NavController,
+    beneficiaryInviteId: String? = null,
     viewModel: OwnerEntranceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -100,7 +101,7 @@ fun OwnerEntranceScreen(
     )
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(beneficiaryInviteId)
         onDispose { }
     }
 

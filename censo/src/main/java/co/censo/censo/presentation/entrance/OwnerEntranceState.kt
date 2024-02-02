@@ -12,6 +12,7 @@ data class OwnerEntranceState(
     val showAcceptTermsOfUse: Boolean = false,
     val userFinishedSetup: Boolean = false,
     val userIsOnboarding: Boolean = false,
+    val beneficiaryInviteId: String? = null,
 
     val preFetchedUserResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,

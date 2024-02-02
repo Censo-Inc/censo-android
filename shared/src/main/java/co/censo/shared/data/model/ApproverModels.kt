@@ -64,6 +64,18 @@ value class Base58EncodedApproverPublicKey(override val value: String) : Base58E
 
 @Serializable
 @JvmInline
+value class Base58EncodedBeneficiaryPublicKey(override val value: String) : Base58EncodedPublicKey {
+    init {
+        runCatching {
+            Base58.base58Decode(this.value)
+        }.onFailure {
+            throw IllegalArgumentException("Invalid beneficiary public key format")
+        }
+    }
+}
+
+@Serializable
+@JvmInline
 value class Base58EncodedDevicePublicKey(override val value: String) : Base58EncodedPublicKey {
     init {
         runCatching {

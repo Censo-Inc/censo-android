@@ -56,6 +56,7 @@
 
                 <data android:scheme="${OWNER_URL_SCHEME}"/>
                 <data android:host="import"/>
+                <data android:host="beneficiary"/>
             </intent-filter>
         </activity>
 

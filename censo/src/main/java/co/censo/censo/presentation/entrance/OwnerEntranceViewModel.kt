@@ -10,6 +10,7 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.Beneficiary
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
@@ -56,7 +57,11 @@ class OwnerEntranceViewModel @Inject constructor(
 
     fun getGoogleSignInClient() = authUtil.getGoogleSignInClient()
 
-    fun onStart() {
+    fun onStart(beneficiaryInviteId: String? = null) {
+        state = state.copy(
+            beneficiaryInviteId = beneficiaryInviteId
+        )
+
         initAcceptedTermsOfUseVersion()
 
         checkUserHasValidToken()
@@ -332,36 +337,47 @@ class OwnerEntranceViewModel @Inject constructor(
     }
 
     private fun loggedInRouting(ownerState: OwnerState) {
-        val destination = when (ownerState) {
-            is OwnerState.Ready -> {
-                if (ownerState.authenticationReset != null) {
-                    Screen.BiometryResetRoute.navToAndPopCurrentDestination().asResource()
-                } else if (ownerState.onboarded) {
-                    val access = ownerState.access
-                    if (access != null && access is Access.ThisDevice && access.intent != AccessIntent.RecoverOwnerKey) {
-                        Screen.AccessApproval.withIntent(intent = access.intent).navToAndPopCurrentDestination().asResource()
-                    } else {
-                        Screen.OwnerVaultScreen.navToAndPopCurrentDestination().asResource()
+        val destination =
+            if (!state.beneficiaryInviteId.isNullOrEmpty()) {
+                Screen.BeneficiarySetup.buildNavRoute(state.beneficiaryInviteId!!)
+            } else {
+                when (ownerState) {
+                    is OwnerState.Ready -> {
+                        if (ownerState.authenticationReset != null) {
+                            Screen.BiometryResetRoute.route
+                        } else if (ownerState.onboarded) {
+                            val access = ownerState.access
+                            if (access != null && access is Access.ThisDevice && access.intent != AccessIntent.RecoverOwnerKey) {
+                                Screen.AccessApproval.withIntent(intent = access.intent)
+                            } else {
+                                Screen.OwnerVaultScreen.route
+                            }
+                        } else {
+                            Screen.EnterPhraseRoute.buildNavRoute(
+                                masterPublicKey = ownerState.vault.publicMasterEncryptionKey,
+                                welcomeFlow = true
+                            )
+                        }
                     }
-                } else {
-                    Screen.EnterPhraseRoute.buildNavRoute(
-                        masterPublicKey = ownerState.vault.publicMasterEncryptionKey,
-                        welcomeFlow = true
-                    ).navToAndPopCurrentDestination().asResource()
+
+                    is OwnerState.Initial -> {
+                        Screen.InitialPlanSetupRoute.route
+                    }
+
+                    is OwnerState.Empty -> {
+                        // can never happen
+                        Screen.EntranceRoute.route
+                    }
+
+                    is OwnerState.Beneficiary -> {
+                        Screen.BeneficiarySetup.buildNavRoute(state.beneficiaryInviteId ?: "")
+                    }
                 }
             }
 
-            is OwnerState.Initial -> {
-                Screen.InitialPlanSetupRoute.navToAndPopCurrentDestination().asResource()
-            }
-
-            is OwnerState.Empty -> {
-                // can never happen
-                Screen.EntranceRoute.navToAndPopCurrentDestination().asResource()
-            }
-        }
-
-        state = state.copy(navigationResource = destination)
+        state = state.copy(
+            navigationResource = destination.navToAndPopCurrentDestination().asResource()
+        )
     }
 
     fun startLoginIdRecovery() {
