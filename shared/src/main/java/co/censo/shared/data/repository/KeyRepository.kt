@@ -30,12 +30,12 @@ interface KeyRepository {
         key: ByteArray,
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false,
-        onRetryAction: () -> Unit
+        onRetryAfterAccessGranted: () -> Unit
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false,
-        onRetryAction: () -> Unit
+        onRetryAfterAccessGranted: () -> Unit
     ): Resource<ByteArray>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
     suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
@@ -100,11 +100,11 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         key: ByteArray,
         participantId: ParticipantId,
         bypassScopeCheck: Boolean,
-        onRetryAction: () -> Unit
+        onRetryAfterAccessGranted: () -> Unit
     ) : Resource<Unit> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
-                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAction))
+                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAfterAccessGranted))
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
@@ -127,11 +127,11 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean,
-        onRetryAction: () -> Unit
+        onRetryAfterAccessGranted: () -> Unit
     ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
-                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAction))
+                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAfterAccessGranted))
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
@@ -163,7 +163,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      * if the user has not granted permission for GDrive access, there is no key to check for
      */
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
-        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true, onRetryAction = {})
+        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true, onRetryAfterAccessGranted = {})
         return if (downloadResource is Resource.Success) {
             downloadResource.data.isNotEmpty()
         } else {
