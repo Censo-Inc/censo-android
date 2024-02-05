@@ -11,8 +11,11 @@ import co.censo.shared.data.storage.CloudStorage
 import org.bouncycastle.util.encoders.Hex
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
@@ -26,18 +29,36 @@ interface KeyRepository {
     suspend fun saveKeyInCloud(
         key: ByteArray,
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean = false
+        bypassScopeCheck: Boolean = false,
+        onRetryAction: () -> Unit
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean = false
+        bypassScopeCheck: Boolean = false,
+        onRetryAction: () -> Unit
     ): Resource<ByteArray>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
     suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
     suspend fun deleteDeviceKeyIfPresent(keyId: String)
+
+    //region CloudAccess
+    fun updateCloudAccessState(cloudAccessState: CloudAccessState)
+
+    suspend fun collectCloudAccessState(collector: FlowCollector<CloudAccessState>)
+    //endregion
 }
 
 class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudStorage) : KeyRepository {
+
+    //region CloudAccessState Flow
+    private val cloudAccessStateFlow = MutableStateFlow<CloudAccessState>(CloudAccessState.Uninitialized)
+    override fun updateCloudAccessState(cloudAccessState: CloudAccessState) {
+        cloudAccessStateFlow.value = cloudAccessState
+    }
+    override suspend fun collectCloudAccessState(collector: FlowCollector<CloudAccessState>) {
+        cloudAccessStateFlow.collect(collector)
+    }
+    //endregion
 
     private val keystoreHelper = KeystoreHelper()
     override fun hasKeyWithId(id: String): Boolean {
@@ -78,10 +99,12 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun saveKeyInCloud(
         key: ByteArray,
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean
+        bypassScopeCheck: Boolean,
+        onRetryAction: () -> Unit
     ) : Resource<Unit> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
+                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAction))
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
@@ -103,10 +126,12 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      */
     override suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean
+        bypassScopeCheck: Boolean,
+        onRetryAction: () -> Unit
     ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
+                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAction))
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
@@ -115,7 +140,15 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             val resource = cloudStorage.retrieveFileContents(participantId)
 
             if (resource is Resource.Success) {
-                return Resource.Success(Hex.decode(resource.data))
+                val key = Hex.decode(resource.data)
+
+                if (key.isEmpty()) {
+                    val e = Exception("Retrieved private key was empty")
+                    e.sendError(CrashReportingUtil.CloudDownload)
+                    return Resource.Error(exception = e)
+                }
+
+                return Resource.Success(key)
             } else {
                 return Resource.Error(exception = resource.error()?.exception)
             }
@@ -130,7 +163,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      * if the user has not granted permission for GDrive access, there is no key to check for
      */
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
-        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
+        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true, onRetryAction = {})
         return if (downloadResource is Resource.Success) {
             downloadResource.data.isNotEmpty()
         } else {
