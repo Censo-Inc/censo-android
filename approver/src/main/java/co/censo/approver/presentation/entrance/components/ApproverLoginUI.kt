@@ -47,15 +47,6 @@ fun ApproverLoginUI(
 ) {
     val uriHandler = LocalUriHandler.current
 
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val aspectRatio = screenHeight / screenWidth
-
-    val additionalGraphicsPadding = when {
-        aspectRatio < 1.8f -> screenWidth * 0.25f
-        else -> 0.dp
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,14 +58,13 @@ fun ApproverLoginUI(
         Spacer(modifier = Modifier.weight(0.2f))
         Image(
             modifier = Modifier
-                .padding(horizontal = additionalGraphicsPadding)
                 .fillMaxWidth()
                 .weight(2f),
-            painter = painterResource(id = R.drawable.entrance_scene_4x),
+            painter = painterResource(id = R.drawable.hello_approver),
             contentDescription = null,
             contentScale = ContentScale.Fit
         )
-        Spacer(modifier = Modifier.weight(0.3f))
+        Spacer(modifier = Modifier.weight(0.2f))
         Image(
             modifier = Modifier.padding(horizontal = 12.dp),
             painter = painterResource(id = R.drawable.censo_approver_logo),
