@@ -8,7 +8,6 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.repository.EncryptedSeedPhrase
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.BIP39InvalidReason
 
@@ -47,7 +46,6 @@ data class EnterPhraseState(
     val showInvalidPhraseDialog: Resource<BIP39InvalidReason> = Resource.Uninitialized,
 
     // Cloud Storage
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val loadKeyInProgress: Resource<Unit> = Resource.Uninitialized,
     val ownerApproverParticipantId: ParticipantId? = null,
 
