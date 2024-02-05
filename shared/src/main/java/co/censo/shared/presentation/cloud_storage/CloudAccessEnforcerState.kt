@@ -1,6 +1,6 @@
 package co.censo.shared.presentation.cloud_storage
 
-data class CloudStorageHandlerState(
+data class CloudAccessEnforcerState(
     val enforceAccess: Boolean = false,
 )
 

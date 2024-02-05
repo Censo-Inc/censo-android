@@ -42,13 +42,9 @@ import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 
-
-//TODO: Convert this to just enforce access UI
-// Dont forget to rename this!!
-// CloudAccessEnforcer
 @Composable
-fun CloudStorageHandler(
-    viewModel: CloudStorageHandlerViewModel = hiltViewModel()
+fun CloudAccessEnforcer(
+    viewModel: CloudAccessEnforcerViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current

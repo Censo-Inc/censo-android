@@ -10,9 +10,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-//TODO: This will become Access Enforce VM
 @HiltViewModel
-class CloudStorageHandlerViewModel @Inject constructor(
+class CloudAccessEnforcerViewModel @Inject constructor(
     private val keyRepository: KeyRepository,
 ) : ViewModel() {
 
