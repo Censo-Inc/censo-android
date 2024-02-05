@@ -5,6 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.censo.shared.data.Resource
+import co.censo.shared.data.model.BiometryScanResultBlob
+import co.censo.shared.data.model.BiometryVerificationId
+import co.censo.shared.data.model.FacetecBiometry
 import co.censo.shared.data.repository.KeyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,6 +22,8 @@ class CloudAccessEnforcerViewModel @Inject constructor(
     var state by mutableStateOf(CloudAccessEnforcerState())
         private set
 
+    private var onAccessGranted: (() -> Unit)? = null
+
     fun onStart() {
         viewModelScope.launch {
             keyRepository.collectCloudAccessState {
@@ -27,17 +33,19 @@ class CloudAccessEnforcerViewModel @Inject constructor(
     }
 
     fun onAccessGranted() {
-        keyRepository.updateCloudAccessState(CloudAccessState.ACCESS_GRANTED)
+        keyRepository.updateCloudAccessState(CloudAccessState.AccessGranted)
     }
 
     private fun onCloudAccessState(cloudAccessState: CloudAccessState) {
         when (cloudAccessState) {
-            CloudAccessState.UNINITIALIZED -> {}
-            CloudAccessState.ACCESS_REQUIRED -> {
+            CloudAccessState.Uninitialized -> {}
+            is CloudAccessState.AccessRequired -> {
+                onAccessGranted = cloudAccessState.onAccessGranted
                 state = state.copy(enforceAccess = true)
             }
-            CloudAccessState.ACCESS_GRANTED -> {
+            CloudAccessState.AccessGranted -> {
                 state = state.copy(enforceAccess = false)
+                onAccessGranted?.invoke()
             }
         }
     }
