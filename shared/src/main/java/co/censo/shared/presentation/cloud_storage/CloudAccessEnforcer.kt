@@ -1,6 +1,5 @@
 package co.censo.shared.presentation.cloud_storage
 
-import ParticipantId
 import StandardButton
 import android.app.Activity
 import android.content.IntentSender
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.R
-import co.censo.shared.data.Resource
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.GoogleAuth
@@ -45,12 +42,12 @@ import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 
+
+//TODO: Convert this to just enforce access UI
+// Dont forget to rename this!!
+// CloudAccessEnforcer
 @Composable
 fun CloudStorageHandler(
-    actionToPerform: CloudStorageAction,
-    onActionSuccess: (privateKey: ByteArray) -> Unit,
-    onActionFailed: (exception: Exception?) -> Unit,
-    onCloudStorageAccessGranted: (() -> Unit)? = null,
     viewModel: CloudStorageHandlerViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -65,7 +62,7 @@ fun CloudStorageHandler(
                 val authResult = Identity.getAuthorizationClient(context)
                     .getAuthorizationResultFromIntent(result.data)
                 if (authResult.grantedScopes.contains(GoogleAuth.DRIVE_FILE_SCOPE.toString())) {
-                    viewModel.performAction(bypassScopeCheckForCloudStorage = true)
+                    viewModel.onAccessGranted()
                 }
             }
         }
@@ -92,7 +89,7 @@ fun CloudStorageHandler(
                             e.sendError(CrashReportingUtil.CloudStorageIntent)
                         }
                     } else {
-                        viewModel.performAction(bypassScopeCheckForCloudStorage = true)
+                        viewModel.onAccessGranted()
                     }
                 }
                 .addOnFailureListener {
@@ -103,28 +100,12 @@ fun CloudStorageHandler(
         }
     }
 
-    LaunchedEffect(key1 = state) {
-        if (state.cloudStorageActionResource is Resource.Success) {
-            onActionSuccess(state.cloudStorageActionResource.data)
-        }
-
-        if (state.cloudStorageActionResource is Resource.Error) {
-            onActionFailed(state.cloudStorageActionResource.exception)
-        }
-
-        if (state.cloudStorageAccessGranted) {
-            onCloudStorageAccessGranted?.invoke()
-        }
-    }
-
     DisposableEffect(key1 =  viewModel) {
-        viewModel.onStart(
-            actionToPerform = actionToPerform
-        )
+        viewModel.onStart()
         onDispose { viewModel.onDispose() }
     }
 
-    if (state.shouldEnforceCloudStorageAccess) {
+    if (state.enforceAccess) {
         GoogleDrivePermissionUI(interactionSource = remember { MutableInteractionSource() }) {
             triggerAuthRequest = true
         }
