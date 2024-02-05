@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.censo.R
 import co.censo.censo.presentation.Screen
@@ -42,7 +41,6 @@ import co.censo.censo.presentation.components.BeginFaceScanButton
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.onboarding.OnboardingTopBar
 import co.censo.shared.util.popCurrentDestinationFromBackStack
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.presentation.components.LearnMoreScreen
@@ -185,30 +183,6 @@ fun InitialPlanSetupScreen(
                             )
                     }
                 }
-            }
-
-            if (state.cloudStorageAction.triggerAction) {
-                val privateKey = state.keyData?.encryptedPrivateKey
-
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = state.participantId,
-                    encryptedPrivateKey = privateKey,
-                    onActionSuccess = { encryptedByteArray ->
-                        when (state.cloudStorageAction.action) {
-                            CloudStorageActions.UPLOAD -> viewModel.onKeySaved()
-                            CloudStorageActions.DOWNLOAD -> viewModel.onKeyLoaded(encryptedByteArray)
-                            else -> {}
-                        }
-                    },
-                    onActionFailed = {
-                        when (state.cloudStorageAction.action) {
-                            CloudStorageActions.UPLOAD -> viewModel.onKeySaveFailed(exception = it)
-                            CloudStorageActions.DOWNLOAD -> viewModel.onKeyLoadFailed(exception = it)
-                            else -> {}
-                        }
-                    },
-                )
             }
         }
     }

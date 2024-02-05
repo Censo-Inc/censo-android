@@ -58,6 +58,7 @@ import co.censo.shared.DeepLinkURI
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.Import
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.presentation.cloud_storage.CloudAccessEnforcer
 import co.censo.shared.presentation.maintenance.MaintenanceScreen
 import co.censo.shared.util.StrongboxUI
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,6 +94,8 @@ class MainActivity : FragmentActivity() {
                 ) {
                     Box {
                         CensoNavHost(navController = navController)
+
+                        CloudAccessEnforcer()
 
                         ValidateApproverKeyScreen(navController = navController)
 

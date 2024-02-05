@@ -5,9 +5,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.generatePartitionId
 import co.censo.shared.data.model.CreatePolicyApiResponse
 import co.censo.shared.data.model.InitialKeyData
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.CreatePolicyParams
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 data class InitialPlanSetupScreenState(
     val welcomeStep: WelcomeStep = WelcomeStep.Authenticated,
@@ -20,7 +18,6 @@ data class InitialPlanSetupScreenState(
     val createPolicyParams: CreatePolicyParams? = null,
     val complete: Boolean = false,
     val keyData: InitialKeyData? = null,
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,

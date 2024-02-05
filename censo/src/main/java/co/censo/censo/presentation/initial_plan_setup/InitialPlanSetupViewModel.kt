@@ -21,8 +21,7 @@ import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,6 +62,10 @@ class InitialPlanSetupViewModel @Inject constructor(
         moveToNextAction()
     }
 
+    fun changeWelcomeStep(welcomeStep: WelcomeStep) {
+        state = state.copy(welcomeStep = welcomeStep)
+    }
+
     private fun createApproverKey() {
         if (state.saveKeyToCloudResource is Resource.Loading) {
             return
@@ -98,7 +101,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                     )
                 )
 
-                savePrivateKeyToCloud()
+                savePrivateKeyToCloud(encryptedKeyData = encryptedKey)
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.CreateApproverKey)
                 state = state.copy(
@@ -109,53 +112,62 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun savePrivateKeyToCloud() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true,
-                action = CloudStorageActions.UPLOAD,
-                reason = null
-            )
-        )
+    private fun savePrivateKeyToCloud(
+        encryptedKeyData: ByteArray,
+        bypassScopeCheck: Boolean = false
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val uploadResponse = try {
+                keyRepository.saveKeyInCloud(
+                    key = encryptedKeyData,
+                    participantId = state.participantId,
+                    bypassScopeCheck = bypassScopeCheck,
+                    onRetryAfterAccessGranted = {
+                        //Retry this method
+                        savePrivateKeyToCloud(
+                            encryptedKeyData = encryptedKeyData,
+                            bypassScopeCheck = true
+                        )
+                    }
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                //Return early and wait until access is granted
+                return@launch
+            }
+
+            if (uploadResponse is Resource.Success) {
+                state = state.copy(saveKeyToCloudResource = Resource.Uninitialized)
+                determineUIStatus()
+            } else if (uploadResponse is Resource.Error) {
+                state = state.copy(
+                    saveKeyToCloudResource = Resource.Error(exception = uploadResponse.exception),
+                    keyData = null
+                )
+            }
+        }
     }
 
-    fun onKeySaved() {
-        state = state.copy(
-            saveKeyToCloudResource = Resource.Uninitialized,
-            cloudStorageAction = CloudStorageActionData()
-        )
-        determineUIStatus()
-    }
+    private fun loadPrivateKeyFromCloud(bypassScopeCheck: Boolean = false) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadResponse = try {
+                keyRepository.retrieveKeyFromCloud(
+                    participantId = state.participantId, bypassScopeCheck = bypassScopeCheck,
+                    onRetryAfterAccessGranted = {
+                        //Retry this method
+                        loadPrivateKeyFromCloud(bypassScopeCheck = true)
+                    }
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                return@launch
+            }
 
-    fun onKeySaveFailed(exception: Exception?) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            saveKeyToCloudResource = Resource.Error(exception = exception),
-            keyData = null
-        )
-    }
-
-    fun changeWelcomeStep(welcomeStep: WelcomeStep) {
-        state = state.copy(welcomeStep = welcomeStep)
-    }
-
-    private fun loadPrivateKeyFromCloud() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true,
-                action = CloudStorageActions.DOWNLOAD,
-                reason = null
-            )
-        )
-    }
-
-    fun onKeyLoaded(encryptedData: ByteArray) {
-        decryptKeyDataAndSetToState(encryptedData)
-    }
-
-    fun onKeyLoadFailed(exception: Exception?) {
-        exception?.sendError(CrashReportingUtil.CloudDownload)
-        resetLoadKeyStateAndCreateNewApproverKey()
+            if (downloadResponse is Resource.Success) {
+                decryptKeyDataAndSetToState(downloadResponse.data)
+            } else if (downloadResponse is Resource.Error) {
+                downloadResponse.exception?.sendError(CrashReportingUtil.CloudDownload)
+                resetLoadKeyStateAndCreateNewApproverKey()
+            }
+        }
     }
 
     private fun createPolicyParams() {
@@ -293,7 +305,6 @@ class InitialPlanSetupViewModel @Inject constructor(
                     publicKey = encryptionKey.publicExternalRepresentation()
                 ),
                 loadKeyFromCloudResource = Resource.Uninitialized,
-                cloudStorageAction = CloudStorageActionData()
             )
             determineUIStatus()
         } catch (e: Exception) {
@@ -304,7 +315,6 @@ class InitialPlanSetupViewModel @Inject constructor(
 
     private fun resetLoadKeyStateAndCreateNewApproverKey() {
         state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
             loadKeyFromCloudResource = Resource.Uninitialized,
         )
         createApproverKey()
