@@ -469,7 +469,6 @@
     <string name="exit_setup">Exit Setup</string>
     <string name="exit_setup_details">This will exit the setup process and delete ALL of your data. You will be required to start over again.</string>
     <string name="reset_user_data_error">Error occurred while trying to reset user data.  Please try again.</string>
-    <string name="storing_one_phrase_free">Storing one seed phrase with Censo is free, but to store more than one you’ll need a subscription. Go ahead and enter your seed phrase now, we’ll ask you to subscribe when you’re ready to save it.</string>
     <string name="password_required">Password required</string>
     <string name="password_required_message_1">It appears that the account for which you are resetting the Login ID currently uses a password instead of a face scan. Please enter your password in the field below.</string>
     <string name="password_required_message_2">Note, your password will be replaced with the anonymous face scan in the next step.</string>
