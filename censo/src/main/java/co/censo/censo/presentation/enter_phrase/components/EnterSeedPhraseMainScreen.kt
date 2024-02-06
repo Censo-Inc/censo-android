@@ -110,22 +110,6 @@ fun SelectSeedPhraseEntryType(
                 fontWeight = FontWeight.Normal
             )
 
-            if (savedPhrases == 1) {
-                val freePhrase = buildAnnotatedString {
-                    withStyle(basicStyle) {
-                        append(stringResource(R.string.storing_one_phrase_free))
-                    }
-                }
-
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 36.dp),
-                    text = freePhrase
-                )
-                Spacer(modifier = Modifier.height(verticalSpacingHeight))
-            }
-
             val languageSelectionText = buildAnnotatedString {
                 withStyle(basicStyle) {
                     if (!userHasOwnPhrase) {
