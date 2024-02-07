@@ -64,7 +64,7 @@ android {
 
         manifestPlaceholders["STRONGBOX_ENABLED"] = true
 
-        buildConfigField("boolean", "BENEFICIARY_ENABLED", "true")
+        buildConfigField("boolean", "BENEFICIARY_ENABLED", "false")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
