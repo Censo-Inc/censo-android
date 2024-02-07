@@ -25,6 +25,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.parseLink
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
@@ -67,7 +68,6 @@ class LoginIdResetViewModel @Inject constructor(
             is LoginIdResetAction.PasteLink -> onPasteLinkClicked(action.clipboardContent)
             is LoginIdResetAction.TokenReceived -> onTokenReceived(action.token)
             LoginIdResetAction.SelectGoogleId -> launchGoogleSignInFlow()
-            LoginIdResetAction.CloudStoragePermissionsGranted -> handleCloudStorageAccessGranted()
             LoginIdResetAction.RetrieveAuthType -> onRetrieveAuthType()
             LoginIdResetAction.StartPasswordInput -> onStartPasswordInput()
             is LoginIdResetAction.PasswordInputFinished -> onPasswordInputFinished(action.password)
@@ -187,7 +187,7 @@ class LoginIdResetViewModel @Inject constructor(
                     receiveAction(LoginIdResetAction.RetrieveUser)
                 }
             }
-            state.forceUserToGrantCloudStorageAccess.jwt?.isNotBlank() == true -> {
+            state.jwt?.isNotBlank() == true -> {
                 state = state.copy(resetStep = LoginIdResetStep.Facetec)
             }
             state.requiredTokens <= state.collectedTokens -> {
@@ -249,12 +249,13 @@ class LoginIdResetViewModel @Inject constructor(
                 val account = completedTask.await()
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
-                    state = state.copy(
-                        forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(
-                            requestAccess = true,
-                            jwt = account.idToken
-                        )
-                    )
+                    state = state.copy(jwt = account.idToken)
+
+                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired(
+                        onAccessGranted = {
+                            handleCloudStorageAccessGranted(account.idToken)
+                        }
+                    ))
                 } else {
                     preSignInUser(account.idToken)
                 }
@@ -265,9 +266,8 @@ class LoginIdResetViewModel @Inject constructor(
         }
     }
 
-    private fun handleCloudStorageAccessGranted() {
-        preSignInUser(state.forceUserToGrantCloudStorageAccess.jwt)
-        resetForceUserToGrantCloudStorageAccess()
+    private fun handleCloudStorageAccessGranted(jwt: String?) {
+        preSignInUser(jwt)
     }
 
     private fun preSignInUser(jwt: String?) {
@@ -308,7 +308,7 @@ class LoginIdResetViewModel @Inject constructor(
             state = state.copy(createDeviceResponse = createDeviceResponse)
 
             if (createDeviceResponse is Resource.Success) {
-                state = state.copy(forceUserToGrantCloudStorageAccess = state.forceUserToGrantCloudStorageAccess.copy(jwt = idToken))
+                state = state.copy(jwt = idToken)
                 receiveAction(LoginIdResetAction.DetermineResetStep)
             }
         }
@@ -322,7 +322,7 @@ class LoginIdResetViewModel @Inject constructor(
 
         return viewModelScope.async {
             val response = ownerRepository.resetLoginId(
-                idToken = state.forceUserToGrantCloudStorageAccess.jwt!!,
+                idToken = state.jwt!!,
                 resetTokens = secureStorage.retrieveResetTokens().map { ResetToken(it) },
                 biometryVerificationId = verificationId,
                 biometryData = biometry,
@@ -371,9 +371,5 @@ class LoginIdResetViewModel @Inject constructor(
 
     fun resetResetLoginIdResponse() {
         state = state.copy(resetLoginIdResponse = Resource.Uninitialized)
-    }
-
-    private fun resetForceUserToGrantCloudStorageAccess() {
-        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
     }
 }
