@@ -12,6 +12,7 @@ import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,10 +39,21 @@ class OwnerKeyValidationViewModel @Inject constructor(
 
     private fun validateApproverKey(participantId: ParticipantId) {
         viewModelScope.launch(Dispatchers.IO) {
-            val hasKeySavedInCloud = runCatching {
-                val downloadResult = keyRepository.retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
+            val hasKeySavedInCloud = try {
+                val downloadResult = keyRepository.retrieveKeyFromCloud(
+                    participantId,
+                    bypassScopeCheck = true,
+                    onRetryAfterAccessGranted = {
+                        //Retry this method
+                        validateApproverKey(participantId = participantId)
+                    })
                 downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
-            }.getOrElse { true } // Defaults to true in case of any trouble
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                //TODO: Test hard before PR
+                return@launch// Return early and let the user grant access
+            } catch (e: Exception) {
+                true // Defaults to true in case of any trouble
+            }
 
             state = if (hasKeySavedInCloud) {
                 state.copy(ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.None)
