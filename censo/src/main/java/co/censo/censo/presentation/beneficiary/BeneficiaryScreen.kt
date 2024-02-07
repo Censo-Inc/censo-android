@@ -17,6 +17,7 @@ import co.censo.shared.presentation.cloud_storage.CloudStorageActions
 import co.censo.shared.presentation.components.CodeVerificationStatus
 import co.censo.shared.presentation.components.CodeVerificationUI
 import co.censo.shared.presentation.components.DisplayError
+import co.censo.shared.presentation.components.PostSuccessAction
 
 @Composable
 fun BeneficiaryScreen(
@@ -37,7 +38,9 @@ fun BeneficiaryScreen(
         //TODO: we should be kicking the user out if they have not accepted or owner state is not beneficiary...
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(color = Color.White)) {
         val beneficiaryState = state.beneficiaryData
 
         beneficiaryState?.let {
@@ -62,9 +65,7 @@ fun BeneficiaryScreen(
                 }
 
                 BeneficiaryPhase.Activated -> {
-                    BeneficiaryActivatedUI {
-                        //todo: leave screen and show base Beneficiary UI
-                    }
+                    PostSuccessAction()
                 }
             }
         }

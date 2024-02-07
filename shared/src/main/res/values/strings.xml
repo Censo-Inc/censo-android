@@ -50,4 +50,7 @@
     <string name="enter_the_6_digit_code_from_the_seed_phrase_owner">The person you are assisting will give you a 6-digit code. Enter it below.</string>
     <string name="save_key_to_cloud">Save Key</string>
 
+    <string name="thanks_for_helping_someone">Thanks for helping someone keep their crypto safe.</string>
+    <string name="you_may_now_close_the_app">You may now close the app.</string>
+
 </resources>

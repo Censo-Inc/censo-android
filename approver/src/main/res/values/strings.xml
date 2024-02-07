@@ -64,8 +64,6 @@
     <string name="continue_text">Continue</string>
     <string name="logged_in_approver_landing_message">You\'re helping someone who trusts you keep their crypto safe.\n\nPlease tap the continue button when they contact you.</string>
     <string name="tapping_sign_in">By tapping Sign in, you agree to our terms of use.</string>
-    <string name="thanks_for_helping_approver">Thanks for helping someone keep their crypto safe.</string>
-    <string name="you_may_now_close_the_app">You may now close the app.</string>
     <string name="code_entered_incorrectly">The code was entered incorrectly</string>
     <string name="this_link">this link</string>
     <string name="to_download_the_censo_app_span">to download the Censo app.</string>

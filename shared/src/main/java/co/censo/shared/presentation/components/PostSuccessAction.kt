@@ -1,4 +1,4 @@
-package co.censo.approver.presentation.components
+package co.censo.shared.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,11 +26,11 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.censo.approver.R
+import co.censo.shared.R
 import co.censo.shared.presentation.SharedColors
 
 @Composable
-fun PostApproverAction() {
+fun PostSuccessAction() {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val aspectRatio = screenHeight / screenWidth
@@ -55,14 +55,14 @@ fun PostApproverAction() {
         ) {
             Image(
                 modifier = Modifier.align(Alignment.Center),
-                painter = painterResource(id = R.drawable.post_approver_congrats),
+                painter = painterResource(id = R.drawable.post_success_congrats),
                 contentDescription = null,
                 contentScale = ContentScale.Fit
             )
         }
         Spacer(modifier = Modifier.weight(0.1f))
         Text(
-            text = stringResource(R.string.thanks_for_helping_approver),
+            text = stringResource(R.string.thanks_for_helping_someone),
             fontSize = fontSize,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
@@ -86,30 +86,30 @@ fun PostApproverAction() {
 
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
-fun LargePostApproverActionPreview() {
+fun LargePostSuccessActionPreview() {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)) {
-        PostApproverAction()
+        PostSuccessAction()
     }
 }
 
 @Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
 @Composable
-fun MediumPostApproverActionPreview() {
+fun MediumPostSuccessActionPreview() {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)) {
-        PostApproverAction()
+        PostSuccessAction()
     }
 }
 
 @Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
-fun SmallPostApproverActionPreview() {
+fun SmallPostSuccessActionPreview() {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)) {
-        PostApproverAction()
+        PostSuccessAction()
     }
 }
