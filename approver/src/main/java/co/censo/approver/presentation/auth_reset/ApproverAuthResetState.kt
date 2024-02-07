@@ -10,7 +10,6 @@ import co.censo.shared.data.model.ApproverPhase
 import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.AuthenticationResetApprovalId
 import co.censo.shared.data.model.SubmitAuthenticationResetTotpVerificationApiResponse
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 data class ApproverAuthResetState(
     // approver state
@@ -35,7 +34,6 @@ data class ApproverAuthResetState(
     val navToApproverEntrance: Boolean = false,
 
     // Cloud Storage
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     ) {
 

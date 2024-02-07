@@ -16,8 +16,7 @@ import co.censo.shared.data.model.AuthenticationResetApprovalId
 import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.isDigitsOnly
 import co.censo.shared.util.sendError
@@ -176,11 +175,6 @@ class ApproverAuthResetViewModel @Inject constructor(
     private fun submitVerificationCode() {
         viewModelScope.launch(Dispatchers.IO) {
 
-            if (state.approverEncryptedKey == null) {
-                loadPrivateKeyFromCloud()
-                return@launch
-            }
-
             val approverKey = state.approverEncryptedKey
             val entropy = state.approverEntropy
 
@@ -233,27 +227,31 @@ class ApproverAuthResetViewModel @Inject constructor(
     //endregion
 
     //region CloudStorage Action methods
-    private fun loadPrivateKeyFromCloud() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true, action = CloudStorageActions.DOWNLOAD
-            ),
-            loadKeyFromCloudResource = Resource.Loading
-        )
-    }
+    private fun loadPrivateKeyFromCloud(bypassScopeCheck: Boolean = false) {
+        state = state.copy(loadKeyFromCloudResource = Resource.Loading)
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadResponse = try {
+                keyRepository.retrieveKeyFromCloud(
+                    participantId = state.participantId,
+                    bypassScopeCheck = bypassScopeCheck,
+                    onRetryAfterAccessGranted = {
+                        //Retry this method
+                        loadPrivateKeyFromCloud(bypassScopeCheck = true)
+                    }
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                //TODO: Should we stop loading UI here? Tend to before PR
+                return@launch
+            }
 
-    fun handleCloudStorageActionSuccess(
-        encryptedKey: ByteArray,
-        cloudStorageAction: CloudStorageActions
-    ) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyFromCloudResource = Resource.Uninitialized
-        )
+            state = state.copy(loadKeyFromCloudResource = Resource.Uninitialized)
 
-        when (cloudStorageAction) {
-            CloudStorageActions.DOWNLOAD -> keyDownloadSuccess(privateEncryptedKey = encryptedKey)
-            else -> {}
+            if (downloadResponse is Resource.Success) {
+                keyDownloadSuccess(privateEncryptedKey = downloadResponse.data)
+            } else if (downloadResponse is Resource.Error) {
+                setErrorToSubmitAuthResetVerificationResource(downloadResponse.exception)
+            }
         }
     }
 
@@ -261,23 +259,6 @@ class ApproverAuthResetViewModel @Inject constructor(
         state = state.copy(approverEncryptedKey = EncryptedKey(privateEncryptedKey))
 
         checkAuthResetConfirmationPhase()
-    }
-
-    fun handleCloudStorageActionFailure(
-        exception: Exception?,
-        cloudStorageAction: CloudStorageActions
-    ) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyFromCloudResource = Resource.Uninitialized
-        )
-
-        when (cloudStorageAction) {
-            CloudStorageActions.DOWNLOAD -> {
-                setErrorToSubmitAuthResetVerificationResource(exception)
-            }
-            else -> {}
-        }
     }
 
     private fun setErrorToSubmitAuthResetVerificationResource(exception: Exception?) {

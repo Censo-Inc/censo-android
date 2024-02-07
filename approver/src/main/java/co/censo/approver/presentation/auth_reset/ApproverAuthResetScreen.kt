@@ -37,7 +37,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
+import co.censo.shared.presentation.cloud_storage.CloudAccessEnforcer
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.popCurrentDestinationFromBackStack
@@ -211,32 +211,11 @@ fun ApproverAuthResetScreen(
         )
     }
 
-    if (state.cloudStorageAction.triggerAction) {
-
-        if (state.loadKeyFromCloudResource is Resource.Loading) {
-            LargeLoading(
-                color = SharedColors.DefaultLoadingColor,
-                fullscreen = true,
-                fullscreenBackgroundColor = Color.White
-            )
-        }
-
-        CloudStorageHandler(
-            actionToPerform = state.cloudStorageAction.action,
-            participantId = state.participantId,
-            encryptedPrivateKey = null,
-            onActionSuccess = { byteArray ->
-                viewModel.handleCloudStorageActionSuccess(
-                    byteArray,
-                    state.cloudStorageAction.action
-                )
-            },
-            onActionFailed = { exception ->
-                viewModel.handleCloudStorageActionFailure(
-                    exception,
-                    state.cloudStorageAction.action
-                )
-            },
+    if (state.loadKeyFromCloudResource is Resource.Loading) {
+        LargeLoading(
+            color = SharedColors.DefaultLoadingColor,
+            fullscreen = true,
+            fullscreenBackgroundColor = Color.White
         )
     }
 }
