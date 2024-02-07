@@ -342,7 +342,6 @@
     <string name="click_past_button_message">When you tap the Paste From Clipboard button, your seed phrase will be pasted from the clipboard, and the clipboard will then be cleared.\n\nYou will then have the opportunity to review the seed phrase before saving it.</string>
     <string name="paste_from_clipboard">Paste From Clipboard</string>
     <string name="subsequent_seed_phrase_saved">Your seed phrase is securely stored.\n\nIt can be accessed only by you.</string>
-    <string name="beneficiary_activated_message">Thanks for helping someone keep their crypto safe.\n\nYou may now close the app.</string>
     <string name="error_occurred_trying_to_get_user_data_please_try_again">Error occurred trying to get user data. Please try again.</string>
     <string name="it_s_time_for_a_better_way">It’s time for a better way.</string>
     <string name="it_s_time_for_a_seed_phrase_manager">IT’S TIME FOR A\nSEED PHRASE\nMANAGER</string>
@@ -521,4 +520,9 @@
     <string name="secure_your_seed_phrases">Secure your seed phrases</string>
     <string name="close">Exit screen</string>
     <string name="delete_beneficiary_user">Delete Beneficiary User</string>
+    <string name="to_become_a_beneficiary_tap_here">To become a beneficiary, tap here.</string>
+    <string name="you_must_add_approvers_before_you_can_add_a_beneficiary">You must add approvers before you can add a beneficiary.</string>
+    <string name="add_beneficiary">Add beneficiary</string>
+    <string name="remove_beneficiary">Remove beneficiary</string>
+    <string name="your_beneficiary_will_be_able_to_securely_access">Your beneficiary will be able to securely access your seed phrases in case of unforeseen circumstances.</string>
 </resources>

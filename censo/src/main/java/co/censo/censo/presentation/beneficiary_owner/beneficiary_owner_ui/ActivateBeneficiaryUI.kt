@@ -6,7 +6,9 @@ import TitleText
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -23,18 +26,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.components.ApproverStep
 import co.censo.censo.presentation.components.ShareTheCodeUIData
 import co.censo.censo.presentation.components.VerificationCodeUIData
-import co.censo.censo.presentation.plan_setup.components.ProspectApproverInfoBox
-import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.Beneficiary
 import co.censo.shared.data.model.BeneficiaryInvitationId
 import co.censo.shared.data.model.BeneficiaryStatus
@@ -52,9 +56,14 @@ fun ActivateBeneficiaryUI(
     storesLink: String,
     onContinue: () -> Unit,
 ) {
-    val nickName: String = beneficiary.label ?: ""
     val context = LocalContext.current
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    val nickName: String = beneficiary.label
     val buttonEnabled = beneficiary.status is BeneficiaryStatus.Activated
+
+    val largeVerticalSpacing = screenHeight * 0.025f
+    val mediumVerticalSpacing = screenHeight * 0.020f
 
     fun shareLink(link: String) {
         val sendIntent: Intent = Intent().apply {
@@ -76,15 +85,16 @@ fun ActivateBeneficiaryUI(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(largeVerticalSpacing))
 
         TitleText(
             modifier = Modifier.fillMaxWidth(),
             title = stringResource(R.string.activate_approver_name, nickName),
             textAlign = TextAlign.Center,
+            fontSize = 28.sp
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(largeVerticalSpacing))
 
         ApproverStep(
             heading = listOf(
@@ -101,7 +111,7 @@ fun ActivateBeneficiaryUI(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(mediumVerticalSpacing))
 
         ApproverStep(
             heading = listOf(
@@ -117,14 +127,25 @@ fun ActivateBeneficiaryUI(
                 deeplink?.let { shareLink(it) }
             }
         ) {
-            Image(
-                modifier = Modifier.size(66.dp),
-                painter = painterResource(id = co.censo.shared.R.drawable.approver_icon),
-                contentDescription = null
-            )
+            Box(
+                modifier = Modifier
+                    .size(66.dp)
+                    .background(
+                        color = SharedColors.ApproverAppIcon,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier.size(36.dp),
+                    painter = painterResource(id = co.censo.shared.R.drawable.logo),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = SharedColors.MainIconColor)
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(mediumVerticalSpacing))
 
         shareTheCodeStepUIData(
             beneficiary.status,
@@ -147,7 +168,7 @@ fun ActivateBeneficiaryUI(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(largeVerticalSpacing))
         }
 
         Divider(
@@ -156,19 +177,19 @@ fun ActivateBeneficiaryUI(
                 .height(1.dp), color = SharedColors.DividerGray
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(largeVerticalSpacing))
 
         ProspectBeneficiaryInfoBox(
             nickName = nickName,
             status = beneficiary.status,
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(largeVerticalSpacing))
 
         StandardButton(
             modifier = Modifier.fillMaxWidth(),
             enabled = buttonEnabled,
-            contentPadding = PaddingValues(vertical = 12.dp),
+            contentPadding = PaddingValues(vertical = mediumVerticalSpacing),
             onClick = onContinue
         ) {
             val continueButtonTextStyle =
@@ -180,7 +201,7 @@ fun ActivateBeneficiaryUI(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(largeVerticalSpacing))
     }
     KeepScreenOn()
 }
@@ -236,9 +257,49 @@ fun shareTheCodeStepUIData(
     else -> null
 }
 
-@Preview(showSystemUi = true, showBackground = true)
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
-fun ActivateBeneficiaryUI() {
+fun SmallActivateBeneficiaryUI() {
+    ActivateBeneficiaryUI(
+        beneficiary = Beneficiary(
+            label = "Ben Eficiary",
+            status = BeneficiaryStatus.Initial(
+                invitationId = BeneficiaryInvitationId(""),
+                deviceEncryptedTotpSecret = Base64EncodedData("")
+            )
+        ),
+        deeplink = "",
+        secondsLeft = 45,
+        verificationCode = "345182",
+        storesLink = ""
+    ) {
+
+    }
+}
+
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun MediumActivateBeneficiaryUI() {
+    ActivateBeneficiaryUI(
+        beneficiary = Beneficiary(
+            label = "Ben Eficiary",
+            status = BeneficiaryStatus.Initial(
+                invitationId = BeneficiaryInvitationId(""),
+                deviceEncryptedTotpSecret = Base64EncodedData("")
+            )
+        ),
+        deeplink = "",
+        secondsLeft = 45,
+        verificationCode = "345182",
+        storesLink = ""
+    ) {
+
+    }
+}
+
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
+@Composable
+fun LargeActivateBeneficiaryUI() {
     ActivateBeneficiaryUI(
         beneficiary = Beneficiary(
             label = "Ben Eficiary",

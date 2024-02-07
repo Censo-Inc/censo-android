@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,7 +38,8 @@ fun NoBeneficiaryTabScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -44,7 +48,7 @@ fun NoBeneficiaryTabScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(screenHeight * 0.10f))
+            Spacer(modifier = Modifier.height(screenHeight * 0.07f))
             Text(
                 text = stringResource(id = R.string.beneficiary_explainer_text),
                 color = SharedColors.MainColorText,
@@ -61,7 +65,7 @@ fun NoBeneficiaryTabScreen(
         ) {
             if (!addBeneficiaryEnabled) {
                 Text(
-                    text = "You must add approvers before you can add a beneficiary.",
+                    text = stringResource(R.string.you_must_add_approvers_before_you_can_add_a_beneficiary),
                     color = SharedColors.ErrorRed,
                     fontWeight = FontWeight.W500,
                     fontSize = 24.sp,
@@ -76,20 +80,36 @@ fun NoBeneficiaryTabScreen(
                 enabled = addBeneficiaryEnabled
             ) {
                 Text(
-                    text = "Add beneficiary",
+                    text = stringResource(R.string.add_beneficiary),
                     style = ButtonTextStyle,
                     color = if (addBeneficiaryEnabled) SharedColors.ButtonTextBlue else Color.White
                 )
             }
-            Spacer(modifier = Modifier.height(screenHeight * 0.0125f))
+            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
         }
 
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(device = Devices.NEXUS_5, showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewNoBeneficaryEnabledScreen() {
+fun SmallPreviewNoBeneficiaryEnabledScreen() {
+    NoBeneficiaryTabScreen(addBeneficiaryEnabled = true) {
+
+    }
+}
+
+@Preview(device = Devices.PIXEL_4, showBackground = true, showSystemUi = true)
+@Composable
+fun MediumPreviewNoBeneficiaryEnabledScreen() {
+    NoBeneficiaryTabScreen(addBeneficiaryEnabled = true) {
+
+    }
+}
+
+@Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)
+@Composable
+fun LargePreviewNoBeneficiaryEnabledScreen() {
     NoBeneficiaryTabScreen(addBeneficiaryEnabled = true) {
 
     }
@@ -97,7 +117,7 @@ fun PreviewNoBeneficaryEnabledScreen() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewNoBeneficaryDisabledScreen() {
+fun PreviewNoBeneficiaryDisabledScreen() {
     NoBeneficiaryTabScreen(addBeneficiaryEnabled = false) {
 
     }

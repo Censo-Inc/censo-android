@@ -113,7 +113,9 @@ fun WelcomeScreenUI(
         }
 
         Column(
-            modifier = Modifier.padding(vertical = 24.dp, horizontal = 44.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -151,7 +153,9 @@ fun WelcomeScreenUI(
                 )
             }
             ClickableText(
-                text = buildAnnotatedString { append("To become a beneficiary, tap here.") },
+                text = buildAnnotatedString {
+                    append(stringResource(R.string.to_become_a_beneficiary_tap_here))
+                },
                 style = TextStyle(
                     textAlign = TextAlign.Center,
                     color = Color.Black,

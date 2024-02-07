@@ -116,7 +116,7 @@ fun AddBeneficiaryLabelUI(
             )
         )
 
-        Spacer(modifier = Modifier.height(verticalSpacingHeight / 2))
+        Spacer(modifier = Modifier.height(verticalSpacingHeight * 1.5f))
 
         StandardButton(
             modifier = Modifier

@@ -172,11 +172,7 @@ fun InitialPlanSetupScreen(
                                         viewModel.changeWelcomeStep(WelcomeStep.ScanningFace)
                                     },
                                     onMinorButtonClick = {
-                                        navController.navigate(
-                                            Screen.AcceptBeneficiary.buildNavRoute(
-                                                null
-                                            )
-                                        )
+                                        navController.navigate(Screen.AcceptBeneficiary.buildNavRoute(null))
                                     }
                                 )
                             } else {

@@ -334,7 +334,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
     private fun loggedInRouting(ownerState: OwnerState) {
         val destination =
-            if (!state.beneficiaryInviteId.isNullOrEmpty()) {
+            if (!state.beneficiaryInviteId.isNullOrEmpty() && ownerState !is OwnerState.Beneficiary) {
                 Screen.AcceptBeneficiary.buildNavRoute(state.beneficiaryInviteId!!)
             } else {
                 when (ownerState) {

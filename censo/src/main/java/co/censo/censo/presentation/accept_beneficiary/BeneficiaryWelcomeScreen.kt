@@ -11,10 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,10 +30,20 @@ fun WelcomeBeneficiaryScreen(
     buttonText: String,
     onContinue: () -> Unit
 ) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+    val horizontalPadding = screenWidth * 0.075f
+
+    val topBottomPadding = screenHeight * 0.025f
+
+    val textBottomPadding = screenHeight * 0.025f
+    val buttonVerticalPadding = screenHeight * 0.020f
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 24.dp, end = 24.dp, top = 32.dp),
+            .padding(start = horizontalPadding, end = horizontalPadding, top = topBottomPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -48,7 +59,7 @@ fun WelcomeBeneficiaryScreen(
                 color = SharedColors.MainColorText,
                 lineHeight = 48.sp,
                 modifier = Modifier
-                    .padding(top = 24.dp, bottom = 24.dp)
+                    .padding(bottom = textBottomPadding)
                     .fillMaxWidth()
             )
 
@@ -63,8 +74,8 @@ fun WelcomeBeneficiaryScreen(
         StandardButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            contentPadding = PaddingValues(vertical = 16.dp),
+                .padding(bottom = topBottomPadding),
+            contentPadding = PaddingValues(vertical = buttonVerticalPadding),
             onClick = onContinue
         ) {
             Text(
@@ -75,9 +86,33 @@ fun WelcomeBeneficiaryScreen(
     }
 }
 
-@Preview(showSystemUi = true, showBackground = true)
+@Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
-fun PreviewStandardWelcomeBeneficiary() {
+fun SmallPreviewStandardWelcomeBeneficiary() {
+    WelcomeBeneficiaryScreen(
+        title = stringResource(R.string.welcome_to_censo),
+        message = stringResource(R.string.standard_beneficiary_message),
+        buttonText = stringResource(id = R.string.continue_text),
+    ) {
+
+    }
+}
+
+@Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
+@Composable
+fun MediumPreviewStandardWelcomeBeneficiary() {
+    WelcomeBeneficiaryScreen(
+        title = stringResource(R.string.welcome_to_censo),
+        message = stringResource(R.string.standard_beneficiary_message),
+        buttonText = stringResource(id = R.string.continue_text),
+    ) {
+
+    }
+}
+
+@Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
+@Composable
+fun LargePreviewStandardWelcomeBeneficiary() {
     WelcomeBeneficiaryScreen(
         title = stringResource(R.string.welcome_to_censo),
         message = stringResource(R.string.standard_beneficiary_message),
