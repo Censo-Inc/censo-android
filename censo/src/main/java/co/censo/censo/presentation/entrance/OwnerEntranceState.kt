@@ -7,7 +7,6 @@ import co.censo.shared.util.NavigationData
 data class OwnerEntranceState(
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<Unit> = Resource.Loading,
-    val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
     val acceptedTermsOfUseVersion: String? = null,
     val showAcceptTermsOfUse: Boolean = false,
     val userFinishedSetup: Boolean = false,
@@ -28,6 +27,7 @@ data class OwnerEntranceState(
             || userResponse is Resource.Error
 }
 
+//TODO: Delete this
 data class ForceUserToGrantCloudStorageAccess(
     val requestAccess: Boolean = false,
     val jwt: String? = ""

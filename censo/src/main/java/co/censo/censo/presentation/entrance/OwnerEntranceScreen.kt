@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.entrance
 
-import ParticipantId
 import StandardButton
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
@@ -57,8 +56,6 @@ import co.censo.censo.R as CensoR
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.touVersion
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
@@ -199,17 +196,6 @@ fun OwnerEntranceScreen(
                     recover = { viewModel.startLoginIdRecovery() },
                 )
             }
-        }
-
-        if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
-            CloudStorageHandler(
-                actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
-                participantId = ParticipantId(""),
-                encryptedPrivateKey = null,
-                onActionSuccess = {},
-                onActionFailed = {},
-                onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
-            )
         }
     }
 }
