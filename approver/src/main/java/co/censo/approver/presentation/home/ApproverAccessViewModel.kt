@@ -18,8 +18,7 @@ import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
@@ -146,16 +145,6 @@ class ApproverAccessViewModel @Inject constructor(
 
             else -> state
         }
-    }
-
-    private fun loadPrivateKeyFromCloud(accessPhase: ApproverPhase.AccessConfirmation) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true, action = CloudStorageActions.DOWNLOAD
-            ),
-            accessConfirmationPhase = accessPhase,
-            loadKeyFromCloudResource = Resource.Loading
-        )
     }
 
     private fun confirmOrRejectOwnerAccessRequest(
@@ -348,20 +337,37 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     //region CloudStorage Action methods
-    fun handleCloudStorageActionSuccess(
-        encryptedKey: ByteArray,
-        cloudStorageAction: CloudStorageActions
+    private fun loadPrivateKeyFromCloud(
+        accessPhase: ApproverPhase.AccessConfirmation,
+        bypassScopeCheck: Boolean = false
     ) {
         state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyFromCloudResource = Resource.Uninitialized
+            accessConfirmationPhase = accessPhase,
+            loadKeyFromCloudResource = Resource.Loading
         )
 
-        when (cloudStorageAction) {
-            CloudStorageActions.DOWNLOAD -> {
-                keyDownloadSuccess(privateEncryptionKey = encryptedKey)
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadResponse = try {
+                keyRepository.retrieveKeyFromCloud(
+                    participantId = ParticipantId(state.participantId),
+                    bypassScopeCheck = bypassScopeCheck,
+                    onRetryAfterAccessGranted = {
+                        //Retry this method
+                        loadPrivateKeyFromCloud(accessPhase = accessPhase, bypassScopeCheck = true)
+                    }
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                //TODO: Should we stop loading UI here? Tend to before PR
+                return@launch
             }
-            else -> {}
+
+            state = state.copy(loadKeyFromCloudResource = Resource.Uninitialized)
+
+            if (downloadResponse is Resource.Success) {
+                keyDownloadSuccess(privateEncryptionKey = downloadResponse.data)
+            } else if (downloadResponse is Resource.Error) {
+                setErrorToApproveAccessResource(downloadResponse.exception)
+            }
         }
     }
 
@@ -380,23 +386,6 @@ class ApproverAccessViewModel @Inject constructor(
             Exception().sendError(CrashReportingUtil.AccessConfirmation)
             state =
                 state.copy(approveAccessResource = Resource.Error(exception = Exception("Unable to confirm owner access, missing access confirmation data")))
-        }
-    }
-
-    fun handleCloudStorageActionFailure(
-        exception: Exception?,
-        cloudStorageAction: CloudStorageActions
-    ) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyFromCloudResource = Resource.Uninitialized
-        )
-
-        when (cloudStorageAction) {
-            CloudStorageActions.DOWNLOAD -> {
-                setErrorToApproveAccessResource(exception)
-            }
-            else -> {}
         }
     }
 
