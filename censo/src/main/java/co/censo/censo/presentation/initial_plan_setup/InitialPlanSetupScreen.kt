@@ -1,6 +1,7 @@
 package co.censo.censo.presentation.initial_plan_setup
 
 import TitleText
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,25 +13,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import co.censo.shared.data.Resource
@@ -50,7 +59,7 @@ import co.censo.shared.presentation.components.LearnMoreUI
 import co.censo.shared.presentation.components.LearnMoreUtil
 import co.censo.shared.util.popUpToTop
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun InitialPlanSetupScreen(
     navController: NavController,
@@ -58,6 +67,12 @@ fun InitialPlanSetupScreen(
 ) {
     val state = viewModel.state
     val showInfoView: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    BackHandler(
+        enabled = state.showPromoCodeUI,
+        onBack = viewModel::dismissPromoCodeUI
+    )
 
     LaunchedEffect(key1 = state) {
         if (state.kickUserOut is Resource.Success) {
@@ -152,9 +167,13 @@ fun InitialPlanSetupScreen(
 
                         is InitialPlanSetupStep.Initial -> {
                             if (state.welcomeStep == WelcomeStep.Authenticated) {
-                                WelcomeScreenUI {
-                                    viewModel.changeWelcomeStep(WelcomeStep.ScanningFace)
-                                }
+                                WelcomeScreenUI(
+                                    isPromoCodeEnabled = !state.promoCodeAccepted,
+                                    showPromoCodeUI = viewModel::showPromoCodeUI,
+                                    navigateToPlanSetup = {
+                                        viewModel.changeWelcomeStep(WelcomeStep.ScanningFace)
+                                    }
+                                )
                             } else {
                                 ScanFaceInformationUI(
                                     startPlanSetup = viewModel::determineUIStatus,
@@ -210,6 +229,38 @@ fun InitialPlanSetupScreen(
                     },
                 )
             }
+        }
+    }
+
+    //Sits on top of entire screen to cover nav bar
+    if (state.initialPlanSetupStep is InitialPlanSetupStep.Initial && state.welcomeStep == WelcomeStep.Authenticated) {
+        if (state.showPromoCodeUI) {
+            EnterPromoCodeUI(
+                loading = state.promoCodeLoading,
+                inputtedPromoCode = state.promoCode,
+                updatePromoCode = viewModel::updatePromoCode,
+                submitPromoCode = {
+                    keyboardController?.hide()
+                    viewModel.submitPromoCode()
+                },
+                dismissPromoCodeUI = viewModel::dismissPromoCodeUI
+            )
+        }
+
+        if (state.promoCodeSuccessDialog) {
+            PromoCodeDialog(
+                title = stringResource(id = R.string.promo_code_accepted),
+                message = stringResource(id = R.string.promo_code_accepted_message),
+                onDismiss = viewModel::dismissPromoDialog
+            )
+        }
+
+        if (state.promoCodeErrorDialog) {
+            PromoCodeDialog(
+                title = stringResource(id = R.string.error),
+                message = stringResource(R.string.unknown_promo_code),
+                onDismiss = viewModel::dismissPromoDialog
+            )
         }
     }
 }
@@ -270,6 +321,37 @@ fun ScanFaceInformationUI(
             annotatedString = LearnMoreUtil.faceScanMessage(),
         )
     }
+}
+
+@Composable
+fun PromoCodeDialog(title: String, message: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        title = {
+            Text(
+                text = title,
+                color = Color.Black,
+                fontSize = 24.sp
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                color = Color.Black,
+                fontSize = 18.sp
+            )
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            ClickableText(
+                text = buildAnnotatedString { append(stringResource(id = R.string.ok)) },
+                style = TextStyle(
+                    color = Color.Black,
+                    fontSize = 20.sp
+                ),
+                onClick = { onDismiss() }
+            )
+        },
+    )
 }
 
 @Preview(device = Devices.PIXEL_4_XL, showBackground = true, showSystemUi = true)

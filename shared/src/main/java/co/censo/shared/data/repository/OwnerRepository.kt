@@ -79,6 +79,7 @@ import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.model.SeedPhraseData
+import co.censo.shared.data.model.SetPromoCodeApiRequest
 import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UpdateSeedPhraseApiRequest
 import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
@@ -288,6 +289,7 @@ interface OwnerRepository {
     suspend fun requestAuthenticationReset(): Resource<InitiateAuthenticationResetApiResponse>
     suspend fun cancelAuthenticationReset(): Resource<CancelAuthenticationResetApiResponse>
     suspend fun replaceAuthentication(authentication: Authentication): Resource<ReplaceAuthenticationApiResponse>
+    suspend fun setPromoCode(code: String) : Resource<Unit>
 }
 
 class OwnerRepositoryImpl(
@@ -910,6 +912,12 @@ class OwnerRepositoryImpl(
     override suspend fun checkForCompletedImport(channel: String): Resource<GetImportEncryptedDataApiResponse> {
         return retrieveApiResource {
             apiService.importedEncryptedData(channel)
+        }
+    }
+
+    override suspend fun setPromoCode(code: String): Resource<Unit> {
+        return retrieveApiResource {
+            apiService.setPromoCode(SetPromoCodeApiRequest(code))
         }
     }
 

@@ -55,6 +55,7 @@ import co.censo.shared.data.model.RetrieveAuthTypeApiRequest
 import co.censo.shared.data.model.RetrieveAuthTypeApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
+import co.censo.shared.data.model.SetPromoCodeApiRequest
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
@@ -450,6 +451,12 @@ interface ApiService {
         @Body apiRequest: ReplaceAuthenticationApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<ReplaceAuthenticationApiResponse>
+
+    @POST("/v1/promo-code")
+    suspend fun setPromoCode(
+        @Body requestBody: SetPromoCodeApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<Unit>
 
 }
 
