@@ -1010,50 +1010,70 @@ class OwnerRepositoryImpl(
         keyConfirmationSignature: ByteArray,
         keyConfirmationTimeMillis: Long
     ): Resource<ActivateBeneficiaryApiResponse> {
+        try {
 
-        val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
-            id = ownerParticipantId.value,
-            bypassScopeCheck = true
-        )
-
-        val encryptedKey = ownerApproverKeyResource.asSuccess().data
-
-        val base58EncodedPrivateKey =
-            encryptedKey.decryptWithEntropy(
-                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
-                entropy = entropy
+            val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
+                id = ownerParticipantId.value,
+                bypassScopeCheck = true
             )
 
-        val beneficiaryKey = ExternalEncryptionKey.generateFromPublicKeyBase58(beneficiaryPublicKey)
+            if (ownerApproverKeyResource !is Resource.Success) {
+                return if (ownerApproverKeyResource is Resource.Error) {
+                    Resource.Error(
+                        ownerApproverKeyResource.exception,
+                        ownerApproverKeyResource.errorResponse,
+                        ownerApproverKeyResource.errorCode
+                    )
+                } else {
+                    Resource.Error(
+                        Exception("Failed to retrieve owner key from cloud to activate beneficiary.")
+                    )
+                }
+            }
 
-        val encryptedOwnerKey = beneficiaryKey.encrypt(
-            Base58.base58Decode(base58EncodedPrivateKey.value)
-        )
+            val encryptedKey = ownerApproverKeyResource.asSuccess().data
 
-        val beneficiaryKeys = approverPublicKeys.map {
-            BeneficiaryEncryptedKey(
-                participantId = it.participantId,
-                encryptedKey = Base64EncodedData(
-                    Base64.getEncoder().encodeToString(
-                        ExternalEncryptionKey.generateFromPublicKeyBase58(it.publicKey).encrypt(encryptedOwnerKey)
+            val base58EncodedPrivateKey =
+                encryptedKey.decryptWithEntropy(
+                    deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                    entropy = entropy
+                )
+
+            val beneficiaryKey =
+                ExternalEncryptionKey.generateFromPublicKeyBase58(beneficiaryPublicKey)
+
+            val encryptedOwnerKey = beneficiaryKey.encrypt(
+                Base58.base58Decode(base58EncodedPrivateKey.value)
+            )
+
+            val beneficiaryKeys = approverPublicKeys.map {
+                BeneficiaryEncryptedKey(
+                    participantId = it.participantId,
+                    encryptedKey = Base64EncodedData(
+                        Base64.getEncoder().encodeToString(
+                            ExternalEncryptionKey.generateFromPublicKeyBase58(it.publicKey)
+                                .encrypt(encryptedOwnerKey)
+                        )
                     )
                 )
+            }
+
+            val activateBeneficiaryRequest = ActivateBeneficiaryApiRequest(
+                keyConfirmationSignature =
+                Base64EncodedData(
+                    Base64.getEncoder().encodeToString(
+                        keyConfirmationSignature
+                    )
+                ),
+                keyConfirmationTimeMillis = keyConfirmationTimeMillis,
+                encryptedKeys = beneficiaryKeys
             )
-        }
 
-        val activateBeneficiaryRequest = ActivateBeneficiaryApiRequest(
-            keyConfirmationSignature =
-            Base64EncodedData(
-                org.apache.commons.codec.binary.Base64.encodeBase64String(
-                    keyConfirmationSignature
-                )
-            ),
-            keyConfirmationTimeMillis = keyConfirmationTimeMillis,
-            encryptedKeys = beneficiaryKeys
-        )
-
-        return retrieveApiResource {
-            apiService.activateBeneficiary(activateBeneficiaryRequest)
+            return retrieveApiResource {
+                apiService.activateBeneficiary(activateBeneficiaryRequest)
+            }
+        } catch (e: Exception) {
+            return Resource.Error(e)
         }
     }
 
