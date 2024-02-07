@@ -1,6 +1,5 @@
 package co.censo.approver.presentation.entrance
 
-import ParticipantId
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
@@ -28,8 +27,6 @@ import co.censo.approver.presentation.entrance.components.LoggedOutPasteLinkUI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
@@ -197,17 +194,6 @@ fun ApproverEntranceScreen(
                     }
                 }
             }
-        }
-
-        if (state.forceUserToGrantCloudStorageAccess.requestAccess) {
-            CloudStorageHandler(
-                actionToPerform = CloudStorageActions.ENFORCE_ACCESS,
-                participantId = ParticipantId(""),
-                encryptedPrivateKey = null,
-                onActionSuccess = {},
-                onActionFailed = {},
-                onCloudStorageAccessGranted = { viewModel.handleCloudStorageAccessGranted() }
-            )
         }
     }
 }

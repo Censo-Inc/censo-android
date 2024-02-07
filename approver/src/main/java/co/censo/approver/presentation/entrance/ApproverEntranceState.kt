@@ -11,7 +11,6 @@ data class ApproverEntranceState(
 
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
     val signInUserResource: Resource<Unit> = Resource.Uninitialized,
-    val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
 
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val navigationResource: Resource<NavigationData> = Resource.Uninitialized,
@@ -22,11 +21,6 @@ data class ApproverEntranceState(
     val apiCallErrorOccurred = signInUserResource is Resource.Error
             || triggerGoogleSignIn is Resource.Error
 }
-
-data class ForceUserToGrantCloudStorageAccess(
-    val requestAccess: Boolean = false,
-    val jwt: String? = ""
-)
 
 enum class RoutingDestination {
     ONBOARDING, ACCESS, AUTH_RESET

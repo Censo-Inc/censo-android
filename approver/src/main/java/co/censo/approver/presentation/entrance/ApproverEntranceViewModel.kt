@@ -18,6 +18,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.parseLink
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.asResource
@@ -189,9 +190,8 @@ class ApproverEntranceViewModel @Inject constructor(
         }
     }
 
-    fun handleCloudStorageAccessGranted() {
-        signInUser(state.forceUserToGrantCloudStorageAccess.jwt)
-        resetForceUserToGrantCloudStorageAccess()
+    private fun handleCloudStorageAccessGranted(jwt: String?) {
+        signInUser(jwt)
     }
 
     fun startGoogleSignInFlow() {
@@ -204,12 +204,11 @@ class ApproverEntranceViewModel @Inject constructor(
                 val account = completedTask.await()
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
-                    state = state.copy(
-                        forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(
-                            requestAccess = true,
-                            jwt = account.idToken
-                        )
-                    )
+                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired(
+                        onAccessGranted = {
+                            handleCloudStorageAccessGranted(account.idToken)
+                        }
+                    ))
                 } else {
                     signInUser(account.idToken)
                 }
@@ -390,10 +389,6 @@ class ApproverEntranceViewModel @Inject constructor(
     //endregion
 
     //region Reset methods
-    private fun resetForceUserToGrantCloudStorageAccess() {
-        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
-    }
-
     fun retrySignIn() {
         startGoogleSignInFlow()
     }
