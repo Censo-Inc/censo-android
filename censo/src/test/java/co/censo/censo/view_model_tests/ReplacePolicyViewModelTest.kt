@@ -436,12 +436,13 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
 //        assertEquals(Screen.OwnerVaultScreen.route, replacePolicyViewModel.state.navigationResource.success()?.data)
 //    }
 
+
     //region Helper methods
     private suspend fun setTrueResponseForKeyRepositoryMethodUserHasKeySavedInCloud() {
         //Set this mocked response so that the VM hits the flow where we set state for triggering a key download
         whenever(
             keyRepository.userHasKeySavedInCloud(
-                genericParticipantId
+                genericParticipantId.value
             )
         ).thenAnswer { true }
     }
@@ -450,7 +451,7 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         //Set this mocked response so that the VM hits the flow where we set state for triggering a key download
         whenever(
             keyRepository.userHasKeySavedInCloud(
-                genericParticipantId
+                genericParticipantId.value
             )
         ).thenAnswer { false }
     }
@@ -491,7 +492,10 @@ class ReplacePolicyViewModelTest : BaseViewModelTest() {
         assertConfirmedProspectApproverDataSetToState()
 
         //Verify that userHasKeySavedInCloud is called
-        Mockito.verify(keyRepository, times(1)).userHasKeySavedInCloud(genericParticipantId)
+        Mockito.verify(keyRepository, times(1)).userHasKeySavedInCloud(genericParticipantId.value)
+
+        //Assert that key download flow was hit since no key data is in state
+        //assertKeyDownloadSetToState()
     }
     //endregion
 
