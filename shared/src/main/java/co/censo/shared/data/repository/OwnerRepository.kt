@@ -85,6 +85,7 @@ import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
 import co.censo.shared.data.model.toByteArray
 import co.censo.shared.data.model.toSeedPhraseData
 import co.censo.shared.data.networking.ApiService
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
@@ -924,10 +925,17 @@ class OwnerRepositoryImpl(
         val intermediateKeyShares = encryptedIntermediatePrivateKeyShards.map {
             val encryptionKey = when (it.isOwnerShard) {
                 true -> {
-                    val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
-                        participantId = it.participantId,
-                        bypassScopeCheck = bypassScopeCheck
-                    )
+                    val ownerApproverKeyResource = try {
+                        keyRepository.retrieveKeyFromCloud(
+                            participantId = it.participantId,
+                            bypassScopeCheck = bypassScopeCheck,
+                            //TODO: Test hard before PR
+                            onRetryAfterAccessGranted = {}//Do not want to retry this directly, we will let the user retry via UI action
+                        )
+                    } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                        throw Exception("Unable to proceed with action, drive access was not granted")
+                    }
+
                     if (ownerApproverKeyResource is Resource.Error) {
                         throw ownerApproverKeyResource.exception!!
                     } else {
