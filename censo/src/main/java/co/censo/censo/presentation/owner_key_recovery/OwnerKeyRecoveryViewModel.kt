@@ -19,8 +19,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -195,20 +194,54 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
                 approverEncryptionKey.publicExternalRepresentation().value
             )
 
-            val keyData = ReplacePolicyKeyData(
-                encryptedPrivateKey = encryptedKey,
-                publicKey = publicKey
-            )
-
             state = state.copy(
-                keyData = keyData,
-                cloudStorageAction = CloudStorageActionData(
-                    triggerAction = true,
-                    action = CloudStorageActions.UPLOAD,
+                keyData = ReplacePolicyKeyData(
+                    encryptedPrivateKey = encryptedKey,
+                    publicKey = publicKey
                 )
             )
+
+            savePrivateKeyToCloud(encryptedKeyData = encryptedKey)
         } catch (e: Exception) {
             state = state.copy(saveKeyToCloud = Resource.Error(exception = e))
+        }
+    }
+
+    private fun savePrivateKeyToCloud(
+        encryptedKeyData: ByteArray,
+        bypassScopeCheck: Boolean = false
+    ) {
+        val participantId = state.ownerParticipantId
+
+        if (participantId == null) {
+            onKeyUploadFailed(Exception("Unable to setup policy missing participant id"))
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val uploadResponse = try {
+                keyRepository.saveKeyInCloud(
+                    key = encryptedKeyData,
+                    participantId = participantId,
+                    bypassScopeCheck = bypassScopeCheck,
+                    onRetryAfterAccessGranted = {
+                        //Retry this method
+                        savePrivateKeyToCloud(
+                            encryptedKeyData = encryptedKeyData,
+                            bypassScopeCheck = true
+                        )
+                    }
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                //Return early and wait until access is granted
+                return@launch
+            }
+
+            if (uploadResponse is Resource.Success) {
+                onKeyUploadSuccess()
+            } else if (uploadResponse is Resource.Error) {
+                onKeyUploadFailed(uploadResponse.exception)
+            }
         }
     }
 
@@ -225,10 +258,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
     }
 
     private fun resetCloudStorageActionState() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            saveKeyToCloud = Resource.Uninitialized
-        )
+        state = state.copy(saveKeyToCloud = Resource.Uninitialized)
     }
 
     fun resetNavigationResource() {

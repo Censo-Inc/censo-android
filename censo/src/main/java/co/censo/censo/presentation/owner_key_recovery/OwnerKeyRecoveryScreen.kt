@@ -17,8 +17,6 @@ import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.shared.data.Resource
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.OnLifecycleEvent
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import kotlinx.coroutines.delay
@@ -150,32 +148,6 @@ fun OwnerKeyRecoveryScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    if (state.cloudStorageAction.triggerAction) {
-        if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-            val encryptedKey = state.keyData?.encryptedPrivateKey
-            val participantId = state.ownerParticipantId
-
-            if (encryptedKey != null && participantId != null) {
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = participantId,
-                    encryptedPrivateKey = encryptedKey,
-                    onActionSuccess = {
-                        viewModel.receiveAction(KeyRecoveryAction.KeyUploadSuccess)
-                    },
-                    onActionFailed = {
-                        viewModel.receiveAction(KeyRecoveryAction.KeyUploadFailed(it))
-                    }
-                )
-            } else {
-                val exceptionCause =
-                    if (encryptedKey == null) "missing private key" else "missing participant id"
-                viewModel.receiveAction(KeyRecoveryAction.KeyUploadFailed(
-                    Exception("Unable to setup policy $exceptionCause")))
             }
         }
     }
