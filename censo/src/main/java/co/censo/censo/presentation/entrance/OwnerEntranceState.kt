@@ -26,9 +26,3 @@ data class OwnerEntranceState(
             || triggerGoogleSignIn is Resource.Error
             || userResponse is Resource.Error
 }
-
-//TODO: Delete this
-data class ForceUserToGrantCloudStorageAccess(
-    val requestAccess: Boolean = false,
-    val jwt: String? = ""
-)
