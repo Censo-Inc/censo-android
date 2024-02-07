@@ -1,6 +1,5 @@
 package co.censo.approver.presentation.onboarding
 
-import ParticipantId
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,8 +38,6 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.popCurrentDestinationFromBackStack
@@ -244,31 +241,6 @@ fun ApproverOnboardingScreen(
                     Text(stringResource(R.string.no))
                 }
             }
-        )
-    }
-
-    if (state.cloudStorageAction.triggerAction) {
-        val privateKey =
-            if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-                viewModel.getEncryptedKeyForUpload()
-            } else null
-
-        CloudStorageHandler(
-            actionToPerform = state.cloudStorageAction.action,
-            participantId = ParticipantId(state.participantId),
-            encryptedPrivateKey = privateKey,
-            onActionSuccess = { byteArray ->
-                viewModel.handleCloudStorageActionSuccess(
-                    byteArray,
-                    state.cloudStorageAction.action
-                )
-            },
-            onActionFailed = { exception ->
-                viewModel.handleCloudStorageActionFailure(
-                    exception,
-                    state.cloudStorageAction.action
-                )
-            },
         )
     }
 }
