@@ -20,7 +20,7 @@ import co.censo.shared.data.model.BeneficiaryStatus
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.GetLiveWithUserUI
 import co.censo.shared.presentation.components.LargeLoading
-import co.censo.shared.util.LinksUtil.CENSO_OWNER_APP_STORE_LINK
+import co.censo.shared.util.LinksUtil.CENSO_BENEFICIARY_APP_STORE_LINK
 
 @Composable
 fun BeneficiaryHomeScreen(
@@ -114,7 +114,7 @@ fun BeneficiaryHomeScreen(
                                 deeplink = DeepLinkURI.createBeneficiaryDeeplink((status as? BeneficiaryStatus.Initial)?.invitationId?.value),
                                 secondsLeft = state.secondsLeft,
                                 verificationCode = state.beneficiaryCode,
-                                storesLink = CENSO_OWNER_APP_STORE_LINK
+                                storesLink = CENSO_BENEFICIARY_APP_STORE_LINK
                             ) {
 
                             }

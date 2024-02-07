@@ -9,6 +9,6 @@ object LinksUtil {
     const val PRIVACY_URL = "https://censo.co/legal/privacy"
 
     const val CENSO_WEB_LINK = "https://censo.co/"
-    const val CENSO_OWNER_APP_STORE_LINK = "https://www.censo.co/"
+    const val CENSO_BENEFICIARY_APP_STORE_LINK = "https://www.censo.co/beneficiary"
     const val CENSO_APPROVER_STORE_LINK = "https://censo.co/approvers"
 }
