@@ -32,12 +32,10 @@ interface KeyRepository {
         key: ByteArray,
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false,
-        onRetryAfterAccessGranted: () -> Unit
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean = false,
-        onRetryAfterAccessGranted: () -> Unit
     ): Resource<ByteArray>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
     suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
@@ -102,12 +100,11 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         key: ByteArray,
         participantId: ParticipantId,
         bypassScopeCheck: Boolean,
-        onRetryAfterAccessGranted: () -> Unit
     ) : Resource<Unit> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
                 projectLog(message = "saveKeyInCloud keyRepo: Updating cloud access state for AccessRequired")
-                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAfterAccessGranted))
+                updateCloudAccessState(CloudAccessState.AccessRequired)
                 projectLog(message = "saveKeyInCloud keyRepo: throwing exception")
                 throw CloudStoragePermissionNotGrantedException()
             }
@@ -125,7 +122,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
 
         if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
             projectLog(message = "saveKeyInCloud keyRepo: Caught UserRecoverableAuthIOException")
-            updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAfterAccessGranted))
+            updateCloudAccessState(CloudAccessState.AccessRequired)
             projectLog(message = "saveKeyInCloud keyRepo: throwing exception")
             throw CloudStoragePermissionNotGrantedException()
         }
@@ -140,12 +137,11 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
         bypassScopeCheck: Boolean,
-        onRetryAfterAccessGranted: () -> Unit
     ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
                 projectLog(message = "retrieveKeyFromCloud keyRepo: Updating cloud access state for AccessRequired")
-                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAfterAccessGranted))
+                updateCloudAccessState(CloudAccessState.AccessRequired)
                 projectLog(message = "retrieveKeyFromCloud keyRepo: throwing exception")
                 throw CloudStoragePermissionNotGrantedException()
             }
@@ -172,7 +168,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
 
             if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
                 projectLog(message = "retrieveKeyFromCloud keyRepo: Caught UserRecoverableAuthIOException")
-                updateCloudAccessState(CloudAccessState.AccessRequired(onRetryAfterAccessGranted))
+                updateCloudAccessState(CloudAccessState.AccessRequired)
                 projectLog(message = "retrieveKeyFromCloud keyRepo: throwing exception")
                 throw CloudStoragePermissionNotGrantedException()
             }
@@ -186,7 +182,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      * if the user has not granted permission for GDrive access, there is no key to check for
      */
     override suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean {
-        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true, onRetryAfterAccessGranted = {})
+        val downloadResource = retrieveKeyFromCloud(participantId, bypassScopeCheck = true)
         return if (downloadResource is Resource.Success) {
             downloadResource.data.isNotEmpty()
         } else {
