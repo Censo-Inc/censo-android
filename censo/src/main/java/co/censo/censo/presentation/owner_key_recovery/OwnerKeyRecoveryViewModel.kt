@@ -111,18 +111,28 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val approverKeysSignatureByIntermediateKey = (shardsResponse.ownerState as? OwnerState.Ready)?.policy?.approverKeysSignatureByIntermediateKey
 
-            val signatureValid = ownerRepository.verifyApproverPublicKeysSignature(
-                encryptedIntermediatePrivateKeyShards = shardsResponse.encryptedShards.filter { !it.isOwnerShard },
-                approverPublicKeys = shardsResponse.encryptedShards.mapNotNull { it.approverPublicKey },
-                approverPublicKeysSignature = approverKeysSignatureByIntermediateKey ?: Base64EncodedData("")
-            )
+            try {
+                val signatureValid = ownerRepository.verifyApproverPublicKeysSignature(
+                    encryptedIntermediatePrivateKeyShards = shardsResponse.encryptedShards.filter { !it.isOwnerShard },
+                    approverPublicKeys = shardsResponse.encryptedShards.mapNotNull { it.approverPublicKey },
+                    approverPublicKeysSignature = approverKeysSignatureByIntermediateKey ?: Base64EncodedData("")
+                )
 
-            if (signatureValid) {
-                state = state.copy(verifyApproverKeysSignature = Resource.Success(Unit))
+                if (signatureValid) {
+                    state = state.copy(verifyApproverKeysSignature = Resource.Success(Unit))
 
-                saveKeyWithEntropy(state.ownerEntropy!!)
-            } else {
-                state = state.copy(verifyApproverKeysSignature = Resource.Error())
+                    saveKeyWithEntropy(state.ownerEntropy!!)
+                } else {
+                    state = state.copy(verifyApproverKeysSignature = Resource.Error())
+                }
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted {
+                    validateApproverKeysSignatureAndUploadNewKey(shardsResponse = shardsResponse)
+                }
+                return@launch
+            } catch (e: Exception) {
+                state = state.copy(verifyApproverKeysSignature = Resource.Error(e))
+                return@launch
             }
         }
     }
@@ -174,6 +184,10 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
                 if (response is Resource.Success) {
                     state = state.copy(ownerKeyUIState = OwnerKeyRecoveryUIState.Completed)
                 }
+            }
+        } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+            observeCloudAccessStateForAccessGranted {
+                replaceShards(encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards)
             }
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.ReplacePolicyShards)

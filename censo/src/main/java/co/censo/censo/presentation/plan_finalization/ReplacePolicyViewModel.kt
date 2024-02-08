@@ -361,6 +361,11 @@ class ReplacePolicyViewModel @Inject constructor(
                         entropy = entropy,
                         deviceKeyId = deviceKeyId,
                     )
+                } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                    observeCloudAccessStateForAccessGranted {
+                        replacePolicy(encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards)
+                    }
+                    return@launch
                 } catch (e: Exception) {
                     e.sendError(CrashReportingUtil.CloudDownload)
                     state = state.copy(replacePolicyResponse = Resource.Error(exception = e))

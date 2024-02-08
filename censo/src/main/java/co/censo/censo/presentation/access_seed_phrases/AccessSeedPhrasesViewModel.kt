@@ -21,6 +21,10 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDestination
 import co.censo.censo.util.TestUtil
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.repository.KeyRepository
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil.AccessPhrase
 import co.censo.shared.util.asResource
@@ -28,6 +32,7 @@ import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -38,8 +43,9 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class AccessSeedPhrasesViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
+    private val keyRepository: KeyRepository,
     private val timer: VaultCountDownTimer,
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(AccessSeedPhrasesState())
         private set
@@ -118,65 +124,94 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         }.await()
     }
 
-    private suspend fun recoverSeedPhrases(response: RetrieveAccessShardsApiResponse) {
+    private fun recoverSeedPhrases(response: RetrieveAccessShardsApiResponse) {
         val ownerState = response.ownerState
         val encryptedShards = response.encryptedShards
 
-        when (ownerState) {
-            is OwnerState.Ready -> {
-                val access = ownerState.access
+        viewModelScope.launch(Dispatchers.IO) {
+            when (ownerState) {
+                is OwnerState.Ready -> {
+                    val access = ownerState.access
 
-                when {
-                    access is Access.ThisDevice && access.status == AccessStatus.Available -> {
-                        state = state.copy(recoveredPhrases = Resource.Loading)
+                    when {
+                        access is Access.ThisDevice && access.status == AccessStatus.Available -> {
+                            state = state.copy(recoveredPhrases = Resource.Loading)
 
-                        runCatching {
-                            val requestedSeedPhrase = state.selectedPhrase
+                            runCatching {
+                                val requestedSeedPhrase = state.selectedPhrase
 
-                            check(requestedSeedPhrase != null)
+                                check(requestedSeedPhrase != null)
 
-                            val recoveredSeedPhrases: List<RecoveredSeedPhrase> =
-                                ownerRepository.recoverSeedPhrases(
-                                    listOf(requestedSeedPhrase),
-                                    encryptedShards,
-                                    ownerState.policy.encryptedMasterKey,
-                                    language = state.currentLanguage
+                                val recoveredSeedPhrases: List<RecoveredSeedPhrase> = try {
+                                    ownerRepository.recoverSeedPhrases(
+                                        listOf(requestedSeedPhrase),
+                                        encryptedShards,
+                                        ownerState.policy.encryptedMasterKey,
+                                        language = state.currentLanguage
+                                    )
+                                } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                                    observeCloudAccessStateForAccessGranted {
+                                        recoverSeedPhrases(response = response)
+                                    }
+                                    return@launch
+                                }
+
+
+
+                                state = state.copy(
+                                    recoveredPhrases = Resource.Success(recoveredSeedPhrases),
+                                    viewedPhrase = recoveredSeedPhrases.firstOrNull()
+                                        ?.let { listOf(it.seedPhrase) } ?: emptyList(),
+                                    accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
+                                    viewedPhraseIds = recoveredSeedPhrases.firstOrNull()
+                                        ?.let { state.viewedPhraseIds + it.guid }
+                                        ?: state.viewedPhraseIds,
+                                    locksAt = Clock.System.now().plus(15.minutes)
                                 )
+                            }.onFailure {
+                                Exception("Failed to recover seed phrases").sendError(AccessPhrase)
+                                state = state.copy(
+                                    recoveredPhrases = Resource.Error(exception = Exception("Failed to recover seed phrases"))
+                                )
+                            }
+                        }
 
+                        else -> {
+                            // there should be 'available' access requested by this device
+                            // navigate back to access approval screen
                             state = state.copy(
-                                recoveredPhrases = Resource.Success(recoveredSeedPhrases),
-                                viewedPhrase = recoveredSeedPhrases.firstOrNull()?.let { listOf(it.seedPhrase) } ?: emptyList(),
-                                accessPhrasesUIState = AccessPhrasesUIState.ViewPhrase,
-                                viewedPhraseIds = recoveredSeedPhrases.firstOrNull()?.let { state.viewedPhraseIds + it.guid } ?: state.viewedPhraseIds,
-                                locksAt = Clock.System.now().plus(15.minutes)
-                            )
-                        }.onFailure {
-                            Exception("Failed to recover seed phrases").sendError(AccessPhrase)
-                            state = state.copy(
-                                recoveredPhrases = Resource.Error(exception = Exception("Failed to recover seed phrases"))
+                                navigationResource = Screen.AccessApproval
+                                    .withIntent(intent = AccessIntent.AccessPhrases)
+                                    .navToAndPopCurrentDestination()
+                                    .asResource()
                             )
                         }
                     }
+                }
 
-                    else -> {
-                        // there should be 'available' access requested by this device
-                        // navigate back to access approval screen
-                        state = state.copy(
-                            navigationResource = Screen.AccessApproval
-                                .withIntent(intent = AccessIntent.AccessPhrases)
-                                .navToAndPopCurrentDestination()
-                                .asResource()
-                        )
-                    }
+                else -> {
+                    // other owner states are not supported on this view
+                    // navigate back to start of the app so it can fix itself
+                    state = state.copy(
+                        navigationResource = Screen.EntranceRoute.navToAndPopCurrentDestination()
+                            .asResource()
+                    )
                 }
             }
+        }
+    }
 
-            else -> {
-                // other owner states are not supported on this view
-                // navigate back to start of the app so it can fix itself
-                state = state.copy(
-                    navigationResource = Screen.EntranceRoute.navToAndPopCurrentDestination().asResource()
-                )
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
             }
         }
     }
