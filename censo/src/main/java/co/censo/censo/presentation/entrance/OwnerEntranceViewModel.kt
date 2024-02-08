@@ -10,7 +10,6 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
-import co.censo.shared.data.model.Beneficiary
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
@@ -22,7 +21,6 @@ import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.asResource
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -30,6 +28,7 @@ import com.google.android.gms.tasks.Task
 import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -186,17 +185,31 @@ class OwnerEntranceViewModel @Inject constructor(
                 val account = completedTask.await()
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
-                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired(
-                        onAccessGranted = {
-                            handleCloudStorageAccessGranted(account.idToken)
-                        }
-                    ))
+                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired)
+                    observeCloudAccessState {
+                        handleCloudStorageAccessGranted(account.idToken)
+                    }
                 } else {
                     signInUser(account.idToken)
                 }
 
             } catch (e: Exception) {
                 googleAuthFailure(GoogleAuthError.ErrorParsingIntent(e))
+            }
+        }
+    }
+
+    private fun observeCloudAccessState(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
             }
         }
     }

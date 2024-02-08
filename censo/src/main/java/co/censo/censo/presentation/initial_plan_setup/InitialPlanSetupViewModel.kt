@@ -22,11 +22,14 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -112,6 +115,21 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
+    private fun observeCloudAccessState(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     private fun savePrivateKeyToCloud(
         encryptedKeyData: ByteArray,
         bypassScopeCheck: Boolean = false
@@ -122,16 +140,16 @@ class InitialPlanSetupViewModel @Inject constructor(
                     key = encryptedKeyData,
                     participantId = state.participantId,
                     bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        //Retry this method
-                        savePrivateKeyToCloud(
-                            encryptedKeyData = encryptedKeyData,
-                            bypassScopeCheck = true
-                        )
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                //Return early and wait until access is granted
+                // TODO: Need to think about UI state at this step
+                observeCloudAccessState {
+                    //Retry this method
+                    savePrivateKeyToCloud(
+                        encryptedKeyData = encryptedKeyData,
+                        bypassScopeCheck = true
+                    )
+                }
                 return@launch
             }
 
@@ -152,12 +170,12 @@ class InitialPlanSetupViewModel @Inject constructor(
             val downloadResponse = try {
                 keyRepository.retrieveKeyFromCloud(
                     participantId = state.participantId, bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        //Retry this method
-                        loadPrivateKeyFromCloud(bypassScopeCheck = true)
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessState {
+                    //Retry this method
+                    loadPrivateKeyFromCloud(bypassScopeCheck = true)
+                }
                 return@launch
             }
 
@@ -177,7 +195,24 @@ class InitialPlanSetupViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             val keyData = state.keyData
-            val publicKey = if (keyRepository.userHasKeySavedInCloud(state.participantId)) {
+
+            val hasKeySavedInCloud = try {
+                keyRepository.userHasKeySavedInCloud(state.participantId)
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessState {
+                    //Retry this method
+                    createPolicyParams()
+                }
+                return@launch
+            } catch (e: Exception) {
+                //TODO: Test this before Review
+                state = state.copy(
+                    createPolicyParamsResponse = Resource.Error(exception = Exception("Unable to check for saved key in cloud"))
+                )
+                return@launch
+            }
+
+            val publicKey = if (hasKeySavedInCloud) {
                 if (keyData == null) {
                     loadPrivateKeyFromCloud()
                     return@launch
