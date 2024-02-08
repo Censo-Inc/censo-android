@@ -3,7 +3,7 @@
 #App Version
 versionNameMajor = "1"
 versionNameMinor = "8"
-versionNamePatch = "0"
+versionNamePatch = "1"
 
 #Major Items
 kotlinVersion = "1.9.22"

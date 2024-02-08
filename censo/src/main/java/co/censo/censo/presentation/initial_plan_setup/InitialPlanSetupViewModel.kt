@@ -6,6 +6,7 @@ import Base64EncodedData
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
@@ -338,5 +339,59 @@ class InitialPlanSetupViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun updatePromoCode(updatedPromoCode: String) {
+        state = state.copy(promoCode = updatedPromoCode.trim().uppercase())
+    }
+
+    fun submitPromoCode() {
+        state = state.copy(promoCodeLoading = true)
+        viewModelScope.launch {
+            val promoCodeResponse = ownerRepository.setPromoCode(state.promoCode)
+            state = state.copy(promoCodeLoading = false)
+            when (promoCodeResponse) {
+                is Resource.Success -> {
+                    state = state.copy(
+                        showPromoCodeUI = false,
+                        promoCode = "",
+                        promoCodeSuccessDialog = true,
+                        promoCodeAccepted = true
+                    )
+                }
+
+                is Resource.Error -> {
+                    state = state.copy(
+                        showPromoCodeUI = false,
+                        promoCode = "",
+                        promoCodeErrorDialog = true
+                    )
+                }
+                Resource.Loading,
+                Resource.Uninitialized -> {
+
+                }
+            }
+        }
+    }
+
+    fun showPromoCodeUI() {
+        state = state.copy(showPromoCodeUI = true)
+    }
+
+    fun dismissPromoCodeUI() {
+        state = state.copy(
+            promoCode = "",
+            showPromoCodeUI = false
+        )
+    }
+
+    fun dismissPromoDialog() {
+        state = state.copy(
+            showPromoCodeUI = false,
+            promoCode = "",
+            promoCodeErrorDialog = false,
+            promoCodeSuccessDialog = false
+        )
     }
 }

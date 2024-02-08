@@ -24,6 +24,13 @@ data class InitialPlanSetupScreenState(
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val kickUserOut: Resource<Unit> = Resource.Uninitialized,
+
+    val showPromoCodeUI: Boolean = false,
+    val promoCodeLoading: Boolean = false,
+    val promoCode: String = "",
+    val promoCodeAccepted: Boolean = false,
+    val promoCodeSuccessDialog: Boolean = false,
+    val promoCodeErrorDialog: Boolean = false,
 ) {
     val apiError = createPolicyParamsResponse is Resource.Error
         || createPolicyResponse is Resource.Error

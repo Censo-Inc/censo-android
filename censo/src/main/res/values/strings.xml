@@ -497,4 +497,9 @@
     <string name="capture_image_permission_rationale">Censo uses the camera to capture a photo of your seed phrase. The captured image is not saved anywhere on the device.</string>
     <string name="cancel_key_recovery">Cancel key recovery</string>
     <string name="cancel_key_recovery_dialog">Your key recovery will be cancelled. Continue?</string>
+    <string name="enter_promo_code">Enter promo code</string>
+    <string name="have_a_promo_code">Have a promo code?</string>
+    <string name="unknown_promo_code">Unknown promo code</string>
+    <string name="promo_code_accepted">Promo code accepted!</string>
+    <string name="promo_code_accepted_message">You\'ll get rewarded more when points arrive</string>
 </resources>
