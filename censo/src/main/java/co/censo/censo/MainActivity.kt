@@ -95,9 +95,9 @@ class MainActivity : FragmentActivity() {
                     Box {
                         CensoNavHost(navController = navController)
 
-                        CloudAccessEnforcer()
-
                         ValidateApproverKeyScreen(navController = navController)
+
+                        CloudAccessEnforcer()
 
                         LockedScreen(navController = navController)
 

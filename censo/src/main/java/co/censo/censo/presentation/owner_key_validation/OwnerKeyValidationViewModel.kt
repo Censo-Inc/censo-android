@@ -49,7 +49,6 @@ class OwnerKeyValidationViewModel @Inject constructor(
                     })
                 downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                //TODO: Test hard before PR
                 return@launch// Return early and let the user grant access
             } catch (e: Exception) {
                 true // Defaults to true in case of any trouble
