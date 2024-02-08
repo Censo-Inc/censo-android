@@ -17,6 +17,7 @@ import co.censo.shared.data.repository.AuthState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
@@ -51,7 +52,7 @@ class OwnerEntranceViewModel @Inject constructor(
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
     private val keyValidationTrigger: MutableSharedFlow<String>,
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(OwnerEntranceState())
         private set
@@ -186,7 +187,7 @@ class OwnerEntranceViewModel @Inject constructor(
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
                     keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired)
-                    observeCloudAccessState {
+                    observeCloudAccessStateForAccessGranted {
                         handleCloudStorageAccessGranted(account.idToken)
                     }
                 } else {
@@ -199,7 +200,7 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun observeCloudAccessState(retryAction: () -> Unit) {
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
         viewModelScope.launch {
             keyRepository.collectCloudAccessState {
                 when (it) {

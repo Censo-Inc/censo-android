@@ -22,6 +22,7 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.projectLog
@@ -39,7 +40,7 @@ import javax.inject.Inject
 class InitialPlanSetupViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(InitialPlanSetupScreenState())
         private set
@@ -115,7 +116,7 @@ class InitialPlanSetupViewModel @Inject constructor(
         }
     }
 
-    private fun observeCloudAccessState(retryAction: () -> Unit) {
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
         viewModelScope.launch {
             keyRepository.collectCloudAccessState {
                 when (it) {
@@ -143,7 +144,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
                 // TODO: Need to think about UI state at this step
-                observeCloudAccessState {
+                observeCloudAccessStateForAccessGranted {
                     //Retry this method
                     savePrivateKeyToCloud(
                         encryptedKeyData = encryptedKeyData,
@@ -172,7 +173,7 @@ class InitialPlanSetupViewModel @Inject constructor(
                     participantId = state.participantId, bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessState {
+                observeCloudAccessStateForAccessGranted {
                     //Retry this method
                     loadPrivateKeyFromCloud(bypassScopeCheck = true)
                 }
@@ -199,7 +200,7 @@ class InitialPlanSetupViewModel @Inject constructor(
             val hasKeySavedInCloud = try {
                 keyRepository.userHasKeySavedInCloud(state.participantId)
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessState {
+                observeCloudAccessStateForAccessGranted {
                     //Retry this method
                     createPolicyParams()
                 }
