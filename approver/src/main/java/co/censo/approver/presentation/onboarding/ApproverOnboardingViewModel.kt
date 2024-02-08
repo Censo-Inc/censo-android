@@ -18,6 +18,8 @@ import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
@@ -26,6 +28,7 @@ import co.censo.shared.util.isDigitsOnly
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -95,7 +98,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     private val approverRepository: ApproverRepository,
     private val keyRepository: KeyRepository,
     private val userStatePollingTimer: VaultCountDownTimer
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(ApproverOnboardingState())
         private set
@@ -244,7 +247,20 @@ class ApproverOnboardingViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            if (!keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))) {
+            val userHasKeySavedInCloud = try {
+                keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted {
+                    determineApproverUIState(approverState = approverState)
+                }
+                return@launch
+            } catch (e: Exception) {
+                //TODO: Circle back to handling this
+                return@launch
+            }
+
+
+            if (!userHasKeySavedInCloud) {
                 state = state.copy(approverUIState = ApproverOnboardingUIState.NeedsToSaveKey)
                 return@launch
             }
@@ -409,6 +425,21 @@ class ApproverOnboardingViewModel @Inject constructor(
     //endregion
 
     //region Cloud Storage
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     private fun savePrivateKeyToCloud(
         encryptedPrivateKey: ByteArray?,
         bypassScopeCheck: Boolean = false
@@ -424,17 +455,15 @@ class ApproverOnboardingViewModel @Inject constructor(
                     key = encryptedPrivateKey,
                     participantId = ParticipantId(state.participantId),
                     bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        //Retry this method
-                        savePrivateKeyToCloud(
-                            encryptedPrivateKey = encryptedPrivateKey,
-                            bypassScopeCheck = true
-                        )
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                //Return early and wait until access is granted
-                //TODO: Test this before PR
+                observeCloudAccessStateForAccessGranted {
+                    //Retry this method
+                    savePrivateKeyToCloud(
+                        encryptedPrivateKey = encryptedPrivateKey,
+                        bypassScopeCheck = true
+                    )
+                }
                 return@launch
             }
 
@@ -459,14 +488,12 @@ class ApproverOnboardingViewModel @Inject constructor(
                 keyRepository.retrieveKeyFromCloud(
                     participantId = ParticipantId(participantId),
                     bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        //Retry this method
-                        loadPrivateKeyFromCloud(bypassScopeCheck = true)
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                //Return early and wait until access is granted
-                //TODO: Test this before PR
+                observeCloudAccessStateForAccessGranted {
+                    //Retry this method
+                    loadPrivateKeyFromCloud(bypassScopeCheck = true)
+                }
                 return@launch
             }
 
