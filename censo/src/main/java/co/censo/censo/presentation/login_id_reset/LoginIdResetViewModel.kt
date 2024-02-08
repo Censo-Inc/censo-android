@@ -24,6 +24,7 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.parseLink
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
@@ -35,6 +36,7 @@ import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -55,7 +57,7 @@ class LoginIdResetViewModel @Inject constructor(
     private val keyRepository: KeyRepository,
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(LoginIdResetState())
         private set
@@ -249,12 +251,11 @@ class LoginIdResetViewModel @Inject constructor(
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
                     state = state.copy(jwt = account.idToken)
+                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired)
 
-                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired(
-                        onAccessGranted = {
-                            handleCloudStorageAccessGranted(account.idToken)
-                        }
-                    ))
+                    observeCloudAccessStateForAccessGranted {
+                        handleCloudStorageAccessGranted(account.idToken)
+                    }
                 } else {
                     preSignInUser(account.idToken)
                 }
@@ -264,6 +265,22 @@ class LoginIdResetViewModel @Inject constructor(
             }
         }
     }
+
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
 
     private fun handleCloudStorageAccessGranted(jwt: String?) {
         preSignInUser(jwt)

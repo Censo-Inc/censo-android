@@ -6,8 +6,6 @@ data class CloudAccessEnforcerState(
 
 sealed class CloudAccessState {
     data object Uninitialized : CloudAccessState()
-    data class AccessRequired(
-        val onAccessGranted: () -> Unit
-    ) : CloudAccessState()
+    data object AccessRequired : CloudAccessState()
     data object AccessGranted : CloudAccessState()
 }

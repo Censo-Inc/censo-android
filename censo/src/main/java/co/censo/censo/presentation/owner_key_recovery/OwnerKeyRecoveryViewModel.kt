@@ -20,11 +20,14 @@ import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +35,7 @@ import javax.inject.Inject
 class OwnerKeyRecoveryViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(OwnerKeyRecoveryState())
         private set
@@ -224,16 +227,14 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
                     key = encryptedKeyData,
                     participantId = participantId,
                     bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        //Retry this method
-                        savePrivateKeyToCloud(
-                            encryptedKeyData = encryptedKeyData,
-                            bypassScopeCheck = true
-                        )
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                //Return early and wait until access is granted
+                observeCloudAccessStateForAccessGranted {
+                    savePrivateKeyToCloud(
+                        encryptedKeyData = encryptedKeyData,
+                        bypassScopeCheck = true
+                    )
+                }
                 return@launch
             }
 
@@ -241,6 +242,21 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
                 onKeyUploadSuccess()
             } else if (uploadResponse is Resource.Error) {
                 onKeyUploadFailed(uploadResponse.exception)
+            }
+        }
+    }
+
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
             }
         }
     }

@@ -13,8 +13,11 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +27,7 @@ class OwnerKeyValidationViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val keyValidationTrigger: MutableSharedFlow<String>,
-    ) : ViewModel() {
+    ) : ViewModel(), CloudAccessContract {
 
     var state by mutableStateOf(OwnerKeyValidationState())
         private set
@@ -37,18 +40,33 @@ class OwnerKeyValidationViewModel @Inject constructor(
         }
     }
 
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     private fun validateApproverKey(participantId: ParticipantId) {
         viewModelScope.launch(Dispatchers.IO) {
             val hasKeySavedInCloud = try {
                 val downloadResult = keyRepository.retrieveKeyFromCloud(
                     participantId,
                     bypassScopeCheck = true,
-                    onRetryAfterAccessGranted = {
-                        //Retry this method
-                        validateApproverKey(participantId = participantId)
-                    })
+                    )
                 downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted {
+                    validateApproverKey(participantId = participantId)
+                }
                 return@launch// Return early and let the user grant access
             } catch (e: Exception) {
                 true // Defaults to true in case of any trouble
