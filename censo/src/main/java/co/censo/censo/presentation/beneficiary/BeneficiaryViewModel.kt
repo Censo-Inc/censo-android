@@ -142,7 +142,9 @@ class BeneficiaryViewModel @Inject constructor(
     private fun submitVerificationCode() {
         viewModelScope.launch(Dispatchers.IO) {
 
-            if (state.beneficiaryEncryptionKey == null) {
+            val beneficiaryKey = state.beneficiaryEncryptionKey
+
+            if (beneficiaryKey == null) {
                 createKeyOrLoadKeyIntoMemory()
                 return@launch
             }
@@ -151,7 +153,7 @@ class BeneficiaryViewModel @Inject constructor(
 
             if (invitationId == null) {
                 state = state.copy(
-                    error = BeneficiaryError.MissingInviteCode,
+                    error = BeneficiaryError.MissingEssentialData,
                     manuallyLoadingVerificationCode = false
                 )
                 return@launch
@@ -160,7 +162,7 @@ class BeneficiaryViewModel @Inject constructor(
             val signedVerificationData = try {
                 signVerificationCode(
                     verificationCode = state.verificationCode,
-                    encryptionKey = state.beneficiaryEncryptionKey!!
+                    encryptionKey = beneficiaryKey
                 )
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.SubmitVerification)
@@ -239,11 +241,17 @@ class BeneficiaryViewModel @Inject constructor(
         )
     }
     fun getEncryptedKeyForUpload(): ByteArray? {
-        val encryptionKey = state.beneficiaryEncryptionKey ?: return null
+        val encryptionKey = state.beneficiaryEncryptionKey
+        val entropy = state.beneficiaryData?.entropy
+
+        if (encryptionKey == null || entropy == null) {
+            state = state.copy(error = BeneficiaryError.MissingEssentialData)
+            return null
+        }
 
         return encryptionKey.encryptWithEntropy(
             deviceKeyId = keyRepository.retrieveSavedDeviceId(),
-            entropy = state.beneficiaryData?.entropy!!
+            entropy = entropy
         )
     }
 
@@ -253,7 +261,12 @@ class BeneficiaryViewModel @Inject constructor(
     ) {
         state = state.copy(cloudStorageAction = CloudStorageActionData())
 
-        val entropy = state.beneficiaryData?.entropy!!
+        val entropy = state.beneficiaryData?.entropy
+
+        if (entropy == null) {
+            state = state.copy(error = BeneficiaryError.MissingEssentialData)
+            return
+        }
 
         //Decrypt the byteArray
         val privateKey =

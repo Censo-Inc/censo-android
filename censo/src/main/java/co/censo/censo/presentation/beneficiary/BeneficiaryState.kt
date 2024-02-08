@@ -24,12 +24,12 @@ data class BeneficiaryState(
 )
 
 enum class BeneficiaryError {
-    MissingInviteCode, FailedSubmitCode, CloudError;
+    MissingEssentialData, FailedSubmitCode, CloudError;
 
     fun errorToString(context: Context) =
         when (this) {
-            MissingInviteCode -> context.getString(R.string.beneficiary_missing_invite_id)
             FailedSubmitCode -> context.getString(R.string.beneficiary_failed_submit_code)
             CloudError -> context.getString(R.string.beneficiary_cloude_error)
+            MissingEssentialData -> context.getString(R.string.missing_essential_beneficiary_data)
         }
 }

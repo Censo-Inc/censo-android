@@ -127,10 +127,7 @@ class BeneficiaryOwnerViewModel @Inject constructor(
                     deviceEncryptedTotpSecret = encryptedTotpSecret
                 )
 
-                state = state.copy(inviteBeneficiaryResource = inviteBeneficiaryResponse)
-
                 state = if (inviteBeneficiaryResponse is Resource.Success) {
-
 
                     onOwnerState(
                         inviteBeneficiaryResponse.data.ownerState,

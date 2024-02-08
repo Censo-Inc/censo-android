@@ -528,7 +528,7 @@
     <string name="need_to_sign_in_to_continue">Need to sign in to continue</string>
     <string name="invalid_link_pasted_please_try_again">Invalid link pasted, please try again</string>
     <string name="verify">Verify %1$s</string>
-    <string name="beneficiary_missing_invite_id">Missing invitation id, please follow link again to continue</string>
     <string name="beneficiary_failed_submit_code">Failed to submit verification code. Please try again.</string>
     <string name="beneficiary_cloude_error">In order to become a Beneficiary, we need to store data in your Google Drive.</string>
+    <string name="missing_essential_beneficiary_data">Missing essential data to complete beneficiary setup. Please try following link sent by owner to try again.</string>
 </resources>
