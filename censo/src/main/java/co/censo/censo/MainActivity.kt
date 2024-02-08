@@ -25,8 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import co.censo.censo.presentation.Screen
-import co.censo.censo.presentation.Screen.AcceptBeneficiary.INVITE_ID_ARG
-import co.censo.censo.presentation.Screen.AcceptBeneficiary.NO_INVITE_ID
+import co.censo.censo.presentation.Screen.AcceptBeneficiaryInvitation.INVITE_ID_ARG
+import co.censo.censo.presentation.Screen.AcceptBeneficiaryInvitation.NO_INVITE_ID
 import co.censo.censo.presentation.Screen.BeneficiarySignInRoute.BENEFICIARY_INVITE_ID
 import co.censo.censo.presentation.Screen.LoginIdResetRoute.DL_RESET_TOKEN_KEY
 import co.censo.censo.presentation.Screen.Companion.CENSO_IMPORT_DEEPLINK
@@ -34,7 +34,7 @@ import co.censo.censo.presentation.Screen.Companion.IMPORT_KEY_KEY
 import co.censo.censo.presentation.Screen.Companion.NAME_KEY
 import co.censo.censo.presentation.Screen.Companion.SIGNATURE_KEY
 import co.censo.censo.presentation.Screen.Companion.TIMESTAMP_KEY
-import co.censo.censo.presentation.accept_beneficiary.AcceptBeneficiaryScreen
+import co.censo.censo.presentation.accept_beneficiary.AcceptBeneficiaryInvitationScreen
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.beneficiary.BeneficiaryScreen
@@ -169,7 +169,7 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.AcceptBeneficiary.route}/{${INVITE_ID_ARG}}",
+                route = "${Screen.AcceptBeneficiaryInvitation.route}/{${INVITE_ID_ARG}}",
                 deepLinks = listOf(
                     navDeepLink {
                         uriPattern =
@@ -179,7 +179,7 @@ class MainActivity : FragmentActivity() {
             ) { backStackEntry ->
                 val inviteId = backStackEntry.arguments?.getString(INVITE_ID_ARG)
 
-                AcceptBeneficiaryScreen(
+                AcceptBeneficiaryInvitationScreen(
                     navController = navController,
                     inviteId = if (inviteId == NO_INVITE_ID) null else inviteId
                 )

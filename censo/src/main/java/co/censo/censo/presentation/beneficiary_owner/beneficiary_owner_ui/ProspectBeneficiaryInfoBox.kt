@@ -58,12 +58,6 @@ fun ProspectBeneficiaryInfoBox(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = stringResource(id = R.string.beneficiary),
-                color = SharedColors.MainColorText,
-                fontSize = labelTextSize
-            )
-
-            Text(
                 text = nickName,
                 color = SharedColors.MainColorText,
                 fontSize = 24.sp

@@ -4,6 +4,8 @@ import co.censo.shared.CensoLink.Companion.CENSO_HOST
 import co.censo.shared.CensoLink.Companion.HOST_INDEX
 import co.censo.shared.CensoLink.Companion.LINK_TYPE_INDEX
 import co.censo.shared.CensoLink.Companion.TYPES
+import co.censo.shared.CensoLink.Companion.V1_BENEFICIARY_ID_INDEX
+import co.censo.shared.CensoLink.Companion.V1_BENEFICIARY_SIZE
 import co.censo.shared.CensoLink.Companion.V1_PART_ID_INDEX
 import co.censo.shared.CensoLink.Companion.V1_SIZE
 import co.censo.shared.CensoLink.Companion.V2
@@ -57,6 +59,29 @@ fun String.parseLink(): CensoLink {
     )
 }
 
+fun String.parseBeneficiaryLink() : CensoLink {
+    val parts = this.replace(Regex("[\\r\\n]+"), "").trim().split("//")
+    if (parts.size != 2 || !parts[HOST_INDEX].startsWith(CENSO_HOST)) {
+        throw Exception("invalid link")
+    }
+    val routeAndIdentifier = parts[1].split("/")
+
+    val type = routeAndIdentifier[LINK_TYPE_INDEX]
+
+    if (type !in TYPES) {
+        throw Exception("invalid link")
+    }
+
+    if (routeAndIdentifier.size != V1_BENEFICIARY_SIZE) {
+        throw Exception("invalid link")
+    }
+
+    return CensoLink(
+        routeAndIdentifier[HOST_INDEX],
+        CensoLink.IdLinks(mainId = routeAndIdentifier[V1_BENEFICIARY_ID_INDEX])
+    )
+}
+
 data class CensoLink(
     val type: String,
     val identifiers: IdLinks
@@ -73,12 +98,15 @@ data class CensoLink(
         const val INVITE_TYPE = "invite"
         const val ID_RESET_TYPE = "reset"
         const val AUTH_RESET_TYPE = "auth-reset"
+        const val BENEFICIARY_TYPE = "beneficiary"
         const val CENSO_HOST = "censo"
-        val TYPES = setOf(ACCESS_TYPE, INVITE_TYPE, ID_RESET_TYPE, AUTH_RESET_TYPE)
+        val TYPES = setOf(ACCESS_TYPE, INVITE_TYPE, ID_RESET_TYPE, AUTH_RESET_TYPE, BENEFICIARY_TYPE)
 
         //V1
         const val V1_PART_ID_INDEX = 1
         const val V1_SIZE = 2
+        const val V1_BENEFICIARY_SIZE = 3
+        const val V1_BENEFICIARY_ID_INDEX = 2
 
         //V2
         const val V2 = "v2"

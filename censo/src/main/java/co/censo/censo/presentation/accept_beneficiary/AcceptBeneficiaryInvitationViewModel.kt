@@ -10,9 +10,9 @@ import co.censo.shared.data.model.AcceptBeneficiaryInvitationApiRequest
 import co.censo.shared.data.model.BiometryScanResultBlob
 import co.censo.shared.data.model.BiometryVerificationId
 import co.censo.shared.data.model.FacetecBiometry
-import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.BeneficiaryRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.parseBeneficiaryLink
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -20,12 +20,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AcceptBeneficiaryViewModel @Inject constructor(
+class AcceptBeneficiaryInvitationViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val beneficiaryRepository: BeneficiaryRepository,
 ) : ViewModel() {
 
-    var state by mutableStateOf(AcceptBeneficiaryState())
+    var state by mutableStateOf(AcceptBeneficiaryInvitationState())
         private set
 
     fun onStart(inviteId: String?) {
@@ -55,20 +55,25 @@ class AcceptBeneficiaryViewModel @Inject constructor(
             return
         }
 
-        //todo: Verify pasted link
+        val beneficiaryId = try {
+            pastedInfo?.parseBeneficiaryLink()?.type ?: throw Exception("No link")
+        } catch (e: Exception) {
+            state = state.copy(badLinkPasted = Resource.Error())
+            return
+        }
+
         state = if (hasUserLoggedIn()) {
             state.copy(
-                invitationId = pastedInfo ?: "",
+                invitationId = beneficiaryId,
                 acceptBeneficiaryUIState = AcceptBeneficiaryUIState.FacetecInfo
             )
         } else {
             state.copy(
-                invitationId = pastedInfo ?: "",
+                invitationId = beneficiaryId,
                 navigateToSignIn = Resource.Success(Unit)
             )
         }
     }
-
     private fun hasUserLoggedIn() = ownerRepository.retrieveJWT().isNotEmpty()
     fun startFacetecScan() {
         state = state.copy(facetecInProgress = true)
@@ -98,8 +103,6 @@ class AcceptBeneficiaryViewModel @Inject constructor(
                 state = state.copy(navigateToBeneficiary = Resource.Success(Unit))
             }
 
-            state = state.copy(acceptBeneficiaryResponse = acceptBeneficiaryResponse)
-
             acceptBeneficiaryResponse.map { it.scanResultBlob }
         }.await()
     }
@@ -126,8 +129,10 @@ class AcceptBeneficiaryViewModel @Inject constructor(
         )
     }
 
-    fun resetError() {
-        state = state.copy(acceptBeneficiaryResponse = Resource.Uninitialized)
+    fun resetLinkMessage() {
+        state = state.copy(
+            badLinkPasted = Resource.Uninitialized,
+        )
     }
 
     fun onCancelResetUser() {

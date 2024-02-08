@@ -519,10 +519,16 @@
     <string name="re_enter_beneficiary_message">If you’ve been chosen by someone using Censo to be their beneficiary, you’ve come to the right place!\n\nTo continue, they must send you a link.\n\nOnce you receive it, you can tap on it to continue.\n\nOr, simply copy the link to the clipboard and paste using the button below.</string>
     <string name="secure_your_seed_phrases">Secure your seed phrases</string>
     <string name="close">Exit screen</string>
-    <string name="delete_beneficiary_user">Delete Beneficiary User</string>
+    <string name="delete_beneficiary_user">Delete My Data</string>
     <string name="to_become_a_beneficiary_tap_here">To become a beneficiary, tap here.</string>
     <string name="you_must_add_approvers_before_you_can_add_a_beneficiary">You must add approvers before you can add a beneficiary.</string>
     <string name="add_beneficiary">Add beneficiary</string>
     <string name="remove_beneficiary">Remove beneficiary</string>
     <string name="your_beneficiary_will_be_able_to_securely_access">Your beneficiary will be able to securely access your seed phrases in case of unforeseen circumstances.</string>
+    <string name="need_to_sign_in_to_continue">Need to sign in to continue</string>
+    <string name="invalid_link_pasted_please_try_again">Invalid link pasted, please try again</string>
+    <string name="verify">Verify %1$s</string>
+    <string name="beneficiary_missing_invite_id">Missing invitation id, please follow link again to continue</string>
+    <string name="beneficiary_failed_submit_code">Failed to submit verification code. Please try again.</string>
+    <string name="beneficiary_cloude_error">In order to become a Beneficiary, we need to store data in your Google Drive.</string>
 </resources>

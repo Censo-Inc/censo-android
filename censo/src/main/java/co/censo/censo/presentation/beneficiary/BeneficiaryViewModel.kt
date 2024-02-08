@@ -151,7 +151,7 @@ class BeneficiaryViewModel @Inject constructor(
 
             if (invitationId == null) {
                 state = state.copy(
-                    error = "Missing invitation id, please follow link again to continue",
+                    error = BeneficiaryError.MissingInviteCode,
                     manuallyLoadingVerificationCode = false
                 )
                 return@launch
@@ -165,7 +165,7 @@ class BeneficiaryViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.SubmitVerification)
                 state = state.copy(
-                    error = "Failed to submit verification code. Please try again.",
+                    error = BeneficiaryError.FailedSubmitCode,
                     manuallyLoadingVerificationCode = false
                 )
                 return@launch
@@ -323,7 +323,7 @@ class BeneficiaryViewModel @Inject constructor(
         exception?.sendError(CrashReportingUtil.CloudUpload)
         state = state.copy(
             savePrivateKeyToCloudResource = Resource.Error(exception = exception),
-            error = "In order to become a Beneficiary, we need to store data in your Google Drive."
+            error = BeneficiaryError.CloudError
         )
     }
 
@@ -334,7 +334,7 @@ class BeneficiaryViewModel @Inject constructor(
             apiResponse = Resource.Error(
                 exception = exception
             ),
-            error = "In order to use become a Beneficiary, we need to store data in your Google Drive."
+            error = BeneficiaryError.CloudError
         )
     }
     //endregion

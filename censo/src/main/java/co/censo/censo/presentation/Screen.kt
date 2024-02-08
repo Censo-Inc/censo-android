@@ -67,7 +67,7 @@ sealed class Screen(val route: String) {
 
     }
 
-    data object AcceptBeneficiary : Screen("accept_beneficiary") {
+    data object AcceptBeneficiaryInvitation : Screen("accept_beneficiary_invitation") {
         const val INVITE_ID_ARG = "invite_id_arg"
         const val NO_INVITE_ID = "no_invite_id"
 
@@ -75,9 +75,9 @@ sealed class Screen(val route: String) {
             beneficiaryInviteId: String?,
         ): String {
             return if (beneficiaryInviteId.isNullOrEmpty()) {
-                "${AcceptBeneficiary.route}/${NO_INVITE_ID}"
+                "${AcceptBeneficiaryInvitation.route}/${NO_INVITE_ID}"
             }else {
-                "${AcceptBeneficiary.route}/${beneficiaryInviteId}"
+                "${AcceptBeneficiaryInvitation.route}/${beneficiaryInviteId}"
             }
         }
     }

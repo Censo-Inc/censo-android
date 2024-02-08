@@ -37,15 +37,11 @@ fun CensoBottomNavBar(
 }
 
 
-val bottomNavItems = listOf(
+val bottomNavItems = listOfNotNull(
     BottomNavItem.Home,
     BottomNavItem.Phrases,
     BottomNavItem.Settings,
-    *(if (BuildConfig.BENEFICIARY_ENABLED) {
-        arrayOf(BottomNavItem.Beneficiary)
-    } else {
-        arrayOf()
-    })
+    if (BuildConfig.BENEFICIARY_ENABLED) BottomNavItem.Beneficiary else null
 )
 
 @Composable

@@ -31,13 +31,13 @@ import javax.inject.Inject
  *
  * Initial -> Waiting for beneficiary to accept invite. Share invite via deeplink
  *
- * Accepted -> Beneficiary has accepted invite, let us generate TOTP codes
+ * Accepted -> Beneficiary has accepted invite, generate TOTP codes
  *
- * Verification Submitted -> Beneficiary has submitted code, lets check it and confirm beneficiary
+ * Verification Submitted -> Beneficiary has submitted code, check it and confirm beneficiary
  *
- * To confirm beneficiary we will need to encrypt the key that we retrieve from Google Drive
+ *      To confirm beneficiary we will need to encrypt the key that we retrieve from Google Drive
  *
- * Activated -> We are all set and have a beneficiary
+ * Activated -> We are all set
  *
  */
 
@@ -89,7 +89,11 @@ class BeneficiaryOwnerViewModel @Inject constructor(
         }
     }
 
-    private fun onOwnerState(ownerState: OwnerState, updateGlobalState: Boolean = true, updateUIState: Boolean = false) {
+    private fun onOwnerState(
+        ownerState: OwnerState,
+        updateGlobalState: Boolean = true,
+        updateUIState: Boolean = false
+    ) {
         if (ownerState is OwnerState.Ready) {
             state = state.copy(ownerState = ownerState)
             if (updateUIState) {

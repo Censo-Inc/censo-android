@@ -53,7 +53,7 @@ fun NoBeneficiaryTabScreen(
                 text = stringResource(id = R.string.beneficiary_explainer_text),
                 color = SharedColors.MainColorText,
                 fontWeight = FontWeight.W500,
-                fontSize = 24.sp,
+                fontSize = 18.sp,
                 textAlign = TextAlign.Center
             )
         }

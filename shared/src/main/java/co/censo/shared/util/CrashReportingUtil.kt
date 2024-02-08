@@ -3,6 +3,7 @@ package co.censo.shared.util
 import io.sentry.Sentry
 
 object CrashReportingUtil {
+
     //Keys
     const val ERROR_MESSAGE_KEY = "ErrorMessage"
     const val MANUALLY_REPORTED_TAG = "ManualReport"
@@ -45,6 +46,7 @@ object CrashReportingUtil {
     const val ImportPhrase = "ImportPhrase"
     const val ImageCapture = "PhotoCapture"
     const val ImageReview = "ImageReview"
+    const val BeneficiarySignCode = "BeneficiarySignCode"
 }
 
 fun Exception.sendError(reason: String) {

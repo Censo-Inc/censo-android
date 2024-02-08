@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import co.censo.shared.data.Resource
@@ -25,6 +25,7 @@ fun BeneficiaryScreen(
 ) {
 
     val state = viewModel.state
+    val context = LocalContext.current
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -32,10 +33,6 @@ fun BeneficiaryScreen(
             Lifecycle.Event.ON_STOP -> viewModel.onStop()
             else -> Unit
         }
-    }
-
-    LaunchedEffect(key1 = state) {
-        //TODO: we should be kicking the user out if they have not accepted or owner state is not beneficiary...
     }
 
     Box(modifier = Modifier
@@ -71,9 +68,9 @@ fun BeneficiaryScreen(
         }
     }
 
-    if (!state.error.isNullOrEmpty()) {
+    if (state.error != null) {
         DisplayError(
-            errorMessage = state.error,
+            errorMessage = state.error.errorToString(context = context),
             dismissAction = viewModel::resetErrorState,
             retryAction = null
         )

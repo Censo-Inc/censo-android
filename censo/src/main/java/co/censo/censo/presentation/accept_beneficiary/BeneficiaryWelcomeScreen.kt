@@ -66,7 +66,7 @@ fun WelcomeBeneficiaryScreen(
             Text(
                 text = message,
                 color = SharedColors.MainColorText,
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.W500
             )
         }

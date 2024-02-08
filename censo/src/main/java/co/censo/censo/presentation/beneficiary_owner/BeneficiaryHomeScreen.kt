@@ -14,6 +14,7 @@ import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.Activa
 import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.ActiveBeneficiaryUI
 import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.AddBeneficiaryLabelUI
 import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.NoBeneficiaryTabScreen
+import co.censo.censo.util.external
 import co.censo.shared.DeepLinkURI
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BeneficiaryStatus
@@ -53,7 +54,7 @@ fun BeneficiaryHomeScreen(
 
             when (state.beneficiaryOwnerUIState) {
                 BeneficiaryOwnerUIState.None -> {
-                    NoBeneficiaryTabScreen(addBeneficiaryEnabled = state.ownerState.policy.approvers.size == 3) {
+                    NoBeneficiaryTabScreen(addBeneficiaryEnabled = state.ownerState.policy.approvers.external().isNotEmpty()) {
                         viewModel.moveUserThroughUI(BeneficiaryOwnerUIState.AddLabel)
                     }
                 }
@@ -74,7 +75,7 @@ fun BeneficiaryHomeScreen(
                     val label = state.ownerState.policy.beneficiary?.label
                         ?: stringResource(id = R.string.beneficiary)
                     GetLiveWithUserUI(
-                        title = "Verify $label",
+                        title = stringResource(R.string.verify, label),
                         message = stringResource(
                             R.string.activate_your_beneficiary_message,
                             label
@@ -94,7 +95,7 @@ fun BeneficiaryHomeScreen(
 
                     when (val status = state.ownerState.policy.beneficiary?.status) {
                         null -> {
-                            NoBeneficiaryTabScreen(addBeneficiaryEnabled = state.ownerState.policy.approvers.size == 3) {
+                            NoBeneficiaryTabScreen(addBeneficiaryEnabled = state.ownerState.policy.approvers.external().isNotEmpty()) {
                                 viewModel.moveUserThroughUI(BeneficiaryOwnerUIState.AddLabel)
                             }
                         }
@@ -116,7 +117,7 @@ fun BeneficiaryHomeScreen(
                                 verificationCode = state.beneficiaryCode,
                                 storesLink = CENSO_BENEFICIARY_APP_STORE_LINK
                             ) {
-
+                                //todo: Should owner manually leave, or leave once verified
                             }
                         }
                     }

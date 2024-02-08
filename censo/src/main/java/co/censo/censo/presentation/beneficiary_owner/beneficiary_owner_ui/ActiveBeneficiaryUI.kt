@@ -50,7 +50,7 @@ fun ActiveBeneficiaryUI(
         Text(
             modifier = Modifier.padding(top = topBottomPadding),
             text = stringResource(R.string.your_beneficiary_will_be_able_to_securely_access),
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             color = SharedColors.MainColorText,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.W500
