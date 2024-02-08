@@ -28,11 +28,14 @@ import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessContract
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -76,7 +79,7 @@ class ReplacePolicyViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val ioDispatcher: CoroutineDispatcher
-) : ViewModel() {
+) : ViewModel(), CloudAccessContract {
     var state by mutableStateOf(ReplacePolicyState())
         private set
 
@@ -247,7 +250,23 @@ class ReplacePolicyViewModel @Inject constructor(
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
             if (!loadedKey) {
-                if (keyRepository.userHasKeySavedInCloud(owner.participantId)) {
+                //TODO: Figure out what is going on when this gets stuck loading, circle back here once we figure out the OwnerRepository stuff
+                val hasKeySavedInCloud = try {
+                    keyRepository.userHasKeySavedInCloud(owner.participantId)
+                } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                    observeCloudAccessStateForAccessGranted {
+                        checkUserHasSavedKeyAndSubmittedPolicy()
+                    }
+                    return@launch
+                } catch (e: Exception) {
+                    e.sendError(CrashReportingUtil.CloudDownload)
+                    state = state.copy(
+                        replacePolicyResponse = Resource.Error(exception = e)
+                    )
+                    return@launch
+                }
+
+                if (hasKeySavedInCloud) {
                     loadKey()
                 } else {
                     saveKeyWithEntropy()
@@ -390,6 +409,22 @@ class ReplacePolicyViewModel @Inject constructor(
     //endregion
 
     //region Cloud Storage
+    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
+        viewModelScope.launch {
+            keyRepository.collectCloudAccessState {
+                when (it) {
+                    CloudAccessState.AccessGranted -> {
+                        retryAction()
+                        //Stop collecting cloud access state
+                        this.cancel()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+
     private fun loadKey(bypassScopeCheck: Boolean = false) {
         val participantId = state.ownerApprover?.participantId
 
@@ -403,11 +438,11 @@ class ReplacePolicyViewModel @Inject constructor(
                 keyRepository.retrieveKeyFromCloud(
                     participantId = participantId,
                     bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        loadKey(bypassScopeCheck = true)
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted {
+                    loadKey(bypassScopeCheck = true)
+                }
                 return@launch
             }
 
@@ -433,11 +468,11 @@ class ReplacePolicyViewModel @Inject constructor(
                     key = encryptedKey,
                     participantId = participantId,
                     bypassScopeCheck = bypassScopeCheck,
-                    onRetryAfterAccessGranted = {
-                        saveKey(encryptedKey = encryptedKey, bypassScopeCheck = true)
-                    }
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted {
+                    saveKey(encryptedKey = encryptedKey, bypassScopeCheck = true)
+                }
                 return@launch
             }
 
