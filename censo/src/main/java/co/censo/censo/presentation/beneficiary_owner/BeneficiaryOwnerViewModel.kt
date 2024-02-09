@@ -101,6 +101,7 @@ class BeneficiaryOwnerViewModel @Inject constructor(
                     state = state.copy(beneficiaryOwnerUIState = it.toBeneficiaryOwnerUIState())
                 }
             }
+
             checkIfNeedToVerifyBeneficiary(ownerState)
         }
 
@@ -185,6 +186,13 @@ class BeneficiaryOwnerViewModel @Inject constructor(
     private fun verifyBeneficiary(
         beneficiaryStatus: BeneficiaryStatus.VerificationSubmitted
     ) {
+        val partId = state.ownerState?.policy?.owner?.participantId
+        val entropy = state.ownerState?.policy?.ownerEntropy
+
+        if (partId == null || entropy == null) {
+            retrieveOwnerState(true)
+            return
+        }
 
         val codeVerified = ownerRepository.checkCodeMatches(
             encryptedTotpSecret = beneficiaryStatus.deviceEncryptedTotpSecret,
@@ -195,27 +203,12 @@ class BeneficiaryOwnerViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             if (codeVerified) {
-
-                //Confirm Beneficiary Response
-                val keyConfirmationTimeMillis = Clock.System.now().toEpochMilliseconds()
-
-                val keyConfirmationMessage =
-                    beneficiaryStatus.beneficiaryPublicKey.getBytes() + keyConfirmationTimeMillis.toString()
-                        .toByteArray()
-                val keyConfirmationSignature =
-                    keyRepository.retrieveInternalDeviceKey().sign(keyConfirmationMessage)
-
-                val partId = state.ownerState?.policy?.owner?.participantId
-                val entropy = state.ownerState?.policy?.ownerEntropy
-
                 val activateBeneficiaryResponse =
                     ownerRepository.activateBeneficiary(
-                        ownerParticipantId = partId!!,
-                        entropy = entropy!!,
+                        ownerParticipantId = partId,
+                        entropy = entropy,
                         beneficiaryPublicKey = beneficiaryStatus.beneficiaryPublicKey,
                         approverPublicKeys = beneficiaryStatus.approverPublicKeys,
-                        keyConfirmationSignature = keyConfirmationSignature,
-                        keyConfirmationTimeMillis = keyConfirmationTimeMillis
                     )
 
                 activateBeneficiaryResponse.onSuccess {
