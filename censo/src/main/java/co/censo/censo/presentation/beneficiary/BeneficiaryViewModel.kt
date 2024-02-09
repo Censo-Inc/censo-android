@@ -19,12 +19,12 @@ import co.censo.shared.data.model.SubmitBeneficiaryVerificationApiRequest
 import co.censo.shared.data.repository.BeneficiaryRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.isDigitsOnly
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -102,15 +102,7 @@ class BeneficiaryViewModel @Inject constructor(
 
     private fun createKeyAndTriggerCloudSave() {
         val beneficiaryEncryptionKey = keyRepository.createApproverKey()
-
-        state = state.copy(
-            beneficiaryEncryptionKey = beneficiaryEncryptionKey,
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true,
-                action = CloudStorageActions.UPLOAD,
-                reason = null
-            )
-        )
+        savePrivateKeyToCloud(beneficiaryEncryptionKey)
     }
 
     fun updateVerificationCode(value: String) {
@@ -213,7 +205,7 @@ class BeneficiaryViewModel @Inject constructor(
         state = state.copy(error = null)
     }
 
-    fun inviteId() = state.beneficiaryData?.invitationId?.value ?: ""
+    private fun inviteId() = state.beneficiaryData?.invitationId?.value ?: ""
 
     private fun createKeyOrLoadKeyIntoMemory() {
         if (state.beneficiaryEncryptionKey == null) {
@@ -232,19 +224,87 @@ class BeneficiaryViewModel @Inject constructor(
     }
 
     //region Cloud Storage
-    private fun loadPrivateKeyFromCloud() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true,
-                action = CloudStorageActions.DOWNLOAD,
-            ),
-        )
+    private fun savePrivateKeyToCloud(
+        encryptionKey: EncryptionKey,
+        bypassScopeCheck: Boolean = false
+    ) {
+        val encryptedPrivateKey = encryptKeyForUpload(encryptionKey)
+
+        if (encryptedPrivateKey == null) {
+            keyUploadFailure(Exception("Unable to onboard user, missing private key"))
+            return
+        }
+
+        val invitationId = inviteId()
+
+        if (invitationId.isEmpty()) {
+            keyUploadFailure(Exception("Unable to submit verification code, missing participant id"))
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val uploadResponse = try {
+                keyRepository.saveKeyInCloud(
+                    key = encryptedPrivateKey,
+                    id = invitationId,
+                    bypassScopeCheck = bypassScopeCheck,
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
+                    //Retry this method
+                    savePrivateKeyToCloud(
+                        encryptionKey = encryptionKey,
+                        bypassScopeCheck = true
+                    )
+                }
+                return@launch
+            }
+
+            if (uploadResponse is Resource.Success) {
+                keyUploadSuccess(encryptionKey)
+            } else if (uploadResponse is Resource.Error) {
+                keyUploadFailure(uploadResponse.exception)
+            }
+        }
     }
-    fun getEncryptedKeyForUpload(): ByteArray? {
-        val encryptionKey = state.beneficiaryEncryptionKey
+    private fun loadPrivateKeyFromCloud(bypassScopeCheck: Boolean = false) {
+        val invitationId = inviteId()
+
+        if (invitationId.isEmpty()) {
+            keyUploadFailure(Exception("Unable to submit verification code, missing participant id"))
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadResponse = try {
+                keyRepository.retrieveKeyFromCloud(
+                    id = invitationId,
+                    bypassScopeCheck = bypassScopeCheck,
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
+                    //Retry this method
+                    loadPrivateKeyFromCloud(bypassScopeCheck = true)
+                }
+                return@launch
+            }
+
+            if (downloadResponse is Resource.Success) {
+                keyDownloadSuccess(downloadResponse.data)
+            } else if (downloadResponse is Resource.Error) {
+                keyDownloadFailure(downloadResponse.exception)
+            }
+        }
+    }
+
+    private fun encryptKeyForUpload(encryptionKey: EncryptionKey): ByteArray? {
         val entropy = state.beneficiaryData?.entropy
 
-        if (encryptionKey == null || entropy == null) {
+        if (entropy == null) {
             state = state.copy(error = BeneficiaryError.MissingEssentialData)
             return null
         }
@@ -255,83 +315,51 @@ class BeneficiaryViewModel @Inject constructor(
         )
     }
 
-    fun handleCloudStorageActionSuccess(
-        encryptedKey: ByteArray,
-        cloudStorageAction: CloudStorageActions
-    ) {
-        state = state.copy(cloudStorageAction = CloudStorageActionData())
-
-        val entropy = state.beneficiaryData?.entropy
-
-        if (entropy == null) {
-            state = state.copy(error = BeneficiaryError.MissingEssentialData)
-            return
-        }
-
-        //Decrypt the byteArray
-        val privateKey =
-            encryptedKey.decryptWithEntropy(
-                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
-                entropy = entropy
-            )
-
-        when (cloudStorageAction) {
-            CloudStorageActions.UPLOAD -> {
-                keyUploadSuccess(privateKey.toEncryptionKey())
-            }
-
-            CloudStorageActions.DOWNLOAD -> {
-                keyDownloadSuccess(
-                    privateEncryptionKey = privateKey.toEncryptionKey(),
-                )
-            }
-
-            else -> {}
-        }
-    }
-
     //region handle key success
-    private fun keyUploadSuccess(privateEncryptionKey: EncryptionKey) {
+    private fun keyUploadSuccess(encryptionKey: EncryptionKey) {
         //User uploaded key successfully, move forward by retrieving user state
         state = state.copy(
-            beneficiaryEncryptionKey = privateEncryptionKey,
+            beneficiaryEncryptionKey = encryptionKey,
             savePrivateKeyToCloudResource = Resource.Uninitialized
         )
         state.beneficiaryData?.let { updateOwnerState(it) } ?: retrieveOwnerUser()
     }
 
     private fun keyDownloadSuccess(
-        privateEncryptionKey: EncryptionKey,
+        encryptedPrivateKey: ByteArray,
     ) {
-        state = state.copy(
-            retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
-            beneficiaryEncryptionKey = privateEncryptionKey
-        )
-        state.beneficiaryData?.let { updateOwnerState(it) } ?: retrieveOwnerUser()
+        decryptKeyData(encryptedPrivateKey = encryptedPrivateKey) { encryptionKey ->
+            state = state.copy(
+                retrievePrivateKeyFromCloudResource = Resource.Uninitialized,
+                beneficiaryEncryptionKey = encryptionKey
+            )
+            state.beneficiaryData?.let { updateOwnerState(it) } ?: retrieveOwnerUser()
+        }
+    }
+
+    private fun decryptKeyData(
+        encryptedPrivateKey: ByteArray,
+        onKeyDecrypted: (encryptionKey: EncryptionKey) -> Unit
+    ) {
+        val entropy = state.beneficiaryData?.entropy
+
+        if (entropy == null) {
+            keyDownloadFailure(Exception("Unable to decrypt key from cloud"))
+            return
+        }
+
+        //Decrypt the byteArray
+        val privateKey =
+            encryptedPrivateKey.decryptWithEntropy(
+                deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                entropy = entropy
+            )
+
+        onKeyDecrypted(privateKey.toEncryptionKey())
     }
     //endregion
 
     //region handle key failure
-    fun handleCloudStorageActionFailure(
-        exception: Exception?,
-        cloudStorageAction: CloudStorageActions
-    ) {
-
-        state = state.copy(cloudStorageAction = CloudStorageActionData())
-
-        when (cloudStorageAction) {
-            CloudStorageActions.UPLOAD -> {
-                keyUploadFailure(exception)
-            }
-
-            CloudStorageActions.DOWNLOAD -> {
-                keyDownloadFailure(exception)
-            }
-
-            else -> {}
-        }
-    }
-
     private fun keyUploadFailure(exception: Exception?) {
         exception?.sendError(CrashReportingUtil.CloudUpload)
         state = state.copy(

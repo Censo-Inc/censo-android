@@ -5,7 +5,6 @@ import co.censo.censo.R
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.model.OwnerState
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 data class BeneficiaryState(
     val beneficiaryData: OwnerState.Beneficiary? = null,
@@ -20,7 +19,6 @@ data class BeneficiaryState(
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
     val retrievePrivateKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
 )
 
 enum class BeneficiaryError {
