@@ -2,6 +2,7 @@ package co.censo.censo.presentation.initial_plan_setup
 
 import StandardButton
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,18 +15,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,10 +46,13 @@ import androidx.compose.ui.unit.sp
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
+import co.censo.shared.presentation.components.LargeLoading
 
 @Composable
 fun WelcomeScreenUI(
-    navigateToPlanSetup: () -> Unit
+    isPromoCodeEnabled: Boolean,
+    showPromoCodeUI: () -> Unit,
+    navigateToPlanSetup: () -> Unit,
 ) {
     Column(
         Modifier
@@ -94,18 +109,42 @@ fun WelcomeScreenUI(
             )
         }
 
-        StandardButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 44.dp, vertical = 24.dp),
-            contentPadding = PaddingValues(vertical = 8.dp),
-            onClick = navigateToPlanSetup,
+        Column(
+            modifier = Modifier.padding(vertical = 24.dp, horizontal = 44.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = stringResource(id = R.string.get_started),
-                style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
-                modifier = Modifier.padding(all = 8.dp)
-            )
+
+            if (isPromoCodeEnabled) {
+                StandardButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    onClick = { showPromoCodeUI() },
+                ) {
+                    Text(
+                        text = stringResource(R.string.have_a_promo_code),
+                        style = ButtonTextStyle.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.padding(all = 8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 8.dp),
+                onClick = navigateToPlanSetup,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.get_started),
+                    style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
+                    modifier = Modifier.padding(all = 8.dp)
+                )
+            }
         }
     }
 }
@@ -162,26 +201,161 @@ fun SetupStep(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EnterPromoCodeUI(
+    loading: Boolean,
+    inputtedPromoCode: String,
+    updatePromoCode: (String) -> Unit,
+    submitPromoCode: () -> Unit,
+    dismissPromoCodeUI: () -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(key1 = Unit) {
+        focusRequester.requestFocus()
+    }
+
+    val textFieldStyle = TextStyle(
+        fontSize = 20.sp,
+        fontWeight = FontWeight.W500,
+        color = SharedColors.MainColorText,
+        textAlign = TextAlign.Center
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Black.copy(alpha = 0.5f))
+            .clickable { dismissPromoCodeUI() },
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .background(color = Color.White)
+                .padding(horizontal = 44.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                value = inputtedPromoCode,
+                onValueChange = updatePromoCode,
+                shape = CircleShape,
+                placeholder = {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.enter_promo_code),
+                        fontSize = textFieldStyle.fontSize,
+                        fontWeight = textFieldStyle.fontWeight,
+                        textAlign = TextAlign.Center,
+                        color = SharedColors.PlaceholderTextGrey,
+                    )
+                },
+                textStyle = textFieldStyle,
+                enabled = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = SharedColors.BorderGrey,
+                    unfocusedBorderColor = SharedColors.BorderGrey,
+                    cursorColor = SharedColors.MainColorText
+                )
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            StandardButton(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                onClick = submitPromoCode,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.submit),
+                    style = textFieldStyle.copy(color = SharedColors.ButtonTextBlue),
+                )
+            }
+        }
+    }
+
+    if (loading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            LargeLoading(fullscreen = false)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewEnterPromoCodeUI() {
+    EnterPromoCodeUI(
+        inputtedPromoCode = "KLJBHVG6757GJH",
+        loading = false,
+        updatePromoCode = {
+
+        },
+        dismissPromoCodeUI = {},
+        submitPromoCode = {
+
+        }
+    )
+}
+
+@Preview
+@Composable
+fun PreviewWelcomeAndPromoTogether() {
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Red)
+    ) {
+        WelcomeScreenUI(
+            isPromoCodeEnabled = true,
+            showPromoCodeUI = {}
+        ) {
+
+        }
+
+        EnterPromoCodeUI(
+            loading = false, inputtedPromoCode = "LKJBH4467FHJGFGH", updatePromoCode = {
+
+            },
+            dismissPromoCodeUI = {},
+            submitPromoCode = {}
+        )
+    }
+}
+
 @Preview(device = Devices.NEXUS_5, showSystemUi = true, showBackground = true)
 @Composable
 fun SmallWelcomeScreenUIPreview() {
-    WelcomeScreenUI {
-
-    }
+    WelcomeScreenUI(
+        isPromoCodeEnabled = true,
+        showPromoCodeUI = {},
+        navigateToPlanSetup = {}
+    )
 }
 
 @Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
 @Composable
 fun MediumWelcomeScreenUIPreview() {
-    WelcomeScreenUI {
-
-    }
+    WelcomeScreenUI(
+        isPromoCodeEnabled = true,
+        showPromoCodeUI = {},
+        navigateToPlanSetup = {}
+    )
 }
 
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
 fun LargeWelcomeScreenUIPreview() {
-    WelcomeScreenUI {
-
-    }
+    WelcomeScreenUI(
+        isPromoCodeEnabled = false,
+        showPromoCodeUI = {},
+        navigateToPlanSetup = {}
+    )
 }
