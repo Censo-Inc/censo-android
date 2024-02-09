@@ -250,7 +250,6 @@ class ReplacePolicyViewModel @Inject constructor(
                 state.keyData?.encryptedPrivateKey != null && state.keyData?.publicKey != null
 
             if (!loadedKey) {
-                //TODO: Figure out what is going on when this gets stuck loading, circle back here once we figure out the OwnerRepository stuff
                 val hasKeySavedInCloud = try {
                     keyRepository.userHasKeySavedInCloud(owner.participantId)
                 } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
