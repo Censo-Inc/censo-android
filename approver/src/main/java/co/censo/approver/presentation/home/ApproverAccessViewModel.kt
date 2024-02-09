@@ -18,16 +18,18 @@ import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -146,16 +148,6 @@ class ApproverAccessViewModel @Inject constructor(
 
             else -> state
         }
-    }
-
-    private fun loadPrivateKeyFromCloud(accessPhase: ApproverPhase.AccessConfirmation) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true, action = CloudStorageActions.DOWNLOAD
-            ),
-            accessConfirmationPhase = accessPhase,
-            loadKeyFromCloudResource = Resource.Loading
-        )
     }
 
     private fun confirmOrRejectOwnerAccessRequest(
@@ -348,20 +340,38 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     //region CloudStorage Action methods
-    fun handleCloudStorageActionSuccess(
-        encryptedKey: ByteArray,
-        cloudStorageAction: CloudStorageActions
+    private fun loadPrivateKeyFromCloud(
+        accessPhase: ApproverPhase.AccessConfirmation,
+        bypassScopeCheck: Boolean = false
     ) {
         state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyFromCloudResource = Resource.Uninitialized
+            accessConfirmationPhase = accessPhase,
+            loadKeyFromCloudResource = Resource.Loading
         )
 
-        when (cloudStorageAction) {
-            CloudStorageActions.DOWNLOAD -> {
-                keyDownloadSuccess(privateEncryptionKey = encryptedKey)
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadResponse = try {
+                keyRepository.retrieveKeyFromCloud(
+                    participantId = ParticipantId(state.participantId),
+                    bypassScopeCheck = bypassScopeCheck,
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
+                    //Retry this method
+                    loadPrivateKeyFromCloud(accessPhase = accessPhase, bypassScopeCheck = true)
+                }
+                return@launch
             }
-            else -> {}
+
+            state = state.copy(loadKeyFromCloudResource = Resource.Uninitialized)
+
+            if (downloadResponse is Resource.Success) {
+                keyDownloadSuccess(privateEncryptionKey = downloadResponse.data)
+            } else if (downloadResponse is Resource.Error) {
+                setErrorToApproveAccessResource(downloadResponse.exception)
+            }
         }
     }
 
@@ -380,23 +390,6 @@ class ApproverAccessViewModel @Inject constructor(
             Exception().sendError(CrashReportingUtil.AccessConfirmation)
             state =
                 state.copy(approveAccessResource = Resource.Error(exception = Exception("Unable to confirm owner access, missing access confirmation data")))
-        }
-    }
-
-    fun handleCloudStorageActionFailure(
-        exception: Exception?,
-        cloudStorageAction: CloudStorageActions
-    ) {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyFromCloudResource = Resource.Uninitialized
-        )
-
-        when (cloudStorageAction) {
-            CloudStorageActions.DOWNLOAD -> {
-                setErrorToApproveAccessResource(exception)
-            }
-            else -> {}
         }
     }
 

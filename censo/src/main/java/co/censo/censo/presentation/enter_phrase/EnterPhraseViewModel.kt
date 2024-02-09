@@ -21,15 +21,16 @@ import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.networking.IgnoreKeysJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
+import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.bitmapToByteArray
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.rotateBitmap
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,7 +44,7 @@ import javax.inject.Inject
 class EnterPhraseViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-    ) : ViewModel() {
+) : ViewModel() {
 
     var state by mutableStateOf(EnterPhraseState())
         private set
@@ -290,7 +291,7 @@ class EnterPhraseViewModel @Inject constructor(
         val masterKeySignature = state.masterKeySignature
         if (masterKeySignature != null) {
             //Load the key from the cloud
-            triggerKeyDownload()
+            loadKey()
         } else {
             storeSeedPhrase(shouldVerifyMasterKeySignature = false)
         }
@@ -306,19 +307,10 @@ class EnterPhraseViewModel @Inject constructor(
         val masterKeySignature = state.masterKeySignature
         if (masterKeySignature != null) {
             //Load the key from the cloud
-            triggerKeyDownload()
+            loadKey()
         } else {
             storeSeedPhrase(shouldVerifyMasterKeySignature = false)
         }
-    }
-
-    private fun triggerKeyDownload() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(
-                triggerAction = true, action = CloudStorageActions.DOWNLOAD,
-            ),
-            loadKeyInProgress = Resource.Loading
-        )
     }
 
     private fun verifyMasterKeySignature(): Boolean {
@@ -606,7 +598,39 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     //region Cloud Storage
-    fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
+    private fun loadKey(bypassScopeCheck: Boolean = false) {
+        state = state.copy(loadKeyInProgress = Resource.Loading)
+
+        val participantId = state.ownerApproverParticipantId
+        if (participantId == null) {
+            onKeyDownloadFailed(Exception("Unable to load key data, missing participant id"))
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadResponse = try {
+                keyRepository.retrieveKeyFromCloud(
+                    participantId = participantId,
+                    bypassScopeCheck = bypassScopeCheck,
+                )
+            } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
+                    loadKey(bypassScopeCheck = true)
+                }
+                return@launch
+            }
+
+            if (downloadResponse is Resource.Success) {
+                onKeyDownloadSuccess(downloadResponse.data)
+            } else if (downloadResponse is Resource.Error) {
+                onKeyDownloadFailed(downloadResponse.exception)
+            }
+        }
+    }
+
+    private fun onKeyDownloadSuccess(encryptedKey: ByteArray) {
         resetCloudStorageActionState()
 
         try {
@@ -643,7 +667,7 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun onKeyDownloadFailed(exception: Exception?) {
+    private fun onKeyDownloadFailed(exception: Exception?) {
         resetCloudStorageActionState()
         state = state.copy(submitResource = Resource.Error(exception = exception))
         exception?.sendError(CrashReportingUtil.CloudDownload)
@@ -652,10 +676,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     //region Reset methods
     private fun resetCloudStorageActionState() {
-        state = state.copy(
-            cloudStorageAction = CloudStorageActionData(),
-            loadKeyInProgress = Resource.Uninitialized
-        )
+        state = state.copy(loadKeyInProgress = Resource.Uninitialized)
     }
 
     fun resetImageCaptureResource() {

@@ -453,6 +453,10 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.createPolicy(createPolicyApiRequest) }
     }
 
+    /**
+     * Can throw a CLOUD_STORAGE_PERMISSION_NOT_GRANTED_EXCEPTION,
+     * the caller should wrap this method in a try catch
+     */
     override suspend fun replacePolicy(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
@@ -495,6 +499,10 @@ class OwnerRepositoryImpl(
         return retrieveApiResource { apiService.replacePolicy(replacePolicyApiRequest) }
     }
 
+    /**
+     * Can throw a CLOUD_STORAGE_PERMISSION_NOT_GRANTED_EXCEPTION,
+     * the caller should wrap this method in a try catch
+     */
     override suspend fun verifyApproverPublicKeysSignature(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         approverPublicKeys: List<Base58EncodedApproverPublicKey>,
@@ -519,6 +527,10 @@ class OwnerRepositoryImpl(
         }.getOrNull() ?: false
     }
 
+    /**
+     * Can throw a CLOUD_STORAGE_PERMISSION_NOT_GRANTED_EXCEPTION,
+     * the caller should wrap this method in a try catch
+     */
     override suspend fun replaceShards(
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
         encryptedMasterPrivateKey: Base64EncodedData,
@@ -849,6 +861,10 @@ class OwnerRepositoryImpl(
         }
     }
 
+    /**
+     * Can throw a CLOUD_STORAGE_PERMISSION_NOT_GRANTED_EXCEPTION,
+     * the caller should wrap this method in a try catch
+     */
     override suspend fun recoverSeedPhrases(
         encryptedSeedPhrases: List<SeedPhrase>,
         encryptedIntermediatePrivateKeyShards: List<EncryptedShard>,
@@ -934,8 +950,9 @@ class OwnerRepositoryImpl(
                 true -> {
                     val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
                         participantId = it.participantId,
-                        bypassScopeCheck = bypassScopeCheck
+                        bypassScopeCheck = bypassScopeCheck,
                     )
+
                     if (ownerApproverKeyResource is Resource.Error) {
                         throw ownerApproverKeyResource.exception!!
                     } else {

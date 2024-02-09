@@ -12,6 +12,7 @@ import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.IdentityToken
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.VaultCountDownTimer
@@ -44,6 +45,9 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
     lateinit var ownerRepository: OwnerRepository
 
     @Mock
+    lateinit var keyRepository: KeyRepository
+
+    @Mock
     lateinit var timer: VaultCountDownTimer
 
     private lateinit var accessSeedPhrasesViewModel: AccessSeedPhrasesViewModel
@@ -63,7 +67,7 @@ class AcccessSeedPhraseViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(testDispatcher)
 
         accessSeedPhrasesViewModel = AccessSeedPhrasesViewModel(
-            ownerRepository = ownerRepository, timer = timer
+            ownerRepository = ownerRepository, keyRepository = keyRepository, timer = timer
         )
     }
 

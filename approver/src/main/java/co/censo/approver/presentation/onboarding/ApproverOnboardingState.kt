@@ -8,7 +8,6 @@ import co.censo.shared.data.model.AcceptApprovershipApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.SubmitApproverVerificationApiResponse
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import co.censo.shared.util.NavigationData
 
 data class ApproverOnboardingState(
@@ -34,8 +33,6 @@ data class ApproverOnboardingState(
 
     //Cloud Storage
     val savePrivateKeyToCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val retrievePrivateKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
 
     //Success/Error Message
     val onboardingMessage: Resource<OnboardingMessage> = Resource.Uninitialized,

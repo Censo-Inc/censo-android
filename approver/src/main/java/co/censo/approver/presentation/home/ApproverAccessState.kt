@@ -10,7 +10,6 @@ import co.censo.shared.data.model.ApproverPhase
 import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -41,7 +40,6 @@ data class ApproverAccessState(
     val showTopBarCancelConfirmationDialog: Boolean = false,
 
     //Cloud Storage
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val loadKeyFromCloudResource: Resource<Unit> = Resource.Uninitialized,
     val accessConfirmationPhase: ApproverPhase.AccessConfirmation? = null,
 

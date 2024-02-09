@@ -1,6 +1,5 @@
 package co.censo.censo.presentation.login_id_reset
 
-import co.censo.censo.presentation.entrance.ForceUserToGrantCloudStorageAccess
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.ResetLoginIdApiResponse
@@ -16,7 +15,7 @@ data class LoginIdResetState(
 
     // step 2
     val triggerGoogleSignIn: Resource<Unit> = Resource.Uninitialized,
-    val forceUserToGrantCloudStorageAccess: ForceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(),
+    val jwt: String? = null,
     val createDeviceResponse: Resource<Unit> = Resource.Uninitialized,
 
     // step 3
@@ -55,7 +54,6 @@ sealed interface LoginIdResetAction {
     data class PasteLink(val clipboardContent: String?) : LoginIdResetAction
     data class TokenReceived(val token: String) : LoginIdResetAction
     data object SelectGoogleId : LoginIdResetAction
-    data object CloudStoragePermissionsGranted : LoginIdResetAction
     data object RetrieveAuthType : LoginIdResetAction
     data object StartPasswordInput : LoginIdResetAction
     data class PasswordInputFinished(val password: String) : LoginIdResetAction

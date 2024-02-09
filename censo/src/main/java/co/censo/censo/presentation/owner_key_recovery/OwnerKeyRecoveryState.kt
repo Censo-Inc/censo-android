@@ -6,7 +6,6 @@ import co.censo.censo.presentation.plan_finalization.ReplacePolicyKeyData
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.ReplacePolicyShardsApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 data class OwnerKeyRecoveryState(
     val ownerParticipantId: ParticipantId? = null,
@@ -20,7 +19,6 @@ data class OwnerKeyRecoveryState(
     val replaceShardsResponse: Resource<ReplacePolicyShardsApiResponse> = Resource.Uninitialized,
 
     // Cloud Storage
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
     val saveKeyToCloud: Resource<Unit> = Resource.Uninitialized,
     val keyData: ReplacePolicyKeyData? = null,
 

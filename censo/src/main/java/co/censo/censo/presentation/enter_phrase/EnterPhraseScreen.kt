@@ -49,8 +49,6 @@ import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.SharedColors
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
 import co.censo.shared.util.ClipboardHelper
@@ -396,23 +394,6 @@ fun EnterPhraseScreen(
 
                 }
             }
-        }
-    }
-
-    if (state.cloudStorageAction.triggerAction && state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
-        val participantId = state.ownerApproverParticipantId
-        if (participantId != null) {
-            CloudStorageHandler(
-                actionToPerform = state.cloudStorageAction.action,
-                participantId = participantId,
-                encryptedPrivateKey = null,
-                onActionSuccess = { viewModel.onKeyDownloadSuccess(it) },
-                onActionFailed = { viewModel.onKeyDownloadFailed(it) }
-            )
-        } else {
-            viewModel.onKeyDownloadFailed(
-                exception = Exception("Unable to load key data, missing participant id")
-            )
         }
     }
 }

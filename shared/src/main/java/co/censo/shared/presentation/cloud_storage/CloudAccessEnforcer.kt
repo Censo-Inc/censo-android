@@ -1,6 +1,5 @@
 package co.censo.shared.presentation.cloud_storage
 
-import ParticipantId
 import StandardButton
 import android.app.Activity
 import android.content.IntentSender
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -29,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -37,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import co.censo.shared.R
-import co.censo.shared.data.Resource
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.GoogleAuth
@@ -46,14 +44,8 @@ import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
 
 @Composable
-fun CloudStorageHandler(
-    actionToPerform: CloudStorageActions,
-    participantId: ParticipantId,
-    encryptedPrivateKey: ByteArray?,
-    onActionSuccess: (privateKey: ByteArray) -> Unit,
-    onActionFailed: (exception: Exception?) -> Unit,
-    onCloudStorageAccessGranted: (() -> Unit)? = null,
-    viewModel: CloudStorageHandlerViewModel = hiltViewModel()
+fun CloudAccessEnforcer(
+    viewModel: CloudAccessEnforcerViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current
@@ -67,7 +59,7 @@ fun CloudStorageHandler(
                 val authResult = Identity.getAuthorizationClient(context)
                     .getAuthorizationResultFromIntent(result.data)
                 if (authResult.grantedScopes.contains(GoogleAuth.DRIVE_FILE_SCOPE.toString())) {
-                    viewModel.performAction(bypassScopeCheckForCloudStorage = true)
+                    viewModel.onAccessGranted()
                 }
             }
         }
@@ -94,7 +86,7 @@ fun CloudStorageHandler(
                             e.sendError(CrashReportingUtil.CloudStorageIntent)
                         }
                     } else {
-                        viewModel.performAction(bypassScopeCheckForCloudStorage = true)
+                        viewModel.onAccessGranted()
                     }
                 }
                 .addOnFailureListener {
@@ -105,30 +97,12 @@ fun CloudStorageHandler(
         }
     }
 
-    LaunchedEffect(key1 = state) {
-        if (state.cloudStorageActionResource is Resource.Success) {
-            onActionSuccess(state.cloudStorageActionResource.data)
-        }
-
-        if (state.cloudStorageActionResource is Resource.Error) {
-            onActionFailed(state.cloudStorageActionResource.exception)
-        }
-
-        if (state.cloudStorageAccessGranted) {
-            onCloudStorageAccessGranted?.invoke()
-        }
-    }
-
     DisposableEffect(key1 =  viewModel) {
-        viewModel.onStart(
-            actionToPerform = actionToPerform,
-            participantId = participantId,
-            privateKey = encryptedPrivateKey
-        )
+        viewModel.onStart()
         onDispose { viewModel.onDispose() }
     }
 
-    if (state.shouldEnforceCloudStorageAccess) {
+    if (state.enforceAccess) {
         GoogleDrivePermissionUI(interactionSource = remember { MutableInteractionSource() }) {
             triggerAuthRequest = true
         }
@@ -143,7 +117,7 @@ fun GoogleDrivePermissionUI(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = SharedColors.DisabledGrey)
+            .background(color = Color.White)
             .clickable(indication = null, interactionSource = interactionSource, onClick = {}),
         contentAlignment = Alignment.Center
     ) {
@@ -165,7 +139,7 @@ fun GoogleDrivePermissionUI(
                 contentPadding = PaddingValues(horizontal = 36.dp, vertical = 16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.grant_permission),
+                    text = stringResource(R.string.grant_access),
                     color = SharedColors.ButtonTextBlue,
                     fontSize = 18.sp
                 )

@@ -12,6 +12,7 @@ import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -114,6 +115,9 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 fileList.files.first {
                     it.name == fileName
                 }
+            } catch (e: UserRecoverableAuthIOException) {
+                e.sendError(RetrieveFileContent)
+                return Resource.Error(exception = e)
             } catch (e: NoSuchElementException) {
                 e.sendError(RetrieveFileContent)
                 return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))

@@ -10,7 +10,6 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
-import co.censo.shared.data.model.Beneficiary
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
@@ -18,9 +17,11 @@ import co.censo.shared.data.repository.AuthState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.asResource
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -28,6 +29,7 @@ import com.google.android.gms.tasks.Task
 import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -170,9 +172,8 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    fun handleCloudStorageAccessGranted() {
-        signInUser(state.forceUserToGrantCloudStorageAccess.jwt)
-        resetForceUserToGrantCloudStorageAccess()
+    private fun handleCloudStorageAccessGranted(jwt: String?) {
+        signInUser(jwt)
     }
 
     fun startGoogleSignInFlow() {
@@ -185,12 +186,12 @@ class OwnerEntranceViewModel @Inject constructor(
                 val account = completedTask.await()
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
-                    state = state.copy(
-                        forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess(
-                            requestAccess = true,
-                            jwt = account.idToken
-                        )
-                    )
+                    keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired)
+                    observeCloudAccessStateForAccessGranted(
+                        coroutineScope = this, keyRepository = keyRepository
+                    ) {
+                        handleCloudStorageAccessGranted(account.idToken)
+                    }
                 } else {
                     signInUser(account.idToken)
                 }
@@ -200,7 +201,6 @@ class OwnerEntranceViewModel @Inject constructor(
             }
         }
     }
-
 
     private fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -287,10 +287,6 @@ class OwnerEntranceViewModel @Inject constructor(
 
     fun resetSignInUserResource() {
         state = state.copy(signInUserResource = Resource.Uninitialized)
-    }
-
-    private fun resetForceUserToGrantCloudStorageAccess() {
-        state = state.copy(forceUserToGrantCloudStorageAccess = ForceUserToGrantCloudStorageAccess())
     }
 
     private suspend fun retrieveOwnerStateSync() {

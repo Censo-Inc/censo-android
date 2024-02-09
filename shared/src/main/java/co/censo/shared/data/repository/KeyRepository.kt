@@ -11,8 +11,12 @@ import co.censo.shared.data.storage.CloudStorage
 import org.bouncycastle.util.encoders.Hex
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.sendError
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
@@ -26,18 +30,34 @@ interface KeyRepository {
     suspend fun saveKeyInCloud(
         key: ByteArray,
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean = false
+        bypassScopeCheck: Boolean = false,
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean = false
+        bypassScopeCheck: Boolean = false,
     ): Resource<ByteArray>
     suspend fun userHasKeySavedInCloud(participantId: ParticipantId): Boolean
     suspend fun deleteSavedKeyFromCloud(participantId: ParticipantId): Resource<Unit>
     suspend fun deleteDeviceKeyIfPresent(keyId: String)
+
+    //region CloudAccess
+    fun updateCloudAccessState(cloudAccessState: CloudAccessState)
+
+    suspend fun collectCloudAccessState(collector: FlowCollector<CloudAccessState>)
+    //endregion
 }
 
 class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudStorage) : KeyRepository {
+
+    //region CloudAccessState Flow
+    private val cloudAccessStateFlow = MutableStateFlow<CloudAccessState>(CloudAccessState.Uninitialized)
+    override fun updateCloudAccessState(cloudAccessState: CloudAccessState) {
+        cloudAccessStateFlow.value = cloudAccessState
+    }
+    override suspend fun collectCloudAccessState(collector: FlowCollector<CloudAccessState>) {
+        cloudAccessStateFlow.collect(collector)
+    }
+    //endregion
 
     private val keystoreHelper = KeystoreHelper()
     override fun hasKeyWithId(id: String): Boolean {
@@ -78,15 +98,16 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     override suspend fun saveKeyInCloud(
         key: ByteArray,
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean
+        bypassScopeCheck: Boolean,
     ) : Resource<Unit> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
+                updateCloudAccessState(CloudAccessState.AccessRequired)
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
 
-        return try {
+        val response = try {
             cloudStorage.uploadFile(
                 fileContent = key.toHexString(),
                 participantId = participantId,
@@ -95,6 +116,13 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             e.sendError(CrashReportingUtil.CloudUpload)
             Resource.Error(exception = e)
         }
+
+        if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
+            updateCloudAccessState(CloudAccessState.AccessRequired)
+            throw CloudStoragePermissionNotGrantedException()
+        }
+
+        return response
     }
 
     /**
@@ -103,25 +131,40 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
      */
     override suspend fun retrieveKeyFromCloud(
         participantId: ParticipantId,
-        bypassScopeCheck: Boolean
+        bypassScopeCheck: Boolean,
     ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
+                updateCloudAccessState(CloudAccessState.AccessRequired)
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
 
-        return try {
-            val resource = cloudStorage.retrieveFileContents(participantId)
-
-            if (resource is Resource.Success) {
-                return Resource.Success(Hex.decode(resource.data))
-            } else {
-                return Resource.Error(exception = resource.error()?.exception)
-            }
+        val response = try {
+            cloudStorage.retrieveFileContents(participantId)
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.CloudDownload)
             Resource.Error(exception = e)
+        }
+
+        if (response is Resource.Success) {
+            val key = Hex.decode(response.data)
+
+            if (key.isEmpty()) {
+                val e = Exception("Retrieved private key was empty")
+                e.sendError(CrashReportingUtil.CloudDownload)
+                return Resource.Error(exception = e)
+            }
+
+            return Resource.Success(key)
+        } else {
+
+            if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
+                updateCloudAccessState(CloudAccessState.AccessRequired)
+                throw CloudStoragePermissionNotGrantedException()
+            }
+
+            return Resource.Error(exception = response.error()?.exception)
         }
     }
 

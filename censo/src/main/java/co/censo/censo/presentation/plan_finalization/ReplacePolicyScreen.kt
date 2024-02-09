@@ -27,8 +27,6 @@ import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.data.Resource
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.OnLifecycleEvent
-import co.censo.shared.presentation.cloud_storage.CloudStorageActions
-import co.censo.shared.presentation.cloud_storage.CloudStorageHandler
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
 import kotlinx.coroutines.delay
@@ -240,69 +238,6 @@ fun ReplacePolicyScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    if (state.cloudStorageAction.triggerAction) {
-        if (state.cloudStorageAction.action == CloudStorageActions.UPLOAD) {
-            val encryptedKey = state.keyData?.encryptedPrivateKey
-            val participantId = state.ownerApprover?.participantId
-
-            if (encryptedKey != null && participantId != null) {
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = participantId,
-                    encryptedPrivateKey = encryptedKey,
-                    onActionSuccess = {
-                        viewModel.receivePlanAction(ReplacePolicyAction.KeyUploadSuccess)
-                    },
-                    onActionFailed = {
-                        viewModel.receivePlanAction(
-                            ReplacePolicyAction.KeyUploadFailed(
-                                it
-                            )
-                        )
-                    }
-                )
-            } else {
-                val exceptionCause =
-                    if (encryptedKey == null) "missing private key" else "missing participant id"
-                viewModel.receivePlanAction(
-                    ReplacePolicyAction.KeyUploadFailed(
-                        Exception("Unable to setup policy $exceptionCause")
-                    )
-                )
-            }
-        } else if (state.cloudStorageAction.action == CloudStorageActions.DOWNLOAD) {
-            val participantId = state.ownerApprover?.participantId
-
-            if (participantId != null) {
-                CloudStorageHandler(
-                    actionToPerform = state.cloudStorageAction.action,
-                    participantId = participantId,
-                    encryptedPrivateKey = null,
-                    onActionSuccess = {
-                        viewModel.receivePlanAction(
-                            ReplacePolicyAction.KeyDownloadSuccess(
-                                it
-                            )
-                        )
-                    },
-                    onActionFailed = {
-                        viewModel.receivePlanAction(
-                            ReplacePolicyAction.KeyDownloadFailed(
-                                it
-                            )
-                        )
-                    }
-                )
-            } else {
-                viewModel.receivePlanAction(
-                    ReplacePolicyAction.KeyDownloadFailed(
-                        Exception("Unable to setup policy, missing participant id")
-                    )
-                )
             }
         }
     }

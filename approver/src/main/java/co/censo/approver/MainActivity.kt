@@ -41,6 +41,7 @@ import co.censo.approver.presentation.owners.ApproverOwnersList
 import co.censo.approver.presentation.owners.LabelOwner
 import co.censo.approver.presentation.reset_links.ResetLinksScreen
 import co.censo.shared.DeepLinkURI.APPROVER_AUTH_REST_V2_URI
+import co.censo.shared.presentation.cloud_storage.CloudAccessEnforcer
 import co.censo.shared.presentation.maintenance.MaintenanceScreen
 import co.censo.approver.BuildConfig as ApproverBuildConfig
 
@@ -60,6 +61,8 @@ class MainActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     CensoNavHost(navController = navController)
+
+                    CloudAccessEnforcer()
                 }
                 MaintenanceScreen()
                 StrongboxUI()

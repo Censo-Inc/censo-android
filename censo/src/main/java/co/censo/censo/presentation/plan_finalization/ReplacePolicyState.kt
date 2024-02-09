@@ -1,7 +1,6 @@
 package co.censo.censo.presentation.plan_finalization
 
 import Base58EncodedApproverPublicKey
-import Base64EncodedData
 import co.censo.censo.presentation.plan_setup.PolicySetupAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
@@ -12,7 +11,6 @@ import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.ReplacePolicyApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
-import co.censo.shared.presentation.cloud_storage.CloudStorageActionData
 
 
 data class ReplacePolicyState(
@@ -37,8 +35,6 @@ data class ReplacePolicyState(
     val verifyKeyConfirmationSignature: Resource<Unit> = Resource.Uninitialized,
 
     // Cloud Storage
-    val cloudStorageAction: CloudStorageActionData = CloudStorageActionData(),
-
     val keyData: ReplacePolicyKeyData? = null,
     val saveKeyToCloud: Resource<Unit> = Resource.Uninitialized,
 
