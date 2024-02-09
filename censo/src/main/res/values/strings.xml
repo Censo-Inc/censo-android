@@ -405,7 +405,7 @@
     <string name="time_to_add_your_first_seed_phrase">Time to add your first seed phrase</string>
     <string name="generate_or_add_own_message">You can add one of your own, or if you would like to try Censo first, generate a new seed phrase with Censo and add that.</string>
     <string name="an_approval_from_current_approvers_is_required">An approval from current approvers is required</string>
-    <string name="added_security_with_approvers">Your approvers:</string>
+    <string name="added_security_with_approvers">Your Approvers</string>
     <string name="resume_adding_approvers">Resume adding approvers</string>
     <string name="approvers_activation_progress_made_so_far_will_be_lost">Approver verification progress made so far will be lost.</string>
     <string name="secure_all_your_seed_phrases_for_only_1_99_month">Secure all your seed\nphrases for\n%1$s</string>
