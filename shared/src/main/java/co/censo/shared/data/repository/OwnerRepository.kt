@@ -85,7 +85,6 @@ import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
 import co.censo.shared.data.model.toByteArray
 import co.censo.shared.data.model.toSeedPhraseData
 import co.censo.shared.data.networking.ApiService
-import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.BIP39
