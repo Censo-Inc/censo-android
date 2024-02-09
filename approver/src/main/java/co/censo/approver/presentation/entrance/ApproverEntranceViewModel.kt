@@ -191,10 +191,6 @@ class ApproverEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun handleCloudStorageAccessGranted(jwt: String?) {
-        signInUser(jwt)
-    }
-
     fun startGoogleSignInFlow() {
         state = state.copy(triggerGoogleSignIn = Resource.Success(Unit))
     }
@@ -210,7 +206,7 @@ class ApproverEntranceViewModel @Inject constructor(
                     observeCloudAccessStateForAccessGranted(
                         coroutineScope = this, keyRepository = keyRepository
                     ) {
-                        handleCloudStorageAccessGranted(account.idToken)
+                        signInUser(account.idToken)
                     }
                 } else {
                     signInUser(account.idToken)

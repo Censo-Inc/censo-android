@@ -172,10 +172,6 @@ class OwnerEntranceViewModel @Inject constructor(
         }
     }
 
-    private fun handleCloudStorageAccessGranted(jwt: String?) {
-        signInUser(jwt)
-    }
-
     fun startGoogleSignInFlow() {
         state = state.copy(triggerGoogleSignIn = Resource.Success(Unit))
     }
@@ -190,7 +186,7 @@ class OwnerEntranceViewModel @Inject constructor(
                     observeCloudAccessStateForAccessGranted(
                         coroutineScope = this, keyRepository = keyRepository
                     ) {
-                        handleCloudStorageAccessGranted(account.idToken)
+                        signInUser(account.idToken)
                     }
                 } else {
                     signInUser(account.idToken)
@@ -243,15 +239,15 @@ class OwnerEntranceViewModel @Inject constructor(
                 idToken = idToken
             )
 
-            if (signInUserResponse is Resource.Success) {
+            state = if (signInUserResponse is Resource.Success) {
                 userAuthenticated()
                 retrieveOwnerStateSync()
-                state = state.copy(
+                state.copy(
                     signInUserResource = if (state.showAcceptTermsOfUse) signInUserResponse else Resource.Loading,
                     userIsOnboarding = state.preFetchedUserResponse.success()?.data?.ownerState?.onboarding() ?: false
                 )
             } else {
-                state = state.copy(signInUserResource = signInUserResponse)
+                state.copy(signInUserResource = signInUserResponse)
             }
         }
     }

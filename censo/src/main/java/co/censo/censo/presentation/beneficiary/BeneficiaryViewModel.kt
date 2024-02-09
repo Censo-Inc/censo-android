@@ -100,9 +100,12 @@ class BeneficiaryViewModel @Inject constructor(
         userStatePollingTimer.stopWithDelay(CountDownTimerImpl.Companion.VERIFICATION_STOP_DELAY)
     }
 
-    private fun createKeyAndTriggerCloudSave() {
+    private fun createKeyAndTriggerCloudSave(submitAfterSuccess : Boolean = false) {
         val beneficiaryEncryptionKey = keyRepository.createApproverKey()
-        savePrivateKeyToCloud(beneficiaryEncryptionKey)
+        savePrivateKeyToCloud(
+            encryptionKey = beneficiaryEncryptionKey,
+            submitAfterSuccess = submitAfterSuccess
+        )
     }
 
     fun updateVerificationCode(value: String) {
@@ -137,7 +140,7 @@ class BeneficiaryViewModel @Inject constructor(
             val beneficiaryKey = state.beneficiaryEncryptionKey
 
             if (beneficiaryKey == null) {
-                createKeyOrLoadKeyIntoMemory()
+                createKeyOrLoadKeyIntoMemory(submitAfterSuccess = true)
                 return@launch
             }
 
@@ -207,17 +210,17 @@ class BeneficiaryViewModel @Inject constructor(
 
     private fun inviteId() = state.beneficiaryData?.invitationId?.value ?: ""
 
-    private fun createKeyOrLoadKeyIntoMemory() {
+    private fun createKeyOrLoadKeyIntoMemory(submitAfterSuccess: Boolean = false) {
         if (state.beneficiaryEncryptionKey == null) {
             viewModelScope.launch(Dispatchers.IO) {
                 try {
                     if (keyRepository.userHasKeySavedInCloud(inviteId())) {
-                        loadPrivateKeyFromCloud()
+                        loadPrivateKeyFromCloud(submitAfterSuccess = submitAfterSuccess)
                     } else {
-                        createKeyAndTriggerCloudSave()
+                        createKeyAndTriggerCloudSave(submitAfterSuccess = submitAfterSuccess)
                     }
                 } catch (e: NoSuchElementException) {
-                    createKeyAndTriggerCloudSave()
+                    createKeyAndTriggerCloudSave(submitAfterSuccess = submitAfterSuccess)
                 }
             }
         }
@@ -226,6 +229,7 @@ class BeneficiaryViewModel @Inject constructor(
     //region Cloud Storage
     private fun savePrivateKeyToCloud(
         encryptionKey: EncryptionKey,
+        submitAfterSuccess: Boolean = false,
         bypassScopeCheck: Boolean = false
     ) {
         val encryptedPrivateKey = encryptKeyForUpload(encryptionKey)
@@ -256,6 +260,7 @@ class BeneficiaryViewModel @Inject constructor(
                     //Retry this method
                     savePrivateKeyToCloud(
                         encryptionKey = encryptionKey,
+                        submitAfterSuccess = submitAfterSuccess,
                         bypassScopeCheck = true
                     )
                 }
@@ -263,13 +268,16 @@ class BeneficiaryViewModel @Inject constructor(
             }
 
             if (uploadResponse is Resource.Success) {
-                keyUploadSuccess(encryptionKey)
+                keyUploadSuccess(
+                    encryptionKey = encryptionKey,
+                    submitAfterSuccess = submitAfterSuccess
+                )
             } else if (uploadResponse is Resource.Error) {
                 keyUploadFailure(uploadResponse.exception)
             }
         }
     }
-    private fun loadPrivateKeyFromCloud(bypassScopeCheck: Boolean = false) {
+    private fun loadPrivateKeyFromCloud(submitAfterSuccess: Boolean = false, bypassScopeCheck: Boolean = false) {
         val invitationId = inviteId()
 
         if (invitationId.isEmpty()) {
@@ -288,13 +296,19 @@ class BeneficiaryViewModel @Inject constructor(
                     coroutineScope = this, keyRepository = keyRepository
                 ) {
                     //Retry this method
-                    loadPrivateKeyFromCloud(bypassScopeCheck = true)
+                    loadPrivateKeyFromCloud(
+                        submitAfterSuccess = submitAfterSuccess,
+                        bypassScopeCheck = true
+                    )
                 }
                 return@launch
             }
 
             if (downloadResponse is Resource.Success) {
-                keyDownloadSuccess(downloadResponse.data)
+                keyDownloadSuccess(
+                    encryptedPrivateKey = downloadResponse.data,
+                    submitAfterSuccess = submitAfterSuccess
+                )
             } else if (downloadResponse is Resource.Error) {
                 keyDownloadFailure(downloadResponse.exception)
             }
@@ -316,17 +330,22 @@ class BeneficiaryViewModel @Inject constructor(
     }
 
     //region handle key success
-    private fun keyUploadSuccess(encryptionKey: EncryptionKey) {
+    private fun keyUploadSuccess(encryptionKey: EncryptionKey, submitAfterSuccess: Boolean) {
         //User uploaded key successfully, move forward by retrieving user state
         state = state.copy(
             beneficiaryEncryptionKey = encryptionKey,
             savePrivateKeyToCloudResource = Resource.Uninitialized
         )
         state.beneficiaryData?.let { updateOwnerState(it) } ?: retrieveOwnerUser()
+
+        if (submitAfterSuccess) {
+            submitVerificationCode()
+        }
     }
 
     private fun keyDownloadSuccess(
         encryptedPrivateKey: ByteArray,
+        submitAfterSuccess: Boolean
     ) {
         decryptKeyData(encryptedPrivateKey = encryptedPrivateKey) { encryptionKey ->
             state = state.copy(
@@ -334,6 +353,10 @@ class BeneficiaryViewModel @Inject constructor(
                 beneficiaryEncryptionKey = encryptionKey
             )
             state.beneficiaryData?.let { updateOwnerState(it) } ?: retrieveOwnerUser()
+
+            if (submitAfterSuccess) {
+                submitVerificationCode()
+            }
         }
     }
 
