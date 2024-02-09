@@ -371,7 +371,6 @@ class ApproverAccessViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                //TODO: Should we stop loading UI here? Tend to before PR
                 observeCloudAccessStateForAccessGranted {
                     //Retry this method
                     loadPrivateKeyFromCloud(accessPhase = accessPhase, bypassScopeCheck = true)

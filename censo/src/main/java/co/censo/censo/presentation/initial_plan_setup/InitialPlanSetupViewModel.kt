@@ -143,7 +143,6 @@ class InitialPlanSetupViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                // TODO: Need to think about UI state at this step
                 observeCloudAccessStateForAccessGranted {
                     //Retry this method
                     savePrivateKeyToCloud(
@@ -204,12 +203,6 @@ class InitialPlanSetupViewModel @Inject constructor(
                     //Retry this method
                     createPolicyParams()
                 }
-                return@launch
-            } catch (e: Exception) {
-                //TODO: Test this before Review
-                state = state.copy(
-                    createPolicyParamsResponse = Resource.Error(exception = Exception("Unable to check for saved key in cloud"))
-                )
                 return@launch
             }
 

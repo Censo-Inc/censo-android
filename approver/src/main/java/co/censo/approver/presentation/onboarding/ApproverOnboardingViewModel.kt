@@ -254,9 +254,6 @@ class ApproverOnboardingViewModel @Inject constructor(
                     determineApproverUIState(approverState = approverState)
                 }
                 return@launch
-            } catch (e: Exception) {
-                //TODO: Circle back to handling this
-                return@launch
             }
 
 
