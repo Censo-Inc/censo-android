@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -116,7 +117,7 @@ fun GoogleDrivePermissionUI(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = SharedColors.DisabledGrey)
+            .background(color = Color.White)
             .clickable(indication = null, interactionSource = interactionSource, onClick = {}),
         contentAlignment = Alignment.Center
     ) {
@@ -138,7 +139,7 @@ fun GoogleDrivePermissionUI(
                 contentPadding = PaddingValues(horizontal = 36.dp, vertical = 16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.grant_permission),
+                    text = stringResource(R.string.grant_access),
                     color = SharedColors.ButtonTextBlue,
                     fontSize = 18.sp
                 )

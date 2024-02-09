@@ -19,8 +19,8 @@
     <string name="terms">Terms</string>
     <string name="privacy">Privacy</string>
     <string name="why_google">Why Google?</string>
-    <string name="google_drive_access_required">Google Drive access is required to be able to backup your key.\n\nThis app cannot backup your key if Google Drive access is not granted.</string>
-    <string name="grant_permission">Grant Permission</string>
+    <string name="google_drive_access_required">Google Drive access is required to use Censo.\n\nYou cannot continue if you do not grant Google Drive access.</string>
+    <string name="grant_access">Grant Access</string>
     <string name="terms_of_use">Terms of Use</string>
     <string name="tou_accept">Accept &amp; Continue</string>
     <string name="tou_review">Review Terms of Use</string>
