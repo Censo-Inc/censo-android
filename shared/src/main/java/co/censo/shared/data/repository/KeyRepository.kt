@@ -13,7 +13,6 @@ import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
-import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import kotlinx.coroutines.flow.FlowCollector
@@ -103,9 +102,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     ) : Resource<Unit> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
-                projectLog(message = "saveKeyInCloud keyRepo: Updating cloud access state for AccessRequired")
                 updateCloudAccessState(CloudAccessState.AccessRequired)
-                projectLog(message = "saveKeyInCloud keyRepo: throwing exception")
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
@@ -121,9 +118,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         }
 
         if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
-            projectLog(message = "saveKeyInCloud keyRepo: Caught UserRecoverableAuthIOException")
             updateCloudAccessState(CloudAccessState.AccessRequired)
-            projectLog(message = "saveKeyInCloud keyRepo: throwing exception")
             throw CloudStoragePermissionNotGrantedException()
         }
 
@@ -140,9 +135,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
     ): Resource<ByteArray> {
         if (!bypassScopeCheck) {
             if (!cloudStorage.checkUserGrantedCloudStoragePermission()) {
-                projectLog(message = "retrieveKeyFromCloud keyRepo: Updating cloud access state for AccessRequired")
                 updateCloudAccessState(CloudAccessState.AccessRequired)
-                projectLog(message = "retrieveKeyFromCloud keyRepo: throwing exception")
                 throw CloudStoragePermissionNotGrantedException()
             }
         }
@@ -167,9 +160,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
         } else {
 
             if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
-                projectLog(message = "retrieveKeyFromCloud keyRepo: Caught UserRecoverableAuthIOException")
                 updateCloudAccessState(CloudAccessState.AccessRequired)
-                projectLog(message = "retrieveKeyFromCloud keyRepo: throwing exception")
                 throw CloudStoragePermissionNotGrantedException()
             }
 
