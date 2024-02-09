@@ -136,6 +136,12 @@ class InitialPlanSetupViewModel @Inject constructor(
                     )
                 }
                 return@launch
+            } catch (e: Exception) {
+                state = state.copy(
+                    saveKeyToCloudResource = Resource.Error(exception = e),
+                    keyData = null
+                )
+                return@launch
             }
 
             if (uploadResponse is Resource.Success) {
@@ -164,6 +170,10 @@ class InitialPlanSetupViewModel @Inject constructor(
                     //Retry this method
                     loadPrivateKeyFromCloud(bypassScopeCheck = true)
                 }
+                return@launch
+            } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.CloudDownload)
+                resetLoadKeyStateAndCreateNewApproverKey()
                 return@launch
             }
 
@@ -194,6 +204,11 @@ class InitialPlanSetupViewModel @Inject constructor(
                     //Retry this method
                     createPolicyParams()
                 }
+                return@launch
+            } catch (e: Exception) {
+                state = state.copy(
+                    createPolicyParamsResponse = Resource.Error(exception = e)
+                )
                 return@launch
             }
 

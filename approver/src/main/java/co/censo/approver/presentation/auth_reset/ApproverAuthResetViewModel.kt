@@ -245,6 +245,9 @@ class ApproverAuthResetViewModel @Inject constructor(
                     loadPrivateKeyFromCloud(bypassScopeCheck = true)
                 }
                 return@launch
+            } catch (e: Exception) {
+                setErrorToSubmitAuthResetVerificationResource(e)
+                return@launch
             }
 
             state = state.copy(loadKeyFromCloudResource = Resource.Uninitialized)
