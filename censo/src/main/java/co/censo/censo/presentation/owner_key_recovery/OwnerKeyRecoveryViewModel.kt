@@ -241,7 +241,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
             val uploadResponse = try {
                 keyRepository.saveKeyInCloud(
                     key = encryptedKeyData,
-                    participantId = participantId,
+                    id = participantId.value,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {

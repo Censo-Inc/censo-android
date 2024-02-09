@@ -113,9 +113,9 @@ fun ActivateApproverUI(
         ApproverStep(
             heading = listOf(
                 stringResource(id = R.string.step_1),
-                stringResource(id = R.string.share_the_app_title)
+                stringResource(id = R.string.share_approver_app_title)
             ),
-            content = stringResource(R.string.share_the_app_link_for_download, nickName),
+            content = stringResource(R.string.share_the_approver_app_link_for_download, nickName),
             onClick = { shareLink(storesLink) }
         ) {
             Image(

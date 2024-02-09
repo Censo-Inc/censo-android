@@ -225,7 +225,7 @@ fun PolicySetupScreen(
                                     R.string.activate_your_approver_message,
                                     state.editedNickname
                                 ),
-                                activatingApprover = true,
+                                buttonText = stringResource(co.censo.shared.R.string.activate_now),
                                 onContinueLive = {
                                     viewModel.receivePlanAction(PolicySetupScreenAction.GoLiveWithApprover)
                                 },

@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -52,7 +54,8 @@ import co.censo.shared.presentation.components.LargeLoading
 fun WelcomeScreenUI(
     isPromoCodeEnabled: Boolean,
     showPromoCodeUI: () -> Unit,
-    navigateToPlanSetup: () -> Unit,
+    onMainButtonClick: () -> Unit,
+    onMinorButtonClick: () -> Unit,
 ) {
     Column(
         Modifier
@@ -110,7 +113,9 @@ fun WelcomeScreenUI(
         }
 
         Column(
-            modifier = Modifier.padding(vertical = 24.dp, horizontal = 44.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -135,16 +140,30 @@ fun WelcomeScreenUI(
             }
 
             StandardButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 44.dp, vertical = 24.dp),
                 contentPadding = PaddingValues(vertical = 8.dp),
-                onClick = navigateToPlanSetup,
+                onClick = onMainButtonClick,
             ) {
                 Text(
-                    text = stringResource(id = R.string.get_started),
+                    text = stringResource(id = R.string.secure_your_seed_phrases),
                     style = ButtonTextStyle.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium),
                     modifier = Modifier.padding(all = 8.dp)
                 )
             }
+            ClickableText(
+                text = buildAnnotatedString {
+                    append(stringResource(R.string.to_become_a_beneficiary_tap_here))
+                },
+                style = TextStyle(
+                    textAlign = TextAlign.Center,
+                    color = Color.Black,
+                    fontWeight = FontWeight.W500,
+                    fontSize = 16.sp
+                ),
+                onClick = { onMinorButtonClick() }
+            )
         }
     }
 }
@@ -239,7 +258,9 @@ fun EnterPromoCodeUI(
         ) {
 
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 value = inputtedPromoCode,
                 onValueChange = updatePromoCode,
                 shape = CircleShape,
@@ -315,8 +336,8 @@ fun PreviewWelcomeAndPromoTogether() {
     ) {
         WelcomeScreenUI(
             isPromoCodeEnabled = true,
-            showPromoCodeUI = {}
-        ) {
+            showPromoCodeUI = {},
+            onMainButtonClick = {}) {
 
         }
 
@@ -336,8 +357,9 @@ fun SmallWelcomeScreenUIPreview() {
     WelcomeScreenUI(
         isPromoCodeEnabled = true,
         showPromoCodeUI = {},
-        navigateToPlanSetup = {}
-    )
+        onMainButtonClick = {}) {
+
+    }
 }
 
 @Preview(device = Devices.PIXEL_4, showSystemUi = true, showBackground = true)
@@ -346,16 +368,18 @@ fun MediumWelcomeScreenUIPreview() {
     WelcomeScreenUI(
         isPromoCodeEnabled = true,
         showPromoCodeUI = {},
-        navigateToPlanSetup = {}
-    )
+        onMainButtonClick = {}) {
+
+    }
 }
 
 @Preview(device = Devices.PIXEL_4_XL, showSystemUi = true, showBackground = true)
 @Composable
 fun LargeWelcomeScreenUIPreview() {
     WelcomeScreenUI(
-        isPromoCodeEnabled = false,
+        isPromoCodeEnabled = true,
         showPromoCodeUI = {},
-        navigateToPlanSetup = {}
-    )
+        onMainButtonClick = {}) {
+
+    }
 }

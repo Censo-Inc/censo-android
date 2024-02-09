@@ -32,12 +32,12 @@ import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproveRequest
 import co.censo.approver.presentation.components.ApproverTopBar
 import co.censo.approver.presentation.components.OwnerCodeVerification
-import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.presentation.components.PostSuccessAction
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import kotlinx.coroutines.delay
 
@@ -174,7 +174,7 @@ fun ApproverAccessScreen(
                             }
 
                             ApproverAccessUIState.Complete -> {
-                                PostApproverAction()
+                                PostSuccessAction()
                                 LaunchedEffect(state.approverAccessUIState) {
                                     delay(5000)
                                     viewModel.onTopBarCloseConfirmed()

@@ -248,7 +248,7 @@ class ApproverOnboardingViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             val userHasKeySavedInCloud = try {
-                keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))
+                keyRepository.userHasKeySavedInCloud(state.participantId)
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
                 observeCloudAccessStateForAccessGranted(
                     coroutineScope = this, keyRepository = keyRepository
@@ -437,7 +437,7 @@ class ApproverOnboardingViewModel @Inject constructor(
             val uploadResponse = try {
                 keyRepository.saveKeyInCloud(
                     key = encryptedPrivateKey,
-                    participantId = ParticipantId(state.participantId),
+                    id = state.participantId,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
@@ -472,7 +472,7 @@ class ApproverOnboardingViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val downloadResponse = try {
                 keyRepository.retrieveKeyFromCloud(
-                    participantId = ParticipantId(participantId),
+                    id = participantId,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {

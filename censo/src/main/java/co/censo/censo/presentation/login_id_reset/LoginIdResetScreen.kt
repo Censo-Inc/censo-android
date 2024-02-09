@@ -203,7 +203,7 @@ fun LoginIdResetScreen(
 
                         LoginIdResetStep.FacetecBiometryConsent -> {
                             ScanFaceInformationUI(
-                                startPlanSetup = { viewModel.receiveAction(LoginIdResetAction.StartFacescan) },
+                                beginFaceScan = { viewModel.receiveAction(LoginIdResetAction.StartFacescan) },
                                 isInfoViewVisible = showInfoView.value,
                                 showInfoView = {
                                     showInfoView.value = true

@@ -249,7 +249,7 @@ class ReplacePolicyViewModel @Inject constructor(
 
             if (!loadedKey) {
                 val hasKeySavedInCloud = try {
-                    keyRepository.userHasKeySavedInCloud(owner.participantId)
+                    keyRepository.userHasKeySavedInCloud(owner.participantId.value)
                 } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
                     observeCloudAccessStateForAccessGranted(
                         coroutineScope = this, keyRepository = keyRepository
@@ -426,7 +426,7 @@ class ReplacePolicyViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val downloadResponse = try {
                 keyRepository.retrieveKeyFromCloud(
-                    participantId = participantId,
+                    id = participantId.value,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
@@ -458,7 +458,7 @@ class ReplacePolicyViewModel @Inject constructor(
             val uploadResponse = try {
                 keyRepository.saveKeyInCloud(
                     key = encryptedKey,
-                    participantId = participantId,
+                    id = participantId.value,
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {

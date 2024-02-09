@@ -1,6 +1,5 @@
 package co.censo.shared.data.storage
 
-import ParticipantId
 import android.content.Context
 import co.censo.shared.data.Resource
 import co.censo.shared.util.CrashReportingUtil.CloudUpload
@@ -23,15 +22,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Collections
 
 interface CloudStorage {
-    suspend fun uploadFile(fileContent: String, participantId: ParticipantId) : Resource<Unit>
-    suspend fun retrieveFileContents(participantId: ParticipantId) : Resource<String?>
+    suspend fun uploadFile(fileContent: String, id: String) : Resource<Unit>
+    suspend fun retrieveFileContents(id: String) : Resource<String?>
     suspend fun checkUserGrantedCloudStoragePermission() : Boolean
-    suspend fun deleteFile(participantId: ParticipantId) : Resource<Unit>
+    suspend fun deleteFile(id: String) : Resource<Unit>
 }
 
 class GoogleDriveStorage(private val context: Context) : CloudStorage {
@@ -44,7 +42,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
         const val APP_NAME = "Censo"
     }
 
-    override suspend fun uploadFile(fileContent: String, participantId: ParticipantId) : Resource<Unit> {
+    override suspend fun uploadFile(fileContent: String, id: String) : Resource<Unit> {
         val account = GoogleSignIn.getLastSignedInAccount(context)
         return if (account != null) {
             val driveService = getDriveService(account, context)
@@ -54,7 +52,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
             }
 
                 //Save local file
-                val fileName = "${FILE_NAME}_${participantId.value}$FILE_EXTENSION"
+                val fileName = "${FILE_NAME}_${id}$FILE_EXTENSION"
                 val localFile = File(context.filesDir, fileName)
 
                 try {
@@ -95,14 +93,14 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
         }
     }
 
-    override suspend fun retrieveFileContents(participantId: ParticipantId) : Resource<String?> {
+    override suspend fun retrieveFileContents(id: String) : Resource<String?> {
         val account = GoogleSignIn.getLastSignedInAccount(context)
         if (account != null) {
             val driveService = getDriveService(account, context)
                 ?: return Resource.Error(exception = Exception("Drive service was null"))
 
             //Assemble FileName and query params
-            val fileName = "${FILE_NAME}_${participantId.value}${FILE_EXTENSION}"
+            val fileName = "${FILE_NAME}_${id}${FILE_EXTENSION}"
             val queryForFileWithMatchingNameAndNotTrashed = "name='$fileName' and trashed=false"
 
             val file = try {
@@ -162,7 +160,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
         return account?.grantedScopes?.contains(GoogleAuth.DRIVE_FILE_SCOPE) ?: false
     }
 
-    override suspend fun deleteFile(participantId: ParticipantId): Resource<Unit> {
+    override suspend fun deleteFile(id: String): Resource<Unit> {
         val account = GoogleSignIn.getLastSignedInAccount(context)
         return if (account != null) {
             val driveService = getDriveService(account, context)
@@ -172,7 +170,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
             }
 
             //Assemble FileName and query params
-            val fileName = "${FILE_NAME}_${participantId.value}${FILE_EXTENSION}"
+            val fileName = "${FILE_NAME}_${id}${FILE_EXTENSION}"
             val queryForFileWithMatchingNameAndNotTrashed = "name='$fileName' and trashed=false"
 
             val file = try {

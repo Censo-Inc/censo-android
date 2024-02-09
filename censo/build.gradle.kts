@@ -64,6 +64,8 @@ android {
 
         manifestPlaceholders["STRONGBOX_ENABLED"] = true
 
+        buildConfigField("boolean", "BENEFICIARY_ENABLED", "false")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         testInstrumentationRunnerArguments["clearPackageData"] = "true"

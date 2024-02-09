@@ -13,6 +13,7 @@ import co.censo.shared.data.cryptography.sha256digest
 import co.censo.shared.data.maintenance.GlobalMaintenanceState
 import co.censo.shared.data.model.AcceptApprovershipApiResponse
 import co.censo.shared.data.model.AcceptAuthenticationResetRequestApiResponse
+import co.censo.shared.data.model.AcceptBeneficiaryInvitationApiRequest
 import co.censo.shared.data.model.AcceptBeneficiaryInvitationApiResponse
 import co.censo.shared.data.model.ActivateBeneficiaryApiRequest
 import co.censo.shared.data.model.ActivateBeneficiaryApiResponse
@@ -468,26 +469,21 @@ interface ApiService {
 
     @GET("/health")
     suspend fun health(): RetrofitResponse<Unit>
-
-    @POST("beneficiary-invitations/${INVITATION_ID}/accept")
+    @POST("v1/beneficiary-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptBeneficiaryInvitation(
         @Path(value = INVITATION_ID) invitationId: String,
+        @Body requestBody: AcceptBeneficiaryInvitationApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ): RetrofitResponse<AcceptBeneficiaryInvitationApiResponse>
 
-    @POST("policy/beneficiary/reject")
-    suspend fun rejectBeneficiaryVerification(
-        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
-    ) : RetrofitResponse<RejectBeneficiaryVerificationApiResponse>
-
-    @POST("beneficiary-invitations/${INVITATION_ID}/verification")
+    @POST("v1/beneficiary-invitations/{$INVITATION_ID}/verification")
     suspend fun submitBeneficiaryVerification(
         @Path(value = INVITATION_ID) invitationId: String,
         @Body requestBody: SubmitBeneficiaryVerificationApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<SubmitBeneficiaryVerificationApiResponse>
 
-    @POST("policy/beneficiary/activate")
+    @POST("v1/policy/beneficiary/activate")
     suspend fun activateBeneficiary(
         @Body requestBody: ActivateBeneficiaryApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
@@ -498,6 +494,10 @@ interface ApiService {
         @Body requestBody: SetPromoCodeApiRequest,
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<Unit>
+    @POST("v1/policy/beneficiary/reject")
+    suspend fun rejectBeneficiaryVerification(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<RejectBeneficiaryVerificationApiResponse>
 }
 
 class AnalyticsInterceptor(

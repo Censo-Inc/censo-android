@@ -30,16 +30,17 @@ import androidx.navigation.NavController
 import co.censo.approver.R
 import co.censo.approver.presentation.ApproverColors
 import co.censo.approver.presentation.Screen
-import co.censo.approver.presentation.components.ApproverCodeVerification
 import co.censo.approver.presentation.components.ApproverTopBar
-import co.censo.approver.presentation.components.CodeVerificationStatus
-import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.SharedColors
+import co.censo.shared.presentation.components.CodeVerificationStatus
+import co.censo.shared.presentation.components.CodeVerificationUI
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.presentation.components.NeedsToSaveKeyUI
+import co.censo.shared.presentation.components.PostSuccessAction
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import kotlinx.coroutines.delay
 
@@ -180,12 +181,15 @@ fun ApproverOnboardingScreen(
                             }
 
                             ApproverOnboardingUIState.NeedsToSaveKey -> {
-                                NeedsToSaveKey(viewModel::createKeyAndTriggerCloudSave)
+                                NeedsToSaveKeyUI(
+                                    message = stringResource(R.string.key_failed_to_save_please_save_again),
+                                    onSaveKey = viewModel::createKeyAndTriggerCloudSave
+                                )
                             }
                             ApproverOnboardingUIState.NeedsToEnterCode,
                             ApproverOnboardingUIState.CodeRejected,
                             ApproverOnboardingUIState.WaitingForConfirmation -> {
-                                ApproverCodeVerification(
+                                CodeVerificationUI(
                                     value = state.verificationCode,
                                     onValueChanged = viewModel::updateVerificationCode,
                                     validCodeLength = TotpGenerator.CODE_LENGTH,
@@ -199,7 +203,7 @@ fun ApproverOnboardingScreen(
                             }
 
                             ApproverOnboardingUIState.Complete -> {
-                                PostApproverAction()
+                                PostSuccessAction()
                                 LaunchedEffect(state.approverUIState) {
                                     delay(5000)
                                     viewModel.onTopBarCloseConfirmed()
@@ -242,20 +246,5 @@ fun ApproverOnboardingScreen(
                 }
             }
         )
-    }
-}
-
-@Composable
-fun NeedsToSaveKey(
-    onSaveKey: () -> Unit
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 12.dp),
-        text = stringResource(R.string.key_failed_to_save_please_save_again),
-        textAlign = TextAlign.Center
-    )
-    Spacer(modifier = Modifier.height(24.dp))
-    Button(onClick = onSaveKey) {
-        Text(text = stringResource(R.string.save_key_to_cloud))
     }
 }

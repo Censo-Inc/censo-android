@@ -47,3 +47,25 @@ fun DeleteUserConfirmationUI(
 
 }
 
+@Composable
+fun DeleteBeneficiaryUserConfirmationUI(
+    title: String,
+    onCancel: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val annotatedString = buildAnnotatedString {
+        append(stringResource(id = R.string.about_to_delete_beneficiary_account))
+        append("\n")
+        append(stringResource(R.string.delete_beneficiary_user))
+    }
+
+    ConfirmationDialog(
+        title = title,
+        message = annotatedString,
+        confirmationText = stringResource(R.string.delete_beneficiary_user),
+        onCancel = onCancel,
+        onDelete = onDelete,
+    )
+
+}
+

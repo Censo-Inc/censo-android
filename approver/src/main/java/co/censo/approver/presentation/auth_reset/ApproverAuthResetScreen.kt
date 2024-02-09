@@ -29,17 +29,17 @@ import co.censo.approver.R
 import co.censo.approver.presentation.ApproverColors
 import co.censo.approver.presentation.Screen
 import co.censo.approver.presentation.components.ApproveRequest
-import co.censo.approver.presentation.components.ApproverCodeVerification
 import co.censo.approver.presentation.components.ApproverTopBar
-import co.censo.approver.presentation.components.CodeVerificationStatus
-import co.censo.approver.presentation.components.PostApproverAction
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.TotpGenerator
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.cloud_storage.CloudAccessEnforcer
+import co.censo.shared.presentation.components.CodeVerificationStatus
+import co.censo.shared.presentation.components.CodeVerificationUI
 import co.censo.shared.presentation.components.DisplayError
 import co.censo.shared.presentation.components.LargeLoading
+import co.censo.shared.presentation.components.PostSuccessAction
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import kotlinx.coroutines.delay
 
@@ -152,7 +152,7 @@ fun ApproverAuthResetScreen(
                             ApproverAuthResetState.UIState.NeedsToEnterCode,
                             ApproverAuthResetState.UIState.WaitingForVerification,
                             ApproverAuthResetState.UIState.CodeRejected, -> {
-                                ApproverCodeVerification(
+                                CodeVerificationUI(
                                     value = state.verificationCode,
                                     onValueChanged = viewModel::updateVerificationCode,
                                     validCodeLength = TotpGenerator.CODE_LENGTH,
@@ -166,7 +166,7 @@ fun ApproverAuthResetScreen(
                             }
 
                             ApproverAuthResetState.UIState.Complete -> {
-                                PostApproverAction()
+                                PostSuccessAction()
                                 LaunchedEffect(state.uiState) {
                                     delay(5000)
                                     viewModel.onTopBarCloseConfirmed()
