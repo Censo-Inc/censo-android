@@ -17,11 +17,11 @@ import co.censo.shared.data.repository.AuthState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.SecurePreferences
-import co.censo.shared.presentation.cloud_storage.CloudAccessContract
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.asResource
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.Scope
@@ -52,7 +52,7 @@ class OwnerEntranceViewModel @Inject constructor(
     private val authUtil: AuthUtil,
     private val secureStorage: SecurePreferences,
     private val keyValidationTrigger: MutableSharedFlow<String>,
-) : ViewModel(), CloudAccessContract {
+) : ViewModel() {
 
     var state by mutableStateOf(OwnerEntranceState())
         private set
@@ -187,7 +187,9 @@ class OwnerEntranceViewModel @Inject constructor(
 
                 if (!account.grantedScopes.contains(Scope(DriveScopes.DRIVE_FILE))) {
                     keyRepository.updateCloudAccessState(CloudAccessState.AccessRequired)
-                    observeCloudAccessStateForAccessGranted {
+                    observeCloudAccessStateForAccessGranted(
+                        coroutineScope = this, keyRepository = keyRepository
+                    ) {
                         handleCloudStorageAccessGranted(account.idToken)
                     }
                 } else {
@@ -199,22 +201,6 @@ class OwnerEntranceViewModel @Inject constructor(
             }
         }
     }
-
-    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
-        viewModelScope.launch {
-            keyRepository.collectCloudAccessState {
-                when (it) {
-                    CloudAccessState.AccessGranted -> {
-                        retryAction()
-                        //Stop collecting cloud access state
-                        this.cancel()
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
-
 
     private fun signInUser(jwt: String?) {
         viewModelScope.launch(Dispatchers.IO) {

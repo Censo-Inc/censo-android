@@ -19,13 +19,13 @@ import co.censo.shared.data.model.forParticipant
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
-import co.censo.shared.presentation.cloud_storage.CloudAccessContract
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CountDownTimerImpl.Companion.POLLING_VERIFICATION_COUNTDOWN
 import co.censo.shared.util.CountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +44,7 @@ class ApproverAccessViewModel @Inject constructor(
     private val accessTotpTimer: VaultCountDownTimer,
     private val userStatePollingTimer: VaultCountDownTimer,
     private val totpGenerator: TotpGenerator
-) : ViewModel(), CloudAccessContract {
+) : ViewModel() {
 
     var state by mutableStateOf(ApproverAccessState())
         private set
@@ -340,21 +340,6 @@ class ApproverAccessViewModel @Inject constructor(
     }
 
     //region CloudStorage Action methods
-    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
-        viewModelScope.launch {
-            keyRepository.collectCloudAccessState {
-                when (it) {
-                    CloudAccessState.AccessGranted -> {
-                        retryAction()
-                        //Stop collecting cloud access state
-                        this.cancel()
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
-
     private fun loadPrivateKeyFromCloud(
         accessPhase: ApproverPhase.AccessConfirmation,
         bypassScopeCheck: Boolean = false
@@ -371,7 +356,9 @@ class ApproverAccessViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     //Retry this method
                     loadPrivateKeyFromCloud(accessPhase = accessPhase, bypassScopeCheck = true)
                 }

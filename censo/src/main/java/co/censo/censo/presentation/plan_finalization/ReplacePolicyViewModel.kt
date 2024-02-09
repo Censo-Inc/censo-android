@@ -28,14 +28,12 @@ import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.encryptWithEntropy
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
-import co.censo.shared.presentation.cloud_storage.CloudAccessContract
-import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -79,7 +77,7 @@ class ReplacePolicyViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val ioDispatcher: CoroutineDispatcher
-) : ViewModel(), CloudAccessContract {
+) : ViewModel() {
     var state by mutableStateOf(ReplacePolicyState())
         private set
 
@@ -253,7 +251,9 @@ class ReplacePolicyViewModel @Inject constructor(
                 val hasKeySavedInCloud = try {
                     keyRepository.userHasKeySavedInCloud(owner.participantId)
                 } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                    observeCloudAccessStateForAccessGranted {
+                    observeCloudAccessStateForAccessGranted(
+                        coroutineScope = this, keyRepository = keyRepository
+                    ) {
                         checkUserHasSavedKeyAndSubmittedPolicy()
                     }
                     return@launch
@@ -361,7 +361,9 @@ class ReplacePolicyViewModel @Inject constructor(
                         deviceKeyId = deviceKeyId,
                     )
                 } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                    observeCloudAccessStateForAccessGranted {
+                    observeCloudAccessStateForAccessGranted(
+                        coroutineScope = this, keyRepository = keyRepository
+                    ) {
                         replacePolicy(encryptedIntermediatePrivateKeyShards = encryptedIntermediatePrivateKeyShards)
                     }
                     return@launch
@@ -413,22 +415,6 @@ class ReplacePolicyViewModel @Inject constructor(
     //endregion
 
     //region Cloud Storage
-    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
-        viewModelScope.launch {
-            keyRepository.collectCloudAccessState {
-                when (it) {
-                    CloudAccessState.AccessGranted -> {
-                        retryAction()
-                        //Stop collecting cloud access state
-                        this.cancel()
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
-
-
     private fun loadKey(bypassScopeCheck: Boolean = false) {
         val participantId = state.ownerApprover?.participantId
 
@@ -444,7 +430,9 @@ class ReplacePolicyViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     loadKey(bypassScopeCheck = true)
                 }
                 return@launch
@@ -474,7 +462,9 @@ class ReplacePolicyViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     saveKey(encryptedKey = encryptedKey, bypassScopeCheck = true)
                 }
                 return@launch

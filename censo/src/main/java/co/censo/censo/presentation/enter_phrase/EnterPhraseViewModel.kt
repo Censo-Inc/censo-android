@@ -22,11 +22,10 @@ import co.censo.shared.data.networking.IgnoreKeysJson
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
-import co.censo.shared.presentation.cloud_storage.CloudAccessContract
-import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.BIP39
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.bitmapToByteArray
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.rotateBitmap
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +44,7 @@ import javax.inject.Inject
 class EnterPhraseViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
-) : ViewModel(), CloudAccessContract {
+) : ViewModel() {
 
     var state by mutableStateOf(EnterPhraseState())
         private set
@@ -599,21 +598,6 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     //region Cloud Storage
-    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
-        viewModelScope.launch {
-            keyRepository.collectCloudAccessState {
-                when (it) {
-                    CloudAccessState.AccessGranted -> {
-                        retryAction()
-                        //Stop collecting cloud access state
-                        this.cancel()
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
-
     private fun loadKey(bypassScopeCheck: Boolean = false) {
         state = state.copy(loadKeyInProgress = Resource.Loading)
 
@@ -630,7 +614,9 @@ class EnterPhraseViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     loadKey(bypassScopeCheck = true)
                 }
                 return@launch

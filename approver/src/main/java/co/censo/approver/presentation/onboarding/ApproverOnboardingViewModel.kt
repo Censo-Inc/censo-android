@@ -18,13 +18,13 @@ import co.censo.shared.data.model.ApproverState
 import co.censo.shared.data.repository.ApproverRepository
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
-import co.censo.shared.presentation.cloud_storage.CloudAccessContract
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CountDownTimerImpl
 import co.censo.shared.util.CrashReportingUtil
 import co.censo.shared.util.VaultCountDownTimer
 import co.censo.shared.util.asResource
 import co.censo.shared.util.isDigitsOnly
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -98,7 +98,7 @@ class ApproverOnboardingViewModel @Inject constructor(
     private val approverRepository: ApproverRepository,
     private val keyRepository: KeyRepository,
     private val userStatePollingTimer: VaultCountDownTimer
-) : ViewModel(), CloudAccessContract {
+) : ViewModel() {
 
     var state by mutableStateOf(ApproverOnboardingState())
         private set
@@ -250,7 +250,9 @@ class ApproverOnboardingViewModel @Inject constructor(
             val userHasKeySavedInCloud = try {
                 keyRepository.userHasKeySavedInCloud(ParticipantId(state.participantId))
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     determineApproverUIState(approverState = approverState)
                 }
                 return@launch
@@ -422,21 +424,6 @@ class ApproverOnboardingViewModel @Inject constructor(
     //endregion
 
     //region Cloud Storage
-    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
-        viewModelScope.launch {
-            keyRepository.collectCloudAccessState {
-                when (it) {
-                    CloudAccessState.AccessGranted -> {
-                        retryAction()
-                        //Stop collecting cloud access state
-                        this.cancel()
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
-
     private fun savePrivateKeyToCloud(
         encryptedPrivateKey: ByteArray?,
         bypassScopeCheck: Boolean = false
@@ -454,7 +441,9 @@ class ApproverOnboardingViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     //Retry this method
                     savePrivateKeyToCloud(
                         encryptedPrivateKey = encryptedPrivateKey,
@@ -487,7 +476,9 @@ class ApproverOnboardingViewModel @Inject constructor(
                     bypassScopeCheck = bypassScopeCheck,
                 )
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     //Retry this method
                     loadPrivateKeyFromCloud(bypassScopeCheck = true)
                 }

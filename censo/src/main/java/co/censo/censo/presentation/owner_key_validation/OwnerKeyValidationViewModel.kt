@@ -13,11 +13,9 @@ import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
-import co.censo.shared.presentation.cloud_storage.CloudAccessContract
-import co.censo.shared.presentation.cloud_storage.CloudAccessState
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +25,7 @@ class OwnerKeyValidationViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val keyRepository: KeyRepository,
     private val keyValidationTrigger: MutableSharedFlow<String>,
-    ) : ViewModel(), CloudAccessContract {
+    ) : ViewModel() {
 
     var state by mutableStateOf(OwnerKeyValidationState())
         private set
@@ -36,21 +34,6 @@ class OwnerKeyValidationViewModel @Inject constructor(
         viewModelScope.launch {
             keyValidationTrigger.collect { participantIdString ->
                 validateApproverKey(ParticipantId(participantIdString))
-            }
-        }
-    }
-
-    override fun observeCloudAccessStateForAccessGranted(retryAction: () -> Unit) {
-        viewModelScope.launch {
-            keyRepository.collectCloudAccessState {
-                when (it) {
-                    CloudAccessState.AccessGranted -> {
-                        retryAction()
-                        //Stop collecting cloud access state
-                        this.cancel()
-                    }
-                    else -> {}
-                }
             }
         }
     }
@@ -64,7 +47,9 @@ class OwnerKeyValidationViewModel @Inject constructor(
                     )
                 downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
-                observeCloudAccessStateForAccessGranted {
+                observeCloudAccessStateForAccessGranted(
+                    coroutineScope = this, keyRepository = keyRepository
+                ) {
                     validateApproverKey(participantId = participantId)
                 }
                 return@launch// Return early and let the user grant access
