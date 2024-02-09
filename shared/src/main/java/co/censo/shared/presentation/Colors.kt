@@ -18,7 +18,7 @@ object SharedColors {
     //New design colors
     private val DarkBlue = Color(0xFF052F69)
     private val SkyBlue = Color(0xFF47F7F7)
-    private val LightBlue = Color(0xFFd7f1f2)
+    private val LightBlue = Color(0xFFD3FDFD)
     private val GreyBackground = Color(0xFFEBF5F6)
 
     val ApproverAppIcon = SkyBlue

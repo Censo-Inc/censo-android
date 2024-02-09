@@ -67,10 +67,10 @@ fun VaultHomeScreen(
     val mediumSpace = screenHeight * 0.04f
 
     val approverTextTitleStyle = TextStyle(
-        fontSize = 20.sp,
-        fontWeight = FontWeight.W700,
-        lineHeight = 30.sp,
-        textAlign = TextAlign.Center,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.W600,
+        lineHeight = 36.sp,
+        textAlign = TextAlign.Start,
         color = SharedColors.MainColorText
     )
 
@@ -83,40 +83,37 @@ fun VaultHomeScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.dashboard),
+            contentDescription = null,
+        )
         Spacer(modifier = Modifier.height(bigSpace))
 
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = buildSeedPhraseCount(seedPhrasesSaved, context),
-            fontWeight = FontWeight.W700,
-            textAlign = TextAlign.Center,
-            color = SharedColors.MainColorText
-        )
-
-        Spacer(modifier = Modifier.height(mediumSpace))
-
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = buildAddSeedPhraseDisclaimer(
-                context = context,
-                multiplePhrases = seedPhrasesSaved != 1
-            ),
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            color = SharedColors.MainColorText
-        )
-
-        Spacer(modifier = Modifier.height(mediumSpace))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            onClick = onAddSeedPhrase
+        Column(modifier = Modifier
+            .background(shape = RoundedCornerShape(16.dp), color = SharedColors.BottomNavBarIndicatorColor)
+            .padding(vertical = 32.dp)
         ) {
             Text(
-                text = stringResource(id = R.string.add_seed_phrase),
-                style = ButtonTextStyle.copy(fontWeight = FontWeight.W400)
+                modifier = Modifier.fillMaxWidth(),
+                text = buildSeedPhraseCount(seedPhrasesSaved, context),
+                fontWeight = FontWeight.W700,
+                textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText
             )
+
+            Spacer(modifier = Modifier.height(mediumSpace))
+
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = buildAddSeedPhraseDisclaimer(
+                    context = context,
+                    multiplePhrases = seedPhrasesSaved != 1
+                ),
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText
+            )
+
         }
 
         val ownerOnly = approvers.size <= 1
