@@ -84,7 +84,7 @@ class CloudAccessEnforcerViewModelTest : BaseViewModelTest() {
         whenever(keyRepository.collectCloudAccessState(any())).thenAnswer { invocation ->
             collector = invocation.getArgument(0)
             launch {
-                collector.emit(CloudAccessState.AccessRequired {})
+                collector.emit(CloudAccessState.AccessRequired)
             }
             return@thenAnswer null
         }
