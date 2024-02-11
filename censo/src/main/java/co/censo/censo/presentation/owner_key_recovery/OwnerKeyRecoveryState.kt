@@ -44,7 +44,5 @@ enum class OwnerKeyRecoveryUIState {
 sealed interface KeyRecoveryAction {
     object Completed : KeyRecoveryAction
     object BackClicked : KeyRecoveryAction
-    object KeyUploadSuccess : KeyRecoveryAction
-    data class KeyUploadFailed(val e: Exception?) : KeyRecoveryAction
     object Retry : KeyRecoveryAction
 }
