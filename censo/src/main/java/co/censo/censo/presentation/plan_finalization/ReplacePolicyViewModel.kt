@@ -104,14 +104,6 @@ class ReplacePolicyViewModel @Inject constructor(
             //Facetec Cancelled
             ReplacePolicyAction.FacetecCancelled -> onFacetecCancelled()
 
-            //Cloud Actions
-            //TODO: Delete these cloud actions when updating ReplacePolicyVMUnitTests, for next PR
-            ReplacePolicyAction.KeyUploadSuccess -> onKeyUploadSuccess()
-            is ReplacePolicyAction.KeyDownloadSuccess -> onKeyDownloadSuccess(action.encryptedKey)
-
-            is ReplacePolicyAction.KeyDownloadFailed -> onKeyDownloadFailed(action.e)
-            is ReplacePolicyAction.KeyUploadFailed -> onKeyUploadFailed(action.e)
-
             //Finalizing Actions
             ReplacePolicyAction.Completed -> onFullyCompleted()
         }

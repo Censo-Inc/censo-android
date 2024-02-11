@@ -82,13 +82,6 @@ sealed interface ReplacePolicyAction {
 
     //Plan Finalization
     object Completed : ReplacePolicyAction
-
-    //Cloud
-    object KeyUploadSuccess : ReplacePolicyAction
-    data class KeyDownloadSuccess(val encryptedKey: ByteArray) : ReplacePolicyAction
-    data class KeyDownloadFailed(val e: Exception?) : ReplacePolicyAction
-    data class KeyUploadFailed(val e: Exception?) : ReplacePolicyAction
-
     //Retry
     object Retry : ReplacePolicyAction
     object BackClicked : ReplacePolicyAction
