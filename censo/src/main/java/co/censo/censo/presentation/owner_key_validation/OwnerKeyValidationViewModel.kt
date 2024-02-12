@@ -48,9 +48,9 @@ class OwnerKeyValidationViewModel @Inject constructor(
                     bypassScopeCheck = true,
                     )
 
-                if (downloadResult is Resource.Error && downloadResult.errorCode == 500) {
+                if (downloadResult is Resource.Error) {
                     state = state.copy(
-                        apiResource = Resource.Error(Exception())
+                        apiResource = Resource.Error(downloadResult.exception)
                     )
                     return@launch
                 }
