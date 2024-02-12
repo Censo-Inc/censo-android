@@ -41,6 +41,7 @@ object SharedColors {
     val MainBorderColor = DarkBlue
     val MainIconColor = DarkBlue
     val DefaultLoadingColor = DarkBlue
+    val ButtonLoadingColor = SkyBlue
 
     val FacetecPrimaryColor = DarkBlue
     val FacetecSecondaryColor = SkyBlue

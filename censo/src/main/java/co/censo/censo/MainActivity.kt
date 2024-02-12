@@ -38,6 +38,7 @@ import co.censo.censo.presentation.accept_beneficiary.AcceptBeneficiaryInvitatio
 import co.censo.censo.presentation.access_approval.AccessApprovalScreen
 import co.censo.censo.presentation.access_seed_phrases.AccessSeedPhrasesScreen
 import co.censo.censo.presentation.beneficiary.BeneficiaryScreen
+import co.censo.censo.presentation.beneficiary_home.BeneficiaryHomeScreen
 import co.censo.censo.presentation.biometry_reset.BiometryResetScreen
 import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
@@ -196,8 +197,11 @@ class MainActivity : FragmentActivity() {
                 )
             }
 
-            composable(route = Screen.Beneficiary.route) {
+            composable(route = Screen.BeneficiarySetup.route) {
                 BeneficiaryScreen()
+            }
+            composable(route = Screen.BeneficiaryHome.route) {
+                BeneficiaryHomeScreen()
             }
             composable(
                 route = "${Screen.PolicySetupRoute.route}/{${Screen.PolicySetupRoute.SETUP_ACTION_ARG}}"
