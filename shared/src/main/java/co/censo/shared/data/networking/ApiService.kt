@@ -94,6 +94,7 @@ import co.censo.shared.data.repository.PlayIntegrityRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.runBlocking
@@ -608,7 +609,7 @@ class FeatureFlagInterceptor(
                 .contains(legacyFeature)
 
             secureStorage.setLegacyEnabled(legacyEnabled)
-        }
+        } ?: secureStorage.setLegacyEnabled(false)
 
         return response
     }
