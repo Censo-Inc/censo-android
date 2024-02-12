@@ -2,6 +2,7 @@ package co.censo.censo.presentation.main
 
 import StandardButton
 import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -63,10 +67,10 @@ fun VaultHomeScreen(
     val mediumSpace = screenHeight * 0.04f
 
     val approverTextTitleStyle = TextStyle(
-        fontSize = 20.sp,
-        fontWeight = FontWeight.W700,
-        lineHeight = 30.sp,
-        textAlign = TextAlign.Center,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.W600,
+        lineHeight = 36.sp,
+        textAlign = TextAlign.Start,
         color = SharedColors.MainColorText
     )
 
@@ -79,40 +83,37 @@ fun VaultHomeScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.dashboard),
+            contentDescription = null,
+        )
         Spacer(modifier = Modifier.height(bigSpace))
 
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = buildSeedPhraseCount(seedPhrasesSaved, context),
-            fontWeight = FontWeight.W700,
-            textAlign = TextAlign.Center,
-            color = SharedColors.MainColorText
-        )
-
-        Spacer(modifier = Modifier.height(mediumSpace))
-
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = buildAddSeedPhraseDisclaimer(
-                context = context,
-                multiplePhrases = seedPhrasesSaved != 1
-            ),
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            color = SharedColors.MainColorText
-        )
-
-        Spacer(modifier = Modifier.height(mediumSpace))
-
-        StandardButton(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            onClick = onAddSeedPhrase
+        Column(modifier = Modifier
+            .background(shape = RoundedCornerShape(16.dp), color = SharedColors.BottomNavBarIndicatorColor)
+            .padding(vertical = 32.dp)
         ) {
             Text(
-                text = stringResource(id = R.string.add_seed_phrase),
-                style = ButtonTextStyle.copy(fontWeight = FontWeight.W400)
+                modifier = Modifier.fillMaxWidth(),
+                text = buildSeedPhraseCount(seedPhrasesSaved, context),
+                fontWeight = FontWeight.W700,
+                textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText
             )
+
+            Spacer(modifier = Modifier.height(mediumSpace))
+
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = buildAddSeedPhraseDisclaimer(
+                    context = context,
+                    multiplePhrases = seedPhrasesSaved != 1
+                ),
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                color = SharedColors.MainColorText
+            )
+
         }
 
         val ownerOnly = approvers.size <= 1
@@ -240,26 +241,32 @@ fun ApproverInfoBox(
 
         val labelTextSize = 15.sp
 
-        Column {
-            Text(
-                text = stringResource(id = R.string.approver),
-                color = SharedColors.MainColorText,
-                fontSize = labelTextSize
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                modifier = Modifier.height(42.dp)
+                    .padding(horizontal = 8.dp),
+                painter = painterResource(id = R.drawable.person_fill),
+                contentDescription = null,
+                contentScale = ContentScale.FillHeight,
+                colorFilter = ColorFilter.tint(SharedColors.MainColorText)
             )
 
-            Text(
-                text = nickName,
-                color = SharedColors.MainColorText,
-                fontSize = 24.sp
-            )
+            Column {
+                Text(
+                    text = nickName,
+                    color = SharedColors.MainColorText,
+                    fontSize = 24.sp
+                )
 
-            val activatedUIData: ApproverActivatedUIData = activatedUIData(status, context)
+                val activatedUIData: ApproverActivatedUIData = activatedUIData(status, context)
 
-            Text(
-                text = activatedUIData.text,
-                color = activatedUIData.color,
-                fontSize = labelTextSize
-            )
+                Text(
+                    text = activatedUIData.text,
+                    color = activatedUIData.color,
+                    fontSize = labelTextSize,
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
         }
 
         if (editEnabled) {

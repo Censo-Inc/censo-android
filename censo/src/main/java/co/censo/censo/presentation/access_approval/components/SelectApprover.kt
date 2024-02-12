@@ -6,6 +6,7 @@ import ParticipantId
 import StandardButton
 import TitleText
 import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -201,11 +204,37 @@ fun SelectingApproverInfoBox(
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .clickable { onSelect() },
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
         val labelTextSize = 14.sp
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                modifier = Modifier.height(42.dp)
+                    .padding(horizontal = 8.dp),
+                painter = painterResource(id = R.drawable.person_fill),
+                contentDescription = null,
+                contentScale = ContentScale.FillHeight,
+                colorFilter = ColorFilter.tint(if (approved) SharedColors.GreyText else SharedColors.MainColorText)
+            )
+
+            Column {
+                Text(
+                    text = nickName,
+                    color = if (approved) SharedColors.GreyText else SharedColors.MainColorText,
+                    fontSize = 24.sp
+                )
+
+                Text(
+                    text = context.getString(R.string.active),
+                    color = if (approved) SharedColors.GreyText else SharedColors.SuccessGreen,
+                    fontSize = labelTextSize,
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -221,26 +250,6 @@ fun SelectingApproverInfoBox(
             }
         }
 
-        Column {
-            Text(
-                text = stringResource(id = R.string.approver),
-                color = if (approved) SharedColors.GreyText else SharedColors.MainColorText,
-                fontSize = labelTextSize
-            )
-
-            Text(
-                text = nickName,
-                color = if (approved) SharedColors.GreyText else SharedColors.MainColorText,
-                fontSize = 24.sp
-            )
-
-            Text(
-                text = context.getString(R.string.active),
-                color = if (approved) SharedColors.GreyText else SharedColors.SuccessGreen,
-                fontSize = labelTextSize
-            )
-
-        }
     }
 }
 
