@@ -96,7 +96,7 @@ class MainActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
-                        CensoNavHost(navController = navController)
+                        CensoNavHost(navController = navController, securePreferences = storage)
 
                         ValidateApproverKeyScreen(navController = navController)
 
@@ -119,7 +119,7 @@ class MainActivity : FragmentActivity() {
     }
 
     @Composable
-    private fun CensoNavHost(navController: NavHostController) {
+    private fun CensoNavHost(navController: NavHostController, securePreferences: SecurePreferences) {
         val bottomNavItem: MutableState<BottomNavItem> =
             remember { mutableStateOf(BottomNavItem.Home) }
 
@@ -136,6 +136,7 @@ class MainActivity : FragmentActivity() {
             composable(route = Screen.OwnerVaultScreen.route) {
                 MainVaultScreen(
                     selectedBottomNavItem = bottomNavItem,
+                    securePreferences = securePreferences,
                     navController = navController
                 )
             }

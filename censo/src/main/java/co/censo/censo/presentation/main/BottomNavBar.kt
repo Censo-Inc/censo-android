@@ -22,8 +22,16 @@ import co.censo.censo.R
 @Composable
 fun CensoBottomNavBar(
     selectedItem: BottomNavItem,
+    beneficiaryEnabled: Boolean,
     onItemSelected: (BottomNavItem) -> Unit
 ) {
+    val bottomNavItems = listOfNotNull(
+        BottomNavItem.Home,
+        BottomNavItem.Phrases,
+        BottomNavItem.Settings,
+        if (beneficiaryEnabled) BottomNavItem.Beneficiary else null
+    )
+
     NavigationBar(containerColor = Color.White) {
         for (item in bottomNavItems) {
             BottomNavBarItemUI(
@@ -35,14 +43,6 @@ fun CensoBottomNavBar(
         }
     }
 }
-
-
-val bottomNavItems = listOfNotNull(
-    BottomNavItem.Home,
-    BottomNavItem.Phrases,
-    BottomNavItem.Settings,
-    if (BuildConfig.BENEFICIARY_ENABLED) BottomNavItem.Beneficiary else null
-)
 
 @Composable
 fun RowScope.BottomNavBarItemUI(

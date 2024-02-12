@@ -34,6 +34,7 @@ import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.TimelockSetting
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.presentation.OnLifecycleEvent
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.DisplayError
@@ -50,6 +51,7 @@ import com.google.android.gms.auth.api.identity.Identity
 fun MainVaultScreen(
     selectedBottomNavItem: MutableState<BottomNavItem>,
     navController: NavController,
+    securePreferences: SecurePreferences,
     viewModel: VaultScreenViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -169,7 +171,10 @@ fun MainVaultScreen(
             )
         },
         bottomBar = {
-            CensoBottomNavBar(selectedBottomNavItem.value) {
+            CensoBottomNavBar(
+                selectedItem = selectedBottomNavItem.value,
+                beneficiaryEnabled = securePreferences.isLegacyEnabled()
+            ) {
                 if (it == BottomNavItem.Home) {
                     viewModel.resetShowApproversUI()
                 }
