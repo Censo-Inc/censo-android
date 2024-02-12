@@ -12,6 +12,7 @@ import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.storage.CloudSavedKeyEmptyException
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.projectLog
@@ -46,9 +47,9 @@ class OwnerKeyValidationViewModel @Inject constructor(
                 val downloadResult = keyRepository.retrieveKeyFromCloud(
                     participantId.value,
                     bypassScopeCheck = true,
-                    )
+                )
 
-                if (downloadResult is Resource.Error) {
+                if (downloadResult is Resource.Error && downloadResult.exception !is CloudSavedKeyEmptyException) {
                     state = state.copy(
                         apiResource = Resource.Error(downloadResult.exception)
                     )

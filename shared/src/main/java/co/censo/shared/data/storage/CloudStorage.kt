@@ -233,3 +233,5 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
 
 class CloudStoragePermissionNotGrantedException(override val message: String = "User did not grant cloud storage permissions") :
     Exception()
+
+class CloudSavedKeyEmptyException(override val message: String = "Key saved to cloud was empty when retrieved") : Exception()

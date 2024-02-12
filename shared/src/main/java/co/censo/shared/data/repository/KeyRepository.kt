@@ -7,6 +7,7 @@ import co.censo.shared.data.cryptography.key.EncryptionKey
 import co.censo.shared.data.cryptography.key.InternalDeviceKey
 import co.censo.shared.data.cryptography.key.KeystoreHelper
 import co.censo.shared.data.cryptography.toHexString
+import co.censo.shared.data.storage.CloudSavedKeyEmptyException
 import co.censo.shared.data.storage.CloudStorage
 import org.bouncycastle.util.encoders.Hex
 import co.censo.shared.data.storage.SecurePreferences
@@ -152,7 +153,7 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             val key = Hex.decode(response.data)
 
             if (key.isEmpty()) {
-                val e = Exception("Retrieved private key was empty")
+                val e = CloudSavedKeyEmptyException()
                 e.sendError(CrashReportingUtil.CloudDownload)
                 return Resource.Error(exception = e)
             }
