@@ -21,6 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
+import co.censo.censo.presentation.access_approval.components.SelectingApproverInfoBox
+import co.censo.censo.presentation.main.ApproverInfoBox
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.SharedColors
@@ -56,17 +58,19 @@ fun Activated(
 
             firstApprover?.let {
                 Spacer(modifier = Modifier.weight(0.1f))
-                ProspectApproverInfoBox(
+                ApproverInfoBox(
                     nickName = firstApprover.label,
-                    status = firstApprover.status
+                    status = firstApprover.status,
+                    editEnabled = false,
                 )
             }
 
             secondApprover?.let {
                 Spacer(modifier = Modifier.weight(0.1f))
-                ProspectApproverInfoBox(
+                ApproverInfoBox(
                     nickName = secondApprover.label,
-                    status = secondApprover.status
+                    status = secondApprover.status,
+                    editEnabled = false,
                 )
             }
 
