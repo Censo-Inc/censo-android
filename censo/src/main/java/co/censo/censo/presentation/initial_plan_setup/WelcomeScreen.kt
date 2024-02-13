@@ -122,7 +122,9 @@ fun WelcomeScreenUI(
 
             if (isPromoCodeEnabled) {
                 StandardButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 44.dp),
                     contentPadding = PaddingValues(vertical = 8.dp),
                     onClick = { showPromoCodeUI() },
                 ) {

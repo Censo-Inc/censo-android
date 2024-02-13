@@ -12,8 +12,10 @@ import co.censo.shared.data.model.AccessIntent
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
+import co.censo.shared.data.storage.CloudSavedKeyEmptyException
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
 import co.censo.shared.util.observeCloudAccessStateForAccessGranted
+import co.censo.shared.util.projectLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,13 +40,21 @@ class OwnerKeyValidationViewModel @Inject constructor(
         }
     }
 
-    private fun validateApproverKey(participantId: ParticipantId) {
+    fun validateApproverKey(participantId: ParticipantId) {
+        state = state.copy(idToCheckForCloudSavedKey = participantId)
         viewModelScope.launch(Dispatchers.IO) {
             val hasKeySavedInCloud = try {
                 val downloadResult = keyRepository.retrieveKeyFromCloud(
                     participantId.value,
                     bypassScopeCheck = true,
+                )
+
+                if (downloadResult is Resource.Error && downloadResult.exception !is CloudSavedKeyEmptyException) {
+                    state = state.copy(
+                        apiResource = Resource.Error(downloadResult.exception)
                     )
+                    return@launch
+                }
 
                 downloadResult is Resource.Success && downloadResult.data.isNotEmpty()
             } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
@@ -59,9 +69,15 @@ class OwnerKeyValidationViewModel @Inject constructor(
             }
 
             state = if (hasKeySavedInCloud) {
-                state.copy(ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.None)
+                state.copy(
+                    ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.None,
+                    idToCheckForCloudSavedKey = participantId
+                )
             } else {
-                state.copy(ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.FileNotFound)
+                state.copy(
+                    ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.FileNotFound,
+                    idToCheckForCloudSavedKey = participantId
+                )
             }
         }
     }
@@ -106,5 +122,9 @@ class OwnerKeyValidationViewModel @Inject constructor(
             navigationResource = Resource.Uninitialized,
             ownerKeyUIState = OwnerKeyValidationState.OwnerKeyValidationUIState.None
         )
+    }
+
+    fun resetErrorState() {
+        state = state.copy(apiResource = Resource.Uninitialized)
     }
 }

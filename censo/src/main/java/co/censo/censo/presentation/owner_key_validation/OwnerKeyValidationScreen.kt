@@ -16,6 +16,7 @@ import co.censo.censo.presentation.components.DeleteUserConfirmationUI
 import co.censo.censo.presentation.owner_key_validation.components.InvalidOwnerKeyUI
 import co.censo.shared.data.Resource
 import co.censo.shared.presentation.OnLifecycleEvent
+import co.censo.shared.presentation.components.DisplayError
 
 @Composable
 fun ValidateApproverKeyScreen(
@@ -47,24 +48,38 @@ fun ValidateApproverKeyScreen(
             onClick = {}
         )
     ) {
-        when (state.ownerKeyUIState) {
-            OwnerKeyValidationState.OwnerKeyValidationUIState.FileNotFound -> {
-                InvalidOwnerKeyUI(
-                    onInitiateRecovery = viewModel::navigateToKeyRecovery,
-                    onDelete = viewModel::triggerDeleteUserDialog
-                )
-
-                if (state.triggerDeleteUserDialog is Resource.Success) {
-                    DeleteUserConfirmationUI(
-                        title = stringResource(id = R.string.cancel_key_recovery),
-                        seedCount = state.ownerState?.vault?.seedPhrases?.size ?: 0,
-                        onCancel = viewModel::onCancelDeleteUserDialog,
-                        onDelete = viewModel::deleteUser,
-                    )
-                }
+        when (state.apiResource) {
+            is Resource.Error -> {
+                DisplayError(
+                    errorMessage = "Error occurred while trying to check for saved cloud data. Please try again.",
+                    dismissAction = null,
+                    retryAction = {
+                        viewModel.resetErrorState()
+                        viewModel.validateApproverKey(state.idToCheckForCloudSavedKey)
+                    })
             }
 
-            else -> { }
+            else -> {
+                when (state.ownerKeyUIState) {
+                    OwnerKeyValidationState.OwnerKeyValidationUIState.FileNotFound -> {
+                        InvalidOwnerKeyUI(
+                            onInitiateRecovery = viewModel::navigateToKeyRecovery,
+                            onDelete = viewModel::triggerDeleteUserDialog
+                        )
+
+                        if (state.triggerDeleteUserDialog is Resource.Success) {
+                            DeleteUserConfirmationUI(
+                                title = stringResource(id = R.string.cancel_key_recovery),
+                                seedCount = state.ownerState?.vault?.seedPhrases?.size ?: 0,
+                                onCancel = viewModel::onCancelDeleteUserDialog,
+                                onDelete = viewModel::deleteUser,
+                            )
+                        }
+                    }
+
+                    else -> { }
+                }
+            }
         }
     }
 }
