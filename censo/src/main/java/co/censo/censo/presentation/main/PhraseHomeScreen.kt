@@ -2,6 +2,7 @@ package co.censo.censo.presentation.main
 
 import StandardButton
 import SeedPhraseId
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.shared.data.model.HashedValue
+import co.censo.shared.data.model.PhraseType
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.presentation.SharedColors
 import co.censo.shared.presentation.ButtonTextStyle
@@ -240,16 +243,28 @@ fun SeedPhraseItem(
                     shape = RoundedCornerShape(12.dp)
                 )
                 .height(120.dp)
-                .weight(1f),
+                .weight(2f),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Image(
+                modifier = Modifier.height(42.dp)
+                    .padding(horizontal = 16.dp)
+                    .weight(.45f),
+                painter = painterResource(id = when (seedPhrase.type) {
+                    PhraseType.Binary -> R.drawable.textbox
+                    PhraseType.Photo -> R.drawable.photo
+                }),
+                contentDescription = null,
+                contentScale = ContentScale.FillHeight,
+                colorFilter = ColorFilter.tint(if (isSelected) SharedColors.SuccessGreen else SharedColors.MainColorText)
+            )
             Text(
                 modifier = Modifier
                     .padding(
-                        top = 18.dp,
-                        bottom = 18.dp,
-                        start = 18.dp,
-                        end = if (isEditable) 0.dp else 18.dp
+                        top = 16.dp,
+                        bottom = 16.dp,
+                        start = 8.dp,
+                        end = if (isEditable) 0.dp else 16.dp
                     )
                     .weight(1f),
                 text = seedPhrase.label,
@@ -322,7 +337,7 @@ fun SeedPhraseItem(
                     .align(Alignment.CenterVertically)
                     .size(48.dp)
                     .weight(0.25f)
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 10.dp),
                 contentDescription = stringResource(R.string.phrase_viewed),
                 tint = SharedColors.SuccessGreen
             )
@@ -341,18 +356,21 @@ fun PreviewPhraseHomeScreenWithTimelock() {
                 guid = SeedPhraseId("1"),
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
         ),
@@ -376,30 +394,35 @@ fun PreviewPhraseHomeScreenNoTimelock() {
                 guid = SeedPhraseId("1"),
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Photo,
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Photo,
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("4"),
                 label = "yet another phrase",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
             SeedPhrase(
                 guid = SeedPhraseId("5"),
                 label = "and another phrase",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
         ),

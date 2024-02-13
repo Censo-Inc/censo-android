@@ -6,6 +6,7 @@ import Base64EncodedData
 import SeedPhraseId
 import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.PhraseType
 import co.censo.shared.data.model.Policy
 import co.censo.shared.data.model.PolicySetup
 import co.censo.shared.data.model.SeedPhrase
@@ -18,6 +19,7 @@ val mockSeedPhrase = SeedPhrase(
     guid = SeedPhraseId(value = "12345"),
     seedPhraseHash = HashedValue(value = ""),
     label = "Dummy Phrase",
+    type = PhraseType.Binary,
     createdAt = Clock.System.now()
 )
 
