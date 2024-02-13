@@ -94,6 +94,7 @@ import co.censo.shared.data.repository.PlayIntegrityRepository
 import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.AuthUtil
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.projectLog
 import co.censo.shared.util.sendError
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.runBlocking
@@ -133,7 +134,6 @@ interface ApiService {
     companion object {
 
         const val INVITATION_ID = "invitationId"
-        const val INTERMEDIATE_KEY = "intermediateKey"
         const val PARTICIPANT_ID = "participantId"
         const val CHANNEL = "channel"
         const val APPROVAL_ID = "approvalId"
@@ -166,6 +166,7 @@ interface ApiService {
                 .addInterceptor(AuthInterceptor(authUtil, secureStorage))
                 .addInterceptor(playIntegrityInterceptor)
                 .addInterceptor(MaintenanceModeInterceptor())
+                .addInterceptor(FeatureFlagInterceptor(secureStorage))
                 .connectTimeout(Duration.ofSeconds(180))
                 .readTimeout(Duration.ofSeconds(180))
                 .callTimeout(Duration.ofSeconds(180))
@@ -590,6 +591,27 @@ class AuthInterceptor(
             Header(DEVICE_PUBLIC_KEY_HEADER, deviceKey.publicExternalRepresentation().value),
             Header(TIMESTAMP_HEADER, now.toString())
         )
+    }
+}
+
+class FeatureFlagInterceptor(
+    private val secureStorage: SecurePreferences
+) : Interceptor {
+    private val featureFlag = "x-censo-feature-flags"
+    private val legacyFeature = "legacy"
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val response = chain.proceed(chain.request())
+
+        response.headers[featureFlag]?.let { featuresEnabled ->
+            val legacyEnabled = featuresEnabled
+                .split(",")
+                .contains(legacyFeature)
+
+            secureStorage.setLegacyEnabled(legacyEnabled)
+        } ?: secureStorage.setLegacyEnabled(false)
+
+        return response
     }
 }
 

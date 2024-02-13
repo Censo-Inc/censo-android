@@ -12,6 +12,7 @@ import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.JWT_KEY
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.USER_SEEN_PERMISSION_DIALOG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.DEVICE_KEY
+import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.LEGACY_FLAG
 import co.censo.shared.data.storage.SecurePreferencesImpl.Companion.LOGIN_ID_RESET_TOKENS
 import javax.inject.Inject
 
@@ -38,6 +39,8 @@ interface SecurePreferences {
     fun saveResetTokens(resetTokens: Set<String>)
     fun retrieveResetTokens(): Set<String>
     fun clearResetTokens()
+    fun isLegacyEnabled() : Boolean
+    fun setLegacyEnabled(legacyEnabled: Boolean)
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -54,6 +57,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         const val LOGIN_ID_RESET_TOKENS = "login_id_reset_tokens"
         const val APPROVER_APPROVAL_ID = "approver_approval_id"
         const val ACCEPTED_TERMS_OF_USE_VERSION = "accepted_terms_of_use_version"
+        const val LEGACY_FLAG = "legacy_flag"
     }
 
     private val masterKeyAlias: MasterKey =
@@ -156,6 +160,16 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
     override fun setUserSeenPermissionDialog(seenDialog: Boolean) {
         val editor = sharedPrefs.edit()
         editor.putBoolean(USER_SEEN_PERMISSION_DIALOG, seenDialog)
+        editor.apply()
+    }
+    //endregion
+
+    //region legacy enabled
+    override fun isLegacyEnabled() = sharedPrefs.getBoolean(LEGACY_FLAG, false)
+
+    override fun setLegacyEnabled(legacyEnabled: Boolean) {
+        val editor = sharedPrefs.edit()
+        editor.putBoolean(LEGACY_FLAG, legacyEnabled)
         editor.apply()
     }
     //endregion
