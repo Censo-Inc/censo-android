@@ -312,9 +312,7 @@ interface OwnerRepository {
         ownerParticipantId: ParticipantId,
         entropy: Base64EncodedData,
         beneficiaryPublicKey: Base58EncodedBeneficiaryPublicKey,
-        approverPublicKeys: List<ApproverPublicKey>,
-        keyConfirmationSignature: ByteArray,
-        keyConfirmationTimeMillis: Long
+        approverPublicKeys: List<ApproverPublicKey>
     ): Resource<ActivateBeneficiaryApiResponse>
 
     suspend fun rejectBeneficiaryVerification(): Resource<RejectBeneficiaryVerificationApiResponse>
@@ -1007,11 +1005,8 @@ class OwnerRepositoryImpl(
         entropy: Base64EncodedData,
         beneficiaryPublicKey: Base58EncodedBeneficiaryPublicKey,
         approverPublicKeys: List<ApproverPublicKey>,
-        keyConfirmationSignature: ByteArray,
-        keyConfirmationTimeMillis: Long
     ): Resource<ActivateBeneficiaryApiResponse> {
         try {
-
             val ownerApproverKeyResource = keyRepository.retrieveKeyFromCloud(
                 id = ownerParticipantId.value,
                 bypassScopeCheck = true
@@ -1038,6 +1033,16 @@ class OwnerRepositoryImpl(
                     deviceKeyId = keyRepository.retrieveSavedDeviceId(),
                     entropy = entropy
                 )
+
+            val keyConfirmationTimeMillis = Clock.System.now().toEpochMilliseconds()
+
+            val keyConfirmationMessage =
+                beneficiaryPublicKey.getBytes() + keyConfirmationTimeMillis.toString().toByteArray()
+
+            val encryptionKey =
+                EncryptionKey.generateFromPrivateKeyRaw(base58EncodedPrivateKey.bigInt())
+
+            val keyConfirmationSignature = encryptionKey.sign(keyConfirmationMessage)
 
             val beneficiaryKey =
                 ExternalEncryptionKey.generateFromPublicKeyBase58(beneficiaryPublicKey)
