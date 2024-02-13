@@ -89,7 +89,7 @@ fun VaultHomeScreen(
 
         Column(modifier = Modifier
             .background(shape = RoundedCornerShape(16.dp), color = SharedColors.BottomNavBarIndicatorColor)
-            .padding(vertical = 32.dp)
+            .padding(vertical = 32.dp, horizontal = 16.dp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
