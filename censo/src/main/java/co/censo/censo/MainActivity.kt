@@ -221,7 +221,8 @@ class MainActivity : FragmentActivity() {
                 route = Screen.InitialPlanSetupRoute.route
             ) {
                 InitialPlanSetupScreen(
-                    navController = navController
+                    navController = navController,
+                    securePreferences = storage,
                 )
             }
             composable(route = Screen.AccessSeedPhrases.route) {
