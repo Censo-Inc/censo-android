@@ -54,7 +54,7 @@ android {
         applicationId = "co.censo.approver"
         minSdk = 33
         targetSdk = 33
-        versionCode = BuildUtils.gitCommitCount()
+        versionCode = 912
         versionName = "${libs.versions.versionNameMajor.get()}.${libs.versions.versionNameMinor.get()}.${libs.versions.versionNamePatch.get()}"
 
         signingConfig = if (signBuild) {
