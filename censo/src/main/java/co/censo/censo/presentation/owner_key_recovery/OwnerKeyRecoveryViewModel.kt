@@ -56,8 +56,6 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
         when (action) {
             KeyRecoveryAction.BackClicked -> onBackClicked()
             KeyRecoveryAction.Completed -> onCompleted()
-            is KeyRecoveryAction.KeyUploadFailed -> onKeyUploadFailed(action.e)
-            KeyRecoveryAction.KeyUploadSuccess -> onKeyUploadSuccess()
             KeyRecoveryAction.Retry -> onRetry()
         }
     }
