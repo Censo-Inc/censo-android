@@ -248,7 +248,8 @@ fun SeedPhraseItem(
         ) {
             Image(
                 modifier = Modifier.height(42.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .weight(.45f),
                 painter = painterResource(id = when (seedPhrase.type) {
                     PhraseType.Binary -> R.drawable.textbox
                     PhraseType.Photo -> R.drawable.photo
