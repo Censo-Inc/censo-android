@@ -24,7 +24,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-private val prolongationThreshold = 10.minutes
+private val prolongationThreshold = 14.minutes
 
 @HiltViewModel
 class LockScreenViewModel @Inject constructor(
