@@ -49,6 +49,7 @@ import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.components.BeginFaceScanButton
 import co.censo.censo.presentation.facetec_auth.FacetecAuth
 import co.censo.censo.presentation.onboarding.OnboardingTopBar
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.util.popCurrentDestinationFromBackStack
 import co.censo.shared.presentation.components.ConfirmationDialog
 import co.censo.shared.presentation.components.LargeLoading
@@ -61,6 +62,7 @@ import co.censo.shared.util.popUpToTop
 @Composable
 fun InitialPlanSetupScreen(
     navController: NavController,
+    securePreferences: SecurePreferences,
     viewModel: InitialPlanSetupViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -168,6 +170,7 @@ fun InitialPlanSetupScreen(
                                 WelcomeScreenUI(
                                     isPromoCodeEnabled = !state.promoCodeAccepted,
                                     showPromoCodeUI = viewModel::showPromoCodeUI,
+                                    beneficiaryEnabled = securePreferences.isLegacyEnabled(),
                                     onMainButtonClick = {
                                         viewModel.changeWelcomeStep(WelcomeStep.ScanningFace)
                                     },

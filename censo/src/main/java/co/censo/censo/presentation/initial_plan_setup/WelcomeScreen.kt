@@ -53,6 +53,7 @@ import co.censo.shared.presentation.components.LargeLoading
 @Composable
 fun WelcomeScreenUI(
     isPromoCodeEnabled: Boolean,
+    beneficiaryEnabled: Boolean,
     showPromoCodeUI: () -> Unit,
     onMainButtonClick: () -> Unit,
     onMinorButtonClick: () -> Unit,
@@ -154,18 +155,20 @@ fun WelcomeScreenUI(
                     modifier = Modifier.padding(all = 8.dp)
                 )
             }
-            ClickableText(
-                text = buildAnnotatedString {
-                    append(stringResource(R.string.to_become_a_beneficiary_tap_here))
-                },
-                style = TextStyle(
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    fontWeight = FontWeight.W500,
-                    fontSize = 16.sp
-                ),
-                onClick = { onMinorButtonClick() }
-            )
+            if (beneficiaryEnabled) {
+                ClickableText(
+                    text = buildAnnotatedString {
+                        append(stringResource(R.string.to_become_a_beneficiary_tap_here))
+                    },
+                    style = TextStyle(
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,
+                        fontWeight = FontWeight.W500,
+                        fontSize = 16.sp
+                    ),
+                    onClick = { onMinorButtonClick() }
+                )
+            }
         }
     }
 }
@@ -338,8 +341,10 @@ fun PreviewWelcomeAndPromoTogether() {
     ) {
         WelcomeScreenUI(
             isPromoCodeEnabled = true,
+            beneficiaryEnabled = false,
             showPromoCodeUI = {},
-            onMainButtonClick = {}) {
+            onMainButtonClick = {}
+        ) {
 
         }
 
@@ -358,8 +363,10 @@ fun PreviewWelcomeAndPromoTogether() {
 fun SmallWelcomeScreenUIPreview() {
     WelcomeScreenUI(
         isPromoCodeEnabled = true,
+        beneficiaryEnabled = false,
         showPromoCodeUI = {},
-        onMainButtonClick = {}) {
+        onMainButtonClick = {}
+    ) {
 
     }
 }
@@ -369,8 +376,10 @@ fun SmallWelcomeScreenUIPreview() {
 fun MediumWelcomeScreenUIPreview() {
     WelcomeScreenUI(
         isPromoCodeEnabled = true,
+        beneficiaryEnabled = false,
         showPromoCodeUI = {},
-        onMainButtonClick = {}) {
+        onMainButtonClick = {}
+    ) {
 
     }
 }
@@ -380,8 +389,10 @@ fun MediumWelcomeScreenUIPreview() {
 fun LargeWelcomeScreenUIPreview() {
     WelcomeScreenUI(
         isPromoCodeEnabled = true,
+        beneficiaryEnabled = false,
         showPromoCodeUI = {},
-        onMainButtonClick = {}) {
+        onMainButtonClick = {}
+    ) {
 
     }
 }
