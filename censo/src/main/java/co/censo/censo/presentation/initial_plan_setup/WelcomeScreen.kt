@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.censo.censo.BuildConfig
 import co.censo.shared.presentation.SharedColors
 import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
@@ -122,7 +123,9 @@ fun WelcomeScreenUI(
 
             if (isPromoCodeEnabled) {
                 StandardButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 44.dp),
                     contentPadding = PaddingValues(vertical = 8.dp),
                     onClick = { showPromoCodeUI() },
                 ) {
@@ -152,18 +155,22 @@ fun WelcomeScreenUI(
                     modifier = Modifier.padding(all = 8.dp)
                 )
             }
-            ClickableText(
-                text = buildAnnotatedString {
-                    append(stringResource(R.string.to_become_a_beneficiary_tap_here))
-                },
-                style = TextStyle(
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    fontWeight = FontWeight.W500,
-                    fontSize = 16.sp
-                ),
-                onClick = { onMinorButtonClick() }
-            )
+
+            //Will be moved behind server flag in for release 1.10
+            if (BuildConfig.BENEFICIARY_ENABLED) {
+                ClickableText(
+                    text = buildAnnotatedString {
+                        append(stringResource(R.string.to_become_a_beneficiary_tap_here))
+                    },
+                    style = TextStyle(
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,
+                        fontWeight = FontWeight.W500,
+                        fontSize = 16.sp
+                    ),
+                    onClick = { onMinorButtonClick() }
+                )
+            }
         }
     }
 }
