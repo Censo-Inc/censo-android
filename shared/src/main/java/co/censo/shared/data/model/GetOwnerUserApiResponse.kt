@@ -267,10 +267,16 @@ enum class AccessApprovalStatus {
 }
 
 @Serializable
+enum class PhraseType {
+    Binary, Photo
+}
+
+@Serializable
 data class SeedPhrase(
     val guid: SeedPhraseId,
     val seedPhraseHash: HashedValue,
     val label: String,
+    val type: PhraseType,
     val createdAt: Instant,
 )
 

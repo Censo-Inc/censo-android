@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,7 +47,6 @@ import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
-import co.censo.shared.presentation.ButtonTextStyle
 
 @Composable
 fun VaultHomeScreen(

@@ -30,6 +30,7 @@ import co.censo.shared.data.model.HashedValue
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.censo.R
 import co.censo.censo.presentation.main.SeedPhraseItem
+import co.censo.shared.data.model.PhraseType
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
@@ -66,7 +67,7 @@ fun SelectPhraseUI(
                     Spacer(modifier = Modifier.height(12.dp))
                     SeedPhraseItem(
                         seedPhrase = seedPhrase,
-                        isSelected = viewedIds.any { it == seedPhrase.guid },
+                        isSelected = viewedIds.contains(seedPhrase.guid),
                         onClick = { onPhraseSelected(seedPhrase) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -110,18 +111,21 @@ fun PreviewSelectPhraseUI() {
                 guid = SeedPhraseId("1"),
                 seedPhraseHash = HashedValue(""),
                 label = "Yankee Hotel Foxtrot",
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now(),
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
                 seedPhraseHash = HashedValue(""),
                 label = "Robin Hood",
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now(),
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
+                type = PhraseType.Binary,
                 createdAt = Clock.System.now()
             ),
         ),
