@@ -402,9 +402,9 @@ sealed class OwnerState {
         val canRequestAuthenticationReset: Boolean,
         val authenticationReset: AuthenticationReset?,
         val subscriptionRequired: Boolean,
-    ) : OwnerState() {
-        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt()
 
+        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt(),
+    ) : OwnerState() {
         fun hasBlockingPhraseAccessRequest(): Boolean {
             return when (access) {
                 is Access.ThisDevice -> access.intent == AccessIntent.AccessPhrases && listOf(AccessStatus.Timelocked, AccessStatus.Available).contains(access.status)
