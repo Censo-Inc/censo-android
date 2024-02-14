@@ -219,6 +219,7 @@ fun SeedPhraseItem(
     seedPhrase: SeedPhrase,
     isEditable: Boolean = false,
     isSelected: Boolean = false,
+    missingNotesBadge: Boolean = false,
     onClick: (() -> Unit)? = null,
     onRename: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null
@@ -246,6 +247,13 @@ fun SeedPhraseItem(
                 .weight(2f),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
+            Box {
+                Row(
+                    modifier = modifier.height(120.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
             Image(
                 modifier = Modifier.height(42.dp)
                     .padding(horizontal = 16.dp)
@@ -276,43 +284,78 @@ fun SeedPhraseItem(
                 color = if (isSelected) SharedColors.SuccessGreen else SharedColors.MainColorText
             )
 
-            if (isEditable) {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White)
-                        .padding(end = 6.dp)
-                        .weight(0.25f)
-                        .wrapContentSize(Alignment.TopEnd)
-                ) {
-                    Icon(
-                        painterResource(id = co.censo.shared.R.drawable.edit_icon),
-                        modifier = Modifier
-                            .clickable { expanded = true }
-                            .size(36.dp),
-                        contentDescription = stringResource(R.string.edit_phrase),
-                        tint = SharedColors.MainIconColor
-                    )
-                    DropdownMenu(
-                        modifier = Modifier.background(color = Color.White),
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false}) {
-                        DropdownMenuItem(
-                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
-                            text = { Text(stringResource(id = R.string.rename), fontSize = 20.sp, color = Color.Black) },
-                            onClick = {
-                                onRename?.let { it() }
-                                expanded = false
+                    if (isEditable) {
+                        Box(
+                            modifier = Modifier
+                                .background(color = Color.White)
+                                .padding(end = 6.dp)
+                                .weight(0.25f)
+                                .wrapContentSize(Alignment.TopEnd)
+                        ) {
+                            Icon(
+                                painterResource(id = co.censo.shared.R.drawable.edit_icon),
+                                modifier = Modifier
+                                    .clickable { expanded = true }
+                                    .size(36.dp),
+                                contentDescription = stringResource(R.string.edit_phrase),
+                                tint = SharedColors.MainIconColor
+                            )
+                            DropdownMenu(
+                                modifier = Modifier.background(color = Color.White),
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }) {
+                                DropdownMenuItem(
+                                    modifier = Modifier.padding(
+                                        start = 4.dp,
+                                        top = 8.dp,
+                                        bottom = 8.dp,
+                                        end = 24.dp
+                                    ),
+                                    text = {
+                                        Text(
+                                            stringResource(id = R.string.rename),
+                                            fontSize = 20.sp,
+                                            color = Color.Black
+                                        )
+                                    },
+                                    onClick = {
+                                        onRename?.let { it() }
+                                        expanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    modifier = Modifier.padding(
+                                        start = 4.dp,
+                                        top = 8.dp,
+                                        bottom = 8.dp,
+                                        end = 24.dp
+                                    ),
+                                    text = {
+                                        Text(
+                                            stringResource(id = R.string.delete),
+                                            fontSize = 20.sp,
+                                            color = Color.Red
+                                        )
+                                    },
+                                    onClick = {
+                                        onDelete?.let { it() }
+                                        expanded = false
+                                    }
+                                )
                             }
-                        )
-                        DropdownMenuItem(
-                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
-                            text = { Text(stringResource(id = R.string.delete), fontSize = 20.sp, color = Color.Red) },
-                            onClick = {
-                                onDelete?.let { it() }
-                                expanded = false
-                            }
-                        )
+                        }
                     }
+                }
+
+                if (missingNotesBadge) {
+                    Text(
+                        text = "NO NOTES",
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 6.dp, end = 12.dp),
+                        color = SharedColors.GreyText,
+                        fontSize = 10.sp
+                    )
                 }
             }
         }
@@ -357,21 +400,24 @@ fun PreviewPhraseHomeScreenWithTimelock() {
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
         ),
         onRenamePhraseClick = {},
@@ -395,35 +441,40 @@ fun PreviewPhraseHomeScreenNoTimelock() {
                 label = "Yankee Hotel Foxtrot",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Photo,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
                 label = "Robin Hood",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Photo,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("4"),
                 label = "yet another phrase",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("5"),
                 label = "and another phrase",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
         ),
         onRenamePhraseClick = {},

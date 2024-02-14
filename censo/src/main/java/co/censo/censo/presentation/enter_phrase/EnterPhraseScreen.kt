@@ -36,6 +36,7 @@ import co.censo.censo.presentation.components.SeedPhraseAdded
 import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.components.ImageReview
+import co.censo.censo.presentation.components.SeedPhraseNotesUI
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -86,6 +87,7 @@ fun EnterPhraseScreen(
 
         EnterPhraseUIState.REVIEW_WORDS,
         EnterPhraseUIState.VIEW,
+        EnterPhraseUIState.NOTES,
         EnterPhraseUIState.LABEL,
         EnterPhraseUIState.GENERATE,
         EnterPhraseUIState.DONE -> stringResource(R.string.add_seed_phrase_title)
@@ -363,8 +365,16 @@ fun EnterPhraseScreen(
                         EnterPhraseUIState.REVIEW_WORDS -> {
                             ReviewSeedPhraseUI(
                                 phraseWords = state.enteredWords,
-                                saveSeedPhrase = { viewModel.moveToLabel(seedPhraseType = SeedPhraseType.TEXT)},
+                                saveSeedPhrase = { viewModel.moveToNotesOrLabel(seedPhraseType = SeedPhraseType.TEXT)},
                                 editSeedPhrase = viewModel::editEntirePhrase
+                            )
+                        }
+
+                        EnterPhraseUIState.NOTES -> {
+                            SeedPhraseNotesUI(
+                                notes = "", // no initial notes on new seed phrase
+                                onContinue = { notes -> viewModel.storeNotesAndMoveToLabel(notes)},
+                                onContinueButtonText = stringResource(R.string.continue_text)
                             )
                         }
 

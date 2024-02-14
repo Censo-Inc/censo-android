@@ -57,6 +57,7 @@ import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.RejectAuthenticationResetRequestApiResponse
 import co.censo.shared.data.model.RejectBeneficiaryVerificationApiResponse
 import co.censo.shared.data.model.RejectTakeoverInitiationApiResponse
+import co.censo.shared.data.model.RemoveBeneficiaryApiResponse
 import co.censo.shared.data.model.ReplaceAuthenticationApiRequest
 import co.censo.shared.data.model.ReplaceAuthenticationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
@@ -94,8 +95,10 @@ import co.censo.shared.data.model.SubmitTakeoverTotpVerificationApiResponse
 import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
-import co.censo.shared.data.model.UpdateSeedPhraseApiRequest
-import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
+import co.censo.shared.data.model.UpdateBeneficiaryApproverContactInfoApiRequest
+import co.censo.shared.data.model.UpdateBeneficiaryApproverContactInfoApiResponse
+import co.censo.shared.data.model.UpdateSeedPhraseMetaInfoApiRequest
+import co.censo.shared.data.model.UpdateSeedPhraseMetaInfoApiResponse
 import co.censo.shared.data.networking.ApiService.Companion.APPLICATION_IDENTIFIER
 import co.censo.shared.data.networking.ApiService.Companion.APP_PLATFORM_HEADER
 import co.censo.shared.data.networking.ApiService.Companion.APP_VERSION_HEADER
@@ -289,6 +292,11 @@ interface ApiService {
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<InviteBeneficiaryApiResponse>
 
+    @DELETE("v1/policy/beneficiary")
+    suspend fun removeBeneficiary(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<RemoveBeneficiaryApiResponse>
+
     @POST("/v1/approvership-invitations/{$INVITATION_ID}/accept")
     suspend fun acceptApprovership(
         @Path(value = INVITATION_ID) invitationId: String
@@ -353,11 +361,11 @@ interface ApiService {
         @Path(value = SEED_PHRASE_ID) seedPhraseId: SeedPhraseId,
     ): RetrofitResponse<GetSeedPhraseApiResponse>
 
-    @PATCH("/v1/vault/seed-phrases/{$SEED_PHRASE_ID}")
-    suspend fun updateSeedPhrase(
+    @PATCH("/v1/vault/seed-phrases/{$SEED_PHRASE_ID}/meta-info")
+    suspend fun updateSeedPhraseMetaInfo(
         @Path(value = SEED_PHRASE_ID) seedPhraseId: SeedPhraseId,
-        @Body apiRequest: UpdateSeedPhraseApiRequest
-    ): RetrofitResponse<UpdateSeedPhraseApiResponse>
+        @Body apiRequest: UpdateSeedPhraseMetaInfoApiRequest
+    ): RetrofitResponse<UpdateSeedPhraseMetaInfoApiResponse>
 
     @POST("/v1/access")
     suspend fun requestAccess(
@@ -513,6 +521,12 @@ interface ApiService {
     suspend fun rejectBeneficiaryVerification(
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<RejectBeneficiaryVerificationApiResponse>
+
+    @PUT("v1/policy/beneficiary/approver-contact-info")
+    suspend fun updateBeneficiaryApproverContactInfo(
+        @Body requestBody: UpdateBeneficiaryApproverContactInfoApiRequest,
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<UpdateBeneficiaryApproverContactInfoApiResponse>
 
     @POST("v1/takeover")
     suspend fun initiateTakeover(

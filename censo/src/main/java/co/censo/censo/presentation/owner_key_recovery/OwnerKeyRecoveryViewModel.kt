@@ -236,7 +236,7 @@ class OwnerKeyRecoveryViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val uploadResponse = try {
+            val uploadResponse: Resource<Unit> = try {
                 keyRepository.saveKeyInCloud(
                     key = encryptedKeyData,
                     id = participantId.value,

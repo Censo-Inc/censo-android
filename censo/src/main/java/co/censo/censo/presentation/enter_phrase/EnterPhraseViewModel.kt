@@ -2,6 +2,7 @@ package co.censo.censo.presentation.enter_phrase
 
 import Base58EncodedApproverPublicKey
 import Base58EncodedMasterPublicKey
+import Base64EncodedData
 import android.graphics.Bitmap
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
@@ -13,9 +14,11 @@ import androidx.lifecycle.viewModelScope
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.decryptWithEntropy
 import co.censo.shared.data.cryptography.hexStringToByteArray
-import co.censo.shared.data.cryptography.key.EncryptionKey
+import co.censo.shared.data.model.BeneficiaryStatus
 import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.InitialKeyData
+import co.censo.shared.data.model.MasterKeyInfo
+import co.censo.shared.data.model.OwnerApproverKeyInfo
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.networking.IgnoreKeysJson
@@ -30,11 +33,9 @@ import co.censo.shared.util.rotateBitmap
 import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.Base64
@@ -223,7 +224,20 @@ class EnterPhraseViewModel @Inject constructor(
         }
     }
 
-    fun moveToLabel(seedPhraseType: SeedPhraseType) {
+    fun moveToNotesOrLabel(seedPhraseType: SeedPhraseType) {
+        val beneficiaryOnboarded = (ownerRepository.getOwnerStateValue() as? OwnerState.Ready)?.policy?.beneficiary?.status is BeneficiaryStatus.Activated
+
+        encryptSeedPhraseAndMoveNext(seedPhraseType, if (beneficiaryOnboarded) EnterPhraseUIState.NOTES else EnterPhraseUIState.LABEL)
+    }
+
+    fun storeNotesAndMoveToLabel(notes: String) {
+        state = state.copy(
+            notes = notes,
+            enterWordUIState = EnterPhraseUIState.LABEL
+        )
+    }
+
+    private fun encryptSeedPhraseAndMoveNext(seedPhraseType: SeedPhraseType, notesOrLabel: EnterPhraseUIState) {
         state = state.copy(seedPhraseType = seedPhraseType)
 
         if (!state.phraseEncryptionInProgress) {
@@ -262,7 +276,7 @@ class EnterPhraseViewModel @Inject constructor(
                     )
 
                     state = state.copy(
-                        enterWordUIState = EnterPhraseUIState.LABEL,
+                        enterWordUIState = notesOrLabel,
                         encryptedSeedPhrase = encryptedSeedPhrase,
                         enteredWords = listOf(),
                         imageBitmap = null,
@@ -287,14 +301,15 @@ class EnterPhraseViewModel @Inject constructor(
     }
 
     fun subscriptionCompleted() {
+        loadKey()
         //We only need to verify master key sig if there is one
-        val masterKeySignature = state.masterKeySignature
-        if (masterKeySignature != null) {
+        /*val masterKeySignature = state.masterKeySignature
+        if (masterKeySignature != null || state.notes.isNotBlank()) {
             //Load the key from the cloud
             loadKey()
         } else {
             storeSeedPhrase(shouldVerifyMasterKeySignature = false)
-        }
+        }*/
     }
 
     fun saveSeedPhrase() {
@@ -303,59 +318,22 @@ class EnterPhraseViewModel @Inject constructor(
             return
         }
 
+        loadKey()
         //We only need to verify master key sig if there is one
-        val masterKeySignature = state.masterKeySignature
-        if (masterKeySignature != null) {
+        /*val masterKeySignature = state.masterKeySignature
+        if (masterKeySignature != null || state.notes.isNotBlank()) {
             //Load the key from the cloud
             loadKey()
         } else {
             storeSeedPhrase(shouldVerifyMasterKeySignature = false)
-        }
-    }
-
-    private fun verifyMasterKeySignature(): Boolean {
-        try {
-            val ownerPolicy = (ownerRepository.getOwnerStateValue() as OwnerState.Ready).policy
-
-            val masterPublicKey = state.masterPublicKey
-            val masterKeySignature = state.masterKeySignature
-            val entropy = ownerPolicy.ownerEntropy
-
-            if (masterKeySignature != null && masterPublicKey != null && entropy != null) {
-                val deviceKeyId = keyRepository.retrieveSavedDeviceId()
-
-                val ownerApproverKeyData = state.keyData
-                return if (ownerApproverKeyData != null) {
-                    val ownerApproverEncryptionKey = EncryptionKey.generateFromPrivateKeyRaw(
-                        raw = ownerApproverKeyData.encryptedPrivateKey.decryptWithEntropy(
-                            deviceKeyId = deviceKeyId, entropy = entropy
-                        ).bigInt()
-                    )
-
-                    ownerApproverEncryptionKey.verify(
-                        signedData = (masterPublicKey.ecPublicKey as BCECPublicKey).q.getEncoded(
-                            false
-                        ),
-                        signature = masterKeySignature.bytes
-                    )
-                } else {
-                    false
-                }
-            } else {
-                return false
-            }
-        } catch (exception: Exception) {
-            state = state.copy(submitResource = Resource.Error(exception = exception))
-            return false
-        }
+        }*/
     }
 
     private fun storeSeedPhrase(shouldVerifyMasterKeySignature: Boolean) {
         state = state.copy(submitResource = Resource.Loading)
 
         viewModelScope.launch {
-
-            if (shouldVerifyMasterKeySignature && !verifyMasterKeySignature()) {
+            if (shouldVerifyMasterKeySignature && state.masterKeySignature == null) {
                 state = state.copy(
                     submitResource = Resource.Error(
                         exception = Exception("Unable to verify data, please try again")
@@ -364,9 +342,22 @@ class EnterPhraseViewModel @Inject constructor(
                 return@launch
             }
 
+            val ownerPolicy = (ownerRepository.getOwnerStateValue() as OwnerState.Ready).policy
             val response = ownerRepository.storeSeedPhrase(
-                state.label.trim(),
-                state.encryptedSeedPhrase!!
+                label = state.label.trim(),
+                notes = state.notes.trim(),
+                encryptedSeedPhrase = state.encryptedSeedPhrase!!,
+                shouldVerifyMasterKeySignature = shouldVerifyMasterKeySignature,
+                ownerApproverKeyInfo = OwnerApproverKeyInfo(
+                    participantId = state.ownerApproverParticipantId!!,
+                    deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                    entropy = ownerPolicy.ownerEntropy!!,
+                    encryptedApproverKey = state.keyData!!.encryptedPrivateKey
+                ),
+                masterKeyInfo = MasterKeyInfo(
+                    publicKey = state.masterPublicKey!!,
+                    keySignature = state.masterKeySignature ?: Base64EncodedData("")
+                )
             )
 
             state = state.copy(submitResource = response.map { })
@@ -498,6 +489,7 @@ class EnterPhraseViewModel @Inject constructor(
                     enterWordUIState = EnterPhraseUIState.VIEW,
                     editedWordIndex = 0
                 )
+            EnterPhraseUIState.NOTES,
             EnterPhraseUIState.LABEL ->
                 state.copy(exitConfirmationDialog = true)
         }
@@ -660,7 +652,9 @@ class EnterPhraseViewModel @Inject constructor(
                 )
             )
 
-            storeSeedPhrase(shouldVerifyMasterKeySignature = true)
+            val masterKeySignaturePresent = state.masterKeySignature != null
+
+            storeSeedPhrase(shouldVerifyMasterKeySignature = masterKeySignaturePresent)
         } catch (e: Exception) {
             e.sendError(CrashReportingUtil.CloudDownload)
             state = state.copy(submitResource = Resource.Error(exception = e))
@@ -779,7 +773,7 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun onSaveImage() {
         state = state.copy(retakingImage = false)
-        moveToLabel(seedPhraseType = SeedPhraseType.IMAGE)
+        moveToNotesOrLabel(seedPhraseType = SeedPhraseType.IMAGE)
     }
 
     fun onRetakeImage() {

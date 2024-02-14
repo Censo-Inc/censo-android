@@ -44,6 +44,7 @@ import co.censo.censo.presentation.enter_phrase.EnterPhraseScreen
 import co.censo.censo.presentation.entrance.OwnerEntranceScreen
 import co.censo.censo.presentation.import_phrase.PhraseImportScreen
 import co.censo.censo.presentation.initial_plan_setup.InitialPlanSetupScreen
+import co.censo.censo.presentation.legacy_information.LegacyInformationScreen
 import co.censo.censo.presentation.lock_screen.LockedScreen
 import co.censo.censo.presentation.login_id_reset.LoginIdResetScreen
 import co.censo.censo.presentation.main.BottomNavItem
@@ -169,6 +170,9 @@ class MainActivity : FragmentActivity() {
                     importingPhrase = importingPhrase,
                     encryptedPhrase = encryptedPhraseData
                 )
+            }
+            composable(route = Screen.LegacyInformation.route) {
+                LegacyInformationScreen(navController)
             }
             composable(
                 route = "${Screen.AcceptBeneficiaryInvitation.route}/{${INVITE_ID_ARG}}",

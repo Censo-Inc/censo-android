@@ -6,6 +6,7 @@ import co.censo.shared.data.model.BeneficiaryStatus
 import co.censo.shared.data.model.GetOwnerUserApiResponse
 import co.censo.shared.data.model.InviteBeneficiaryApiResponse
 import co.censo.shared.data.model.OwnerState
+import co.censo.shared.data.model.RemoveBeneficiaryApiResponse
 import kotlinx.datetime.Clock
 
 data class BeneficiaryOwnerState(
@@ -20,7 +21,10 @@ data class BeneficiaryOwnerState(
     val secondsLeft: Int = 0,
     val counter: Long = Clock.System.now().epochSeconds.div(TotpGenerator.CODE_EXPIRATION),
     val beneficiaryCode: String = "",
-    val beneficiaryOwnerUIState: BeneficiaryOwnerUIState = BeneficiaryOwnerUIState.None
+    val beneficiaryOwnerUIState: BeneficiaryOwnerUIState = BeneficiaryOwnerUIState.None,
+
+    //Remove beneficiary
+    val removeBeneficiaryResource: Resource<RemoveBeneficiaryApiResponse> = Resource.Uninitialized,
 )
 
 fun BeneficiaryStatus?.toBeneficiaryOwnerUIState() =

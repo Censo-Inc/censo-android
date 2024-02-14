@@ -1,5 +1,6 @@
 package co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui
 
+import Base58EncodedBeneficiaryPublicKey
 import Base64EncodedData
 import android.content.Context
 import androidx.compose.foundation.background
@@ -17,13 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.censo.R
 import co.censo.censo.presentation.plan_setup.components.ApproverActivatedUIData
 import co.censo.shared.data.model.BeneficiaryInvitationId
+import co.censo.shared.data.model.BeneficiaryKeyInfo
 import co.censo.shared.data.model.BeneficiaryStatus
 import co.censo.shared.presentation.SharedColors
 import kotlinx.datetime.Clock
@@ -130,7 +131,13 @@ fun ProspectApproverInfoBoxRegularPreview() {
         ProspectBeneficiaryInfoBox(
             nickName = "Goji",
             status = BeneficiaryStatus.Activated(
-                confirmedAt = Clock.System.now()
+                confirmedAt = Clock.System.now(),
+                approverContactInfo = listOf(),
+                beneficiaryKeyInfo = BeneficiaryKeyInfo(
+                    publicKey = Base58EncodedBeneficiaryPublicKey(""),
+                    keySignature = Base64EncodedData(""),
+                    keyTimeMillis = 0L
+                )
             ),
         )
     }

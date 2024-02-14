@@ -127,7 +127,7 @@ class VaultScreenViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            val response = ownerRepository.updateSeedPhrase(seedPhrase.guid, state.label)
+            val response = ownerRepository.updateSeedPhraseLabel(seedPhrase.guid, state.label)
 
             state = state.copy(
                 updateSeedPhraseResource = response

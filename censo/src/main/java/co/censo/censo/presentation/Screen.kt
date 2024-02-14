@@ -83,6 +83,7 @@ sealed class Screen(val route: String) {
     }
     data object BeneficiarySetup: Screen("beneficiary_setup")
     data object BeneficiaryHome: Screen("beneficiary_home")
+    data object LegacyInformation : Screen("legacy_information")
 
     object LoginIdResetRoute : Screen("login_id_reset_route") {
         const val DL_RESET_TOKEN_KEY = "reset_token_key"

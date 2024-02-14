@@ -412,7 +412,7 @@ fun MainVaultScreen(
                                 )
                             }
 
-                        BottomNavItem.Beneficiary -> BeneficiaryHomeScreen()
+                        BottomNavItem.Beneficiary -> BeneficiaryHomeScreen(navController)
                     }
 
 

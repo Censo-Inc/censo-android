@@ -531,13 +531,26 @@
     <string name="beneficiary_failed_submit_code">Failed to submit verification code. Please try again.</string>
     <string name="beneficiary_cloude_error">In order to become a Beneficiary, we need to store data in your Google Drive.</string>
     <string name="missing_essential_beneficiary_data">Missing essential data to complete beneficiary setup. Please try following link sent by owner to try again.</string>
+    <string name="your_beneficiary_may_need_additional_information">Your beneficiary may need additional information about your approvers and your seed phrases</string>
+    <string name="provide_information">Provide information</string>
+    <string name="save_information">Save information</string>
+    <string name="enter_contact_information">Enter contact information</string>
+    <string name="legacy_information_landing_message">To ensure that your beneficiaries can access your seed phrases in case of unforeseen circumstances, you can provide additional information about your approvers and your seed phrases.\n\nThe information about your approvers is visible to only you and your beneficiary, and only you may edit it.\n\nThe information about your seed phrases is visible and editable only to you until your beneficiary successfully completes the takeover process, and then will be visible only to your beneficiary.</string>
+    <string name="seed_phrase_notes_field_placeholder_text">Provide any information which your beneficiary might need to access your crypto.\n\nFor example, you might want to provide the chains and wallets this phrase is used in, or specific tokens or dApps of interest.</string>
+    <string name="legacy_information_type_approver_message">Your beneficiary will need the assistance of your approvers to takeover your account. Provide any necessary contact information for your approvers.</string>
+    <string name="approver_information">Approver information</string>
+    <string name="legacy_information_type_seed_phrase_message">You can also provide additional information about your seed phrases to ensure your beneficiary will be able to access your assets.</string>
+    <string name="seed_phrase_information">Seed phrase information</string>
+    <string name="legacy_title_information_type">Legacy - Information</string>
+    <string name="legacy_title_approver_information">Legacy - Approver information</string>
+    <string name="legacy_title_seed_phrase_information">Legacy - Seed phrase information</string>
+    <string name="legacy_title_seed_phrase_id">Legacy - %1$s</string>
     <string name="beneficiary_home_message">You are the beneficiary for someone using Censo to secure their seed phrases.\n\nUsing the button below, you can initiate the takeover process, which, once completed, will give you access to their crypto seed phrases, as well as any instructions they may have left.</string>
     <string name="settings">Settings</string>
     <string name="initiate_takeover">Initiate Takeover</string>
     <string name="takeover_initiatied_message">Takeover initiation requires the approval of one of the two Trusted Approvers on the account.\n\nYou will need to share a link with them, which they will need to tap on or paste into their Approver app.\n\nSelect one of the approvers, and click the Share button.</string>
     <string name="takeover_initiation_part_one">The takeover initiation was approved by %1$s. Unless it is canceled, the takeover will be ready to complete in</string>
     <string name="takeover_initiation_part_two">When the timelock period ends, %1$s will have to verify you and then the takeover will be complete.\n\nThis verification should preferably take place either on the phone or in person.</string>
-
     <string name="takeover_rejected">The takeover initiation was rejected by %1$s.\n\nYou cannot continue with this takeover, but you can cancel and try again.</string>
     <string name="cancel_takeover">Cancel takeover</string>
     <string name="some_time">some time</string>

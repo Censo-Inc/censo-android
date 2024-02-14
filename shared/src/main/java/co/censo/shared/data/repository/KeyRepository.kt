@@ -1,6 +1,5 @@
 package co.censo.shared.data.repository
 
-import ParticipantId
 import co.censo.shared.data.Resource
 import co.censo.shared.data.cryptography.ECHelper
 import co.censo.shared.data.cryptography.key.EncryptionKey
@@ -9,15 +8,16 @@ import co.censo.shared.data.cryptography.key.KeystoreHelper
 import co.censo.shared.data.cryptography.toHexString
 import co.censo.shared.data.storage.CloudSavedKeyEmptyException
 import co.censo.shared.data.storage.CloudStorage
-import org.bouncycastle.util.encoders.Hex
-import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.data.storage.SecurePreferences
 import co.censo.shared.presentation.cloud_storage.CloudAccessState
 import co.censo.shared.util.CrashReportingUtil
+import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.sendError
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.bouncycastle.util.encoders.Hex
 
 interface KeyRepository {
     fun hasKeyWithId(id: String): Boolean
@@ -34,6 +34,11 @@ interface KeyRepository {
         bypassScopeCheck: Boolean = false,
     ) : Resource<Unit>
     suspend fun retrieveKeyFromCloud(
+        id: String,
+        bypassScopeCheck: Boolean = false
+    ) : Resource<ByteArray>
+
+    suspend fun retrieveKeyFromCloudAwaitPermissions(
         id: String,
         bypassScopeCheck: Boolean = false
     ) : Resource<ByteArray>
@@ -167,6 +172,21 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
             }
 
             return Resource.Error(exception = response.error()?.exception)
+        }
+    }
+
+    override suspend fun retrieveKeyFromCloudAwaitPermissions(
+        id: String,
+        bypassScopeCheck: Boolean
+    ): Resource<ByteArray> {
+        return try {
+            retrieveKeyFromCloud(id = id, bypassScopeCheck = bypassScopeCheck)
+        } catch (permissionNotGranted: CloudStoragePermissionNotGrantedException) {
+            observeCloudAccessStateForAccessGranted(keyRepository = this) {
+                retrieveKeyFromCloud(id = id, bypassScopeCheck = true)
+            }
+        } catch (e: Exception) {
+            Resource.Error(e)
         }
     }
 

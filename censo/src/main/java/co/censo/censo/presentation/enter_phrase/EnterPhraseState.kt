@@ -23,6 +23,7 @@ data class EnterPhraseState(
     val labelTooLong: String? = null,
     val seedPhraseType: SeedPhraseType = SeedPhraseType.TEXT,
     val encryptedSeedPhrase: EncryptedSeedPhrase? = null,
+    val notes: String = "",
     val existingPhraseCount: Int = 0,
     val desiredGeneratedPhraseLength: BIP39.WordCount = BIP39.WordCount.TwentyFour,
 
@@ -78,6 +79,7 @@ data class EnterPhraseState(
     val backArrowType = when (enterWordUIState) {
         EnterPhraseUIState.SELECT_ENTRY_TYPE_OWN,
         EnterPhraseUIState.EDIT,
+        EnterPhraseUIState.NOTES,
         EnterPhraseUIState.LABEL,
         EnterPhraseUIState.SELECTED,
         EnterPhraseUIState.GENERATE,
@@ -104,6 +106,7 @@ enum class EnterPhraseUIState {
     VIEW,
     REVIEW_WORDS,
     REVIEW_IMAGE,
+    NOTES,
     LABEL,
     DONE,
     NOTIFICATIONS,

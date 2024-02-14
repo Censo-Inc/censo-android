@@ -255,9 +255,27 @@ class BeneficiaryOwnerViewModel @Inject constructor(
         state = state.copy(createBeneficiaryError = null)
     }
 
+    fun dismissRemoveBeneficiaryError() {
+        state = state.copy(removeBeneficiaryResource = Resource.Uninitialized)
+    }
+
     fun moveUserThroughUI(uiState: BeneficiaryOwnerUIState) {
         state = state.copy(
             beneficiaryOwnerUIState = uiState
         )
+    }
+
+    fun removeBeneficiary() {
+        state = state.copy(removeBeneficiaryResource = Resource.Loading)
+
+        viewModelScope.launch {
+            val response = ownerRepository.removeBeneficiary()
+
+            if (response is Resource.Success) {
+                onOwnerState(response.data.ownerState, updateUIState = true)
+            }
+
+            state = state.copy(removeBeneficiaryResource = response)
+        }
     }
 }

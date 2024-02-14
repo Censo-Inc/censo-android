@@ -113,6 +113,7 @@ fun PreviewSelectPhraseUI() {
                 label = "Yankee Hotel Foxtrot",
                 type = PhraseType.Binary,
                 createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("2"),
@@ -120,13 +121,15 @@ fun PreviewSelectPhraseUI() {
                 label = "Robin Hood",
                 type = PhraseType.Binary,
                 createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
             SeedPhrase(
                 guid = SeedPhraseId("3"),
                 label = "SEED PHRASE WITH A VERY LONG NAME OF 50 CHARACTERS",
                 seedPhraseHash = HashedValue(""),
                 type = PhraseType.Binary,
-                createdAt = Clock.System.now()
+                createdAt = Clock.System.now(),
+                encryptedNotes = null,
             ),
         ),
         viewedIds = listOf(

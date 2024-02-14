@@ -9,7 +9,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavController
 import co.censo.censo.R
+import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.ActivateBeneficiaryUI
 import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.ActiveBeneficiaryUI
 import co.censo.censo.presentation.beneficiary_owner.beneficiary_owner_ui.AddBeneficiaryLabelUI
@@ -25,6 +27,7 @@ import co.censo.shared.util.LinksUtil.CENSO_BENEFICIARY_APP_STORE_LINK
 
 @Composable
 fun BeneficiaryHomeScreen(
+    navController: NavController,
     viewModel: BeneficiaryOwnerViewModel = hiltViewModel()
 ) {
 
@@ -50,6 +53,8 @@ fun BeneficiaryHomeScreen(
         if (ownerState == null) {
             //this should not happen. We get owner state in entrance VM every time we enter app.
             LargeLoading(fullscreen = true)
+
+            // FIXME handle remove beneficiary loading and error cases
         } else {
 
             when (state.beneficiaryOwnerUIState) {
@@ -103,10 +108,15 @@ fun BeneficiaryHomeScreen(
                         is BeneficiaryStatus.Activated -> {
                             ActiveBeneficiaryUI(
                                 label = beneficiary?.label ?: "",
-                                activatedStatus = status
-                            ) {
-                                //todo: Remove beneficiary
-                            }
+                                activatedStatus = status,
+                                onProvideLegacyInformation = {
+                                    navController.navigate(Screen.LegacyInformation.route)
+                                },
+                                onRemoveBeneficiary = viewModel::removeBeneficiary,
+                                loading = state.removeBeneficiaryResource is Resource.Loading,
+                                removeBeneficiaryError = state.removeBeneficiaryResource as? Resource.Error,
+                                dismissRemoveBeneficiaryError = viewModel::dismissRemoveBeneficiaryError,
+                            )
                         }
 
                         else -> {

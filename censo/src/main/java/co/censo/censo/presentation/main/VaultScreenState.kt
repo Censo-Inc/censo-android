@@ -10,7 +10,7 @@ import co.censo.shared.data.model.LockApiResponse
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.model.TimelockApiResponse
-import co.censo.shared.data.model.UpdateSeedPhraseApiResponse
+import co.censo.shared.data.model.UpdateSeedPhraseMetaInfoApiResponse
 
 data class VaultScreenState(
     // owner state
@@ -30,7 +30,7 @@ data class VaultScreenState(
     // api requests
     val userResponse: Resource<GetOwnerUserApiResponse> = Resource.Uninitialized,
     val deleteSeedPhraseResource: Resource<DeleteSeedPhraseApiResponse> = Resource.Uninitialized,
-    val updateSeedPhraseResource: Resource<UpdateSeedPhraseApiResponse> = Resource.Uninitialized,
+    val updateSeedPhraseResource: Resource<UpdateSeedPhraseMetaInfoApiResponse> = Resource.Uninitialized,
     val deleteUserResource: Resource<Unit> = Resource.Uninitialized,
     val lockResponse : Resource<LockApiResponse> = Resource.Uninitialized,
     val resyncCloudAccessRequest : Boolean = false,

@@ -189,8 +189,16 @@ sealed class BeneficiaryStatus {
     @SerialName("Activated")
     data class Activated(
         val confirmedAt: Instant,
+        val approverContactInfo: List<OwnerApproverContactInfo>,
+        val beneficiaryKeyInfo: BeneficiaryKeyInfo,
     ) : BeneficiaryStatus()
 }
+
+@Serializable
+data class OwnerApproverContactInfo(
+    val participantId: ParticipantId,
+    val encryptedContactInfo: Base64EncodedData,
+)
 
 @Serializable
 data class ApproverPublicKey(
@@ -205,6 +213,25 @@ data class Beneficiary(
 )
 
 @Serializable
+data class BeneficiaryKeyInfo(
+    val publicKey: Base58EncodedBeneficiaryPublicKey,
+    val keySignature: Base64EncodedData,
+    val keyTimeMillis: Long,
+)
+
+data class MasterKeyInfo(
+    val publicKey: Base58EncodedMasterPublicKey,
+    val keySignature: Base64EncodedData,
+)
+
+data class OwnerApproverKeyInfo(
+    val participantId: ParticipantId,
+    val deviceKeyId: String,
+    val entropy: Base64EncodedData,
+    val encryptedApproverKey: ByteArray,
+)
+
+@Serializable
 data class Policy(
     val createdAt: Instant,
     val approvers: List<Approver.TrustedApprover>,
@@ -212,15 +239,13 @@ data class Policy(
     val encryptedMasterKey: Base64EncodedData,
     val intermediateKey: Base58EncodedIntermediatePublicKey,
     val approverKeysSignatureByIntermediateKey: Base64EncodedData,
-
     val masterKeySignature: Base64EncodedData?,
     val ownerEntropy: Base64EncodedData?,
     val downgradedAt: Instant?,
     val beneficiary: Beneficiary?,
 
-    val owner: Approver.TrustedApprover? =
-        approvers.firstOrNull { it.isOwner },
-    )
+    val owner: Approver.TrustedApprover? = approvers.firstOrNull { it.isOwner },
+)
 
 @Serializable
 sealed class Access {
@@ -278,6 +303,7 @@ data class SeedPhrase(
     val label: String,
     val type: PhraseType,
     val createdAt: Instant,
+    val encryptedNotes: SeedPhraseEncryptedNotes?,
 )
 
 @Serializable

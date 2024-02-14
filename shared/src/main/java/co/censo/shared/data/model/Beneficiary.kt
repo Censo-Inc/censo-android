@@ -20,6 +20,11 @@ data class InviteBeneficiaryApiResponse(
 )
 
 @Serializable
+data class RemoveBeneficiaryApiResponse(
+    val ownerState: OwnerState,
+)
+
+@Serializable
 data class AcceptBeneficiaryInvitationApiRequest(
     val biometryVerificationId: BiometryVerificationId,
     val biometryData: FacetecBiometry,

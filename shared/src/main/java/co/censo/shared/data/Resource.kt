@@ -50,6 +50,25 @@ sealed class Resource<out T> {
             is Error -> Error(this.exception, this.errorResponse, this.errorCode)
         }
     }
+
+    fun <K> flatMap(f: (T) -> Resource<K>): Resource<K> {
+        return when (this) {
+            is Uninitialized -> Uninitialized
+            is Loading -> Loading
+            is Success -> f(this.data)
+            is Error -> Error(this.exception, this.errorResponse, this.errorCode)
+        }
+    }
+
+    suspend fun <K> flatMapSuspend(f: suspend (T) -> Resource<K>): Resource<K> {
+        return when (this) {
+            is Uninitialized -> Uninitialized
+            is Loading -> Loading
+            is Success -> f(this.data)
+            is Error -> Error(this.exception, this.errorResponse, this.errorCode)
+        }
+    }
+
     fun onSuccess(success: (T) -> Unit) {
         if (this is Success) {
             success(this.data)

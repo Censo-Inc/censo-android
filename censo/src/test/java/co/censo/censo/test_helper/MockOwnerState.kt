@@ -20,7 +20,8 @@ val mockSeedPhrase = SeedPhrase(
     seedPhraseHash = HashedValue(value = ""),
     label = "Dummy Phrase",
     type = PhraseType.Binary,
-    createdAt = Clock.System.now()
+    createdAt = Clock.System.now(),
+    encryptedNotes = null,
 )
 
 val mockReadyOwnerStateWithNullPolicySetup = OwnerState.Ready(
