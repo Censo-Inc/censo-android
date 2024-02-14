@@ -315,8 +315,79 @@ sealed class BeneficiaryPhase {
 
     @Serializable
     @SerialName("Activated")
-    data object Activated : BeneficiaryPhase()
+    data class Activated(
+        val approverContactInfo: List<BeneficiaryApproverContactInfo>,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverAnotherDevice")
+    data object TakeoverAnotherDevice : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverInitiated")
+    data class TakeoverInitiated(
+        val guid: String,
+        val createdAt: Instant,
+        val approverContactInfo: List<BeneficiaryApproverContactInfo>,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverRejected")
+    data class TakeoverRejected(
+        val guid: String,
+        val approverContactInfo: BeneficiaryApproverContactInfo,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverTimelocked")
+    data class TakeoverTimelocked(
+        val guid: String,
+        val unlocksAt: Instant,
+        val approverContactInfo: BeneficiaryApproverContactInfo,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverVerificationPending")
+    data class TakeoverVerificationPending(
+        val guid: String,
+        val approverContactInfo: BeneficiaryApproverContactInfo,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverWaitingForVerificationSignature")
+    data class TakeoverWaitingForVerificationSignature(
+        val guid: String,
+        val approverContactInfo: BeneficiaryApproverContactInfo,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverVerificationSignatureSubmitted")
+    data class TakeoverVerificationSignatureSubmitted(
+        val guid: String,
+        val approverContactInfo: BeneficiaryApproverContactInfo,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverVerificationSignatureRejected")
+    data class TakeoverVerificationSignatureRejected(
+        val guid: String,
+        val approverContactInfo: BeneficiaryApproverContactInfo,
+    ) : BeneficiaryPhase()
+
+    @Serializable
+    @SerialName("TakeoverAvailable")
+    data class TakeoverAvailable(
+        val guid: String,
+    ) : BeneficiaryPhase()
 }
+
+@Serializable
+data class BeneficiaryApproverContactInfo(
+    val participantId: ParticipantId,
+    val label: String,
+    val encryptedContactInfo: Base64EncodedData?,
+)
+
 
 @Serializable
 sealed class AuthenticationReset {
@@ -386,7 +457,7 @@ sealed class OwnerState {
         val entropy: Base64EncodedData,
         val authType: AuthType,
         val phase: BeneficiaryPhase,
-    ) : OwnerState()
+        ) : OwnerState()
 
     @Serializable
     @SerialName("Ready")

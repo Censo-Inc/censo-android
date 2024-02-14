@@ -41,9 +41,11 @@ fun BeneficiaryScreen(
 
         beneficiaryState?.let {
             when (it.phase) {
-                BeneficiaryPhase.Accepted,
-                BeneficiaryPhase.VerificationRejected,
-                BeneficiaryPhase.WaitingForVerification -> {
+                is BeneficiaryPhase.Activated -> {
+                    PostSuccessAction()
+                }
+
+                else -> {
 
                     val verificationStatus = when {
                         it.phase is BeneficiaryPhase.VerificationRejected -> CodeVerificationStatus.Rejected
@@ -58,10 +60,6 @@ fun BeneficiaryScreen(
                         value = state.verificationCode,
                         onValueChanged = viewModel::updateVerificationCode
                     )
-                }
-
-                BeneficiaryPhase.Activated -> {
-                    PostSuccessAction()
                 }
             }
         }

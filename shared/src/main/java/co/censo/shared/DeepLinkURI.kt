@@ -1,5 +1,6 @@
 package co.censo.shared
 
+import ParticipantId
 import co.censo.shared.CensoLink.Companion.CENSO_HOST
 import co.censo.shared.CensoLink.Companion.HOST_INDEX
 import co.censo.shared.CensoLink.Companion.LINK_TYPE_INDEX
@@ -23,8 +24,11 @@ object DeepLinkURI {
     const val OWNER_LOGIN_ID_RESET_URI = "${BuildConfig.OWNER_URL_SCHEME}://reset/"
     const val CENSO_IMPORT_URI = "${BuildConfig.OWNER_URL_SCHEME}://import/v1/"
     const val CENSO_BENEFICIARY_URI = "${BuildConfig.OWNER_URL_SCHEME}://beneficiary/v1/"
+    const val CENSO_TAKEOVER_INITIATION = "${BuildConfig.OWNER_URL_SCHEME}://takeover-initiation/v1/"
 
     fun createBeneficiaryDeeplink(invitationId: String?) = invitationId?.let {  "${CENSO_BENEFICIARY_URI}${invitationId}" }
+
+    fun createTakeoverApproverDeepLink(participantId: String, takeoverId: String) = "${CENSO_TAKEOVER_INITIATION}$participantId/$takeoverId"
 }
 
 fun String.parseLink(): CensoLink {

@@ -19,9 +19,12 @@ import co.censo.shared.data.model.ActivateBeneficiaryApiRequest
 import co.censo.shared.data.model.ActivateBeneficiaryApiResponse
 import co.censo.shared.data.model.ApproveAccessApiRequest
 import co.censo.shared.data.model.ApproveAccessApiResponse
+import co.censo.shared.data.model.ApproveTakeoverInitiationApiRequest
+import co.censo.shared.data.model.ApproveTakeoverInitiationApiResponse
 import co.censo.shared.data.model.AttestationChallengeResponse
 import co.censo.shared.data.model.AuthenticationResetApprovalId
 import co.censo.shared.data.model.CancelAuthenticationResetApiResponse
+import co.censo.shared.data.model.CancelTakeoverApiResponse
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiRequest
 import co.censo.shared.data.model.CompleteOwnerApprovershipApiResponse
 import co.censo.shared.data.model.ConfirmApprovershipApiRequest
@@ -33,6 +36,8 @@ import co.censo.shared.data.model.CreatePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
+import co.censo.shared.data.model.FinalizeTakeoverApiRequest
+import co.censo.shared.data.model.FinalizeTakeoverApiResponse
 import co.censo.shared.data.model.GetApproverUserApiResponse
 import co.censo.shared.data.model.GetImportEncryptedDataApiResponse
 import co.censo.shared.data.model.GetOwnerUserApiResponse
@@ -40,6 +45,7 @@ import co.censo.shared.data.model.GetSeedPhraseApiResponse
 import co.censo.shared.data.model.InitiateAccessApiRequest
 import co.censo.shared.data.model.InitiateAccessApiResponse
 import co.censo.shared.data.model.InitiateAuthenticationResetApiResponse
+import co.censo.shared.data.model.InitiateTakeoverApiResponse
 import co.censo.shared.data.model.InviteBeneficiaryApiRequest
 import co.censo.shared.data.model.InviteBeneficiaryApiResponse
 import co.censo.shared.data.model.LabelOwnerByApproverApiRequest
@@ -50,6 +56,7 @@ import co.censo.shared.data.model.RejectAccessApiResponse
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.RejectAuthenticationResetRequestApiResponse
 import co.censo.shared.data.model.RejectBeneficiaryVerificationApiResponse
+import co.censo.shared.data.model.RejectTakeoverInitiationApiResponse
 import co.censo.shared.data.model.ReplaceAuthenticationApiRequest
 import co.censo.shared.data.model.ReplaceAuthenticationApiResponse
 import co.censo.shared.data.model.ReplacePolicyApiRequest
@@ -62,12 +69,16 @@ import co.censo.shared.data.model.RetrieveAuthTypeApiRequest
 import co.censo.shared.data.model.RetrieveAuthTypeApiResponse
 import co.censo.shared.data.model.RetrieveAccessShardsApiRequest
 import co.censo.shared.data.model.RetrieveAccessShardsApiResponse
+import co.censo.shared.data.model.RetrieveTakeoverKeyApiRequest
+import co.censo.shared.data.model.RetrieveTakeoverKeyApiResponse
 import co.censo.shared.data.model.SetPromoCodeApiRequest
 import co.censo.shared.data.model.SignInApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiRequest
 import co.censo.shared.data.model.StoreAccessTotpSecretApiResponse
 import co.censo.shared.data.model.StoreSeedPhraseApiRequest
 import co.censo.shared.data.model.StoreSeedPhraseApiResponse
+import co.censo.shared.data.model.StoreTakeoverTotpSecretApiRequest
+import co.censo.shared.data.model.StoreTakeoverTotpSecretApiResponse
 import co.censo.shared.data.model.SubmitAccessTotpVerificationApiRequest
 import co.censo.shared.data.model.SubmitAccessTotpVerificationApiResponse
 import co.censo.shared.data.model.SubmitApproverVerificationApiRequest
@@ -78,6 +89,8 @@ import co.censo.shared.data.model.SubmitBeneficiaryVerificationApiRequest
 import co.censo.shared.data.model.SubmitBeneficiaryVerificationApiResponse
 import co.censo.shared.data.model.SubmitPurchaseApiRequest
 import co.censo.shared.data.model.SubmitPurchaseApiResponse
+import co.censo.shared.data.model.SubmitTakeoverTotpVerificationApiRequest
+import co.censo.shared.data.model.SubmitTakeoverTotpVerificationApiResponse
 import co.censo.shared.data.model.TimelockApiResponse
 import co.censo.shared.data.model.UnlockApiRequest
 import co.censo.shared.data.model.UnlockApiResponse
@@ -134,6 +147,7 @@ interface ApiService {
     companion object {
 
         const val INVITATION_ID = "invitationId"
+        const val TAKEOVER_ID = "takeoverId"
         const val PARTICIPANT_ID = "participantId"
         const val CHANNEL = "channel"
         const val APPROVAL_ID = "approvalId"
@@ -499,6 +513,65 @@ interface ApiService {
     suspend fun rejectBeneficiaryVerification(
         @HeaderMap headers: Map<String, String> = enablePlayIntegrity
     ) : RetrofitResponse<RejectBeneficiaryVerificationApiResponse>
+
+    @POST("v1/takeover")
+    suspend fun initiateTakeover(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<InitiateTakeoverApiResponse>
+
+    @DELETE("v1/takeover")
+    suspend fun cancelTakeover(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity
+    ) : RetrofitResponse<CancelTakeoverApiResponse>
+
+    @POST("v1/takeover/{$TAKEOVER_ID}/approval")
+    suspend fun approveTakeoverInitiation(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity,
+        @Path(value = TAKEOVER_ID) takeoverId: String,
+        @Body requestBody: ApproveTakeoverInitiationApiRequest
+    ) : RetrofitResponse<ApproveTakeoverInitiationApiResponse>
+
+    @POST("v1/takeover/{$TAKEOVER_ID}/rejection")
+    suspend fun rejectTakeoverInitiation(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity,
+        @Path(value = TAKEOVER_ID) takeoverId: String,
+    ) : RetrofitResponse<RejectTakeoverInitiationApiResponse>
+
+    @POST("v1/takeover/{$TAKEOVER_ID}/totp")
+    suspend fun storeTakeoverTotpSecret(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity,
+        @Path(value = TAKEOVER_ID) takeoverId: String,
+        @Body requestBody: StoreTakeoverTotpSecretApiRequest
+    ) : RetrofitResponse<StoreTakeoverTotpSecretApiResponse>
+
+    @POST("v1/takeover/totp-verification")
+    suspend fun submitTakeoverTotpVerification(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity,
+        @Body requestBody: SubmitTakeoverTotpVerificationApiRequest
+    ) : RetrofitResponse<SubmitTakeoverTotpVerificationApiResponse>
+
+    @POST("v1/takeover/{$TAKEOVER_ID}/totp-verification/approval")
+    suspend fun approveTakeoverTotpVerification(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity,
+        @Body requestBody: ApproveTakeoverInitiationApiRequest,
+        @Path(value = TAKEOVER_ID) takeoverId: String,
+        ) : RetrofitResponse<ApproveTakeoverInitiationApiResponse>
+
+    @POST("v1/takeover/{$TAKEOVER_ID}/totp-verification/rejection")
+    suspend fun rejectTakeoverTotpVerification(
+        @HeaderMap headers: Map<String, String> = enablePlayIntegrity,
+        @Path(value = TAKEOVER_ID) takeoverId: String,
+    ) : RetrofitResponse<RejectTakeoverInitiationApiResponse>
+
+    @POST("v1/takeover/retrieval")
+    suspend fun retrieveTakeoverKey(
+        @Body requestBody: RetrieveTakeoverKeyApiRequest,
+    ) : RetrofitResponse<RetrieveTakeoverKeyApiResponse>
+
+    @POST("v1/takeover/finalize")
+    suspend fun finalizeTakeover(
+        @Body requestBody: FinalizeTakeoverApiRequest,
+    ) : RetrofitResponse<FinalizeTakeoverApiResponse>
 }
 
 class AnalyticsInterceptor(

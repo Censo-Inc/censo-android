@@ -10,6 +10,7 @@ import co.censo.censo.presentation.Screen.PolicySetupRoute.navToAndPopCurrentDes
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessIntent
+import co.censo.shared.data.model.BeneficiaryPhase
 import co.censo.shared.data.model.GoogleAuthError
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.touVersion
@@ -29,7 +30,6 @@ import com.google.android.gms.tasks.Task
 import com.google.api.services.drive.DriveScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -356,7 +356,15 @@ class OwnerEntranceViewModel @Inject constructor(
 
                     is OwnerState.Empty -> Screen.EntranceRoute.route // can never happen
 
-                    is OwnerState.Beneficiary -> Screen.Beneficiary.route
+                    is OwnerState.Beneficiary -> {
+                        when (ownerState.phase) {
+                            is BeneficiaryPhase.Activated,
+                                is BeneficiaryPhase.TakeoverInitiated,
+                                is BeneficiaryPhase.TakeoverRejected,
+                                is BeneficiaryPhase.TakeoverTimelocked -> Screen.BeneficiaryHome.route
+                            else -> Screen.BeneficiarySetup.route
+                        }
+                    }
                 }
             }
 

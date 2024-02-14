@@ -42,7 +42,7 @@ fun AcceptBeneficiaryInvitationScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.navigateToBeneficiary is Resource.Success) {
-            navController.navigate(Screen.Beneficiary.route)
+            navController.navigate(Screen.BeneficiarySetup.route)
             viewModel.resetNavigation()
         }
 

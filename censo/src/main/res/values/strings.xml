@@ -531,4 +531,18 @@
     <string name="beneficiary_failed_submit_code">Failed to submit verification code. Please try again.</string>
     <string name="beneficiary_cloude_error">In order to become a Beneficiary, we need to store data in your Google Drive.</string>
     <string name="missing_essential_beneficiary_data">Missing essential data to complete beneficiary setup. Please try following link sent by owner to try again.</string>
+    <string name="beneficiary_home_message">You are the beneficiary for someone using Censo to secure their seed phrases.\n\nUsing the button below, you can initiate the takeover process, which, once completed, will give you access to their crypto seed phrases, as well as any instructions they may have left.</string>
+    <string name="settings">Settings</string>
+    <string name="initiate_takeover">Initiate Takeover</string>
+    <string name="takeover_initiatied_message">Takeover initiation requires the approval of one of the two Trusted Approvers on the account.\n\nYou will need to share a link with them, which they will need to tap on or paste into their Approver app.\n\nSelect one of the approvers, and click the Share button.</string>
+    <string name="takeover_initiation_part_one">The takeover initiation was approved by %1$s. Unless it is canceled, the takeover will be ready to complete in</string>
+    <string name="takeover_initiation_part_two">When the timelock period ends, %1$s will have to verify you and then the takeover will be complete.\n\nThis verification should preferably take place either on the phone or in person.</string>
+
+    <string name="takeover_rejected">The takeover initiation was rejected by %1$s.\n\nYou cannot continue with this takeover, but you can cancel and try again.</string>
+    <string name="cancel_takeover">Cancel takeover</string>
+    <string name="some_time">some time</string>
+    <string name="failed_to_initiate_takeover">Failed to initiate takeover. Please try again.</string>
+    <string name="failed_to_cancel_takeover">Failed to cancel takeover. Please try again.</string>
+    <string name="welcome_back_to_censo">Welcome back\nto Censo</string>
+    <string name="contact_information">Contact information:</string>
 </resources>

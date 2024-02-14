@@ -202,7 +202,7 @@ fun SelectingApproverInfoBox(
                 color = if (approved) SharedColors.DisabledGrey else if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(PaddingValues(horizontal = 20.dp, vertical = 12.dp))
             .clickable { onSelect() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
