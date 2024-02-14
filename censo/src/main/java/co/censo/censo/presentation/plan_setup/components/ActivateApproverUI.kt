@@ -51,6 +51,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.components.ApproverStep
 import co.censo.censo.presentation.components.ShareTheCodeUIData
 import co.censo.censo.presentation.components.VerificationCodeUIData
+import co.censo.censo.presentation.main.ApproverInfoBox
 import co.censo.shared.data.model.Approver
 import co.censo.shared.data.model.ApproverStatus
 import co.censo.shared.data.model.deeplink
@@ -180,7 +181,7 @@ fun ActivateApproverUI(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        ProspectApproverInfoBox(
+        ApproverInfoBox(
             nickName = nickName,
             status = approverStatus,
             onEdit = onEditNickname

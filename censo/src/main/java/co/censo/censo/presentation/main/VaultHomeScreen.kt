@@ -215,7 +215,8 @@ private fun buildAddSeedPhraseDisclaimer(
 fun ApproverInfoBox(
     nickName: String,
     status: ApproverStatus?,
-    editEnabled: Boolean = true
+    editEnabled: Boolean = true,
+    onEdit: (() -> Unit)? = null
 ) {
 
     val context = LocalContext.current
@@ -269,7 +270,7 @@ fun ApproverInfoBox(
 
         if (editEnabled) {
 
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { onEdit?.invoke() }) {
                 Icon(
                     painterResource(id = co.censo.shared.R.drawable.edit_icon),
                     contentDescription = stringResource(R.string.edit_approver_name),
