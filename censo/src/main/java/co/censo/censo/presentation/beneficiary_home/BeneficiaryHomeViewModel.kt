@@ -76,6 +76,19 @@ class BeneficiaryHomeViewModel @Inject constructor(
         }
     }
 
+    fun showCancelDialog() {
+        state = state.copy(triggerCancelTakeoverDialog = true)
+    }
+
+    fun dismissCancelDialog() {
+        state = state.copy(triggerCancelTakeoverDialog = false)
+    }
+
+    fun confirmDialog() {
+        dismissCancelDialog()
+        cancelTakeover()
+    }
+
     fun cancelTakeover() {
         if (state.cancelTakeoverResponse is Resource.Loading) return
 

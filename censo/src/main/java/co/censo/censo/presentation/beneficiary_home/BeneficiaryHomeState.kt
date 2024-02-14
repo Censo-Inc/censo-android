@@ -15,6 +15,8 @@ data class BeneficiaryHomeState(
 
     val selectedApprover: BeneficiaryApproverContactInfo? = null,
 
+    val triggerCancelTakeoverDialog: Boolean = false,
+
     //API Calls
     val initiateTakeoverResponse: Resource<InitiateTakeoverApiResponse> = Resource.Uninitialized,
     val cancelTakeoverResponse: Resource<CancelTakeoverApiResponse> = Resource.Uninitialized,
@@ -44,12 +46,12 @@ fun BeneficiaryHomeError.toErrorString(context: Context) =
 
 fun OwnerState.Beneficiary.toBeneficiaryPhraseUIState(): TakeoverUIState =
     when (this.phase) {
-        BeneficiaryPhase.VerificationRejected -> TODO()
-        BeneficiaryPhase.WaitingForVerification -> TODO()
-        BeneficiaryPhase.Accepted,
+        is BeneficiaryPhase.VerificationRejected -> TODO()
+        is BeneficiaryPhase.WaitingForVerification -> TODO()
+        is BeneficiaryPhase.Accepted,
         is BeneficiaryPhase.Activated -> TakeoverUIState.Home
 
-        BeneficiaryPhase.TakeoverAnotherDevice -> TODO()
+        is BeneficiaryPhase.TakeoverAnotherDevice -> TODO()
         is BeneficiaryPhase.TakeoverAvailable -> TODO()
         is BeneficiaryPhase.TakeoverInitiated -> TakeoverUIState.TakeoverInitiated
         is BeneficiaryPhase.TakeoverRejected -> TakeoverUIState.TakeoverRejected

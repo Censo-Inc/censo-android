@@ -3,10 +3,14 @@ package co.censo.censo.presentation.beneficiary_home
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import co.censo.censo.R
 import co.censo.censo.presentation.beneficiary_home.ui.BeneficiaryHomeUI
 import co.censo.censo.presentation.beneficiary_home.ui.SelectTakeoverApproverUI
 import co.censo.censo.presentation.beneficiary_home.ui.TakeoverAcceptedRejectedUI
+import co.censo.censo.presentation.biometry_reset.BiometryResetAction
+import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BeneficiaryPhase
 import co.censo.shared.presentation.components.BasicScreen
@@ -58,7 +62,7 @@ fun BeneficiaryHomeScreen(
                             accepted = false,
                             approverLabel = takeoverRejected.approverContactInfo.label,
                             countdownTime = null,
-                            onCancelTakeover = viewmodel::cancelTakeover
+                            onCancelTakeover = viewmodel::showCancelDialog
                         )
                     }
                 }
@@ -74,6 +78,15 @@ fun BeneficiaryHomeScreen(
                     }
                 }
             }
+        }
+
+        if (state.triggerCancelTakeoverDialog) {
+            YesNoDialog(
+                title = stringResource(R.string.are_you_sure),
+                message = stringResource(R.string.cancel_biometry_reset_dialog),
+                onDismiss =  viewmodel::dismissCancelDialog,
+                onConfirm =  viewmodel::confirmDialog
+            )
         }
     }
 }

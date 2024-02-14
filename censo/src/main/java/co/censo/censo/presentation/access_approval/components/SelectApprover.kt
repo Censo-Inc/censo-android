@@ -38,7 +38,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.censo.shared.data.model.Approver
@@ -185,8 +184,6 @@ fun SelectingApproverInfoBox(
     nickName: String,
     selected: Boolean,
     approved: Boolean,
-    sidePadding: Dp = 36.dp,
-    internalPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
     onSelect: () -> Unit
 ) {
 
@@ -195,7 +192,7 @@ fun SelectingApproverInfoBox(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = sidePadding)
+            .padding(horizontal = 36.dp)
             .background(
                 shape = RoundedCornerShape(12.dp),
                 color = Color.Transparent
@@ -205,7 +202,7 @@ fun SelectingApproverInfoBox(
                 color = if (approved) SharedColors.DisabledGrey else if (selected) SharedColors.MainBorderColor else SharedColors.BorderGrey,
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(internalPadding)
+            .padding(PaddingValues(horizontal = 20.dp, vertical = 12.dp))
             .clickable { onSelect() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

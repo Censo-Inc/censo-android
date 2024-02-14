@@ -98,7 +98,12 @@ fun Instant.timeLeft(): String {
     val hours = (durationInSeconds % (24 * 3600)) / 3600
     val minutes = (durationInSeconds % 3600) / 60
 
-    return "$days days, $hours hours, $minutes minutes"
+    return when {
+        days > 1 -> "$days days"
+        hours > 1 -> "$hours hours"
+        minutes > 1 -> "$minutes minutes"
+        else -> "less than a minute"
+    }
 }
 
 
