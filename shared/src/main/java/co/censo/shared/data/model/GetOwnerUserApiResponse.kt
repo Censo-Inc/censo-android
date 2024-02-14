@@ -15,8 +15,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.bouncycastle.util.encoders.Hex
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class GetOwnerUserApiResponse(
@@ -500,7 +499,12 @@ sealed class OwnerState {
         val authenticationReset: AuthenticationReset?,
         val subscriptionRequired: Boolean,
 
-        val locksAt: Instant? = unlockedForSeconds?.calculateLocksAt(),
+        // StateFlow of owner data conflates values based on `equals`. Update is be skipped when
+        // `unlockedForSeconds` provided from BE happen to be same as previous value.
+        // Resulting Instant should be included into `equals` and `hashCode` checks.
+        val locksAt: Instant? = unlockedForSeconds?.let {
+            Clock.System.now() + it.toLong().seconds
+        }
     ) : OwnerState() {
         fun hasBlockingPhraseAccessRequest(): Boolean {
             return when (access) {
@@ -533,12 +537,6 @@ sealed class OwnerState {
         is Beneficiary -> false
     }
 
-}
-
-fun ULong?.calculateLocksAt(): Instant? {
-    return this?.let {
-        Clock.System.now().plus(it.toLong().toDuration(DurationUnit.SECONDS))
-    }
 }
 
 @Serializable

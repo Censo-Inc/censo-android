@@ -163,7 +163,10 @@ class LockScreenViewModelTest : BaseViewModelTest() {
         whenever(ownerRepository.collectOwnerState(any())).thenAnswer { invocation ->
             collector = invocation.getArgument(0)
             launch {
-                collector.emit(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null))
+                collector.emit(mockReadyOwnerStateWithPolicySetup.copy(
+                    unlockedForSeconds = null,
+                    locksAt = null
+                ))
             }
             return@thenAnswer null
         }
@@ -244,7 +247,10 @@ class LockScreenViewModelTest : BaseViewModelTest() {
             collector = invocation.getArgument(0)
             launch {
                 //Initially we want locked state
-                collector.emit(mockReadyOwnerStateWithPolicySetup.copy(unlockedForSeconds = null))
+                collector.emit(mockReadyOwnerStateWithPolicySetup.copy(
+                    unlockedForSeconds = null,
+                    locksAt = null,
+                ))
             }
             return@thenAnswer null
         }
