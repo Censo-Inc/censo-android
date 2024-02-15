@@ -37,6 +37,7 @@ import co.censo.censo.presentation.components.SimpleAlertDialog
 import co.censo.censo.presentation.components.YesNoDialog
 import co.censo.censo.presentation.components.ImageReview
 import co.censo.censo.presentation.components.SeedPhraseNotesUI
+import co.censo.censo.presentation.components.SeedPhraseNotesUIEntryPoint
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.enter_phrase.components.ReviewSeedPhraseUI
 import co.censo.censo.presentation.enter_phrase.components.indexToWordText
@@ -374,7 +375,7 @@ fun EnterPhraseScreen(
                             SeedPhraseNotesUI(
                                 notes = "", // no initial notes on new seed phrase
                                 onContinue = { notes -> viewModel.storeNotesAndMoveToLabel(notes)},
-                                onContinueButtonText = stringResource(R.string.continue_text)
+                                entryPoint = SeedPhraseNotesUIEntryPoint.AddSeedPhrase,
                             )
                         }
 

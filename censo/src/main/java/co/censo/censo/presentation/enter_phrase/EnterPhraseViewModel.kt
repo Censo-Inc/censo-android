@@ -18,7 +18,7 @@ import co.censo.shared.data.model.BeneficiaryStatus
 import co.censo.shared.data.model.ImportedPhrase
 import co.censo.shared.data.model.InitialKeyData
 import co.censo.shared.data.model.MasterKeyInfo
-import co.censo.shared.data.model.OwnerApproverKeyInfo
+import co.censo.shared.data.model.OwnerApproverEncryptedKeyInfo
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhraseData
 import co.censo.shared.data.networking.IgnoreKeysJson
@@ -302,14 +302,6 @@ class EnterPhraseViewModel @Inject constructor(
 
     fun subscriptionCompleted() {
         loadKey()
-        //We only need to verify master key sig if there is one
-        /*val masterKeySignature = state.masterKeySignature
-        if (masterKeySignature != null || state.notes.isNotBlank()) {
-            //Load the key from the cloud
-            loadKey()
-        } else {
-            storeSeedPhrase(shouldVerifyMasterKeySignature = false)
-        }*/
     }
 
     fun saveSeedPhrase() {
@@ -317,16 +309,7 @@ class EnterPhraseViewModel @Inject constructor(
             showPaywall()
             return
         }
-
         loadKey()
-        //We only need to verify master key sig if there is one
-        /*val masterKeySignature = state.masterKeySignature
-        if (masterKeySignature != null || state.notes.isNotBlank()) {
-            //Load the key from the cloud
-            loadKey()
-        } else {
-            storeSeedPhrase(shouldVerifyMasterKeySignature = false)
-        }*/
     }
 
     private fun storeSeedPhrase(shouldVerifyMasterKeySignature: Boolean) {
@@ -348,7 +331,7 @@ class EnterPhraseViewModel @Inject constructor(
                 notes = state.notes.trim(),
                 encryptedSeedPhrase = state.encryptedSeedPhrase!!,
                 shouldVerifyMasterKeySignature = shouldVerifyMasterKeySignature,
-                ownerApproverKeyInfo = OwnerApproverKeyInfo(
+                ownerApproverEncryptedKeyInfo = OwnerApproverEncryptedKeyInfo(
                     participantId = state.ownerApproverParticipantId!!,
                     deviceKeyId = keyRepository.retrieveSavedDeviceId(),
                     entropy = ownerPolicy.ownerEntropy!!,

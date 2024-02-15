@@ -1,5 +1,8 @@
 package co.censo.censo.presentation.main
 
+import Base64EncodedData
+import ParticipantId
+import SeedPhraseId
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,8 +13,11 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.Access
 import co.censo.shared.data.model.AccessStatus
 import co.censo.shared.data.model.ApproverStatus
+import co.censo.shared.data.model.MasterKeyInfo
+import co.censo.shared.data.model.OwnerApproverEncryptedKeyInfo
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhrase
+import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.repository.PushRepository
 import co.censo.shared.util.VaultCountDownTimer
@@ -36,6 +42,7 @@ enum class AccessButtonLabelEnum {
 class VaultScreenViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val pushRepository: PushRepository,
+    private val keyRepository: KeyRepository,
     private val timer: VaultCountDownTimer,
 ) : ViewModel() {
 
@@ -44,7 +51,7 @@ class VaultScreenViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            onOwnerState(ownerRepository.getOwnerStateValue(), updateGlobalState = false)
+            onOwnerState(ownerRepository.getOwnerStateValue())
         }
     }
 
@@ -146,6 +153,10 @@ class VaultScreenViewModel @Inject constructor(
 
     fun resetShowRenamePhase() {
         state = state.copy(showRenamePhrase = Resource.Uninitialized)
+    }
+
+    fun resetShowPhraseNotes() {
+        state = state.copy(showPhraseNotes = Resource.Uninitialized)
     }
 
     fun determinePolicyModificationRoute(): String {
@@ -293,7 +304,7 @@ class VaultScreenViewModel @Inject constructor(
         }
     }
 
-    private fun onOwnerState(ownerState: OwnerState, updateGlobalState: Boolean = true) {
+    private fun onOwnerState(ownerState: OwnerState) {
         state = when (ownerState) {
             is OwnerState.Ready -> {
                 state.copy(ownerState = ownerState)
@@ -306,9 +317,7 @@ class VaultScreenViewModel @Inject constructor(
             }
         }
 
-        if (updateGlobalState) {
-            ownerRepository.updateOwnerState(ownerState)
-        }
+        ownerRepository.updateOwnerState(ownerState)
     }
 
     fun accessTimelockExpiration(): Instant? {
@@ -356,6 +365,56 @@ class VaultScreenViewModel @Inject constructor(
             label = seedPhrase.label,
             showRenamePhrase = Resource.Success(seedPhrase),
         )
+    }
+
+    fun showSeedPhraseNotes(seedPhrase: SeedPhrase) {
+        state = state.copy(showPhraseNotes = Resource.Loading)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val ownerEntropy = state.ownerState!!.policy.ownerEntropy!!
+            val participantId = state.ownerState!!.policy.owner!!.participantId
+
+            val decryptNotesResult = retrieveOwnerApproverKeyInfo(participantId, ownerEntropy)
+                    .flatMapSuspend { ownerKeyInfo ->
+                        ownerRepository.decryptSeedPhraseMetaInfo(
+                            seedPhrase = seedPhrase,
+                            ownerApproverEncryptedKeyInfo = ownerKeyInfo
+                        )
+                    }
+
+            state = state.copy(showPhraseNotes = decryptNotesResult)
+        }
+    }
+
+    fun updateSeedPhraseNotes(guid: SeedPhraseId, notes: String) {
+        state = state.copy(
+            showPhraseNotes = Resource.Uninitialized,
+            updateSeedPhraseResource = Resource.Loading
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val ownerEntropy = state.ownerState!!.policy.ownerEntropy!!
+            val participantId = state.ownerState!!.policy.owner!!.participantId
+            val masterPublicKey = state.ownerState!!.vault.publicMasterEncryptionKey
+            val masterPublicKeySignature = state.ownerState!!.policy.masterKeySignature
+
+            val updateNotesResult = retrieveOwnerApproverKeyInfo(participantId, ownerEntropy)
+                .flatMapSuspend { ownerKeyInfo ->
+                    ownerRepository.updateSeedPhraseNotes(
+                        guid = guid,
+                        notes = notes,
+                        ownerApproverEncryptedKeyInfo = ownerKeyInfo,
+                        masterKeyInfo = MasterKeyInfo(
+                            publicKey = masterPublicKey,
+                            keySignature = masterPublicKeySignature ?: Base64EncodedData("") // FIXME remove fallback after VAULT-875
+                        )
+                    )
+                }
+
+            updateNotesResult.onSuccess { onOwnerState(it.ownerState) }
+
+            state = state.copy(updateSeedPhraseResource = updateNotesResult)
+        }
     }
 
     fun updateLabel(updatedLabel: String) {
@@ -481,5 +540,17 @@ class VaultScreenViewModel @Inject constructor(
 
     fun resetDeletePolicySetupResource() {
         state = state.copy(deletePolicySetup = Resource.Uninitialized)
+    }
+
+    private suspend fun retrieveOwnerApproverKeyInfo(participantId: ParticipantId, ownerEntropy: Base64EncodedData): Resource<OwnerApproverEncryptedKeyInfo> {
+        return keyRepository.retrieveKeyFromCloudAwaitPermissions(participantId.value)
+            .map { encryptedKey ->
+                OwnerApproverEncryptedKeyInfo(
+                    participantId = participantId,
+                    deviceKeyId = keyRepository.retrieveSavedDeviceId(),
+                    entropy = ownerEntropy,
+                    encryptedApproverKey = encryptedKey
+                )
+            }
     }
 }

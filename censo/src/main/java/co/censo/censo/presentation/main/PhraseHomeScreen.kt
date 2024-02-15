@@ -22,7 +22,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -66,6 +68,7 @@ fun PhraseHomeScreen(
     seedPhrases: List<SeedPhrase>,
     onAddClick: () -> Unit,
     onAccessClick: () -> Unit,
+    onPhraseNotesClick: (SeedPhrase) -> Unit,
     onRenamePhraseClick: (SeedPhrase) -> Unit,
     onDeletePhraseClick: (SeedPhrase) -> Unit,
     onCancelAccessClick: () -> Unit,
@@ -93,12 +96,9 @@ fun PhraseHomeScreen(
                     SeedPhraseItem(
                         seedPhrase = seedPhrase,
                         isEditable = true,
-                        onRename = {
-                            onRenamePhraseClick(seedPhrase)
-                        },
-                        onDelete = {
-                            onDeletePhraseClick(seedPhrase)
-                        }
+                        onNotes = { onPhraseNotesClick(seedPhrase) },
+                        onRename = { onRenamePhraseClick(seedPhrase) },
+                        onDelete = { onDeletePhraseClick(seedPhrase) },
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -219,8 +219,9 @@ fun SeedPhraseItem(
     seedPhrase: SeedPhrase,
     isEditable: Boolean = false,
     isSelected: Boolean = false,
-    missingNotesBadge: Boolean = false,
+    hasNotes: Boolean = false,
     onClick: (() -> Unit)? = null,
+    onNotes: (() -> Unit)? = null,
     onRename: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null
 ) {
@@ -248,14 +249,9 @@ fun SeedPhraseItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Box {
-                Row(
-                    modifier = modifier.height(120.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
             Image(
-                modifier = Modifier.height(42.dp)
+                modifier = Modifier
+                    .height(42.dp)
                     .padding(horizontal = 16.dp)
                     .weight(.45f),
                 painter = painterResource(id = when (seedPhrase.type) {
@@ -284,78 +280,51 @@ fun SeedPhraseItem(
                 color = if (isSelected) SharedColors.SuccessGreen else SharedColors.MainColorText
             )
 
-                    if (isEditable) {
-                        Box(
-                            modifier = Modifier
-                                .background(color = Color.White)
-                                .padding(end = 6.dp)
-                                .weight(0.25f)
-                                .wrapContentSize(Alignment.TopEnd)
-                        ) {
-                            Icon(
-                                painterResource(id = co.censo.shared.R.drawable.edit_icon),
-                                modifier = Modifier
-                                    .clickable { expanded = true }
-                                    .size(36.dp),
-                                contentDescription = stringResource(R.string.edit_phrase),
-                                tint = SharedColors.MainIconColor
-                            )
-                            DropdownMenu(
-                                modifier = Modifier.background(color = Color.White),
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }) {
-                                DropdownMenuItem(
-                                    modifier = Modifier.padding(
-                                        start = 4.dp,
-                                        top = 8.dp,
-                                        bottom = 8.dp,
-                                        end = 24.dp
-                                    ),
-                                    text = {
-                                        Text(
-                                            stringResource(id = R.string.rename),
-                                            fontSize = 20.sp,
-                                            color = Color.Black
-                                        )
-                                    },
-                                    onClick = {
-                                        onRename?.let { it() }
-                                        expanded = false
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    modifier = Modifier.padding(
-                                        start = 4.dp,
-                                        top = 8.dp,
-                                        bottom = 8.dp,
-                                        end = 24.dp
-                                    ),
-                                    text = {
-                                        Text(
-                                            stringResource(id = R.string.delete),
-                                            fontSize = 20.sp,
-                                            color = Color.Red
-                                        )
-                                    },
-                                    onClick = {
-                                        onDelete?.let { it() }
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (missingNotesBadge) {
-                    Text(
-                        text = "NO NOTES",
+            if (isEditable) {
+                Box(
+                    modifier = Modifier
+                        .background(color = Color.White)
+                        .padding(end = 8.dp)
+                        .weight(0.25f)
+                        .wrapContentSize(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 6.dp, end = 12.dp),
-                        color = SharedColors.GreyText,
-                        fontSize = 10.sp
+                            .clickable { expanded = true }
+                            .size(36.dp),
+                        contentDescription = stringResource(R.string.edit_phrase),
+                        tint = SharedColors.MainIconColor
                     )
+                    DropdownMenu(
+                        modifier = Modifier.background(color = Color.White),
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }) {
+                        DropdownMenuItem(
+                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                            text = { Text(stringResource(R.string.notes), fontSize = 20.sp, color = Color.Black) },
+                            onClick = {
+                                onNotes?.invoke()
+                                expanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                            text = { Text(stringResource(id = R.string.rename), fontSize = 20.sp, color = Color.Black) },
+                            onClick = {
+                                onRename?.invoke()
+                                expanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
+                            text = { Text(stringResource(id = R.string.delete), fontSize = 20.sp, color = Color.Red) },
+                            onClick = {
+                                onDelete?.invoke()
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -367,7 +336,10 @@ fun SeedPhraseItem(
                     .size(48.dp)
                     .weight(0.25f)
                     .align(Alignment.CenterVertically),
-                imageVector = Icons.Filled.ChevronRight,
+                imageVector = when (hasNotes) {
+                    true -> Icons.Filled.ChevronRight
+                    false -> Icons.Filled.Add
+                },
                 contentDescription = stringResource(R.string.select_phrase_cont_description),
                 tint = SharedColors.MainIconColor
             )
@@ -420,6 +392,7 @@ fun PreviewPhraseHomeScreenWithTimelock() {
                 encryptedNotes = null,
             ),
         ),
+        onPhraseNotesClick = {},
         onRenamePhraseClick = {},
         onDeletePhraseClick = {},
         onCancelAccessClick = {},
@@ -477,6 +450,7 @@ fun PreviewPhraseHomeScreenNoTimelock() {
                 encryptedNotes = null,
             ),
         ),
+        onPhraseNotesClick = {},
         onRenamePhraseClick = {},
         onDeletePhraseClick = {},
         onCancelAccessClick = {},

@@ -57,7 +57,7 @@ fun SelectSeedPhraseUI(
                     Spacer(modifier = Modifier.height(12.dp))
                     SeedPhraseItem(
                         seedPhrase = seedPhrase,
-                        missingNotesBadge = seedPhrase.encryptedNotes == null,
+                        hasNotes = seedPhrase.encryptedNotes != null,
                         onClick = {
                             onSeedPhraseSelected(seedPhrase)
                         },

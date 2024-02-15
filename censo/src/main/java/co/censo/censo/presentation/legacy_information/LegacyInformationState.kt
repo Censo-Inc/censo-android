@@ -9,7 +9,7 @@ import co.censo.shared.data.model.DecryptedApproverContactInfo
 import co.censo.shared.data.model.DecryptedSeedPhraseNotes
 import co.censo.shared.data.model.MasterKeyInfo
 import co.censo.shared.data.model.OwnerApproverContactInfo
-import co.censo.shared.data.model.OwnerApproverKeyInfo
+import co.censo.shared.data.model.OwnerApproverEncryptedKeyInfo
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.model.UpdateBeneficiaryApproverContactInfoApiResponse
 import co.censo.shared.data.model.UpdateSeedPhraseMetaInfoApiResponse
@@ -20,7 +20,7 @@ import kotlinx.coroutines.CompletableDeferred
 data class LegacyInformationState(
     //data
     val ownerData: OwnerData? = null,
-    val ownerKeyCompletable: CompletableDeferred<OwnerApproverKeyInfo> = CompletableDeferred(),
+    val ownerKeyCompletable: CompletableDeferred<OwnerApproverEncryptedKeyInfo> = CompletableDeferred(),
 
     // ui state
     val uiState: UIState = UIState.Information,

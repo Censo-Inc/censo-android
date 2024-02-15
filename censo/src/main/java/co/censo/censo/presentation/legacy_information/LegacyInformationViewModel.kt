@@ -11,7 +11,7 @@ import co.censo.shared.data.Resource
 import co.censo.shared.data.model.BeneficiaryStatus
 import co.censo.shared.data.model.DecryptedApproverContactInfo
 import co.censo.shared.data.model.MasterKeyInfo
-import co.censo.shared.data.model.OwnerApproverKeyInfo
+import co.censo.shared.data.model.OwnerApproverEncryptedKeyInfo
 import co.censo.shared.data.model.OwnerState
 import co.censo.shared.data.model.SeedPhrase
 import co.censo.shared.data.repository.KeyRepository
@@ -45,7 +45,7 @@ class LegacyInformationViewModel @Inject constructor(
             val keyRetrievalResult = keyRepository.retrieveKeyFromCloudAwaitPermissions(state.ownerData!!.participantId.value)
             if (keyRetrievalResult is Resource.Success) {
                 state.ownerKeyCompletable.complete(
-                    OwnerApproverKeyInfo(
+                    OwnerApproverEncryptedKeyInfo(
                         participantId = state.ownerData!!.participantId,
                         deviceKeyId = keyRepository.retrieveSavedDeviceId(),
                         entropy = state.ownerData!!.entropy,
@@ -99,7 +99,7 @@ class LegacyInformationViewModel @Inject constructor(
             val approversContactInfo = ownerRepository.decryptApproverContactInfo(
                 approvers = ownerData.approvers,
                 approverContactInfo = ownerData.approverContactInfo,
-                ownerApproverKeyInfo = state.ownerKeyCompletable.await()
+                ownerApproverEncryptedKeyInfo = state.ownerKeyCompletable.await()
             )
 
             if (approversContactInfo is Resource.Success) {
@@ -127,7 +127,7 @@ class LegacyInformationViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val seedPhraseInfo = ownerRepository.decryptSeedPhraseMetaInfo(
                 seedPhrase = seedPhrase,
-                ownerApproverKeyInfo = state.ownerKeyCompletable.await(),
+                ownerApproverEncryptedKeyInfo = state.ownerKeyCompletable.await(),
             )
 
             if (seedPhraseInfo is Resource.Success) {
@@ -151,7 +151,7 @@ class LegacyInformationViewModel @Inject constructor(
 
             val updateResult = ownerRepository.updateBeneficiaryApproverContactInfo(
                 clearTextApproverContacts = approverContactInfo.filter { it.contactInfo.isNotBlank() },
-                ownerApproverKeyInfo = state.ownerKeyCompletable.await(),
+                ownerApproverEncryptedKeyInfo = state.ownerKeyCompletable.await(),
                 beneficiaryKeyInfo = ownerData.beneficiaryKeyInfo,
                 masterKeyInfo = ownerData.masterKeyInfo
             )
@@ -176,7 +176,7 @@ class LegacyInformationViewModel @Inject constructor(
                 notes.isNotBlank() -> ownerRepository.updateSeedPhraseNotes(
                     guid = guid,
                     notes = notes,
-                    ownerApproverKeyInfo = state.ownerKeyCompletable.await(),
+                    ownerApproverEncryptedKeyInfo = state.ownerKeyCompletable.await(),
                     masterKeyInfo = state.ownerData!!.masterKeyInfo
                 )
 

@@ -29,6 +29,8 @@ import co.censo.censo.R
 import co.censo.censo.presentation.Screen
 import co.censo.censo.presentation.beneficiary_owner.BeneficiaryHomeScreen
 import co.censo.censo.presentation.components.DeleteUserConfirmationUI
+import co.censo.censo.presentation.components.SeedPhraseNotesUI
+import co.censo.censo.presentation.components.SeedPhraseNotesUIEntryPoint
 import co.censo.censo.presentation.enter_phrase.components.AddPhraseLabelUI
 import co.censo.censo.presentation.push_notification.PushNotificationScreen
 import co.censo.shared.data.Resource
@@ -157,10 +159,14 @@ fun MainVaultScreen(
         topBar = {
             VaultTopBar(
                 bottomNavItem = selectedBottomNavItem.value,
+                seedPhraseLabel = (state.showPhraseNotes as? Resource.Success)?.data?.label,
                 showClose = state.showClose,
                 onDismiss = {
                     if (state.showRenamePhrase is Resource.Success) {
                         viewModel.resetShowRenamePhase()
+                    }
+                    if (state.showPhraseNotes is Resource.Success) {
+                        viewModel.resetShowPhraseNotes()
                     }
                     if (showInfoView.value) {
                         showInfoView.value = false
@@ -290,6 +296,14 @@ fun MainVaultScreen(
                                 retryAction = null
                             )
                         }
+
+                        state.showPhraseNotes is Resource.Error -> {
+                            DisplayError(
+                                errorMessage = state.showPhraseNotes.getErrorMessage(context),
+                                dismissAction = viewModel::resetRemoveApprovers,
+                                retryAction = null
+                            )
+                        }
                     }
                 }
 
@@ -349,6 +363,17 @@ fun MainVaultScreen(
                                     onSavePhrase = viewModel::renameSeedPhrase,
                                     isRename = true
                                 )
+                            } else if (state.showPhraseNotes is Resource.Success) {
+                                SeedPhraseNotesUI(
+                                    notes = state.showPhraseNotes.data.notes,
+                                    onContinue = { updatedNotes ->
+                                        viewModel.updateSeedPhraseNotes(
+                                            state.showPhraseNotes.data.guid,
+                                            updatedNotes
+                                        )
+                                    },
+                                    entryPoint = SeedPhraseNotesUIEntryPoint.EditSeedPhrase,
+                                )
                             } else {
                                 PhraseHomeScreen(
                                     seedPhrases = state.ownerState?.vault?.seedPhrases
@@ -368,6 +393,9 @@ fun MainVaultScreen(
                                                 intent = AccessIntent.AccessPhrases
                                             )
                                         )
+                                    },
+                                    onPhraseNotesClick = { seedPhrase ->
+                                        viewModel.showSeedPhraseNotes(seedPhrase)
                                     },
                                     onRenamePhraseClick = { seedPhrase ->
                                         viewModel.showRenamePhrase(seedPhrase)

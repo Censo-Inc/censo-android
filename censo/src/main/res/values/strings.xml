@@ -533,10 +533,10 @@
     <string name="missing_essential_beneficiary_data">Missing essential data to complete beneficiary setup. Please try following link sent by owner to try again.</string>
     <string name="your_beneficiary_may_need_additional_information">Your beneficiary may need additional information about your approvers and your seed phrases</string>
     <string name="provide_information">Provide information</string>
-    <string name="save_information">Save information</string>
     <string name="enter_contact_information">Enter contact information</string>
     <string name="legacy_information_landing_message">To ensure that your beneficiaries can access your seed phrases in case of unforeseen circumstances, you can provide additional information about your approvers and your seed phrases.\n\nThe information about your approvers is visible to only you and your beneficiary, and only you may edit it.\n\nThe information about your seed phrases is visible and editable only to you until your beneficiary successfully completes the takeover process, and then will be visible only to your beneficiary.</string>
-    <string name="seed_phrase_notes_field_placeholder_text">Provide any information which your beneficiary might need to access your crypto.\n\nFor example, you might want to provide the chains and wallets this phrase is used in, or specific tokens or dApps of interest.</string>
+    <string name="seed_phrase_notes_legacy_placeholder_text">Provide any information which your beneficiary might need to access your crypto.\n\nFor example, you might want to provide the chains and wallets this phrase is used in, or specific tokens or dApps of interest.</string>
+    <string name="seed_phrase_notes_owner_placeholder_text">Provide any information which you might need to access your crypto.\n\nFor example, you might want to provide the chains and wallets this phrase is used in, or specific tokens or dApps of interest.</string>
     <string name="legacy_information_type_approver_message">Your beneficiary will need the assistance of your approvers to takeover your account. Provide any necessary contact information for your approvers.</string>
     <string name="approver_information">Approver information</string>
     <string name="legacy_information_type_seed_phrase_message">You can also provide additional information about your seed phrases to ensure your beneficiary will be able to access your assets.</string>
@@ -558,4 +558,5 @@
     <string name="failed_to_cancel_takeover">Failed to cancel takeover. Please try again.</string>
     <string name="welcome_back_to_censo">Welcome back\nto Censo</string>
     <string name="contact_information">Contact information:</string>
+    <string name="notes">Notes</string>
 </resources>

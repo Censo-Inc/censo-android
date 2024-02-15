@@ -223,7 +223,7 @@ data class MasterKeyInfo(
     val keySignature: Base64EncodedData,
 )
 
-data class OwnerApproverKeyInfo(
+data class OwnerApproverEncryptedKeyInfo(
     val participantId: ParticipantId,
     val deviceKeyId: String,
     val entropy: Base64EncodedData,

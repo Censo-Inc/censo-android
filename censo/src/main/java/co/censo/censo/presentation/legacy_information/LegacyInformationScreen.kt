@@ -31,6 +31,7 @@ import co.censo.censo.R
 import co.censo.censo.presentation.legacy_information.components.ApproversContactInfoUI
 import co.censo.censo.presentation.legacy_information.components.LegacyInfoUI
 import co.censo.censo.presentation.components.SeedPhraseNotesUI
+import co.censo.censo.presentation.components.SeedPhraseNotesUIEntryPoint
 import co.censo.censo.presentation.legacy_information.components.SelectInfoTypeUI
 import co.censo.censo.presentation.legacy_information.components.SelectSeedPhraseUI
 import co.censo.shared.data.Resource
@@ -181,7 +182,7 @@ fun LegacyInformationScreen(
                             SeedPhraseNotesUI(
                                 notes = uiState.seedPhrase.notes,
                                 onContinue = { notes -> viewModel.saveSeedPhraseInformation(uiState.seedPhrase.guid, notes) },
-                                onContinueButtonText = stringResource(R.string.save_information)
+                                entryPoint = SeedPhraseNotesUIEntryPoint.LegacyInformation,
                             )
                         }
                     }

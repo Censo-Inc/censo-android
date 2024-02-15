@@ -2,6 +2,7 @@ package co.censo.censo.presentation.main
 
 import co.censo.censo.presentation.enter_phrase.EnterPhraseState
 import co.censo.shared.data.Resource
+import co.censo.shared.data.model.DecryptedSeedPhraseNotes
 import co.censo.shared.data.model.DeleteAccessApiResponse
 import co.censo.shared.data.model.DeletePolicySetupApiResponse
 import co.censo.shared.data.model.DeleteSeedPhraseApiResponse
@@ -19,6 +20,7 @@ data class VaultScreenState(
     val triggerDeleteUserDialog: Resource<Unit> = Resource.Uninitialized,
     val triggerDeletePhraseDialog: Resource<SeedPhrase> = Resource.Uninitialized,
     val showRenamePhrase: Resource<SeedPhrase> = Resource.Uninitialized,
+    val showPhraseNotes: Resource<DecryptedSeedPhraseNotes> = Resource.Uninitialized,
 
     // toast
     val syncCloudAccessMessage: Resource<SyncCloudAccessMessage> = Resource.Uninitialized,
@@ -65,6 +67,7 @@ data class VaultScreenState(
             enableTimelockResource is Resource.Loading ||
             disableTimelockResource is Resource.Loading ||
             cancelDisableTimelockResource is Resource.Loading ||
+            showPhraseNotes is Resource.Loading ||
             kickUserOut is Resource.Success
 
     val asyncError = userResponse is Resource.Error ||
@@ -78,12 +81,13 @@ data class VaultScreenState(
                 cancelDisableTimelockResource is Resource.Error ||
                 cancelAccessResource is Resource.Error ||
                 showAddApproversUI is Resource.Error ||
-                removeApprovers is Resource.Error
+                removeApprovers is Resource.Error ||
+                showPhraseNotes is Resource.Error
 
     val labelIsTooLong = label.length > EnterPhraseState.PHRASE_LABEL_MAX_LENGTH
     val labelValid = label.isNotEmpty() && !labelIsTooLong
 
-    val showClose = showAddApproversUI is Resource.Success || showRenamePhrase is Resource.Success
+    val showClose = showAddApproversUI is Resource.Success || showRenamePhrase is Resource.Success || showPhraseNotes is Resource.Success
 }
 
 enum class SyncCloudAccessMessage {

@@ -75,7 +75,7 @@ fun ApproversContactInfoUI(
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp)
         ) {
             Text(
-                text = stringResource(R.string.save_information),
+                text = stringResource(R.string.save),
                 style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
             )
         }

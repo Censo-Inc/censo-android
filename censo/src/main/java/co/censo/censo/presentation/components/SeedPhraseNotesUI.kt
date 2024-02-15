@@ -35,11 +35,15 @@ import co.censo.censo.R
 import co.censo.shared.presentation.ButtonTextStyle
 import co.censo.shared.presentation.SharedColors
 
+enum class SeedPhraseNotesUIEntryPoint {
+    LegacyInformation, AddSeedPhrase, EditSeedPhrase
+}
+
 @Composable
 fun SeedPhraseNotesUI(
     notes: String,
     onContinue: (String) -> Unit,
-    onContinueButtonText: String,
+    entryPoint: SeedPhraseNotesUIEntryPoint,
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val verticalSpacingHeight = screenHeight * 0.025f
@@ -85,7 +89,12 @@ fun SeedPhraseNotesUI(
 
                     if (seedPhraseInfoState.value.isEmpty()) {
                         Text(
-                            text = stringResource(R.string.seed_phrase_notes_field_placeholder_text),
+                            text = when (entryPoint) {
+                                SeedPhraseNotesUIEntryPoint.LegacyInformation -> stringResource(R.string.seed_phrase_notes_legacy_placeholder_text)
+
+                                SeedPhraseNotesUIEntryPoint.AddSeedPhrase,
+                                SeedPhraseNotesUIEntryPoint.EditSeedPhrase -> stringResource(R.string.seed_phrase_notes_owner_placeholder_text)
+                            },
                             style = TextStyle(
                                 fontSize = 20.sp,
                                 color = Color.Gray
@@ -105,7 +114,12 @@ fun SeedPhraseNotesUI(
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 20.dp)
         ) {
             Text(
-                text = onContinueButtonText,
+                text = when (entryPoint) {
+                    SeedPhraseNotesUIEntryPoint.AddSeedPhrase -> stringResource(R.string.continue_text)
+
+                    SeedPhraseNotesUIEntryPoint.LegacyInformation,
+                    SeedPhraseNotesUIEntryPoint.EditSeedPhrase -> stringResource(R.string.save)
+                },
                 style = ButtonTextStyle.copy(fontSize = 20.sp, fontWeight = FontWeight.W400)
             )
         }
@@ -121,7 +135,7 @@ fun LargeSeedPhraseNotesUI() {
     SeedPhraseNotesUI(
         notes = "Yankee Hotel Foxtrot",
         onContinue = {},
-        onContinueButtonText = "Save information"
+        entryPoint = SeedPhraseNotesUIEntryPoint.LegacyInformation,
     )
 }
 
@@ -131,7 +145,7 @@ fun MediumSeedPhraseNotesUI() {
     SeedPhraseNotesUI(
         notes = "Yankee Hotel Foxtrot",
         onContinue = {},
-        onContinueButtonText = "Save information"
+        entryPoint = SeedPhraseNotesUIEntryPoint.AddSeedPhrase,
     )
 }
 
@@ -141,6 +155,6 @@ fun SmallSeedPhraseNotesUI() {
     SeedPhraseNotesUI(
         notes = "Yankee Hotel Foxtrot",
         onContinue = {},
-        onContinueButtonText = "Save information"
+        entryPoint = SeedPhraseNotesUIEntryPoint.EditSeedPhrase,
     )
 }

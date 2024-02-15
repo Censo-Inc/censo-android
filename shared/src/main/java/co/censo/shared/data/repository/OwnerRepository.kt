@@ -68,7 +68,7 @@ import co.censo.shared.data.model.InviteBeneficiaryApiRequest
 import co.censo.shared.data.model.InviteBeneficiaryApiResponse
 import co.censo.shared.data.model.MasterKeyInfo
 import co.censo.shared.data.model.OwnerApproverContactInfo
-import co.censo.shared.data.model.OwnerApproverKeyInfo
+import co.censo.shared.data.model.OwnerApproverEncryptedKeyInfo
 import co.censo.shared.data.model.OwnerProof
 import co.censo.shared.data.model.RejectApproverVerificationApiResponse
 import co.censo.shared.data.model.RejectBeneficiaryVerificationApiResponse
@@ -263,7 +263,7 @@ interface OwnerRepository {
         notes: String?,
         encryptedSeedPhrase: EncryptedSeedPhrase,
         shouldVerifyMasterKeySignature: Boolean,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
         masterKeyInfo: MasterKeyInfo
     ): Resource<StoreSeedPhraseApiResponse>
 
@@ -277,7 +277,7 @@ interface OwnerRepository {
     suspend fun updateSeedPhraseNotes(
         guid: SeedPhraseId,
         notes: String,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
         masterKeyInfo: MasterKeyInfo,
     ): Resource<UpdateSeedPhraseMetaInfoApiResponse>
 
@@ -347,7 +347,7 @@ interface OwnerRepository {
     suspend fun rejectBeneficiaryVerification(): Resource<RejectBeneficiaryVerificationApiResponse>
     suspend fun updateBeneficiaryApproverContactInfo(
         clearTextApproverContacts: List<DecryptedApproverContactInfo>,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
         beneficiaryKeyInfo: BeneficiaryKeyInfo,
         masterKeyInfo: MasterKeyInfo
     ): Resource<UpdateBeneficiaryApproverContactInfoApiResponse>
@@ -355,12 +355,12 @@ interface OwnerRepository {
     suspend fun decryptApproverContactInfo(
         approvers: List<Approver.TrustedApprover>,
         approverContactInfo: List<OwnerApproverContactInfo>,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo
     ): Resource<List<DecryptedApproverContactInfo>>
 
     suspend fun decryptSeedPhraseMetaInfo(
         seedPhrase: SeedPhrase,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
     ): Resource<DecryptedSeedPhraseNotes>
 }
 
@@ -849,13 +849,13 @@ class OwnerRepositoryImpl(
         notes: String?,
         encryptedSeedPhrase: EncryptedSeedPhrase,
         shouldVerifyMasterKeySignature: Boolean,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
         masterKeyInfo: MasterKeyInfo
     ): Resource<StoreSeedPhraseApiResponse> {
         return runCatching {
-            val ownerApproverKey = ownerApproverKeyInfo.encryptedApproverKey.decryptWithEntropy(
-                deviceKeyId = ownerApproverKeyInfo.deviceKeyId,
-                entropy = ownerApproverKeyInfo.entropy
+            val ownerApproverKey = ownerApproverEncryptedKeyInfo.encryptedApproverKey.decryptWithEntropy(
+                deviceKeyId = ownerApproverEncryptedKeyInfo.deviceKeyId,
+                entropy = ownerApproverEncryptedKeyInfo.entropy
             ).toEncryptionKey()
 
             if (shouldVerifyMasterKeySignature && !ownerApproverKey.masterKeySignatureIsValid(masterKeyInfo)) {
@@ -905,13 +905,13 @@ class OwnerRepositoryImpl(
     override suspend fun updateSeedPhraseNotes(
         guid: SeedPhraseId,
         notes: String,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
         masterKeyInfo: MasterKeyInfo,
     ): Resource<UpdateSeedPhraseMetaInfoApiResponse> {
         return runCatching {
-            val ownerApproverKey = ownerApproverKeyInfo.encryptedApproverKey.decryptWithEntropy(
-                        deviceKeyId = ownerApproverKeyInfo.deviceKeyId,
-                        entropy = ownerApproverKeyInfo.entropy
+            val ownerApproverKey = ownerApproverEncryptedKeyInfo.encryptedApproverKey.decryptWithEntropy(
+                        deviceKeyId = ownerApproverEncryptedKeyInfo.deviceKeyId,
+                        entropy = ownerApproverEncryptedKeyInfo.entropy
                     ).toEncryptionKey()
 
             val masterKeyVerified = ownerApproverKey.masterKeySignatureIsValid(masterKeyInfo)
@@ -1216,14 +1216,14 @@ class OwnerRepositoryImpl(
 
     override suspend fun updateBeneficiaryApproverContactInfo(
         clearTextApproverContacts: List<DecryptedApproverContactInfo>,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
         beneficiaryKeyInfo: BeneficiaryKeyInfo,
         masterKeyInfo: MasterKeyInfo
     ): Resource<UpdateBeneficiaryApproverContactInfoApiResponse> {
         return runCatching {
-            val ownerApproverKey = ownerApproverKeyInfo.encryptedApproverKey.decryptWithEntropy(
-                deviceKeyId = ownerApproverKeyInfo.deviceKeyId,
-                entropy = ownerApproverKeyInfo.entropy
+            val ownerApproverKey = ownerApproverEncryptedKeyInfo.encryptedApproverKey.decryptWithEntropy(
+                deviceKeyId = ownerApproverEncryptedKeyInfo.deviceKeyId,
+                entropy = ownerApproverEncryptedKeyInfo.entropy
             ).toEncryptionKey()
 
             val encryptedContactInfo = verifyKeysAndEncryptContactsInfo(
@@ -1242,12 +1242,12 @@ class OwnerRepositoryImpl(
     override suspend fun decryptApproverContactInfo(
         approvers: List<Approver.TrustedApprover>,
         approverContactInfo: List<OwnerApproverContactInfo>,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo
     ): Resource<List<DecryptedApproverContactInfo>> {
         return runCatching {
-            val ownerApproverKey = ownerApproverKeyInfo.encryptedApproverKey.decryptWithEntropy(
-                deviceKeyId = ownerApproverKeyInfo.deviceKeyId,
-                entropy = ownerApproverKeyInfo.entropy
+            val ownerApproverKey = ownerApproverEncryptedKeyInfo.encryptedApproverKey.decryptWithEntropy(
+                deviceKeyId = ownerApproverEncryptedKeyInfo.deviceKeyId,
+                entropy = ownerApproverEncryptedKeyInfo.entropy
             ).toEncryptionKey()
 
             val approverContactInfoMap = approverContactInfo.associateBy { it.participantId }
@@ -1270,12 +1270,12 @@ class OwnerRepositoryImpl(
 
     override suspend fun decryptSeedPhraseMetaInfo(
         seedPhrase: SeedPhrase,
-        ownerApproverKeyInfo: OwnerApproverKeyInfo,
+        ownerApproverEncryptedKeyInfo: OwnerApproverEncryptedKeyInfo,
     ): Resource<DecryptedSeedPhraseNotes> {
         return runCatching {
-            val ownerApproverKey = ownerApproverKeyInfo.encryptedApproverKey.decryptWithEntropy(
-                deviceKeyId = ownerApproverKeyInfo.deviceKeyId,
-                entropy = ownerApproverKeyInfo.entropy
+            val ownerApproverKey = ownerApproverEncryptedKeyInfo.encryptedApproverKey.decryptWithEntropy(
+                deviceKeyId = ownerApproverEncryptedKeyInfo.deviceKeyId,
+                entropy = ownerApproverEncryptedKeyInfo.entropy
             ).toEncryptionKey()
 
             Resource.Success(
