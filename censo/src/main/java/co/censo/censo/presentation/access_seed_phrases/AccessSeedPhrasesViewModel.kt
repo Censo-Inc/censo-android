@@ -222,6 +222,20 @@ class AccessSeedPhrasesViewModel @Inject constructor(
         )
     }
 
+    fun onFacescanCancelled() {
+        state = if (state.selectedPhrase == null) {
+            state.copy(
+                accessPhrasesUIState = AccessPhrasesUIState.SelectPhrase,
+                retrieveShardsResponse = Resource.Uninitialized
+            )
+        } else {
+            state.copy(
+                accessPhrasesUIState = AccessPhrasesUIState.ReadyToStart,
+                retrieveShardsResponse = Resource.Uninitialized
+            )
+        }
+    }
+
     fun onBackClicked() {
         val accessPhrasesUIState = when (state.accessPhrasesUIState) {
             AccessPhrasesUIState.ViewPhrase,

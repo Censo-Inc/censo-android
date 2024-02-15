@@ -179,7 +179,8 @@ fun AccessSeedPhrasesScreen(
                                         verificationId,
                                         biometry
                                     )
-                                }
+                                },
+                                onCancelled = viewModel::onFacescanCancelled
                             )
                         }
 
