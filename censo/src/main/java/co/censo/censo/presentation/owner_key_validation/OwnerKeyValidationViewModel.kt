@@ -14,8 +14,10 @@ import co.censo.shared.data.repository.KeyRepository
 import co.censo.shared.data.repository.OwnerRepository
 import co.censo.shared.data.storage.CloudSavedKeyEmptyException
 import co.censo.shared.data.storage.CloudStoragePermissionNotGrantedException
+import co.censo.shared.util.CrashReportingUtil.CloudDownload
 import co.censo.shared.util.observeCloudAccessStateForAccessGranted
 import co.censo.shared.util.projectLog
+import co.censo.shared.util.sendError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,6 +52,7 @@ class OwnerKeyValidationViewModel @Inject constructor(
                 )
 
                 if (downloadResult is Resource.Error && downloadResult.exception !is CloudSavedKeyEmptyException) {
+                    downloadResult.exception?.sendError(CloudDownload)
                     state = state.copy(
                         apiResource = Resource.Error(downloadResult.exception)
                     )
