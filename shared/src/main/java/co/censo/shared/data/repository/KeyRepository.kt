@@ -165,13 +165,20 @@ class KeyRepositoryImpl(val storage: SecurePreferences, val cloudStorage: CloudS
 
             return Resource.Success(key)
         } else {
+            return when (response.error()?.exception) {
+                is UserRecoverableAuthIOException -> {
+                    updateCloudAccessState(CloudAccessState.AccessRequired)
+                    throw CloudStoragePermissionNotGrantedException()
+                }
 
-            if (response is Resource.Error && response.exception is UserRecoverableAuthIOException) {
-                updateCloudAccessState(CloudAccessState.AccessRequired)
-                throw CloudStoragePermissionNotGrantedException()
+                is NoSuchElementException -> {
+                    Resource.Error(exception = CloudSavedKeyEmptyException())
+                }
+
+                else -> {
+                    Resource.Error(exception = response.error()?.exception)
+                }
             }
-
-            return Resource.Error(exception = response.error()?.exception)
         }
     }
 

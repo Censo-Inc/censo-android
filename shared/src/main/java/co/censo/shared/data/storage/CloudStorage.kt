@@ -118,7 +118,7 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                 return Resource.Error(exception = e)
             } catch (e: NoSuchElementException) {
                 e.sendError(RetrieveFileContent)
-                return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
+                return Resource.Error(exception = e)
             } catch (e: Exception) {
                 e.sendError(RetrieveFileContent)
                 return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
@@ -184,8 +184,9 @@ class GoogleDriveStorage(private val context: Context) : CloudStorage {
                     it.name == fileName
                 }
             } catch (e: NoSuchElementException) {
+                //If the file does not exist, then treat the deletion as a success
                 e.sendError(DeleteFile)
-                return Resource.Error(exception = Exception("Retrieved files did not contain matching name"))
+                return Resource.Success(Unit)
             } catch (e: Exception) {
                 e.sendError(DeleteFile)
                 return Resource.Error(exception = Exception("Unable to find requested file in users Drive"))
